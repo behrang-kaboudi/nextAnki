@@ -9,6 +9,9 @@ export async function POST(req: Request) {
   const delegate = getDelegate(body.model) as unknown as {
     create: (args: Record<string, unknown>) => Promise<unknown>;
   };
-  const row = await delegate.create({ data: body.data ?? {} });
+  const data = { ...(body.data ?? {}) } as Record<string, unknown>;
+  delete data.createdAt;
+  delete data.updatedAt;
+  const row = await delegate.create({ data });
   return NextResponse.json({ row });
 }

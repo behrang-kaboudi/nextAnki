@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import "@/lib/backup/scheduler";
 import { Footer } from "@/components/footer";
 import { Navbar } from "@/components/Navbar";
 import { getActiveTheme } from "@/lib/theme/themeRepository";
@@ -48,7 +49,7 @@ export default async function RootLayout({
         />
         <div className="min-h-dvh bg-background text-foreground">
           {layout === "sidebar" ? (
-            <div className="mx-auto flex min-h-dvh w-full max-w-7xl">
+            <div className="mx-auto flex min-h-dvh w-full max-w-screen-2xl">
               <Navbar layout={layout} />
               <div className="flex min-w-0 flex-1 flex-col">
                 <main className="min-w-0 flex-1 px-4 py-10 sm:px-8">
@@ -60,7 +61,7 @@ export default async function RootLayout({
           ) : layout === "topbar" ? (
             <div className="min-h-dvh">
               <Navbar layout={layout} />
-              <main className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-8">
+              <main className="mx-auto w-full max-w-screen-2xl px-4 py-10 sm:px-8">
                 {children}
               </main>
               <Footer />
@@ -68,7 +69,7 @@ export default async function RootLayout({
           ) : (
             <div className="min-h-dvh">
               <Navbar layout={layout} />
-              <main className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-8">
+              <main className="mx-auto w-full max-w-screen-2xl px-4 py-10 sm:px-8">
                 {children}
               </main>
               <Footer />

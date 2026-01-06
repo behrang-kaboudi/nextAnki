@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 
+import { prisma } from "@/lib/prisma";
+
 type PrismaScalar =
   | "String"
   | "Int"
@@ -67,6 +69,26 @@ function guessSearchableFields(fields: PrismaField[]) {
     .slice(0, 6);
 }
 
+function mysqlTypeToScalar(mysqlType: string): PrismaScalar {
+  const t = mysqlType.toLowerCase();
+  if (t.includes("int")) return "Int";
+  if (t.includes("double") || t.includes("float")) return "Float";
+  if (t.includes("decimal")) return "Decimal";
+  if (t.includes("bool") || t.includes("tinyint(1)")) return "Boolean";
+  if (t.includes("datetime") || t.includes("timestamp") || t.includes("date")) return "DateTime";
+  if (t.includes("json")) return "Json";
+  return "String";
+}
+
+type MySqlColumn = {
+  Field: string;
+  Type: string;
+  Null: "YES" | "NO";
+  Key: "" | "PRI" | "UNI" | "MUL";
+  Default: string | number | null;
+  Extra: string;
+};
+
 export async function GET() {
   const dmmf = Prisma.dmmf;
   const enums: Record<string, string[]> = {};
@@ -108,6 +130,33 @@ export async function GET() {
       searchableFields: guessSearchableFields(fields),
     };
   });
+
+  // Merge real DB columns to avoid stale Prisma.dmmf during dev (server not restarted / client not reloaded).
+  // This keeps the admin UI in sync with the actual database schema.
+  for (const m of models) {
+    try {
+      const cols = (await prisma.$queryRawUnsafe(`SHOW COLUMNS FROM \`${m.name}\``)) as MySqlColumn[];
+      const existing = new Set(m.fields.map((f) => f.name));
+      for (const c of cols) {
+        if (existing.has(c.Field)) continue;
+        m.fields.push({
+          name: c.Field,
+          kind: "scalar",
+          type: mysqlTypeToScalar(c.Type),
+          isList: false,
+          isRequired: c.Null === "NO",
+          isId: c.Key === "PRI",
+          isUnique: c.Key === "UNI",
+          hasDefaultValue: c.Default !== null,
+          documentation: null,
+        });
+      }
+      m.displayFields = guessDisplayFields(m.fields, m.primaryKey);
+      m.searchableFields = guessSearchableFields(m.fields);
+    } catch {
+      // ignore (table might not exist / permission)
+    }
+  }
 
   const registry: PrismaRegistry = { models, enums };
   return NextResponse.json(registry);

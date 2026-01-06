@@ -13,7 +13,15 @@ export const navbarStyles = {
   brandSubtext: "text-xs text-muted",
   nav: "grid gap-1",
   navLink:
-    "rounded-xl px-3 py-2 text-sm text-muted transition hover:bg-background hover:text-foreground",
+    "rounded-xl px-3 py-2.5 text-base font-medium text-muted transition hover:bg-background hover:text-foreground hover:shadow-[0_0_0_1px_var(--card)] active:scale-[0.99]",
+  navGroup: "group grid gap-1 rounded-xl",
+  navGroupSummary:
+    "flex cursor-pointer list-none items-center justify-between rounded-xl px-3 py-2.5 text-base font-medium text-muted transition hover:bg-background hover:text-foreground hover:shadow-[0_0_0_1px_var(--card)] [&::-webkit-details-marker]:hidden",
+  navGroupChevron:
+    "size-5 opacity-70 transition duration-200 group-open:rotate-180",
+  subnav: "grid gap-1 pl-3",
+  subnavLink:
+    "rounded-xl px-3 py-2 text-[0.95rem] text-muted transition hover:bg-background hover:text-foreground",
   sidebarFooter: "mt-auto grid gap-3",
   sidebarHint: "text-xs text-muted",
   primaryAction:
@@ -21,24 +29,31 @@ export const navbarStyles = {
   topbarHeader:
     "sticky top-0 z-40 border-b border-card bg-background/80 backdrop-blur",
   topbarContainer:
-    "mx-auto flex w-full max-w-7xl items-center gap-3 px-4 py-3 sm:px-8",
+    "mx-auto flex w-full max-w-screen-2xl items-center gap-3 px-4 py-3 sm:px-8",
   topbarBrand: "inline-flex items-center gap-3",
   topbarNav: "hidden flex-1 items-center gap-1 sm:flex",
   topbarLink:
-    "rounded-xl px-3 py-2 text-sm text-muted transition hover:bg-card hover:text-foreground",
+    "rounded-xl px-3 py-2.5 text-base font-medium text-muted transition hover:bg-card hover:text-foreground hover:shadow-[0_0_0_1px_var(--card)] active:scale-[0.99]",
+  topbarGroup: "group relative",
+  topbarGroupSummary:
+    "flex cursor-pointer list-none items-center gap-2 rounded-xl px-3 py-2.5 text-base font-medium text-muted transition hover:bg-card hover:text-foreground hover:shadow-[0_0_0_1px_var(--card)] [&::-webkit-details-marker]:hidden",
+  topbarDropdown:
+    "absolute left-0 top-[calc(100%+0.5rem)] z-50 grid w-48 gap-1 rounded-2xl border border-card bg-card p-2 shadow-elevated",
+  topbarDropdownLink:
+    "rounded-xl px-3 py-2 text-[0.95rem] font-medium text-foreground transition hover:bg-background",
   topbarActions: "hidden sm:flex items-center gap-2",
   topbarMobileButton:
     "ml-auto inline-flex items-center justify-center rounded-xl border border-card bg-card px-3 py-2 text-foreground transition hover:bg-background sm:hidden",
   mobileMenuButton:
     "inline-flex items-center justify-center rounded-xl border border-card bg-card px-3 py-2 text-foreground transition hover:bg-background sm:hidden",
-  mobileMenuIcon: "text-lg leading-none",
+  mobileMenuIcon: "text-xl leading-none",
   mobileMenuOverlay:
     "sm:hidden fixed inset-0 z-50 bg-black/30 backdrop-blur-sm",
   mobileMenuPanel:
     "absolute right-4 top-4 w-[min(92vw,22rem)] rounded-2xl border border-card bg-card p-3 shadow-elevated",
   mobileMenuNav: "flex flex-col gap-1",
   mobileMenuLink:
-    "rounded-xl px-3 py-3 text-sm text-foreground transition hover:bg-background",
+    "rounded-xl px-3 py-3 text-base font-medium text-foreground transition hover:bg-background hover:shadow-[0_0_0_1px_var(--card)] active:scale-[0.99]",
   mobileMenuPrimaryAction:
     "mt-2 rounded-xl bg-[var(--primary)] px-3 py-3 text-center text-sm font-semibold text-[var(--primary-foreground)] transition hover:opacity-95",
 } as const;
