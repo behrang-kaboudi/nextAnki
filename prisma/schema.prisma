@@ -1,0 +1,109 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Theme {
+  id        Int      @id @default(autoincrement())
+  slug      String   @unique
+  name      String
+  isDefault Boolean  @default(false)
+  variables Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isDefault])
+}
+
+enum PictureWordType {
+  noun
+  adding
+  animal
+  person
+  notPersonal
+  humanBody
+  relationalObj
+  personAdj
+  personAdj_adj
+  adj
+  food
+  place
+  accessory
+  tool
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String?
+  password  String
+  createdAt DateTime @default(now())
+}
+
+model Word {
+  id                               Int      @id @default(autoincrement())
+  anki_link_id                     String   @unique
+  base_form                        String
+  phonetic_us                      String?
+  phonetic_us_normalized           String?
+  meaning_fa                       String
+  meaning_fa_IPA                   String
+  meaning_fa_IPA_normalized        String   @default("")
+  pos                              String?
+  concept_explained                String?
+  concept_explained_fa             String?
+  word_hint_story                  String?
+  sentence_en                      String
+  example_meaning_fa               String?
+  explanation_for_sentence_meaning String?
+  learning_depth                   Float?
+  mixed_sentence                   String?
+  category                         String?
+  typeOfWordInDb                   String   @default("temp")
+  hint_sentence                    String?
+  first_letter_en_hint             String?
+  first_letter_fa_hint             String?
+  hint_to_select                   String?
+  word_note                        String?
+  common_error                     String?
+  createdAt                        DateTime @default(now())
+  updatedAt                        DateTime @updatedAt
+
+  @@index([base_form])
+  @@index([typeOfWordInDb])
+}
+
+model IpaKeyword {
+  id        Int      @id @default(autoincrement())
+  number    Int      @unique
+  fa        String
+  faPlain   String   @default("")
+  ipa_fa    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([fa])
+  @@index([faPlain])
+}
+
+model PictureWord {
+  id          Int             @id @default(autoincrement())
+  fa          String
+  ipa_fa      String
+  ipa_fa_normalized String    @default("")
+  phinglish   String
+  en          String
+  type        PictureWordType @default(noun)
+  canBePersonal Boolean       @default(false)
+  ipaVerified Boolean         @default(false)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@unique([fa, en])
+  @@index([fa])
+  @@index([en])
+}

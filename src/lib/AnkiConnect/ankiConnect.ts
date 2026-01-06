@@ -70,7 +70,10 @@ export type AnkiNotesInfo = Array<{
 }>;
 
 export type AnkiConnectActionMap = {
-  requestPermission: { params?: Record<string, never>; result: { permission: "granted" | "denied" } };
+  requestPermission: {
+    params?: Record<string, never>;
+    result: { permission: "granted" | "denied" };
+  };
   version: { params?: Record<string, never>; result: number };
   sync: { params?: Record<string, never>; result: null };
 
@@ -102,11 +105,17 @@ export type AnkiConnectActionMap = {
       mod: number;
     }>;
   };
-  answerCards: { params: { answers: Array<{ cardId: number; ease: 1 | 2 | 3 | 4 }> }; result: null };
+  answerCards: {
+    params: { answers: Array<{ cardId: number; ease: 1 | 2 | 3 | 4 }> };
+    result: null;
+  };
   forgetCards: { params: { cards: number[] }; result: null };
 
   addNote: { params: { note: AnkiNote }; result: number | null };
-  updateNoteFields: { params: { note: { id: number; fields: AnkiNoteFields } }; result: null };
+  updateNoteFields: {
+    params: { note: { id: number; fields: AnkiNoteFields } };
+    result: null;
+  };
   deleteNotes: { params: { notes: number[] }; result: null };
 
   addTags: { params: { notes: number[]; tags: string }; result: null };
@@ -153,7 +162,7 @@ function isRetryableTransportError(error: unknown) {
 }
 
 export function createAnkiConnectClient(
-  options: AnkiConnectClientOptions = {},
+  options: AnkiConnectClientOptions = {}
 ): AnkiConnectClient {
   const baseUrl = options.baseUrl ?? defaultBaseUrl;
   const timeoutMs = options.timeoutMs ?? 5000;
@@ -175,22 +184,20 @@ export function createAnkiConnectClient(
 
   async function ankiRequest<TAction extends AnkiConnectAction>(
     action: TAction,
-    params?: ActionParams<TAction>,
+    params?: ActionParams<TAction>
   ): Promise<ActionResult<TAction> | null> {
     const payload: AnkiConnectRequest<TAction, ActionParams<TAction>> = {
       action,
       version: 6,
-      params: (params ?? ({} as ActionParams<TAction>)),
+      params: params ?? ({} as ActionParams<TAction>),
     };
 
     return enqueueRequest(async () => {
       for (;;) {
         try {
-          const res = await axios.post<AnkiConnectResponse<ActionResult<TAction>>>(
-            baseUrl,
-            payload,
-            { timeout: timeoutMs },
-          );
+          const res = await axios.post<
+            AnkiConnectResponse<ActionResult<TAction>>
+          >(baseUrl, payload, { timeout: timeoutMs });
 
           if (res.data.error) {
             const message = res.data.error.toString();
@@ -225,7 +232,9 @@ export function createAnkiConnectClient(
 
   return {
     request(action, ...rest) {
-      const params = (rest[0] ?? undefined) as ActionParams<typeof action> | undefined;
+      const params = (rest[0] ?? undefined) as
+        | ActionParams<typeof action>
+        | undefined;
       return ankiRequest(action, params);
     },
   };

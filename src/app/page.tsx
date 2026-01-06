@@ -1,5 +1,6 @@
 import { auth, signIn, signOut } from "@/auth";
 import { PageHeader } from "@/components/page-header";
+import Link from "next/link";
 
 export default async function Home() {
   const session = await auth();
@@ -10,6 +11,18 @@ export default async function Home() {
         title="Dashboard"
         subtitle="Quick access to the Anki Bridge UI."
       />
+
+      <div className="grid gap-3 rounded-2xl border border-card bg-card p-6 shadow-elevated">
+        <div className="text-sm font-semibold text-foreground">Tools</div>
+        <div className="flex flex-wrap gap-3">
+          <Link
+            href="/word-extraction"
+            className="inline-flex items-center justify-center rounded-xl bg-[var(--primary)] px-4 py-3 text-sm font-semibold text-[var(--primary-foreground)] shadow-elevated transition hover:opacity-95"
+          >
+            Word Extraction
+          </Link>
+        </div>
+      </div>
 
       <div className="rounded-2xl border border-card bg-card p-6 shadow-elevated">
         {session ? (

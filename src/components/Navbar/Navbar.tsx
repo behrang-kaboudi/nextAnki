@@ -18,6 +18,7 @@ const navItems: NavbarItem[] = [
       { href: "/ipa-test", label: "ipa-test" },
       { href: "/ipa/keywords", label: "ipa-keywords" },
       { href: "/ipa/picture-words", label: "picture-words" },
+      { href: "/ipa/picture-words/audio", label: "picture-words-audio" },
       { href: "/ipa/phrase-building", label: "phrase-building" },
     ],
   },

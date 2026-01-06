@@ -48,18 +48,27 @@ type Operator =
   | "gte"
   | "lt"
   | "lte"
+  | "lenEq"
+  | "lenGt"
+  | "lenGte"
+  | "lenLt"
+  | "lenLte"
   | "isEmpty"
   | "isNotEmpty"
+  | "existsIn"
+  | "notExistsIn"
   | "in"
   | "notIn";
 
 type Filter = { field: string; op: Operator; value?: unknown };
 type Sort = { field: string; dir: "asc" | "desc" };
+type FilterMode = "all" | "any";
 
 type ListParams = {
   model: string;
   searchText?: string;
   filters: Filter[];
+  filterMode?: FilterMode;
   sort?: Sort;
   page: number;
   pageSize: number;
@@ -155,14 +164,31 @@ function operatorOptionsForField(field: PrismaField, enums: PrismaRegistry["enum
   if (!isScalarType(field.type)) return ["eq", "neq"];
   switch (field.type) {
     case "String":
-      return ["eq", "neq", "contains", "notContains", "startsWith", "isEmpty", "isNotEmpty", "in", "notIn"];
+      return [
+        "eq",
+        "neq",
+        "contains",
+        "notContains",
+        "startsWith",
+        "existsIn",
+        "notExistsIn",
+        "lenEq",
+        "lenGt",
+        "lenGte",
+        "lenLt",
+        "lenLte",
+        "isEmpty",
+        "isNotEmpty",
+        "in",
+        "notIn",
+      ];
     case "Int":
     case "Float":
     case "BigInt":
     case "Decimal":
-      return ["eq", "neq", "gt", "gte", "lt", "lte", "isEmpty", "isNotEmpty", "in", "notIn"];
+      return ["eq", "neq", "gt", "gte", "lt", "lte", "existsIn", "notExistsIn", "isEmpty", "isNotEmpty", "in", "notIn"];
     case "DateTime":
-      return ["eq", "gt", "gte", "lt", "lte", "isEmpty", "isNotEmpty", "in", "notIn"];
+      return ["eq", "gt", "gte", "lt", "lte", "existsIn", "notExistsIn", "isEmpty", "isNotEmpty", "in", "notIn"];
     case "Boolean":
       return ["eq", "neq"];
     case "Json":
@@ -170,6 +196,21 @@ function operatorOptionsForField(field: PrismaField, enums: PrismaRegistry["enum
     default:
       return ["eq", "neq"];
   }
+}
+
+function isLengthOperator(op: Operator) {
+  return op === "lenEq" || op === "lenGt" || op === "lenGte" || op === "lenLt" || op === "lenLte";
+}
+
+function parseModelFieldRef(value: unknown) {
+  if (typeof value !== "string") return null;
+  const raw = value.trim();
+  const dot = raw.indexOf(".");
+  if (dot <= 0 || dot === raw.length - 1) return null;
+  const model = raw.slice(0, dot).trim();
+  const field = raw.slice(dot + 1).trim();
+  if (!model || !field) return null;
+  return { model, field };
 }
 
 function shouldUseTextarea(field: PrismaField) {
@@ -181,10 +222,16 @@ function isAutoManagedUpdatedAt(field: PrismaField) {
   const name = field.name.toLowerCase();
   const doc = (field.documentation ?? "").toLowerCase();
   return (
-    name === "updatedat" &&
-    field.hasDefaultValue &&
-    (doc.includes("auto") || doc.includes("managed") || doc.includes("updated at") || doc.includes("@updatedat"))
+    name === "updatedat" ||
+    (name === "updatedat" &&
+      field.hasDefaultValue &&
+      (doc.includes("auto") || doc.includes("managed") || doc.includes("updated at") || doc.includes("@updatedat")))
   );
+}
+
+function isAutoManagedCreatedAt(field: PrismaField) {
+  const name = field.name.toLowerCase();
+  return name === "createdat" && field.hasDefaultValue;
 }
 
 function datetimeLocalFromIso(iso: unknown) {
@@ -443,7 +490,26 @@ function CardContent({ children }: { children: React.ReactNode }) {
   return <div className="px-4 py-3">{children}</div>;
 }
 
-function Icon({ name, className }: { name: "plus" | "refresh" | "download" | "trash" | "eye" | "edit" | "chevron"; className?: string }) {
+function Icon({
+  name,
+  className,
+}: {
+  name:
+    | "plus"
+    | "refresh"
+    | "download"
+    | "trash"
+    | "eye"
+    | "edit"
+    | "chevron"
+    | "compress"
+    | "expand"
+    | "braces"
+    | "minify"
+    | "arrowUp"
+    | "arrowDown";
+  className?: string;
+}) {
   const common = cn("h-4 w-4", className);
   switch (name) {
     case "plus":
@@ -493,6 +559,57 @@ function Icon({ name, className }: { name: "plus" | "refresh" | "download" | "tr
       return (
         <svg viewBox="0 0 24 24" className={common} fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M6 9l6 6 6-6" />
+        </svg>
+      );
+    case "compress":
+      return (
+        <svg viewBox="0 0 24 24" className={common} fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M8 3H3v5" />
+          <path d="M16 21h5v-5" />
+          <path d="M3 8l6-6" />
+          <path d="M21 16l-6 6" />
+        </svg>
+      );
+    case "expand":
+      return (
+        <svg viewBox="0 0 24 24" className={common} fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M3 8V3h5" />
+          <path d="M21 16v5h-5" />
+          <path d="M8 3L3 8" />
+          <path d="M16 21l5-5" />
+        </svg>
+      );
+    case "braces":
+      return (
+        <svg viewBox="0 0 24 24" className={common} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+          <path d="M10 4c-2 0-3 1-3 3v2c0 1-1 2-2 2 1 0 2 1 2 2v2c0 2 1 3 3 3" />
+          <path d="M14 4c2 0 3 1 3 3v2c0 1 1 2 2 2-1 0-2 1-2 2v2c0 2-1 3-3 3" />
+          <path d="M11.5 10h1" />
+          <path d="M11.5 14h1" />
+        </svg>
+      );
+    case "minify":
+      return (
+        <svg viewBox="0 0 24 24" className={common} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+          <path d="M4 7h16" />
+          <path d="M6 12h12" />
+          <path d="M8 17h8" />
+          <path d="M9 10l-3 2 3 2" />
+          <path d="M15 10l3 2-3 2" />
+        </svg>
+      );
+    case "arrowUp":
+      return (
+        <svg viewBox="0 0 24 24" className={common} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+          <path d="M12 19V5" />
+          <path d="M6 11l6-6 6 6" />
+        </svg>
+      );
+    case "arrowDown":
+      return (
+        <svg viewBox="0 0 24 24" className={common} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+          <path d="M12 5v14" />
+          <path d="M6 13l6 6 6-6" />
         </svg>
       );
   }
@@ -693,7 +810,7 @@ type SavedView = {
   id: string;
   name: string;
   model: string;
-  params: Pick<ListParams, "filters" | "sort" | "visibleColumns" | "pageSize" | "searchText">;
+  params: Pick<ListParams, "filters" | "filterMode" | "sort" | "visibleColumns" | "pageSize" | "searchText">;
   createdAt: number;
 };
 
@@ -717,11 +834,14 @@ function saveSavedViews(views: SavedView[]) {
 
 function QuerySummary({ params }: { params: ListParams }) {
   const filterCount = params.filters.filter((f) => f.field && f.op).length;
+  const mode = params.filterMode === "any" ? "Any (OR)" : "All (AND)";
   return (
     <div className="flex flex-wrap items-center gap-2 text-xs text-neutral-700">
       <Badge variant="outline">{params.model}</Badge>
       {params.searchText ? <Badge>Search: “{params.searchText}”</Badge> : <Badge>Search: —</Badge>}
-      <Badge>Filters: {filterCount}</Badge>
+      <Badge>
+        Filters: {filterCount} • {mode}
+      </Badge>
       <Badge>
         Sort: {params.sort ? `${params.sort.field} ${params.sort.dir}` : "—"}
       </Badge>
@@ -861,6 +981,7 @@ export default function Page() {
   const debouncedSearch = useDebouncedValue(draftSearchText, 420);
 
   const [draftFilters, setDraftFilters] = useState<Filter[]>([]);
+  const [draftFilterMode, setDraftFilterMode] = useState<FilterMode>("all");
   const [draftSort, setDraftSort] = useState<Sort | undefined>(undefined);
   const [draftVisibleColumns, setDraftVisibleColumns] = useState<string[]>([]);
   const [draftPageSize, setDraftPageSize] = useState<number>(20);
@@ -886,6 +1007,7 @@ export default function Page() {
         model: model.name,
         searchText: debouncedSearch || undefined,
         filters: draftFilters,
+        filterMode: draftFilterMode,
         sort: draftSort,
         page,
         pageSize: draftPageSize,
@@ -897,6 +1019,7 @@ export default function Page() {
     model,
     debouncedSearch,
     draftFilters,
+    draftFilterMode,
     draftSort,
     page,
     draftPageSize,
@@ -918,10 +1041,12 @@ export default function Page() {
     setDraftPageSize(50);
     setPage(1);
     setDraftFilters(defaultFilterRow);
+    setDraftFilterMode("all");
     setAppliedParams({
       model: model.name,
       searchText: undefined,
       filters: [],
+      filterMode: "all",
       sort: undefined,
       page: 1,
       pageSize: 50,
@@ -1052,7 +1177,7 @@ export default function Page() {
 
   const editableFields = useMemo(() => {
     if (!model) return [];
-    return scalarAndEnumFields.filter((f) => !isAutoManagedUpdatedAt(f));
+    return scalarAndEnumFields.filter((f) => !isAutoManagedUpdatedAt(f) && !isAutoManagedCreatedAt(f));
   }, [model, scalarAndEnumFields]);
 
   function buildInitialValues(mode: "create" | "edit" | "view", row?: Row) {
@@ -1098,10 +1223,27 @@ export default function Page() {
       if (mode === "edit" && f.isId) continue;
 
       const raw = formValues[f.name];
-      if (f.isRequired && (raw === "" || raw === null || raw === undefined)) {
+      // Only enforce required on create. For edit, unchanged or omitted fields are allowed.
+      if (mode === "create" && f.isRequired && (raw === "" || raw === null || raw === undefined)) {
         errs[f.name] = "این فیلد اجباری است.";
         continue;
       }
+
+      if (mode === "edit") {
+        const hasOriginal = Object.prototype.hasOwnProperty.call(editRow ?? {}, f.name);
+        if (!hasOriginal && (raw === "" || raw === null || raw === undefined)) continue;
+
+        const original = (editRow as Row | null)?.[f.name];
+        let originalForm: unknown = original ?? "";
+        if (f.kind === "scalar" && f.type === "DateTime" && !f.isList) originalForm = datetimeLocalFromIso(original);
+        else if (Array.isArray(original) && f.isList && f.type === "String") originalForm = original.join(", ");
+        else if (f.kind === "scalar" && f.type === "Json") originalForm = original ? JSON.stringify(original, null, 2) : "";
+        else if (typeof original === "boolean") originalForm = original;
+        else originalForm = original ?? "";
+
+        if (String(raw ?? "") === String(originalForm ?? "")) continue;
+      }
+
       const normalized = normalizeInputValue(f, raw);
       if (!normalized.ok) {
         errs[f.name] = normalized.error;
@@ -1180,6 +1322,7 @@ export default function Page() {
       model: applied.model,
       params: {
         filters: applied.filters,
+        filterMode: applied.filterMode,
         sort: applied.sort,
         visibleColumns: applied.visibleColumns,
         pageSize: applied.pageSize,
@@ -1207,6 +1350,7 @@ export default function Page() {
       return;
     }
     setDraftFilters(v.params.filters ?? []);
+    setDraftFilterMode(v.params.filterMode === "any" ? "any" : "all");
     setDraftSort(v.params.sort);
     setDraftVisibleColumns(v.params.visibleColumns ?? defaultVisibleColumns);
     setDraftPageSize(v.params.pageSize ?? 20);
@@ -1216,6 +1360,7 @@ export default function Page() {
       model: model.name,
       searchText: v.params.searchText ?? undefined,
       filters: v.params.filters ?? [],
+      filterMode: v.params.filterMode === "any" ? "any" : "all",
       sort: v.params.sort,
       page: 1,
       pageSize: v.params.pageSize ?? 20,
@@ -1465,6 +1610,7 @@ export default function Page() {
       model: model.name,
       searchText: debouncedSearch || undefined,
       filters: normalizeFiltersForApply(draftFilters),
+      filterMode: draftFilterMode,
       sort: draftSort,
       page: 1,
       pageSize: draftPageSize,
@@ -1482,6 +1628,7 @@ export default function Page() {
       model: model.name,
       searchText: (prev?.searchText ?? debouncedSearch) || undefined,
       filters: prev?.filters ?? draftFilters.filter((f) => f.field && f.op),
+      filterMode: prev?.filterMode ?? draftFilterMode,
       sort: prev?.sort ?? draftSort,
       page: 1,
       pageSize: prev?.pageSize ?? draftPageSize,
@@ -1496,6 +1643,7 @@ export default function Page() {
     const firstField = filterableFields[0]?.name ?? "";
     const firstOp = firstField ? operatorOptions[firstField]?.[0] ?? "eq" : "eq";
     setDraftFilters(firstField ? [{ field: firstField, op: firstOp, value: "" }] : []);
+    setDraftFilterMode("all");
     setDraftSort(undefined);
     setDraftVisibleColumns(defaultVisibleColumns);
     setDraftPageSize(50);
@@ -1504,6 +1652,7 @@ export default function Page() {
       model: model.name,
       searchText: undefined,
       filters: [],
+      filterMode: "all",
       sort: undefined,
       page: 1,
       pageSize: 50,
@@ -1533,14 +1682,17 @@ export default function Page() {
     const filtersD = JSON.stringify(draftNormalizedFilters ?? []);
     const searchA = applied.searchText ?? "";
     const searchD = debouncedSearch ?? "";
+    const modeA = applied.filterMode === "any" ? "any" : "all";
+    const modeD = draftFilterMode;
     return (
       searchA !== searchD ||
       sortA !== sortD ||
       colsA !== colsD ||
       filtersA !== filtersD ||
+      modeA !== modeD ||
       Number(applied.pageSize) !== Number(draftPageSize)
     );
-  }, [applied, model, debouncedSearch, draftSort, draftVisibleCols, draftNormalizedFilters, draftPageSize]);
+  }, [applied, model, debouncedSearch, draftSort, draftVisibleCols, draftNormalizedFilters, draftPageSize, draftFilterMode]);
 
   const isDirtyExcludingSearchSort = useMemo(() => {
     if (!applied || !model) return false;
@@ -1548,8 +1700,10 @@ export default function Page() {
     const colsD = JSON.stringify(draftVisibleCols ?? []);
     const filtersA = JSON.stringify(applied.filters ?? []);
     const filtersD = JSON.stringify(draftNormalizedFilters ?? []);
-    return colsA !== colsD || filtersA !== filtersD || Number(applied.pageSize) !== Number(draftPageSize);
-  }, [applied, model, draftVisibleCols, draftNormalizedFilters, draftPageSize]);
+    const modeA = applied.filterMode === "any" ? "any" : "all";
+    const modeD = draftFilterMode;
+    return colsA !== colsD || filtersA !== filtersD || modeA !== modeD || Number(applied.pageSize) !== Number(draftPageSize);
+  }, [applied, model, draftVisibleCols, draftNormalizedFilters, draftPageSize, draftFilterMode]);
 
   useEffect(() => {
     if (!model || !applied) return;
@@ -1566,6 +1720,7 @@ export default function Page() {
       model: model.name,
       searchText: nextSearch,
       filters: prev?.filters ?? [],
+      filterMode: prev?.filterMode ?? draftFilterMode,
       sort: nextSort,
       page: 1,
       pageSize: prev?.pageSize ?? draftPageSize,
@@ -1580,6 +1735,7 @@ export default function Page() {
       model: applied.model,
       searchText: applied.searchText ?? "",
       filters: applied.filters ?? [],
+      filterMode: applied.filterMode === "any" ? "any" : "all",
       sort: applied.sort ?? null,
       pageSize: applied.pageSize,
       visibleColumns: applied.visibleColumns ?? [],
@@ -1593,6 +1749,7 @@ export default function Page() {
         model: v.model,
         searchText: v.params.searchText ?? "",
         filters: v.params.filters ?? [],
+        filterMode: v.params.filterMode === "any" ? "any" : "all",
         sort: v.params.sort ?? null,
         pageSize: v.params.pageSize ?? 20,
         visibleColumns: v.params.visibleColumns ?? [],
@@ -1601,18 +1758,17 @@ export default function Page() {
     });
   }, [savedViews, currentViewFingerprint]);
 
-  async function copyVisibleJson() {
+  async function copyVisibleJson(opts: { compact: boolean }) {
     if (copyBusy) return;
     if (!model) return;
     try {
-      const pk = model.primaryKey;
-      const cols = Array.from(new Set([pk, ...columns]));
+      const cols = Array.from(new Set(columns));
       const payload = rows.map((r) => {
         const obj: Record<string, unknown> = {};
         for (const c of cols) obj[c] = r?.[c];
         return obj;
       });
-      const text = JSON.stringify(payload, null, 2);
+      const text = opts.compact ? JSON.stringify(payload) : JSON.stringify(payload, null, 2);
       await navigator.clipboard.writeText(text);
       push({ type: "success", title: "کپی شد", description: `JSON (${payload.length} rows) در کلیپ‌بورد کپی شد.` });
       setCopyBusy(true);
@@ -1717,7 +1873,7 @@ export default function Page() {
                 <div className="text-sm text-neutral-700">هیچ مدلی در registry موجود نیست. /api/admin/meta/models را پیاده‌سازی کنید یا prismaRegistry را پر کنید.</div>
               ) : (
                 <div className="grid grid-cols-1 gap-4">
-                  <div className="grid grid-cols-1 gap-3 md:grid-cols-[2fr_2fr_0.9fr_0.9fr] md:items-start">
+                  <div className="grid grid-cols-1 gap-3 md:grid-cols-[2fr_2fr_1.3fr] md:items-start">
                     <div className="md:pr-2">
                       <div className="mb-1 text-xs text-neutral-600">Global Search</div>
                       <Input value={draftSearchText} onChange={(e) => setDraftSearchText(e.target.value)} placeholder="Search…" />
@@ -1754,40 +1910,60 @@ export default function Page() {
                       </div>
                     </div>
 
-                    <div className="flex flex-col justify-end gap-2">
-                      <div className="text-xs font-semibold text-neutral-700">Filters (AND)</div>
-                      <Button variant="outline" size="sm" onClick={addFilterRow} className="w-full justify-center">
-                        <Icon name="plus" />
-                        Add filter
-                      </Button>
-                    </div>
-
-                    <div className="flex flex-col justify-end gap-2">
-                      <div className="text-xs font-semibold text-transparent">.</div>
-                      <Button
-                        size="sm"
-                        onClick={applyQuery}
-                        disabled={!canRender || !isQueryDirty}
-                        className="w-full justify-center bg-indigo-600 text-white hover:bg-indigo-700"
-                      >
-                        Apply
-                      </Button>
-                    </div>
+	                    <div className="flex flex-col justify-end gap-2">
+	                      <div className="text-xs font-semibold text-neutral-700">Filters</div>
+	                      <div className="grid grid-cols-[minmax(220px,1fr)_auto_auto] items-center gap-2">
+	                        <div className="min-w-[220px]">
+	                          <Select
+	                            value={draftFilterMode}
+	                            onChange={(v) => setDraftFilterMode((v === "any" ? "any" : "all") as FilterMode)}
+	                            options={[
+	                              { value: "all", label: "Match: All (AND)" },
+	                              { value: "any", label: "Match: Any (OR)" },
+	                            ]}
+	                          />
+	                        </div>
+	                        <Button variant="outline" size="sm" onClick={addFilterRow} className="h-8 px-2">
+	                          <Icon name="plus" />
+	                          Add
+	                        </Button>
+	                        <Button
+	                          size="sm"
+	                          onClick={applyQuery}
+	                          disabled={!canRender || !isQueryDirty}
+	                          className="h-8 bg-indigo-600 px-3 text-white hover:bg-indigo-700"
+	                        >
+	                          Apply
+	                        </Button>
+	                      </div>
+	                    </div>
                   </div>
 
                   <div className="grid grid-cols-1 gap-2">
                     {draftFilters.map((f, i) => {
                         const fieldMeta = filterableFields.find((x) => x.name === f.field) ?? null;
-                        const ops = fieldMeta ? operatorOptionsForField(fieldMeta, registry.enums) : (["eq"] as Operator[]);
+                        const allOps = fieldMeta ? operatorOptionsForField(fieldMeta, registry.enums) : (["eq"] as Operator[]);
+                        const isCrossTableOp = f.op === "existsIn" || f.op === "notExistsIn";
                         const isOpNoValue = f.op === "isEmpty" || f.op === "isNotEmpty";
+                        const isLengthOp = isLengthOperator(f.op);
+                        const supportsLengthMode =
+                          fieldMeta?.kind === "scalar" && fieldMeta.type === "String" && !fieldMeta.isList;
+                        const filterMode = supportsLengthMode && isLengthOp ? "length" : "value";
+                        const ops =
+                          supportsLengthMode && filterMode === "length"
+                            ? (["lenEq", "lenGt", "lenGte", "lenLt", "lenLte"] as Operator[])
+                            : allOps.filter((op) => !isLengthOperator(op));
                         const isBoolean = fieldMeta?.kind === "scalar" && fieldMeta.type === "Boolean" && !fieldMeta.isList;
                         const isEnum = fieldMeta?.kind === "enum" || (!!fieldMeta && !isScalarType(fieldMeta.type) && !!registry.enums[fieldMeta.type]);
                         const isDateTime = fieldMeta?.kind === "scalar" && fieldMeta.type === "DateTime" && !fieldMeta.isList;
                         const enumValues = isEnum && fieldMeta ? registry.enums[String(fieldMeta.type)] ?? [] : [];
 
                         return (
-                          <div key={i} className="grid grid-cols-1 gap-2 rounded-md border border-neutral-200 bg-neutral-50 p-2 md:grid-cols-12 md:items-center">
-                            <div className="md:col-span-4">
+                          <div
+                            key={i}
+                            className="flex flex-col gap-2 rounded-md border border-neutral-200 bg-neutral-50 p-2 md:flex-row md:flex-nowrap md:items-center"
+                          >
+                            <div className="md:w-[240px] md:flex-none">
                               <Select
                                 value={f.field}
                                 onChange={(v) => {
@@ -1798,7 +1974,24 @@ export default function Page() {
                                 options={filterableFields.map((ff) => ({ value: ff.name, label: ff.name }))}
                               />
                             </div>
-                            <div className="md:col-span-3">
+                            <div className={supportsLengthMode ? "md:w-[160px] md:flex-none" : "md:w-[1px] md:flex-none"}>
+                              {supportsLengthMode ? (
+                                <Select
+                                  value={filterMode}
+                                  onChange={(mode) => {
+                                    if (mode === "length") updateFilter(i, { op: "lenEq", value: "0" });
+                                    else updateFilter(i, { op: "contains", value: "" });
+                                  }}
+                                  options={[
+                                    { value: "value", label: "type: value" },
+                                    { value: "length", label: "type: length" },
+                                  ]}
+                                />
+                              ) : (
+                                <div />
+                              )}
+                            </div>
+                            <div className="md:w-[170px] md:flex-none">
                               <OperatorSelect
                                 value={f.op}
                                 options={ops}
@@ -1807,8 +2000,44 @@ export default function Page() {
                                 }
                               />
                             </div>
-                            <div className="md:col-span-4">
-                              {isOpNoValue ? (
+                            <div className="min-w-0 md:flex-1">
+                              {isCrossTableOp ? (
+                                (() => {
+                                  const parsedRef = parseModelFieldRef(f.value);
+                                  const modelName = parsedRef?.model ?? registry.models[0]?.name ?? "";
+                                  const modelMeta = registry.models.find((m) => m.name === modelName) ?? null;
+                                  const otherFields = (modelMeta?.fields ?? []).filter((ff) => ff.kind === "scalar" || ff.kind === "enum");
+                                  const otherField =
+                                    parsedRef?.field && otherFields.some((ff) => ff.name === parsedRef.field)
+                                      ? parsedRef.field
+                                      : otherFields[0]?.name ?? "";
+
+                                  return (
+                                    <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+                                      <Select
+                                        value={modelName}
+                                        onChange={(nextModel) => {
+                                          const nextMeta = registry.models.find((m) => m.name === nextModel) ?? null;
+                                          const nextFields = (nextMeta?.fields ?? []).filter(
+                                            (ff) => ff.kind === "scalar" || ff.kind === "enum",
+                                          );
+                                          const nextField = nextFields[0]?.name ?? "";
+                                          updateFilter(i, { value: nextField ? `${nextModel}.${nextField}` : `${nextModel}.` });
+                                        }}
+                                        options={registry.models.map((m) => ({ value: m.name, label: m.name }))}
+                                        placeholder="Other model"
+                                      />
+                                      <Select
+                                        value={otherField}
+                                        onChange={(nextField) => updateFilter(i, { value: `${modelName}.${nextField}` })}
+                                        options={otherFields.map((ff) => ({ value: ff.name, label: ff.name }))}
+                                        placeholder="Other field"
+                                        disabled={!modelName || otherFields.length === 0}
+                                      />
+                                    </div>
+                                  );
+                                })()
+                              ) : isOpNoValue ? (
                                 <div className="text-xs text-neutral-500">No value</div>
                               ) : (
                                 <div className="flex items-center gap-2">
@@ -1837,6 +2066,13 @@ export default function Page() {
                                         onChange={(e) => updateFilter(i, { value: e.target.value })}
                                         placeholder="YYYY-MM-DDThh:mm"
                                       />
+                                    ) : isLengthOp ? (
+                                      <Input
+                                        type="number"
+                                        value={String(f.value ?? "")}
+                                        onChange={(e) => updateFilter(i, { value: e.target.value })}
+                                        placeholder="Length…"
+                                      />
                                     ) : (
                                       <Input
                                         value={String(f.value ?? "")}
@@ -1846,7 +2082,7 @@ export default function Page() {
                                     )}
                                   </div>
                                   {fieldMeta ? (
-                                    <Badge variant="outline" title="Field type">
+                                    <Badge variant="outline" className="hidden md:inline-flex" title="Field type">
                                       {fieldMeta.kind}:{String(fieldMeta.type)}
                                       {fieldMeta.isList ? "[]" : ""}
                                     </Badge>
@@ -1854,7 +2090,7 @@ export default function Page() {
                                 </div>
                               )}
                             </div>
-                            <div className="md:col-span-1 md:flex md:justify-end">
+                            <div className="md:flex-none md:self-center">
                               <Button variant="ghost" size="icon" onClick={() => removeFilter(i)} aria-label="Remove filter">
                                 <Icon name="trash" />
                               </Button>
@@ -1879,11 +2115,35 @@ export default function Page() {
                   {!loading && !error ? <Badge variant="outline">{total} total</Badge> : null}
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2">
-                  <div className="flex flex-wrap items-center gap-2 rounded-md border border-neutral-200 bg-neutral-50 p-1">
-                    <div className="flex items-center gap-2 px-1">
-                      <div className="text-xs font-medium text-neutral-700">Page Size</div>
-                      <div className="w-24">
+	                <div className="flex flex-wrap items-center gap-2">
+	                  <div className="flex flex-wrap items-center gap-2 rounded-md border border-neutral-200 bg-neutral-50 p-1">
+	                    <div className="px-1 text-xs font-medium text-neutral-700">
+	                      Page {page} / {totalPages}
+	                    </div>
+		                    <div className="flex items-center gap-1">
+		                      <Button
+		                        variant="outline"
+		                        size="sm"
+		                        onClick={() => setPage((p) => Math.max(1, p - 1))}
+		                        disabled={page <= 1 || loading}
+		                      >
+		                        Prev
+		                      </Button>
+		                      <Button
+		                        variant="outline"
+		                        size="sm"
+		                        onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+		                        disabled={page >= totalPages || loading}
+		                      >
+		                        Next
+		                      </Button>
+		                    </div>
+		                  </div>
+
+	                  <div className="flex flex-wrap items-center gap-2 rounded-md border border-neutral-200 bg-neutral-50 p-1">
+	                    <div className="flex items-center gap-2 px-1">
+	                      <div className="text-xs font-medium text-neutral-700">Page Size</div>
+	                      <div className="w-24">
                         <Select
                           value={String(draftPageSize)}
                           onChange={(v) => {
@@ -1891,15 +2151,16 @@ export default function Page() {
                             setDraftPageSize(nextSize);
                             if (!model) return;
                             setPage(1);
-                            setAppliedParams((prev) => ({
-                              model: model.name,
-                              searchText: (prev?.searchText ?? debouncedSearch) || undefined,
-                              filters: prev?.filters ?? [],
-                              sort: prev?.sort,
-                              page: 1,
-                              pageSize: nextSize,
-                              visibleColumns: prev?.visibleColumns ?? (draftVisibleColumns.length ? draftVisibleColumns : defaultVisibleColumns),
-                            }));
+	                            setAppliedParams((prev) => ({
+	                              model: model.name,
+	                              searchText: (prev?.searchText ?? debouncedSearch) || undefined,
+	                              filters: prev?.filters ?? [],
+	                              filterMode: prev?.filterMode ?? draftFilterMode,
+	                              sort: prev?.sort,
+	                              page: 1,
+	                              pageSize: nextSize,
+	                              visibleColumns: prev?.visibleColumns ?? (draftVisibleColumns.length ? draftVisibleColumns : defaultVisibleColumns),
+	                            }));
                             setSelectedIds(new Set());
                           }}
                           options={[1, 5, 10, 20, 50, 100].map((n) => ({ value: String(n), label: String(n) }))}
@@ -1907,16 +2168,33 @@ export default function Page() {
                         />
                       </div>
                     </div>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={copyVisibleJson}
-                      disabled={!rows.length || copyBusy}
-                      title="Copy visible rows (visible columns) as JSON"
-                      className="!border-emerald-200 !bg-emerald-50 !text-emerald-900 hover:!bg-emerald-100"
-                    >
-                      Copy JSON ({rows.length})
-                    </Button>
+                    <div className="flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 p-1">
+                      <div className="px-2 text-xs font-medium text-emerald-900">
+                        Copy JSON ({rows.length})
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          onClick={() => copyVisibleJson({ compact: false })}
+                          disabled={!rows.length || copyBusy}
+                          title="Copy pretty JSON"
+                          className="!border-emerald-200 !bg-emerald-50 !text-emerald-900 hover:!bg-emerald-100"
+                        >
+                          <Icon name="braces" />
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          onClick={() => copyVisibleJson({ compact: true })}
+                          disabled={!rows.length || copyBusy}
+                          title="Copy compact JSON"
+                          className="!border-emerald-200 !bg-emerald-50 !text-emerald-900 hover:!bg-emerald-100"
+                        >
+                          <Icon name="minify" />
+                        </Button>
+                      </div>
+                    </div>
                     <DropdownMenu
                       trigger={({ open, setOpen }) => (
                         <Button
@@ -2037,9 +2315,9 @@ export default function Page() {
               {error ? <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}</div> : null}
 
               <div className="overflow-auto rounded-md border border-neutral-200">
-                <table className="min-w-full border-collapse text-sm">
-                  <thead className="bg-neutral-50">
-                    <tr className="border-b border-neutral-200">
+	                <table className="min-w-full border-collapse text-sm">
+	                  <thead className="bg-neutral-50">
+	                    <tr className="border-b border-neutral-200">
                       <th className="w-10 px-3 py-2 text-left">
                         <Checkbox
                           checked={allVisibleSelected}
@@ -2050,14 +2328,48 @@ export default function Page() {
                           <span className="sr-only">(some selected)</span>
                         ) : null}
                       </th>
-                      {columns.map((c) => (
-                        <th key={c} className="whitespace-nowrap px-3 py-2 text-left text-xs font-semibold text-neutral-700">
-                          {c}
-                        </th>
-                      ))}
-                      <th className="px-3 py-2 text-right text-xs font-semibold text-neutral-700">Actions</th>
-                    </tr>
-                  </thead>
+	                      {columns.map((c) => {
+	                        const isSorted = draftSort?.field === c;
+	                        const ariaSort = isSorted ? (draftSort?.dir === "asc" ? "ascending" : "descending") : "none";
+	                        return (
+	                          <th
+	                            key={c}
+	                            scope="col"
+	                            aria-sort={ariaSort}
+	                            className={cn(
+	                              "whitespace-nowrap px-3 py-2 text-left text-xs font-semibold",
+	                              isSorted ? "text-neutral-900" : "text-neutral-700",
+	                            )}
+	                          >
+	                            <button
+	                              type="button"
+	                              className={cn(
+	                                "inline-flex items-center gap-1 rounded px-1 py-0.5 hover:bg-neutral-100",
+	                                isSorted && "bg-neutral-100",
+	                              )}
+	                              onClick={() => {
+	                                setDraftSort((prev) => {
+	                                  if (!prev || prev.field !== c) return { field: c, dir: "asc" };
+	                                  if (prev.dir === "asc") return { field: c, dir: "desc" };
+	                                  return undefined;
+	                                });
+	                                setPage(1);
+	                              }}
+	                              title="Sort"
+	                            >
+	                              <span>{c}</span>
+	                              {isSorted ? (
+	                                <Icon name={draftSort?.dir === "asc" ? "arrowUp" : "arrowDown"} className="h-3.5 w-3.5 opacity-70" />
+	                              ) : (
+	                                <Icon name="chevron" className="h-3.5 w-3.5 opacity-40" />
+	                              )}
+	                            </button>
+	                          </th>
+	                        );
+	                      })}
+	                      <th className="px-3 py-2 text-right text-xs font-semibold text-neutral-700">Actions</th>
+	                    </tr>
+	                  </thead>
                   <tbody>
                     {loading ? (
                       Array.from({ length: 8 }).map((_, i) => (
@@ -2216,10 +2528,11 @@ export default function Page() {
 
                 const val = formValues[f.name];
                 const err = formErrors[f.name];
+                const showRequiredStar = !isEdit && f.isRequired && !f.hasDefaultValue && !f.isId;
                 const baseLabel = (
                   <div className="mb-1 flex items-center justify-between">
                     <div className="text-xs font-semibold text-neutral-700">
-                      {f.name} {f.isRequired ? <span className="text-red-600">*</span> : null}
+                      {f.name} {showRequiredStar ? <span className="text-red-600">*</span> : null}
                     </div>
                     <div className="text-[11px] text-neutral-500">
                       {f.kind}:{String(f.type)}

@@ -8,7 +8,10 @@
     "start": "next start",
     "lint": "eslint",
     "db:push": "prisma db push",
-    "import:words": "node scripts/import-words-to-mysql.mjs"
+    "import:words": "node scripts/import-words-to-mysql.mjs",
+    "import:ipaMap2": "node scripts/import-ipa-map2-to-mysql.mjs",
+    "backfill:ipaKeywordFaPlain": "node scripts/backfill-ipa-keyword-fa-plain.mjs",
+    "normalize:ipaKeywordSpaces": "node scripts/normalize-ipa-keyword-spaces.mjs"
   },
   "dependencies": {
     "@prisma/client": "^6.19.1",

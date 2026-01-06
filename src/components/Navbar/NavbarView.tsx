@@ -4,8 +4,9 @@ import { navbarStyles } from "./styles";
 import type { ThemeLayout } from "@/lib/theme/defaultThemes";
 
 export type NavbarItem = {
-  href: string;
   label: string;
+  href?: string;
+  children?: NavbarItem[];
 };
 
 type NavbarViewProps = {
@@ -16,6 +17,169 @@ type NavbarViewProps = {
   onMobileMenuClose: () => void;
   onMobileMenuToggle: () => void;
 };
+
+function ChevronDownIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      fill="currentColor"
+      aria-hidden="true"
+      className={className}
+    >
+      <path
+        fillRule="evenodd"
+        d="M5.22 7.97a.75.75 0 0 1 1.06 0L10 11.69l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.03a.75.75 0 0 1 0-1.06Z"
+        clipRule="evenodd"
+      />
+    </svg>
+  );
+}
+
+function SidebarNavItems({
+  items,
+  onNavigate,
+}: {
+  items: NavbarItem[];
+  onNavigate?: () => void;
+}) {
+  const closeSiblingDetails = (event: React.MouseEvent<HTMLElement>) => {
+    const nav = (event.currentTarget as HTMLElement).closest("nav");
+    if (!nav) return;
+    const currentDetails = (event.currentTarget as HTMLElement).closest("details");
+    nav.querySelectorAll("details[open]").forEach((details) => {
+      if (currentDetails && details === currentDetails) return;
+      (details as HTMLDetailsElement).open = false;
+    });
+  };
+
+  const closeAllDetailsInNav = (event: React.MouseEvent<HTMLElement>) => {
+    const nav = (event.currentTarget as HTMLElement).closest("nav");
+    if (!nav) return;
+
+    nav.querySelectorAll("details[open]").forEach((details) => {
+      (details as HTMLDetailsElement).open = false;
+    });
+  };
+
+  return (
+    <>
+      {items.map((item) => {
+        if (item.children?.length) {
+          return (
+            <details key={item.label} className={navbarStyles.navGroup}>
+              <summary className={navbarStyles.navGroupSummary} onClick={closeSiblingDetails}>
+                <span>{item.label}</span>
+                <ChevronDownIcon className={navbarStyles.navGroupChevron} />
+              </summary>
+              <div className={navbarStyles.subnav}>
+                {item.children.map((child) => (
+                  <Link
+                    key={child.href ?? child.label}
+                    href={child.href ?? "#"}
+                    onClick={(event) => {
+                      closeAllDetailsInNav(event);
+                      onNavigate?.();
+                    }}
+                    className={navbarStyles.subnavLink}
+                  >
+                    {child.label}
+                  </Link>
+                ))}
+              </div>
+            </details>
+          );
+        }
+
+        return (
+          <Link
+            key={item.href ?? item.label}
+            href={item.href ?? "#"}
+            onClick={(event) => {
+              closeAllDetailsInNav(event);
+              onNavigate?.();
+            }}
+            className={navbarStyles.navLink}
+          >
+            {item.label}
+          </Link>
+        );
+      })}
+    </>
+  );
+}
+
+function TopbarNavItems({
+  items,
+  onNavigate,
+}: {
+  items: NavbarItem[];
+  onNavigate?: () => void;
+}) {
+  const closeSiblingDetails = (event: React.MouseEvent<HTMLElement>) => {
+    const nav = (event.currentTarget as HTMLElement).closest("nav");
+    if (!nav) return;
+    const currentDetails = (event.currentTarget as HTMLElement).closest("details");
+    nav.querySelectorAll("details[open]").forEach((details) => {
+      if (currentDetails && details === currentDetails) return;
+      (details as HTMLDetailsElement).open = false;
+    });
+  };
+
+  const closeAllDetailsInNav = (event: React.MouseEvent<HTMLElement>) => {
+    const nav = (event.currentTarget as HTMLElement).closest("nav");
+    if (!nav) return;
+
+    nav.querySelectorAll("details[open]").forEach((details) => {
+      (details as HTMLDetailsElement).open = false;
+    });
+  };
+
+  return (
+    <>
+      {items.map((item) => {
+        if (item.children?.length) {
+          return (
+            <details key={item.label} className={navbarStyles.topbarGroup}>
+              <summary className={navbarStyles.topbarGroupSummary} onClick={closeSiblingDetails}>
+                <span>{item.label}</span>
+                <ChevronDownIcon className={navbarStyles.navGroupChevron} />
+              </summary>
+              <div className={navbarStyles.topbarDropdown}>
+                {item.children.map((child) => (
+                  <Link
+                    key={child.href ?? child.label}
+                    href={child.href ?? "#"}
+                    onClick={(event) => {
+                      closeAllDetailsInNav(event);
+                      onNavigate?.();
+                    }}
+                    className={navbarStyles.topbarDropdownLink}
+                  >
+                    {child.label}
+                  </Link>
+                ))}
+              </div>
+            </details>
+          );
+        }
+
+        return (
+          <Link
+            key={item.href ?? item.label}
+            href={item.href ?? "#"}
+            onClick={(event) => {
+              closeAllDetailsInNav(event);
+              onNavigate?.();
+            }}
+            className={navbarStyles.topbarLink}
+          >
+            {item.label}
+          </Link>
+        );
+      })}
+    </>
+  );
+}
 
 export function NavbarView({
   navItems,
@@ -61,15 +225,7 @@ export function NavbarView({
             </Link>
 
             <nav className={navbarStyles.nav}>
-              {navItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={navbarStyles.navLink}
-                >
-                  {item.label}
-                </Link>
-              ))}
+              <SidebarNavItems items={navItems} />
             </nav>
 
             <div className={navbarStyles.sidebarFooter}>
@@ -93,16 +249,7 @@ export function NavbarView({
               onClick={(event) => event.stopPropagation()}
             >
               <nav className={navbarStyles.mobileMenuNav}>
-                {navItems.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={onMobileMenuClose}
-                    className={navbarStyles.mobileMenuLink}
-                  >
-                    {item.label}
-                  </Link>
-                ))}
+                <SidebarNavItems items={navItems} onNavigate={onMobileMenuClose} />
                 <Link
                   href="/connect"
                   onClick={onMobileMenuClose}
@@ -131,15 +278,7 @@ export function NavbarView({
             </Link>
 
             <nav className={navbarStyles.topbarNav}>
-              {navItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={navbarStyles.topbarLink}
-                >
-                  {item.label}
-                </Link>
-              ))}
+              <TopbarNavItems items={navItems} />
             </nav>
 
             <button
@@ -172,16 +311,7 @@ export function NavbarView({
               onClick={(event) => event.stopPropagation()}
             >
               <nav className={navbarStyles.mobileMenuNav}>
-                {navItems.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={onMobileMenuClose}
-                    className={navbarStyles.mobileMenuLink}
-                  >
-                    {item.label}
-                  </Link>
-                ))}
+                <SidebarNavItems items={navItems} onNavigate={onMobileMenuClose} />
                 <Link
                   href="/connect"
                   onClick={onMobileMenuClose}
@@ -209,11 +339,7 @@ export function NavbarView({
           </Link>
 
           <nav className={navbarStyles.topbarNav}>
-            {navItems.map((item) => (
-              <Link key={item.href} href={item.href} className={navbarStyles.topbarLink}>
-                {item.label}
-              </Link>
-            ))}
+            <TopbarNavItems items={navItems} />
           </nav>
 
           <button
@@ -243,16 +369,7 @@ export function NavbarView({
             onClick={(event) => event.stopPropagation()}
           >
             <nav className={navbarStyles.mobileMenuNav}>
-              {navItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={onMobileMenuClose}
-                  className={navbarStyles.mobileMenuLink}
-                >
-                  {item.label}
-                </Link>
-              ))}
+              <SidebarNavItems items={navItems} onNavigate={onMobileMenuClose} />
               <Link
                 href="/connect"
                 onClick={onMobileMenuClose}

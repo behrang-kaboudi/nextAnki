@@ -10,6 +10,9 @@ export async function POST(req: Request) {
     update: (args: Record<string, unknown>) => Promise<unknown>;
   };
   const pk = getPrimaryKey(body.model);
-  const row = await delegate.update({ where: { [pk]: body.id }, data: body.data ?? {} });
+  const data = { ...(body.data ?? {}) } as Record<string, unknown>;
+  delete data.createdAt;
+  delete data.updatedAt;
+  const row = await delegate.update({ where: { [pk]: body.id }, data });
   return NextResponse.json({ row });
 }
