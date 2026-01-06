@@ -1,0 +1,37 @@
+Set Backup 
+----------------------------------------------------------------------
+Do the following actions in order:
+
+1. Take a fresh backup of the current local database.
+2. Overwrite this exact file with the new backup:
+   dbBackupToWork/database_backup.archive
+3. Create a FULL git commit for the entire project:
+   - Include all current changes (code + database backup).
+   - Write a clear and meaningful commit message describing the changes.
+4. Push the commit to GitHub.
+
+Rules:
+- Do NOT compare databases.
+- Do NOT merge databases.
+- Assume the local database is always correct.
+- Always overwrite the existing backup file.
+- Do not add explanations.
+----------------------------------------------------------------------
+Get backup From:
+----------------------------------------------------------------------
+Do the following actions in order:
+
+1. Pull the latest changes from the current GitHub branch.
+2. If Prisma schema or migrations have changed:
+   - Apply the required Prisma migrations to the local database.
+3. Restore the local database using this exact backup file:
+   dbBackupToWork/database_backup.archive
+4. Make sure the local database is now based on this backup.
+5. Do not create any git commit.
+6. Do not push anything.
+
+Rules:
+- Assume the backup file is the source of truth.
+- Do NOT compare databases.
+- Do NOT merge databases.
+- Do NOT add explanations.
