@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "db:push": "prisma db push",
+    "db:restore": "node scripts/restore-backup.js",
     "import:words": "node scripts/import-words-to-mysql.mjs",
     "import:ipaMap2": "node scripts/import-ipa-map2-to-mysql.mjs",
     "backfill:ipaKeywordFaPlain": "node scripts/backfill-ipa-keyword-fa-plain.mjs",
