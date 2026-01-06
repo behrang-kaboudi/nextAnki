@@ -22,16 +22,19 @@ Get backup From:
 Do the following actions in order:
 
 1. Pull the latest changes from the current GitHub branch.
-2. If Prisma schema or migrations have changed:
+2. If there are new or updated project dependencies:
+   - Install them using the project’s package manager.
+3. If Prisma schema or migrations have changed:
    - Apply the required Prisma migrations to the local database.
-3. Restore the local database using this exact backup file:
+4. Restore the local database using this exact backup file:
    dbBackupToWork/database_backup.archive
-4. Make sure the local database is now based on this backup.
-5. Do not create any git commit.
-6. Do not push anything.
+5. Make sure the local database is now based on this backup.
+6. Do not create any git commit.
+7. Do not push anything.
 
 Rules:
 - Assume the backup file is the source of truth.
 - Do NOT compare databases.
 - Do NOT merge databases.
 - Do NOT add explanations.
+
