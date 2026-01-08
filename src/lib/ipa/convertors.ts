@@ -63,7 +63,12 @@ function getKeysBasket(ipaString: string) {
     return basket;
   }
 
-  const addedToken = tokens[0]! + tokens[1]! + (tokens[2] || "") + (tokens[3] || "") + (tokens[4] || "");
+  const addedToken =
+    tokens[0]! +
+    tokens[1]! +
+    (tokens[2] || "") +
+    (tokens[3] || "") +
+    (tokens[4] || "");
   let key1 = "";
   let key2 = "";
   let key3 = "";
@@ -89,7 +94,8 @@ async function getAllowdWord(ipaString: string) {
     const key = basket[i]!;
     for (let j = 0; j < ipaMapWithConvert.length; j++) {
       const ipaObj = ipaMapWithConvert[j]!;
-      if (ipaObj.ipa.startsWith(key) || key.startsWith(ipaObj.ipa)) allowedWords.push(ipaObj);
+      if (ipaObj.ipa.startsWith(key) || key.startsWith(ipaObj.ipa))
+        allowedWords.push(ipaObj);
     }
   }
 
@@ -107,13 +113,19 @@ async function getAllowdWord(ipaString: string) {
 const DEFAULT_PREFIX_LEN = 5;
 
 function editDistance(a: string, b: string) {
-  const dp = Array.from({ length: a.length + 1 }, () => Array(b.length + 1).fill(0));
+  const dp = Array.from({ length: a.length + 1 }, () =>
+    Array(b.length + 1).fill(0)
+  );
   for (let i = 0; i <= a.length; i++) dp[i]![0] = i;
   for (let j = 0; j <= b.length; j++) dp[0]![j] = j;
   for (let i = 1; i <= a.length; i++) {
     for (let j = 1; j <= b.length; j++) {
       const cost = a[i - 1] === b[j - 1] ? 0 : 1;
-      dp[i]![j] = Math.min(dp[i - 1]![j]! + 1, dp[i]![j - 1]! + 1, dp[i - 1]![j - 1]! + cost);
+      dp[i]![j] = Math.min(
+        dp[i - 1]![j]! + 1,
+        dp[i]![j - 1]! + 1,
+        dp[i - 1]![j - 1]! + cost
+      );
     }
   }
   return dp[a.length]![b.length]!;
@@ -151,7 +163,12 @@ function getIpaVariantsForScoring(ipa: string) {
   return [canon];
 }
 
-function prefixSimilarityCount(a: string, b: string, n: number, { allowInitialSEGate = false } = {}) {
+function prefixSimilarityCount(
+  a: string,
+  b: string,
+  n: number,
+  { allowInitialSEGate = false } = {}
+) {
   const aa = toSymbols(a);
   const bb = toSymbols(b);
   let count = 0;
@@ -177,7 +194,11 @@ function isConsonant(symbol: string) {
   return !IPA_VOWELS.has(symbol);
 }
 
-function consonantMatchCountOnPrefix(inputIPA: string, targetIPA: string, prefixLen: number) {
+function consonantMatchCountOnPrefix(
+  inputIPA: string,
+  targetIPA: string,
+  prefixLen: number
+) {
   const a = toSymbols(prefixIPA(inputIPA, prefixLen));
   const b = toSymbols(prefixIPA(targetIPA, prefixLen));
   let matches = 0;
@@ -196,8 +217,12 @@ function bagMatchCountOnPrefix(
   prefixLen: number,
   predicate?: (s: string) => boolean
 ) {
-  const a = toSymbols(prefixIPA(inputIPA, prefixLen)).filter((x) => x && (!predicate || predicate(x)));
-  const b = toSymbols(prefixIPA(targetIPA, prefixLen)).filter((x) => x && (!predicate || predicate(x)));
+  const a = toSymbols(prefixIPA(inputIPA, prefixLen)).filter(
+    (x) => x && (!predicate || predicate(x))
+  );
+  const b = toSymbols(prefixIPA(targetIPA, prefixLen)).filter(
+    (x) => x && (!predicate || predicate(x))
+  );
   const counts = new Map<string, number>();
   for (const s of a) counts.set(s, (counts.get(s) || 0) + 1);
   let common = 0;
@@ -218,13 +243,25 @@ function firstConsonantBigram(ipa: string, prefixLen: number) {
   return consonants[0]! + consonants[1]!;
 }
 
-function passesPrefixGates(inputIPA: string, targetIPA: string, { gate1Len, gate2Len }: { gate1Len: number; gate2Len: number }) {
+function passesPrefixGates(
+  inputIPA: string,
+  targetIPA: string,
+  { gate1Len, gate2Len }: { gate1Len: number; gate2Len: number }
+) {
   const variants = getIpaVariantsForScoring(inputIPA);
   const allowInitialSEGate = true;
   for (const v of variants) {
-    const gate1 = prefixSimilarityCount(v, targetIPA, gate1Len, { allowInitialSEGate });
-    const gate2 = prefixSimilarityCount(v, targetIPA, gate2Len, { allowInitialSEGate });
-    if (gate1 >= Math.max(1, gate1Len - 1) && gate2 >= Math.max(1, gate2Len - 2)) return { pass: true };
+    const gate1 = prefixSimilarityCount(v, targetIPA, gate1Len, {
+      allowInitialSEGate,
+    });
+    const gate2 = prefixSimilarityCount(v, targetIPA, gate2Len, {
+      allowInitialSEGate,
+    });
+    if (
+      gate1 >= Math.max(1, gate1Len - 1) &&
+      gate2 >= Math.max(1, gate2Len - 2)
+    )
+      return { pass: true };
   }
   return { pass: false };
 }
@@ -232,15 +269,37 @@ function passesPrefixGates(inputIPA: string, targetIPA: string, { gate1Len, gate
 function buildRankFeatures(
   inputIPA: string,
   targetIPA: string,
-  { prefixLen, gate1Len, gate2Len }: { prefixLen: number; gate1Len: number; gate2Len: number }
+  {
+    prefixLen,
+    gate1Len,
+    gate2Len,
+  }: { prefixLen: number; gate1Len: number; gate2Len: number }
 ) {
-  const gatePass = passesPrefixGates(inputIPA, targetIPA, { gate1Len, gate2Len }).pass;
+  const gatePass = passesPrefixGates(inputIPA, targetIPA, {
+    gate1Len,
+    gate2Len,
+  }).pass;
   return {
     gatePass,
-    prefixVowelBag: bagMatchCountOnPrefix(inputIPA, targetIPA, prefixLen, (s) => !isConsonant(s)),
-    prefixConsBag: bagMatchCountOnPrefix(inputIPA, targetIPA, prefixLen, (s) => isConsonant(s)),
-    prefixConsExact: consonantMatchCountOnPrefix(inputIPA, targetIPA, prefixLen),
-    firstConsBigramMatch: firstConsonantBigram(inputIPA, prefixLen) === firstConsonantBigram(targetIPA, prefixLen) ? 1 : 0,
+    prefixVowelBag: bagMatchCountOnPrefix(
+      inputIPA,
+      targetIPA,
+      prefixLen,
+      (s) => !isConsonant(s)
+    ),
+    prefixConsBag: bagMatchCountOnPrefix(inputIPA, targetIPA, prefixLen, (s) =>
+      isConsonant(s)
+    ),
+    prefixConsExact: consonantMatchCountOnPrefix(
+      inputIPA,
+      targetIPA,
+      prefixLen
+    ),
+    firstConsBigramMatch:
+      firstConsonantBigram(inputIPA, prefixLen) ===
+      firstConsonantBigram(targetIPA, prefixLen)
+        ? 1
+        : 0,
   };
 }
 
@@ -252,16 +311,28 @@ function phoneticDistance(
     prefixLen,
     gate1Len,
     gate2Len,
-  }: { includeRejected: boolean; prefixLen: number; gate1Len: number; gate2Len: number }
+  }: {
+    includeRejected: boolean;
+    prefixLen: number;
+    gate1Len: number;
+    gate2Len: number;
+  }
 ) {
-  const gatePass = passesPrefixGates(inputIPA, targetIPA, { gate1Len, gate2Len }).pass;
+  const gatePass = passesPrefixGates(inputIPA, targetIPA, {
+    gate1Len,
+    gate2Len,
+  }).pass;
   if (!gatePass && !includeRejected) return 1e12;
 
   const a = prefixIPA(inputIPA, prefixLen);
   const b = prefixIPA(targetIPA, prefixLen);
   let dist = editDistance(a, b);
 
-  const features = buildRankFeatures(inputIPA, targetIPA, { prefixLen, gate1Len, gate2Len });
+  const features = buildRankFeatures(inputIPA, targetIPA, {
+    prefixLen,
+    gate1Len,
+    gate2Len,
+  });
   dist -= features.prefixConsExact * 0.6;
   dist -= features.firstConsBigramMatch * 0.8;
   dist -= features.prefixConsBag * 0.25;
@@ -280,11 +351,20 @@ function findMostSimilarIPA(
     prefixLen = DEFAULT_PREFIX_LEN,
     gate1Len = DEFAULT_PREFIX_LEN - 1,
     gate2Len = DEFAULT_PREFIX_LEN,
-  }: { includeRejected?: boolean; prefixLen?: number; gate1Len?: number; gate2Len?: number } = {}
+  }: {
+    includeRejected?: boolean;
+    prefixLen?: number;
+    gate1Len?: number;
+    gate2Len?: number;
+  } = {}
 ) {
   return items
     .map((item) => {
-      const features = buildRankFeatures(inputIPA, item.ipa, { prefixLen, gate1Len, gate2Len });
+      const features = buildRankFeatures(inputIPA, item.ipa, {
+        prefixLen,
+        gate1Len,
+        gate2Len,
+      });
       const score = phoneticDistance(inputIPA, item.ipa, {
         includeRejected,
         prefixLen,
@@ -320,7 +400,9 @@ function makeRng(seed: number) {
 
 const selectionCounts = new Map<string, number>();
 
-function pickWeightedByScore<T extends { score: number; ipa?: string; number?: number }>(
+function pickWeightedByScore<
+  T extends { score: number; ipa?: string; number?: number }
+>(
   items: T[],
   seedStr: string,
   {
@@ -340,7 +422,10 @@ function pickWeightedByScore<T extends { score: number; ipa?: string; number?: n
   } = {}
 ) {
   if (!Array.isArray(items) || items.length === 0) return null;
-  const k = Math.max(1, Math.min(items.length, Number.isFinite(topK) ? topK : 8));
+  const k = Math.max(
+    1,
+    Math.min(items.length, Number.isFinite(topK) ? topK : 8)
+  );
   const slice = items.slice(0, k);
   const best = slice[0]!.score;
 
@@ -349,8 +434,8 @@ function pickWeightedByScore<T extends { score: number; ipa?: string; number?: n
     typeof temperature === "number" && Number.isFinite(temperature)
       ? Math.max(1e-6, temperature)
       : isRejectSpace
-        ? 400
-        : 1.0;
+      ? 400
+      : 1.0;
 
   const weights: number[] = [];
   let sum = 0;
@@ -358,7 +443,10 @@ function pickWeightedByScore<T extends { score: number; ipa?: string; number?: n
     let delta = it.score - best;
 
     if (diversityKey) {
-      const key = diversityKey === "number" ? String(it.number ?? "") : String(it.ipa ?? "");
+      const key =
+        diversityKey === "number"
+          ? String(it.number ?? "")
+          : String(it.ipa ?? "");
       if (key) {
         const c = selectionCounts.get(key) || 0;
         const capped = Math.min(c, diversityCap);
@@ -408,14 +496,20 @@ export async function getKeyWord(
   const normalizedIpa = getIpaSegments(ipaString, 8).join("");
   const allowedWords = await getAllowdWord(ipaString);
 
-  const allKeyWords = findMostSimilarIPA(normalizedIpa, allowedWords, Infinity, {
-    includeRejected,
-    prefixLen,
-    gate1Len,
-    gate2Len,
-  });
+  const allKeyWords = findMostSimilarIPA(
+    normalizedIpa,
+    allowedWords,
+    Infinity,
+    {
+      includeRejected,
+      prefixLen,
+      gate1Len,
+      gate2Len,
+    }
+  );
 
-  const keyWords = limit === Infinity ? allKeyWords : allKeyWords.slice(0, Math.max(0, limit));
+  const keyWords =
+    limit === Infinity ? allKeyWords : allKeyWords.slice(0, Math.max(0, limit));
 
   const selected = pickOne
     ? pickWeightedByScore(allKeyWords, normalizedIpa, {

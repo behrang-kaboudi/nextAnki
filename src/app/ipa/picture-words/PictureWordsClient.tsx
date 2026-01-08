@@ -394,11 +394,11 @@ export function PictureWordsClient() {
   const [searchIpaOnly, setSearchIpaOnly] = useState(false);
   const [showDuplicateFaOnly, setShowDuplicateFaOnly] = useState(false);
   const [drafts, setDrafts] = useState<
-    Record<number, { ipa_fa: string; phinglish: string }>
+    Record<number, { fa: string; ipa_fa: string; phinglish: string; canBePersonal: boolean }>
   >({});
   const [savingId, setSavingId] = useState<number | null>(null);
   const [activeField, setActiveField] = useState<
-    | { kind: "draft"; id: number; field: "ipa_fa" | "phinglish" }
+    | { kind: "draft"; id: number; field: "fa" | "ipa_fa" | "phinglish" }
     | { kind: "search" }
     | { kind: "import" }
     | null
@@ -430,7 +430,12 @@ export function PictureWordsClient() {
         const next = { ...prev };
         for (const row of data.rows) {
           if (!next[row.id]) {
-            next[row.id] = { ipa_fa: row.ipa_fa, phinglish: row.phinglish };
+            next[row.id] = {
+              fa: row.fa,
+              ipa_fa: row.ipa_fa,
+              phinglish: row.phinglish,
+              canBePersonal: row.canBePersonal,
+            };
           }
         }
         return next;
@@ -552,19 +557,25 @@ export function PictureWordsClient() {
 
   const onVerify = useCallback(
     async (id: number) => {
-      const draft = drafts[id];
-      if (!draft) return;
-
       const previous = rows.find((row) => row.id === id);
       if (!previous) return;
+      const draft =
+        drafts[id] ?? {
+          fa: previous.fa,
+          ipa_fa: previous.ipa_fa,
+          phinglish: previous.phinglish,
+          canBePersonal: previous.canBePersonal,
+        };
       setSavingId(id);
       setTableError(null);
       setTableNotice("Saving…");
 
       const optimistic: PictureWordRow = {
         ...previous,
+        fa: draft.fa,
         ipa_fa: draft.ipa_fa,
         phinglish: draft.phinglish,
+        canBePersonal: draft.canBePersonal,
         ipaVerified: true,
       };
       setLastChangedRow(optimistic);
@@ -573,8 +584,10 @@ export function PictureWordsClient() {
           row.id === id
             ? {
                 ...row,
+                fa: draft.fa,
                 ipa_fa: draft.ipa_fa,
                 phinglish: draft.phinglish,
+                canBePersonal: draft.canBePersonal,
                 ipaVerified: true,
               }
             : row
@@ -586,8 +599,10 @@ export function PictureWordsClient() {
           headers: { "content-type": "application/json" },
           body: JSON.stringify({
             id,
+            fa: draft.fa,
             ipa_fa: draft.ipa_fa,
             phinglish: draft.phinglish,
+            canBePersonal: draft.canBePersonal,
           }),
         });
         const data = (await response.json()) as {
@@ -625,6 +640,7 @@ export function PictureWordsClient() {
           phinglish: lastChangedRow.phinglish,
           en: lastChangedRow.en,
           type: lastChangedRow.type,
+          canBePersonal: lastChangedRow.canBePersonal,
           ipaVerified: lastChangedRow.ipaVerified,
         }),
       });
@@ -641,8 +657,10 @@ export function PictureWordsClient() {
       setDrafts((prev) => ({
         ...prev,
         [data.row!.id]: {
+          fa: data.row!.fa,
           ipa_fa: data.row!.ipa_fa,
           phinglish: data.row!.phinglish,
+          canBePersonal: data.row!.canBePersonal,
         },
       }));
       setLastChangedRow(data.row!);
@@ -655,14 +673,24 @@ export function PictureWordsClient() {
 
   const getDraft = useCallback(
     (row: PictureWordRow) =>
-      drafts[row.id] ?? { ipa_fa: row.ipa_fa, phinglish: row.phinglish },
+      drafts[row.id] ?? {
+        fa: row.fa,
+        ipa_fa: row.ipa_fa,
+        phinglish: row.phinglish,
+        canBePersonal: row.canBePersonal,
+      },
     [drafts]
   );
 
   const hasRowChanges = useCallback(
     (row: PictureWordRow) => {
       const draft = getDraft(row);
-      return draft.ipa_fa !== row.ipa_fa || draft.phinglish !== row.phinglish;
+      return (
+        draft.fa !== row.fa ||
+        draft.ipa_fa !== row.ipa_fa ||
+        draft.phinglish !== row.phinglish ||
+        draft.canBePersonal !== row.canBePersonal
+      );
     },
     [getDraft]
   );
@@ -740,9 +768,11 @@ export function PictureWordsClient() {
       const nextCursor = start + character.length;
 
       if (activeField?.kind === "draft") {
+        if (activeField.field === "fa") return;
         setDrafts((prev) => ({
           ...prev,
           [activeField.id]: {
+            fa: prev[activeField.id]?.fa ?? "",
             ipa_fa:
               activeField.field === "ipa_fa"
                 ? nextValue
@@ -751,6 +781,7 @@ export function PictureWordsClient() {
               activeField.field === "phinglish"
                 ? nextValue
                 : prev[activeField.id]?.phinglish ?? "",
+            canBePersonal: prev[activeField.id]?.canBePersonal ?? false,
           },
         }));
       } else if (activeField?.kind === "search") {
@@ -949,7 +980,38 @@ export function PictureWordsClient() {
                 <tbody>
                   <tr className="border-t border-card text-[1.05rem]">
                     <td className="break-words px-4 py-3 text-foreground">
-                      {lastChangedRow.fa}
+                      <input
+                        value={drafts[lastChangedRow.id]?.fa ?? lastChangedRow.fa}
+                        onChange={(e) =>
+                          setDrafts((prev) => ({
+                            ...prev,
+                            [lastChangedRow.id]: {
+                              fa: e.target.value,
+                              ipa_fa:
+                                prev[lastChangedRow.id]?.ipa_fa ??
+                                lastChangedRow.ipa_fa,
+                              phinglish:
+                                prev[lastChangedRow.id]?.phinglish ??
+                                lastChangedRow.phinglish,
+                              canBePersonal:
+                                prev[lastChangedRow.id]?.canBePersonal ??
+                                lastChangedRow.canBePersonal,
+                            },
+                          }))
+                        }
+                        onFocus={(e) => {
+                          lastFocusedInputRef.current = e.currentTarget;
+                          setActiveField({
+                            kind: "draft",
+                            id: lastChangedRow.id,
+                            field: "fa",
+                          });
+                        }}
+                        disabled={
+                          !rows.some((row) => row.id === lastChangedRow.id)
+                        }
+                        className="w-full rounded-lg border border-card bg-background px-2 py-1 text-[1.25rem] text-foreground disabled:opacity-60"
+                      />
                     </td>
                     <td className="hidden px-4 py-3 lg:table-cell">
                       <input
@@ -961,10 +1023,16 @@ export function PictureWordsClient() {
                           setDrafts((prev) => ({
                             ...prev,
                             [lastChangedRow.id]: {
+                              fa:
+                                prev[lastChangedRow.id]?.fa ??
+                                lastChangedRow.fa,
                               ipa_fa: e.target.value,
                               phinglish:
                                 prev[lastChangedRow.id]?.phinglish ??
                                 lastChangedRow.phinglish,
+                              canBePersonal:
+                                prev[lastChangedRow.id]?.canBePersonal ??
+                                lastChangedRow.canBePersonal,
                             },
                           }))
                         }
@@ -992,10 +1060,16 @@ export function PictureWordsClient() {
                           setDrafts((prev) => ({
                             ...prev,
                             [lastChangedRow.id]: {
+                              fa:
+                                prev[lastChangedRow.id]?.fa ??
+                                lastChangedRow.fa,
                               ipa_fa:
                                 prev[lastChangedRow.id]?.ipa_fa ??
                                 lastChangedRow.ipa_fa,
                               phinglish: e.target.value,
+                              canBePersonal:
+                                prev[lastChangedRow.id]?.canBePersonal ??
+                                lastChangedRow.canBePersonal,
                             },
                           }))
                         }
@@ -1039,6 +1113,38 @@ export function PictureWordsClient() {
                     </td>
                     <td className="whitespace-nowrap px-4 py-3 text-muted">
                       {lastChangedRow.type}
+                    </td>
+                    <td className="px-4 py-3">
+                      <label className="inline-flex items-center gap-2 text-sm text-muted">
+                        <input
+                          type="checkbox"
+                          checked={
+                            drafts[lastChangedRow.id]?.canBePersonal ??
+                            lastChangedRow.canBePersonal
+                          }
+                          onChange={(e) =>
+                            setDrafts((prev) => ({
+                              ...prev,
+                              [lastChangedRow.id]: {
+                                fa:
+                                  prev[lastChangedRow.id]?.fa ??
+                                  lastChangedRow.fa,
+                                ipa_fa:
+                                  prev[lastChangedRow.id]?.ipa_fa ??
+                                  lastChangedRow.ipa_fa,
+                                phinglish:
+                                  prev[lastChangedRow.id]?.phinglish ??
+                                  lastChangedRow.phinglish,
+                                canBePersonal: e.target.checked,
+                              },
+                            }))
+                          }
+                          disabled={
+                            !rows.some((row) => row.id === lastChangedRow.id)
+                          }
+                        />
+                        <span>canBePersonal</span>
+                      </label>
                     </td>
                     <td className="px-4 py-3">
                       {rows.some((row) => row.id === lastChangedRow.id) ? (
@@ -1147,6 +1253,7 @@ export function PictureWordsClient() {
                   {!showUnverifiedOnly ? (
                     <th className="w-28 px-4 py-3">Verify</th>
                   ) : null}
+                  <th className="w-28 px-4 py-3">Personal?</th>
                   <th className="w-24 px-4 py-3">Delete</th>
                 </tr>
               </thead>
@@ -1157,7 +1264,24 @@ export function PictureWordsClient() {
                     className="border-t border-card text-[1.05rem]"
                   >
                     <td className="break-words px-4 py-3 text-foreground">
-                      {row.fa}
+                      <input
+                        value={drafts[row.id]?.fa ?? row.fa}
+                        onChange={(e) =>
+                          setDrafts((prev) => ({
+                            ...prev,
+                            [row.id]: {
+                              fa: e.target.value,
+                              ipa_fa: prev[row.id]?.ipa_fa ?? row.ipa_fa,
+                              phinglish:
+                                prev[row.id]?.phinglish ?? row.phinglish,
+                              canBePersonal:
+                                prev[row.id]?.canBePersonal ??
+                                row.canBePersonal,
+                            },
+                          }))
+                        }
+                        className="w-full rounded-lg border border-card bg-background px-2 py-1 text-[1.25rem] text-foreground"
+                      />
                     </td>
                     <td className="hidden px-4 py-3 lg:table-cell">
                       <input
@@ -1166,9 +1290,13 @@ export function PictureWordsClient() {
                           setDrafts((prev) => ({
                             ...prev,
                             [row.id]: {
+                              fa: prev[row.id]?.fa ?? row.fa,
                               ipa_fa: e.target.value,
                               phinglish:
                                 prev[row.id]?.phinglish ?? row.phinglish,
+                              canBePersonal:
+                                prev[row.id]?.canBePersonal ??
+                                row.canBePersonal,
                             },
                           }))
                         }
@@ -1190,8 +1318,12 @@ export function PictureWordsClient() {
                           setDrafts((prev) => ({
                             ...prev,
                             [row.id]: {
+                              fa: prev[row.id]?.fa ?? row.fa,
                               ipa_fa: prev[row.id]?.ipa_fa ?? row.ipa_fa,
                               phinglish: e.target.value,
+                              canBePersonal:
+                                prev[row.id]?.canBePersonal ??
+                                row.canBePersonal,
                             },
                           }))
                         }
@@ -1253,6 +1385,26 @@ export function PictureWordsClient() {
                       </td>
                     ) : null}
                     <td className="px-4 py-3">
+                      <label className="inline-flex items-center gap-2 text-sm text-muted">
+                        <input
+                          type="checkbox"
+                          checked={drafts[row.id]?.canBePersonal ?? row.canBePersonal}
+                          onChange={(e) =>
+                            setDrafts((prev) => ({
+                              ...prev,
+                              [row.id]: {
+                                fa: prev[row.id]?.fa ?? row.fa,
+                                ipa_fa: prev[row.id]?.ipa_fa ?? row.ipa_fa,
+                                phinglish:
+                                  prev[row.id]?.phinglish ?? row.phinglish,
+                                canBePersonal: e.target.checked,
+                              },
+                            }))
+                          }
+                        />
+                      </label>
+                    </td>
+                    <td className="px-4 py-3">
                       <button
                         type="button"
                         onClick={() => onDelete(row)}
@@ -1268,7 +1420,7 @@ export function PictureWordsClient() {
                 {sorted.length === 0 ? (
                   <tr className="border-t border-card">
                     <td
-                      colSpan={7}
+                      colSpan={8}
                       className="px-4 py-10 text-center text-sm text-muted"
                     >
                       No results.

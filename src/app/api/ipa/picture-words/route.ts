@@ -587,24 +587,48 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: "Invalid id" }, { status: 400 });
   }
 
-  const ipa_fa = normalizeInput(obj?.ipa_fa);
-  const phinglish = normalizeInput(obj?.phinglish);
+  const faRaw = normalizeOptionalString(obj?.fa);
+  const fa = faRaw ? normalizeFa(faRaw) : undefined;
+  const ipa_fa = normalizeOptionalString(obj?.ipa_fa);
+  const phinglish = normalizeOptionalString(obj?.phinglish);
+  const hasCanBePersonal = Object.prototype.hasOwnProperty.call(
+    obj ?? {},
+    "canBePersonal",
+  );
+  const canBePersonal = hasCanBePersonal
+    ? parseCanBePersonal(obj?.canBePersonal)
+    : undefined;
 
-  if (!ipa_fa || !phinglish) {
+  const isVerifying = Boolean(ipa_fa || phinglish);
+  if (isVerifying && (!ipa_fa || !phinglish)) {
     return NextResponse.json(
-      { error: "`ipa_fa` and `phinglish` are required" },
+      { error: "When updating IPA, both `ipa_fa` and `phinglish` are required" },
       { status: 400 },
     );
   }
 
+  if (
+    !fa &&
+    !ipa_fa &&
+    !phinglish &&
+    typeof canBePersonal !== "boolean"
+  ) {
+    return NextResponse.json({ error: "No fields to update" }, { status: 400 });
+  }
+
+  const data: Record<string, unknown> = {};
+  if (fa) data.fa = fa;
+  if (typeof canBePersonal === "boolean") data.canBePersonal = canBePersonal;
+  if (ipa_fa) {
+    data.ipa_fa = ipa_fa;
+    data.ipa_fa_normalized = computeNormalized(ipa_fa);
+  }
+  if (phinglish) data.phinglish = phinglish;
+  if (isVerifying) data.ipaVerified = true;
+
   const updated = await prisma.pictureWord.update({
     where: { id },
-    data: {
-      ipa_fa,
-      ipa_fa_normalized: computeNormalized(ipa_fa),
-      phinglish,
-      ipaVerified: true,
-    },
+    data,
     select: {
       id: true,
       fa: true,
@@ -612,6 +636,7 @@ export async function PATCH(request: Request) {
       phinglish: true,
       en: true,
       type: true,
+      canBePersonal: true,
       ipaVerified: true,
     },
   });

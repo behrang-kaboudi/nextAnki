@@ -2,11 +2,12 @@ import "server-only";
 
 import { NextResponse } from "next/server";
 
-import { findMatchesForAll2CharWords } from "@/lib/ipa/selectKey2";
+import { findMatchesForAll3CharWords } from "@/lib/ipa/selectKey3";
 
 export const runtime = "nodejs";
 
 export async function GET() {
-  const data = await findMatchesForAll2CharWords();
+  const data = await findMatchesForAll3CharWords();
   return NextResponse.json(data);
 }
+

@@ -48,8 +48,9 @@ function normalizeDifferentIpaTo1(ipa: string) {
     case "ð":
       return "z";
     case "g":
-    case "ŋ":
       return "ɡ";
+    case "ŋ":
+      return "n";
     case "ɹ":
     case "ɾ":
       return "r";
