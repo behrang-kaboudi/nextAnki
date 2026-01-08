@@ -92,6 +92,36 @@ export const VOWELS = new Set([
   "ɝ",
 ]);
 
+// Derived from `ipaKeyWords2.ts` (field `ipa_fa`) after applying:
+// - `convertIpa2to1ForOneSound` (e.g. `tʃ` → `ʧ`, `dʒ` → `ʤ`, `oʊ` → `o`)
+// - `normalizeDifferentIpaTo1` (e.g. `ə/ɛ/ɜ` → `e`, `i` → `ɪ`, `u` → `ʊ`)
+export const FA_KEYWORDS_VOWELS_NORMALIZED = new Set(["e", "o", "æ", "ɪ", "ʊ", "ʌ"]);
+
+export const FA_KEYWORDS_CONSONANTS_NORMALIZED = new Set([
+  "b",
+  "d",
+  "f",
+  "h",
+  "j",
+  "k",
+  "l",
+  "m",
+  "n",
+  "p",
+  "r",
+  "s",
+  "t",
+  "v",
+  "x",
+  "z",
+  "ɡ",
+  "ɣ",
+  "ʃ",
+  "ʒ",
+  "ʤ",
+  "ʧ",
+]);
+
 export const isCombiningMark = (ch: string) => /\p{M}/u.test(ch);
 export const stressKindOf = (ch: string) =>
   ch === "ˈ" ? "primary" : ch === "ˌ" ? "secondary" : null;
@@ -119,4 +149,3 @@ export function normalizeIPA(input: string) {
 
   return out;
 }
-

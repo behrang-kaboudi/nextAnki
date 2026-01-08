@@ -1586,7 +1586,16 @@ export default function Page() {
           f.op === "isEmpty" ||
           f.op === "isNotEmpty" ||
           !(f.value === "" || f.value === null || f.value === undefined),
-      );
+      )
+      .map((f) => {
+        const fieldMeta = filterableFields.find((x) => x.name === f.field) ?? null;
+        if (!fieldMeta) return f;
+        if (fieldMeta.kind === "scalar" && fieldMeta.type === "Boolean" && !fieldMeta.isList) {
+          if (f.value === "true") return { ...f, value: true };
+          if (f.value === "false") return { ...f, value: false };
+        }
+        return f;
+      });
   }
 
   function updateFilter(i: number, patch: Partial<Filter>) {
@@ -2314,8 +2323,8 @@ export default function Page() {
             <CardContent>
               {error ? <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}</div> : null}
 
-              <div className="overflow-auto rounded-md border border-neutral-200">
-	                <table className="min-w-full border-collapse text-sm">
+              <div className="overflow-x-auto overflow-y-auto rounded-md border border-neutral-200">
+	                <table className="min-w-full w-max border-collapse text-sm">
 	                  <thead className="bg-neutral-50">
 	                    <tr className="border-b border-neutral-200">
                       <th className="w-10 px-3 py-2 text-left">
@@ -2666,8 +2675,8 @@ export default function Page() {
           <div className="text-xs text-neutral-600">Saved views are persisted in localStorage.</div>
 
           {savedViews.length ? (
-            <div className="overflow-auto rounded-md border border-neutral-200">
-              <table className="min-w-full border-collapse text-sm">
+            <div className="overflow-x-auto overflow-y-auto rounded-md border border-neutral-200">
+              <table className="min-w-full w-max border-collapse text-sm">
                 <thead className="bg-neutral-50">
                   <tr className="border-b border-neutral-200">
                     <th className="px-3 py-2 text-left text-xs font-semibold text-neutral-700">Name</th>
