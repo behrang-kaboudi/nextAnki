@@ -38,6 +38,14 @@ enum PictureWordType {
   sport
 }
 
+enum PictureWordUsage {
+  Job
+  adj
+  person
+  free
+  notSet
+}
+
 model User {
   id        Int      @id @default(autoincrement())
   email     String   @unique
@@ -100,6 +108,7 @@ model PictureWord {
   phinglish   String
   en          String
   type        PictureWordType @default(noun)
+  usage       PictureWordUsage @default(notSet)
   canBePersonal Boolean       @default(false)
   canImagineAsHuman Boolean   @default(false)
   canUseAsHumanAdj Boolean    @default(false)

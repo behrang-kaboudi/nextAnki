@@ -17,6 +17,7 @@ type PictureWordInput = {
     | "adding"
     | "animal"
     | "person"
+    | "occupation"
     | "notPersonal"
     | "humanBody"
     | "relationalObj"
@@ -28,6 +29,7 @@ type PictureWordInput = {
     | "accessory"
     | "tool"
     | "sport";
+  usage: "Job" | "adj" | "person" | "free" | "notSet";
   canBePersonal: boolean;
   canImagineAsHuman: boolean;
   canUseAsHumanAdj: boolean;
@@ -37,7 +39,7 @@ type PictureWordInput = {
 type PictureWordUpdate = {
   id: number;
   data: Partial<PictureWordInput>;
-  meta?: { invalidType?: boolean };
+  meta?: { invalidType?: boolean; invalidUsage?: boolean };
 };
 
 type PictureWordUpdateField = keyof PictureWordInput;
@@ -131,8 +133,22 @@ function toPictureWordInput(value: unknown): PictureWordInput | null {
 	                    ? "tool"
                   : typeRaw === "sport"
                     ? "sport"
-	            : "";
+            : "";
   if (typeRaw && !type) return null;
+  const usageRaw = normalizeInput(obj.usage).toLowerCase();
+  const usage =
+    usageRaw === "job"
+      ? "Job"
+      : usageRaw === "adj"
+        ? "adj"
+        : usageRaw === "person"
+          ? "person"
+          : usageRaw === "free"
+            ? "free"
+            : usageRaw === "notset"
+              ? "notSet"
+              : "";
+  if (usageRaw && !usage) return null;
   const ipaVerified = Boolean(obj.ipaVerified);
   const canBePersonal = parseCanBePersonal(obj.canBePersonal);
   const canImagineAsHuman = parseCanBePersonal(obj.canImagineAsHuman);
@@ -145,6 +161,7 @@ function toPictureWordInput(value: unknown): PictureWordInput | null {
     phinglish,
     en,
     type: (type || "noun") as PictureWordInput["type"],
+    usage: (usage || "notSet") as PictureWordInput["usage"],
     canBePersonal,
     canImagineAsHuman,
     canUseAsHumanAdj,
@@ -201,6 +218,21 @@ function toPictureWordUpdate(value: unknown): PictureWordUpdate | null {
             : undefined;
   const invalidType = Boolean(typeRaw && !type);
 
+  const usageRaw = normalizeOptionalString(obj.usage)?.toLowerCase();
+  const usage =
+    usageRaw === "job"
+      ? "Job"
+      : usageRaw === "adj"
+        ? "adj"
+        : usageRaw === "person"
+          ? "person"
+          : usageRaw === "free"
+            ? "free"
+            : usageRaw === "notset"
+              ? "notSet"
+              : undefined;
+  const invalidUsage = Boolean(usageRaw && !usage);
+
   const hasCanBePersonal = Object.prototype.hasOwnProperty.call(obj, "canBePersonal");
   const canBePersonal = hasCanBePersonal ? parseCanBePersonal(obj.canBePersonal) : undefined;
   const hasCanImagineAsHuman = Object.prototype.hasOwnProperty.call(obj, "canImagineAsHuman");
@@ -215,13 +247,18 @@ function toPictureWordUpdate(value: unknown): PictureWordUpdate | null {
   if (phinglish) data.phinglish = phinglish;
   if (en) data.en = en;
   if (type) data.type = type;
+  if (usage) data.usage = usage;
   if (typeof canBePersonal === "boolean") data.canBePersonal = canBePersonal;
   if (typeof canImagineAsHuman === "boolean") data.canImagineAsHuman = canImagineAsHuman;
   if (typeof canUseAsHumanAdj === "boolean") data.canUseAsHumanAdj = canUseAsHumanAdj;
   if (typeof ipaVerified === "boolean") data.ipaVerified = ipaVerified;
 
   if (Object.keys(data).length === 0) return null;
-  return { id, data, meta: invalidType ? { invalidType: true } : undefined };
+  return {
+    id,
+    data,
+    meta: invalidType || invalidUsage ? { invalidType, invalidUsage } : undefined,
+  };
 }
 
 function filterUpdateData(
@@ -246,7 +283,10 @@ function parseUpdateFields(value: unknown): PictureWordUpdateField[] | null {
     "phinglish",
     "en",
     "type",
+    "usage",
     "canBePersonal",
+    "canImagineAsHuman",
+    "canUseAsHumanAdj",
     "ipaVerified",
   ];
   const allowedSet = new Set(allowed);
@@ -295,6 +335,8 @@ function hasInvalidType(value: unknown): boolean {
 function validateUpdate(update: PictureWordUpdate): string | null {
   if (update.meta?.invalidType)
     return "type must be one of: noun, adding, animal, person, occupation, notPersonal, humanBody, relationalObj, personAdj, personAdj_adj, adj, food, place, accessory, tool";
+  if (update.meta?.invalidUsage)
+    return "usage must be one of: Job, adj, person, free, notSet";
   const { data } = update;
   if (data.fa && !isPersianFa(data.fa)) return "fa must contain only Persian letters and spaces";
   if (data.ipa_fa && hasPersianLetters(data.ipa_fa)) return "ipa_fa must not contain Persian letters";
@@ -313,6 +355,7 @@ export async function GET() {
       phinglish: true,
       en: true,
       type: true,
+      usage: true,
       canBePersonal: true,
       canImagineAsHuman: true,
       canUseAsHumanAdj: true,
@@ -370,6 +413,9 @@ export async function POST(request: Request) {
             en: true,
             type: true,
             canBePersonal: true,
+            canImagineAsHuman: true,
+            canUseAsHumanAdj: true,
+            usage: true,
             ipaVerified: true,
           },
         });
@@ -412,6 +458,9 @@ export async function POST(request: Request) {
           en: true,
           type: true,
           canBePersonal: true,
+          canImagineAsHuman: true,
+          canUseAsHumanAdj: true,
+          usage: true,
           ipaVerified: true,
         },
       });

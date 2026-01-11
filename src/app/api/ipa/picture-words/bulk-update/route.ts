@@ -6,6 +6,7 @@ export const runtime = "nodejs";
 
 const ALLOWED_FIELDS = [
   "type",
+  "usage",
   "canBePersonal",
   "canImagineAsHuman",
   "canUseAsHumanAdj",
@@ -40,6 +41,9 @@ const TYPE_VALUES = [
 
 type PictureWordTypeValue = (typeof TYPE_VALUES)[number];
 
+const USAGE_VALUES = ["Job", "adj", "person", "free", "notSet"] as const;
+type PictureWordUsageValue = (typeof USAGE_VALUES)[number];
+
 function normalizeIds(value: unknown): number[] | null {
   if (!Array.isArray(value)) return null;
   const ids = value
@@ -73,6 +77,10 @@ function isTypeValue(value: unknown): value is PictureWordTypeValue {
   return typeof value === "string" && (TYPE_VALUES as readonly string[]).includes(value);
 }
 
+function isUsageValue(value: unknown): value is PictureWordUsageValue {
+  return typeof value === "string" && (USAGE_VALUES as readonly string[]).includes(value);
+}
+
 export async function POST(req: Request) {
   try {
     const body = (await req.json()) as unknown;
@@ -103,6 +111,14 @@ export async function POST(req: Request) {
         );
       }
       updateData.type = obj.value;
+    } else if (field === "usage") {
+      if (!isUsageValue(obj.value)) {
+        return NextResponse.json(
+          { error: `value must be one of: ${USAGE_VALUES.join(", ")}` },
+          { status: 400 }
+        );
+      }
+      updateData.usage = obj.value;
     } else if (
       field === "canBePersonal" ||
       field === "canImagineAsHuman" ||
