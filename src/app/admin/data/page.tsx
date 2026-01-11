@@ -1169,7 +1169,27 @@ export default function Page() {
   const [savedViewsOpen, setSavedViewsOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
+  const [updateByKeysOpen, setUpdateByKeysOpen] = useState(false);
   const [copyBusy, setCopyBusy] = useState(false);
+  const [copyScope, setCopyScope] = useState<"page" | "limit" | "all">("page");
+  const [copyLimit, setCopyLimit] = useState(200);
+
+  const [updateByKeysModelName, setUpdateByKeysModelName] = useState<string>("");
+  const updateByKeysModel = useMemo(
+    () => registry.models.find((m) => m.name === updateByKeysModelName) ?? null,
+    [registry.models, updateByKeysModelName],
+  );
+  const updateByKeysScalarEnumFields = useMemo(() => {
+    if (!updateByKeysModel) return [];
+    return updateByKeysModel.fields.filter((f) => f.kind === "scalar" || f.kind === "enum");
+  }, [updateByKeysModel]);
+
+  const [updateByKeysText, setUpdateByKeysText] = useState("");
+  const [updateByKeysKeyFields, setUpdateByKeysKeyFields] = useState<Set<string>>(new Set());
+  const [updateByKeysUpdateFields, setUpdateByKeysUpdateFields] = useState<Set<string>>(new Set());
+  const [updateByKeysBusy, setUpdateByKeysBusy] = useState(false);
+  const [updateByKeysError, setUpdateByKeysError] = useState<string | null>(null);
+  const [updateByKeysReport, setUpdateByKeysReport] = useState<Record<string, unknown> | null>(null);
 
   const [formValues, setFormValues] = useState<Record<string, unknown>>({});
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
@@ -1767,16 +1787,60 @@ export default function Page() {
     });
   }, [savedViews, currentViewFingerprint]);
 
+  async function fetchRowsForCopy(opts: { limit: number | null }) {
+    if (!model) return [];
+    const cols = Array.from(new Set(columns));
+    const pageSize = 200;
+    const target = opts.limit === null ? Number.POSITIVE_INFINITY : Math.max(0, Math.trunc(opts.limit));
+    const allRows: Array<Record<string, unknown>> = [];
+
+    let page = 1;
+    while (allRows.length < target) {
+      const res = await apiPost<ListResponse>("/api/admin/data/list", {
+        model: model.name,
+        searchText: applied?.searchText ?? undefined,
+        filters: applied?.filters ?? [],
+        filterMode: applied?.filterMode ?? draftFilterMode,
+        sort: applied?.sort,
+        page,
+        pageSize,
+        visibleColumns: cols,
+      });
+
+      const chunk = (res.rows ?? []).map((r) => {
+        const obj: Record<string, unknown> = {};
+        for (const c of cols) obj[c] = (r as Record<string, unknown>)?.[c];
+        return obj;
+      });
+
+      if (!chunk.length) break;
+      const remaining = target - allRows.length;
+      allRows.push(...chunk.slice(0, Math.max(0, remaining)));
+      if (chunk.length < pageSize) break;
+      page += 1;
+    }
+
+    return allRows;
+  }
+
   async function copyVisibleJson(opts: { compact: boolean }) {
     if (copyBusy) return;
     if (!model) return;
     try {
-      const cols = Array.from(new Set(columns));
-      const payload = rows.map((r) => {
-        const obj: Record<string, unknown> = {};
-        for (const c of cols) obj[c] = r?.[c];
-        return obj;
-      });
+      const payload =
+        copyScope === "page"
+          ? (() => {
+              const cols = Array.from(new Set(columns));
+              return rows.map((r) => {
+                const obj: Record<string, unknown> = {};
+                for (const c of cols) obj[c] = r?.[c];
+                return obj;
+              });
+            })()
+          : await fetchRowsForCopy({
+              limit: copyScope === "all" ? null : Math.max(0, Math.trunc(copyLimit)),
+            });
+
       const text = opts.compact ? JSON.stringify(payload) : JSON.stringify(payload, null, 2);
       await navigator.clipboard.writeText(text);
       push({ type: "success", title: "کپی شد", description: `JSON (${payload.length} rows) در کلیپ‌بورد کپی شد.` });
@@ -1818,8 +1882,7 @@ export default function Page() {
                 </div>
               </div>
 
-	              <div className="flex flex-wrap items-center justify-end gap-2">
-	                <div className="flex flex-wrap items-center gap-2">
+		              <div className="flex flex-wrap items-center justify-end gap-2">
 	                  <Button size="sm" onClick={openCreate} disabled={!canRender}>
 	                    <Icon name="plus" />
 	                    New
@@ -1830,6 +1893,24 @@ export default function Page() {
 	                  </Button>
 	                  <Button size="sm" variant="outline" onClick={() => setImportOpen(true)} disabled={!canRender}>
 	                    Import
+	                  </Button>
+	                  <Button
+	                    size="sm"
+	                    variant="outline"
+	                    onClick={() => {
+	                      const nextModel = model?.name ?? registry.models[0]?.name ?? "";
+	                      setUpdateByKeysModelName(nextModel);
+	                      const pk = registry.models.find((m) => m.name === nextModel)?.primaryKey ?? "id";
+	                      setUpdateByKeysKeyFields(new Set(pk ? [pk] : ["id"]));
+	                      setUpdateByKeysUpdateFields(new Set());
+	                      setUpdateByKeysText("");
+	                      setUpdateByKeysError(null);
+	                      setUpdateByKeysReport(null);
+	                      setUpdateByKeysOpen(true);
+	                    }}
+	                    disabled={!canRender}
+	                  >
+	                    Update
 	                  </Button>
 	                  <Button
 	                    size="sm"
@@ -1865,8 +1946,7 @@ export default function Page() {
                     <Icon name="refresh" />
                     Refresh
                   </Button>
-                </div>
-              </div>
+	              </div>
             </div>
           </div>
 
@@ -2124,7 +2204,8 @@ export default function Page() {
                   {!loading && !error ? <Badge variant="outline">{total} total</Badge> : null}
                 </div>
 
-	                <div className="flex flex-wrap items-center gap-2">
+	                <div className="grid gap-2">
+	                  <div className="flex flex-wrap items-center justify-between gap-2">
 	                  <div className="flex flex-wrap items-center gap-2 rounded-md border border-neutral-200 bg-neutral-50 p-1">
 	                    <div className="px-1 text-xs font-medium text-neutral-700">
 	                      Page {page} / {totalPages}
@@ -2181,6 +2262,28 @@ export default function Page() {
                       <div className="px-2 text-xs font-medium text-emerald-900">
                         Copy JSON ({rows.length})
                       </div>
+                      <div className="flex items-center gap-2">
+                        <Select
+                          value={copyScope}
+                          onChange={(v) => setCopyScope(v as "page" | "limit" | "all")}
+                          options={[
+                            { value: "page", label: "page" },
+                            { value: "limit", label: "first N" },
+                            { value: "all", label: "all (query)" },
+                          ]}
+                          className="w-28 bg-white text-xs"
+                        />
+                        {copyScope === "limit" ? (
+                          <input
+                            value={String(copyLimit)}
+                            onChange={(e) => setCopyLimit(Number(e.target.value))}
+                            inputMode="numeric"
+                            className="h-8 w-20 rounded-md border border-emerald-200 bg-white px-2 text-xs text-emerald-900"
+                            placeholder="N"
+                            disabled={copyBusy}
+                          />
+                        ) : null}
+                      </div>
                       <div className="flex items-center gap-1">
                         <Button
                           size="icon"
@@ -2204,6 +2307,10 @@ export default function Page() {
                         </Button>
                       </div>
                     </div>
+	                  </div>
+	                  </div>
+
+	                  <div className="flex flex-wrap items-center justify-between gap-2">
                     <DropdownMenu
                       trigger={({ open, setOpen }) => (
                         <Button
@@ -2305,19 +2412,19 @@ export default function Page() {
                       </div>
                     )}
                   </DropdownMenu>
-                </div>
 
-                <Button
-                  variant="destructive"
-                    onClick={() => setBulkDeleteOpen(true)}
-                    disabled={!selectedCount || !canRender}
-                    title={selectedCount ? `Delete ${selectedCount} selected` : "Select rows first"}
-                    className="shadow-sm"
-                  >
-                    <Icon name="trash" />
-                    Bulk Delete ({selectedCount})
-                  </Button>
-                </div>
+                    <Button
+                      variant="destructive"
+                      onClick={() => setBulkDeleteOpen(true)}
+                      disabled={!selectedCount || !canRender}
+                      title={selectedCount ? `Delete ${selectedCount} selected` : "Select rows first"}
+                      className="shadow-sm"
+                    >
+                      <Icon name="trash" />
+                      Bulk Delete ({selectedCount})
+                    </Button>
+	                </div>
+              </div>
               </div>
             </CardHeader>
             <CardContent>
@@ -2906,6 +3013,216 @@ export default function Page() {
             </div>
           </div>
         )}
+      </Dialog>
+
+      <Dialog
+        open={updateByKeysOpen}
+        onOpenChange={(v) => {
+          setUpdateByKeysOpen(v);
+          if (!v) {
+            setUpdateByKeysError(null);
+            setUpdateByKeysReport(null);
+            setUpdateByKeysBusy(false);
+          }
+        }}
+        title="Update (JSON) by Keys"
+        widthClass="max-w-5xl"
+        footer={
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="text-xs text-neutral-500">
+              Model:{" "}
+              <span className="font-semibold text-neutral-800">
+                {updateByKeysModel?.name ?? "—"}
+              </span>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setUpdateByKeysOpen(false)} disabled={updateByKeysBusy}>
+                Close
+              </Button>
+              <Button
+                onClick={async () => {
+                  if (updateByKeysBusy) return;
+                  const modelToUse = updateByKeysModel?.name ?? "";
+                  if (!modelToUse) {
+                    setUpdateByKeysError("Select a model.");
+                    return;
+                  }
+                  const keyFields = Array.from(updateByKeysKeyFields);
+                  const updateFields = Array.from(updateByKeysUpdateFields);
+                  if (!keyFields.length) {
+                    setUpdateByKeysError("Select at least one key field.");
+                    return;
+                  }
+                  if (!updateFields.length) {
+                    setUpdateByKeysError("Select at least one update field.");
+                    return;
+                  }
+                  if (!updateByKeysText.trim()) {
+                    setUpdateByKeysError("Paste JSON (array of objects) first.");
+                    return;
+                  }
+
+                  let items: unknown;
+                  try {
+                    items = JSON.parse(updateByKeysText);
+                  } catch (e) {
+                    setUpdateByKeysError(e instanceof Error ? e.message : String(e));
+                    return;
+                  }
+
+                  setUpdateByKeysBusy(true);
+                  setUpdateByKeysError(null);
+                  setUpdateByKeysReport(null);
+                  try {
+                    const res = await apiPost<Record<string, unknown>>("/api/admin/data/bulkUpdateByKeys", {
+                      model: modelToUse,
+                      keyFields,
+                      updateFields,
+                      items,
+                    });
+                    setUpdateByKeysReport(res);
+                    push({
+                      type: "success",
+                      title: "Updated",
+                      description: `updated=${String(res.updated ?? 0)} processed=${String(res.processed ?? 0)}`,
+                    });
+                  } catch (e) {
+                    setUpdateByKeysError(e instanceof Error ? e.message : String(e));
+                  } finally {
+                    setUpdateByKeysBusy(false);
+                  }
+                }}
+                disabled={updateByKeysBusy}
+              >
+                {updateByKeysBusy ? "Updating…" : "Update"}
+              </Button>
+            </div>
+          </div>
+        }
+      >
+        <div className="grid grid-cols-1 gap-4">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-[280px_1fr] md:items-end">
+            <div>
+              <div className="mb-1 text-xs font-semibold text-neutral-700">Table / Model</div>
+              <Select
+                value={updateByKeysModelName}
+                onChange={(v) => {
+                  setUpdateByKeysModelName(v);
+                  const m = registry.models.find((x) => x.name === v);
+                  const pk = m?.primaryKey ?? "id";
+                  setUpdateByKeysKeyFields(new Set(pk ? [pk] : ["id"]));
+                  setUpdateByKeysUpdateFields(new Set());
+                  setUpdateByKeysReport(null);
+                  setUpdateByKeysError(null);
+                }}
+                options={registry.models.map((m) => ({ value: m.name, label: m.name }))}
+                placeholder="Select model"
+              />
+            </div>
+            <div className="text-xs text-neutral-500">
+              Paste JSON array of objects. Each object must include all selected key fields; update uses selected update fields (if present on the object).
+            </div>
+          </div>
+
+          {!updateByKeysModel ? (
+            <div className="text-sm text-neutral-700">Select a model.</div>
+          ) : (
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-[260px_260px_1fr]">
+              <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-3">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="text-xs font-semibold text-neutral-700">Key fields</div>
+                  <div className="text-xs text-neutral-500">selected: {updateByKeysKeyFields.size}</div>
+                </div>
+                <div className="mt-2 grid max-h-64 gap-2 overflow-auto">
+                  {updateByKeysScalarEnumFields.map((f) => {
+                    const checked = updateByKeysKeyFields.has(f.name);
+                    const disabled = f.name === updateByKeysModel.primaryKey;
+                    return (
+                      <label key={f.name} className="flex cursor-pointer items-center gap-2 rounded border border-neutral-200 bg-white px-2 py-1">
+                        <Checkbox
+                          checked={checked}
+                          onCheckedChange={(v) => {
+                            if (disabled) return;
+                            setUpdateByKeysKeyFields((prev) => {
+                              const next = new Set(prev);
+                              if (v) next.add(f.name);
+                              else next.delete(f.name);
+                              return next;
+                            });
+                          }}
+                          aria-label={`Key field ${f.name}`}
+                        />
+                        <span className="truncate text-xs text-neutral-800" title={f.name}>
+                          {f.name}
+                        </span>
+                        {disabled ? <span className="ml-auto text-[11px] text-neutral-500">PK</span> : null}
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-3">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="text-xs font-semibold text-neutral-700">Update fields</div>
+                  <div className="text-xs text-neutral-500">selected: {updateByKeysUpdateFields.size}</div>
+                </div>
+                <div className="mt-2 grid max-h-64 gap-2 overflow-auto">
+                  {updateByKeysScalarEnumFields
+                    .filter((f) => f.name !== updateByKeysModel.primaryKey)
+                    .map((f) => {
+                      const checked = updateByKeysUpdateFields.has(f.name);
+                      return (
+                        <label key={f.name} className="flex cursor-pointer items-center gap-2 rounded border border-neutral-200 bg-white px-2 py-1">
+                          <Checkbox
+                            checked={checked}
+                            onCheckedChange={(v) => {
+                              setUpdateByKeysUpdateFields((prev) => {
+                                const next = new Set(prev);
+                                if (v) next.add(f.name);
+                                else next.delete(f.name);
+                                return next;
+                              });
+                            }}
+                            aria-label={`Update field ${f.name}`}
+                          />
+                          <span className="truncate text-xs text-neutral-800" title={f.name}>
+                            {f.name}
+                          </span>
+                        </label>
+                      );
+                    })}
+                </div>
+              </div>
+
+              <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-3">
+                <div className="text-xs font-semibold text-neutral-700">JSON</div>
+                <textarea
+                  value={updateByKeysText}
+                  onChange={(e) => setUpdateByKeysText(e.target.value)}
+                  rows={12}
+                  className="mt-2 w-full resize-y rounded-md border border-neutral-200 bg-white px-3 py-2 font-mono text-xs text-neutral-900"
+                  placeholder='[{"id": 1, "field": "value"}]'
+                  disabled={updateByKeysBusy}
+                />
+
+                {updateByKeysError ? (
+                  <div className="mt-3 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+                    {updateByKeysError}
+                  </div>
+                ) : null}
+                {updateByKeysReport ? (
+                  <div className="mt-3 rounded-md border border-neutral-200 bg-white p-3 text-xs text-neutral-800">
+                    <div className="font-semibold">Report</div>
+                    <pre className="mt-2 overflow-auto whitespace-pre-wrap break-words font-mono">
+                      {JSON.stringify(updateByKeysReport, null, 2)}
+                    </pre>
+                  </div>
+                ) : null}
+              </div>
+            </div>
+          )}
+        </div>
       </Dialog>
 
       <ToastViewport toasts={toasts} />

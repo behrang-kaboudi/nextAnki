@@ -101,7 +101,9 @@ export function getIpaSegments(ipaString: string, length: number) {
 }
 
 function getIpaSegmentsWithSpaces(ipaString: string, length: number) {
-  const tokens = ipaToTokenObjects(ipaString, { keepBoundaries: true });
+  const tokens = ipaToTokenObjects(ipaString, {
+    keepBoundaries: true,
+  });
   const parts: string[] = [];
 
   for (let i = 0; i < tokens.length; i++) {

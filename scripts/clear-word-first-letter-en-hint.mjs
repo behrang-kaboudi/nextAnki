@@ -1,12 +1,14 @@
+import "dotenv/config";
+
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
 async function main() {
-  const res = await prisma.word.updateMany({
+  const result = await prisma.word.updateMany({
     data: { first_letter_en_hint: null },
   });
-  console.log(`Cleared first_letter_en_hint for ${res.count} rows.`);
+  process.stdout.write(`Cleared Word.first_letter_en_hint for ${result.count} row(s)\n`);
 }
 
 main()
@@ -15,6 +17,6 @@ main()
     process.exitCode = 1;
   })
   .finally(async () => {
-    await prisma.$disconnect();
+    await prisma.$disconnect().catch(() => {});
   });
 
