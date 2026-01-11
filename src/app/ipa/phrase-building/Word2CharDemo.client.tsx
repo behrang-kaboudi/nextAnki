@@ -9,6 +9,7 @@ export function Word2CharDemoClient() {
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useState<MatchMode>("3char");
   const [showLessThanKeysOnly, setShowLessThanKeysOnly] = useState(false);
+  const [showNonDirectOnly, setShowNonDirectOnly] = useState(false);
   const [data, setData] = useState<
     | null
     | {
@@ -18,6 +19,15 @@ export function Word2CharDemoClient() {
           phonetic_us_normalized: string;
           combinationKeys?: string[];
           keys: Array<{ fa: string; ipa_fa_normalized: string }>;
+          matchStyle?: "direct" | "merged";
+          mergedPairs?: Array<{
+            left: { id: number; fa: string; ipa_fa_normalized: string; type: string };
+            right: { id: number; fa: string; ipa_fa_normalized: string; type: string };
+          }>;
+          parts?: {
+            first2: Array<{ fa: string; ipa_fa_normalized: string }>;
+            last2: Array<{ fa: string; ipa_fa_normalized: string }>;
+          };
           bestMatch: null | {
             id: number;
             fa: string;
@@ -32,9 +42,13 @@ export function Word2CharDemoClient() {
 
   const visibleWords = useMemo(() => {
     if (!data?.words?.length) return [];
-    if (!showLessThanKeysOnly) return data.words;
-    return data.words.filter((w) => (w.keys?.length ?? 0) < filterKeysLessThan);
-  }, [data?.words, showLessThanKeysOnly]);
+    let words = data.words;
+    if (mode === "4char" && showNonDirectOnly) {
+      words = words.filter((w) => w.matchStyle && w.matchStyle !== "direct");
+    }
+    if (!showLessThanKeysOnly) return words;
+    return words.filter((w) => (w.keys?.length ?? 0) < filterKeysLessThan);
+  }, [data?.words, mode, showLessThanKeysOnly, showNonDirectOnly]);
 
   const stats = useMemo(() => {
     const words = data?.words ?? [];
@@ -74,6 +88,15 @@ export function Word2CharDemoClient() {
           phonetic_us_normalized: string;
           combinationKeys?: string[];
           keys: Array<{ fa: string; ipa_fa_normalized: string }>;
+          matchStyle?: "direct" | "merged";
+          mergedPairs?: Array<{
+            left: { id: number; fa: string; ipa_fa_normalized: string; type: string };
+            right: { id: number; fa: string; ipa_fa_normalized: string; type: string };
+          }>;
+          parts?: {
+            first2: Array<{ fa: string; ipa_fa_normalized: string }>;
+            last2: Array<{ fa: string; ipa_fa_normalized: string }>;
+          };
           bestMatch: null | {
             id: number;
             fa: string;
@@ -123,6 +146,15 @@ export function Word2CharDemoClient() {
               disabled={loading}
             />
             keys &lt; {filterKeysLessThan}
+          </label>
+          <label className="inline-flex select-none items-center gap-2 text-sm text-muted">
+            <input
+              type="checkbox"
+              checked={showNonDirectOnly}
+              onChange={(e) => setShowNonDirectOnly(e.target.checked)}
+              disabled={loading || mode !== "4char"}
+            />
+            non-direct only
           </label>
           <button
             type="button"
@@ -194,27 +226,114 @@ export function Word2CharDemoClient() {
                       <th className="border-b border-border/60 py-1 pr-3">base_form</th>
                       <th className="border-b border-border/60 py-1 pr-3">phonetic_us</th>
                       <th className="border-b border-border/60 py-1 pr-3">phonetic_us_normalized</th>
-                      <th className="border-b border-border/60 py-1 pr-3">combination</th>
+                      {mode === "4char" ? (
+                        <th className="border-b border-border/60 py-1 pr-3">style</th>
+                      ) : null}
                       <th className="border-b border-border/60 py-1 pr-3">bestMatch</th>
                       <th className="border-b border-border/60 py-1 pr-3">keys</th>
                     </tr>
                   </thead>
                   <tbody>
                     {visibleWords.map((w, idx) => (
-                      <tr key={`${w.phonetic_us_normalized}-${idx}`} className="align-top">
+                      <tr
+                        key={`${w.phonetic_us_normalized}-${idx}`}
+                        className={[
+                          "align-top",
+                          mode === "4char" && w.matchStyle && w.matchStyle !== "direct"
+                            ? "bg-amber-500/10"
+                            : "",
+                        ].join(" ")}
+                      >
                         <td className="py-1 pr-3">{w.base_form}</td>
                         <td className="py-1 pr-3 font-mono">{w.phonetic_us ?? ""}</td>
-                        <td className="py-1 pr-3 font-mono">{w.phonetic_us_normalized}</td>
-                        <td className="py-1 pr-3 font-mono text-xs">
-                          {w.combinationKeys?.length ? w.combinationKeys.join(" | ") : ""}
+                        <td
+                          className="py-1 pr-3 font-mono"
+                          title={
+                            w.combinationKeys?.length
+                              ? w.combinationKeys.join(" | ")
+                              : ""
+                          }
+                        >
+                          {w.phonetic_us_normalized}
                         </td>
+                        {mode === "4char" ? (
+                          <td className="py-1 pr-3 font-mono text-xs">{w.matchStyle ?? ""}</td>
+                        ) : null}
                         <td className="py-1 pr-3 font-mono text-xs">
                           {w.bestMatch
                             ? `id:${w.bestMatch.id} type:${w.bestMatch.type} fa:'${w.bestMatch.fa}' ipa:'${w.bestMatch.ipa_fa_normalized}'`
                             : ""}
                         </td>
                         <td className="py-1 pr-3 font-mono text-xs">
-                          {w.keys?.length ? w.keys.map((k) => `fa: '${k.fa}', ipa_fa_normalized: '${k.ipa_fa_normalized}'`).join(" | ") : ""}
+                          {w.matchStyle === "merged"
+                            ? w.mergedPairs?.length
+                              ? (
+                                  <div className="grid gap-1">
+                                    <div className="text-[11px] text-muted">
+                                      pairs: {w.mergedPairs.length}
+                                    </div>
+                                    <div className="grid gap-1">
+                                      {w.mergedPairs.map((p, i) => (
+                                        <div
+                                          key={`${p.left.id}-${p.right.id}-${i}`}
+                                          className="rounded border border-border/60 bg-background px-2 py-1"
+                                          title={`${p.left.fa} (${p.left.ipa_fa_normalized}) + ${p.right.fa} (${p.right.ipa_fa_normalized})`}
+                                        >
+                                          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                                            <span className="inline-flex h-5 w-5 items-center justify-center rounded border border-border/60 bg-background text-[11px] text-muted">
+                                              0
+                                            </span>
+                                            <span className="font-semibold text-foreground">
+                                              {p.left.fa}
+                                            </span>
+                                            <span className="text-muted">+</span>
+                                            <span className="inline-flex h-5 w-5 items-center justify-center rounded border border-border/60 bg-background text-[11px] text-muted">
+                                              1
+                                            </span>
+                                            <span className="font-semibold text-foreground">
+                                              {p.right.fa}
+                                            </span>
+                                          </div>
+                                          <div className="mt-0.5 text-[11px] text-muted">
+                                            {p.left.ipa_fa_normalized} +{" "}
+                                            {p.right.ipa_fa_normalized}
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )
+                              : w.parts
+                                ? (
+                                    <div className="grid gap-1">
+                                      <div className="text-[11px] text-muted">
+                                        pairs: 0 (fallback to parts)
+                                      </div>
+                                      <div className="rounded border border-border/60 bg-background px-2 py-1">
+                                        <div className="text-[11px] text-muted">
+                                          first2:
+                                        </div>
+                                        <div className="text-foreground">
+                                          {w.parts.first2.map((k) => k.fa).join(" | ")}
+                                        </div>
+                                        <div className="mt-1 text-[11px] text-muted">
+                                          last2:
+                                        </div>
+                                        <div className="text-foreground">
+                                          {w.parts.last2.map((k) => k.fa).join(" | ")}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  )
+                                : ""
+                            : w.keys?.length
+                              ? w.keys
+                                  .map(
+                                    (k) =>
+                                      `fa: '${k.fa}', ipa_fa_normalized: '${k.ipa_fa_normalized}'`
+                                  )
+                                  .join(" | ")
+                              : ""}
                         </td>
                       </tr>
                     ))}

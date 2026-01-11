@@ -26,8 +26,11 @@ type PictureWordInput = {
     | "food"
     | "place"
     | "accessory"
-    | "tool";
+    | "tool"
+    | "sport";
   canBePersonal: boolean;
+  canImagineAsHuman: boolean;
+  canUseAsHumanAdj: boolean;
   ipaVerified: boolean;
 };
 
@@ -104,6 +107,8 @@ function toPictureWordInput(value: unknown): PictureWordInput | null {
 		          ? "animal"
 		          : typeRaw === "person"
 		            ? "person"
+                : typeRaw === "occupation"
+                  ? "occupation"
 		            : typeRaw === "notpersonal"
 		              ? "notPersonal"
 		              : typeRaw === "humanbody"
@@ -124,10 +129,14 @@ function toPictureWordInput(value: unknown): PictureWordInput | null {
 	                  ? "accessory"
 	                  : typeRaw === "tool"
 	                    ? "tool"
+                  : typeRaw === "sport"
+                    ? "sport"
 	            : "";
   if (typeRaw && !type) return null;
   const ipaVerified = Boolean(obj.ipaVerified);
   const canBePersonal = parseCanBePersonal(obj.canBePersonal);
+  const canImagineAsHuman = parseCanBePersonal(obj.canImagineAsHuman);
+  const canUseAsHumanAdj = parseCanBePersonal(obj.canUseAsHumanAdj);
 
   if (!fa || !ipa_fa || !phinglish || !en) return null;
   return {
@@ -137,6 +146,8 @@ function toPictureWordInput(value: unknown): PictureWordInput | null {
     en,
     type: (type || "noun") as PictureWordInput["type"],
     canBePersonal,
+    canImagineAsHuman,
+    canUseAsHumanAdj,
     ipaVerified,
   };
 }
@@ -163,6 +174,8 @@ function toPictureWordUpdate(value: unknown): PictureWordUpdate | null {
 		          ? "animal"
 		          : typeRaw === "person"
 		            ? "person"
+                : typeRaw === "occupation"
+                  ? "occupation"
 		            : typeRaw === "notpersonal"
 		              ? "notPersonal"
 		              : typeRaw === "humanbody"
@@ -183,11 +196,17 @@ function toPictureWordUpdate(value: unknown): PictureWordUpdate | null {
                   ? "accessory"
                   : typeRaw === "tool"
                     ? "tool"
+                  : typeRaw === "sport"
+                    ? "sport"
             : undefined;
   const invalidType = Boolean(typeRaw && !type);
 
   const hasCanBePersonal = Object.prototype.hasOwnProperty.call(obj, "canBePersonal");
   const canBePersonal = hasCanBePersonal ? parseCanBePersonal(obj.canBePersonal) : undefined;
+  const hasCanImagineAsHuman = Object.prototype.hasOwnProperty.call(obj, "canImagineAsHuman");
+  const canImagineAsHuman = hasCanImagineAsHuman ? parseCanBePersonal(obj.canImagineAsHuman) : undefined;
+  const hasCanUseAsHumanAdj = Object.prototype.hasOwnProperty.call(obj, "canUseAsHumanAdj");
+  const canUseAsHumanAdj = hasCanUseAsHumanAdj ? parseCanBePersonal(obj.canUseAsHumanAdj) : undefined;
   const ipaVerified = typeof obj.ipaVerified === "boolean" ? obj.ipaVerified : undefined;
 
   const data: Partial<PictureWordInput> = {};
@@ -197,6 +216,8 @@ function toPictureWordUpdate(value: unknown): PictureWordUpdate | null {
   if (en) data.en = en;
   if (type) data.type = type;
   if (typeof canBePersonal === "boolean") data.canBePersonal = canBePersonal;
+  if (typeof canImagineAsHuman === "boolean") data.canImagineAsHuman = canImagineAsHuman;
+  if (typeof canUseAsHumanAdj === "boolean") data.canUseAsHumanAdj = canUseAsHumanAdj;
   if (typeof ipaVerified === "boolean") data.ipaVerified = ipaVerified;
 
   if (Object.keys(data).length === 0) return null;
@@ -257,6 +278,7 @@ function hasInvalidType(value: unknown): boolean {
 	    typeRaw !== "adding" &&
 	    typeRaw !== "animal" &&
 	    typeRaw !== "person" &&
+      typeRaw !== "occupation" &&
 	    typeRaw !== "notpersonal" &&
 	    typeRaw !== "humanbody" &&
 	    typeRaw !== "relationalobj" &&
@@ -272,7 +294,7 @@ function hasInvalidType(value: unknown): boolean {
 
 function validateUpdate(update: PictureWordUpdate): string | null {
   if (update.meta?.invalidType)
-    return "type must be one of: noun, adding, animal, person, notPersonal, humanBody, relationalObj, personAdj, personAdj_adj, adj, food, place, accessory, tool";
+    return "type must be one of: noun, adding, animal, person, occupation, notPersonal, humanBody, relationalObj, personAdj, personAdj_adj, adj, food, place, accessory, tool";
   const { data } = update;
   if (data.fa && !isPersianFa(data.fa)) return "fa must contain only Persian letters and spaces";
   if (data.ipa_fa && hasPersianLetters(data.ipa_fa)) return "ipa_fa must not contain Persian letters";
@@ -292,6 +314,8 @@ export async function GET() {
       en: true,
       type: true,
       canBePersonal: true,
+      canImagineAsHuman: true,
+      canUseAsHumanAdj: true,
       ipaVerified: true,
     },
   });
@@ -484,6 +508,8 @@ export async function POST(request: Request) {
 	          fa: true,
 	          ipa_fa: true,
 	          canBePersonal: true,
+            canImagineAsHuman: true,
+            canUseAsHumanAdj: true,
 	          phinglish: true,
 	          en: true,
 	          type: true,
@@ -495,10 +521,12 @@ export async function POST(request: Request) {
         continue;
       }
 
-	      const hasChanges =
-	        (update.data.fa !== undefined && update.data.fa !== existing.fa) ||
-	        (update.data.ipa_fa !== undefined && update.data.ipa_fa !== existing.ipa_fa) ||
-	        (update.data.canBePersonal !== undefined && update.data.canBePersonal !== existing.canBePersonal) ||
+      const hasChanges =
+        (update.data.fa !== undefined && update.data.fa !== existing.fa) ||
+        (update.data.ipa_fa !== undefined && update.data.ipa_fa !== existing.ipa_fa) ||
+        (update.data.canBePersonal !== undefined && update.data.canBePersonal !== existing.canBePersonal) ||
+        (update.data.canImagineAsHuman !== undefined && update.data.canImagineAsHuman !== existing.canImagineAsHuman) ||
+        (update.data.canUseAsHumanAdj !== undefined && update.data.canUseAsHumanAdj !== existing.canUseAsHumanAdj) ||
 	        (update.data.phinglish !== undefined && update.data.phinglish !== existing.phinglish) ||
 	        (update.data.en !== undefined && update.data.en !== existing.en) ||
 	        (update.data.type !== undefined && update.data.type !== existing.type) ||
@@ -598,6 +626,20 @@ export async function PATCH(request: Request) {
   const canBePersonal = hasCanBePersonal
     ? parseCanBePersonal(obj?.canBePersonal)
     : undefined;
+  const hasCanImagineAsHuman = Object.prototype.hasOwnProperty.call(
+    obj ?? {},
+    "canImagineAsHuman",
+  );
+  const canImagineAsHuman = hasCanImagineAsHuman
+    ? parseCanBePersonal(obj?.canImagineAsHuman)
+    : undefined;
+  const hasCanUseAsHumanAdj = Object.prototype.hasOwnProperty.call(
+    obj ?? {},
+    "canUseAsHumanAdj",
+  );
+  const canUseAsHumanAdj = hasCanUseAsHumanAdj
+    ? parseCanBePersonal(obj?.canUseAsHumanAdj)
+    : undefined;
 
   const isVerifying = Boolean(ipa_fa || phinglish);
   if (isVerifying && (!ipa_fa || !phinglish)) {
@@ -611,7 +653,9 @@ export async function PATCH(request: Request) {
     !fa &&
     !ipa_fa &&
     !phinglish &&
-    typeof canBePersonal !== "boolean"
+    typeof canBePersonal !== "boolean" &&
+    typeof canImagineAsHuman !== "boolean" &&
+    typeof canUseAsHumanAdj !== "boolean"
   ) {
     return NextResponse.json({ error: "No fields to update" }, { status: 400 });
   }
@@ -619,6 +663,10 @@ export async function PATCH(request: Request) {
   const data: Record<string, unknown> = {};
   if (fa) data.fa = fa;
   if (typeof canBePersonal === "boolean") data.canBePersonal = canBePersonal;
+  if (typeof canImagineAsHuman === "boolean")
+    data.canImagineAsHuman = canImagineAsHuman;
+  if (typeof canUseAsHumanAdj === "boolean")
+    data.canUseAsHumanAdj = canUseAsHumanAdj;
   if (ipa_fa) {
     data.ipa_fa = ipa_fa;
     data.ipa_fa_normalized = computeNormalized(ipa_fa);
@@ -637,6 +685,8 @@ export async function PATCH(request: Request) {
       en: true,
       type: true,
       canBePersonal: true,
+      canImagineAsHuman: true,
+      canUseAsHumanAdj: true,
       ipaVerified: true,
     },
   });

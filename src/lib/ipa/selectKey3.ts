@@ -26,6 +26,7 @@ const GROUP_MATCH_TYPES: ReadonlySet<PictureWordType> = new Set([
   "place",
   "accessory",
   "tool",
+  "sport",
 ]);
 function getBestMatch(matches: Array<PictureWord>, word: Word) {
   if (!matches.length) return null;
@@ -85,7 +86,7 @@ async function getMatchesFor3CharWord(ipa: string) {
 
 export async function findMatchesForAll3CharWords() {
   const words = await get3CharWords();
-  await setKeys();
+  // await setKeys();
   const wordsWithKeys = await Promise.all(
     words.map(async (w) => {
       if (!w.phonetic_us_normalized) return { ...w, keys: [], bestMatch: null };

@@ -10,20 +10,21 @@ function addS(preCollection: string[], toChange = "") {
 }
 function addReplaceMents(preCollection: string[], toChange = "") {
   if (!toChange) toChange = preCollection[0];
-  preCollection.push(toChange.replace(/j/g, "ɪ"));
-  preCollection.push(toChange.replace(/ɪ/g, "j"));
-  preCollection.push(toChange.replace(/ɪ/g, "e"));
-  preCollection.push(toChange.replace(/e/g, "ɪ"));
-  preCollection.push(toChange.replace(/ʤ/g, "ʒ"));
-  preCollection.push(toChange.replace(/ʒ/g, "ʤ"));
-  preCollection.push(toChange.replace(/o/g, "ʊ"));
-  preCollection.push(toChange.replace(/ʊ/g, "o"));
-  preCollection.push(toChange.replace(/æ/g, "ʌ"));
-  preCollection.push(toChange.replace(/ʌ/g, "æ"));
+  preCollection.push(toChange.replace("j", "ɪ"));
+  preCollection.push(toChange.replace("ɪ", "j"));
+  preCollection.push(toChange.replace("ɪ", "e"));
+  preCollection.push(toChange.replace("e", "ɪ"));
+  preCollection.push(toChange.replace("ʤ", "ʒ"));
+  preCollection.push(toChange.replace("ʒ", "ʤ"));
+  preCollection.push(toChange.replace("o", "ʊ"));
+  preCollection.push(toChange.replace("ʊ", "o"));
+  preCollection.push(toChange.replace("æ", "ʌ"));
+  preCollection.push(toChange.replace("ʌ", "ʌ"));
 }
-// function addReplaceMentsSecond(preCollection: string[], toChange = "") {
+// function addReplaceMentsSecondLoosly(preCollection: string[], toChange = "") {
 //   if (!toChange) toChange = preCollection[0];
 
+//   // preCollection.push(toChange.replace(/ɪ/g, "ʌ"));
 //   // preCollection.push(toChange.replace(/ɪ/g, "e"));
 //   // preCollection.push(toChange.replace(/e/g, "ɪ"));
 //   // preCollection.push(toChange.replace(/ʤ/g, "ʒ"));
@@ -34,9 +35,16 @@ function addReplaceMents(preCollection: string[], toChange = "") {
 
 function comb2(preCollection: string[]) {
   const parts = [preCollection[0][0], preCollection[0][1]];
+  // if (preCollection[0] === "jɪ") {
+  //   preCollection.push("ʌjɪne");
+  //   preCollection.push("ʌjne");
+  //   preCollection.push("ʌɪne");
+  // }
   squeezeCharConsonantFrame(parts[0] + parts[1], preCollection);
   preCollection.push(`_${preCollection[0]}`);
   expandConsonantPairsWithVowels(preCollection[0], preCollection);
+  preCollection.push(parts[0] + "_" + parts[1]);
+  preCollection.push(preCollection[0].replace("ʧ", "ʤ"));
 }
 function combOnly3Char(preCollection: string[]) {
   const parts = [preCollection[0][0], preCollection[0][1], preCollection[0][2]];
@@ -150,7 +158,14 @@ function squeezeCharConsonantFrame(input: string, preCollection: string[]) {
   const squeezed = first + third;
   if (!preCollection.includes(squeezed)) preCollection.push(squeezed);
 }
-
+export function loosCombinationFor2(value: string): string[] {
+  const collection: string[] = [];
+  collection.push(value);
+  if (value.length == 2) comb2(collection);
+  if (value.length == 3) comb3(collection);
+  if (value.length == 4) comb4(collection);
+  return Array.from(new Set(collection));
+}
 export function combination(value: string): string[] {
   const collection: string[] = [];
   collection.push(value);

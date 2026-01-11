@@ -13,6 +13,7 @@ type PictureWordRow = {
     | "adding"
     | "animal"
     | "person"
+    | "occupation"
     | "notPersonal"
     | "humanBody"
     | "relationalObj"
@@ -22,17 +23,70 @@ type PictureWordRow = {
     | "food"
     | "place"
     | "accessory"
-    | "tool";
+    | "tool"
+    | "sport";
   canBePersonal: boolean;
+  canImagineAsHuman: boolean;
+  canUseAsHumanAdj: boolean;
   ipaVerified: boolean;
 };
 
-type PictureWordUpdateField = "type" | "canBePersonal";
+type PictureWordUpdateField =
+  | "type"
+  | "canBePersonal"
+  | "canImagineAsHuman"
+  | "canUseAsHumanAdj";
 
 const UPDATE_FIELD_LABELS: Record<PictureWordUpdateField, string> = {
   type: "type",
   canBePersonal: "canBePersonal",
+  canImagineAsHuman: "canImagineAsHuman",
+  canUseAsHumanAdj: "canUseAsHumanAdj",
 };
+
+type BulkUpdateField =
+  | "type"
+  | "canBePersonal"
+  | "canImagineAsHuman"
+  | "canUseAsHumanAdj"
+  | "ipaVerified"
+  | "fa"
+  | "en"
+  | "ipa_fa"
+  | "ipa_fa_normalized"
+  | "phinglish";
+
+const BULK_UPDATE_FIELDS: Array<{ value: BulkUpdateField; label: string }> = [
+  { value: "type", label: "type" },
+  { value: "canBePersonal", label: "canBePersonal" },
+  { value: "canImagineAsHuman", label: "canImagineAsHuman" },
+  { value: "canUseAsHumanAdj", label: "canUseAsHumanAdj" },
+  { value: "ipaVerified", label: "ipaVerified" },
+  { value: "fa", label: "fa" },
+  { value: "en", label: "en" },
+  { value: "ipa_fa", label: "ipa_fa" },
+  { value: "ipa_fa_normalized", label: "ipa_fa_normalized" },
+  { value: "phinglish", label: "phinglish" },
+];
+
+const BULK_TYPE_VALUES: PictureWordRow["type"][] = [
+  "noun",
+  "adding",
+  "animal",
+  "person",
+  "occupation",
+  "notPersonal",
+  "humanBody",
+  "relationalObj",
+  "personAdj",
+  "personAdj_adj",
+  "adj",
+  "food",
+  "place",
+  "accessory",
+  "tool",
+  "sport",
+];
 
 function normalizeJsonish(input: string) {
   let text = input.trim();
@@ -80,6 +134,34 @@ function safeJsonParse(
   }
 }
 
+function parseIdArray(input: string):
+  | { ok: true; ids: number[] }
+  | { ok: false; error: string } {
+  const raw = input.trim();
+  if (!raw) return { ok: false, error: "IDs is required." };
+
+  if (raw.startsWith("[") || raw.startsWith("{")) {
+    const parsed = safeJsonParse(raw);
+    if (!parsed.ok) return { ok: false, error: parsed.error };
+    if (!Array.isArray(parsed.data))
+      return { ok: false, error: "IDs must be a JSON array." };
+    const ids = parsed.data
+      .map((x) => (typeof x === "number" ? x : Number(x)))
+      .filter((x) => Number.isFinite(x) && x > 0);
+    const unique = Array.from(new Set(ids));
+    if (!unique.length) return { ok: false, error: "No valid IDs found." };
+    return { ok: true, ids: unique };
+  }
+
+  const ids = raw
+    .split(/[\s,]+/g)
+    .map((x) => Number(x))
+    .filter((x) => Number.isFinite(x) && x > 0);
+  const unique = Array.from(new Set(ids));
+  if (!unique.length) return { ok: false, error: "No valid IDs found." };
+  return { ok: true, ids: unique };
+}
+
 const ImportSidebar = memo(function ImportSidebar({
   text,
   setText,
@@ -102,6 +184,18 @@ const ImportSidebar = memo(function ImportSidebar({
   const [promptLoading, setPromptLoading] = useState(false);
   const [promptError, setPromptError] = useState<string | null>(null);
   const [promptNotice, setPromptNotice] = useState<string | null>(null);
+  const [isBulkUpdateOpen, setIsBulkUpdateOpen] = useState(false);
+  const [bulkIdsText, setBulkIdsText] = useState("");
+  const [bulkField, setBulkField] = useState<BulkUpdateField>("type");
+  const [bulkValue, setBulkValue] = useState("");
+  const [bulkTypeValue, setBulkTypeValue] =
+    useState<PictureWordRow["type"]>("noun");
+  const [bulkBooleanValue, setBulkBooleanValue] = useState<"true" | "false">(
+    "true"
+  );
+  const [bulkLoading, setBulkLoading] = useState(false);
+  const [bulkError, setBulkError] = useState<string | null>(null);
+  const [bulkNotice, setBulkNotice] = useState<string | null>(null);
   const [updateFields, setUpdateFields] = useState<PictureWordUpdateField[]>([
     "type",
     "canBePersonal",
@@ -147,20 +241,91 @@ const ImportSidebar = memo(function ImportSidebar({
     }
   }, [promptText]);
 
+  const submitBulkUpdate = useCallback(async () => {
+    if (bulkLoading) return;
+    setBulkError(null);
+    setBulkNotice(null);
+    const parsed = parseIdArray(bulkIdsText);
+    if (!parsed.ok) {
+      setBulkError(parsed.error);
+      return;
+    }
+
+    const value =
+      bulkField === "type"
+        ? bulkTypeValue
+        : bulkField === "canBePersonal" ||
+            bulkField === "canImagineAsHuman" ||
+            bulkField === "canUseAsHumanAdj" ||
+            bulkField === "ipaVerified"
+          ? bulkBooleanValue === "true"
+          : bulkValue;
+
+    if (
+      bulkField !== "type" &&
+      bulkField !== "canBePersonal" &&
+      bulkField !== "canImagineAsHuman" &&
+      bulkField !== "canUseAsHumanAdj" &&
+      bulkField !== "ipaVerified"
+    ) {
+      if (!String(value ?? "").trim()) {
+        setBulkError("Value is required.");
+        return;
+      }
+    }
+
+    setBulkLoading(true);
+    try {
+      const response = await fetch("/api/ipa/picture-words/bulk-update", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ ids: parsed.ids, field: bulkField, value }),
+      });
+      const data = (await response.json()) as {
+        ok?: boolean;
+        updatedCount?: number;
+        error?: string;
+      };
+      if (!response.ok)
+        throw new Error(data.error || `Request failed (${response.status})`);
+      setBulkNotice(`Updated ${data.updatedCount ?? 0} record(s).`);
+    } catch (e) {
+      setBulkError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setBulkLoading(false);
+    }
+  }, [
+    bulkBooleanValue,
+    bulkField,
+    bulkIdsText,
+    bulkLoading,
+    bulkTypeValue,
+    bulkValue,
+  ]);
+
   return (
     <aside className="h-fit rounded-2xl border border-card bg-card p-4 shadow-elevated">
       <div className="flex items-center justify-between gap-3">
         <div className="text-lg font-semibold text-foreground">Import</div>
-        <button
-          type="button"
-          onClick={() => {
-            setIsPromptOpen(true);
-            void loadPrompt();
-          }}
-          className="rounded-xl border border-card bg-background px-3 py-2 text-sm font-semibold text-foreground transition hover:bg-card"
-        >
-          Prompt
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setIsBulkUpdateOpen(true)}
+            className="rounded-xl border border-card bg-background px-3 py-2 text-sm font-semibold text-foreground transition hover:bg-card"
+          >
+            Update by IDs
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setIsPromptOpen(true);
+              void loadPrompt();
+            }}
+            className="rounded-xl border border-card bg-background px-3 py-2 text-sm font-semibold text-foreground transition hover:bg-card"
+          >
+            Prompt
+          </button>
+        </div>
       </div>
       <div className="mt-1 text-sm text-muted">
         Paste a JSON array of <code className="font-mono">PictureWord</code>{" "}
@@ -374,6 +539,133 @@ const ImportSidebar = memo(function ImportSidebar({
           </div>
         </div>
       ) : null}
+
+      {isBulkUpdateOpen ? (
+        <div
+          className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm"
+          onClick={() => setIsBulkUpdateOpen(false)}
+        >
+          <div
+            className="mx-auto mt-10 flex w-[min(92vw,46rem)] flex-col rounded-2xl border border-card bg-card p-4 shadow-elevated"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="grid gap-1">
+                <div className="text-lg font-semibold text-foreground">
+                  Update by IDs
+                </div>
+                <div className="text-sm text-muted">
+                  Updates selected <code className="font-mono">PictureWord</code>{" "}
+                  rows.
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsBulkUpdateOpen(false)}
+                className="rounded-xl border border-card bg-background px-3 py-2 text-sm font-semibold text-foreground transition hover:bg-card"
+              >
+                Close
+              </button>
+            </div>
+
+            <div className="mt-4 grid gap-3">
+              <div className="grid gap-2">
+                <div className="text-sm font-semibold text-foreground">Field</div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <select
+                    value={bulkField}
+                    onChange={(e) => setBulkField(e.target.value as BulkUpdateField)}
+                    className="h-9 rounded-xl border border-card bg-background px-3 text-sm text-foreground"
+                    disabled={bulkLoading}
+                  >
+                    {BULK_UPDATE_FIELDS.map((f) => (
+                      <option key={f.value} value={f.value}>
+                        {f.label}
+                      </option>
+                    ))}
+                  </select>
+
+                  {bulkField === "type" ? (
+                    <select
+                      value={bulkTypeValue}
+                      onChange={(e) =>
+                        setBulkTypeValue(e.target.value as PictureWordRow["type"])
+                      }
+                      className="h-9 min-w-48 rounded-xl border border-card bg-background px-3 text-sm text-foreground"
+                      disabled={bulkLoading}
+                    >
+                      {BULK_TYPE_VALUES.map((t) => (
+                        <option key={t} value={t}>
+                          {t}
+                        </option>
+                      ))}
+                    </select>
+                  ) : bulkField === "canBePersonal" ||
+                    bulkField === "canImagineAsHuman" ||
+                    bulkField === "canUseAsHumanAdj" ||
+                    bulkField === "ipaVerified" ? (
+                    <select
+                      value={bulkBooleanValue}
+                      onChange={(e) =>
+                        setBulkBooleanValue(e.target.value as "true" | "false")
+                      }
+                      className="h-9 min-w-32 rounded-xl border border-card bg-background px-3 text-sm text-foreground"
+                      disabled={bulkLoading}
+                    >
+                      <option value="true">true</option>
+                      <option value="false">false</option>
+                    </select>
+                  ) : (
+                    <input
+                      value={bulkValue}
+                      onChange={(e) => setBulkValue(e.target.value)}
+                      className="h-9 min-w-64 flex-1 rounded-xl border border-card bg-background px-3 text-sm text-foreground"
+                      placeholder="Value…"
+                      disabled={bulkLoading}
+                    />
+                  )}
+                </div>
+              </div>
+
+              <div className="grid gap-2">
+                <div className="text-sm font-semibold text-foreground">
+                  PictureWord IDs
+                </div>
+                <textarea
+                  value={bulkIdsText}
+                  onChange={(e) => setBulkIdsText(e.target.value)}
+                  rows={6}
+                  className="w-full resize-y rounded-xl border border-card bg-background px-3 py-2 font-mono text-xs text-foreground"
+                  placeholder={"[1, 2, 3]\n\nor: 1,2,3"}
+                  disabled={bulkLoading}
+                />
+              </div>
+
+              {bulkError ? (
+                <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-700">
+                  {bulkError}
+                </div>
+              ) : null}
+              {bulkNotice ? (
+                <div className="rounded-xl border border-card bg-background p-3 text-sm text-foreground">
+                  {bulkNotice}
+                </div>
+              ) : null}
+
+              <div className="flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => void submitBulkUpdate()}
+                  disabled={bulkLoading}
+                  className="rounded-xl bg-[var(--primary)] px-4 py-2 text-sm font-semibold text-[var(--primary-foreground)] shadow-elevated transition hover:opacity-95 disabled:opacity-60"
+                >
+                  {bulkLoading ? "Updating…" : "Submit"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </aside>
   );
 });
@@ -394,7 +686,17 @@ export function PictureWordsClient() {
   const [searchIpaOnly, setSearchIpaOnly] = useState(false);
   const [showDuplicateFaOnly, setShowDuplicateFaOnly] = useState(false);
   const [drafts, setDrafts] = useState<
-    Record<number, { fa: string; ipa_fa: string; phinglish: string; canBePersonal: boolean }>
+    Record<
+      number,
+      {
+        fa: string;
+        ipa_fa: string;
+        phinglish: string;
+        canBePersonal: boolean;
+        canImagineAsHuman: boolean;
+        canUseAsHumanAdj: boolean;
+      }
+    >
   >({});
   const [savingId, setSavingId] = useState<number | null>(null);
   const [activeField, setActiveField] = useState<
@@ -435,6 +737,8 @@ export function PictureWordsClient() {
               ipa_fa: row.ipa_fa,
               phinglish: row.phinglish,
               canBePersonal: row.canBePersonal,
+              canImagineAsHuman: row.canImagineAsHuman,
+              canUseAsHumanAdj: row.canUseAsHumanAdj,
             };
           }
         }
@@ -565,6 +869,8 @@ export function PictureWordsClient() {
           ipa_fa: previous.ipa_fa,
           phinglish: previous.phinglish,
           canBePersonal: previous.canBePersonal,
+          canImagineAsHuman: previous.canImagineAsHuman,
+          canUseAsHumanAdj: previous.canUseAsHumanAdj,
         };
       setSavingId(id);
       setTableError(null);
@@ -576,6 +882,8 @@ export function PictureWordsClient() {
         ipa_fa: draft.ipa_fa,
         phinglish: draft.phinglish,
         canBePersonal: draft.canBePersonal,
+        canImagineAsHuman: draft.canImagineAsHuman,
+        canUseAsHumanAdj: draft.canUseAsHumanAdj,
         ipaVerified: true,
       };
       setLastChangedRow(optimistic);
@@ -588,6 +896,8 @@ export function PictureWordsClient() {
                 ipa_fa: draft.ipa_fa,
                 phinglish: draft.phinglish,
                 canBePersonal: draft.canBePersonal,
+                canImagineAsHuman: draft.canImagineAsHuman,
+                canUseAsHumanAdj: draft.canUseAsHumanAdj,
                 ipaVerified: true,
               }
             : row
@@ -603,6 +913,8 @@ export function PictureWordsClient() {
             ipa_fa: draft.ipa_fa,
             phinglish: draft.phinglish,
             canBePersonal: draft.canBePersonal,
+            canImagineAsHuman: draft.canImagineAsHuman,
+            canUseAsHumanAdj: draft.canUseAsHumanAdj,
           }),
         });
         const data = (await response.json()) as {
@@ -641,6 +953,8 @@ export function PictureWordsClient() {
           en: lastChangedRow.en,
           type: lastChangedRow.type,
           canBePersonal: lastChangedRow.canBePersonal,
+          canImagineAsHuman: lastChangedRow.canImagineAsHuman,
+          canUseAsHumanAdj: lastChangedRow.canUseAsHumanAdj,
           ipaVerified: lastChangedRow.ipaVerified,
         }),
       });
@@ -661,6 +975,8 @@ export function PictureWordsClient() {
           ipa_fa: data.row!.ipa_fa,
           phinglish: data.row!.phinglish,
           canBePersonal: data.row!.canBePersonal,
+          canImagineAsHuman: data.row!.canImagineAsHuman,
+          canUseAsHumanAdj: data.row!.canUseAsHumanAdj,
         },
       }));
       setLastChangedRow(data.row!);
@@ -678,6 +994,8 @@ export function PictureWordsClient() {
         ipa_fa: row.ipa_fa,
         phinglish: row.phinglish,
         canBePersonal: row.canBePersonal,
+        canImagineAsHuman: row.canImagineAsHuman,
+        canUseAsHumanAdj: row.canUseAsHumanAdj,
       },
     [drafts]
   );
@@ -689,7 +1007,9 @@ export function PictureWordsClient() {
         draft.fa !== row.fa ||
         draft.ipa_fa !== row.ipa_fa ||
         draft.phinglish !== row.phinglish ||
-        draft.canBePersonal !== row.canBePersonal
+        draft.canBePersonal !== row.canBePersonal ||
+        draft.canImagineAsHuman !== row.canImagineAsHuman ||
+        draft.canUseAsHumanAdj !== row.canUseAsHumanAdj
       );
     },
     [getDraft]
@@ -782,6 +1102,8 @@ export function PictureWordsClient() {
                 ? nextValue
                 : prev[activeField.id]?.phinglish ?? "",
             canBePersonal: prev[activeField.id]?.canBePersonal ?? false,
+            canImagineAsHuman: prev[activeField.id]?.canImagineAsHuman ?? false,
+            canUseAsHumanAdj: prev[activeField.id]?.canUseAsHumanAdj ?? false,
           },
         }));
       } else if (activeField?.kind === "search") {
@@ -1136,6 +1458,12 @@ export function PictureWordsClient() {
                                   prev[lastChangedRow.id]?.phinglish ??
                                   lastChangedRow.phinglish,
                                 canBePersonal: e.target.checked,
+                                canImagineAsHuman:
+                                  prev[lastChangedRow.id]?.canImagineAsHuman ??
+                                  lastChangedRow.canImagineAsHuman,
+                                canUseAsHumanAdj:
+                                  prev[lastChangedRow.id]?.canUseAsHumanAdj ??
+                                  lastChangedRow.canUseAsHumanAdj,
                               },
                             }))
                           }
@@ -1145,6 +1473,80 @@ export function PictureWordsClient() {
                         />
                         <span>canBePersonal</span>
                       </label>
+                      <div className="mt-2 grid gap-1">
+                        <label className="inline-flex items-center gap-2 text-sm text-muted">
+                          <input
+                            type="checkbox"
+                            checked={
+                              drafts[lastChangedRow.id]?.canImagineAsHuman ??
+                              lastChangedRow.canImagineAsHuman
+                            }
+                            onChange={(e) =>
+                              setDrafts((prev) => ({
+                                ...prev,
+                                [lastChangedRow.id]: {
+                                  fa:
+                                    prev[lastChangedRow.id]?.fa ??
+                                    lastChangedRow.fa,
+                                  ipa_fa:
+                                    prev[lastChangedRow.id]?.ipa_fa ??
+                                    lastChangedRow.ipa_fa,
+                                  phinglish:
+                                    prev[lastChangedRow.id]?.phinglish ??
+                                    lastChangedRow.phinglish,
+                                  canBePersonal:
+                                    prev[lastChangedRow.id]?.canBePersonal ??
+                                    lastChangedRow.canBePersonal,
+                                  canImagineAsHuman: e.target.checked,
+                                  canUseAsHumanAdj:
+                                    prev[lastChangedRow.id]?.canUseAsHumanAdj ??
+                                    lastChangedRow.canUseAsHumanAdj,
+                                },
+                              }))
+                            }
+                            disabled={
+                              !rows.some((row) => row.id === lastChangedRow.id)
+                            }
+                          />
+                          <span>canImagineAsHuman</span>
+                        </label>
+                        <label className="inline-flex items-center gap-2 text-sm text-muted">
+                          <input
+                            type="checkbox"
+                            checked={
+                              drafts[lastChangedRow.id]?.canUseAsHumanAdj ??
+                              lastChangedRow.canUseAsHumanAdj
+                            }
+                            onChange={(e) =>
+                              setDrafts((prev) => ({
+                                ...prev,
+                                [lastChangedRow.id]: {
+                                  fa:
+                                    prev[lastChangedRow.id]?.fa ??
+                                    lastChangedRow.fa,
+                                  ipa_fa:
+                                    prev[lastChangedRow.id]?.ipa_fa ??
+                                    lastChangedRow.ipa_fa,
+                                  phinglish:
+                                    prev[lastChangedRow.id]?.phinglish ??
+                                    lastChangedRow.phinglish,
+                                  canBePersonal:
+                                    prev[lastChangedRow.id]?.canBePersonal ??
+                                    lastChangedRow.canBePersonal,
+                                  canImagineAsHuman:
+                                    prev[lastChangedRow.id]?.canImagineAsHuman ??
+                                    lastChangedRow.canImagineAsHuman,
+                                  canUseAsHumanAdj: e.target.checked,
+                                },
+                              }))
+                            }
+                            disabled={
+                              !rows.some((row) => row.id === lastChangedRow.id)
+                            }
+                          />
+                          <span>canUseAsHumanAdj</span>
+                        </label>
+                      </div>
                     </td>
                     <td className="px-4 py-3">
                       {rows.some((row) => row.id === lastChangedRow.id) ? (
@@ -1324,6 +1726,12 @@ export function PictureWordsClient() {
                               canBePersonal:
                                 prev[row.id]?.canBePersonal ??
                                 row.canBePersonal,
+                              canImagineAsHuman:
+                                prev[row.id]?.canImagineAsHuman ??
+                                row.canImagineAsHuman,
+                              canUseAsHumanAdj:
+                                prev[row.id]?.canUseAsHumanAdj ??
+                                row.canUseAsHumanAdj,
                             },
                           }))
                         }
@@ -1385,24 +1793,91 @@ export function PictureWordsClient() {
                       </td>
                     ) : null}
                     <td className="px-4 py-3">
-                      <label className="inline-flex items-center gap-2 text-sm text-muted">
-                        <input
-                          type="checkbox"
-                          checked={drafts[row.id]?.canBePersonal ?? row.canBePersonal}
-                          onChange={(e) =>
-                            setDrafts((prev) => ({
-                              ...prev,
-                              [row.id]: {
-                                fa: prev[row.id]?.fa ?? row.fa,
-                                ipa_fa: prev[row.id]?.ipa_fa ?? row.ipa_fa,
-                                phinglish:
-                                  prev[row.id]?.phinglish ?? row.phinglish,
-                                canBePersonal: e.target.checked,
-                              },
-                            }))
-                          }
-                        />
-                      </label>
+                      <div className="grid gap-1">
+                        <label className="inline-flex items-center gap-2 text-sm text-muted">
+                          <input
+                            type="checkbox"
+                            checked={
+                              drafts[row.id]?.canBePersonal ?? row.canBePersonal
+                            }
+                            onChange={(e) =>
+                              setDrafts((prev) => ({
+                                ...prev,
+                                [row.id]: {
+                                  fa: prev[row.id]?.fa ?? row.fa,
+                                  ipa_fa: prev[row.id]?.ipa_fa ?? row.ipa_fa,
+                                  phinglish:
+                                    prev[row.id]?.phinglish ?? row.phinglish,
+                                  canBePersonal: e.target.checked,
+                                  canImagineAsHuman:
+                                    prev[row.id]?.canImagineAsHuman ??
+                                    row.canImagineAsHuman,
+                                  canUseAsHumanAdj:
+                                    prev[row.id]?.canUseAsHumanAdj ??
+                                    row.canUseAsHumanAdj,
+                                },
+                              }))
+                            }
+                          />
+                          <span>canBePersonal</span>
+                        </label>
+                        <label className="inline-flex items-center gap-2 text-sm text-muted">
+                          <input
+                            type="checkbox"
+                            checked={
+                              drafts[row.id]?.canImagineAsHuman ??
+                              row.canImagineAsHuman
+                            }
+                            onChange={(e) =>
+                              setDrafts((prev) => ({
+                                ...prev,
+                                [row.id]: {
+                                  fa: prev[row.id]?.fa ?? row.fa,
+                                  ipa_fa: prev[row.id]?.ipa_fa ?? row.ipa_fa,
+                                  phinglish:
+                                    prev[row.id]?.phinglish ?? row.phinglish,
+                                  canBePersonal:
+                                    prev[row.id]?.canBePersonal ??
+                                    row.canBePersonal,
+                                  canImagineAsHuman: e.target.checked,
+                                  canUseAsHumanAdj:
+                                    prev[row.id]?.canUseAsHumanAdj ??
+                                    row.canUseAsHumanAdj,
+                                },
+                              }))
+                            }
+                          />
+                          <span>canImagineAsHuman</span>
+                        </label>
+                        <label className="inline-flex items-center gap-2 text-sm text-muted">
+                          <input
+                            type="checkbox"
+                            checked={
+                              drafts[row.id]?.canUseAsHumanAdj ??
+                              row.canUseAsHumanAdj
+                            }
+                            onChange={(e) =>
+                              setDrafts((prev) => ({
+                                ...prev,
+                                [row.id]: {
+                                  fa: prev[row.id]?.fa ?? row.fa,
+                                  ipa_fa: prev[row.id]?.ipa_fa ?? row.ipa_fa,
+                                  phinglish:
+                                    prev[row.id]?.phinglish ?? row.phinglish,
+                                  canBePersonal:
+                                    prev[row.id]?.canBePersonal ??
+                                    row.canBePersonal,
+                                  canImagineAsHuman:
+                                    prev[row.id]?.canImagineAsHuman ??
+                                    row.canImagineAsHuman,
+                                  canUseAsHumanAdj: e.target.checked,
+                                },
+                              }))
+                            }
+                          />
+                          <span>canUseAsHumanAdj</span>
+                        </label>
+                      </div>
                     </td>
                     <td className="px-4 py-3">
                       <button

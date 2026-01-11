@@ -25,6 +25,7 @@ const GROUP_MATCH_TYPES: ReadonlySet<PictureWordType> = new Set([
   "place",
   "accessory",
   "tool",
+  "sport",
 ]);
 
 function getBestMatch(matches: Array<PictureWord>, word: Word) {
@@ -81,7 +82,7 @@ async function getMatchesFor2CharWord(ipa: string) {
   return matches.filter((m) => GROUP_MATCH_TYPES.has(m.type));
 }
 export async function findMatchesForAll2CharWords() {
-  await setKeys();
+  // await setKeys();
   const words = await get2CharWords();
 
   const wordsWithKeys = await Promise.all(
