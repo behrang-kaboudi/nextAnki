@@ -2,6 +2,27 @@
 
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+function TrashIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      {...props}
+    >
+      <path d="M3 6h18" />
+      <path d="M8 6V4h8v2" />
+      <path d="M19 6l-1 14H6L5 6" />
+      <path d="M10 11v6" />
+      <path d="M14 11v6" />
+    </svg>
+  );
+}
+
 type PictureWordRow = {
   id: number;
   fa: string;
@@ -25,20 +46,31 @@ type PictureWordRow = {
     | "accessory"
     | "tool"
     | "sport";
+  usage: "Job" | "adj" | "person" | "free" | "notSet";
   canBePersonal: boolean;
   canImagineAsHuman: boolean;
   canUseAsHumanAdj: boolean;
   ipaVerified: boolean;
 };
 
+const USAGE_VALUES: Array<PictureWordRow["usage"]> = [
+  "Job",
+  "adj",
+  "person",
+  "free",
+  "notSet",
+];
+
 type PictureWordUpdateField =
   | "type"
+  | "usage"
   | "canBePersonal"
   | "canImagineAsHuman"
   | "canUseAsHumanAdj";
 
 const UPDATE_FIELD_LABELS: Record<PictureWordUpdateField, string> = {
   type: "type",
+  usage: "usage",
   canBePersonal: "canBePersonal",
   canImagineAsHuman: "canImagineAsHuman",
   canUseAsHumanAdj: "canUseAsHumanAdj",
@@ -46,6 +78,7 @@ const UPDATE_FIELD_LABELS: Record<PictureWordUpdateField, string> = {
 
 type BulkUpdateField =
   | "type"
+  | "usage"
   | "canBePersonal"
   | "canImagineAsHuman"
   | "canUseAsHumanAdj"
@@ -58,6 +91,7 @@ type BulkUpdateField =
 
 const BULK_UPDATE_FIELDS: Array<{ value: BulkUpdateField; label: string }> = [
   { value: "type", label: "type" },
+  { value: "usage", label: "usage" },
   { value: "canBePersonal", label: "canBePersonal" },
   { value: "canImagineAsHuman", label: "canImagineAsHuman" },
   { value: "canUseAsHumanAdj", label: "canUseAsHumanAdj" },
@@ -683,6 +717,7 @@ export function PictureWordsClient() {
   );
   const [query, setQuery] = useState("");
   const [showUnverifiedOnly, setShowUnverifiedOnly] = useState(false);
+  const [showNotSetUsageOnly, setShowNotSetUsageOnly] = useState(false);
   const [searchIpaOnly, setSearchIpaOnly] = useState(false);
   const [showDuplicateFaOnly, setShowDuplicateFaOnly] = useState(false);
   const [drafts, setDrafts] = useState<
@@ -692,6 +727,7 @@ export function PictureWordsClient() {
         fa: string;
         ipa_fa: string;
         phinglish: string;
+        usage: PictureWordRow["usage"];
         canBePersonal: boolean;
         canImagineAsHuman: boolean;
         canUseAsHumanAdj: boolean;
@@ -736,6 +772,7 @@ export function PictureWordsClient() {
               fa: row.fa,
               ipa_fa: row.ipa_fa,
               phinglish: row.phinglish,
+              usage: row.usage,
               canBePersonal: row.canBePersonal,
               canImagineAsHuman: row.canImagineAsHuman,
               canUseAsHumanAdj: row.canUseAsHumanAdj,
@@ -868,6 +905,7 @@ export function PictureWordsClient() {
           fa: previous.fa,
           ipa_fa: previous.ipa_fa,
           phinglish: previous.phinglish,
+          usage: previous.usage,
           canBePersonal: previous.canBePersonal,
           canImagineAsHuman: previous.canImagineAsHuman,
           canUseAsHumanAdj: previous.canUseAsHumanAdj,
@@ -881,6 +919,7 @@ export function PictureWordsClient() {
         fa: draft.fa,
         ipa_fa: draft.ipa_fa,
         phinglish: draft.phinglish,
+        usage: draft.usage,
         canBePersonal: draft.canBePersonal,
         canImagineAsHuman: draft.canImagineAsHuman,
         canUseAsHumanAdj: draft.canUseAsHumanAdj,
@@ -895,6 +934,7 @@ export function PictureWordsClient() {
                 fa: draft.fa,
                 ipa_fa: draft.ipa_fa,
                 phinglish: draft.phinglish,
+                usage: draft.usage,
                 canBePersonal: draft.canBePersonal,
                 canImagineAsHuman: draft.canImagineAsHuman,
                 canUseAsHumanAdj: draft.canUseAsHumanAdj,
@@ -912,6 +952,7 @@ export function PictureWordsClient() {
             fa: draft.fa,
             ipa_fa: draft.ipa_fa,
             phinglish: draft.phinglish,
+            usage: draft.usage,
             canBePersonal: draft.canBePersonal,
             canImagineAsHuman: draft.canImagineAsHuman,
             canUseAsHumanAdj: draft.canUseAsHumanAdj,
@@ -952,6 +993,7 @@ export function PictureWordsClient() {
           phinglish: lastChangedRow.phinglish,
           en: lastChangedRow.en,
           type: lastChangedRow.type,
+          usage: lastChangedRow.usage,
           canBePersonal: lastChangedRow.canBePersonal,
           canImagineAsHuman: lastChangedRow.canImagineAsHuman,
           canUseAsHumanAdj: lastChangedRow.canUseAsHumanAdj,
@@ -974,6 +1016,7 @@ export function PictureWordsClient() {
           fa: data.row!.fa,
           ipa_fa: data.row!.ipa_fa,
           phinglish: data.row!.phinglish,
+          usage: data.row!.usage,
           canBePersonal: data.row!.canBePersonal,
           canImagineAsHuman: data.row!.canImagineAsHuman,
           canUseAsHumanAdj: data.row!.canUseAsHumanAdj,
@@ -993,6 +1036,7 @@ export function PictureWordsClient() {
         fa: row.fa,
         ipa_fa: row.ipa_fa,
         phinglish: row.phinglish,
+        usage: row.usage,
         canBePersonal: row.canBePersonal,
         canImagineAsHuman: row.canImagineAsHuman,
         canUseAsHumanAdj: row.canUseAsHumanAdj,
@@ -1007,6 +1051,7 @@ export function PictureWordsClient() {
         draft.fa !== row.fa ||
         draft.ipa_fa !== row.ipa_fa ||
         draft.phinglish !== row.phinglish ||
+        draft.usage !== row.usage ||
         draft.canBePersonal !== row.canBePersonal ||
         draft.canImagineAsHuman !== row.canImagineAsHuman ||
         draft.canUseAsHumanAdj !== row.canUseAsHumanAdj
@@ -1032,6 +1077,7 @@ export function PictureWordsClient() {
     const q = query.trim().toLowerCase();
     let base = rows;
     if (showUnverifiedOnly) base = base.filter((row) => !row.ipaVerified);
+    if (showNotSetUsageOnly) base = base.filter((row) => row.usage === "notSet");
     if (showDuplicateFaOnly)
       base = base.filter((row) => duplicateFaSet.has(row.fa.trim()));
     if (!q) return base;
@@ -1050,6 +1096,7 @@ export function PictureWordsClient() {
     query,
     rows,
     showUnverifiedOnly,
+    showNotSetUsageOnly,
     searchIpaOnly,
     showDuplicateFaOnly,
     duplicateFaSet,
@@ -1104,6 +1151,7 @@ export function PictureWordsClient() {
             canBePersonal: prev[activeField.id]?.canBePersonal ?? false,
             canImagineAsHuman: prev[activeField.id]?.canImagineAsHuman ?? false,
             canUseAsHumanAdj: prev[activeField.id]?.canUseAsHumanAdj ?? false,
+            usage: prev[activeField.id]?.usage ?? "notSet",
           },
         }));
       } else if (activeField?.kind === "search") {
@@ -1170,6 +1218,14 @@ export function PictureWordsClient() {
                 onChange={(e) => setShowUnverifiedOnly(e.target.checked)}
               />
               Unverified only
+            </label>
+            <label className="inline-flex select-none items-center gap-2 rounded-xl border border-card bg-background px-3 py-2 text-sm text-foreground">
+              <input
+                type="checkbox"
+                checked={showNotSetUsageOnly}
+                onChange={(e) => setShowNotSetUsageOnly(e.target.checked)}
+              />
+              usage = notSet
             </label>
             <label className="inline-flex select-none items-center gap-2 rounded-xl border border-card bg-background px-3 py-2 text-sm text-foreground">
               <input
@@ -1315,9 +1371,18 @@ export function PictureWordsClient() {
                               phinglish:
                                 prev[lastChangedRow.id]?.phinglish ??
                                 lastChangedRow.phinglish,
+                              usage:
+                                prev[lastChangedRow.id]?.usage ??
+                                lastChangedRow.usage,
                               canBePersonal:
                                 prev[lastChangedRow.id]?.canBePersonal ??
                                 lastChangedRow.canBePersonal,
+                              canImagineAsHuman:
+                                prev[lastChangedRow.id]?.canImagineAsHuman ??
+                                lastChangedRow.canImagineAsHuman,
+                              canUseAsHumanAdj:
+                                prev[lastChangedRow.id]?.canUseAsHumanAdj ??
+                                lastChangedRow.canUseAsHumanAdj,
                             },
                           }))
                         }
@@ -1352,9 +1417,18 @@ export function PictureWordsClient() {
                               phinglish:
                                 prev[lastChangedRow.id]?.phinglish ??
                                 lastChangedRow.phinglish,
+                              usage:
+                                prev[lastChangedRow.id]?.usage ??
+                                lastChangedRow.usage,
                               canBePersonal:
                                 prev[lastChangedRow.id]?.canBePersonal ??
                                 lastChangedRow.canBePersonal,
+                              canImagineAsHuman:
+                                prev[lastChangedRow.id]?.canImagineAsHuman ??
+                                lastChangedRow.canImagineAsHuman,
+                              canUseAsHumanAdj:
+                                prev[lastChangedRow.id]?.canUseAsHumanAdj ??
+                                lastChangedRow.canUseAsHumanAdj,
                             },
                           }))
                         }
@@ -1389,9 +1463,18 @@ export function PictureWordsClient() {
                                 prev[lastChangedRow.id]?.ipa_fa ??
                                 lastChangedRow.ipa_fa,
                               phinglish: e.target.value,
+                              usage:
+                                prev[lastChangedRow.id]?.usage ??
+                                lastChangedRow.usage,
                               canBePersonal:
                                 prev[lastChangedRow.id]?.canBePersonal ??
                                 lastChangedRow.canBePersonal,
+                              canImagineAsHuman:
+                                prev[lastChangedRow.id]?.canImagineAsHuman ??
+                                lastChangedRow.canImagineAsHuman,
+                              canUseAsHumanAdj:
+                                prev[lastChangedRow.id]?.canUseAsHumanAdj ??
+                                lastChangedRow.canUseAsHumanAdj,
                             },
                           }))
                         }
@@ -1433,119 +1516,56 @@ export function PictureWordsClient() {
                     <td className="break-words px-4 py-3 text-foreground">
                       {lastChangedRow.en}
                     </td>
-                    <td className="whitespace-nowrap px-4 py-3 text-muted">
-                      {lastChangedRow.type}
-                    </td>
                     <td className="px-4 py-3">
-                      <label className="inline-flex items-center gap-2 text-sm text-muted">
-                        <input
-                          type="checkbox"
-                          checked={
-                            drafts[lastChangedRow.id]?.canBePersonal ??
-                            lastChangedRow.canBePersonal
-                          }
-                          onChange={(e) =>
-                            setDrafts((prev) => ({
-                              ...prev,
-                              [lastChangedRow.id]: {
-                                fa:
-                                  prev[lastChangedRow.id]?.fa ??
-                                  lastChangedRow.fa,
-                                ipa_fa:
-                                  prev[lastChangedRow.id]?.ipa_fa ??
-                                  lastChangedRow.ipa_fa,
-                                phinglish:
-                                  prev[lastChangedRow.id]?.phinglish ??
-                                  lastChangedRow.phinglish,
-                                canBePersonal: e.target.checked,
-                                canImagineAsHuman:
-                                  prev[lastChangedRow.id]?.canImagineAsHuman ??
-                                  lastChangedRow.canImagineAsHuman,
-                                canUseAsHumanAdj:
-                                  prev[lastChangedRow.id]?.canUseAsHumanAdj ??
-                                  lastChangedRow.canUseAsHumanAdj,
-                              },
-                            }))
-                          }
-                          disabled={
-                            !rows.some((row) => row.id === lastChangedRow.id)
-                          }
-                        />
-                        <span>canBePersonal</span>
-                      </label>
-                      <div className="mt-2 grid gap-1">
-                        <label className="inline-flex items-center gap-2 text-sm text-muted">
-                          <input
-                            type="checkbox"
-                            checked={
-                              drafts[lastChangedRow.id]?.canImagineAsHuman ??
-                              lastChangedRow.canImagineAsHuman
-                            }
-                            onChange={(e) =>
-                              setDrafts((prev) => ({
-                                ...prev,
-                                [lastChangedRow.id]: {
-                                  fa:
-                                    prev[lastChangedRow.id]?.fa ??
-                                    lastChangedRow.fa,
-                                  ipa_fa:
-                                    prev[lastChangedRow.id]?.ipa_fa ??
-                                    lastChangedRow.ipa_fa,
-                                  phinglish:
-                                    prev[lastChangedRow.id]?.phinglish ??
-                                    lastChangedRow.phinglish,
-                                  canBePersonal:
-                                    prev[lastChangedRow.id]?.canBePersonal ??
-                                    lastChangedRow.canBePersonal,
-                                  canImagineAsHuman: e.target.checked,
-                                  canUseAsHumanAdj:
-                                    prev[lastChangedRow.id]?.canUseAsHumanAdj ??
-                                    lastChangedRow.canUseAsHumanAdj,
-                                },
-                              }))
-                            }
-                            disabled={
-                              !rows.some((row) => row.id === lastChangedRow.id)
-                            }
-                          />
-                          <span>canImagineAsHuman</span>
-                        </label>
-                        <label className="inline-flex items-center gap-2 text-sm text-muted">
-                          <input
-                            type="checkbox"
-                            checked={
-                              drafts[lastChangedRow.id]?.canUseAsHumanAdj ??
-                              lastChangedRow.canUseAsHumanAdj
-                            }
-                            onChange={(e) =>
-                              setDrafts((prev) => ({
-                                ...prev,
-                                [lastChangedRow.id]: {
-                                  fa:
-                                    prev[lastChangedRow.id]?.fa ??
-                                    lastChangedRow.fa,
-                                  ipa_fa:
-                                    prev[lastChangedRow.id]?.ipa_fa ??
-                                    lastChangedRow.ipa_fa,
-                                  phinglish:
-                                    prev[lastChangedRow.id]?.phinglish ??
-                                    lastChangedRow.phinglish,
-                                  canBePersonal:
-                                    prev[lastChangedRow.id]?.canBePersonal ??
-                                    lastChangedRow.canBePersonal,
-                                  canImagineAsHuman:
-                                    prev[lastChangedRow.id]?.canImagineAsHuman ??
-                                    lastChangedRow.canImagineAsHuman,
-                                  canUseAsHumanAdj: e.target.checked,
-                                },
-                              }))
-                            }
-                            disabled={
-                              !rows.some((row) => row.id === lastChangedRow.id)
-                            }
-                          />
-                          <span>canUseAsHumanAdj</span>
-                        </label>
+                      <div className="grid gap-1">
+                        {USAGE_VALUES.map((value) => (
+                          <label
+                            key={value}
+                            className="inline-flex items-center gap-2 text-sm text-muted"
+                          >
+                            <input
+                              type="radio"
+                              name={`usage-${lastChangedRow.id}`}
+                              value={value}
+                              checked={
+                                (drafts[lastChangedRow.id]?.usage ??
+                                  lastChangedRow.usage) === value
+                              }
+                              onChange={() => {
+                                setDrafts((prev) => ({
+                                  ...prev,
+                                  [lastChangedRow.id]: {
+                                    fa:
+                                      prev[lastChangedRow.id]?.fa ??
+                                      lastChangedRow.fa,
+                                    ipa_fa:
+                                      prev[lastChangedRow.id]?.ipa_fa ??
+                                      lastChangedRow.ipa_fa,
+                                    phinglish:
+                                      prev[lastChangedRow.id]?.phinglish ??
+                                      lastChangedRow.phinglish,
+                                    usage: value,
+                                    canBePersonal:
+                                      prev[lastChangedRow.id]?.canBePersonal ??
+                                      lastChangedRow.canBePersonal,
+                                    canImagineAsHuman:
+                                      prev[lastChangedRow.id]
+                                        ?.canImagineAsHuman ??
+                                      lastChangedRow.canImagineAsHuman,
+                                    canUseAsHumanAdj:
+                                      prev[lastChangedRow.id]
+                                        ?.canUseAsHumanAdj ??
+                                      lastChangedRow.canUseAsHumanAdj,
+                                  },
+                                }));
+                              }}
+                              disabled={
+                                !rows.some((row) => row.id === lastChangedRow.id)
+                              }
+                            />
+                            <span>{value}</span>
+                          </label>
+                        ))}
                       </div>
                     </td>
                     <td className="px-4 py-3">
@@ -1556,9 +1576,10 @@ export function PictureWordsClient() {
                           disabled={
                             tableLoading || savingId === lastChangedRow.id
                           }
-                          className="w-full rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-sm font-semibold text-red-700 transition hover:bg-red-500/15 disabled:opacity-60"
+                          aria-label="Delete"
+                          className="inline-flex items-center justify-center rounded-xl border border-red-500/30 bg-red-500/10 p-2 text-red-700 transition hover:bg-red-500/15 disabled:opacity-60"
                         >
-                          Delete
+                          <TrashIcon className="h-5 w-5" />
                         </button>
                       ) : (
                         <button
@@ -1625,38 +1646,13 @@ export function PictureWordsClient() {
                     <th className="w-28 px-4 py-3">Verify</th>
                   ) : null}
                   <th className="w-[14%] px-4 py-3">en</th>
-                  <th className="w-16 px-4 py-3">
-                    <button
-                      type="button"
-                      onClick={() => toggleSort("type")}
-                      className={`inline-flex w-full cursor-pointer items-center justify-between gap-2 rounded-lg px-2 py-1 text-left transition hover:bg-card hover:text-foreground ${
-                        sort?.key === "type"
-                          ? "bg-card text-foreground shadow-elevated"
-                          : ""
-                      }`}
-                      aria-sort={
-                        sort?.key === "type"
-                          ? sort.dir === "asc"
-                            ? "ascending"
-                            : "descending"
-                          : "none"
-                      }
-                    >
-                      <span>type</span>
-                      <span className="text-base font-bold">
-                        {sort?.key === "type"
-                          ? sort.dir === "asc"
-                            ? "↑"
-                            : "↓"
-                          : "↕"}
-                      </span>
-                    </button>
-                  </th>
+                  <th className="w-28 px-4 py-3">usage</th>
                   {!showUnverifiedOnly ? (
                     <th className="w-28 px-4 py-3">Verify</th>
                   ) : null}
-                  <th className="w-28 px-4 py-3">Personal?</th>
-                  <th className="w-24 px-4 py-3">Delete</th>
+                  <th className="w-14 px-2 py-3 text-center">
+                    <TrashIcon className="mx-auto h-5 w-5 text-muted" />
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -1769,8 +1765,44 @@ export function PictureWordsClient() {
                     <td className="break-words px-4 py-3 text-foreground">
                       {row.en}
                     </td>
-                    <td className="whitespace-nowrap px-4 py-3 text-muted">
-                      {row.type}
+                    <td className="px-4 py-3">
+                      <div className="grid gap-1">
+                        {USAGE_VALUES.map((value) => (
+                          <label
+                            key={value}
+                            className="inline-flex items-center gap-2 text-sm text-muted"
+                          >
+                            <input
+                              type="radio"
+                              name={`usage-${row.id}`}
+                              value={value}
+                              checked={(drafts[row.id]?.usage ?? row.usage) === value}
+                              onChange={() => {
+                                setDrafts((prev) => ({
+                                  ...prev,
+                                  [row.id]: {
+                                    fa: prev[row.id]?.fa ?? row.fa,
+                                    ipa_fa: prev[row.id]?.ipa_fa ?? row.ipa_fa,
+                                    phinglish:
+                                      prev[row.id]?.phinglish ?? row.phinglish,
+                                    usage: value,
+                                    canBePersonal:
+                                      prev[row.id]?.canBePersonal ??
+                                      row.canBePersonal,
+                                    canImagineAsHuman:
+                                      prev[row.id]?.canImagineAsHuman ??
+                                      row.canImagineAsHuman,
+                                    canUseAsHumanAdj:
+                                      prev[row.id]?.canUseAsHumanAdj ??
+                                      row.canUseAsHumanAdj,
+                                  },
+                                }));
+                              }}
+                            />
+                            <span>{value}</span>
+                          </label>
+                        ))}
+                      </div>
                     </td>
                     {!showUnverifiedOnly ? (
                       <td className="px-4 py-3">
@@ -1792,101 +1824,15 @@ export function PictureWordsClient() {
                         </button>
                       </td>
                     ) : null}
-                    <td className="px-4 py-3">
-                      <div className="grid gap-1">
-                        <label className="inline-flex items-center gap-2 text-sm text-muted">
-                          <input
-                            type="checkbox"
-                            checked={
-                              drafts[row.id]?.canBePersonal ?? row.canBePersonal
-                            }
-                            onChange={(e) =>
-                              setDrafts((prev) => ({
-                                ...prev,
-                                [row.id]: {
-                                  fa: prev[row.id]?.fa ?? row.fa,
-                                  ipa_fa: prev[row.id]?.ipa_fa ?? row.ipa_fa,
-                                  phinglish:
-                                    prev[row.id]?.phinglish ?? row.phinglish,
-                                  canBePersonal: e.target.checked,
-                                  canImagineAsHuman:
-                                    prev[row.id]?.canImagineAsHuman ??
-                                    row.canImagineAsHuman,
-                                  canUseAsHumanAdj:
-                                    prev[row.id]?.canUseAsHumanAdj ??
-                                    row.canUseAsHumanAdj,
-                                },
-                              }))
-                            }
-                          />
-                          <span>canBePersonal</span>
-                        </label>
-                        <label className="inline-flex items-center gap-2 text-sm text-muted">
-                          <input
-                            type="checkbox"
-                            checked={
-                              drafts[row.id]?.canImagineAsHuman ??
-                              row.canImagineAsHuman
-                            }
-                            onChange={(e) =>
-                              setDrafts((prev) => ({
-                                ...prev,
-                                [row.id]: {
-                                  fa: prev[row.id]?.fa ?? row.fa,
-                                  ipa_fa: prev[row.id]?.ipa_fa ?? row.ipa_fa,
-                                  phinglish:
-                                    prev[row.id]?.phinglish ?? row.phinglish,
-                                  canBePersonal:
-                                    prev[row.id]?.canBePersonal ??
-                                    row.canBePersonal,
-                                  canImagineAsHuman: e.target.checked,
-                                  canUseAsHumanAdj:
-                                    prev[row.id]?.canUseAsHumanAdj ??
-                                    row.canUseAsHumanAdj,
-                                },
-                              }))
-                            }
-                          />
-                          <span>canImagineAsHuman</span>
-                        </label>
-                        <label className="inline-flex items-center gap-2 text-sm text-muted">
-                          <input
-                            type="checkbox"
-                            checked={
-                              drafts[row.id]?.canUseAsHumanAdj ??
-                              row.canUseAsHumanAdj
-                            }
-                            onChange={(e) =>
-                              setDrafts((prev) => ({
-                                ...prev,
-                                [row.id]: {
-                                  fa: prev[row.id]?.fa ?? row.fa,
-                                  ipa_fa: prev[row.id]?.ipa_fa ?? row.ipa_fa,
-                                  phinglish:
-                                    prev[row.id]?.phinglish ?? row.phinglish,
-                                  canBePersonal:
-                                    prev[row.id]?.canBePersonal ??
-                                    row.canBePersonal,
-                                  canImagineAsHuman:
-                                    prev[row.id]?.canImagineAsHuman ??
-                                    row.canImagineAsHuman,
-                                  canUseAsHumanAdj: e.target.checked,
-                                },
-                              }))
-                            }
-                          />
-                          <span>canUseAsHumanAdj</span>
-                        </label>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
+                    <td className="px-2 py-3 text-center">
                       <button
                         type="button"
                         onClick={() => onDelete(row)}
                         disabled={tableLoading || savingId === row.id}
-                        className="w-full rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-sm font-semibold text-red-700 transition hover:bg-red-500/15 disabled:opacity-60"
+                        aria-label="Delete"
+                        className="inline-flex items-center justify-center rounded-xl border border-red-500/30 bg-red-500/10 p-2 text-red-700 transition hover:bg-red-500/15 disabled:opacity-60"
                       >
-                        Delete
+                        <TrashIcon className="h-5 w-5" />
                       </button>
                     </td>
                   </tr>
@@ -1895,7 +1841,7 @@ export function PictureWordsClient() {
                 {sorted.length === 0 ? (
                   <tr className="border-t border-card">
                     <td
-                      colSpan={8}
+                      colSpan={7}
                       className="px-4 py-10 text-center text-sm text-muted"
                     >
                       No results.
