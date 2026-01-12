@@ -1,5 +1,5 @@
 {
-  "createdAt": "2026-01-11T23:27:26.645Z",
+  "createdAt": "2026-01-12T16:39:49.093Z",
   "data": {
     "theme": [
       {
@@ -84603,9 +84603,9 @@
       },
       {
         "id": 640,
-        "fa": "بنّا",
-        "ipa_fa": "bæn.nɑː",
-        "ipa_fa_normalized": "bænʌ",
+        "fa": "اوستا بنّا",
+        "ipa_fa": "usta bæn.nɑː",
+        "ipa_fa_normalized": "ʊstʌ bænʌ",
         "phinglish": "banna",
         "en": "mason",
         "type": "occupation",
@@ -84615,7 +84615,7 @@
         "canUseAsHumanAdj": false,
         "ipaVerified": true,
         "createdAt": "2026-01-02T18:57:54.746Z",
-        "updatedAt": "2026-01-10T23:47:47.278Z"
+        "updatedAt": "2026-01-12T14:21:02.531Z"
       },
       {
         "id": 641,
@@ -90762,22 +90762,6 @@
         "updatedAt": "2026-01-05T14:44:43.383Z"
       },
       {
-        "id": 1255,
-        "fa": "االماس",
-        "ipa_fa": "/ælˈmɒːs/",
-        "ipa_fa_normalized": "ælmʌs",
-        "phinglish": "almas",
-        "en": "diamond",
-        "type": "noun",
-        "usage": "notSet",
-        "canBePersonal": true,
-        "canImagineAsHuman": false,
-        "canUseAsHumanAdj": false,
-        "ipaVerified": true,
-        "createdAt": "2026-01-05T14:32:37.994Z",
-        "updatedAt": "2026-01-10T13:27:18.827Z"
-      },
-      {
         "id": 1256,
         "fa": "عطار",
         "ipa_fa": "/ætˈtɒːɾ/",
@@ -91752,22 +91736,6 @@
         "ipaVerified": true,
         "createdAt": "2026-01-05T14:34:44.712Z",
         "updatedAt": "2026-01-10T00:32:43.338Z"
-      },
-      {
-        "id": 1320,
-        "fa": "اوپراتور",
-        "ipa_fa": "/o.pe.ɾɒːˈtoːɾ/",
-        "ipa_fa_normalized": "operʌtor",
-        "phinglish": "operator",
-        "en": "operator",
-        "type": "occupation",
-        "usage": "notSet",
-        "canBePersonal": false,
-        "canImagineAsHuman": false,
-        "canUseAsHumanAdj": false,
-        "ipaVerified": true,
-        "createdAt": "2026-01-05T14:34:44.712Z",
-        "updatedAt": "2026-01-10T23:47:47.278Z"
       },
       {
         "id": 1321,
