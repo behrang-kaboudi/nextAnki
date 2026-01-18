@@ -32,6 +32,8 @@ export type ListParams = {
   searchText?: string;
   filters: Filter[];
   filterMode?: FilterMode;
+  sqlWhere?: string;
+  sqlParams?: unknown[];
   sort?: Sort;
   page: number;
   pageSize: number;

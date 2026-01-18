@@ -69,6 +69,8 @@ type ListParams = {
   searchText?: string;
   filters: Filter[];
   filterMode?: FilterMode;
+  sqlWhere?: string;
+  sqlParams?: unknown[];
   sort?: Sort;
   page: number;
   pageSize: number;
@@ -200,6 +202,109 @@ function operatorOptionsForField(field: PrismaField, enums: PrismaRegistry["enum
 
 function isLengthOperator(op: Operator) {
   return op === "lenEq" || op === "lenGt" || op === "lenGte" || op === "lenLt" || op === "lenLte";
+}
+
+function splitTopLevel(where: string, delimiter: "AND" | "OR") {
+  return where
+    .split(new RegExp(`\\s+${delimiter}\\s+`, "i"))
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+function parseSqlLiteral(raw: string) {
+  const s = raw.trim();
+  if (!s) return "";
+  if ((s.startsWith("'") && s.endsWith("'")) || (s.startsWith("\"") && s.endsWith("\""))) {
+    return s.slice(1, -1);
+  }
+  if (/^(true|false)$/i.test(s)) return s.toLowerCase() === "true";
+  if (/^-?\\d+(\\.\\d+)?$/.test(s)) return Number(s);
+  return s;
+}
+
+function normalizeSqlWhereInput(raw: string) {
+  let s = raw.trim();
+  // Common accidental trailing colons (e.g. "... = 1:") should not break query validation.
+  while (s.endsWith(":") || s.endsWith("：")) {
+    s = s.slice(0, -1).trimEnd();
+  }
+  return s;
+}
+
+function parseSqlWhereToFilters(where: string, allowedFields: string[]) {
+  const cleaned = where.trim().replace(/^where\\s+/i, "").trim();
+  if (!cleaned) return { ok: true as const, filterMode: "all" as FilterMode, filters: [] as Filter[] };
+
+  const hasAnd = /\\s+and\\s+/i.test(cleaned);
+  const hasOr = /\\s+or\\s+/i.test(cleaned);
+  if (hasAnd && hasOr) {
+    return { ok: false as const, error: "Mixed AND/OR is not supported (use only AND or only OR)." };
+  }
+
+  const mode: FilterMode = hasOr ? "any" : "all";
+  const parts = hasOr ? splitTopLevel(cleaned, "OR") : splitTopLevel(cleaned, "AND");
+  const filters: Filter[] = [];
+
+  for (const part of parts) {
+    const isNullMatch = part.match(/^([a-zA-Z_][\\w]*)\\s+is\\s+(not\\s+)?null$/i);
+    if (isNullMatch) {
+      const field = isNullMatch[1]!;
+      if (!allowedFields.includes(field)) return { ok: false as const, error: `Unknown field: ${field}` };
+      const not = Boolean(isNullMatch[2]);
+      filters.push({ field, op: not ? "isNotEmpty" : "isEmpty" });
+      continue;
+    }
+
+    const inMatch = part.match(/^([a-zA-Z_][\\w]*)\\s+(not\\s+)?in\\s*\\((.+)\\)$/i);
+    if (inMatch) {
+      const field = inMatch[1]!;
+      if (!allowedFields.includes(field)) return { ok: false as const, error: `Unknown field: ${field}` };
+      const not = Boolean(inMatch[2]);
+      const listRaw = inMatch[3]!;
+      const values = listRaw
+        .split(",")
+        .map((x) => parseSqlLiteral(x))
+        .filter((v) => v !== "");
+      filters.push({ field, op: not ? "notIn" : "in", value: values });
+      continue;
+    }
+
+    const likeMatch = part.match(/^([a-zA-Z_][\\w]*)\\s+(not\\s+)?like\\s+(.+)$/i);
+    if (likeMatch) {
+      const field = likeMatch[1]!;
+      if (!allowedFields.includes(field)) return { ok: false as const, error: `Unknown field: ${field}` };
+      const not = Boolean(likeMatch[2]);
+      const pattern = String(parseSqlLiteral(likeMatch[3]!));
+      if (pattern.startsWith("%") && pattern.endsWith("%") && pattern.length >= 2) {
+        filters.push({ field, op: not ? "notContains" : "contains", value: pattern.slice(1, -1) });
+      } else if (pattern.endsWith("%")) {
+        filters.push({ field, op: not ? "notContains" : "startsWith", value: pattern.slice(0, -1) });
+      } else {
+        filters.push({ field, op: not ? "neq" : "eq", value: pattern });
+      }
+      continue;
+    }
+
+    const cmpMatch = part.match(/^([a-zA-Z_][\\w]*)\\s*(=|!=|<>|>=|<=|>|<)\\s*(.+)$/);
+    if (cmpMatch) {
+      const field = cmpMatch[1]!;
+      if (!allowedFields.includes(field)) return { ok: false as const, error: `Unknown field: ${field}` };
+      const opRaw = cmpMatch[2]!;
+      const value = parseSqlLiteral(cmpMatch[3]!);
+      const op: Operator =
+        opRaw === "=" ? "eq" :
+        opRaw === "!=" || opRaw === "<>" ? "neq" :
+        opRaw === ">" ? "gt" :
+        opRaw === ">=" ? "gte" :
+        opRaw === "<" ? "lt" : "lte";
+      filters.push({ field, op, value });
+      continue;
+    }
+
+    return { ok: false as const, error: `Unsupported SQL condition: ${part}` };
+  }
+
+  return { ok: true as const, filterMode: mode, filters };
 }
 
 function parseModelFieldRef(value: unknown) {
@@ -810,7 +915,10 @@ type SavedView = {
   id: string;
   name: string;
   model: string;
-  params: Pick<ListParams, "filters" | "filterMode" | "sort" | "visibleColumns" | "pageSize" | "searchText">;
+  params: Pick<
+    ListParams,
+    "filters" | "filterMode" | "sort" | "visibleColumns" | "pageSize" | "searchText" | "sqlWhere" | "sqlParams"
+  >;
   createdAt: number;
 };
 
@@ -966,6 +1074,8 @@ export default function Page() {
     return model.fields.filter((f) => f.kind === "scalar" || f.kind === "enum");
   }, [model]);
 
+  const filterableFieldNames = useMemo(() => filterableFields.map((f) => f.name), [filterableFields]);
+
   const defaultVisibleColumns = useMemo(() => {
     if (!model) return [];
     const preferred = model.displayFields?.filter((n) => model.fields.some((f) => f.name === n)) ?? [];
@@ -982,6 +1092,8 @@ export default function Page() {
 
   const [draftFilters, setDraftFilters] = useState<Filter[]>([]);
   const [draftFilterMode, setDraftFilterMode] = useState<FilterMode>("all");
+  const [draftSqlWhere, setDraftSqlWhere] = useState("");
+  const [draftSqlParams, setDraftSqlParams] = useState("[]");
   const [draftSort, setDraftSort] = useState<Sort | undefined>(undefined);
   const [draftVisibleColumns, setDraftVisibleColumns] = useState<string[]>([]);
   const [draftPageSize, setDraftPageSize] = useState<number>(20);
@@ -1094,7 +1206,17 @@ export default function Page() {
   useEffect(() => {
     if (!applied || !model) return;
     fetchList(applied).catch(() => {});
-  }, [applied?.model, applied?.searchText, JSON.stringify(applied?.filters), JSON.stringify(applied?.sort), applied?.page, applied?.pageSize, JSON.stringify(applied?.visibleColumns)]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [
+    applied?.model,
+    applied?.searchText,
+    JSON.stringify(applied?.filters),
+    JSON.stringify(applied?.sort),
+    applied?.page,
+    applied?.pageSize,
+    JSON.stringify(applied?.visibleColumns),
+    applied?.sqlWhere,
+    JSON.stringify(applied?.sqlParams ?? []),
+  ]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const totalPages = useMemo(() => Math.max(1, Math.ceil(total / (applied?.pageSize ?? 20))), [total, applied?.pageSize]);
 
@@ -1172,7 +1294,14 @@ export default function Page() {
   const [updateByKeysOpen, setUpdateByKeysOpen] = useState(false);
   const [copyBusy, setCopyBusy] = useState(false);
   const [copyScope, setCopyScope] = useState<"page" | "limit" | "all">("page");
-  const [copyLimit, setCopyLimit] = useState(200);
+  const [copyLimitText, setCopyLimitText] = useState("200");
+  const copyLimit = useMemo(() => {
+    const trimmed = copyLimitText.trim();
+    if (!trimmed) return null;
+    const n = Number(trimmed);
+    if (!Number.isFinite(n)) return null;
+    return Math.max(0, Math.trunc(n));
+  }, [copyLimitText]);
 
   const [updateByKeysModelName, setUpdateByKeysModelName] = useState<string>("");
   const updateByKeysModel = useMemo(
@@ -1343,6 +1472,8 @@ export default function Page() {
       params: {
         filters: applied.filters,
         filterMode: applied.filterMode,
+        sqlWhere: applied.sqlWhere,
+        sqlParams: applied.sqlParams,
         sort: applied.sort,
         visibleColumns: applied.visibleColumns,
         pageSize: applied.pageSize,
@@ -1371,6 +1502,8 @@ export default function Page() {
     }
     setDraftFilters(v.params.filters ?? []);
     setDraftFilterMode(v.params.filterMode === "any" ? "any" : "all");
+    setDraftSqlWhere(v.params.sqlWhere ?? "");
+    setDraftSqlParams(JSON.stringify(v.params.sqlParams ?? [], null, 2));
     setDraftSort(v.params.sort);
     setDraftVisibleColumns(v.params.visibleColumns ?? defaultVisibleColumns);
     setDraftPageSize(v.params.pageSize ?? 20);
@@ -1381,6 +1514,8 @@ export default function Page() {
       searchText: v.params.searchText ?? undefined,
       filters: v.params.filters ?? [],
       filterMode: v.params.filterMode === "any" ? "any" : "all",
+      sqlWhere: v.params.sqlWhere ?? undefined,
+      sqlParams: v.params.sqlParams ?? undefined,
       sort: v.params.sort,
       page: 1,
       pageSize: v.params.pageSize ?? 20,
@@ -1635,11 +1770,26 @@ export default function Page() {
   function applyQuery() {
     if (!model) return;
     setPage(1);
+    let sqlWhere: string | undefined;
+    let sqlParams: unknown[] | undefined;
+    const normalizedSqlWhere = normalizeSqlWhereInput(draftSqlWhere);
+    if (normalizedSqlWhere) {
+      sqlWhere = normalizedSqlWhere;
+      if (normalizedSqlWhere !== draftSqlWhere.trim()) setDraftSqlWhere(normalizedSqlWhere);
+      try {
+        const parsed = JSON.parse(draftSqlParams || "[]") as unknown;
+        sqlParams = Array.isArray(parsed) ? parsed : [];
+      } catch {
+        sqlParams = [];
+      }
+    }
     setAppliedParams({
       model: model.name,
       searchText: debouncedSearch || undefined,
       filters: normalizeFiltersForApply(draftFilters),
       filterMode: draftFilterMode,
+      sqlWhere,
+      sqlParams,
       sort: draftSort,
       page: 1,
       pageSize: draftPageSize,
@@ -1666,6 +1816,25 @@ export default function Page() {
     setSelectedIds(new Set());
   }
 
+  function applySort(nextSort: Sort | undefined) {
+    if (!model) return;
+    setDraftSort(nextSort);
+    setPage(1);
+    setAppliedParams((prev) => ({
+      model: model.name,
+      searchText: (prev?.searchText ?? debouncedSearch) || undefined,
+      filters: prev?.filters ?? [],
+      filterMode: prev?.filterMode ?? draftFilterMode,
+      sqlWhere: prev?.sqlWhere,
+      sqlParams: prev?.sqlParams,
+      sort: nextSort,
+      page: 1,
+      pageSize: prev?.pageSize ?? draftPageSize,
+      visibleColumns: prev?.visibleColumns ?? draftVisibleCols,
+    }));
+    setSelectedIds(new Set());
+  }
+
   function resetQuery() {
     if (!model) return;
     setDraftSearchText("");
@@ -1676,12 +1845,16 @@ export default function Page() {
     setDraftSort(undefined);
     setDraftVisibleColumns(defaultVisibleColumns);
     setDraftPageSize(50);
+    setDraftSqlWhere("");
+    setDraftSqlParams("[]");
     setPage(1);
     setAppliedParams({
       model: model.name,
       searchText: undefined,
       filters: [],
       filterMode: "all",
+      sqlWhere: undefined,
+      sqlParams: undefined,
       sort: undefined,
       page: 1,
       pageSize: 50,
@@ -1713,15 +1886,32 @@ export default function Page() {
     const searchD = debouncedSearch ?? "";
     const modeA = applied.filterMode === "any" ? "any" : "all";
     const modeD = draftFilterMode;
+    const sqlA = (applied.sqlWhere ?? "").trim();
+    const sqlD = draftSqlWhere.trim();
+    const sqlParamsA = JSON.stringify(applied.sqlParams ?? []);
+    const sqlParamsD = draftSqlParams || "[]";
     return (
       searchA !== searchD ||
       sortA !== sortD ||
       colsA !== colsD ||
       filtersA !== filtersD ||
       modeA !== modeD ||
+      sqlA !== sqlD ||
+      sqlParamsA !== sqlParamsD ||
       Number(applied.pageSize) !== Number(draftPageSize)
     );
-  }, [applied, model, debouncedSearch, draftSort, draftVisibleCols, draftNormalizedFilters, draftPageSize, draftFilterMode]);
+  }, [
+    applied,
+    model,
+    debouncedSearch,
+    draftSort,
+    draftVisibleCols,
+    draftNormalizedFilters,
+    draftPageSize,
+    draftFilterMode,
+    draftSqlWhere,
+    draftSqlParams,
+  ]);
 
   const isDirtyExcludingSearchSort = useMemo(() => {
     if (!applied || !model) return false;
@@ -1731,8 +1921,28 @@ export default function Page() {
     const filtersD = JSON.stringify(draftNormalizedFilters ?? []);
     const modeA = applied.filterMode === "any" ? "any" : "all";
     const modeD = draftFilterMode;
-    return colsA !== colsD || filtersA !== filtersD || modeA !== modeD || Number(applied.pageSize) !== Number(draftPageSize);
-  }, [applied, model, draftVisibleCols, draftNormalizedFilters, draftPageSize, draftFilterMode]);
+    const sqlA = (applied.sqlWhere ?? "").trim();
+    const sqlD = draftSqlWhere.trim();
+    const sqlParamsA = JSON.stringify(applied.sqlParams ?? []);
+    const sqlParamsD = draftSqlParams || "[]";
+    return (
+      colsA !== colsD ||
+      filtersA !== filtersD ||
+      modeA !== modeD ||
+      sqlA !== sqlD ||
+      sqlParamsA !== sqlParamsD ||
+      Number(applied.pageSize) !== Number(draftPageSize)
+    );
+  }, [
+    applied,
+    model,
+    draftVisibleCols,
+    draftNormalizedFilters,
+    draftPageSize,
+    draftFilterMode,
+    draftSqlWhere,
+    draftSqlParams,
+  ]);
 
   useEffect(() => {
     if (!model || !applied) return;
@@ -1750,6 +1960,8 @@ export default function Page() {
       searchText: nextSearch,
       filters: prev?.filters ?? [],
       filterMode: prev?.filterMode ?? draftFilterMode,
+      sqlWhere: prev?.sqlWhere,
+      sqlParams: prev?.sqlParams,
       sort: nextSort,
       page: 1,
       pageSize: prev?.pageSize ?? draftPageSize,
@@ -1765,6 +1977,8 @@ export default function Page() {
       searchText: applied.searchText ?? "",
       filters: applied.filters ?? [],
       filterMode: applied.filterMode === "any" ? "any" : "all",
+      sqlWhere: applied.sqlWhere ?? "",
+      sqlParams: applied.sqlParams ?? [],
       sort: applied.sort ?? null,
       pageSize: applied.pageSize,
       visibleColumns: applied.visibleColumns ?? [],
@@ -1779,6 +1993,8 @@ export default function Page() {
         searchText: v.params.searchText ?? "",
         filters: v.params.filters ?? [],
         filterMode: v.params.filterMode === "any" ? "any" : "all",
+        sqlWhere: v.params.sqlWhere ?? "",
+        sqlParams: v.params.sqlParams ?? [],
         sort: v.params.sort ?? null,
         pageSize: v.params.pageSize ?? 20,
         visibleColumns: v.params.visibleColumns ?? [],
@@ -1801,6 +2017,8 @@ export default function Page() {
         searchText: applied?.searchText ?? undefined,
         filters: applied?.filters ?? [],
         filterMode: applied?.filterMode ?? draftFilterMode,
+        sqlWhere: applied?.sqlWhere,
+        sqlParams: applied?.sqlParams,
         sort: applied?.sort,
         page,
         pageSize,
@@ -1838,7 +2056,7 @@ export default function Page() {
               });
             })()
           : await fetchRowsForCopy({
-              limit: copyScope === "all" ? null : Math.max(0, Math.trunc(copyLimit)),
+              limit: copyScope === "all" ? null : (copyLimit ?? 0),
             });
 
       const text = opts.compact ? JSON.stringify(payload) : JSON.stringify(payload, null, 2);
@@ -1851,6 +2069,13 @@ export default function Page() {
       setCopyBusy(false);
     }
   }
+
+  const copyCountLabel = useMemo(() => {
+    if (copyScope === "page") return rows.length;
+    if (copyScope === "all") return total;
+    const n = copyLimit ?? 0;
+    return total ? Math.min(n, total) : n;
+  }, [copyScope, rows.length, total, copyLimit]);
 
   const canRender = !!model;
 
@@ -2029,6 +2254,33 @@ export default function Page() {
                   </div>
 
                   <div className="grid grid-cols-1 gap-2">
+                    <div className="rounded-md border border-neutral-200 bg-neutral-50 p-3">
+                      <div className="mb-2 flex items-center justify-between gap-2">
+                        <div className="text-xs font-semibold text-neutral-700">SQL WHERE</div>
+                      </div>
+                      <textarea
+                        value={draftSqlWhere}
+                        onChange={(e) => setDraftSqlWhere(e.target.value)}
+                        placeholder={`Example (subquery supported):\nbase_form IN (\n  SELECT base_form FROM Word GROUP BY base_form HAVING COUNT(*) > 1\n)`}
+                        className="w-full resize-y rounded-md border border-neutral-200 bg-white p-2 font-mono text-xs text-neutral-900"
+                        rows={5}
+                      />
+                      <div className="mt-2 grid gap-2 md:grid-cols-2">
+                        <div>
+                          <div className="mb-1 text-[11px] font-semibold text-neutral-700">SQL Params (JSON array)</div>
+                          <Input
+                            value={draftSqlParams}
+                            onChange={(e) => setDraftSqlParams(e.target.value)}
+                            placeholder='e.g. ["%foo%", 123]'
+                          />
+                        </div>
+                        <div className="text-[11px] text-neutral-500 md:pt-5">
+                          This is read-only and rejects <code>;</code>, comments, and DDL/DML keywords.
+                          Use <code>?</code> placeholders + params for values.
+                        </div>
+                      </div>
+                    </div>
+
                     {draftFilters.map((f, i) => {
                         const fieldMeta = filterableFields.find((x) => x.name === f.field) ?? null;
                         const allOps = fieldMeta ? operatorOptionsForField(fieldMeta, registry.enums) : (["eq"] as Operator[]);
@@ -2253,14 +2505,17 @@ export default function Page() {
 	                            }));
                             setSelectedIds(new Set());
                           }}
-                          options={[1, 5, 10, 20, 50, 100].map((n) => ({ value: String(n), label: String(n) }))}
+                          options={[1, 5, 10, 20, 50, 100, 200, 300, 400, 500].map((n) => ({
+                            value: String(n),
+                            label: String(n),
+                          }))}
                           className="bg-white"
                         />
                       </div>
                     </div>
                     <div className="flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 p-1">
                       <div className="px-2 text-xs font-medium text-emerald-900">
-                        Copy JSON ({rows.length})
+                        Copy JSON ({copyCountLabel})
                       </div>
                       <div className="flex items-center gap-2">
                         <Select
@@ -2275,8 +2530,8 @@ export default function Page() {
                         />
                         {copyScope === "limit" ? (
                           <input
-                            value={String(copyLimit)}
-                            onChange={(e) => setCopyLimit(Number(e.target.value))}
+                            value={copyLimitText}
+                            onChange={(e) => setCopyLimitText(e.target.value)}
                             inputMode="numeric"
                             className="h-8 w-20 rounded-md border border-emerald-200 bg-white px-2 text-xs text-emerald-900"
                             placeholder="N"
@@ -2289,7 +2544,7 @@ export default function Page() {
                           size="icon"
                           variant="outline"
                           onClick={() => copyVisibleJson({ compact: false })}
-                          disabled={!rows.length || copyBusy}
+                          disabled={!rows.length || copyBusy || (copyScope === "limit" && copyLimit === null)}
                           title="Copy pretty JSON"
                           className="!border-emerald-200 !bg-emerald-50 !text-emerald-900 hover:!bg-emerald-100"
                         >
@@ -2299,7 +2554,7 @@ export default function Page() {
                           size="icon"
                           variant="outline"
                           onClick={() => copyVisibleJson({ compact: true })}
-                          disabled={!rows.length || copyBusy}
+                          disabled={!rows.length || copyBusy || (copyScope === "limit" && copyLimit === null)}
                           title="Copy compact JSON"
                           className="!border-emerald-200 !bg-emerald-50 !text-emerald-900 hover:!bg-emerald-100"
                         >
@@ -2463,16 +2718,16 @@ export default function Page() {
 	                                "inline-flex items-center gap-1 rounded px-1 py-0.5 hover:bg-neutral-100",
 	                                isSorted && "bg-neutral-100",
 	                              )}
-	                              onClick={() => {
-	                                setDraftSort((prev) => {
-	                                  if (!prev || prev.field !== c) return { field: c, dir: "asc" };
-	                                  if (prev.dir === "asc") return { field: c, dir: "desc" };
-	                                  return undefined;
-	                                });
-	                                setPage(1);
-	                              }}
-	                              title="Sort"
-	                            >
+                              onClick={() => {
+                                const nextSort = (() => {
+                                  if (!draftSort || draftSort.field !== c) return { field: c, dir: "asc" } as const;
+                                  if (draftSort.dir === "asc") return { field: c, dir: "desc" } as const;
+                                  return undefined;
+                                })();
+                                applySort(nextSort);
+                              }}
+                              title="Sort"
+                            >
 	                              <span>{c}</span>
 	                              {isSorted ? (
 	                                <Icon name={draftSort?.dir === "asc" ? "arrowUp" : "arrowDown"} className="h-3.5 w-3.5 opacity-70" />

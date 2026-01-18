@@ -31,8 +31,6 @@ type PictureWordInput = {
     | "sport";
   usage: "Job" | "adj" | "person" | "free" | "notSet";
   canBePersonal: boolean;
-  canImagineAsHuman: boolean;
-  canUseAsHumanAdj: boolean;
   ipaVerified: boolean;
 };
 
@@ -151,8 +149,6 @@ function toPictureWordInput(value: unknown): PictureWordInput | null {
   if (usageRaw && !usage) return null;
   const ipaVerified = Boolean(obj.ipaVerified);
   const canBePersonal = parseCanBePersonal(obj.canBePersonal);
-  const canImagineAsHuman = parseCanBePersonal(obj.canImagineAsHuman);
-  const canUseAsHumanAdj = parseCanBePersonal(obj.canUseAsHumanAdj);
 
   if (!fa || !ipa_fa || !phinglish || !en) return null;
   return {
@@ -163,8 +159,6 @@ function toPictureWordInput(value: unknown): PictureWordInput | null {
     type: (type || "noun") as PictureWordInput["type"],
     usage: (usage || "notSet") as PictureWordInput["usage"],
     canBePersonal,
-    canImagineAsHuman,
-    canUseAsHumanAdj,
     ipaVerified,
   };
 }
@@ -235,10 +229,6 @@ function toPictureWordUpdate(value: unknown): PictureWordUpdate | null {
 
   const hasCanBePersonal = Object.prototype.hasOwnProperty.call(obj, "canBePersonal");
   const canBePersonal = hasCanBePersonal ? parseCanBePersonal(obj.canBePersonal) : undefined;
-  const hasCanImagineAsHuman = Object.prototype.hasOwnProperty.call(obj, "canImagineAsHuman");
-  const canImagineAsHuman = hasCanImagineAsHuman ? parseCanBePersonal(obj.canImagineAsHuman) : undefined;
-  const hasCanUseAsHumanAdj = Object.prototype.hasOwnProperty.call(obj, "canUseAsHumanAdj");
-  const canUseAsHumanAdj = hasCanUseAsHumanAdj ? parseCanBePersonal(obj.canUseAsHumanAdj) : undefined;
   const ipaVerified = typeof obj.ipaVerified === "boolean" ? obj.ipaVerified : undefined;
 
   const data: Partial<PictureWordInput> = {};
@@ -249,8 +239,6 @@ function toPictureWordUpdate(value: unknown): PictureWordUpdate | null {
   if (type) data.type = type;
   if (usage) data.usage = usage;
   if (typeof canBePersonal === "boolean") data.canBePersonal = canBePersonal;
-  if (typeof canImagineAsHuman === "boolean") data.canImagineAsHuman = canImagineAsHuman;
-  if (typeof canUseAsHumanAdj === "boolean") data.canUseAsHumanAdj = canUseAsHumanAdj;
   if (typeof ipaVerified === "boolean") data.ipaVerified = ipaVerified;
 
   if (Object.keys(data).length === 0) return null;
@@ -285,8 +273,6 @@ function parseUpdateFields(value: unknown): PictureWordUpdateField[] | null {
     "type",
     "usage",
     "canBePersonal",
-    "canImagineAsHuman",
-    "canUseAsHumanAdj",
     "ipaVerified",
   ];
   const allowedSet = new Set(allowed);
@@ -305,6 +291,8 @@ function validatePictureWordInput(row: PictureWordInput): string | null {
   if (hasPersianLetters(row.ipa_fa)) return "ipa_fa must not contain Persian letters";
   if (hasPersianLetters(row.phinglish)) return "phinglish must not contain Persian letters";
   if (hasPersianLetters(row.en)) return "en must not contain Persian letters";
+  if (row.canBePersonal && row.usage !== "person")
+    return "When canBePersonal is true, usage must be person";
   return null;
 }
 
@@ -342,6 +330,8 @@ function validateUpdate(update: PictureWordUpdate): string | null {
   if (data.ipa_fa && hasPersianLetters(data.ipa_fa)) return "ipa_fa must not contain Persian letters";
   if (data.phinglish && hasPersianLetters(data.phinglish)) return "phinglish must not contain Persian letters";
   if (data.en && hasPersianLetters(data.en)) return "en must not contain Persian letters";
+  if (data.canBePersonal === true && data.usage && data.usage !== "person")
+    return "When canBePersonal is true, usage must be person";
   return null;
 }
 
@@ -357,8 +347,6 @@ export async function GET() {
       type: true,
       usage: true,
       canBePersonal: true,
-      canImagineAsHuman: true,
-      canUseAsHumanAdj: true,
       ipaVerified: true,
     },
   });
@@ -389,6 +377,9 @@ export async function POST(request: Request) {
       if (!Object.keys(data).length) {
         return NextResponse.json({ error: "No selected fields to update" }, { status: 400 });
       }
+      if (data.canBePersonal === true) {
+        data.usage = "person";
+      }
       const finalUpdate: PictureWordUpdate = { id: asUpdate.id, data };
       const validationError = validateUpdate(asUpdate);
       if (validationError) {
@@ -413,8 +404,6 @@ export async function POST(request: Request) {
             en: true,
             type: true,
             canBePersonal: true,
-            canImagineAsHuman: true,
-            canUseAsHumanAdj: true,
             usage: true,
             ipaVerified: true,
           },
@@ -448,6 +437,14 @@ export async function POST(request: Request) {
     }
 
 	    try {
+      const duplicateFa = await prisma.pictureWord.findFirst({
+        where: { fa: row.fa },
+        select: { id: true },
+      });
+      if (duplicateFa) {
+        return NextResponse.json({ error: "Duplicate fa" }, { status: 409 });
+      }
+
       const created = await prisma.pictureWord.create({
         data: { ...row, ipa_fa_normalized: computeNormalized(row.ipa_fa) },
         select: {
@@ -458,8 +455,6 @@ export async function POST(request: Request) {
           en: true,
           type: true,
           canBePersonal: true,
-          canImagineAsHuman: true,
-          canUseAsHumanAdj: true,
           usage: true,
           ipaVerified: true,
         },
@@ -475,11 +470,13 @@ export async function POST(request: Request) {
   }
 
   const rows: Array<PictureWordInput & { ipa_fa_normalized: string }> = [];
+  const rowItems: unknown[] = [];
   const updatesById: Array<PictureWordUpdate & { providedFa?: string }> = [];
   let skipped = 0;
   let unchanged = 0;
   let updated = 0;
   const rejected: RejectedRow[] = [];
+  const seenFaInPayload = new Set<string>();
   for (const item of body) {
     const update = toPictureWordUpdate(item);
     if (update) {
@@ -505,6 +502,11 @@ export async function POST(request: Request) {
         rejected.push({ item, reason: validationError });
         continue;
       }
+
+      if (candidate.data.canBePersonal === true) {
+        candidate.data.usage = "person";
+      }
+
       updatesById.push({ ...candidate, providedFa });
       continue;
     }
@@ -527,7 +529,49 @@ export async function POST(request: Request) {
       rejected.push({ item, reason: validationError });
       continue;
     }
+
+    // Prevent duplicate fa within the same import payload.
+    if (seenFaInPayload.has(row.fa)) {
+      skipped += 1;
+      rejected.push({ item, reason: "Duplicate fa (in import payload)" });
+      continue;
+    }
+    seenFaInPayload.add(row.fa);
+
     rows.push({ ...row, ipa_fa_normalized: computeNormalized(row.ipa_fa) });
+    rowItems.push(item);
+  }
+
+  // Prevent inserting rows whose `fa` already exists in DB (regardless of `en`).
+  if (rows.length > 0) {
+    const uniqueFa = Array.from(new Set(rows.map((r) => r.fa)));
+    const existing = await prisma.pictureWord.findMany({
+      where: { fa: { in: uniqueFa } },
+      select: { fa: true },
+    });
+    const existingFa = new Set(existing.map((r) => normalizeFa(r.fa)));
+
+    if (existingFa.size > 0) {
+      const keptRows: Array<PictureWordInput & { ipa_fa_normalized: string }> = [];
+      const keptItems: unknown[] = [];
+      for (let i = 0; i < rows.length; i += 1) {
+        const r = rows[i]!;
+        if (existingFa.has(r.fa)) {
+          skipped += 1;
+          rejected.push({
+            item: rowItems[i],
+            reason: "Duplicate fa (already exists)",
+          });
+          continue;
+        }
+        keptRows.push(r);
+        keptItems.push(rowItems[i]);
+      }
+      rows.length = 0;
+      rows.push(...keptRows);
+      rowItems.length = 0;
+      rowItems.push(...keptItems);
+    }
   }
 
   for (const update of updatesById) {
@@ -557,8 +601,6 @@ export async function POST(request: Request) {
 	          fa: true,
 	          ipa_fa: true,
 	          canBePersonal: true,
-            canImagineAsHuman: true,
-            canUseAsHumanAdj: true,
 	          phinglish: true,
 	          en: true,
 	          type: true,
@@ -574,8 +616,6 @@ export async function POST(request: Request) {
         (update.data.fa !== undefined && update.data.fa !== existing.fa) ||
         (update.data.ipa_fa !== undefined && update.data.ipa_fa !== existing.ipa_fa) ||
         (update.data.canBePersonal !== undefined && update.data.canBePersonal !== existing.canBePersonal) ||
-        (update.data.canImagineAsHuman !== undefined && update.data.canImagineAsHuman !== existing.canImagineAsHuman) ||
-        (update.data.canUseAsHumanAdj !== undefined && update.data.canUseAsHumanAdj !== existing.canUseAsHumanAdj) ||
 	        (update.data.phinglish !== undefined && update.data.phinglish !== existing.phinglish) ||
 	        (update.data.en !== undefined && update.data.en !== existing.en) ||
 	        (update.data.type !== undefined && update.data.type !== existing.type) ||
@@ -668,6 +708,26 @@ export async function PATCH(request: Request) {
   const fa = faRaw ? normalizeFa(faRaw) : undefined;
   const ipa_fa = normalizeOptionalString(obj?.ipa_fa);
   const phinglish = normalizeOptionalString(obj?.phinglish);
+  const en = normalizeOptionalString(obj?.en);
+  const usageRaw = normalizeOptionalString(obj?.usage)?.toLowerCase();
+  const usage =
+    usageRaw === "job"
+      ? "Job"
+      : usageRaw === "adj"
+        ? "adj"
+        : usageRaw === "person"
+          ? "person"
+          : usageRaw === "free"
+            ? "free"
+            : usageRaw === "notset"
+              ? "notSet"
+              : undefined;
+  if (usageRaw && !usage) {
+    return NextResponse.json(
+      { error: "usage must be one of: Job, adj, person, free, notSet" },
+      { status: 400 },
+    );
+  }
   const hasCanBePersonal = Object.prototype.hasOwnProperty.call(
     obj ?? {},
     "canBePersonal",
@@ -675,23 +735,9 @@ export async function PATCH(request: Request) {
   const canBePersonal = hasCanBePersonal
     ? parseCanBePersonal(obj?.canBePersonal)
     : undefined;
-  const hasCanImagineAsHuman = Object.prototype.hasOwnProperty.call(
-    obj ?? {},
-    "canImagineAsHuman",
-  );
-  const canImagineAsHuman = hasCanImagineAsHuman
-    ? parseCanBePersonal(obj?.canImagineAsHuman)
-    : undefined;
-  const hasCanUseAsHumanAdj = Object.prototype.hasOwnProperty.call(
-    obj ?? {},
-    "canUseAsHumanAdj",
-  );
-  const canUseAsHumanAdj = hasCanUseAsHumanAdj
-    ? parseCanBePersonal(obj?.canUseAsHumanAdj)
-    : undefined;
 
-  const isVerifying = Boolean(ipa_fa || phinglish);
-  if (isVerifying && (!ipa_fa || !phinglish)) {
+  const isUpdatingIpa = Boolean(ipa_fa || phinglish);
+  if (isUpdatingIpa && (!ipa_fa || !phinglish)) {
     return NextResponse.json(
       { error: "When updating IPA, both `ipa_fa` and `phinglish` are required" },
       { status: 400 },
@@ -702,43 +748,68 @@ export async function PATCH(request: Request) {
     !fa &&
     !ipa_fa &&
     !phinglish &&
-    typeof canBePersonal !== "boolean" &&
-    typeof canImagineAsHuman !== "boolean" &&
-    typeof canUseAsHumanAdj !== "boolean"
+    !en &&
+    !usage &&
+    typeof canBePersonal !== "boolean"
   ) {
     return NextResponse.json({ error: "No fields to update" }, { status: 400 });
   }
 
+  if (en && hasPersianLetters(en)) {
+    return NextResponse.json(
+      { error: "en must not contain Persian letters" },
+      { status: 400 },
+    );
+  }
+
   const data: Record<string, unknown> = {};
   if (fa) data.fa = fa;
+  if (usage) data.usage = usage;
   if (typeof canBePersonal === "boolean") data.canBePersonal = canBePersonal;
-  if (typeof canImagineAsHuman === "boolean")
-    data.canImagineAsHuman = canImagineAsHuman;
-  if (typeof canUseAsHumanAdj === "boolean")
-    data.canUseAsHumanAdj = canUseAsHumanAdj;
+  if (en) data.en = en;
   if (ipa_fa) {
     data.ipa_fa = ipa_fa;
     data.ipa_fa_normalized = computeNormalized(ipa_fa);
   }
   if (phinglish) data.phinglish = phinglish;
-  if (isVerifying) data.ipaVerified = true;
+  data.ipaVerified = true;
 
-  const updated = await prisma.pictureWord.update({
-    where: { id },
-    data,
-    select: {
-      id: true,
-      fa: true,
-      ipa_fa: true,
-      phinglish: true,
-      en: true,
-      type: true,
-      canBePersonal: true,
-      canImagineAsHuman: true,
-      canUseAsHumanAdj: true,
-      ipaVerified: true,
-    },
-  });
+  if (canBePersonal === true) {
+    if (usage && usage !== "person") {
+      return NextResponse.json(
+        { error: "When canBePersonal is true, usage must be person" },
+        { status: 400 },
+      );
+    }
+    data.usage = "person";
+  }
 
-  return NextResponse.json({ row: updated });
+  try {
+    const updated = await prisma.pictureWord.update({
+      where: { id },
+      data,
+      select: {
+        id: true,
+        fa: true,
+        ipa_fa: true,
+        phinglish: true,
+        en: true,
+        type: true,
+        usage: true,
+        canBePersonal: true,
+        ipaVerified: true,
+      },
+    });
+
+    return NextResponse.json({ row: updated });
+  } catch (error) {
+    const code = (error as { code?: string } | null)?.code;
+    if (code === "P2025") {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+    if (code === "P2002") {
+      return NextResponse.json({ error: "Duplicate (fa + en)" }, { status: 409 });
+    }
+    throw error;
+  }
 }

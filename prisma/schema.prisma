@@ -7,6 +7,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum UserStatus {
+  active
+  suspended
+  banned
+}
+
 model Theme {
   id        Int      @id @default(autoincrement())
   slug      String   @unique
@@ -46,14 +52,6 @@ enum PictureWordUsage {
   notSet
 }
 
-model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  name      String?
-  password  String
-  createdAt DateTime @default(now())
-}
-
 model Word {
   id                               Int      @id @default(autoincrement())
   anki_link_id                     String   @unique
@@ -68,18 +66,22 @@ model Word {
   concept_explained_fa             String?
   word_hint_story                  String?
   sentence_en                      String
-  example_meaning_fa               String?
+  sentence_en_meaning_fa           String?
   explanation_for_sentence_meaning String?
   learning_depth                   Float?
   mixed_sentence                   String?
+  other_meanings_fa                String?
   category                         String?
   typeOfWordInDb                   String   @default("temp")
   hint_sentence                    String?
   first_letter_en_hint             String?
   first_letter_fa_hint             String?
   hint_to_select                   String?
+  json_hint                        String?
   word_note                        String?
   common_error                     String?
+  /// Score 0-100: how imageable/visual the word is (default 10).
+  imageability                     Int      @default(10)
   createdAt                        DateTime @default(now())
   updatedAt                        DateTime @updatedAt
 
@@ -110,8 +112,6 @@ model PictureWord {
   type        PictureWordType @default(noun)
   usage       PictureWordUsage @default(notSet)
   canBePersonal Boolean       @default(false)
-  canImagineAsHuman Boolean   @default(false)
-  canUseAsHumanAdj Boolean    @default(false)
   ipaVerified Boolean         @default(false)
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
@@ -119,4 +119,116 @@ model PictureWord {
   @@unique([fa, en])
   @@index([fa])
   @@index([en])
+}
+
+model User {
+  id             String       @id @default(cuid())
+  name           String?
+  email          String       @unique
+  emailVerified  DateTime?
+  image          String?
+  hashedPassword String?
+  status         UserStatus   @default(active)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  accounts       Account[]
+  sessions       Session[]
+  roles          UserRole[]
+  passwordResets PasswordResetToken[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Role {
+  id          String           @id @default(cuid())
+  name        String           @unique
+  description String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  users       UserRole[]
+  permissions RolePermission[]
+}
+
+model Permission {
+  id          String           @id @default(cuid())
+  name        String           @unique
+  description String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  roles       RolePermission[]
+}
+
+model UserRole {
+  userId String
+  roleId String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
+  @@index([roleId])
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@index([permissionId])
 }

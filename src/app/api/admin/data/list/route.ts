@@ -209,6 +209,20 @@ function sqlForFilters(
   return { whereSql, values };
 }
 
+function stripLeadingWhere(sql: string) {
+  return sql.trim().replace(/^where\\s+/i, "").trim();
+}
+
+function assertSafeSqlWhere(where: string) {
+  const w = where.trim();
+  if (!w) return;
+  if (w.includes(";")) throw new Error("SQL WHERE must not include semicolons.");
+  if (/--|\/\*/.test(w)) throw new Error("SQL comments are not allowed.");
+  if (/\\b(insert|update|delete|drop|alter|create|truncate|grant|revoke)\\b/i.test(w)) {
+    throw new Error("Only WHERE-style expressions are allowed.");
+  }
+}
+
 export async function POST(req: Request) {
   const body = (await req.json()) as ListParams;
   const model = body?.model;
@@ -236,6 +250,7 @@ export async function POST(req: Request) {
   );
   const wantsCrossTable = (body.filters ?? []).some((f) => f?.op === "existsIn" || f?.op === "notExistsIn");
   const requestedCols = Array.from(new Set([primaryKey, ...(body.visibleColumns ?? [])])).filter(Boolean);
+  const wantsRawWhere = typeof body.sqlWhere === "string" && body.sqlWhere.trim().length > 0;
 
   // If the client wants length filtering OR requests columns not present in Prisma client,
   // fallback to raw SQL so the admin UI stays usable after schema changes.
@@ -243,7 +258,7 @@ export async function POST(req: Request) {
   const dmmfFields = new Set((dmmfModel?.fields ?? []).map((f) => f.name));
   const hasUnknownCols = requestedCols.some((c) => !dmmfFields.has(c));
 
-  if (wantsLength || hasUnknownCols || wantsWildcard || wantsCrossTable) {
+  if (wantsLength || hasUnknownCols || wantsWildcard || wantsCrossTable || wantsRawWhere) {
     try {
       const dbCols = await getDbColumns(model);
       const allowedCols = new Set(dbCols);
@@ -264,37 +279,45 @@ export async function POST(req: Request) {
         }
       }
 
-    const selectCols = requestedCols.filter((c) => allowedCols.has(c));
-    const sortField = body.sort?.field && allowedCols.has(body.sort.field) ? body.sort.field : null;
-    const sortDir = body.sort?.dir === "desc" ? "DESC" : "ASC";
+      const selectCols = requestedCols.filter((c) => allowedCols.has(c));
+      const sortField = body.sort?.field && allowedCols.has(body.sort.field) ? body.sort.field : null;
+      const sortDir = body.sort?.dir === "desc" ? "DESC" : "ASC";
 
-    const { whereSql, values } = sqlForFilters(body, searchableFields, allowedColsByModel);
-    const orderBySql = sortField ? `ORDER BY \`${sortField}\` ${sortDir}` : "";
+      let { whereSql, values } = sqlForFilters(body, searchableFields, allowedColsByModel);
+      const sqlParams = Array.isArray(body.sqlParams) ? body.sqlParams : [];
+      if (wantsRawWhere) {
+        const raw = stripLeadingWhere(body.sqlWhere ?? "");
+        assertSafeSqlWhere(raw);
+        whereSql = whereSql ? `${whereSql} AND (${raw})` : `WHERE (${raw})`;
+      }
+      const orderBySql = sortField ? `ORDER BY \`${sortField}\` ${sortDir}` : "";
 
-    const rows = (await prisma.$queryRawUnsafe(
-      `
-        SELECT ${selectCols.map((c) => `\`${c}\``).join(", ")}
-        FROM \`${model}\`
-        ${whereSql}
-        ${orderBySql}
-        LIMIT ? OFFSET ?
-      `,
-      ...values,
-      take,
-      skip,
-    )) as unknown[];
+      const rows = (await prisma.$queryRawUnsafe(
+        `
+          SELECT ${selectCols.map((c) => `\`${c}\``).join(", ")}
+          FROM \`${model}\`
+          ${whereSql}
+          ${orderBySql}
+          LIMIT ? OFFSET ?
+        `,
+        ...values,
+        ...sqlParams,
+        take,
+        skip,
+      )) as unknown[];
 
-    const totalRes = (await prisma.$queryRawUnsafe(
-      `
-        SELECT COUNT(*) as cnt
-        FROM \`${model}\`
-        ${whereSql}
-      `,
-      ...values,
-    )) as Array<{ cnt: number }>;
+      const totalRes = (await prisma.$queryRawUnsafe(
+        `
+          SELECT COUNT(*) as cnt
+          FROM \`${model}\`
+          ${whereSql}
+        `,
+        ...values,
+        ...sqlParams,
+      )) as Array<{ cnt: number }>;
 
-    const total = Number(totalRes?.[0]?.cnt ?? 0);
-    return NextResponse.json({ rows, total });
+      const total = Number(totalRes?.[0]?.cnt ?? 0);
+      return NextResponse.json({ rows, total });
     } catch (e) {
       return NextResponse.json({ error: e instanceof Error ? e.message : String(e) }, { status: 400 });
     }
@@ -332,7 +355,13 @@ export async function POST(req: Request) {
     const sortField = body.sort?.field && allowedCols.has(body.sort.field) ? body.sort.field : null;
     const sortDir = body.sort?.dir === "desc" ? "DESC" : "ASC";
 
-    const { whereSql, values } = sqlForFilters(body, searchableFields, allowedColsByModel);
+    let { whereSql, values } = sqlForFilters(body, searchableFields, allowedColsByModel);
+    const sqlParams = Array.isArray(body.sqlParams) ? body.sqlParams : [];
+    if (wantsRawWhere) {
+      const raw = stripLeadingWhere(body.sqlWhere ?? "");
+      assertSafeSqlWhere(raw);
+      whereSql = whereSql ? `${whereSql} AND (${raw})` : `WHERE (${raw})`;
+    }
     const orderBySql = sortField ? `ORDER BY \`${sortField}\` ${sortDir}` : "";
 
     const rows = (await prisma.$queryRawUnsafe(
@@ -344,6 +373,7 @@ export async function POST(req: Request) {
         LIMIT ? OFFSET ?
       `,
       ...values,
+      ...sqlParams,
       take,
       skip,
     )) as unknown[];
@@ -355,6 +385,7 @@ export async function POST(req: Request) {
         ${whereSql}
       `,
       ...values,
+      ...sqlParams,
     )) as Array<{ cnt: number }>;
 
     const total = Number(totalRes?.[0]?.cnt ?? 0);

@@ -6,7 +6,15 @@ const { PrismaClient } = require("@prisma/client");
 
 const prisma = new PrismaClient();
 const CHUNK_SIZE = 300;
-const backupPath = path.join(__dirname, "..", "dbBackupToWork", "database_backup.archive");
+const defaultBackupPath = path.join(
+  __dirname,
+  "..",
+  "dbBackupToWork",
+  "database_backup.archive"
+);
+const backupPath = process.argv[2]
+  ? path.resolve(process.argv[2])
+  : defaultBackupPath;
 
 function chunk(array, size) {
   const result = [];
@@ -22,6 +30,32 @@ function withDates(rows) {
     createdAt: row.createdAt ? new Date(row.createdAt) : undefined,
     updatedAt: row.updatedAt ? new Date(row.updatedAt) : undefined,
   }));
+}
+
+function pickKeys(row, allowedKeys) {
+  const out = {};
+  for (const k of allowedKeys) {
+    if (Object.prototype.hasOwnProperty.call(row, k)) out[k] = row[k];
+  }
+  return out;
+}
+
+function sanitizePictureWord(rows) {
+  const allowed = [
+    "id",
+    "fa",
+    "ipa_fa",
+    "ipa_fa_normalized",
+    "phinglish",
+    "en",
+    "type",
+    "usage",
+    "canBePersonal",
+    "ipaVerified",
+    "createdAt",
+    "updatedAt",
+  ];
+  return rows.map((r) => pickKeys(r, allowed));
 }
 
 async function createMany(label, rows, create) {
@@ -59,8 +93,10 @@ async function main() {
     prisma.ipaKeyword.createMany({ data: rows, skipDuplicates: true })
   );
 
-  await createMany("PictureWord", withDates(data.pictureWord ?? []), (rows) =>
-    prisma.pictureWord.createMany({ data: rows, skipDuplicates: true })
+  await createMany(
+    "PictureWord",
+    sanitizePictureWord(withDates(data.pictureWord ?? [])),
+    (rows) => prisma.pictureWord.createMany({ data: rows, skipDuplicates: true })
   );
 
   await createMany("Word", withDates(data.word ?? []), (rows) =>
