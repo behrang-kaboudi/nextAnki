@@ -9,6 +9,5 @@ export type SetFor2Result = {
   person?: FaEn;
   job?: FaEn;
   adj?: FaEn;
-  persian?: FaEn;
   persianImage?: FaEn | null;
 };
