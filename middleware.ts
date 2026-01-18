@@ -1,7 +1,12 @@
-export { auth as middleware } from "@/auth"
-
 export const config = {
   matcher: [
-    "/((?!api/ipa/keyword|ipa-test|_next/static|_next/image|favicon.ico).*)",
+    "/((?!api/auth|api/ipa/keyword|ipa-test|_next/static|_next/image|favicon.ico).*)",
   ],
 };
+
+import { NextResponse } from "next/server";
+
+export default function middleware() {
+  // Auth is currently disabled: allow all routes for all users.
+  return NextResponse.next();
+}

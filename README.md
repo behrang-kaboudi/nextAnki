@@ -16,6 +16,27 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+## Authentication (NextAuth + Prisma)
+
+- Copy `.env.example` to `.env.local` and fill in:
+  - `DATABASE_URL`
+  - `AUTH_SECRET`
+  - `NEXTAUTH_URL`
+  - OAuth credentials to enable provider buttons (Google / Microsoft / GitHub)
+  - SMTP settings to enable magic-link login
+- Run Prisma migrations:
+  - `npx prisma migrate dev` (or `npx prisma db push` for local dev)
+
+### OAuth callback URLs (dev)
+
+- Google: `http://localhost:3000/api/auth/callback/google`
+- Microsoft Entra ID: `http://localhost:3000/api/auth/callback/microsoft-entra-id`
+- GitHub: `http://localhost:3000/api/auth/callback/github`
+
+### Magic link email
+
+In dev, emails are logged unless you wire a real provider in `src/lib/auth/emailSender.ts`.
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.

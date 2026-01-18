@@ -19,7 +19,7 @@ function addReplaceMents(preCollection: string[], toChange = "") {
   preCollection.push(toChange.replace("o", "ʊ"));
   preCollection.push(toChange.replace("ʊ", "o"));
   preCollection.push(toChange.replace("æ", "ʌ"));
-  preCollection.push(toChange.replace("ʌ", "ʌ"));
+  preCollection.push(toChange.replace("ʌ", "æ"));
 }
 // function addReplaceMentsSecondLoosly(preCollection: string[], toChange = "") {
 //   if (!toChange) toChange = preCollection[0];

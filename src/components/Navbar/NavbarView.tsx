@@ -2,11 +2,14 @@ import Link from "next/link";
 
 import { navbarStyles } from "./styles";
 import type { ThemeLayout } from "@/lib/theme/defaultThemes";
+import { MenuIcon } from "@/components/icons";
+import { NavAuthWidget } from "@/components/auth/NavAuthWidget";
 
 export type NavbarItem = {
   label: string;
   href?: string;
   children?: NavbarItem[];
+  icon?: Parameters<typeof MenuIcon>[0]["name"];
 };
 
 type NavbarViewProps = {
@@ -68,7 +71,10 @@ function SidebarNavItems({
           return (
             <details key={item.label} className={navbarStyles.navGroup}>
               <summary className={navbarStyles.navGroupSummary} onClick={closeSiblingDetails}>
-                <span>{item.label}</span>
+                <span className="flex items-center gap-2">
+                  {item.icon ? <MenuIcon name={item.icon} className="size-5 opacity-80" /> : null}
+                  <span>{item.label}</span>
+                </span>
                 <ChevronDownIcon className={navbarStyles.navGroupChevron} />
               </summary>
               <div className={navbarStyles.subnav}>
@@ -82,7 +88,12 @@ function SidebarNavItems({
                     }}
                     className={navbarStyles.subnavLink}
                   >
-                    {child.label}
+                    <span className="flex items-center gap-2">
+                      {child.icon ? (
+                        <MenuIcon name={child.icon} className="size-4 opacity-70" />
+                      ) : null}
+                      <span>{child.label}</span>
+                    </span>
                   </Link>
                 ))}
               </div>
@@ -100,7 +111,10 @@ function SidebarNavItems({
             }}
             className={navbarStyles.navLink}
           >
-            {item.label}
+            <span className="flex items-center gap-2">
+              {item.icon ? <MenuIcon name={item.icon} className="size-5 opacity-80" /> : null}
+              <span>{item.label}</span>
+            </span>
           </Link>
         );
       })}
@@ -141,7 +155,10 @@ function TopbarNavItems({
           return (
             <details key={item.label} className={navbarStyles.topbarGroup}>
               <summary className={navbarStyles.topbarGroupSummary} onClick={closeSiblingDetails}>
-                <span>{item.label}</span>
+                <span className="flex items-center gap-2">
+                  {item.icon ? <MenuIcon name={item.icon} className="size-5 opacity-80" /> : null}
+                  <span>{item.label}</span>
+                </span>
                 <ChevronDownIcon className={navbarStyles.navGroupChevron} />
               </summary>
               <div className={navbarStyles.topbarDropdown}>
@@ -155,7 +172,12 @@ function TopbarNavItems({
                     }}
                     className={navbarStyles.topbarDropdownLink}
                   >
-                    {child.label}
+                    <span className="flex items-center gap-2">
+                      {child.icon ? (
+                        <MenuIcon name={child.icon} className="size-4 opacity-70" />
+                      ) : null}
+                      <span>{child.label}</span>
+                    </span>
                   </Link>
                 ))}
               </div>
@@ -173,7 +195,10 @@ function TopbarNavItems({
             }}
             className={navbarStyles.topbarLink}
           >
-            {item.label}
+            <span className="flex items-center gap-2">
+              {item.icon ? <MenuIcon name={item.icon} className="size-5 opacity-80" /> : null}
+              <span>{item.label}</span>
+            </span>
           </Link>
         );
       })}
@@ -229,9 +254,7 @@ export function NavbarView({
             </nav>
 
             <div className={navbarStyles.sidebarFooter}>
-              <Link href="/connect" className={navbarStyles.primaryAction}>
-                Connect Anki
-              </Link>
+              <NavAuthWidget variant="primary" />
               <div className={navbarStyles.sidebarHint}>
                 Runs locally against AnkiConnect
               </div>
@@ -250,13 +273,7 @@ export function NavbarView({
             >
               <nav className={navbarStyles.mobileMenuNav}>
                 <SidebarNavItems items={navItems} onNavigate={onMobileMenuClose} />
-                <Link
-                  href="/connect"
-                  onClick={onMobileMenuClose}
-                  className={navbarStyles.mobileMenuPrimaryAction}
-                >
-                  Connect Anki
-                </Link>
+                <NavAuthWidget variant="mobile" onNavigate={onMobileMenuClose} />
               </nav>
             </div>
           </div>
@@ -294,9 +311,7 @@ export function NavbarView({
             </button>
 
             <div className={navbarStyles.topbarActions}>
-              <Link href="/connect" className={navbarStyles.primaryAction}>
-                Connect
-              </Link>
+              <NavAuthWidget variant="primary" />
             </div>
           </div>
         </header>
@@ -312,13 +327,7 @@ export function NavbarView({
             >
               <nav className={navbarStyles.mobileMenuNav}>
                 <SidebarNavItems items={navItems} onNavigate={onMobileMenuClose} />
-                <Link
-                  href="/connect"
-                  onClick={onMobileMenuClose}
-                  className={navbarStyles.mobileMenuPrimaryAction}
-                >
-                  Connect
-                </Link>
+                <NavAuthWidget variant="mobile" onNavigate={onMobileMenuClose} />
               </nav>
             </div>
           </div>
@@ -355,9 +364,7 @@ export function NavbarView({
           </button>
 
           <div className={navbarStyles.topbarActions}>
-            <Link href="/connect" className={navbarStyles.primaryAction}>
-              Connect
-            </Link>
+            <NavAuthWidget variant="primary" />
           </div>
         </div>
       </header>
@@ -370,13 +377,7 @@ export function NavbarView({
           >
             <nav className={navbarStyles.mobileMenuNav}>
               <SidebarNavItems items={navItems} onNavigate={onMobileMenuClose} />
-              <Link
-                href="/connect"
-                onClick={onMobileMenuClose}
-                className={navbarStyles.mobileMenuPrimaryAction}
-              >
-                Connect
-              </Link>
+              <NavAuthWidget variant="mobile" onNavigate={onMobileMenuClose} />
             </nav>
           </div>
         </div>

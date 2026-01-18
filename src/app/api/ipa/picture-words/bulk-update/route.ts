@@ -8,8 +8,6 @@ const ALLOWED_FIELDS = [
   "type",
   "usage",
   "canBePersonal",
-  "canImagineAsHuman",
-  "canUseAsHumanAdj",
   "ipaVerified",
   "fa",
   "en",
@@ -121,8 +119,6 @@ export async function POST(req: Request) {
       updateData.usage = obj.value;
     } else if (
       field === "canBePersonal" ||
-      field === "canImagineAsHuman" ||
-      field === "canUseAsHumanAdj" ||
       field === "ipaVerified"
     ) {
       const parsed = parseBoolean(obj.value);
