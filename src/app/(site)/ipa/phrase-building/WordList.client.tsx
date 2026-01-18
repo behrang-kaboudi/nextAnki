@@ -7,7 +7,6 @@ type MatchSymbols = {
   person?: FaEn;
   job?: FaEn;
   adj?: FaEn;
-  persian?: FaEn;
   persianImage?: FaEn | null;
 };
 
@@ -29,14 +28,17 @@ function formatMatch(match: MatchSymbols | null | undefined): string {
     parts.push(`job: ${match.job?.fa ?? ""} / ${match.job?.en ?? ""}`.trim());
   if (match.adj?.fa || match.adj?.en)
     parts.push(`adj: ${match.adj?.fa ?? ""} / ${match.adj?.en ?? ""}`.trim());
-  if (match.persian?.fa || match.persian?.en)
-    parts.push(`persian: ${match.persian?.fa ?? ""} / ${match.persian?.en ?? ""}`.trim());
+  if (match.persianImage?.fa || match.persianImage?.en)
+    parts.push(
+      `persianImage: ${match.persianImage?.fa ?? ""} / ${match.persianImage?.en ?? ""}`.trim()
+    );
   return parts.join(" | ");
 }
 
 export function WordListClient() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(50);
+  const [loadAll, setLoadAll] = useState(false);
   const [only2CharPhonetic, setOnly2CharPhonetic] = useState(false);
   const [only3CharPhonetic, setOnly3CharPhonetic] = useState(false);
   const [only4CharPhonetic, setOnly4CharPhonetic] = useState(false);
@@ -44,6 +46,8 @@ export function WordListClient() {
   const [onlyOver6CharPhonetic, setOnlyOver6CharPhonetic] = useState(false);
   const [onlySpaced, setOnlySpaced] = useState(false);
   const [onlyEmptyMatch, setOnlyEmptyMatch] = useState(false);
+  const [onlyNoJob, setOnlyNoJob] = useState(false);
+  const [progress, setProgress] = useState<null | { done: number; total: number }>(null);
   const [sortBy, setSortBy] = useState<
     "base_form" | "phonetic_us_normalized" | "meaning_fa"
   >("base_form");
@@ -70,14 +74,28 @@ export function WordListClient() {
   }, [data?.total, pageSize]);
 
   const clampedPage = Math.min(Math.max(page, 1), totalPages);
+  const shouldLoad =
+    loadAll ||
+    only2CharPhonetic ||
+    only3CharPhonetic ||
+    only4CharPhonetic ||
+    only5CharPhonetic ||
+    onlyOver6CharPhonetic ||
+    onlySpaced ||
+    onlyEmptyMatch ||
+    onlyNoJob;
 
   const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
     try {
+      if (!shouldLoad) return;
+      setLoading(true);
+      setError(null);
+      setProgress(null);
       const res = await fetch(
-        `/api/ipa/phrase-building/words?page=${clampedPage}&pageSize=${pageSize}&includeMatch=1&includeMatchStats=1&sortBy=${sortBy}&sortDir=${sortDir}${
-          only2CharPhonetic
+        `/api/ipa/phrase-building/words?page=${clampedPage}&pageSize=${pageSize}&includeMatch=1&includeMatchStats=1&sortBy=${sortBy}&sortDir=${sortDir}&stream=1${
+          loadAll
+            ? ""
+            : only2CharPhonetic
             ? "&phoneticLen=2"
             : only3CharPhonetic
               ? "&phoneticLen=3"
@@ -88,29 +106,47 @@ export function WordListClient() {
                   : onlyOver6CharPhonetic
                     ? "&phoneticLenGt=6"
                   : ""
-        }${onlySpaced ? "&onlySpaced=1" : ""}${onlyEmptyMatch ? "&onlyEmptyMatch=1" : ""}`,
+        }${!loadAll && onlySpaced ? "&onlySpaced=1" : ""}${!loadAll && onlyEmptyMatch ? "&onlyEmptyMatch=1" : ""}${!loadAll && onlyNoJob ? "&onlyNoJob=1" : ""}`,
         { cache: "no-store" }
       );
-      const json = (await res.json()) as {
-        total: number;
-        rows: WordRow[];
-        matchStats?:
-          | null
-          | {
-              matched: number;
-              empty: number;
-              total: number;
-              noJob: number;
-              jobEnIsJob: number;
-            };
-        error?: string;
-      };
-      if (!res.ok) throw new Error(json.error || `Request failed (${res.status})`);
-      setData({
-        total: json.total ?? 0,
-        rows: json.rows ?? [],
-        matchStats: json.matchStats ?? null,
-      });
+      if (!res.ok) {
+        const msg = await res.text();
+        throw new Error(msg || `Request failed (${res.status})`);
+      }
+
+      const reader = res.body?.getReader();
+      if (!reader) throw new Error("No response body");
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        let idx: number;
+        while ((idx = buffer.indexOf("\n")) !== -1) {
+          const line = buffer.slice(0, idx).trim();
+          buffer = buffer.slice(idx + 1);
+          if (!line) continue;
+          const evt = JSON.parse(line) as
+            | { type: "start"; total: number }
+            | { type: "progress"; done: number; total: number }
+            | { type: "done"; payload: { total: number; rows: WordRow[]; matchStats: null } }
+            | { type: "error"; error: string };
+
+          if (evt.type === "start") setProgress({ done: 0, total: evt.total });
+          if (evt.type === "progress") setProgress({ done: evt.done, total: evt.total });
+          if (evt.type === "error") throw new Error(evt.error);
+          if (evt.type === "done") {
+            setData({
+              total: evt.payload.total ?? 0,
+              rows: evt.payload.rows ?? [],
+              matchStats: null,
+            });
+            setProgress(null);
+          }
+        }
+      }
     } catch (e) {
       setData(null);
       setError(e instanceof Error ? e.message : "Unknown error");
@@ -119,6 +155,7 @@ export function WordListClient() {
     }
   }, [
     clampedPage,
+    loadAll,
     only2CharPhonetic,
     only3CharPhonetic,
     only4CharPhonetic,
@@ -126,14 +163,17 @@ export function WordListClient() {
     onlyOver6CharPhonetic,
     onlySpaced,
     onlyEmptyMatch,
+    onlyNoJob,
     pageSize,
     sortBy,
     sortDir,
+    shouldLoad,
   ]);
 
   useEffect(() => {
+    if (!shouldLoad) return;
     void load();
-  }, [load]);
+  }, [load, shouldLoad]);
 
   useEffect(() => {
     if (page !== clampedPage) setPage(clampedPage);
@@ -150,6 +190,7 @@ export function WordListClient() {
             {data?.matchStats
               ? `${data.matchStats.matched} filled / ${data.matchStats.empty} empty (total)`
               : "—"}
+            {progress ? ` • processing: ${progress.done}/${progress.total}` : ""}
           </div>
           {data?.matchStats ? (
             <div className="text-xs text-muted tabular-nums">
@@ -163,9 +204,34 @@ export function WordListClient() {
           <label className="inline-flex items-center gap-2 rounded-md border border-border/60 bg-background px-3 py-2 text-sm text-foreground">
             <input
               type="checkbox"
+              checked={loadAll}
+              onChange={(e) => {
+                const checked = e.target.checked;
+                setPage(1);
+                setLoadAll(checked);
+                if (checked) {
+                  setOnly2CharPhonetic(false);
+                  setOnly3CharPhonetic(false);
+                  setOnly4CharPhonetic(false);
+                  setOnly5CharPhonetic(false);
+                  setOnlyOver6CharPhonetic(false);
+                  setOnlySpaced(false);
+                  setOnlyEmptyMatch(false);
+                  setOnlyNoJob(false);
+                } else {
+                  setData(null);
+                }
+              }}
+            />
+            <span>Load all</span>
+          </label>
+          <label className="inline-flex items-center gap-2 rounded-md border border-border/60 bg-background px-3 py-2 text-sm text-foreground">
+            <input
+              type="checkbox"
               checked={only2CharPhonetic}
               onChange={(e) => {
                 setPage(1);
+                if (e.target.checked) setLoadAll(false);
                 if (e.target.checked) {
                   setOnly3CharPhonetic(false);
                   setOnly4CharPhonetic(false);
@@ -183,6 +249,7 @@ export function WordListClient() {
               checked={only3CharPhonetic}
               onChange={(e) => {
                 setPage(1);
+                if (e.target.checked) setLoadAll(false);
                 if (e.target.checked) {
                   setOnly2CharPhonetic(false);
                   setOnly4CharPhonetic(false);
@@ -200,6 +267,7 @@ export function WordListClient() {
               checked={only4CharPhonetic}
               onChange={(e) => {
                 setPage(1);
+                if (e.target.checked) setLoadAll(false);
                 if (e.target.checked) {
                   setOnly2CharPhonetic(false);
                   setOnly3CharPhonetic(false);
@@ -217,6 +285,7 @@ export function WordListClient() {
               checked={only5CharPhonetic}
               onChange={(e) => {
                 setPage(1);
+                if (e.target.checked) setLoadAll(false);
                 if (e.target.checked) {
                   setOnly2CharPhonetic(false);
                   setOnly3CharPhonetic(false);
@@ -234,6 +303,7 @@ export function WordListClient() {
               checked={onlyOver6CharPhonetic}
               onChange={(e) => {
                 setPage(1);
+                if (e.target.checked) setLoadAll(false);
                 if (e.target.checked) {
                   setOnly2CharPhonetic(false);
                   setOnly3CharPhonetic(false);
@@ -251,6 +321,7 @@ export function WordListClient() {
               checked={onlySpaced}
               onChange={(e) => {
                 setPage(1);
+                if (e.target.checked) setLoadAll(false);
                 setOnlySpaced(e.target.checked);
               }}
             />
@@ -262,10 +333,25 @@ export function WordListClient() {
               checked={onlyEmptyMatch}
               onChange={(e) => {
                 setPage(1);
+                if (e.target.checked) setOnlyNoJob(false);
+                if (e.target.checked) setLoadAll(false);
                 setOnlyEmptyMatch(e.target.checked);
               }}
             />
             <span>Empty match</span>
+          </label>
+          <label className="inline-flex items-center gap-2 rounded-md border border-border/60 bg-background px-3 py-2 text-sm text-foreground">
+            <input
+              type="checkbox"
+              checked={onlyNoJob}
+              onChange={(e) => {
+                setPage(1);
+                if (e.target.checked) setOnlyEmptyMatch(false);
+                if (e.target.checked) setLoadAll(false);
+                setOnlyNoJob(e.target.checked);
+              }}
+            />
+            <span>No job (job.en=&quot;job&quot;)</span>
           </label>
           <button
             type="button"

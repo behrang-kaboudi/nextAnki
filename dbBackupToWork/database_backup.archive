@@ -1,5 +1,5 @@
 {
-  "createdAt": "2026-01-18T06:25:46.017Z",
+  "createdAt": "2026-01-18T20:04:13.275Z",
   "data": {
     "theme": [
       {
@@ -54683,15 +54683,6 @@
         "updatedAt": "2026-01-02T12:03:57.375Z"
       },
       {
-        "id": 951,
-        "number": 368014,
-        "fa": "اچ دی ام آی کابل",
-        "faPlain": "اچ دی ام آی کابل",
-        "ipa_fa": "/eʧ di em ɒːj kɒː.bl/",
-        "createdAt": "2025-12-31T18:17:33.758Z",
-        "updatedAt": "2026-01-02T12:03:57.376Z"
-      },
-      {
         "id": 952,
         "number": 368015,
         "fa": "ادیتور",
@@ -58246,17 +58237,17 @@
       },
       {
         "id": 249,
-        "fa": "لانه",
-        "ipa_fa": "lɑː.ne",
-        "ipa_fa_normalized": "lʌne",
-        "phinglish": "lane",
-        "en": "nest",
-        "type": "animal",
-        "usage": "person",
+        "fa": "لانه ساز",
+        "ipa_fa": "lɑː.ne sʌz",
+        "ipa_fa_normalized": "lʌne sʌz",
+        "phinglish": "lane saz",
+        "en": "nest maker",
+        "type": "occupation",
+        "usage": "Job",
         "canBePersonal": false,
         "ipaVerified": true,
         "createdAt": "2026-01-02T18:38:26.324Z",
-        "updatedAt": "2026-01-16T20:02:38.759Z"
+        "updatedAt": "2026-01-18T14:59:53.800Z"
       },
       {
         "id": 250,
@@ -67800,11 +67791,11 @@
         "phinglish": "parvaz",
         "en": "flight",
         "type": "noun",
-        "usage": "person",
+        "usage": "free",
         "canBePersonal": true,
         "ipaVerified": true,
         "createdAt": "2026-01-05T14:29:47.551Z",
-        "updatedAt": "2026-01-16T21:15:02.666Z"
+        "updatedAt": "2026-01-18T14:49:25.320Z"
       },
       {
         "id": 1201,
@@ -68164,11 +68155,11 @@
         "phinglish": "catring",
         "en": "catering",
         "type": "food",
-        "usage": "person",
-        "canBePersonal": true,
+        "usage": "Job",
+        "canBePersonal": false,
         "ipaVerified": true,
         "createdAt": "2026-01-05T14:29:47.551Z",
-        "updatedAt": "2026-01-16T21:15:02.666Z"
+        "updatedAt": "2026-01-18T14:57:23.508Z"
       },
       {
         "id": 1229,
@@ -69578,11 +69569,11 @@
         "phinglish": "ekhtar",
         "en": "warning",
         "type": "noun",
-        "usage": "person",
+        "usage": "free",
         "canBePersonal": true,
         "ipaVerified": true,
         "createdAt": "2026-01-05T14:34:44.712Z",
-        "updatedAt": "2026-01-16T21:15:02.666Z"
+        "updatedAt": "2026-01-18T15:00:27.793Z"
       },
       {
         "id": 1338,
@@ -69648,11 +69639,11 @@
         "phinglish": "episode",
         "en": "episode",
         "type": "noun",
-        "usage": "person",
+        "usage": "free",
         "canBePersonal": true,
         "ipaVerified": true,
         "createdAt": "2026-01-05T14:36:11.105Z",
-        "updatedAt": "2026-01-16T21:15:02.666Z"
+        "updatedAt": "2026-01-18T14:50:21.522Z"
       },
       {
         "id": 1343,
@@ -69942,11 +69933,11 @@
         "phinglish": "ezdevaj",
         "en": "marriage",
         "type": "noun",
-        "usage": "person",
+        "usage": "free",
         "canBePersonal": true,
         "ipaVerified": true,
         "createdAt": "2026-01-05T14:42:08.155Z",
-        "updatedAt": "2026-01-16T21:15:02.666Z"
+        "updatedAt": "2026-01-18T08:53:56.084Z"
       },
       {
         "id": 1368,
@@ -74780,17 +74771,17 @@
       },
       {
         "id": 1748,
-        "fa": "تاکسی فروش",
-        "ipa_fa": "tak.siː furush",
-        "ipa_fa_normalized": "tʌksɪ fʊrʊsh",
-        "phinglish": "taksi furush",
+        "fa": "تاکسی دار",
+        "ipa_fa": "tak.siː dʌr",
+        "ipa_fa_normalized": "tʌksɪ dʌr",
+        "phinglish": "taksi dar",
         "en": "taxi seller",
         "type": "tool",
         "usage": "Job",
         "canBePersonal": true,
         "ipaVerified": true,
         "createdAt": "2026-01-16T20:56:13.706Z",
-        "updatedAt": "2026-01-16T21:15:02.666Z"
+        "updatedAt": "2026-01-18T14:52:34.488Z"
       },
       {
         "id": 1749,
@@ -75619,20 +75610,6 @@
         "updatedAt": "2026-01-16T21:15:02.666Z"
       },
       {
-        "id": 1808,
-        "fa": "آب فروش",
-        "ipa_fa": "ɑːb furush",
-        "ipa_fa_normalized": "ʌb fʊrʊsh",
-        "phinglish": "ab furush",
-        "en": "water seller",
-        "type": "food",
-        "usage": "Job",
-        "canBePersonal": true,
-        "ipaVerified": true,
-        "createdAt": "2026-01-16T20:56:13.727Z",
-        "updatedAt": "2026-01-16T21:15:02.666Z"
-      },
-      {
         "id": 1809,
         "fa": "عروسک فروش",
         "ipa_fa": "æ.ruː.sæk furush",
@@ -76291,20 +76268,6 @@
         "updatedAt": "2026-01-16T21:15:02.666Z"
       },
       {
-        "id": 1857,
-        "fa": "ترمز فروش",
-        "ipa_fa": "/toɾ.moz/ furush",
-        "ipa_fa_normalized": "tormoz fʊrʊsh",
-        "phinglish": "tormoz furush",
-        "en": "brake seller",
-        "type": "tool",
-        "usage": "Job",
-        "canBePersonal": true,
-        "ipaVerified": true,
-        "createdAt": "2026-01-16T20:56:13.745Z",
-        "updatedAt": "2026-01-16T21:15:02.666Z"
-      },
-      {
         "id": 1858,
         "fa": "ویتامین فروش",
         "ipa_fa": "/vi.ta.min/ furush",
@@ -76396,20 +76359,6 @@
         "phinglish": "ketabche furush",
         "en": "booklet seller",
         "type": "accessory",
-        "usage": "Job",
-        "canBePersonal": true,
-        "ipaVerified": true,
-        "createdAt": "2026-01-16T20:56:13.748Z",
-        "updatedAt": "2026-01-16T21:15:02.666Z"
-      },
-      {
-        "id": 1865,
-        "fa": "کترینگ فروش",
-        "ipa_fa": "/ke.tɾing/ furush",
-        "ipa_fa_normalized": "ketrɪnɡ fʊrʊsh",
-        "phinglish": "catring furush",
-        "en": "catering seller",
-        "type": "food",
         "usage": "Job",
         "canBePersonal": true,
         "ipaVerified": true,
