@@ -9,7 +9,7 @@ import {
   findPictureWordsByIpaPrefix,
   startsWithSAndNextIsConsonant,
 } from "./shared";
-import type { SetFor2Result, FaEn } from "./types";
+import type { SetFor2Result } from "./types";
 import { for1CharAdj } from "./forChars";
 
 async function findByPattern(pattern: string): Promise<PictureWord[]> {
@@ -55,7 +55,7 @@ export async function setFor3(
     matches = await findByPatternCandidates(`e${phoneticNormalized}`);
   }
   const symbols: SetFor2Result = {
-    person: pickBestFaEn(matches, "person"),
+    person: pickBestPictureWord(matches, "person"),
   };
   const missedChars = charsMissingFromBestIpa(
     phoneticNormalized,
@@ -63,7 +63,7 @@ export async function setFor3(
   );
   if (missedChars.length > 0) {
     const adjMatches = await for1CharAdj(missedChars[0]);
-    const adjCandidate = pickBestFaEn(adjMatches, "adj");
+    const adjCandidate = pickBestPictureWord(adjMatches, "adj");
     symbols.adj = adjCandidate;
 
     if (!adjCandidate) {
@@ -78,10 +78,10 @@ export async function setFor3(
   return symbols;
 }
 
-function pickBestFaEn(
+function pickBestPictureWord(
   matches: PictureWord[],
   usage: PictureWordUsage
-): FaEn | undefined {
+): PictureWord | undefined {
   const filtered = filterByUsage(matches, usage);
   const sorted = [...filtered].sort(
     (a, b) =>
@@ -90,11 +90,7 @@ function pickBestFaEn(
   );
   const best = sorted[0];
   if (!best) return undefined;
-  return {
-    fa: best.fa,
-    en: best.en,
-    ipa_fa_normalized: best.ipa_fa_normalized,
-  };
+  return best;
 }
 
 // Note: no PictureWord-returning variant; callers should use `setFor3` (symbols).

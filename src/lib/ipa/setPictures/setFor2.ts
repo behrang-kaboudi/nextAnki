@@ -8,7 +8,7 @@ import {
   findPictureWordsByIpaPrefix,
 } from "./shared";
 
-import type { FaEn, SetFor2Result } from "./types";
+import type { SetFor2Result } from "./types";
 
 async function findByPatternCandidates(
   phoneticNormalized: string
@@ -40,7 +40,7 @@ async function findByPatternCandidates(
 function bestOfUsage(
   matches: PictureWord[],
   usage: PictureWordUsage
-): FaEn | undefined {
+): PictureWord | undefined {
   const filtered = filterByUsage(matches, usage);
   const sorted = [...filtered].sort(
     (a, b) =>
@@ -49,7 +49,7 @@ function bestOfUsage(
   );
   const row = sorted[0];
   if (!row) return undefined;
-  return { fa: row.fa, en: row.en, ipa_fa_normalized: row.ipa_fa_normalized };
+  return row;
 }
 
 export async function setFor2(

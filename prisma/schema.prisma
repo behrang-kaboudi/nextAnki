@@ -77,7 +77,7 @@ model Word {
   first_letter_en_hint             String?
   first_letter_fa_hint             String?
   hint_to_select                   String?
-  json_hint                        String?
+  json_hint                        String?  @db.Text
   word_note                        String?
   common_error                     String?
   /// Score 0-100: how imageable/visual the word is (default 10).

@@ -1,7 +1,8 @@
 import "server-only";
 
 import type { Word } from "@prisma/client";
-import type { FaEn, SetFor2Result } from "./types";
+import type { PictureWord } from "@prisma/client";
+import type { SetFor2Result } from "./types";
 import { setFor2 } from "./setFor2";
 import { setFor3 } from "./setFor3";
 import { setFor4 } from "./setFor4";
@@ -11,16 +12,16 @@ import { setForSpace } from "./setForSpace";
 import { setForPersian } from "./setForPersian";
 
 export async function pickPictureSymbolsForPhoneticNormalized(
-  word: Word
+  word: Word,
 ): Promise<SetFor2Result | null> {
   const normalized = (word.phonetic_us_normalized ?? "").trim();
-  let persianImage: FaEn | null;
+  let persianImage: PictureWord | null;
   if (word.imageability! < 62) {
     persianImage = await setForPersian(word.meaning_fa_IPA_normalized ?? "");
     if (!persianImage)
       console.log(
         `[setForAny.ts:21]`,
-        "Noooooooooooooooooooooooooooooooooooooooooo"
+        "Noooooooooooooooooooooooooooooooooooooooooo",
       );
   }
 

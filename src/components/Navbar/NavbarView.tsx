@@ -10,6 +10,7 @@ export type NavbarItem = {
   href?: string;
   children?: NavbarItem[];
   icon?: Parameters<typeof MenuIcon>[0]["name"];
+  description?: string;
 };
 
 type NavbarViewProps = {
@@ -82,6 +83,7 @@ function SidebarNavItems({
                   <Link
                     key={child.href ?? child.label}
                     href={child.href ?? "#"}
+                    title={child.description ?? child.label}
                     onClick={(event) => {
                       closeAllDetailsInNav(event);
                       onNavigate?.();
@@ -105,6 +107,7 @@ function SidebarNavItems({
           <Link
             key={item.href ?? item.label}
             href={item.href ?? "#"}
+            title={item.description ?? item.label}
             onClick={(event) => {
               closeAllDetailsInNav(event);
               onNavigate?.();
@@ -166,6 +169,7 @@ function TopbarNavItems({
                   <Link
                     key={child.href ?? child.label}
                     href={child.href ?? "#"}
+                    title={child.description ?? child.label}
                     onClick={(event) => {
                       closeAllDetailsInNav(event);
                       onNavigate?.();
@@ -189,6 +193,7 @@ function TopbarNavItems({
           <Link
             key={item.href ?? item.label}
             href={item.href ?? "#"}
+            title={item.description ?? item.label}
             onClick={(event) => {
               closeAllDetailsInNav(event);
               onNavigate?.();

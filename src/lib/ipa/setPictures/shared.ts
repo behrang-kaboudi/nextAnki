@@ -8,7 +8,6 @@ import {
   FA_KEYWORDS_CONSONANTS_NORMALIZED,
   FA_KEYWORDS_VOWELS_NORMALIZED,
 } from "@/lib/ipa/ipaSets";
-import type { FaEn } from "./types";
 
 function firstNonSpaceChar(value: string): string | null {
   for (const ch of Array.from(value)) {
@@ -113,7 +112,7 @@ export function startsWithSAndNextIsConsonant(ipa: string): boolean {
 
 export function charsMissingFromBestIpa(
   phoneticNormalized: string,
-  best: FaEn | undefined
+  best: PictureWord | undefined
 ): string[] {
   const phonetic = (phoneticNormalized ?? "").trim();
   const ipa = (best?.ipa_fa_normalized ?? "").trim();

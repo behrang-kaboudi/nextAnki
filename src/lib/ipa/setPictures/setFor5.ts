@@ -13,6 +13,7 @@ import {
 import type { SetFor2Result } from "./types";
 import { for2Char, for1CharAdj, for3Char } from "./forChars";
 import { pickBestFaEn } from "./pickBestFaEn";
+import { placeholderJobPictureWord } from "./placeholders";
 
 async function findByPattern(pattern: string): Promise<PictureWord[]> {
   const preferredUsage: PictureWordUsage | null = PictureWordUsage.person;
@@ -128,10 +129,8 @@ export async function setFor5(
       `${phoneticNormalized[2] ?? ""}${phoneticNormalized[3] ?? ""}${phoneticNormalized[4] ?? ""}`,
       "Job"
     );
-    symbols.job = pickBestFaEn(jobs, phoneticNormalized) || {
-      fa: "💼",
-      en: "job",
-    };
+    symbols.job =
+      pickBestFaEn(jobs, phoneticNormalized) || placeholderJobPictureWord();
   }
 
   return symbols;

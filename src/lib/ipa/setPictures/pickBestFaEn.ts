@@ -2,8 +2,6 @@ import "server-only";
 
 import type { PictureWord } from "@prisma/client";
 
-import type { FaEn } from "./types";
-
 function charCounts(value: string): Map<string, number> {
   const counts = new Map<string, number>();
   for (const ch of Array.from((value ?? "").trim())) {
@@ -31,7 +29,7 @@ function overlapScore(candidate: string, target: string): number {
 export function pickBestFaEn(
   matches: PictureWord[],
   targetChars: string
-): FaEn | undefined {
+): PictureWord | undefined {
   const sorted = [...matches].sort((a, b) => {
     const aIpa = a.ipa_fa_normalized ?? "";
     const bIpa = b.ipa_fa_normalized ?? "";
@@ -42,9 +40,5 @@ export function pickBestFaEn(
   });
   const best = sorted[0];
   if (!best) return undefined;
-  return {
-    fa: best.fa,
-    en: best.en,
-    ipa_fa_normalized: best.ipa_fa_normalized,
-  };
+  return best;
 }
