@@ -17,6 +17,7 @@ export type MenuLinkItem = {
   label: string;
   href: Route<string>;
   icon?: MenuIcon;
+  description?: string;
 };
 
 export type MenuGroupItem = {

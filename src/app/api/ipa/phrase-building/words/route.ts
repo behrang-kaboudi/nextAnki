@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { Prisma, type Word } from "@prisma/client";
+import { Prisma, type PictureWord, type Word } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { pickPictureSymbolsForPhoneticNormalized } from "@/lib/ipa/setPictures/setForAny";
 
@@ -40,9 +40,9 @@ function parseSortDir(value: string | null): "asc" | "desc" {
 }
 
 function hasAnyMatchSymbols(match: {
-  person?: { fa?: string; en?: string } | null;
-  job?: { fa?: string; en?: string } | null;
-  adj?: { fa?: string; en?: string } | null;
+  person?: Pick<PictureWord, "fa" | "en"> | null;
+  job?: Pick<PictureWord, "fa" | "en"> | null;
+  adj?: Pick<PictureWord, "fa" | "en"> | null;
 } | null): boolean {
   if (!match) return false;
   return Boolean(
@@ -56,7 +56,7 @@ function hasAnyMatchSymbols(match: {
 }
 
 function isPlaceholderJob(match: {
-  job?: { fa?: string; en?: string } | null;
+  job?: Pick<PictureWord, "fa" | "en"> | null;
 } | null): boolean {
   const fa = (match?.job?.fa ?? "").trim();
   const en = (match?.job?.en ?? "").trim().toLowerCase();

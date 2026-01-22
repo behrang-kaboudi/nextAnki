@@ -4,6 +4,7 @@ import type { SetFor2Result } from "./types";
 import { FA_KEYWORDS_VOWELS_NORMALIZED } from "@/lib/ipa/ipaSets";
 import { for3Char, for4Char } from "./forChars";
 import { pickBestFaEn } from "./pickBestFaEn";
+import { placeholderJobPictureWord } from "./placeholders";
 
 export async function setFor6(
   phoneticNormalized: string
@@ -47,10 +48,7 @@ export async function setFor6(
       ? await for4Char(part2, "Job")
       : await for3Char(part2, "Job");
 
-  symbols.job = pickBestFaEn(jobs, part2) || {
-    fa: "💼",
-    en: "job",
-  };
+  symbols.job = pickBestFaEn(jobs, part2) || placeholderJobPictureWord();
   if (phoneticNormalized === "ʧʌɪldhʊd") {
     console.log("[setFor6.ts:45]", symbols);
   }

@@ -10,8 +10,6 @@ import {
   sortCharsConsonantsThenVowels,
   startsWithSAndNextIsConsonant,
 } from "./shared";
-import type { SetFor2Result, FaEn } from "./types";
-import { for2Char, for1CharAdj, for3Char } from "./forChars";
 import { pickBestFaEn } from "./pickBestFaEn";
 
 async function findByPattern(pattern: string): Promise<PictureWord[]> {
@@ -100,7 +98,7 @@ async function findByPatternCandidates(
 
 export async function setForPersian(
   phoneticNormalized: string
-): Promise<FaEn | null> {
+): Promise<PictureWord | null> {
   const matches = await findByPatternCandidates(phoneticNormalized);
   const best = pickBestFaEn(matches, phoneticNormalized);
   return best ? best : null;

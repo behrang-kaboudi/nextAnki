@@ -1,4 +1,5 @@
-You are a Persian linguist building a professional bilingual vocabulary dataset.
+==============================================================================
+sameMeanings_fa
 
 You are given:
 
@@ -11,7 +12,6 @@ Generate a field called sameMeanings_fa as a SINGLE STRING.
 STRICT RULES FOR sameMeanings_fa:
 
 1. Include ONLY Persian words or very short phrases that:
-
    - can naturally REPLACE meaning_fa inside sentence_en_meaning_fa
    - keep the sentence fluent, idiomatic, and commonly used
    - preserve the same grammatical role (noun ↔ noun, adjective ↔ adjective)
@@ -23,19 +23,16 @@ STRICT RULES FOR sameMeanings_fa:
    Otherwise, DISCARD it.
 
 3. DO NOT include:
-
    - dictionary-only or abstract synonyms
    - words that require changing the verb, structure, or sentence logic
    - rare, literary, poetic, or academic words
    - explanations, paraphrases, or long phrases
 
 4. If NO valid replacements exist:
-
    - output sameMeanings_fa as an EMPTY STRING ""
    - NOT null, NOT omitted
 
 5. Formatting rules (MANDATORY):
-
    - Output MUST be a single string
    - Separate multiple meanings using ONLY the character \*
    - NO spaces before or after \*

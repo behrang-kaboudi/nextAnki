@@ -17,6 +17,7 @@ function toNavbarItems(items: MenuItem[]): NavbarItem[] {
       label: item.label,
       href: item.href,
       icon: item.icon,
+      description: item.description,
     };
   });
 }
