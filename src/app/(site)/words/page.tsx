@@ -1,6 +1,9 @@
 import Link from "next/link";
 
 import { prisma } from "@/lib/prisma";
+import VoiceCell from "./VoiceCell.client";
+import HintExportModal from "./HintExportModal.client";
+import BatchVoiceGenerate from "./BatchVoiceGenerate.client";
 
 export const metadata = {
   title: "Words",
@@ -48,11 +51,8 @@ export default async function WordsPage({
         id: true,
         anki_link_id: true,
         base_form: true,
-        phonetic_us_normalized: true,
         meaning_fa: true,
-        json_hint: true,
-        imageability: true,
-        updatedAt: true,
+        hint_sentence: true,
       },
     }),
   ]);
@@ -76,6 +76,11 @@ export default async function WordsPage({
           <p className="mt-1 text-sm opacity-80">
             DB table: <span className="font-mono">Word</span>
           </p>
+        </div>
+
+        <div className="flex w-full flex-wrap items-center justify-end gap-2 sm:w-auto">
+          <HintExportModal q={q} />
+          <BatchVoiceGenerate rows={rows.map((r) => ({ id: r.id, text: r.hint_sentence }))} />
         </div>
 
         <form className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
@@ -133,10 +138,8 @@ export default async function WordsPage({
                 <th className="whitespace-nowrap px-3 py-2 font-semibold">id</th>
                 <th className="whitespace-nowrap px-3 py-2 font-semibold">base_form</th>
                 <th className="whitespace-nowrap px-3 py-2 font-semibold">meaning_fa</th>
-                <th className="whitespace-nowrap px-3 py-2 font-semibold">phonetic_us_normalized</th>
-                <th className="whitespace-nowrap px-3 py-2 font-semibold">imageability</th>
-                <th className="whitespace-nowrap px-3 py-2 font-semibold">json_hint</th>
-                <th className="whitespace-nowrap px-3 py-2 font-semibold">updatedAt</th>
+                <th className="whitespace-nowrap px-3 py-2 font-semibold">hint_sentence</th>
+                <th className="whitespace-nowrap px-3 py-2 font-semibold">voice</th>
               </tr>
             </thead>
             <tbody>
@@ -147,29 +150,18 @@ export default async function WordsPage({
                   <td className="max-w-[520px] truncate px-3 py-2" title={r.meaning_fa}>
                     {r.meaning_fa}
                   </td>
-                  <td className="whitespace-nowrap px-3 py-2 font-mono opacity-80">
-                    {r.phonetic_us_normalized ?? "—"}
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-2">{r.imageability ?? "—"}</td>
+                  <td className="whitespace-nowrap px-3 py-2">{r.hint_sentence ?? "—"}</td>
                   <td className="whitespace-nowrap px-3 py-2">
-                    {r.json_hint ? (
-                      <span className="rounded bg-emerald-100 px-2 py-0.5 text-[11px] text-emerald-800">
-                        set
-                      </span>
-                    ) : (
-                      <span className="rounded bg-neutral-100 px-2 py-0.5 text-[11px] text-neutral-700">
-                        empty
-                      </span>
-                    )}
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-2 font-mono opacity-80">
-                    {new Date(r.updatedAt).toISOString().slice(0, 10)}
+                    <VoiceCell
+                      wordId={r.id}
+                      text={r.hint_sentence}
+                    />
                   </td>
                 </tr>
               ))}
               {rows.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-3 py-6 text-center text-sm opacity-70">
+                  <td colSpan={5} className="px-3 py-6 text-center text-sm opacity-70">
                     No rows.
                   </td>
                 </tr>
@@ -181,4 +173,3 @@ export default async function WordsPage({
     </main>
   );
 }
-

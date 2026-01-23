@@ -77,11 +77,17 @@ export type AnkiConnectActionMap = {
   version: { params?: Record<string, never>; result: number };
   sync: { params?: Record<string, never>; result: null };
 
+  storeMediaFile: {
+    params: { filename: string; data: string; deleteExisting?: boolean };
+    result: string | null;
+  };
+
   deckNames: { params?: Record<string, never>; result: string[] };
   createDeck: { params: { deck: string }; result: null };
 
   modelNames: { params?: Record<string, never>; result: string[] };
   modelFieldNames: { params: { modelName: string }; result: string[] };
+  modelFieldAdd: { params: { modelName: string; fieldName: string }; result: null };
 
   findNotes: { params: { query: string }; result: number[] };
   notesInfo: { params: { notes: number[] }; result: AnkiNotesInfo };
