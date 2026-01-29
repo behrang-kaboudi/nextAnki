@@ -26,7 +26,9 @@ const sections: Section[] = [
     title: "Word",
     defaultOpen: true,
     links: [
-      { href: "/words", label: "Words (DB)", note: "Browse Word records" },
+      { href: "/word-hints/json", label: "Word Hints — json_hint", note: "Preview & compare" },
+      { href: "/word-hints/audio", label: "Word Hints — Audio", note: "Generate & manage" },
+      { href: "/words/sentence-fields", label: "Sentence Fields", note: "TEMP: sentence_en + sentence_en_meaning_fa" },
       { href: "/word-extraction", label: "Word Extraction" },
       { href: "/words/word-cleanup", label: "Missing in DB" },
     ],
@@ -112,7 +114,7 @@ export function TestsClient() {
   );
 
   return (
-    <main className="mx-auto w-full max-w-6xl p-4">
+    <main className="mx-auto w-full max-w-6xl select-text p-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-xl font-semibold">Tests</h1>
@@ -152,7 +154,7 @@ export function TestsClient() {
             className="rounded border bg-white/50 p-3 dark:bg-black/10"
             open={Boolean(!q && section.defaultOpen)}
           >
-            <summary className="cursor-pointer select-none text-sm font-semibold">
+            <summary className="cursor-pointer text-sm font-semibold">
               {section.title}{" "}
               <span className="text-xs font-normal opacity-60">
                 ({section.links.length})

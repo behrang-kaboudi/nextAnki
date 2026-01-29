@@ -1,21 +1,11 @@
-import type { PictureWord } from "@prisma/client";
-import { PictureWordType, PictureWordUsage } from "@prisma/client";
+import { IpaCandidate } from "./shared";
 
-export function placeholderJobPictureWord(): PictureWord {
-  const now = new Date(0);
+export function placeholderJobPictureWord(): IpaCandidate {
   return {
-    id: 0,
-    fa: "💼",
-    ipa_fa: "",
-    ipa_fa_normalized: "",
-    phinglish: "",
-    en: "job",
-    type: PictureWordType.noun,
-    usage: PictureWordUsage.Job,
-    canBePersonal: false,
-    ipaVerified: false,
-    createdAt: now,
-    updatedAt: now,
+    fa: "💼💼💼💼💼💼💼💼💼💼💼💼💼",
+    en: "💼💼💼💼💼💼💼💼💼💼💼💼💼",
+    target_ipa: "__________",
+    usage: "job",
+    source: "pictureWord",
   };
 }
-

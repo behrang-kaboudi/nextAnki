@@ -1,29 +1,29 @@
 import "server-only";
 
-import { PictureWord, PictureWordUsage } from "@prisma/client";
+import { PictureWordUsage } from "@prisma/client";
 
 import {
   addReplaceMentsForEach,
   filterByUsage,
-  findPictureWordsByIpaPrefix,
   startsWithSAndNextIsConsonant,
   charsMissingFromBestIpa,
+  IpaCandidate,
   sortCharsConsonantsThenVowels,
 } from "./shared";
 import type { SetFor2Result } from "./types";
-import { for2Char, for1CharAdj } from "./forChars";
+import { for2Char, for1CharAdj, findPictureWordsByIpaPrefix } from "./forChars";
 import { pickBestFaEn } from "./pickBestFaEn";
 import { placeholderJobPictureWord } from "./placeholders";
 
-async function findByPattern(pattern: string): Promise<PictureWord[]> {
+async function findByPattern(pattern: string): Promise<IpaCandidate[]> {
   const preferredUsage: PictureWordUsage | null = PictureWordUsage.person;
   const matches = await findPictureWordsByIpaPrefix(pattern);
   return filterByUsage(matches, preferredUsage);
 }
 
 async function findByPatternCandidates(
-  phoneticNormalized: string
-): Promise<PictureWord[]> {
+  phoneticNormalized: string,
+): Promise<IpaCandidate[]> {
   const a = phoneticNormalized[0] ?? "";
   const b = phoneticNormalized[1] ?? "";
   const c = phoneticNormalized[2] ?? "";
@@ -65,7 +65,7 @@ async function findByPatternCandidates(
 }
 
 export async function setFor4(
-  phoneticNormalized: string
+  phoneticNormalized: string,
 ): Promise<SetFor2Result> {
   phoneticNormalized = phoneticNormalized.replace(" ", "");
   let matches = await findByPatternCandidates(phoneticNormalized);
@@ -81,7 +81,7 @@ export async function setFor4(
   if (matches.length > 0) {
     const missedChars = charsMissingFromBestIpa(
       phoneticNormalized,
-      symbols.person
+      symbols.person,
     );
     if (missedChars.length > 0) {
       const sortedMissed = sortCharsConsonantsThenVowels(missedChars);
@@ -100,12 +100,12 @@ export async function setFor4(
   if (matches.length === 0) {
     const persons = await for2Char(
       phoneticNormalized[0] + phoneticNormalized[1],
-      PictureWordUsage.person
+      PictureWordUsage.person,
     );
     symbols.person = pickBestFaEn(persons, phoneticNormalized);
     const jobs = await for2Char(
       phoneticNormalized[2] + phoneticNormalized[3],
-      PictureWordUsage.Job
+      PictureWordUsage.Job,
     );
     symbols.job =
       pickBestFaEn(jobs, phoneticNormalized) || placeholderJobPictureWord();

@@ -2,10 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-type Row = {
-  id: number;
-  text: string | null;
-};
+type Row = { id: number; text: string | null };
 
 export default function BatchVoiceGenerate({ rows }: { rows: Row[] }) {
   const items = useMemo(
@@ -49,7 +46,10 @@ export default function BatchVoiceGenerate({ rows }: { rows: Row[] }) {
     setRunning(Boolean(data.status.running));
     setError(data.status.error);
 
-    const remaining = Math.max(0, (data.status.totalCandidates ?? 0) - (data.status.processedCandidates ?? 0));
+    const remaining = Math.max(
+      0,
+      (data.status.totalCandidates ?? 0) - (data.status.processedCandidates ?? 0)
+    );
     setStatusText(
       `done=${data.status.processedCandidates}/${data.status.totalCandidates} remaining=${remaining} currentId=${data.status.currentId ?? "—"} generated=${data.status.generated} skippedExists=${data.status.skippedExists} zeroByte=${data.status.zeroByteFound} regeneratedZeroByte=${data.status.regeneratedZeroByte}`
     );
@@ -92,20 +92,20 @@ export default function BatchVoiceGenerate({ rows }: { rows: Row[] }) {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center gap-2">
-      <button
-        type="button"
-        onClick={() => void run()}
-        disabled={running || items.length === 0}
-        className="rounded border px-3 py-2 text-sm hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5"
-      >
-        {running ? "Generating voices (ALL)…" : "Generate voices (ALL)"}
-      </button>
-      {jobId ? <span className="text-xs opacity-70">job: {jobId}</span> : null}
-      {error ? (
-        <span className="max-w-[320px] truncate text-xs text-red-600" title={error}>
-          {error}
-        </span>
-      ) : null}
+        <button
+          type="button"
+          onClick={() => void run()}
+          disabled={running || items.length === 0}
+          className="rounded border px-3 py-2 text-sm hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5"
+        >
+          {running ? "Generating voices (ALL)…" : "Generate voices (ALL)"}
+        </button>
+        {jobId ? <span className="text-xs opacity-70">job: {jobId}</span> : null}
+        {error ? (
+          <span className="max-w-[320px] truncate text-xs text-red-600" title={error}>
+            {error}
+          </span>
+        ) : null}
       </div>
       {statusText ? <div className="text-xs opacity-80">{statusText}</div> : null}
     </div>

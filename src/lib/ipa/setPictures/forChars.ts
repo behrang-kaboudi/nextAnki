@@ -1,12 +1,47 @@
 import "server-only";
 
-import { PictureWord, PictureWordUsage } from "@prisma/client";
+import { PictureWordUsage } from "@prisma/client";
 
-import {
-  addReplaceMentsForEach,
-  filterByUsage,
-  findPictureWordsByIpaPrefix,
-} from "./shared";
+import { prisma } from "@/lib/prisma";
+
+import { addReplaceMentsForEach, filterByUsage, IpaCandidate } from "./shared";
+
+export async function findPictureWordsByIpaPrefix(
+  ipaPrefix: string,
+): Promise<IpaCandidate[]> {
+  const pattern = (ipaPrefix ?? "").trim();
+  if (!pattern) return [];
+
+  const likePattern = pattern.endsWith("%") ? pattern : `${pattern}%`;
+
+  const rows = await prisma.$queryRaw<
+    Array<{
+      id: number;
+      fa: string;
+      en: string;
+      target_ipa: string;
+      usage: PictureWordUsage;
+    }>
+  >`
+    SELECT 
+      \`usage\`,
+      fa,
+      en,
+      ipa_fa_normalized AS target_ipa
+    FROM PictureWord
+    WHERE ipa_fa_normalized LIKE ${likePattern}
+    ORDER BY fa ASC, en ASC
+  `;
+
+  return rows.map((row) => ({
+    fa: row.fa,
+    en: row.en,
+    target_ipa: row.target_ipa,
+    usage: row.usage,
+    source: "pictureWord",
+  }));
+}
+
 function get2CharPatterns(phoneticNormalized: string): string[] {
   const a = phoneticNormalized[0] ?? "";
   const b = phoneticNormalized[1] ?? "";
@@ -68,8 +103,8 @@ function get4CharPatterns(phoneticNormalized: string): string[] {
 }
 export async function for2Char(
   phoneticNormalized: string,
-  preferredUsage: PictureWordUsage | null = PictureWordUsage.person
-): Promise<PictureWord[]> {
+  preferredUsage: PictureWordUsage | null = PictureWordUsage.person,
+): Promise<IpaCandidate[]> {
   const patterns = get2CharPatterns(phoneticNormalized);
   for (const pattern of patterns) {
     const matches = await findPictureWordsByIpaPrefix(pattern);
@@ -82,8 +117,8 @@ export async function for2Char(
 
 export async function for3Char(
   phoneticNormalized: string,
-  preferredUsage: PictureWordUsage | null = PictureWordUsage.person
-): Promise<PictureWord[]> {
+  preferredUsage: PictureWordUsage | null = PictureWordUsage.person,
+): Promise<IpaCandidate[]> {
   const a = phoneticNormalized[0] ?? "";
   const b = phoneticNormalized[1] ?? "";
   const c = phoneticNormalized[2] ?? "";
@@ -101,8 +136,8 @@ export async function for3Char(
 
 export async function for4Char(
   phoneticNormalized: string,
-  preferredUsage: PictureWordUsage | null = PictureWordUsage.person
-): Promise<PictureWord[]> {
+  preferredUsage: PictureWordUsage | null = PictureWordUsage.person,
+): Promise<IpaCandidate[]> {
   const a = phoneticNormalized[0] ?? "";
   const b = phoneticNormalized[1] ?? "";
   const c = phoneticNormalized[2] ?? "";
@@ -127,8 +162,8 @@ export async function for4Char(
 }
 
 export async function for1CharAdj(
-  phoneticNormalized: string
-): Promise<PictureWord[]> {
+  phoneticNormalized: string,
+): Promise<IpaCandidate[]> {
   const preferredUsage: PictureWordUsage | null = PictureWordUsage.adj;
   const a = phoneticNormalized[0] ?? "";
 

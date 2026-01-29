@@ -1,4 +1,5 @@
 ══════════════════════════════════════
+field name: phonetic_us
 RULES FOR phonetic_us (American English Only)
 
 - This field must ALWAYS have a value; it must never be empty or null.
@@ -11,12 +12,10 @@ RULES FOR phonetic_us (American English Only)
 - If multiple pronunciations exist, select the most common General American pronunciation based on reliable dictionaries (Merriam-Webster, Cambridge, Oxford).
 - If pronunciation depends on grammatical role or stress pattern (e.g., noun vs. verb), choose the IPA that matches the actual usage in the given sentence or context.
   Examples:
-
   - record (noun) → rɛkərd
   - record (verb) → rɪkord
 
 - American vowel rules (MANDATORY – STRICT):
-
   - NEVER use the symbols ɔ or ɔː in phonetic_us.
   - NEVER use ɒ.
   - Any vowel that would normally be transcribed as ɔ or ɔː MUST be replaced based on auditory perception:
@@ -26,12 +25,10 @@ RULES FOR phonetic_us (American English Only)
   - Do NOT use oʊ as a replacement unless the word genuinely contains the GOAT diphthong.
 
 - For r-colored environments:
-
   - Use ɑr or or depending on auditory perception.
   - Do NOT use ɔr.
 
 - For phrasal verbs and multi-word expressions:
-
   - Transcribe each word as naturally pronounced in connected American speech.
   - Preserve natural stress patterns.
 

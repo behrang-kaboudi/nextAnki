@@ -1,29 +1,34 @@
 import "server-only";
 
-import { PictureWord, PictureWordUsage } from "@prisma/client";
+import { PictureWordUsage } from "@prisma/client";
 
 import {
   addReplaceMentsForEach,
   charsMissingFromBestIpa,
   filterByUsage,
-  findPictureWordsByIpaPrefix,
   sortCharsConsonantsThenVowels,
   startsWithSAndNextIsConsonant,
+  IpaCandidate,
 } from "./shared";
 import type { SetFor2Result } from "./types";
-import { for2Char, for1CharAdj, for3Char } from "./forChars";
+import {
+  for2Char,
+  for1CharAdj,
+  for3Char,
+  findPictureWordsByIpaPrefix,
+} from "./forChars";
 import { pickBestFaEn } from "./pickBestFaEn";
 import { placeholderJobPictureWord } from "./placeholders";
 
-async function findByPattern(pattern: string): Promise<PictureWord[]> {
+async function findByPattern(pattern: string): Promise<IpaCandidate[]> {
   const preferredUsage: PictureWordUsage | null = PictureWordUsage.person;
   const matches = await findPictureWordsByIpaPrefix(pattern);
   return filterByUsage(matches, preferredUsage);
 }
 
 async function findByPatternCandidates(
-  phoneticNormalized: string
-): Promise<PictureWord[]> {
+  phoneticNormalized: string,
+): Promise<IpaCandidate[]> {
   const a = phoneticNormalized[0] ?? "";
   const b = phoneticNormalized[1] ?? "";
   const c = phoneticNormalized[2] ?? "";
@@ -71,7 +76,7 @@ async function findByPatternCandidates(
 }
 
 export async function setFor5(
-  phoneticNormalized: string
+  phoneticNormalized: string,
 ): Promise<SetFor2Result> {
   let matches = await findByPatternCandidates(phoneticNormalized);
   if (
@@ -87,7 +92,7 @@ export async function setFor5(
   if (matches.length > 0) {
     const missedChars = charsMissingFromBestIpa(
       phoneticNormalized,
-      symbols.person
+      symbols.person,
     );
     if (missedChars.length > 0) {
       const sortedMissed = sortCharsConsonantsThenVowels(missedChars);
@@ -106,7 +111,7 @@ export async function setFor5(
   if (matches.length > 0) {
     const missedChars = charsMissingFromBestIpa(
       phoneticNormalized,
-      symbols.person
+      symbols.person,
     );
     if (missedChars.length > 0) {
       const adjMatches = await for1CharAdj(missedChars[0]);
@@ -121,13 +126,13 @@ export async function setFor5(
   if (matches.length === 0) {
     const persons = await for2Char(
       `${phoneticNormalized[0] ?? ""}${phoneticNormalized[1] ?? ""}`,
-      "person"
+      "person",
     );
     symbols.person = pickBestFaEn(persons, phoneticNormalized);
 
     const jobs = await for3Char(
       `${phoneticNormalized[2] ?? ""}${phoneticNormalized[3] ?? ""}${phoneticNormalized[4] ?? ""}`,
-      "Job"
+      "Job",
     );
     symbols.job =
       pickBestFaEn(jobs, phoneticNormalized) || placeholderJobPictureWord();

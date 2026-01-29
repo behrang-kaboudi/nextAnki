@@ -7,7 +7,7 @@ import { pickBestFaEn } from "./pickBestFaEn";
 import { placeholderJobPictureWord } from "./placeholders";
 
 export async function setFor6(
-  phoneticNormalized: string
+  phoneticNormalized: string,
 ): Promise<SetFor2Result> {
   const symbols: SetFor2Result = {};
 
@@ -33,8 +33,10 @@ export async function setFor6(
       : await for3Char(part1, "person");
   symbols.person = pickBestFaEn(persons, phoneticNormalized);
   const part1LastChar =
-    Array.from(part1).filter((ch) => ch.trim()).slice(-1)[0] ?? "";
-  const personFirst5 = Array.from(symbols.person?.ipa_fa_normalized ?? "")
+    Array.from(part1)
+      .filter((ch) => ch.trim())
+      .slice(-1)[0] ?? "";
+  const personFirst5 = Array.from(symbols.person?.target_ipa ?? "")
     .filter((ch) => ch.trim())
     .slice(0, 5)
     .join("");

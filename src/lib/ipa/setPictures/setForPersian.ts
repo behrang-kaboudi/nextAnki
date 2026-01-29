@@ -2,25 +2,26 @@ import "server-only";
 
 import { PictureWord, PictureWordUsage } from "@prisma/client";
 
+import { prisma } from "@/lib/prisma";
+
 import {
   addReplaceMentsForEach,
   charsMissingFromBestIpa,
   filterByUsage,
-  findPictureWordsByIpaPrefix,
-  sortCharsConsonantsThenVowels,
-  startsWithSAndNextIsConsonant,
+  IpaCandidate,
 } from "./shared";
 import { pickBestFaEn } from "./pickBestFaEn";
+import { findPictureWordsByIpaPrefix } from "./forChars";
 
-async function findByPattern(pattern: string): Promise<PictureWord[]> {
+async function findByPattern(pattern: string): Promise<IpaCandidate[]> {
   const preferredUsage: PictureWordUsage | null = PictureWordUsage.person;
   const matches = await findPictureWordsByIpaPrefix(pattern);
   return filterByUsage(matches, preferredUsage);
 }
 
 async function findByPatternCandidates(
-  phoneticNormalized: string
-): Promise<PictureWord[]> {
+  phoneticNormalized: string,
+): Promise<IpaCandidate[]> {
   const a = phoneticNormalized[0] ?? "";
   const b = phoneticNormalized[1] ?? "";
   const c = phoneticNormalized[2] ?? "";
@@ -97,8 +98,8 @@ async function findByPatternCandidates(
 }
 
 export async function setForPersian(
-  phoneticNormalized: string
-): Promise<PictureWord | null> {
+  phoneticNormalized: string,
+): Promise<IpaCandidate | null> {
   const matches = await findByPatternCandidates(phoneticNormalized);
   const best = pickBestFaEn(matches, phoneticNormalized);
   return best ? best : null;

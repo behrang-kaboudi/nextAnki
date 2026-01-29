@@ -9,6 +9,14 @@ import {
   FA_KEYWORDS_VOWELS_NORMALIZED,
 } from "@/lib/ipa/ipaSets";
 
+export type IpaCandidate = {
+  fa: string;
+  en: string;
+  target_ipa: string;
+  usage: string;
+  source: "pictureWord" | "word";
+};
+
 function firstNonSpaceChar(value: string): string | null {
   for (const ch of Array.from(value)) {
     if (ch.trim()) return ch;
@@ -36,7 +44,7 @@ export function containsAllChars(value: string, required: string): boolean {
 }
 
 export async function findPictureWordsWithSameFirstIpaChar(
-  phonetic: string
+  phonetic: string,
 ): Promise<PictureWord[]> {
   const normalized = normalizeIpaForDb(phonetic ?? "", 2000);
   const firstChar = firstNonSpaceChar(normalized);
@@ -48,34 +56,18 @@ export async function findPictureWordsWithSameFirstIpaChar(
   });
 }
 
-export function filterByUsage<T extends { usage: PictureWord["usage"] }>(
-  rows: T[],
-  preferredUsage: PictureWord["usage"] | null
-): T[] {
+export function filterByUsage(
+  rows: IpaCandidate[],
+  preferredUsage: IpaCandidate["usage"] | null,
+): IpaCandidate[] {
   return preferredUsage === null
     ? rows
     : rows.filter((row) => row.usage === preferredUsage);
 }
 
-export async function findPictureWordsByIpaPrefix(
-  ipaPrefix: string
-): Promise<PictureWord[]> {
-  const pattern = (ipaPrefix ?? "").trim();
-  if (!pattern) return [];
-
-  const likePattern = pattern.endsWith("%") ? pattern : `${pattern}%`;
-
-  return prisma.$queryRaw<PictureWord[]>`
-    SELECT *
-    FROM PictureWord
-    WHERE ipa_fa_normalized LIKE ${likePattern}
-    ORDER BY fa ASC, en ASC
-  `;
-}
-
 export function addReplaceMentsForEach(
   patterns: string[],
-  toChange?: string
+  toChange?: string,
 ): void {
   const source = (toChange ?? patterns[0] ?? "").trim();
   if (!source) return;
@@ -112,10 +104,10 @@ export function startsWithSAndNextIsConsonant(ipa: string): boolean {
 
 export function charsMissingFromBestIpa(
   phoneticNormalized: string,
-  best: PictureWord | undefined
+  best: IpaCandidate | undefined,
 ): string[] {
   const phonetic = (phoneticNormalized ?? "").trim();
-  const ipa = (best?.ipa_fa_normalized ?? "").trim();
+  const ipa = (best?.target_ipa ?? "").trim();
   if (!phonetic) return [];
   if (!ipa) return Array.from(phonetic);
 
