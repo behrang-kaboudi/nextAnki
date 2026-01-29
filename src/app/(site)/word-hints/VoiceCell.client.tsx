@@ -7,9 +7,10 @@ import { buildHintSentenceAudioFilename } from "@/lib/audio/hintSentenceAudioNam
 type Props = {
   wordId: number;
   text: string | null;
+  generatedAtMs: number | null;
 };
 
-export default function VoiceCell({ wordId, text }: Props) {
+export default function VoiceCell({ wordId, text, generatedAtMs }: Props) {
   const hintPhrase = useMemo(() => String(text ?? "").trim(), [text]);
   const enabled = Boolean(hintPhrase);
   const [filename, setFilename] = useState<string | null>(null);
@@ -39,7 +40,10 @@ export default function VoiceCell({ wordId, text }: Props) {
   const fetchLatest = useCallback(async () => {
     if (!enabled) return;
     try {
-      const res = await fetch(`/api/words/voice-file?wordId=${encodeURIComponent(String(wordId))}`, { method: "GET" });
+      const res = await fetch(
+        `/api/words/voice-file?wordId=${encodeURIComponent(String(wordId))}`,
+        { method: "GET" }
+      );
       const data = (await res.json().catch(() => null)) as
         | { ok?: boolean; filename?: string | null; publicPath?: string | null; error?: string }
         | null;
@@ -75,7 +79,10 @@ export default function VoiceCell({ wordId, text }: Props) {
     setBusy(true);
     setError(null);
     try {
-      const nextFilename = buildHintSentenceAudioFilename({ id: wordId });
+      const nextFilename = buildHintSentenceAudioFilename({
+        id: wordId,
+        timestampMs: generatedAtMs ?? Date.now(),
+      });
       const res = await fetch("/api/tts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -101,13 +108,15 @@ export default function VoiceCell({ wordId, text }: Props) {
     } finally {
       setBusy(false);
     }
-  }, [busy, checkExists, enabled, text, wordId]);
+  }, [busy, checkExists, enabled, generatedAtMs, text, wordId]);
 
   if (!enabled) return <span className="opacity-60">—</span>;
 
   return (
     <div className="flex items-center gap-2">
-      {exists && publicPath ? <audio controls preload="none" src={publicPath} className="h-7 w-48" /> : null}
+      {exists && publicPath ? (
+        <audio controls preload="none" src={publicPath} className="h-7 w-48" />
+      ) : null}
       {!exists ? (
         <button
           type="button"

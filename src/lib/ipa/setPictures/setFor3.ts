@@ -1,18 +1,18 @@
 import "server-only";
 
-import type { PictureWord, PictureWordUsage } from "@prisma/client";
+import type { PictureWordUsage } from "@prisma/client";
 
 import {
   addReplaceMentsForEach,
   charsMissingFromBestIpa,
   filterByUsage,
-  findPictureWordsByIpaPrefix,
+  IpaCandidate,
   startsWithSAndNextIsConsonant,
 } from "./shared";
-import type { SetFor2Result } from "./types";
-import { for1CharAdj } from "./forChars";
+import { SetFor2Result } from "./types";
+import { for1CharAdj, findPictureWordsByIpaPrefix } from "./forChars";
 
-async function findByPattern(pattern: string): Promise<PictureWord[]> {
+async function findByPattern(pattern: string): Promise<IpaCandidate[]> {
   const preferredUsage: PictureWordUsage | null = "person";
   const matches = await findPictureWordsByIpaPrefix(pattern);
   return filterByUsage(matches, preferredUsage);
@@ -20,7 +20,7 @@ async function findByPattern(pattern: string): Promise<PictureWord[]> {
 
 async function findByPatternCandidates(
   phoneticNormalized: string,
-): Promise<PictureWord[]> {
+): Promise<IpaCandidate[]> {
   const patterns = [
     `${phoneticNormalized[0]}${phoneticNormalized[1]}${phoneticNormalized[2]}`,
     `${phoneticNormalized[0]}${phoneticNormalized[1]}_${phoneticNormalized[2]}`,
@@ -79,14 +79,12 @@ export async function setFor3(
 }
 
 function pickBestPictureWord(
-  matches: PictureWord[],
+  matches: IpaCandidate[],
   usage: PictureWordUsage,
-): PictureWord | undefined {
+): IpaCandidate | undefined {
   const filtered = filterByUsage(matches, usage);
   const sorted = [...filtered].sort(
-    (a, b) =>
-      Array.from(a.ipa_fa_normalized).length -
-      Array.from(b.ipa_fa_normalized).length,
+    (a, b) => Array.from(a.target_ipa).length - Array.from(b.target_ipa).length,
   );
   const best = sorted[0];
   if (!best) return undefined;

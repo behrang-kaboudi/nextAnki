@@ -10,12 +10,13 @@ import { setFor5 } from "./setFor5";
 import { setFor6 } from "./setFor6";
 import { setForSpace } from "./setForSpace";
 import { setForPersian } from "./setForPersian";
+import { IpaCandidate } from "./shared";
 
 export async function pickPictureSymbolsForPhoneticNormalized(
   word: Word,
 ): Promise<SetFor2Result | null> {
   const normalized = (word.phonetic_us_normalized ?? "").trim();
-  let persianImage: PictureWord | null;
+  let persianImage: IpaCandidate | null;
   if (word.imageability! < 62) {
     persianImage = await setForPersian(word.meaning_fa_IPA_normalized ?? "");
     if (!persianImage)

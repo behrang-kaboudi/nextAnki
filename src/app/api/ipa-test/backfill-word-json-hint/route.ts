@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 import type { Word } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { pickPictureSymbolsForPhoneticNormalized } from "@/lib/ipa/setPictures/setForAny";
+import { normalizeJsonHintForCompare, stringifyJsonHintWithTimestamp } from "@/lib/words/jsonHint";
 
 const clampInt = (value: string | null, def: number, min: number, max: number) => {
   const n = value ? Number.parseInt(value, 10) : Number.NaN;
@@ -63,16 +64,15 @@ export async function POST(req: Request) {
           ? await pickPictureSymbolsForPhoneticNormalized(row as unknown as Word)
           : null;
 
-      const nextJson = match ? JSON.stringify(match) : null;
-      const prevJson =
-        (row.json_hint ?? null) === "" ? null : row.json_hint ?? null;
-      const needsUpdate = prevJson !== nextJson;
+      const nextComparable = match ? JSON.stringify(match) : null;
+      const prevComparable = normalizeJsonHintForCompare(row.json_hint ?? null);
+      const needsUpdate = prevComparable !== nextComparable;
       if (!needsUpdate) continue;
 
       if (!dryRun) {
         await prisma.word.update({
           where: { id: row.id },
-          data: { json_hint: nextJson },
+          data: { json_hint: match ? stringifyJsonHintWithTimestamp(match) : null },
         });
       }
       updated += 1;

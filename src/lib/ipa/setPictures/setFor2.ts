@@ -2,17 +2,16 @@ import "server-only";
 
 import type { PictureWord, PictureWordUsage } from "@prisma/client";
 
-import {
-  addReplaceMentsForEach,
-  filterByUsage,
-  findPictureWordsByIpaPrefix,
-} from "./shared";
+import { prisma } from "@/lib/prisma";
+
+import { addReplaceMentsForEach, filterByUsage, IpaCandidate } from "./shared";
+import { findPictureWordsByIpaPrefix } from "./forChars";
 
 import type { SetFor2Result } from "./types";
 
 async function findByPatternCandidates(
-  phoneticNormalized: string
-): Promise<PictureWord[]> {
+  phoneticNormalized: string,
+): Promise<IpaCandidate[]> {
   const preferredUsage: PictureWordUsage | null = "person";
   const a = phoneticNormalized[0] ?? "";
   const b = phoneticNormalized[1] ?? "";
@@ -38,14 +37,12 @@ async function findByPatternCandidates(
 }
 
 function bestOfUsage(
-  matches: PictureWord[],
-  usage: PictureWordUsage
-): PictureWord | undefined {
+  matches: IpaCandidate[],
+  usage: PictureWordUsage,
+): IpaCandidate | undefined {
   const filtered = filterByUsage(matches, usage);
   const sorted = [...filtered].sort(
-    (a, b) =>
-      Array.from(a.ipa_fa_normalized).length -
-      Array.from(b.ipa_fa_normalized).length
+    (a, b) => Array.from(a.target_ipa).length - Array.from(b.target_ipa).length,
   );
   const row = sorted[0];
   if (!row) return undefined;
@@ -53,7 +50,7 @@ function bestOfUsage(
 }
 
 export async function setFor2(
-  phoneticNormalized: string
+  phoneticNormalized: string,
 ): Promise<SetFor2Result> {
   const matches = await findByPatternCandidates(phoneticNormalized);
 

@@ -2,6 +2,8 @@ import "server-only";
 
 import { prisma } from "@/lib/prisma";
 import { ensureHintSentenceVoice } from "@/lib/words/hintSentenceVoice";
+import { getJsonHintGeneratedAtMs } from "@/lib/words/jsonHint";
+import { buildHintSentenceAudioFilename } from "@/lib/audio/hintSentenceAudioNaming";
 
 export type VoiceJobStatus = {
   jobId: string;
@@ -91,11 +93,12 @@ async function runJob(state: VoiceJobState) {
   let cursorId: number | null = null;
 
   for (;;) {
-    const rows: Array<{ id: number; hint_sentence: string | null }> = await prisma.word.findMany({
+    const rows: Array<{ id: number; hint_sentence: string | null; json_hint: string | null }> =
+      await prisma.word.findMany({
       orderBy: { id: "asc" },
       take,
       ...(cursorId ? { cursor: { id: cursorId }, skip: 1 } : {}),
-      select: { id: true, hint_sentence: true },
+      select: { id: true, hint_sentence: true, json_hint: true },
     });
     if (rows.length === 0) break;
 
@@ -108,7 +111,18 @@ async function runJob(state: VoiceJobState) {
         continue;
       }
 
-      const res = await ensureHintSentenceVoice({ id: r.id, hintSentence: hintPhrase, provider: "azure" });
+      const generatedAtMs = getJsonHintGeneratedAtMs(r.json_hint ?? null);
+      const res = await ensureHintSentenceVoice({
+        id: r.id,
+        hintSentence: hintPhrase,
+        provider: "azure",
+        filenameFor: (opts) =>
+          buildHintSentenceAudioFilename({
+            id: opts.id,
+            timestampMs: generatedAtMs ?? Date.now(),
+            ext: opts.ext,
+          }),
+      });
       if (res.action === "skipped_exists") state.skippedExists += 1;
       if (res.action === "generated") state.generated += 1;
       if (res.action === "regenerated_zero_byte") {
