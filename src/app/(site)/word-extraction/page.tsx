@@ -3,6 +3,8 @@
 import { PageHeader } from "@/components/page-header";
 import { useCallback, useRef, useState } from "react";
 
+import { WORD_EXTRACTION_PROMPTS_PHASE3 } from "@/lib/word-extraction/promptSpecs";
+
 const buttonBase =
   "inline-flex h-11 cursor-pointer items-center justify-center rounded-xl px-4 text-xs font-semibold tracking-wide shadow-elevated transition-all duration-150 ease-out hover:-translate-y-0.5 hover:shadow-[0_12px_30px_rgba(0,0,0,0.18)] hover:brightness-105 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:shadow-elevated";
 
@@ -272,6 +274,12 @@ export default function WordExtractionPage() {
     }
   }, [promptText]);
 
+  const helperSpecs = WORD_EXTRACTION_PROMPTS_PHASE3;
+  const helperDefaultActiveId =
+    helperSpecs.find((s) => s.id === "sentence_en_meaning_fa")?.id ??
+    helperSpecs.find((s) => s.fieldKey)?.id ??
+    "sentence_en_meaning_fa";
+
   const [isBase2ModalOpen, setIsBase2ModalOpen] = useState(false);
   const [isBase2ModalLoading, setIsBase2ModalLoading] = useState(false);
   const [base2ModalError, setBase2ModalError] = useState<string | null>(null);
@@ -282,10 +290,17 @@ export default function WordExtractionPage() {
   const [isPhase4ApplyBusy, setIsPhase4ApplyBusy] = useState(false);
   const [isPhase4PromptModalOpen, setIsPhase4PromptModalOpen] = useState(false);
   const [isPhase4PromptModalLoading, setIsPhase4PromptModalLoading] = useState(false);
+  const [isPhase4MissingLoading, setIsPhase4MissingLoading] = useState(false);
   const [phase4PromptModalError, setPhase4PromptModalError] = useState<string | null>(null);
   const [phase4PromptModalItems, setPhase4PromptModalItems] = useState<{ path: string; text: string }[]>([]);
   const [phase4PromptModalTailJson, setPhase4PromptModalTailJson] = useState<string>("");
   const [phase4PromptModalCopied, setPhase4PromptModalCopied] = useState(false);
+  const [phase4Checked, setPhase4Checked] = useState<Record<string, boolean>>(() =>
+    Object.fromEntries(
+      helperSpecs.map((spec) => [spec.id, spec.id === "base" || spec.id === helperDefaultActiveId]),
+    ),
+  );
+  const [phase4ActiveId, setPhase4ActiveId] = useState<string>(helperDefaultActiveId);
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
   const [isHelpModalLoading, setIsHelpModalLoading] = useState(false);
   const [isHelpModalSaving, setIsHelpModalSaving] = useState(false);
@@ -302,11 +317,7 @@ export default function WordExtractionPage() {
     setBase2ModalTailJson("");
     setBase2ModalCopied(false);
     try {
-      const paths = [
-        "src/prompts/word-extraction/base/inputOutRulseV1 .md",
-        "src/prompts/word-extraction/phonetic_us/rulseV1.md",
-        "src/prompts/word-extraction/imageability/rulseV1.md",
-      ];
+      const paths = WORD_EXTRACTION_PROMPTS_PHASE3.map((spec) => spec.path);
       const results = await Promise.all(
         paths.map(async (path) => {
           const res = await fetch(
@@ -351,12 +362,7 @@ export default function WordExtractionPage() {
     setPhase4PromptModalTailJson("");
     setPhase4PromptModalCopied(false);
     try {
-      const paths = [
-        "src/prompts/word-extraction/base/inputOutRulseV1 .md",
-        "src/prompts/word-extraction/sentence_meaning_fa/rulseV1.md",
-        "src/prompts/word-extraction/pos/rulseV1.md",
-        "src/prompts/word-extraction/other_meanings_fa/rulseV1.md",
-      ];
+      const paths = helperSpecs.map((spec) => spec.path);
       const results = await Promise.all(
         paths.map(async (path) => {
           const res = await fetch(
@@ -373,8 +379,16 @@ export default function WordExtractionPage() {
       );
       setPhase4PromptModalItems(results);
 
+      const active =
+        helperSpecs.find((s) => s.id === phase4ActiveId) ??
+        helperSpecs.find((s) => s.fieldKey) ??
+        helperSpecs[0];
+      if (!active?.fieldKey) {
+        throw new Error("Invalid helper field selection");
+      }
+      setIsPhase4MissingLoading(true);
       const missingRes = await fetch(
-        "/api/word-extraction/phase4/missing-sentence-en-meaning-fa",
+        `/api/word-extraction/helper/missing-by-field?field=${encodeURIComponent(active.fieldKey)}`,
         { method: "GET" },
       );
       const missingJson = (await missingRes.json().catch(() => null)) as
@@ -383,16 +397,62 @@ export default function WordExtractionPage() {
       if (!missingRes.ok || !missingJson?.ok) {
         throw new Error(
           missingJson?.error ??
-            `Failed to load missing sentence_en_meaning_fa rows (${missingRes.status})`,
+            `Failed to load missing helper rows (${missingRes.status})`,
         );
       }
       setPhase4PromptModalTailJson(JSON.stringify(missingJson.items ?? [], null, 2));
     } catch (error) {
       setPhase4PromptModalError(error instanceof Error ? error.message : String(error));
     } finally {
+      setIsPhase4MissingLoading(false);
       setIsPhase4PromptModalLoading(false);
     }
+  }, [helperSpecs, phase4ActiveId]);
+
+  const loadPhase4Missing = useCallback(async (fieldKey: string) => {
+    setIsPhase4MissingLoading(true);
+    setPhase4PromptModalError(null);
+    try {
+      const missingRes = await fetch(
+        `/api/word-extraction/helper/missing-by-field?field=${encodeURIComponent(fieldKey)}`,
+        { method: "GET" },
+      );
+      const missingJson = (await missingRes.json().catch(() => null)) as
+        | { ok?: boolean; error?: string; items?: unknown }
+        | null;
+      if (!missingRes.ok || !missingJson?.ok) {
+        throw new Error(
+          missingJson?.error ??
+            `Failed to load missing helper rows (${missingRes.status})`,
+        );
+      }
+      setPhase4PromptModalTailJson(JSON.stringify(missingJson.items ?? [], null, 2));
+    } catch (error) {
+      setPhase4PromptModalError(error instanceof Error ? error.message : String(error));
+    } finally {
+      setIsPhase4MissingLoading(false);
+    }
   }, []);
+
+  const buildHelperPromptText = useCallback(
+    () => {
+      const checkedSpecs = helperSpecs.filter((s) => Boolean(phase4Checked[s.id]));
+      const activeSpec = helperSpecs.find((s) => s.id === phase4ActiveId) ?? null;
+      const ordered =
+        activeSpec && phase4Checked[activeSpec.id]
+          ? [activeSpec, ...checkedSpecs.filter((s) => s.id !== activeSpec.id)]
+          : checkedSpecs;
+
+      const combined = ordered
+        .map((spec) => phase4PromptModalItems.find((it) => it.path === spec.path)?.text.trim())
+        .filter((t): t is string => Boolean(t && t.length))
+        .join("\n\n");
+
+      const tail = phase4PromptModalTailJson ? `\n\n${phase4PromptModalTailJson}` : "";
+      return `${combined}${tail}`;
+    },
+    [helperSpecs, phase4ActiveId, phase4Checked, phase4PromptModalItems, phase4PromptModalTailJson],
+  );
 
   const openHelpModal = useCallback(async () => {
     setIsHelpModalOpen(true);
@@ -452,7 +512,7 @@ export default function WordExtractionPage() {
       const parsed = JSON.parse(promptText) as unknown;
       if (!Array.isArray(parsed)) {
         throw new Error(
-          "Input must be a JSON array: [{ id, phonetic_us, imageability }]",
+          "Input must be a JSON array: [{ id, phonetic_us?, imageability?, learning_depth?, sentence_en_meaning_fa?, pos?, other_meanings_fa? }]",
         );
       }
 
@@ -484,11 +544,11 @@ export default function WordExtractionPage() {
       const parsed = JSON.parse(promptText) as unknown;
       if (!Array.isArray(parsed)) {
         throw new Error(
-          "Input must be a JSON array: [{ id, sentence_en_meaning_fa, pos, other_meanings_fa }]",
+          "Input must be a JSON array: [{ id, phonetic_us?, imageability?, learning_depth?, sentence_en_meaning_fa?, pos?, other_meanings_fa? }]",
         );
       }
 
-      const res = await fetch("/api/word-extraction/phase4/update-bulk", {
+      const res = await fetch("/api/word-extraction/base2/update-bulk", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify(parsed),
@@ -824,7 +884,9 @@ export default function WordExtractionPage() {
 
         <div className="grid gap-3 rounded-2xl border border-card bg-background/60 p-4 backdrop-blur lg:grid-cols-2">
           <div className="grid gap-3 rounded-xl border border-card bg-background/70 p-3">
-            <div className="text-xs font-semibold tracking-wide text-muted">PHASE 3</div>
+            <div className="text-xs font-semibold tracking-wide text-muted">
+              PHASE 3 — PHONETIC_US + IMAGEABILITY + LEARNING_DEPTH + SENTENCE_EN_MEANING_FA + POS + OTHER_MEANINGS_FA
+            </div>
             <div className="grid gap-3">
               <button
                 type="button"
@@ -832,7 +894,7 @@ export default function WordExtractionPage() {
                 onClick={openBase2PromptModal}
                 disabled={isBase2ModalLoading}
               >
-                3.1 PROMPT FOR: PHONETIC_US + IMAGEABILITY
+                3.1 PROMPT FOR: PHONETIC_US + IMAGEABILITY + LEARNING_DEPTH + SENTENCE_EN_MEANING_FA + POS + OTHER_MEANINGS_FA
               </button>
               <button
                 type="button"
@@ -842,13 +904,15 @@ export default function WordExtractionPage() {
               >
                 {isBase2ApplyBusy
                   ? "UPDATING..."
-                  : "3.2 APPLY PHONETIC_US + IMAGEABILITY (ALL)"}
+                  : "3.2 APPLY PHASE 3 (ALL)"}
               </button>
             </div>
           </div>
 
           <div className="grid gap-3 rounded-xl border border-card bg-background/70 p-3">
-            <div className="text-xs font-semibold tracking-wide text-muted">PHASE 4</div>
+            <div className="text-xs font-semibold tracking-wide text-muted">
+              HELPER (PHASE 4 AREA)
+            </div>
             <div className="grid gap-3">
               <button
                 type="button"
@@ -856,7 +920,7 @@ export default function WordExtractionPage() {
                 onClick={openPhase4PromptModal}
                 disabled={isPhase4PromptModalLoading}
               >
-                4.1 PROMPT FOR: SENTENCE_EN_MEANING_FA
+                4.1 PROMPT FILES + MISSING (SELECT FIELD)
               </button>
               <button
                 type="button"
@@ -864,7 +928,7 @@ export default function WordExtractionPage() {
                 onClick={applyPhase4FromJson}
                 disabled={isPhase4ApplyBusy}
               >
-                {isPhase4ApplyBusy ? "UPDATING..." : "4.2 APPLY SENTENCE_EN_MEANING_FA"}
+                {isPhase4ApplyBusy ? "UPDATING..." : "4.2 APPLY (HELPER)"}
               </button>
             </div>
           </div>
@@ -1150,10 +1214,10 @@ export default function WordExtractionPage() {
             <div className="flex items-start justify-between gap-3">
               <div>
                 <div className="text-base font-semibold">
-                  Phase 3 — phonetic_us + imageability
+                  Phase 3 — phonetic_us + imageability + learning_depth + sentence meaning + pos + other meanings
                 </div>
                 <div className="mt-1 text-xs opacity-70">
-                  Prompt files + 20 missing rows (id/base_form/meaning_fa)
+                  Prompt files + 20 missing rows (id/base_form/meaning_fa/sentence_en)
                 </div>
               </div>
               <button
@@ -1223,10 +1287,10 @@ export default function WordExtractionPage() {
             <div className="flex items-start justify-between gap-3">
               <div>
                 <div className="text-base font-semibold">
-                  Phase 4 — sentence meaning (FA)
+                  Helper — prompt files + missing rows
                 </div>
                 <div className="mt-1 text-xs opacity-70">
-                  Prompt files + 20 missing rows
+                  Select a field to load 20 missing rows; check files to include in the shown prompt text.
                 </div>
               </div>
               <button
@@ -1248,38 +1312,96 @@ export default function WordExtractionPage() {
               <div className="text-sm opacity-70">Loading…</div>
             ) : (
               <div className="flex min-h-0 flex-1 flex-col gap-3">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div className="text-xs opacity-70">
-                    {phase4PromptModalItems.length} file(s)
+                <div className="min-h-0 flex flex-[0_0_30%] flex-col overflow-hidden rounded-2xl border bg-background/50">
+                  <div className="flex items-center justify-between gap-2 border-b px-3 py-2">
+                    <div className="text-[11px] font-semibold tracking-wide text-muted">
+                      FIELDS / FILES
+                    </div>
+                    <div className="text-[11px] opacity-70">
+                      {helperSpecs.filter((s) => phase4Checked[s.id]).length} checked
+                    </div>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const combined = phase4PromptModalItems
-                        .map((item) => item.text.trim())
-                        .join("\n\n");
-                      const tail = phase4PromptModalTailJson
-                        ? `\n\n${phase4PromptModalTailJson}`
-                        : "";
-                      void navigator.clipboard.writeText(`${combined}${tail}`).then(() => {
-                        setPhase4PromptModalCopied(true);
-                        window.setTimeout(() => setPhase4PromptModalCopied(false), 1200);
-                      });
-                    }}
-                    className={`rounded border px-3 py-2 text-sm transition hover:bg-black/5 dark:hover:bg-white/5 ${
-                      phase4PromptModalCopied ? "border-emerald-500/40 bg-emerald-500/10" : ""
-                    }`}
-                  >
-                    {phase4PromptModalCopied ? "Copied" : "Copy all"}
-                  </button>
+                  <div className="min-h-0 flex-1 overflow-auto p-2">
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      {helperSpecs.map((spec) => {
+                        const checked = Boolean(phase4Checked[spec.id]);
+                        const isActive = spec.id === phase4ActiveId;
+                        const shortName = (() => {
+                          const parts = spec.path.split("/");
+                          const file = parts.at(-1) ?? spec.path;
+                          const parent = parts.at(-2);
+                          return parent ? `${parent}/${file}` : file;
+                        })();
+                        return (
+                          <div
+                            key={spec.id}
+                            className={`group flex cursor-pointer items-start gap-2 rounded-xl border px-2 py-2 text-[11px] transition hover:bg-black/5 dark:hover:bg-white/5 ${
+                              isActive ? "border-emerald-500/30 bg-emerald-500/5" : "border-transparent"
+                            }`}
+                            onClick={() => {
+                              setPhase4ActiveId(spec.id);
+                              if (!checked) {
+                                setPhase4Checked((cur) => ({ ...cur, [spec.id]: true }));
+                              }
+                              if (spec.fieldKey) void loadPhase4Missing(spec.fieldKey);
+                            }}
+                            title={spec.path}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={checked}
+                              onChange={(e) => {
+                                const next = e.target.checked;
+                                setPhase4Checked((cur) => ({ ...cur, [spec.id]: next }));
+                                setPhase4ActiveId(spec.id);
+                                if (next && spec.fieldKey) void loadPhase4Missing(spec.fieldKey);
+                              }}
+                              onClick={(e) => e.stopPropagation()}
+                              className="mt-0.5"
+                            />
+                            <div className="min-w-0">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <span className={`${isActive ? "font-semibold" : ""}`}>{spec.label}</span>
+                                <span className="opacity-60">{spec.fieldKey ? spec.fieldKey : "base"}</span>
+                              </div>
+                              <div className="truncate text-[10px] opacity-60">
+                                <span className="hidden group-hover:inline">{spec.path}</span>
+                                <span className="group-hover:hidden">{shortName}</span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
                 </div>
-                <textarea
-                  readOnly
-                  value={`${phase4PromptModalItems
-                    .map((item) => item.text.trim())
-                    .join("\n\n")}${phase4PromptModalTailJson ? `\n\n${phase4PromptModalTailJson}` : ""}`}
-                  className="min-h-0 flex-1 resize-none rounded border bg-transparent p-3 font-mono text-xs"
-                />
+
+                <div className="min-h-0 flex-1 overflow-hidden rounded-2xl border">
+                  <div className="flex flex-wrap items-center justify-between gap-2 border-b px-3 py-2">
+                    <div className="text-xs opacity-70">
+                      {isPhase4MissingLoading ? "Loading missing rows…" : "Prompt + missing rows"}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        void navigator.clipboard.writeText(buildHelperPromptText()).then(() => {
+                          setPhase4PromptModalCopied(true);
+                          window.setTimeout(() => setPhase4PromptModalCopied(false), 1200);
+                        });
+                      }}
+                      className={`rounded border px-3 py-2 text-sm transition hover:bg-black/5 dark:hover:bg-white/5 ${
+                        phase4PromptModalCopied ? "border-emerald-500/40 bg-emerald-500/10" : ""
+                      }`}
+                    >
+                      {phase4PromptModalCopied ? "Copied" : "Copy all"}
+                    </button>
+                  </div>
+                  <textarea
+                    readOnly
+                    value={buildHelperPromptText()}
+                    className="h-full w-full resize-none bg-transparent p-3 font-mono text-xs"
+                  />
+                </div>
               </div>
             )}
           </div>

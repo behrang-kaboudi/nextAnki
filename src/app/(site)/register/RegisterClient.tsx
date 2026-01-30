@@ -7,7 +7,7 @@ import { PageHeader } from "@/components/page-header";
 import { ErrorAlert } from "@/components/auth/ErrorAlert";
 import { AuthForm } from "@/components/auth/AuthForm";
 import { OAuthButton } from "@/components/auth/OAuthButton";
-import type { ProviderDefinition } from "@/lib/providers/types";
+import type { AuthProviderId, ProviderDefinition } from "@/lib/providers/types";
 
 export function RegisterClient({
   callbackUrl,
@@ -18,7 +18,11 @@ export function RegisterClient({
 }) {
   const [error, setError] = useState<string | null>(null);
   const oauthProviders = providers.filter(
-    (p) => p.id !== "credentials" && p.id !== "email",
+    (
+      p,
+    ): p is ProviderDefinition & {
+      id: Exclude<AuthProviderId, "credentials" | "email">;
+    } => p.id !== "credentials" && p.id !== "email",
   );
 
   return (

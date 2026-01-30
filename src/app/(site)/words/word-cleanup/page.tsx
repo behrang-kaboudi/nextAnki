@@ -125,7 +125,7 @@ export default function WordCleanupPage() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               className="h-10 w-full rounded-xl border border-card bg-background px-3 text-sm text-foreground outline-none focus:ring-2 focus:ring-neutral-400"
-              placeholder='Default: note:"Meta-LEX-vR9" deck:"TempFor1WordsForNewStudy"'
+              placeholder='Default: note:"Meta-LEX-vR9" deck:"WordsForNewStudy"'
             />
           </div>
           <div className="grid gap-2">

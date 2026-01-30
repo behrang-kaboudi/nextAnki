@@ -1,5 +1,5 @@
 {
-  "createdAt": "2026-01-29T01:13:40.652Z",
+  "createdAt": "2026-01-30T19:15:20.706Z",
   "data": {
     "theme": [
       {
@@ -46326,7 +46326,7 @@
         "sentence_en": "I left the key on the kitchen counter this morning.",
         "sentence_en_meaning_fa": "امروز صبح کلید را روی پیشخوانِ آشپزخانه گذاشتم.",
         "explanation_for_sentence_meaning": null,
-        "learning_depth": null,
+        "learning_depth": 0.95,
         "mixed_sentence": null,
         "other_meanings_fa": "سوییچ",
         "category": null,
@@ -46340,7 +46340,7 @@
         "common_error": null,
         "imageability": 91,
         "createdAt": "2026-01-28T06:45:04.770Z",
-        "updatedAt": "2026-01-28T21:43:20.434Z"
+        "updatedAt": "2026-01-30T10:05:16.550Z"
       },
       {
         "id": 2295,
@@ -46358,7 +46358,7 @@
         "sentence_en": "This shoe hurts my heel after walking a few blocks.",
         "sentence_en_meaning_fa": "این کفش بعد از چند خیابان راه رفتن پاشنهٔ پایم را درد می‌آورد.",
         "explanation_for_sentence_meaning": null,
-        "learning_depth": null,
+        "learning_depth": 0.95,
         "mixed_sentence": null,
         "other_meanings_fa": "",
         "category": null,
@@ -46372,7 +46372,7 @@
         "common_error": null,
         "imageability": 93,
         "createdAt": "2026-01-28T06:45:04.784Z",
-        "updatedAt": "2026-01-28T21:43:20.434Z"
+        "updatedAt": "2026-01-30T10:05:16.549Z"
       },
       {
         "id": 2296,
@@ -46390,7 +46390,7 @@
         "sentence_en": "The child refused to sleep without his favorite toy.",
         "sentence_en_meaning_fa": "کودک بدون اسباب‌بازیِ موردعلاقه‌اش حاضر نشد بخوابد.",
         "explanation_for_sentence_meaning": null,
-        "learning_depth": null,
+        "learning_depth": 0.85,
         "mixed_sentence": null,
         "other_meanings_fa": "بازیچه",
         "category": null,
@@ -46404,7 +46404,7 @@
         "common_error": null,
         "imageability": 88,
         "createdAt": "2026-01-28T06:45:04.785Z",
-        "updatedAt": "2026-01-28T21:43:20.433Z"
+        "updatedAt": "2026-01-30T10:05:16.547Z"
       },
       {
         "id": 2297,
@@ -46422,7 +46422,7 @@
         "sentence_en": "She cracked an egg into the pan for breakfast.",
         "sentence_en_meaning_fa": "او برای صبحانه یک تخم‌مرغ داخل تابه شکست.",
         "explanation_for_sentence_meaning": null,
-        "learning_depth": null,
+        "learning_depth": 0.9,
         "mixed_sentence": null,
         "other_meanings_fa": "",
         "category": null,
@@ -46436,7 +46436,7 @@
         "common_error": null,
         "imageability": 90,
         "createdAt": "2026-01-28T06:45:04.787Z",
-        "updatedAt": "2026-01-28T21:43:20.432Z"
+        "updatedAt": "2026-01-30T10:05:16.543Z"
       },
       {
         "id": 2298,
@@ -46454,7 +46454,7 @@
         "sentence_en": "I usually drink tea in the afternoon to relax.",
         "sentence_en_meaning_fa": "من معمولاً بعدازظهر برای آرام شدن چای می‌نوشم.",
         "explanation_for_sentence_meaning": null,
-        "learning_depth": null,
+        "learning_depth": 0.9,
         "mixed_sentence": null,
         "other_meanings_fa": "",
         "category": null,
@@ -46468,7 +46468,7 @@
         "common_error": null,
         "imageability": 78,
         "createdAt": "2026-01-28T06:45:04.788Z",
-        "updatedAt": "2026-01-28T21:43:20.432Z"
+        "updatedAt": "2026-01-30T10:05:16.542Z"
       },
       {
         "id": 2299,
@@ -46486,7 +46486,7 @@
         "sentence_en": "A bee landed on my arm while I was gardening.",
         "sentence_en_meaning_fa": "هنگام باغبانی یک زنبور روی بازوی من نشست.",
         "explanation_for_sentence_meaning": null,
-        "learning_depth": null,
+        "learning_depth": 0.85,
         "mixed_sentence": null,
         "other_meanings_fa": "زنبورعسل",
         "category": null,
@@ -46500,7 +46500,7 @@
         "common_error": null,
         "imageability": 95,
         "createdAt": "2026-01-28T06:45:04.789Z",
-        "updatedAt": "2026-01-28T21:43:20.431Z"
+        "updatedAt": "2026-01-30T10:05:16.540Z"
       },
       {
         "id": 2300,
@@ -46518,7 +46518,7 @@
         "sentence_en": "The cow stood quietly in the field chewing grass.",
         "sentence_en_meaning_fa": "گاو در مزرعه آرام ایستاده بود و علف می‌جوید.",
         "explanation_for_sentence_meaning": null,
-        "learning_depth": null,
+        "learning_depth": 0.9,
         "mixed_sentence": null,
         "other_meanings_fa": "",
         "category": null,
@@ -46532,7 +46532,7 @@
         "common_error": null,
         "imageability": 98,
         "createdAt": "2026-01-28T06:45:04.791Z",
-        "updatedAt": "2026-01-28T21:43:20.429Z"
+        "updatedAt": "2026-01-30T10:05:16.538Z"
       },
       {
         "id": 2301,
@@ -46550,7 +46550,7 @@
         "sentence_en": "She baked an apple pie for the family dinner.",
         "sentence_en_meaning_fa": "او برای شام خانوادگی یک پایِ سیب پخت.",
         "explanation_for_sentence_meaning": null,
-        "learning_depth": null,
+        "learning_depth": 0.85,
         "mixed_sentence": null,
         "other_meanings_fa": "",
         "category": null,
@@ -46564,7 +46564,7 @@
         "common_error": null,
         "imageability": 94,
         "createdAt": "2026-01-28T06:45:04.792Z",
-        "updatedAt": "2026-01-28T21:43:20.428Z"
+        "updatedAt": "2026-01-30T10:05:16.534Z"
       },
       {
         "id": 2302,
@@ -46582,7 +46582,7 @@
         "sentence_en": "She tied a red bow around the gift box.",
         "sentence_en_meaning_fa": "او یک پاپیون قرمز دور جعبهٔ هدیه بست.",
         "explanation_for_sentence_meaning": null,
-        "learning_depth": null,
+        "learning_depth": 0.75,
         "mixed_sentence": null,
         "other_meanings_fa": "",
         "category": null,
@@ -46596,7 +46596,7 @@
         "common_error": null,
         "imageability": 85,
         "createdAt": "2026-01-28T06:45:04.795Z",
-        "updatedAt": "2026-01-28T21:43:20.427Z"
+        "updatedAt": "2026-01-30T10:05:16.529Z"
       },
       {
         "id": 2303,
@@ -46614,7 +46614,7 @@
         "sentence_en": "He picked a pea off his plate and laughed.",
         "sentence_en_meaning_fa": "او یک نخودفرنگی از بشقابش برداشت و خندید.",
         "explanation_for_sentence_meaning": null,
-        "learning_depth": null,
+        "learning_depth": 0.8,
         "mixed_sentence": null,
         "other_meanings_fa": "نخود سبز",
         "category": null,
@@ -46628,7 +46628,7 @@
         "common_error": null,
         "imageability": 92,
         "createdAt": "2026-01-28T06:45:04.796Z",
-        "updatedAt": "2026-01-28T21:43:20.412Z"
+        "updatedAt": "2026-01-30T10:05:16.498Z"
       }
     ],
     "ipaKeyword": [

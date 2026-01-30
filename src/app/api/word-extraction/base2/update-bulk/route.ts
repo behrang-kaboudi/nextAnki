@@ -7,10 +7,26 @@ import { prisma } from "@/lib/prisma";
 
 export const runtime = "nodejs";
 
-type PayloadItem = { id: number; phonetic_us: string; imageability: number };
+type PayloadItem = {
+  id: number;
+  phonetic_us?: string;
+  imageability?: number;
+  learning_depth?: number;
+  sentence_en_meaning_fa?: string;
+  pos?: string;
+  other_meanings_fa?: string | null;
+};
 
-const allowedKeys = ["id", "phonetic_us", "imageability"] as const;
-const allowedKeySet = new Set<string>(allowedKeys);
+const requiredKeys = ["id"] as const;
+const optionalKeys = [
+  "phonetic_us",
+  "imageability",
+  "learning_depth",
+  "sentence_en_meaning_fa",
+  "pos",
+  "other_meanings_fa",
+] as const;
+const allowedKeySet = new Set<string>([...requiredKeys, ...optionalKeys]);
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   if (!value || typeof value !== "object") return false;
@@ -37,6 +53,19 @@ function asImageability(value: unknown): number | null {
   return i;
 }
 
+function asLearningDepth(value: unknown): number | null {
+  if (typeof value !== "number" || !Number.isFinite(value)) return null;
+  if (value === -100) return -100;
+  if (value < 0 || value > 1) return null;
+  return value;
+}
+
+function asNullableTrimmedStringAllowEmpty(value: unknown): string | null {
+  if (value === null) return null;
+  if (typeof value !== "string") return null;
+  return value.trim();
+}
+
 function validateItem(value: unknown): { ok: true; item: PayloadItem } | { ok: false; issues: string[] } {
   if (!isPlainObject(value)) return { ok: false, issues: ["Item must be an object"] };
 
@@ -46,22 +75,64 @@ function validateItem(value: unknown): { ok: true; item: PayloadItem } | { ok: f
   const extraKeys = keys.filter((k) => !allowedKeySet.has(k));
   if (extraKeys.length) issues.push(`Extra field(s): ${extraKeys.join(", ")}`);
 
-  const missingKeys = allowedKeys.filter((k) => !(k in value));
+  const missingKeys = requiredKeys.filter((k) => !(k in value));
   if (missingKeys.length) issues.push(`Missing field(s): ${missingKeys.join(", ")}`);
 
-  if (keys.length !== allowedKeys.length) {
-    issues.push(`Item must have exactly ${allowedKeys.length} fields`);
+  if (keys.length < requiredKeys.length + 1) {
+    issues.push("Item must include at least one updatable field besides id");
   }
 
   const id = asPositiveInt(value.id);
-  const phonetic_us = asNonEmptyString(value.phonetic_us);
-  const imageability = asImageability(value.imageability);
   if (!id) issues.push("id must be a positive number");
-  if (!phonetic_us) issues.push("phonetic_us must be a non-empty string");
-  if (imageability === null) issues.push("imageability must be a number between 0 and 100");
+
+  const hasPhoneticUs = "phonetic_us" in value;
+  const phonetic_us = hasPhoneticUs ? asNonEmptyString((value as Record<string, unknown>).phonetic_us) : undefined;
+  if (hasPhoneticUs && !phonetic_us) issues.push("phonetic_us must be a non-empty string");
+
+  const hasImageability = "imageability" in value;
+  const imageability = hasImageability ? asImageability((value as Record<string, unknown>).imageability) : undefined;
+  if (hasImageability && imageability === null) issues.push("imageability must be a number between 0 and 100");
+
+  const hasLearningDepth = "learning_depth" in value;
+  const learning_depth = hasLearningDepth
+    ? asLearningDepth((value as Record<string, unknown>).learning_depth)
+    : undefined;
+  if (hasLearningDepth && learning_depth === null) issues.push("learning_depth must be -100 or a number between 0 and 1");
+
+  const hasSentenceMeaning = "sentence_en_meaning_fa" in value;
+  const sentence_en_meaning_fa = hasSentenceMeaning
+    ? asNonEmptyString((value as Record<string, unknown>).sentence_en_meaning_fa)
+    : undefined;
+  if (hasSentenceMeaning && !sentence_en_meaning_fa) {
+    issues.push("sentence_en_meaning_fa must be a non-empty string");
+  }
+
+  const hasPos = "pos" in value;
+  const pos = hasPos ? asNonEmptyString((value as Record<string, unknown>).pos) : undefined;
+  if (hasPos && !pos) issues.push("pos must be a non-empty string");
+
+  const hasOtherMeanings = "other_meanings_fa" in value;
+  const other_meanings_fa = hasOtherMeanings
+    ? asNullableTrimmedStringAllowEmpty((value as Record<string, unknown>).other_meanings_fa)
+    : undefined;
+  if (hasOtherMeanings && other_meanings_fa === null && (value as Record<string, unknown>).other_meanings_fa !== null) {
+    issues.push("other_meanings_fa must be a string (can be empty) or null");
+  }
 
   if (issues.length) return { ok: false, issues };
-  return { ok: true, item: { id, phonetic_us, imageability } };
+
+  return {
+    ok: true,
+    item: {
+      id,
+      ...(phonetic_us === undefined ? {} : { phonetic_us }),
+      ...(imageability === undefined ? {} : { imageability }),
+      ...(learning_depth === undefined ? {} : { learning_depth }),
+      ...(sentence_en_meaning_fa === undefined ? {} : { sentence_en_meaning_fa }),
+      ...(pos === undefined ? {} : { pos }),
+      ...(other_meanings_fa === undefined ? {} : { other_meanings_fa }),
+    },
+  };
 }
 
 export async function POST(req: Request) {
@@ -91,26 +162,51 @@ export async function POST(req: Request) {
 
     if (errors.length) {
       return NextResponse.json(
-        { ok: false, error: "Invalid input items (must be exactly { id, phonetic_us, imageability })", errors },
+        {
+          ok: false,
+          error:
+            "Invalid input items (must be { id } plus one or more of: phonetic_us, imageability, learning_depth, sentence_en_meaning_fa, pos, other_meanings_fa)",
+          errors,
+        },
         { status: 400 }
       );
     }
 
     let updated = 0;
     const results: Array<
-      | { ok: true; id: number; phonetic_us_normalized: string; imageability: number }
+      | {
+          ok: true;
+          id: number;
+          phonetic_us_normalized?: string;
+          imageability?: number;
+          learning_depth?: number;
+          sentence_en_meaning_fa?: string;
+          pos?: string;
+          other_meanings_fa?: string | null;
+        }
       | { ok: false; id: number; error: string }
     > = [];
 
     for (const item of items) {
       try {
-        const phonetic_us_normalized = normalizeIpaForDb(item.phonetic_us, 2000);
+        const patch: Record<string, unknown> = {};
+        let phonetic_us_normalized: string | undefined;
+
+        if (item.phonetic_us !== undefined) {
+          phonetic_us_normalized = normalizeIpaForDb(item.phonetic_us, 2000);
+          patch.phonetic_us = item.phonetic_us;
+          patch.phonetic_us_normalized = phonetic_us_normalized;
+        }
+        if (item.imageability !== undefined) patch.imageability = item.imageability;
+        if (item.learning_depth !== undefined) patch.learning_depth = item.learning_depth;
+        if (item.sentence_en_meaning_fa !== undefined) patch.sentence_en_meaning_fa = item.sentence_en_meaning_fa;
+        if (item.pos !== undefined) patch.pos = item.pos;
+        if (item.other_meanings_fa !== undefined) patch.other_meanings_fa = item.other_meanings_fa;
+
         const row = await prisma.word.update({
           where: { id: item.id },
           data: {
-            phonetic_us: item.phonetic_us,
-            phonetic_us_normalized,
-            imageability: item.imageability,
+            ...patch,
           },
           select: { id: true },
         });
@@ -118,8 +214,12 @@ export async function POST(req: Request) {
         results.push({
           ok: true,
           id: row.id,
-          phonetic_us_normalized,
-          imageability: item.imageability,
+          ...(phonetic_us_normalized === undefined ? {} : { phonetic_us_normalized }),
+          ...(item.imageability === undefined ? {} : { imageability: item.imageability }),
+          ...(item.learning_depth === undefined ? {} : { learning_depth: item.learning_depth }),
+          ...(item.sentence_en_meaning_fa === undefined ? {} : { sentence_en_meaning_fa: item.sentence_en_meaning_fa }),
+          ...(item.pos === undefined ? {} : { pos: item.pos }),
+          ...(item.other_meanings_fa === undefined ? {} : { other_meanings_fa: item.other_meanings_fa }),
         });
       } catch (e) {
         results.push({ ok: false, id: item.id, error: e instanceof Error ? e.message : String(e) });
@@ -134,4 +234,3 @@ export async function POST(req: Request) {
     );
   }
 }
-

@@ -69,6 +69,31 @@ export type AnkiNotesInfo = Array<{
   >;
 }>;
 
+export type AnkiDeckConfig = {
+  id: number;
+  name: string;
+  [k: string]: unknown;
+  new?: {
+    perDay?: number;
+    per_day?: number;
+    delays?: number[];
+    ints?: number[];
+    initialFactor?: number;
+    initial_factor?: number;
+    [k: string]: unknown;
+  };
+  lapse?: {
+    delays?: number[];
+    [k: string]: unknown;
+  };
+  rev?: {
+    perDay?: number;
+    per_day?: number;
+    ease4?: number;
+    [k: string]: unknown;
+  };
+};
+
 export type AnkiConnectActionMap = {
   requestPermission: {
     params?: Record<string, never>;
@@ -83,11 +108,46 @@ export type AnkiConnectActionMap = {
   };
 
   deckNames: { params?: Record<string, never>; result: string[] };
-  createDeck: { params: { deck: string }; result: null };
+  createDeck: { params: { deck: string }; result: number };
+
+  getDeckConfig: { params: { deck: string }; result: AnkiDeckConfig };
+  saveDeckConfig: { params: { config: AnkiDeckConfig }; result: boolean };
+  setDeckConfigId: { params: { decks: string[]; configId: number }; result: boolean };
+  cloneDeckConfigId: {
+    params: { name: string; cloneFrom?: number };
+    result: number | false;
+  };
 
   modelNames: { params?: Record<string, never>; result: string[] };
   modelFieldNames: { params: { modelName: string }; result: string[] };
   modelFieldAdd: { params: { modelName: string; fieldName: string }; result: null };
+  modelFieldRemove: { params: { modelName: string; fieldName: string }; result: null };
+  modelFieldReposition: {
+    params: { modelName: string; fieldName: string; index: number };
+    result: null;
+  };
+  createModel: {
+    params: {
+      modelName: string;
+      inOrderFields: string[];
+      cardTemplates: Array<{ Name?: string; Front: string; Back: string }>;
+      css?: string;
+      isCloze?: boolean;
+    };
+    result: unknown;
+  };
+  modelTemplates: {
+    params: { modelName: string };
+    result: Record<string, { Front: string; Back: string }>;
+  };
+  modelTemplateAdd: {
+    params: { modelName: string; template: { Name: string; Front: string; Back: string } };
+    result: null;
+  };
+  updateModelTemplates: {
+    params: { model: { name: string; templates: Record<string, { Front?: string; Back?: string }> } };
+    result: null;
+  };
 
   findNotes: { params: { query: string }; result: number[] };
   notesInfo: { params: { notes: number[] }; result: AnkiNotesInfo };

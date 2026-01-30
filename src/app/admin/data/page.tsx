@@ -566,13 +566,25 @@ function Checkbox({
   );
 }
 
-function Badge({ children, variant = "secondary" }: { children: React.ReactNode; variant?: "secondary" | "outline" }) {
+function Badge({
+  children,
+  variant = "secondary",
+  className,
+  title,
+}: {
+  children: React.ReactNode;
+  variant?: "secondary" | "outline";
+  className?: string;
+  title?: string;
+}) {
   return (
     <span
       className={cn(
         "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium",
         variant === "outline" ? "border border-neutral-200 text-neutral-700" : "bg-neutral-100 text-neutral-700",
+        className,
       )}
+      title={title}
     >
       {children}
     </span>
@@ -971,8 +983,15 @@ const OP_HELP: Record<Operator, string> = {
   gte: "بزرگ‌تر یا مساوی مقدار.",
   lt: "کوچک‌تر از مقدار.",
   lte: "کوچک‌تر یا مساوی مقدار.",
+  lenEq: "طول متن دقیقاً برابر است با مقدار.",
+  lenGt: "طول متن بزرگ‌تر از مقدار است.",
+  lenGte: "طول متن بزرگ‌تر یا مساوی مقدار است.",
+  lenLt: "طول متن کوچک‌تر از مقدار است.",
+  lenLte: "طول متن کوچک‌تر یا مساوی مقدار است.",
   isEmpty: "خالی است (null یا رشته خالی).",
   isNotEmpty: "خالی نیست (نه null و نه رشته خالی).",
+  existsIn: "حداقل یک رکورد مرتبط وجود دارد.",
+  notExistsIn: "هیچ رکورد مرتبطی وجود ندارد.",
   in: "مقدار داخل لیست است (برای چند مقدار: با کاما جدا کنید).",
   notIn: "مقدار داخل لیست نیست (برای چند مقدار: با کاما جدا کنید).",
 };

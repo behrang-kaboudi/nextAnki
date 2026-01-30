@@ -8,7 +8,7 @@ import { ErrorAlert } from "@/components/auth/ErrorAlert";
 import { AuthForm } from "@/components/auth/AuthForm";
 import { OAuthButton } from "@/components/auth/OAuthButton";
 import { MagicLinkForm } from "@/components/auth/MagicLinkForm";
-import type { ProviderDefinition } from "@/lib/providers/types";
+import type { AuthProviderId, ProviderDefinition } from "@/lib/providers/types";
 
 export function LoginClient({
   callbackUrl,
@@ -22,7 +22,11 @@ export function LoginClient({
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useState<"password" | "magic">("password");
   const oauthProviders = providers.filter(
-    (p) => p.id !== "credentials" && p.id !== "email",
+    (
+      p,
+    ): p is ProviderDefinition & {
+      id: Exclude<AuthProviderId, "credentials" | "email">;
+    } => p.id !== "credentials" && p.id !== "email",
   );
 
   return (
