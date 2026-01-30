@@ -115,7 +115,7 @@ export default function WordFieldVoiceCell({
 
   return (
     <div className="flex items-center gap-2">
-      {exists && publicPath ? (
+      {publicPath ? (
         <>
           <audio
             ref={audioRef}
@@ -130,10 +130,12 @@ export default function WordFieldVoiceCell({
             onClick={() => {
               const el = audioRef.current;
               if (!el) return;
+              if (!exists) return;
               if (el.paused) void el.play();
               else el.pause();
             }}
-            className="inline-flex items-center rounded border p-1.5 text-[11px] hover:bg-black/5 dark:hover:bg-white/5"
+            disabled={!exists}
+            className="inline-flex items-center rounded border p-1.5 text-[11px] hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5"
             title={`${playing ? "Pause" : "Play"}${size ? ` • ${size} bytes` : ""}`}
             aria-label={playing ? "Pause" : "Play"}
           >
