@@ -1,9 +1,8 @@
 import Link from "next/link";
 
 import { prisma } from "@/lib/prisma";
-import BatchVoiceGenerate from "../BatchVoiceGenerate.client";
-import { getJsonHintGeneratedAtMs } from "@/lib/words/jsonHint";
-import VoiceCell from "../VoiceCell.client";
+import BatchWordFieldVoiceGenerate from "../BatchWordFieldVoiceGenerate.client";
+import WordFieldVoiceCell from "../WordFieldVoiceCell.client";
 
 export const metadata = {
   title: "Word Hints — Audio",
@@ -52,16 +51,12 @@ export default async function WordHintsAudioPage({
         anki_link_id: true,
         base_form: true,
         meaning_fa: true,
-        hint_sentence: true,
-        json_hint: true,
+        other_meanings_fa: true,
+        sentence_en: true,
+        sentence_en_meaning_fa: true,
       },
     }),
   ]);
-
-  const rowsWithMeta = rows.map((r) => ({
-    ...r,
-    json_hint_generated_at_ms: getJsonHintGeneratedAtMs(r.json_hint ?? null),
-  }));
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const prevPage = Math.max(1, page - 1);
@@ -80,12 +75,37 @@ export default async function WordHintsAudioPage({
         <div>
           <h1 className="text-xl font-semibold">Audio</h1>
           <p className="mt-1 text-sm opacity-80">
-            Generate and manage hint_sentence audio.
+            UI for generating audio for <span className="font-mono">base_form</span>,{" "}
+            <span className="font-mono">meaning_fa</span>,{" "}
+            <span className="font-mono">other_meanings_fa</span>,{" "}
+            <span className="font-mono">sentence_en</span>,{" "}
+            <span className="font-mono">sentence_en_meaning_fa</span>.
           </p>
         </div>
 
         <div className="flex w-full flex-wrap items-center justify-end gap-2 sm:w-auto">
-          <BatchVoiceGenerate rows={rows.map((r) => ({ id: r.id, text: r.hint_sentence }))} />
+          <div className="grid w-full gap-2 sm:w-auto sm:grid-cols-2">
+            <BatchWordFieldVoiceGenerate
+              field="base_form"
+              candidates={rows.map((r) => ({ id: r.id, text: r.base_form }))}
+            />
+            <BatchWordFieldVoiceGenerate
+              field="meaning_fa"
+              candidates={rows.map((r) => ({ id: r.id, text: r.meaning_fa }))}
+            />
+            <BatchWordFieldVoiceGenerate
+              field="other_meanings_fa"
+              candidates={rows.map((r) => ({ id: r.id, text: r.other_meanings_fa }))}
+            />
+            <BatchWordFieldVoiceGenerate
+              field="sentence_en"
+              candidates={rows.map((r) => ({ id: r.id, text: r.sentence_en }))}
+            />
+            <BatchWordFieldVoiceGenerate
+              field="sentence_en_meaning_fa"
+              candidates={rows.map((r) => ({ id: r.id, text: r.sentence_en_meaning_fa }))}
+            />
+          </div>
         </div>
 
         <form className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
@@ -143,31 +163,80 @@ export default async function WordHintsAudioPage({
                 <th className="whitespace-nowrap px-3 py-2 font-semibold">id</th>
                 <th className="whitespace-nowrap px-3 py-2 font-semibold">base_form</th>
                 <th className="whitespace-nowrap px-3 py-2 font-semibold">meaning_fa</th>
-                <th className="whitespace-nowrap px-3 py-2 font-semibold">hint_sentence</th>
-                <th className="whitespace-nowrap px-3 py-2 font-semibold">voice</th>
+                <th className="whitespace-nowrap px-3 py-2 font-semibold">other_meanings_fa</th>
+                <th className="whitespace-nowrap px-3 py-2 font-semibold">sentence_en</th>
+                <th className="whitespace-nowrap px-3 py-2 font-semibold">sentence_en_meaning_fa</th>
               </tr>
             </thead>
             <tbody>
-              {rowsWithMeta.map((r) => (
+              {rows.map((r) => (
                 <tr key={r.id} className="border-b">
                   <td className="whitespace-nowrap px-3 py-2 font-mono">{r.id}</td>
-                  <td className="whitespace-nowrap px-3 py-2">{r.base_form}</td>
-                  <td className="max-w-[520px] truncate px-3 py-2" title={r.meaning_fa}>
-                    {r.meaning_fa}
+                  <td className="max-w-[280px] px-3 py-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="truncate" title={r.base_form}>
+                        {r.base_form}
+                      </span>
+                      <WordFieldVoiceCell
+                        field="base_form"
+                        ankiLinkId={r.anki_link_id}
+                        text={r.base_form}
+                      />
+                    </div>
                   </td>
-                  <td className="whitespace-nowrap px-3 py-2">{r.hint_sentence ?? "—"}</td>
-                  <td className="whitespace-nowrap px-3 py-2">
-                    <VoiceCell
-                      wordId={r.id}
-                      text={r.hint_sentence}
-                      generatedAtMs={r.json_hint_generated_at_ms}
-                    />
+                  <td className="max-w-[360px] px-3 py-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="truncate" title={r.meaning_fa}>
+                        {r.meaning_fa}
+                      </span>
+                      <WordFieldVoiceCell
+                        field="meaning_fa"
+                        ankiLinkId={r.anki_link_id}
+                        text={r.meaning_fa}
+                      />
+                    </div>
+                  </td>
+                  <td className="max-w-[360px] px-3 py-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="truncate" title={String(r.other_meanings_fa ?? "")}>
+                        {r.other_meanings_fa ?? "—"}
+                      </span>
+                      <WordFieldVoiceCell
+                        field="other_meanings_fa"
+                        ankiLinkId={r.anki_link_id}
+                        text={r.other_meanings_fa}
+                      />
+                    </div>
+                  </td>
+                  <td className="max-w-[360px] px-3 py-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="truncate" title={r.sentence_en}>
+                        {r.sentence_en}
+                      </span>
+                      <WordFieldVoiceCell
+                        field="sentence_en"
+                        ankiLinkId={r.anki_link_id}
+                        text={r.sentence_en}
+                      />
+                    </div>
+                  </td>
+                  <td className="max-w-[360px] px-3 py-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="truncate" title={String(r.sentence_en_meaning_fa ?? "")}>
+                        {r.sentence_en_meaning_fa ?? "—"}
+                      </span>
+                      <WordFieldVoiceCell
+                        field="sentence_en_meaning_fa"
+                        ankiLinkId={r.anki_link_id}
+                        text={r.sentence_en_meaning_fa}
+                      />
+                    </div>
                   </td>
                 </tr>
               ))}
-              {rowsWithMeta.length === 0 ? (
+              {rows.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-3 py-6 text-center text-sm opacity-70">
+                  <td colSpan={6} className="px-3 py-6 text-center text-sm opacity-70">
                     No rows.
                   </td>
                 </tr>
@@ -179,4 +248,3 @@ export default async function WordHintsAudioPage({
     </main>
   );
 }
-
