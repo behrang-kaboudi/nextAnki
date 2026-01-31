@@ -43,7 +43,7 @@ const sections: Section[] = [
   {
     title: "Anki",
     links: [
-      { href: "/anki-note", label: "Anki Note" },
+      { href: "/anki-note", label: "Card Management" },
       { href: "/structure-builder", label: "Structure Builder" },
     ],
   },
