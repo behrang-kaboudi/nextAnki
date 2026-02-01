@@ -1,5 +1,6 @@
 Set Backup 
 ----------------------------------------------------------------------
+
 Do the following actions in order:
 
 1. Take a fresh backup of the current local database.
@@ -16,9 +17,12 @@ Rules:
 - Assume the local database is always correct.
 - Always overwrite the existing backup file.
 - Do not add explanations.
+
+
 ----------------------------------------------------------------------
 Get backup From:
 ----------------------------------------------------------------------
+
 Do the following actions in order:
 
 1. Pull the latest changes from the current GitHub branch.

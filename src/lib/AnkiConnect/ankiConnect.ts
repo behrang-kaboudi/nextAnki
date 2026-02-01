@@ -164,12 +164,35 @@ export type AnkiConnectActionMap = {
       type: number;
       queue: number;
       due: number;
+      interval?: number;
       factor: number;
       reps: number;
       lapses: number;
       left: number;
       mod: number;
     }>;
+  };
+  getIntervals: {
+    params: { cards: number[] | string[]; complete?: boolean };
+    result: number[] | number[][];
+  };
+  changeDeck: { params: { cards: number[]; deck: string }; result: null };
+  setDueDate: { params: { cards: number[]; days: string }; result: boolean };
+  getReviewsOfCards: {
+    params: { cards: number[] | string[] };
+    result: Record<
+      string,
+      Array<{
+        id: number;
+        usn: number;
+        ease: number;
+        ivl: number;
+        lastIvl: number;
+        factor: number;
+        time: number;
+        type: number;
+      }>
+    >;
   };
   answerCards: {
     params: { answers: Array<{ cardId: number; ease: 1 | 2 | 3 | 4 }> };

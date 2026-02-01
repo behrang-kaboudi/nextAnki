@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 
 import { ankiRequest, ankiRequestDetailed, type AnkiNotesInfo } from "@/lib/AnkiConnect";
 import { WordAnkiConstants } from "@/lib/AnkiDeck/constants";
@@ -28,6 +28,18 @@ export default function AnkiNotePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [notesInfo, setNotesInfo] = useState<AnkiNotesInfo | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [sessionStudyCardCount, setSessionStudyCardCount] = useState(2);
+  const [phaseLogs, setPhaseLogs] = useState<string[]>([]);
+  const phaseLogBoxRef = useRef<HTMLDivElement | null>(null);
+  const [phase1Running, setPhase1Running] = useState(false);
+  const [phase1StatusText, setPhase1StatusText] = useState<string | null>(null);
+  const [phase1Error, setPhase1Error] = useState<string | null>(null);
+  const [phase2Running, setPhase2Running] = useState(false);
+  const [phase2StatusText, setPhase2StatusText] = useState<string | null>(null);
+  const [phase2Error, setPhase2Error] = useState<string | null>(null);
+  const [phase3Running, setPhase3Running] = useState(false);
+  const [phase3StatusText, setPhase3StatusText] = useState<string | null>(null);
+  const [phase3Error, setPhase3Error] = useState<string | null>(null);
   const [browseLimit, setBrowseLimit] = useState(50);
   const [browseQueryExtra, setBrowseQueryExtra] = useState("");
   const [openNoteIds, setOpenNoteIds] = useState<Record<number, boolean>>({});
@@ -42,6 +54,480 @@ export default function AnkiNotePage() {
   const [syncAllError, setSyncAllError] = useState<string | null>(null);
 
   const queries = useMemo(() => buildQueries(ankiLinkId), [ankiLinkId]);
+  const phaseCount = 3;
+  const numberOptions = useMemo(() => Array.from({ length: 100 }, (_, i) => i + 1), []);
+
+  function appendPhaseLog(line: string) {
+    setPhaseLogs((prev) => [...prev, line]);
+  }
+
+  function appendPhaseLogIds(label: string, ids: number[], chunkSize = 50) {
+    appendPhaseLog(`${label} (${ids.length})`);
+    for (let i = 0; i < ids.length; i += chunkSize) {
+      appendPhaseLog(ids.slice(i, i + chunkSize).join(", "));
+    }
+  }
+
+  function chunkArray<T>(items: T[], chunkSize: number) {
+    if (chunkSize <= 0) return [items];
+    const chunks: T[][] = [];
+    for (let i = 0; i < items.length; i += chunkSize) chunks.push(items.slice(i, i + chunkSize));
+    return chunks;
+  }
+
+  function escapeAnkiQueryValue(value: string) {
+    return value.replaceAll('"', '\\"');
+  }
+
+  async function getNoteIdsForCardIds(cardIds: number[]) {
+    const noteIds = new Set<number>();
+    for (const chunk of chunkArray(cardIds, 200)) {
+      const infoRes = await ankiRequestDetailed("cardsInfo", { cards: chunk });
+      if (!infoRes.ok) return { ok: false as const, error: infoRes.error };
+      for (const card of infoRes.result ?? []) noteIds.add(card.note);
+    }
+    return { ok: true as const, noteIds: Array.from(noteIds) };
+  }
+
+  async function getNotesInfoByIds(noteIds: number[]) {
+    const out: AnkiNotesInfo = [];
+    for (const chunk of chunkArray(noteIds, 200)) {
+      const infoRes = await ankiRequestDetailed("notesInfo", { notes: chunk });
+      if (!infoRes.ok) return { ok: false as const, error: infoRes.error };
+      if (infoRes.result) out.push(...infoRes.result);
+    }
+    return { ok: true as const, notesInfo: out };
+  }
+
+  async function getLastReviewsByCardId(cardIds: number[]) {
+    const out = new Map<number, { id: number; ease: number; type: number; ivl: number; lastIvl: number; time: number } | null>();
+    for (const chunk of chunkArray(cardIds, 100)) {
+      const reviewsRes = await ankiRequestDetailed("getReviewsOfCards", { cards: chunk });
+      if (!reviewsRes.ok) return { ok: false as const, error: reviewsRes.error };
+
+      const byCardId = reviewsRes.result ?? {};
+      for (const cardId of chunk) {
+        const reviews = byCardId[String(cardId)] ?? [];
+        const last = reviews.reduce<(typeof reviews)[number] | null>(
+          (best, r) => (best === null || r.id > best.id ? r : best),
+          null,
+        );
+        out.set(cardId, last ?? null);
+      }
+    }
+    return { ok: true as const, lastByCardId: out };
+  }
+
+  async function filterCardIdsWhereLastAnswerAgain(cardIds: number[]) {
+    const lastRes = await getLastReviewsByCardId(cardIds);
+    if (!lastRes.ok) return lastRes;
+    const out: number[] = [];
+    for (const cardId of cardIds) {
+      const last = lastRes.lastByCardId.get(cardId) ?? null;
+      if (last?.ease === 1) out.push(cardId);
+    }
+    return { ok: true as const, cardIds: out, lastByCardId: lastRes.lastByCardId };
+  }
+
+  async function runPhase1() {
+    if (phase1Running) return;
+
+    setPhase1Running(true);
+    setPhase1Error(null);
+    setPhase1StatusText("Starting…");
+
+    try {
+      const sourceDeck = WordAnkiConstants.decks.Rahnama;
+      const targetDeck = WordAnkiConstants.decks.tempRoot;
+      const enToFaDeck = WordAnkiConstants.decks.EnToFa;
+      const faToEnDeck = WordAnkiConstants.decks.FaToEn;
+
+      const query = `deck:"${escapeAnkiQueryValue(sourceDeck)}" prop:ivl>1`;
+      setPhase1StatusText(`Finding cards in ${sourceDeck} with interval > 1 day…`);
+
+      const foundCardsRes = await ankiRequestDetailed("findCards", { query });
+      if (!foundCardsRes.ok) {
+        setPhase1Error(foundCardsRes.error);
+        return;
+      }
+
+      const sourceCardIds = foundCardsRes.result ?? [];
+      if (sourceCardIds.length === 0) {
+        setPhase1StatusText("No matching cards found.");
+        return;
+      }
+
+      setPhase1StatusText(`Moving ${sourceCardIds.length} cards to ${targetDeck}…`);
+      const moveRes = await ankiRequestDetailed("changeDeck", { cards: sourceCardIds, deck: targetDeck });
+      if (!moveRes.ok) {
+        setPhase1Error(moveRes.error);
+        return;
+      }
+
+      setPhase1StatusText("Finding related notes…");
+      const noteIds = new Set<number>();
+      for (const chunk of chunkArray(sourceCardIds, 200)) {
+        const infoRes = await ankiRequestDetailed("cardsInfo", { cards: chunk });
+        if (!infoRes.ok) {
+          setPhase1Error(infoRes.error);
+          return;
+        }
+        for (const card of infoRes.result ?? []) noteIds.add(card.note);
+      }
+
+      const uniqueNoteIds = Array.from(noteIds);
+      setPhase1StatusText(`Finding EnToFa/FaToEn cards for ${uniqueNoteIds.length} notes…`);
+
+      const siblingCardIds = new Set<number>();
+      for (const noteId of uniqueNoteIds) {
+        const noteQuery = `nid:${noteId} (deck:"${escapeAnkiQueryValue(enToFaDeck)}" OR deck:"${escapeAnkiQueryValue(
+          faToEnDeck
+        )}")`;
+        const cardIdsRes = await ankiRequestDetailed("findCards", { query: noteQuery });
+        if (!cardIdsRes.ok) {
+          setPhase1Error(cardIdsRes.error);
+          return;
+        }
+        for (const cardId of cardIdsRes.result ?? []) siblingCardIds.add(cardId);
+      }
+
+        const siblingIds = Array.from(siblingCardIds);
+        if (siblingIds.length === 0) {
+          setPhase1StatusText("No related EnToFa/FaToEn cards found (nothing to reschedule).");
+          return;
+        }
+
+        setPhase1StatusText(`Checking last answer (Again) for ${siblingIds.length} cards…`);
+        const dueTodayRes = await filterCardIdsWhereLastAnswerAgain(siblingIds);
+        if (!dueTodayRes.ok) {
+          setPhase1Error(dueTodayRes.error);
+          return;
+        }
+        const dueTodayCardIds = dueTodayRes.cardIds;
+
+        if (dueTodayCardIds.length === 0) {
+          setPhase1StatusText("No EnToFa/FaToEn cards had last answer = Again (nothing to reschedule).");
+          return;
+        }
+
+      setPhase1StatusText(`Setting due date to today for ${dueTodayCardIds.length} cards…`);
+      for (const chunk of chunkArray(dueTodayCardIds, 200)) {
+        const dueRes = await ankiRequestDetailed("setDueDate", { cards: chunk, days: "0" });
+        if (!dueRes.ok) {
+          setPhase1Error(dueRes.error);
+          return;
+        }
+      }
+
+      setPhase1StatusText(`Resetting (forget) ${dueTodayCardIds.length} cards…`);
+      for (const chunk of chunkArray(dueTodayCardIds, 200)) {
+        const forgetRes = await ankiRequestDetailed("forgetCards", { cards: chunk });
+        if (!forgetRes.ok) {
+          setPhase1Error(forgetRes.error);
+          return;
+        }
+      }
+
+      setPhase1StatusText(
+        `Done. Moved: ${sourceCardIds.length}. Notes: ${uniqueNoteIds.length}. Due today: ${dueTodayCardIds.length}. Reset: ${dueTodayCardIds.length}.`
+      );
+    } finally {
+      setPhase1Running(false);
+    }
+  }
+
+  async function runPhase2() {
+    if (phase2Running) return;
+
+    setPhase2Running(true);
+    setPhase2Error(null);
+    setPhase2StatusText("Starting…");
+
+    try {
+      const enToFaDeck = WordAnkiConstants.decks.EnToFa;
+      const faToEnDeck = WordAnkiConstants.decks.FaToEn;
+      const rahnamaDeck = WordAnkiConstants.decks.Rahnama;
+      const modelName = WordAnkiConstants.noteTypes.META_LEX_VR9;
+      const rahnamaOrd = 3;
+
+      const query = `deck:"${escapeAnkiQueryValue(enToFaDeck)}" OR deck:"${escapeAnkiQueryValue(faToEnDeck)}"`;
+
+      setPhase2StatusText("Finding EnToFa/FaToEn cards…");
+      const cardsRes = await ankiRequestDetailed("findCards", { query });
+      if (!cardsRes.ok) {
+        setPhase2Error(cardsRes.error);
+        return;
+      }
+      const candidateIds = cardsRes.result ?? [];
+      if (candidateIds.length === 0) {
+        setPhase2StatusText("No cards found.");
+        return;
+      }
+
+      setPhase2StatusText(`Filtering cards with interval > 2 days (getIntervals) from ${candidateIds.length} cards…`);
+      const intervalsRes = await ankiRequestDetailed("getIntervals", { cards: candidateIds, complete: false });
+      if (!intervalsRes.ok) {
+        setPhase2Error(intervalsRes.error);
+        return;
+      }
+
+      const intervals = Array.isArray(intervalsRes.result) ? intervalsRes.result : [];
+      const intervalFiltered: number[] = [];
+      for (let i = 0; i < candidateIds.length; i += 1) {
+        const interval = Number((intervals as unknown[])[i]);
+        if (Number.isFinite(interval) && interval > 2) intervalFiltered.push(candidateIds[i]);
+      }
+
+      if (intervalFiltered.length === 0) {
+        setPhase2StatusText("No cards matched interval > 2 days.");
+        return;
+      }
+
+      appendPhaseLogIds("فاز ۲: کارت‌های پیدا شده (interval>2) در EnToFa/FaToEn (cardIds)", intervalFiltered);
+
+      setPhase2StatusText(`Checking last answer (Again) for ${intervalFiltered.length} cards…`);
+      const againRes = await filterCardIdsWhereLastAnswerAgain(intervalFiltered);
+      if (!againRes.ok) {
+        setPhase2Error(againRes.error);
+        return;
+      }
+      const matchedIds = againRes.cardIds;
+      if (againRes.lastByCardId) {
+        const maxToLog = 80;
+        const slice = intervalFiltered.slice(0, maxToLog);
+        appendPhaseLog(`فاز ۲: نمونه وضعیت آخرین Review برای ${slice.length} کارت اول (بر اساس getReviewsOfCards)`);
+        for (const cardId of slice) {
+          const last = againRes.lastByCardId.get(cardId) ?? null;
+          appendPhaseLog(
+            `${cardId} => ${last ? `ease=${last.ease} type=${last.type} ivl=${last.ivl} lastIvl=${last.lastIvl} id=${last.id}` : "NO_REVIEWS"}`,
+          );
+        }
+      }
+      if (matchedIds.length === 0) {
+        setPhase2StatusText("No cards matched last answer = Again.");
+        return;
+      }
+
+      setPhase2StatusText(`Finding notes for ${matchedIds.length} cards…`);
+      const noteIdsRes = await getNoteIdsForCardIds(matchedIds);
+      if (!noteIdsRes.ok) {
+        setPhase2Error(noteIdsRes.error);
+        return;
+      }
+      const noteIds = noteIdsRes.noteIds;
+      if (noteIds.length === 0) {
+        setPhase2StatusText("No notes found (unexpected).");
+        return;
+      }
+
+      setPhase2StatusText(`Finding Rahnama cards for ${noteIds.length} notes…`);
+      const rahnamaCardIds = new Set<number>();
+      for (const noteId of noteIds) {
+        const noteCardsRes = await ankiRequestDetailed("findCards", { query: `nid:${noteId}` });
+        if (!noteCardsRes.ok) {
+          setPhase2Error(noteCardsRes.error);
+          return;
+        }
+        const noteCardIds = noteCardsRes.result ?? [];
+        if (noteCardIds.length === 0) continue;
+
+        for (const chunk of chunkArray(noteCardIds, 200)) {
+          const infoRes = await ankiRequestDetailed("cardsInfo", { cards: chunk });
+          if (!infoRes.ok) {
+            setPhase2Error(infoRes.error);
+            return;
+          }
+          for (const card of infoRes.result ?? []) {
+            if (card.modelName === modelName && card.ord === rahnamaOrd) rahnamaCardIds.add(card.cardId);
+          }
+        }
+      }
+
+      const rahnamaIds = Array.from(rahnamaCardIds);
+      if (rahnamaIds.length === 0) {
+        setPhase2StatusText("No Rahnama cards found for these notes.");
+        return;
+      }
+
+      setPhase2StatusText(`Checking current deck of ${rahnamaIds.length} Rahnama cards…`);
+      const rahnamaInfo: Array<{ cardId: number; deckName: string }> = [];
+      for (const chunk of chunkArray(rahnamaIds, 200)) {
+        const infoRes = await ankiRequestDetailed("cardsInfo", { cards: chunk });
+        if (!infoRes.ok) {
+          setPhase2Error(infoRes.error);
+          return;
+        }
+        for (const c of infoRes.result ?? []) rahnamaInfo.push({ cardId: c.cardId, deckName: c.deckName });
+      }
+
+      const toMove = rahnamaInfo.filter((c) => c.deckName !== rahnamaDeck).map((c) => c.cardId);
+      const alreadyInDeck = rahnamaInfo.length - toMove.length;
+
+      if (toMove.length) {
+        setPhase2StatusText(`Moving ${toMove.length} Rahnama cards to ${rahnamaDeck}…`);
+        const moveRes = await ankiRequestDetailed("changeDeck", { cards: toMove, deck: rahnamaDeck });
+        if (!moveRes.ok) {
+          setPhase2Error(moveRes.error);
+          return;
+        }
+      }
+
+      if (alreadyInDeck) {
+        appendPhaseLog(`فاز ۲: ${alreadyInDeck} کارت Rahnama از قبل داخل ${rahnamaDeck} بود (بدون ریست).`);
+      }
+
+      if (toMove.length) {
+        setPhase2StatusText(`Resetting (forget) ${toMove.length} moved Rahnama cards…`);
+        for (const chunk of chunkArray(toMove, 200)) {
+          const forgetRes = await ankiRequestDetailed("forgetCards", { cards: chunk });
+          if (!forgetRes.ok) {
+            setPhase2Error(forgetRes.error);
+            return;
+          }
+        }
+      }
+
+      setPhase2StatusText(
+        `Done. Matched: ${matchedIds.length}. Rahnama found: ${rahnamaIds.length}. Moved+reset: ${toMove.length}.`,
+      );
+    } finally {
+      setPhase2Running(false);
+    }
+  }
+
+  async function runPhase3() {
+    if (phase3Running) return;
+
+    setPhase3Running(true);
+    setPhase3Error(null);
+    setPhase3StatusText("Starting…");
+
+    try {
+      const desiredCount = Math.max(1, Math.min(100, Math.trunc(Number(sessionStudyCardCount) || 1)));
+
+      const enToFaDeck = WordAnkiConstants.decks.EnToFa;
+      const faToEnDeck = WordAnkiConstants.decks.FaToEn;
+      const emlaDeck = WordAnkiConstants.decks.Emla;
+      const tempRootDeck = WordAnkiConstants.decks.tempRoot;
+
+      setPhase3StatusText(`Counting due-now cards in ${enToFaDeck}…`);
+      const dueRes = await ankiRequestDetailed("findCards", {
+        query: `deck:"${escapeAnkiQueryValue(enToFaDeck)}" is:due`,
+      });
+      if (!dueRes.ok) {
+        setPhase3Error(dueRes.error);
+        return;
+      }
+
+      const dueNowCardIds = dueRes.result ?? [];
+      const dueNowCount = dueNowCardIds.length;
+      if (dueNowCount >= desiredCount) {
+        setPhase3StatusText(`OK. Due-now = ${dueNowCount} (>= ${desiredCount}).`);
+        return;
+      }
+
+      const needed = desiredCount - dueNowCount;
+      setPhase3StatusText(`Need ${needed} more note(s) from ${tempRootDeck}…`);
+
+      const tempNotesRes = await ankiRequestDetailed("findNotes", {
+        query: `deck:"${escapeAnkiQueryValue(tempRootDeck)}"`,
+      });
+      if (!tempNotesRes.ok) {
+        setPhase3Error(tempNotesRes.error);
+        return;
+      }
+
+      const tempNoteIds = tempNotesRes.result ?? [];
+      if (tempNoteIds.length === 0) {
+        setPhase3StatusText(`No notes found in ${tempRootDeck}.`);
+        return;
+      }
+
+      setPhase3StatusText(`Loading note info (base_form) for ${tempNoteIds.length} notes…`);
+      const infoRes = await getNotesInfoByIds(tempNoteIds);
+      if (!infoRes.ok) {
+        setPhase3Error(infoRes.error);
+        return;
+      }
+
+      const candidates = infoRes.notesInfo
+        .map((n) => {
+          const baseForm = n.fields?.base_form?.value?.trim() ?? "";
+          const sortLen = baseForm ? baseForm.length : Number.POSITIVE_INFINITY;
+          return { noteId: n.noteId, baseForm, sortLen };
+        })
+        .sort((a, b) => a.sortLen - b.sortLen || a.noteId - b.noteId);
+
+      const pickedNoteIds = candidates.slice(0, needed).map((c) => c.noteId);
+      if (pickedNoteIds.length === 0) {
+        setPhase3StatusText("No candidate notes found (missing base_form?).");
+        return;
+      }
+
+      setPhase3StatusText(`Selecting cards from ${pickedNoteIds.length} note(s)…`);
+      const moveEnToFa: number[] = [];
+      const moveFaToEn: number[] = [];
+      const moveEmla: number[] = [];
+
+      for (const noteId of pickedNoteIds) {
+        const noteCardsRes = await ankiRequestDetailed("findCards", { query: `nid:${noteId}` });
+        if (!noteCardsRes.ok) {
+          setPhase3Error(noteCardsRes.error);
+          return;
+        }
+        const noteCardIds = noteCardsRes.result ?? [];
+        if (noteCardIds.length === 0) continue;
+
+        for (const chunk of chunkArray(noteCardIds, 200)) {
+          const cardsInfoRes = await ankiRequestDetailed("cardsInfo", { cards: chunk });
+          if (!cardsInfoRes.ok) {
+            setPhase3Error(cardsInfoRes.error);
+            return;
+          }
+
+          for (const card of cardsInfoRes.result ?? []) {
+            if (card.ord === 0) moveEnToFa.push(card.cardId);
+            else if (card.ord === 1) moveFaToEn.push(card.cardId);
+            else if (card.ord === 2) moveEmla.push(card.cardId);
+          }
+        }
+      }
+
+      if (!moveEnToFa.length && !moveFaToEn.length && !moveEmla.length) {
+        setPhase3StatusText("No EnToFa/FaToEn/Emla cards found for selected notes.");
+        return;
+      }
+
+      setPhase3StatusText("Moving cards to target decks…");
+      if (moveEnToFa.length) {
+        const res = await ankiRequestDetailed("changeDeck", { cards: moveEnToFa, deck: enToFaDeck });
+        if (!res.ok) {
+          setPhase3Error(res.error);
+          return;
+        }
+      }
+      if (moveFaToEn.length) {
+        const res = await ankiRequestDetailed("changeDeck", { cards: moveFaToEn, deck: faToEnDeck });
+        if (!res.ok) {
+          setPhase3Error(res.error);
+          return;
+        }
+      }
+      if (moveEmla.length) {
+        const res = await ankiRequestDetailed("changeDeck", { cards: moveEmla, deck: emlaDeck });
+        if (!res.ok) {
+          setPhase3Error(res.error);
+          return;
+        }
+      }
+
+      setPhase3StatusText(
+        `Done. Due-now: ${dueNowCount}/${desiredCount}. Picked notes: ${pickedNoteIds.length}. Moved cards: EnToFa=${moveEnToFa.length}, FaToEn=${moveFaToEn.length}, Emla=${moveEmla.length}.`,
+      );
+    } finally {
+      setPhase3Running(false);
+    }
+  }
 
   async function handleSearch() {
     setIsLoading(true);
@@ -217,6 +703,36 @@ export default function AnkiNotePage() {
     return () => clearInterval(t);
   }, [syncAllRunning]);
 
+  useEffect(() => {
+    if (phase1StatusText) appendPhaseLog(`فاز ۱: ${phase1StatusText}`);
+  }, [phase1StatusText]);
+
+  useEffect(() => {
+    if (phase1Error) appendPhaseLog(`فاز ۱ (خطا): ${phase1Error}`);
+  }, [phase1Error]);
+
+  useEffect(() => {
+    if (phase2StatusText) appendPhaseLog(`فاز ۲: ${phase2StatusText}`);
+  }, [phase2StatusText]);
+
+  useEffect(() => {
+    if (phase2Error) appendPhaseLog(`فاز ۲ (خطا): ${phase2Error}`);
+  }, [phase2Error]);
+
+  useEffect(() => {
+    if (phase3StatusText) appendPhaseLog(`فاز ۳: ${phase3StatusText}`);
+  }, [phase3StatusText]);
+
+  useEffect(() => {
+    if (phase3Error) appendPhaseLog(`فاز ۳ (خطا): ${phase3Error}`);
+  }, [phase3Error]);
+
+  useEffect(() => {
+    const el = phaseLogBoxRef.current;
+    if (!el) return;
+    el.scrollTop = el.scrollHeight;
+  }, [phaseLogs.length]);
+
   async function openFieldsModal() {
     setFieldsModalOpen(true);
     setModelError(null);
@@ -293,6 +809,187 @@ export default function AnkiNotePage() {
         title="Card Management"
         subtitle="AnkiConnect must be running (port 8765). Searches by `anki_link_id` (or `AnkiLinkId`)."
       />
+
+      <div dir="rtl" className="rounded-2xl border border-card bg-card p-5 text-right shadow-elevated">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <div className="text-sm font-semibold text-foreground">فازها</div>
+            <div className="mt-1 text-xs text-muted">
+              این کادر برای تعریف چند فاز است. فعلاً فقط اسکلت UI آماده است.
+            </div>
+          </div>
+
+          <div className="w-full sm:w-[160px]">
+            <div className="mb-1 text-xs font-semibold text-muted">تعداد کارت ها برای مطالعه جلسه</div>
+            <select
+              value={String(sessionStudyCardCount)}
+              onChange={(e) => setSessionStudyCardCount(Math.max(1, Math.min(100, Number(e.target.value) || 1)))}
+              className="h-11 w-full rounded-xl border border-card bg-background px-3 text-sm text-foreground outline-none focus:ring-2 focus:ring-[var(--ring)]"
+            >
+              {numberOptions.map((n) => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: phaseCount }, (_, idx) => {
+            const phaseNumber = idx + 1;
+            return (
+              <div key={phaseNumber} className="rounded-xl border border-card bg-background p-3">
+                <div className="text-sm font-semibold text-foreground">
+                  فاز {phaseNumber}
+                  <span className="ms-2 text-xs font-semibold text-muted">
+                    {phaseNumber === 1
+                      ? "فعال سازی برای مطالعه مجد"
+                      : phaseNumber === 2
+                        ? "تمرین تصویر سازی"
+                        : phaseNumber === 3
+                          ? "افزودن کارت"
+                          : ""}
+                  </span>
+                </div>
+                {phaseNumber === 1 ? (
+                  <div className="mt-2 grid gap-3">
+                    <button
+                      type="button"
+                      onClick={() => void runPhase1()}
+                      disabled={phase1Running}
+                      className="h-11 rounded-xl bg-[var(--primary)] px-4 text-sm font-semibold text-[var(--primary-foreground)] shadow-elevated transition hover:opacity-95 disabled:opacity-60"
+                    >
+                      {phase1Running ? "در حال انجام..." : "اجرای فاز ۱"}
+                    </button>
+
+                    <div dir="rtl" className="grid gap-2 text-right">
+                      <ol className="list-decimal space-y-1 ps-5 text-xs text-muted">
+                        <li>
+                          کارت‌های deck {WordAnkiConstants.decks.Rahnama} که interval آن‌ها بیشتر از ۱ روز است پیدا
+                          می‌شود.
+                        </li>
+                        <li>آن کارت‌ها به deck {WordAnkiConstants.decks.tempRoot} منتقل می‌شوند.</li>
+                        <li>نوت‌های معادلِ آن کارت‌ها پیدا می‌شوند.</li>
+                        <li>
+                          از همان نوت‌ها کارت‌های مرتبطِ deck های {WordAnkiConstants.decks.EnToFa} و{" "}
+                          {WordAnkiConstants.decks.FaToEn} پیدا می‌شوند.
+                        </li>
+                        <li>اگر آخرین پاسخ آن کارت‌ها Again نبود هیچ کاری انجام نمی‌شود.</li>
+                        <li>اگر آخرین پاسخ Again بود، زمان مرورشان به امروز تغییر می‌کند و بعد forget می‌خورند تا ریست شوند.</li>
+                      </ol>
+
+                      {phase1StatusText ? (
+                        <div className="text-xs text-foreground/80">{phase1StatusText}</div>
+                      ) : null}
+                      {phase1Error ? <div className="text-xs text-red-700">{phase1Error}</div> : null}
+                    </div>
+                  </div>
+                ) : phaseNumber === 2 ? (
+                  <div className="mt-2 grid gap-3">
+                    <button
+                      type="button"
+                      onClick={() => void runPhase2()}
+                      disabled={phase2Running}
+                      className="h-11 rounded-xl bg-[var(--primary)] px-4 text-sm font-semibold text-[var(--primary-foreground)] shadow-elevated transition hover:opacity-95 disabled:opacity-60"
+                    >
+                      {phase2Running ? "در حال انجام..." : "اجرای فاز ۲"}
+                    </button>
+
+                    <div dir="rtl" className="grid gap-2 text-right">
+                      <ol className="list-decimal space-y-1 ps-5 text-xs text-muted">
+                        <li>
+                          همه کارت‌های deck های {WordAnkiConstants.decks.EnToFa} و {WordAnkiConstants.decks.FaToEn} پیدا
+                          می‌شوند.
+                        </li>
+                        <li>interval کارت‌ها با getIntervals بررسی می‌شود و فقط interval&gt;2 نگه داشته می‌شود.</li>
+                        <li>آیدی کارت‌های interval&gt;2 در لاگ چاپ می‌شود.</li>
+                        <li>از بین آن‌ها کارت‌هایی که آخرین پاسخشان Again بوده انتخاب می‌شوند.</li>
+                        <li>با کمک نوتِ معادل، کارت نوع Rahnama پیدا می‌شود.</li>
+                        <li>deck کارت Rahnama به {WordAnkiConstants.decks.Rahnama} تغییر می‌کند.</li>
+                        <li>
+                          اگر کارت Rahnama از قبل داخل {WordAnkiConstants.decks.Rahnama} نباشد و الان به آن منتقل شود، با
+                          forget ریست می‌شود تا دوباره تکرار شود.
+                        </li>
+                      </ol>
+
+                      {phase2StatusText ? (
+                        <div className="text-xs text-foreground/80">{phase2StatusText}</div>
+                      ) : null}
+                      {phase2Error ? <div className="text-xs text-red-700">{phase2Error}</div> : null}
+                    </div>
+                  </div>
+                ) : phaseNumber === 3 ? (
+                  <div className="mt-2 grid gap-3">
+                    <button
+                      type="button"
+                      onClick={() => void runPhase3()}
+                      disabled={phase3Running}
+                      className="h-11 rounded-xl bg-[var(--primary)] px-4 text-sm font-semibold text-[var(--primary-foreground)] shadow-elevated transition hover:opacity-95 disabled:opacity-60"
+                    >
+                      {phase3Running ? "در حال انجام..." : "اجرای فاز ۳"}
+                    </button>
+
+                    <div className="grid gap-2">
+                      <ol className="list-decimal space-y-1 ps-5 text-xs text-muted">
+                        <li>
+                          تعداد کارت‌های آماده‌ی مطالعه (due-now) را از deck {WordAnkiConstants.decks.EnToFa} می‌شمارد
+                          (is:due).
+                        </li>
+                        <li>
+                          اگر تعدادشان کمتر از مقدار «تعداد کارت ها برای مطالعه جلسه» باشد، اختلاف را به صورت تعداد نوت
+                          از deck {WordAnkiConstants.decks.tempRoot} برمی‌دارد.
+                        </li>
+                        <li>نوت‌ها فعلاً بر اساس کوتاه‌ترین طول رشته‌ی فیلد base_form انتخاب می‌شوند.</li>
+                        <li>
+                          از نوت‌های انتخاب‌شده کارت‌های نوع EnToFa / FaToEn / Emla انتخاب می‌شوند و به deck های متناظر
+                          خودشان منتقل می‌شوند.
+                        </li>
+                      </ol>
+
+                      {phase3StatusText ? (
+                        <div className="text-xs text-foreground/80">{phase3StatusText}</div>
+                      ) : null}
+                      {phase3Error ? <div className="text-xs text-red-700">{phase3Error}</div> : null}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="mt-1 text-xs text-muted">تعریف این فاز را بعداً اضافه می‌کنیم.</div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="mt-4 rounded-xl border border-card bg-background p-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="text-sm font-semibold text-foreground">لاگ</div>
+            <button
+              type="button"
+              onClick={() => setPhaseLogs([])}
+              className="h-9 rounded-xl border border-card bg-card px-3 text-xs font-semibold text-foreground hover:bg-black/5 dark:hover:bg-white/5"
+            >
+              پاک کردن
+            </button>
+          </div>
+          <div
+            ref={phaseLogBoxRef}
+            className="mt-2 max-h-[240px] overflow-auto rounded-xl border border-card bg-card p-3 text-xs text-foreground"
+          >
+            {phaseLogs.length ? (
+              <div className="grid gap-1">
+                {phaseLogs.map((line, idx) => (
+                  <div key={idx} dir="auto" className="whitespace-pre-wrap">
+                    {line}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-muted">فعلاً لاگی ثبت نشده.</div>
+            )}
+          </div>
+        </div>
+      </div>
 
       <div className="rounded-2xl border border-card bg-card p-5 shadow-elevated">
         <div className="mb-3 flex flex-wrap items-center justify-end gap-2">
