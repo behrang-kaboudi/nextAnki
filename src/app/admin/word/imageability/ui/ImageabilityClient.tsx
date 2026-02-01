@@ -55,14 +55,16 @@ export function ImageabilityClient() {
         | { error: string };
       if (!res.ok) throw new Error("error" in json ? json.error : `Request failed (${res.status})`);
 
+      if ("error" in json) {
+        throw new Error(json.error);
+      }
+
       setNotice(
         `Updated: ${json.updated}/${json.requested}. Missing: ${json.missing}${
           typeof json.rejectedCount === "number" ? `, rejected: ${json.rejectedCount}` : ""
-        }`
+        }`,
       );
-      if (json.missingIds.length > 0) {
-        setText(JSON.stringify(json.missingIds.map((id) => ({ id })), null, 2));
-      }
+      if (json.missingIds.length > 0) setText(JSON.stringify(json.missingIds.map((id) => ({ id })), null, 2));
     } catch (e) {
       setNotice(e instanceof Error ? e.message : String(e));
     } finally {
@@ -97,13 +99,13 @@ export function ImageabilityClient() {
           {loading ? "Updating…" : "Update"}
         </button>
 
-          {notice ? (
-            <div className="text-sm text-muted">{notice}</div>
-          ) : (
-            <div className="text-sm text-muted">
-              Each item must include `id` and `sentence_en`. `sentence_en_meaning_fa` is optional. Other fields are ignored.
-            </div>
-          )}
+        {notice ? (
+          <div className="text-sm text-muted">{notice}</div>
+        ) : (
+          <div className="text-sm text-muted">
+            Each item must include `id` and `sentence_en`. `sentence_en_meaning_fa` is optional. Other fields are ignored.
+          </div>
+        )}
       </div>
     </div>
   );

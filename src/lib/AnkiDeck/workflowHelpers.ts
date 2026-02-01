@@ -1,6 +1,7 @@
 import { ankiRequest } from "@/lib/AnkiConnect";
 import type { Result } from "./result";
 import { err, ok } from "./result";
+import { quoteAnkiSearchValue } from "./queries";
 
 export function chunkArray<T>(items: T[], chunkSize: number) {
   if (chunkSize <= 0) return [items];
@@ -13,6 +14,71 @@ export async function findCardsByQuery(query: string): Promise<Result<number[]>>
   const cardIds = await ankiRequest("findCards", { query });
   if (!cardIds) return err(`findCards failed for query: ${query}`);
   return ok(cardIds);
+}
+
+export async function findCardIdsInDeck(deckName: string): Promise<Result<number[]>> {
+  const query = `deck:${quoteAnkiSearchValue(deckName)}`;
+  return findCardsByQuery(query);
+}
+
+export type AnkiCardInfo = {
+  cardId: number;
+  interval?: number;
+  note: number;
+  deckName: string;
+  modelName: string;
+  ord: number;
+  type: number;
+  queue: number;
+  due: number;
+  factor: number;
+  reps: number;
+  lapses: number;
+  left: number;
+  mod: number;
+};
+
+export type AnkiRevlogEntry = {
+  id: number;
+  usn: number;
+  ease: number;
+  ivl: number;
+  lastIvl: number;
+  factor: number;
+  time: number;
+  type: number;
+};
+
+export async function getCardsInfoByCardIds(cardIds: number[], chunkSize = 100): Promise<Result<AnkiCardInfo[]>> {
+  const out: AnkiCardInfo[] = [];
+  for (const chunk of chunkArray(cardIds, chunkSize)) {
+    const info = await ankiRequest("cardsInfo", { cards: chunk });
+    if (!info) return err("cardsInfo failed while loading card info");
+    out.push(...(info as unknown as AnkiCardInfo[]));
+  }
+  return ok(out);
+}
+
+export async function getLastRevlogByCardIds(
+  cardIds: number[],
+  chunkSize = 100,
+): Promise<Result<Map<number, AnkiRevlogEntry | null>>> {
+  const out = new Map<number, AnkiRevlogEntry | null>();
+  for (const chunk of chunkArray(cardIds, chunkSize)) {
+    const res = await ankiRequest("getReviewsOfCards", { cards: chunk });
+    if (!res) return err("getReviewsOfCards failed while loading revlog");
+
+    const byCardId = res as Record<string, AnkiRevlogEntry[]>;
+    for (const cardId of chunk) {
+      const reviews = byCardId[String(cardId)] ?? [];
+      const last = reviews.reduce<AnkiRevlogEntry | null>(
+        (best, r) => (best === null || r.id > best.id ? r : best),
+        null,
+      );
+      out.set(cardId, last);
+    }
+  }
+  return ok(out);
 }
 
 export async function findNotesByQuery(query: string): Promise<Result<number[]>> {
@@ -56,4 +122,3 @@ export async function pressAgainOnce(cardIds: number[]): Promise<Result<{ okCard
   }
   return ok({ okCardIds, failedCardIds });
 }
-

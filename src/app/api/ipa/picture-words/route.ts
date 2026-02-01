@@ -77,7 +77,7 @@ function hasPersianLetters(value: string) {
 function parseCanBePersonal(value: unknown): boolean {
   if (typeof value === "boolean") return value;
   if (typeof value === "number") return Number.isFinite(value) && value > 0;
-  if (typeof value === "bigint") return value > 0n;
+  if (typeof value === "bigint") return value > BigInt(0);
   if (typeof value === "string") {
     const s = value.trim().toLowerCase();
     if (!s) return false;
