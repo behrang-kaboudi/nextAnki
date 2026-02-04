@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { PictureWordUsage } from "@prisma/client";
+import type { PictureWordUsage, Word } from "@prisma/client";
 
 import {
   addReplaceMentsForEach,
@@ -38,15 +38,23 @@ async function findByPatternCandidates(
   patterns.push(`_${phoneticNormalized[0]}${phoneticNormalized[1]}`);
   for (const pattern of patterns) {
     const matches = await findByPattern(pattern);
-    if (matches.length > 0) return matches;
+    const filtered1 = matches.filter((m) => m.target_ipa != phoneticNormalized);
+    const filtered2 = filtered1.filter((m) => {
+      if (!m.target_lang) return true;
+      if (m.target_ipa.length <= 2) return true;
+      return false;
+    });
+    const filtered3 = filterByUsage(filtered2, null);
+    if (filtered3.length > 0) return filtered3;
   }
 
   return [];
 }
 
 export async function setFor3(
-  phoneticNormalized: string,
+  word: Pick<Word, "phonetic_us_normalized">,
 ): Promise<SetFor2Result> {
+  const phoneticNormalized = (word.phonetic_us_normalized ?? "").trim();
   let matches = await findByPatternCandidates(phoneticNormalized);
   if (
     matches.length === 0 &&

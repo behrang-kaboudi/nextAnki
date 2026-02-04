@@ -24,10 +24,45 @@ type AllChangedItem = Row & {
   changed: boolean;
 };
 
-function previewText(value: string | null, max = 72) {
+function prettyJson(value: string | null) {
   const s = (value ?? "").trim();
-  if (!s) return "—";
-  return s.length > max ? `${s.slice(0, max)}…` : s;
+  if (!s) return null;
+  function formatParsed(parsed: unknown) {
+    if (typeof parsed === "string") {
+      try {
+        return JSON.stringify(JSON.parse(parsed) as unknown, null, 2);
+      } catch {
+        return parsed;
+      }
+    }
+    return JSON.stringify(parsed, null, 2);
+  }
+
+  const normalized = s.replaceAll("\r\n", "\n").replaceAll("\r", "\n");
+
+  try {
+    return formatParsed(JSON.parse(normalized) as unknown);
+  } catch {
+    // Common legacy case: first line is `{ "key":` and the next lines contain a JSON value.
+    // Example:
+    // { "person":
+    // {"id":...}
+    const lines = normalized.split("\n").filter((l) => l.trim().length > 0);
+    if (lines.length >= 2) {
+      const head = lines[0].trim();
+      const rest = lines.slice(1).join("\n").trim();
+      if (head.endsWith(":")) {
+        const candidate = `${head} ${rest}\n}`;
+        try {
+          return formatParsed(JSON.parse(candidate) as unknown);
+        } catch {
+          // ignore
+        }
+      }
+    }
+
+    return normalized;
+  }
 }
 
 export default function WordHintsTable({ rows }: { rows: Row[] }) {
@@ -267,6 +302,8 @@ export default function WordHintsTable({ rows }: { rows: Row[] }) {
               {visibleRows.map((r) => {
                 const p = preview[String(r.id)];
                 const changed = Boolean(p?.changed);
+                const jsonPretty = prettyJson(r.json_hint);
+                const nextPretty = changed ? prettyJson(p?.nextJson ?? null) : null;
                 return (
                   <tr
                     key={r.id}
@@ -287,17 +324,23 @@ export default function WordHintsTable({ rows }: { rows: Row[] }) {
                     <td className="whitespace-nowrap px-3 py-2">
                       {r.hint_sentence ?? "—"}
                     </td>
-                    <td
-                      className="max-w-[460px] truncate px-3 py-2 font-mono"
-                      title={r.json_hint ?? ""}
-                    >
-                      {previewText(r.json_hint)}
+                    <td className="w-[520px] px-3 py-2 align-top">
+                      {jsonPretty ? (
+                        <pre className="max-h-56 overflow-auto whitespace-pre-wrap break-words font-mono text-[11px] leading-4">
+                          {jsonPretty}
+                        </pre>
+                      ) : (
+                        "—"
+                      )}
                     </td>
-                    <td
-                      className="max-w-[460px] truncate px-3 py-2 font-mono"
-                      title={changed ? (p?.nextJson ?? "") : ""}
-                    >
-                      {changed ? previewText(p?.nextJson ?? null) : "—"}
+                    <td className="w-[520px] px-3 py-2 align-top">
+                      {nextPretty ? (
+                        <pre className="max-h-56 overflow-auto whitespace-pre-wrap break-words font-mono text-[11px] leading-4">
+                          {nextPretty}
+                        </pre>
+                      ) : (
+                        "—"
+                      )}
                     </td>
                     <td className="whitespace-nowrap px-3 py-2">
                       <button

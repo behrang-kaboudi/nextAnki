@@ -13,9 +13,16 @@ export type IpaCandidate = {
   fa: string;
   en: string;
   target_ipa: string;
+  target_lang?: "fa" | "en";
   usage: string;
   source: "pictureWord" | "word";
 };
+
+export function getIpaCandidateTargetLang(
+  candidate: Pick<IpaCandidate, "target_lang">,
+): "fa" | "en" {
+  return candidate.target_lang ?? "fa";
+}
 
 function firstNonSpaceChar(value: string): string | null {
   for (const ch of Array.from(value)) {
@@ -60,9 +67,12 @@ export function filterByUsage(
   rows: IpaCandidate[],
   preferredUsage: IpaCandidate["usage"] | null,
 ): IpaCandidate[] {
-  return preferredUsage === null
-    ? rows
-    : rows.filter((row) => row.usage === preferredUsage);
+  const ADJ = "adj";
+  const wantAdj = String(preferredUsage ?? "").trim() === ADJ;
+
+  return wantAdj
+    ? rows.filter((row) => String(row.usage).trim() === ADJ)
+    : rows.filter((row) => String(row.usage).trim() !== ADJ);
 }
 
 export function addReplaceMentsForEach(

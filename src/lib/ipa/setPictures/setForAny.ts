@@ -1,7 +1,6 @@
 import "server-only";
 
 import type { Word } from "@prisma/client";
-import type { PictureWord } from "@prisma/client";
 import type { SetFor2Result } from "./types";
 import { setFor2 } from "./setFor2";
 import { setFor3 } from "./setFor3";
@@ -18,7 +17,7 @@ export async function pickPictureSymbolsForPhoneticNormalized(
   const normalized = (word.phonetic_us_normalized ?? "").trim();
   let persianImage: IpaCandidate | null;
   if (word.imageability! < 62) {
-    persianImage = await setForPersian(word.meaning_fa_IPA_normalized ?? "");
+    persianImage = await setForPersian(word);
     if (!persianImage)
       console.log(
         `[setForAny.ts:21]`,
@@ -34,17 +33,14 @@ export async function pickPictureSymbolsForPhoneticNormalized(
     };
   };
 
-  if (normalized.length < 3) return withPersianImage(await setFor2(normalized));
-  if (normalized.length === 3)
-    return withPersianImage(await setFor3(normalized));
+  if (normalized.length < 3) return withPersianImage(await setFor2(word));
+  if (normalized.length === 3) return withPersianImage(await setFor3(word));
   if (normalized.includes(" "))
     return withPersianImage(await setForSpace(normalized));
 
-  if (normalized.length === 4)
-    return withPersianImage(await setFor4(normalized));
-  if (normalized.length === 5)
-    return withPersianImage(await setFor5(normalized));
-  if (normalized.length > 5) return withPersianImage(await setFor6(normalized));
+  if (normalized.length === 4) return withPersianImage(await setFor4(word));
+  if (normalized.length === 5) return withPersianImage(await setFor5(word));
+  if (normalized.length > 5) return withPersianImage(await setFor6(word));
 
   return null;
 }

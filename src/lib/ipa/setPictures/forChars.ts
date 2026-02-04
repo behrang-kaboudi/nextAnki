@@ -14,9 +14,8 @@ export async function findPictureWordsByIpaPrefix(
 
   const likePattern = pattern.endsWith("%") ? pattern : `${pattern}%`;
 
-  const rows = await prisma.$queryRaw<
+  const pictureRows = await prisma.$queryRaw<
     Array<{
-      id: number;
       fa: string;
       en: string;
       target_ipa: string;
@@ -33,13 +32,95 @@ export async function findPictureWordsByIpaPrefix(
     ORDER BY fa ASC, en ASC
   `;
 
-  return rows.map((row) => ({
-    fa: row.fa,
-    en: row.en,
-    target_ipa: row.target_ipa,
-    usage: row.usage,
-    source: "pictureWord",
-  }));
+  const wordRows = await prisma.$queryRaw<
+    Array<{
+      fa: string;
+      en: string;
+      target_ipa: string;
+      usage: string | null;
+    }>
+  >`
+    SELECT
+      meaning_fa AS fa,
+      base_form AS en,
+      \`meaning_fa_IPA_normalized\` AS target_ipa,
+      pos AS \`usage\`,
+      imageability
+    FROM Word
+    WHERE \`meaning_fa_IPA_normalized\` LIKE ${likePattern}
+      AND \`meaning_fa_IPA_normalized\` <> ''
+      AND imageability > 64
+      AND pos = 'noun'
+    ORDER BY meaning_fa ASC, base_form ASC
+  `;
+  const wordRowsEn = await prisma.$queryRaw<
+    Array<{
+      fa: string;
+      en: string;
+      target_ipa: string;
+      usage: string | null;
+    }>
+  >`
+    SELECT
+      meaning_fa AS fa,
+      base_form AS en,
+      \`phonetic_us_normalized\` AS target_ipa,
+      pos AS \`usage\`,
+      imageability
+    FROM Word
+    WHERE \`phonetic_us_normalized\` LIKE ${likePattern}
+      AND \`phonetic_us_normalized\` <> ''
+      AND imageability > 64
+       AND pos = 'noun'
+    ORDER BY meaning_fa ASC, base_form ASC
+  `;
+  if (ipaPrefix === "tæh") {
+    console.log(`[forChars.ts:99]`, wordRows);
+  }
+  const out: IpaCandidate[] = [];
+  const seen = new Set<string>();
+  function pushUnique(it: IpaCandidate) {
+    const key = `${it.source}|${it.fa}|${it.en}|${it.target_ipa}|${it.usage}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    out.push(it);
+  }
+
+  for (const row of pictureRows) {
+    pushUnique({
+      fa: row.fa,
+      en: row.en,
+      target_ipa: row.target_ipa,
+      usage: row.usage,
+      source: "pictureWord",
+    });
+  }
+
+  for (const row of wordRows) {
+    const target = (row.target_ipa ?? "").trim();
+    if (!target) continue;
+    pushUnique({
+      fa: row.fa,
+      en: row.en,
+      target_ipa: target,
+      usage: (row.usage ?? "word").trim() || "word",
+      source: "word",
+    });
+  }
+  for (const row of wordRowsEn) {
+    const target = (row.target_ipa ?? "").trim();
+    if (!target) continue;
+    pushUnique({
+      fa: row.fa,
+      en: row.en,
+      target_ipa: target,
+      usage: (row.usage ?? "word").trim() || "word",
+      source: "word",
+      target_lang: "en",
+    });
+  }
+
+  return out;
 }
 
 function get2CharPatterns(phoneticNormalized: string): string[] {
@@ -103,7 +184,7 @@ function get4CharPatterns(phoneticNormalized: string): string[] {
 }
 export async function for2Char(
   phoneticNormalized: string,
-  preferredUsage: PictureWordUsage | null = PictureWordUsage.person,
+  preferredUsage: PictureWordUsage | null = null,
 ): Promise<IpaCandidate[]> {
   const patterns = get2CharPatterns(phoneticNormalized);
   for (const pattern of patterns) {
@@ -117,7 +198,7 @@ export async function for2Char(
 
 export async function for3Char(
   phoneticNormalized: string,
-  preferredUsage: PictureWordUsage | null = PictureWordUsage.person,
+  preferredUsage: PictureWordUsage | null = null,
 ): Promise<IpaCandidate[]> {
   const a = phoneticNormalized[0] ?? "";
   const b = phoneticNormalized[1] ?? "";
@@ -136,7 +217,7 @@ export async function for3Char(
 
 export async function for4Char(
   phoneticNormalized: string,
-  preferredUsage: PictureWordUsage | null = PictureWordUsage.person,
+  preferredUsage: PictureWordUsage | null = null,
 ): Promise<IpaCandidate[]> {
   const a = phoneticNormalized[0] ?? "";
   const b = phoneticNormalized[1] ?? "";

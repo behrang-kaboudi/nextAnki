@@ -1,6 +1,6 @@
 import "server-only";
 
-import { PictureWord, PictureWordUsage } from "@prisma/client";
+import { PictureWord, PictureWordUsage, Word } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
 
@@ -16,6 +16,7 @@ import { findPictureWordsByIpaPrefix } from "./forChars";
 async function findByPattern(pattern: string): Promise<IpaCandidate[]> {
   const preferredUsage: PictureWordUsage | null = PictureWordUsage.person;
   const matches = await findPictureWordsByIpaPrefix(pattern);
+
   return filterByUsage(matches, preferredUsage);
 }
 
@@ -91,16 +92,24 @@ async function findByPatternCandidates(
 
   for (const pattern of patterns) {
     const matches = await findByPattern(pattern);
-    if (matches.length > 0) return matches;
+    if (matches.length > 0) {
+      if (phoneticNormalized === "tæhrɪk kærdæn") {
+        console.log(`[setForPersian.ts:96]`, pattern);
+      }
+
+      return matches;
+    }
   }
 
   return [];
 }
 
-export async function setForPersian(
-  phoneticNormalized: string,
-): Promise<IpaCandidate | null> {
+export async function setForPersian(word: Word): Promise<IpaCandidate | null> {
+  const phoneticNormalized = word.meaning_fa_IPA_normalized ?? "";
   const matches = await findByPatternCandidates(phoneticNormalized);
+  if (word.base_form === "goad") {
+    console.log(`[setForPersian.ts:104]`, matches, phoneticNormalized);
+  }
   const best = pickBestFaEn(matches, phoneticNormalized);
   return best ? best : null;
 }

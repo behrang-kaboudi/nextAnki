@@ -1,5 +1,7 @@
 import "server-only";
 
+import type { Word } from "@prisma/client";
+
 import type { SetFor2Result } from "./types";
 import { FA_KEYWORDS_VOWELS_NORMALIZED } from "@/lib/ipa/ipaSets";
 import { for3Char, for4Char } from "./forChars";
@@ -7,8 +9,9 @@ import { pickBestFaEn } from "./pickBestFaEn";
 import { placeholderJobPictureWord } from "./placeholders";
 
 export async function setFor6(
-  phoneticNormalized: string,
+  word: Pick<Word, "phonetic_us_normalized">,
 ): Promise<SetFor2Result> {
+  const phoneticNormalized = (word.phonetic_us_normalized ?? "").trim();
   const symbols: SetFor2Result = {};
 
   // fallback: split into 3-char + 3-char segments (same spirit as setFor5)

@@ -1,8 +1,6 @@
 import "server-only";
 
-import type { PictureWord, PictureWordUsage } from "@prisma/client";
-
-import { prisma } from "@/lib/prisma";
+import type { PictureWordUsage, Word } from "@prisma/client";
 
 import { addReplaceMentsForEach, filterByUsage, IpaCandidate } from "./shared";
 import { findPictureWordsByIpaPrefix } from "./forChars";
@@ -18,10 +16,10 @@ async function findByPatternCandidates(
 
   const patterns = [
     `${phoneticNormalized}`,
-    `_${phoneticNormalized}`,
+    // `_${phoneticNormalized}`,
     `${a}_${b}`,
-    `${a}__${b}`,
-    `${a}${b}_`,
+    // `${a}__${b}`,
+    // `${a}${b}_`,
     `_${a}${b}`,
   ];
 
@@ -29,8 +27,10 @@ async function findByPatternCandidates(
 
   for (const pattern of patterns) {
     const matches = await findPictureWordsByIpaPrefix(pattern);
-    const filtered = filterByUsage(matches, preferredUsage);
-    if (filtered.length > 0) return filtered;
+    const filtered1 = matches.filter((m) => m.target_ipa != phoneticNormalized);
+    const filtered2 = filtered1.filter((m) => !m.target_lang);
+    const filtered3 = filterByUsage(filtered2, preferredUsage);
+    if (filtered3.length > 0) return filtered3;
   }
 
   return [];
@@ -50,8 +50,9 @@ function bestOfUsage(
 }
 
 export async function setFor2(
-  phoneticNormalized: string,
+  word: Pick<Word, "phonetic_us_normalized">,
 ): Promise<SetFor2Result> {
+  const phoneticNormalized = (word.phonetic_us_normalized ?? "").trim();
   const matches = await findByPatternCandidates(phoneticNormalized);
 
   const symbols: SetFor2Result = {
