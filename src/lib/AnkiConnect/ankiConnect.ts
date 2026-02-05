@@ -106,6 +106,10 @@ export type AnkiConnectActionMap = {
     params: { filename: string; data: string; deleteExisting?: boolean };
     result: string | null;
   };
+  deleteMediaFile: {
+    params: { filename: string };
+    result: null;
+  };
 
   deckNames: { params?: Record<string, never>; result: string[] };
   createDeck: { params: { deck: string }; result: number };

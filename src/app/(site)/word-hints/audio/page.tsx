@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { prisma } from "@/lib/prisma";
 import BatchWordFieldVoiceGenerate from "../BatchWordFieldVoiceGenerate.client";
+import AudioHelpModal from "../AudioHelpModal.client";
 import WordFieldVoiceCell from "../WordFieldVoiceCell.client";
 
 export const metadata = {
@@ -73,7 +74,10 @@ export default async function WordHintsAudioPage({
     <main className="mx-auto w-full max-w-6xl p-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold">Audio</h1>
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="text-xl font-semibold">Audio</h1>
+            <AudioHelpModal />
+          </div>
           <p className="mt-1 text-sm opacity-80">
             UI for generating audio for <span className="font-mono">base_form</span>,{" "}
             <span className="font-mono">meaning_fa</span>,{" "}
@@ -87,23 +91,18 @@ export default async function WordHintsAudioPage({
           <div className="grid w-full gap-2 sm:w-auto sm:grid-cols-2">
             <BatchWordFieldVoiceGenerate
               field="base_form"
-              candidates={rows.map((r) => ({ id: r.id, text: r.base_form }))}
             />
             <BatchWordFieldVoiceGenerate
               field="meaning_fa"
-              candidates={rows.map((r) => ({ id: r.id, text: r.meaning_fa }))}
             />
             <BatchWordFieldVoiceGenerate
               field="other_meanings_fa"
-              candidates={rows.map((r) => ({ id: r.id, text: r.other_meanings_fa }))}
             />
             <BatchWordFieldVoiceGenerate
               field="sentence_en"
-              candidates={rows.map((r) => ({ id: r.id, text: r.sentence_en }))}
             />
             <BatchWordFieldVoiceGenerate
               field="sentence_en_meaning_fa"
-              candidates={rows.map((r) => ({ id: r.id, text: r.sentence_en_meaning_fa }))}
             />
           </div>
         </div>

@@ -4,6 +4,7 @@ import fs from "node:fs";
 
 import {
   type WordAudioFieldKey,
+  WORD_AUDIO_FIELDS,
   WORD_AUDIO_FILENAME_SEPARATOR,
   WORD_AUDIO_PUBLIC_URL_PREFIX,
   sanitizeWordAudioFilenamePart,
@@ -14,6 +15,56 @@ export type WordFieldAudioFileMatch = { filename: string; timestampMs: number; s
 
 function escapeRegExp(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+export function listWordFieldAudioIdsWithAnyNonZeroAudio(field: WordAudioFieldKey): Set<string> {
+  const dir = getWordFieldAudioAbsoluteDir();
+  let entries: string[] = [];
+  try {
+    entries = fs.readdirSync(dir);
+  } catch {
+    return new Set();
+  }
+
+  const ids = new Set<string>();
+
+  const sep = WORD_AUDIO_FILENAME_SEPARATOR;
+  const legacyRe = new RegExp(
+    `^(?<id>.+)_(?<field>${WORD_AUDIO_FIELDS.map(escapeRegExp).join("|")})_(?<ts>\\d{8,})\\.mp3$`
+  );
+
+  for (const filename of entries) {
+    if (!filename.endsWith(".mp3")) continue;
+
+    let id: string | null = null;
+    let parsedField: string | null = null;
+
+    if (filename.includes(sep)) {
+      const withoutExt = filename.slice(0, -".mp3".length);
+      const parts = withoutExt.split(sep);
+      if (parts.length === 3) {
+        id = parts[0] || null;
+        parsedField = parts[1] || null;
+      }
+    } else {
+      const m = legacyRe.exec(filename);
+      id = typeof m?.groups?.id === "string" ? m.groups.id : null;
+      parsedField = typeof m?.groups?.field === "string" ? m.groups.field : null;
+    }
+
+    if (!id || parsedField !== field) continue;
+
+    let size = 0;
+    try {
+      size = fs.statSync(getWordFieldAudioAbsolutePath(filename)).size;
+    } catch {
+      continue;
+    }
+    if (size <= 0) continue;
+    ids.add(id);
+  }
+
+  return ids;
 }
 
 export function listWordFieldAudioFiles({

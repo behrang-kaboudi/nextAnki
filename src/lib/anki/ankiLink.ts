@@ -2,21 +2,10 @@ import "server-only";
 
 import { prisma } from "@/lib/prisma";
 import { createAnkiConnectClient, type AnkiNotesInfo } from "@/lib/AnkiConnect";
-
-function asNonEmptyString(value: unknown): string | null {
-  if (typeof value !== "string") return null;
-  const t = value.trim();
-  return t ? t : null;
-}
+import { getAnkiLinkIdFromNoteFields as extractAnkiLinkIdFromNoteFields } from "@/lib/anki/wordAnkiMapping";
 
 export function getAnkiLinkIdFromNoteFields(note: AnkiNotesInfo[number]): string | null {
-  const a = asNonEmptyString(note.fields?.anki_link_id?.value);
-  if (a) return a;
-  const b = asNonEmptyString(note.fields?.AnkiLinkId?.value);
-  if (b) return b;
-  const c = asNonEmptyString(note.fields?.ankiLinkId?.value);
-  if (c) return c;
-  return null;
+  return extractAnkiLinkIdFromNoteFields(note);
 }
 
 export async function getAnkiNoteAndDbWordByAnkiLinkId(noteId: number) {
@@ -37,4 +26,3 @@ export async function getAnkiNoteAndDbWordByAnkiLinkId(noteId: number) {
 
   return { ok: true as const, note, word };
 }
-

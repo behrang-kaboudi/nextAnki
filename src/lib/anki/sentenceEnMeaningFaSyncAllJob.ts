@@ -1,0 +1,378 @@
+import "server-only";
+
+import fs from "node:fs";
+
+import { createAnkiConnectClient } from "@/lib/AnkiConnect";
+import { WordAnkiConstants } from "@/lib/AnkiDeck";
+import { sanitizeWordAudioFilenamePart, WORD_AUDIO_FILENAME_SEPARATOR } from "@/lib/audio/wordFieldAudioNaming";
+import { getWordFieldAudioAbsoluteDir, getWordFieldAudioAbsolutePath } from "@/lib/audio/wordFieldAudioPaths.server";
+import { getAnkiLinkIdFromNoteFields } from "@/lib/anki/wordAnkiMapping";
+import { prisma } from "@/lib/prisma";
+
+export type SentenceEnMeaningFaSyncAllStatus = {
+  jobId: string;
+  running: boolean;
+  done: boolean;
+  startedAt: string | null;
+  finishedAt: string | null;
+  error: string | null;
+
+  stopRequested: boolean;
+  stoppedEarly: boolean;
+
+  total: number;
+  processed: number;
+  updated: number;
+  skippedSame: number;
+  skippedNoLinkId: number;
+  skippedNoWord: number;
+  failed: number;
+  mediaUploaded: number;
+  mediaDeleted: number;
+  currentNoteId: number | null;
+};
+
+type State = SentenceEnMeaningFaSyncAllStatus & { _started: boolean };
+
+function nowIso() {
+  return new Date().toISOString();
+}
+
+function chunk<T>(arr: T[], size: number): T[][] {
+  const out: T[][] = [];
+  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+  return out;
+}
+
+async function runWithConcurrency<T>(
+  items: T[],
+  concurrency: number,
+  worker: (item: T) => Promise<void>
+): Promise<void> {
+  const c = Math.max(1, Math.trunc(concurrency) || 1);
+  let idx = 0;
+  const runners = Array.from({ length: Math.min(c, items.length) }, async () => {
+    for (;;) {
+      const i = idx;
+      idx += 1;
+      if (i >= items.length) return;
+      await worker(items[i]);
+    }
+  });
+  await Promise.all(runners);
+}
+
+function getState(): State {
+  const g = globalThis as unknown as { __sentenceEnMeaningFaSyncAll?: State };
+  if (!g.__sentenceEnMeaningFaSyncAll) {
+    g.__sentenceEnMeaningFaSyncAll = {
+      jobId: `sentence_en_meaning_fa_sync_${Date.now()}`,
+      running: false,
+      done: false,
+      startedAt: null,
+      finishedAt: null,
+      error: null,
+      stopRequested: false,
+      stoppedEarly: false,
+      total: 0,
+      processed: 0,
+      updated: 0,
+      skippedSame: 0,
+      skippedNoLinkId: 0,
+      skippedNoWord: 0,
+      failed: 0,
+      mediaUploaded: 0,
+      mediaDeleted: 0,
+      currentNoteId: null,
+      _started: false,
+    };
+  }
+  return g.__sentenceEnMeaningFaSyncAll;
+}
+
+export function getSentenceEnMeaningFaSyncAllStatus(): SentenceEnMeaningFaSyncAllStatus {
+  const s = getState();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { _started: _ignored, ...pub } = s;
+  return pub;
+}
+
+function extractFirstSoundFilename(value: string): string | null {
+  const m = /\[sound:(?<fn>[^\]]+)\]/i.exec(value);
+  const fn = m?.groups?.fn?.trim();
+  return fn ? fn : null;
+}
+
+type ExistingFileInfo = { filename: string; timestampMs: number; size: number };
+
+function indexLatestAudioForSentenceEnMeaningFa(): Map<string, ExistingFileInfo> {
+  const dir = getWordFieldAudioAbsoluteDir();
+  let entries: string[] = [];
+  try {
+    entries = fs.readdirSync(dir);
+  } catch {
+    return new Map();
+  }
+
+  const sep = WORD_AUDIO_FILENAME_SEPARATOR.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const reNew = new RegExp(`^(?<anki>.+?)${sep}sentence_en_meaning_fa${sep}(?<ts>\\d{8,})\\.mp3$`);
+  const reLegacy = new RegExp(`^(?<anki>.+)_sentence_en_meaning_fa_(?<ts>\\d{8,})\\.mp3$`);
+
+  const latestById = new Map<string, ExistingFileInfo>();
+  for (const filename of entries) {
+    const m = reNew.exec(filename) ?? reLegacy.exec(filename);
+    const anki = m?.groups?.anki;
+    const ts = Number(m?.groups?.ts);
+    if (!anki || !Number.isFinite(ts)) continue;
+
+    let size = 0;
+    try {
+      size = fs.statSync(getWordFieldAudioAbsolutePath(filename)).size;
+    } catch {
+      continue;
+    }
+
+    const prev = latestById.get(anki);
+    if (!prev || Math.trunc(ts) > prev.timestampMs) {
+      latestById.set(anki, { filename, timestampMs: Math.trunc(ts), size });
+    }
+  }
+
+  return latestById;
+}
+
+function generateSentenceEnMeaningFaValue(
+  dbValue: string,
+  ankiLinkId: string,
+  audioIndex: Map<string, ExistingFileInfo>
+): string {
+  const text = String(dbValue ?? "");
+  const key = sanitizeWordAudioFilenamePart(ankiLinkId);
+  const audio = audioIndex.get(key);
+  if (!audio || audio.size <= 0) return text;
+  const tag = `[sound:${audio.filename}]`;
+  if (text.includes(tag)) return text;
+  const base = text.trim();
+  return base ? `${base} ${tag}` : tag;
+}
+
+async function storeMediaFile(filename: string, dataB64: string, anki: ReturnType<typeof createAnkiConnectClient>) {
+  const res = await anki.requestDetailed("storeMediaFile", { filename, data: dataB64, deleteExisting: true });
+  if (!res.ok) return { ok: false as const, error: res.error };
+  return { ok: true as const };
+}
+
+async function deleteMediaFile(filename: string, anki: ReturnType<typeof createAnkiConnectClient>) {
+  const res = await anki.requestDetailed("deleteMediaFile", { filename });
+  if (!res.ok) return { ok: false as const, error: res.error };
+  return { ok: true as const };
+}
+
+async function updateNoteField(noteId: number, value: string, anki: ReturnType<typeof createAnkiConnectClient>) {
+  const res = await anki.requestDetailed("updateNoteFields", {
+    note: { id: noteId, fields: { sentence_en_meaning_fa: value } },
+  });
+  if (!res.ok) return { ok: false as const, error: res.error };
+  return { ok: true as const };
+}
+
+async function runJob(state: State) {
+  state.running = true;
+  state.done = false;
+  state.error = null;
+  state.stopRequested = false;
+  state.stoppedEarly = false;
+  state.startedAt = nowIso();
+  state.finishedAt = null;
+  state.total = 0;
+  state.processed = 0;
+  state.updated = 0;
+  state.skippedSame = 0;
+  state.skippedNoLinkId = 0;
+  state.skippedNoWord = 0;
+  state.failed = 0;
+  state.mediaUploaded = 0;
+  state.mediaDeleted = 0;
+  state.currentNoteId = null;
+
+  const modelName = WordAnkiConstants.noteTypes.META_LEX_VR9;
+  const query = `note:"${modelName.replaceAll('"', '\\"')}"`;
+
+  const ankiFinder = createAnkiConnectClient({ timeoutMs: 30000, retryDelayMs: 1000 });
+  const idsRes = await ankiFinder.requestDetailed("findNotes", { query });
+  if (!idsRes.ok) throw new Error(idsRes.error);
+  const ids = idsRes.result ?? [];
+  state.total = ids.length;
+
+  const audioIndex = indexLatestAudioForSentenceEnMeaningFa();
+
+  // Preload current field values + anki_link_id to avoid extra notesInfo per note.
+  const beforeByNoteId = new Map<number, { ankiLinkId: string | null; value: string }>();
+  for (const batch of chunk(ids, 250)) {
+    const infoRes = await ankiFinder.requestDetailed("notesInfo", { notes: batch });
+    if (!infoRes.ok) throw new Error(infoRes.error);
+    for (const n of infoRes.result ?? []) {
+      const ankiLinkId = getAnkiLinkIdFromNoteFields(n);
+      const value = String(n.fields?.sentence_en_meaning_fa?.value ?? "");
+      beforeByNoteId.set(n.noteId, { ankiLinkId, value });
+    }
+  }
+
+  // Preload DB words (read-only) for faster bulk processing.
+  const allIds = Array.from(
+    new Set(
+      Array.from(beforeByNoteId.values())
+        .map((x) => x.ankiLinkId)
+        .filter((x): x is string => Boolean(x)),
+    ),
+  );
+
+  const dbValueByAnkiLinkId = new Map<string, string>();
+  for (const group of chunk(allIds, 1000)) {
+    const rows = await prisma.word.findMany({
+      where: { anki_link_id: { in: group } },
+      select: { anki_link_id: true, sentence_en_meaning_fa: true },
+    });
+    for (const r of rows) dbValueByAnkiLinkId.set(r.anki_link_id, r.sentence_en_meaning_fa ?? "");
+  }
+
+  const concurrency = 20;
+  const clients = Array.from({ length: concurrency }, () =>
+    createAnkiConnectClient({ timeoutMs: 30000, retryDelayMs: 1000 }),
+  );
+
+  const mediaDataCache = new Map<string, string>();
+  const mediaUploadInflight = new Map<string, Promise<{ ok: true } | { ok: false; error: string }>>();
+
+  async function ensureUploaded(
+    filename: string,
+    anki: ReturnType<typeof createAnkiConnectClient>
+  ): Promise<{ ok: true; uploaded: boolean } | { ok: false; error: string }> {
+    const existing = mediaUploadInflight.get(filename);
+    if (existing) {
+      const out = await existing;
+      return out.ok ? { ok: true as const, uploaded: false } : out;
+    }
+
+    const task = (async () => {
+      let dataB64 = mediaDataCache.get(filename);
+      if (!dataB64) {
+        const abs = getWordFieldAudioAbsolutePath(filename);
+        let stSize = 0;
+        try {
+          stSize = fs.statSync(abs).size;
+        } catch {
+          return { ok: false as const, error: `Local audio not found: ${filename}` };
+        }
+        if (stSize <= 0) return { ok: false as const, error: `Local audio is zero-byte: ${filename}` };
+        const bytes = fs.readFileSync(abs);
+        dataB64 = bytes.toString("base64");
+        mediaDataCache.set(filename, dataB64);
+      }
+
+      const res = await storeMediaFile(filename, dataB64, anki);
+      if (!res.ok) return { ok: false as const, error: res.error };
+      return { ok: true as const };
+    })();
+
+    mediaUploadInflight.set(filename, task);
+    const out = await task;
+    return out.ok ? { ok: true as const, uploaded: true } : out;
+  }
+
+  await runWithConcurrency(ids, concurrency, async (noteId) => {
+    if (state.stopRequested) return;
+    state.currentNoteId = noteId;
+
+    const before = beforeByNoteId.get(noteId);
+    const ankiLinkId = before?.ankiLinkId ?? null;
+    const oldValue = before?.value ?? "";
+
+    if (!ankiLinkId) {
+      state.skippedNoLinkId += 1;
+      state.processed += 1;
+      return;
+    }
+
+    const dbValue = dbValueByAnkiLinkId.get(ankiLinkId);
+    if (dbValue == null) {
+      state.skippedNoWord += 1;
+      state.processed += 1;
+      return;
+    }
+
+    const newValue = generateSentenceEnMeaningFaValue(dbValue, ankiLinkId, audioIndex);
+    if (newValue === oldValue) {
+      state.skippedSame += 1;
+      state.processed += 1;
+      return;
+    }
+
+    const client = clients[noteId % clients.length]!;
+
+    const oldFilename = extractFirstSoundFilename(oldValue);
+    const newFilename = extractFirstSoundFilename(newValue);
+
+    if (newFilename) {
+      const up = await ensureUploaded(newFilename, client);
+      if (!up.ok) {
+        state.failed += 1;
+        state.processed += 1;
+        return;
+      }
+      if (up.uploaded) state.mediaUploaded += 1;
+    }
+
+    const upd = await updateNoteField(noteId, newValue, client);
+    if (!upd.ok) {
+      state.failed += 1;
+      state.processed += 1;
+      return;
+    }
+
+    if (oldFilename && oldFilename !== newFilename) {
+      const del = await deleteMediaFile(oldFilename, client);
+      if (del.ok) state.mediaDeleted += 1;
+    }
+
+    state.updated += 1;
+    state.processed += 1;
+  });
+
+  if (state.stopRequested && state.processed < state.total) {
+    state.stoppedEarly = true;
+  }
+
+  state.running = false;
+  state.done = true;
+  state.finishedAt = nowIso();
+  state.currentNoteId = null;
+}
+
+export function startSentenceEnMeaningFaSyncAllIfNeeded(): SentenceEnMeaningFaSyncAllStatus {
+  const state = getState();
+  if (state.running) return getSentenceEnMeaningFaSyncAllStatus();
+  if (state._started && !state.done) return getSentenceEnMeaningFaSyncAllStatus();
+
+  state.jobId = `sentence_en_meaning_fa_sync_${Date.now()}`;
+  state._started = true;
+  state.stopRequested = false;
+  state.stoppedEarly = false;
+
+  void runJob(state).catch((e) => {
+    state.running = false;
+    state.done = true;
+    state.error = e instanceof Error ? e.message : String(e);
+    state.finishedAt = nowIso();
+    state.currentNoteId = null;
+  });
+
+  return getSentenceEnMeaningFaSyncAllStatus();
+}
+
+export function requestStopSentenceEnMeaningFaSyncAll(): SentenceEnMeaningFaSyncAllStatus {
+  const state = getState();
+  state.stopRequested = true;
+  return getSentenceEnMeaningFaSyncAllStatus();
+}
+

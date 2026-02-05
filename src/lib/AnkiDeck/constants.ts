@@ -9,6 +9,7 @@ export const WordAnkiConstants = {
       "phonetic_us",
       "pos",
       "meaning_fa",
+      "other_meanings_fa",
       "concept_explained_fa",
       "sentence_en",
       "sentence_en_meaning_fa",
@@ -20,6 +21,7 @@ export const WordAnkiConstants = {
       "hint_sentence",
       "phonetic_us_normalized",
       "learning_depth",
+      "imageability",
     ],
   },
   noteTemplates: {

@@ -50,6 +50,17 @@ const sections: Section[] = [
     ],
   },
   {
+    title: "sync anki/words",
+    defaultOpen: true,
+    links: [
+      {
+        href: "/tests/sync-anki-words",
+        label: "Sync Anki fields (Words)",
+        note: "Placeholder (TBD): update Anki note fields from DB",
+      },
+    ],
+  },
+  {
     title: "Admin",
     links: [
       { href: "/admin/themes", label: "Themes" },

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import type { WordAudioFieldKey } from "@/lib/audio/wordFieldAudioNaming";
 import {
@@ -19,22 +19,66 @@ const FIELD_LABEL: Record<WordAudioFieldKey, string> = {
 
 export default function BatchWordFieldVoiceGenerate({
   field,
-  candidates,
 }: {
   field: WordAudioFieldKey;
-  candidates: Array<{ id: number; text: string | null }>;
 }) {
-  const enabledCount = useMemo(
-    () => candidates.map((c) => String(c.text ?? "").trim()).filter(Boolean).length,
-    [candidates]
-  );
-
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [statusText, setStatusText] = useState<string | null>(null);
+  const [statsBusy, setStatsBusy] = useState(false);
+  const [statsText, setStatsText] = useState<string | null>(null);
   const [jobId, setJobId] = useState<string | null>(null);
   const [running, setRunning] = useState(false);
   const [notifiedDoneJobId, setNotifiedDoneJobId] = useState<string | null>(null);
+
+  const fetchStats = useCallback(async () => {
+    if (statsBusy) return;
+    setStatsBusy(true);
+    try {
+      const res = await fetch(`/api/words/field-voice-stats?field=${encodeURIComponent(field)}`, {
+        method: "GET",
+        headers: { "Cache-Control": "no-store" },
+      });
+      const data = (await res.json().catch(() => null)) as
+        | {
+            ok?: boolean;
+            error?: string;
+            totalWords?: number;
+            eligibleWords?: number;
+            withAudioWords?: number;
+            missingAudioWords?: number;
+            noTextWords?: number;
+            missingOfTotalRatio?: number;
+            missingOfEligibleRatio?: number;
+          }
+        | null;
+      if (!res.ok || data?.ok !== true) throw new Error(data?.error || `Request failed (${res.status})`);
+
+      const nf = new Intl.NumberFormat();
+      const pct = (v: number) => `${(v * 100).toFixed(1)}%`;
+      const msg =
+        `field=${FIELD_LABEL[field]} | ` +
+        `missing=${nf.format(data.missingAudioWords ?? 0)}/${nf.format(data.totalWords ?? 0)} (${pct(data.missingOfTotalRatio ?? 0)}) ` +
+        `eligible=${nf.format(data.eligibleWords ?? 0)} (missing of eligible: ${pct(data.missingOfEligibleRatio ?? 0)}) ` +
+        `noText=${nf.format(data.noTextWords ?? 0)}`;
+      setStatsText(msg);
+
+      const RLM = "\u200F";
+      window.alert(
+        `${RLM}آمار صوت (${FIELD_LABEL[field]}):\n` +
+          `${RLM}بدون صوت (فقط رکوردهای دارای متن): ${nf.format(data.missingAudioWords ?? 0)}\n` +
+          `${RLM}کل رکوردها در دیتابیس: ${nf.format(data.totalWords ?? 0)}\n` +
+          `${RLM}نسبت بدون صوت به کل: ${pct(data.missingOfTotalRatio ?? 0)}\n` +
+          `${RLM}دارای متن (قابل تولید): ${nf.format(data.eligibleWords ?? 0)}\n` +
+          `${RLM}بدون صوت نسبت به دارای متن: ${pct(data.missingOfEligibleRatio ?? 0)}`
+      );
+    } catch (e) {
+      setStatsText(null);
+      window.alert(e instanceof Error ? e.message : String(e));
+    } finally {
+      setStatsBusy(false);
+    }
+  }, [field, statsBusy]);
 
   const poll = useCallback(async () => {
     const res = await fetch(
@@ -121,6 +165,9 @@ export default function BatchWordFieldVoiceGenerate({
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center gap-2">
+        <span className="rounded border px-2 py-1 text-xs font-semibold">
+          {FIELD_LABEL[field]}
+        </span>
         <button
           type="button"
           onClick={() => void generateAll()}
@@ -136,8 +183,17 @@ export default function BatchWordFieldVoiceGenerate({
           )}
           <span className="text-[10px] font-semibold opacity-80">ALL</span>
         </button>
+        <button
+          type="button"
+          onClick={() => void fetchStats()}
+          disabled={statsBusy}
+          aria-label={`Audio stats — ${FIELD_LABEL[field]}`}
+          title={`Audio stats — ${FIELD_LABEL[field]}`}
+          className="inline-flex items-center rounded border px-2 py-1.5 text-sm hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5"
+        >
+          {statsBusy ? <span className="animate-pulse opacity-70">…</span> : <span className="text-[10px] font-semibold opacity-80">STATS</span>}
+        </button>
         {jobId ? <span className="text-xs opacity-70">job: {jobId}</span> : null}
-        <span className="text-xs opacity-70">{FIELD_LABEL[field]} • candidates: {enabledCount}</span>
       </div>
       {error ? (
         <div className="max-w-[520px] truncate text-xs text-red-600" title={error}>
@@ -145,6 +201,7 @@ export default function BatchWordFieldVoiceGenerate({
         </div>
       ) : null}
       {statusText ? <div className="text-xs opacity-80">{statusText}</div> : null}
+      {statsText ? <div className="text-xs opacity-80">{statsText}</div> : null}
       <div className="text-xs opacity-80">
         Folder: <span className="font-mono">public/{WORD_AUDIO_PUBLIC_DIR_RELATIVE}</span> •
         name:{" "}

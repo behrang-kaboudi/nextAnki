@@ -90,6 +90,7 @@ export default function StructureBuilderPage() {
   const [isRunning, setIsRunning] = useState(false);
   const [logs, setLogs] = useState<string[]>([]);
   const [manualRahnamaIntervalsRequired, setManualRahnamaIntervalsRequired] = useState(false);
+  const [helpKey, setHelpKey] = useState<null | "create" | "step1" | "step2" | "step3" | "step4">(null);
   const logBoxRef = useRef<HTMLDivElement | null>(null);
 
   function appendLog(line: string) {
@@ -528,6 +529,72 @@ export default function StructureBuilderPage() {
     }
   }
 
+  const helpContent = useMemo(() => {
+    return {
+      create: {
+        title: "Create Structure",
+        body: (
+          <div className="space-y-2 text-sm leading-6">
+            <p>همه‌ی Stepها (1 تا 4) را پشت سر هم اجرا می‌کند و نتیجه را در Log می‌نویسد.</p>
+            <p className="text-xs opacity-80">
+              پیش‌نیاز: Anki باز باشد، افزونه‌ی AnkiConnect فعال باشد و در Step 3 دسترسی (Permission) را در Anki تایید
+              کرده باشی.
+            </p>
+          </div>
+        ),
+      },
+      step1: {
+        title: "Step 1: Ensure Decks",
+        body: (
+          <div className="space-y-2 text-sm leading-6">
+            <p>دک‌های اصلی و زیر-دک‌ها را چک می‌کند و اگر وجود نداشته باشند می‌سازد.</p>
+            <p className="text-xs opacity-80">
+              این Step فقط ساختار Deck را می‌سازد (تنظیمات و Note Type را تغییر نمی‌دهد).
+            </p>
+          </div>
+        ),
+      },
+      step2: {
+        title: "Step 2: Ensure Deck Configs",
+        body: (
+          <div className="space-y-2 text-sm leading-6">
+            <p>Deck Configهای مورد نیاز را ایجاد/پیدا می‌کند و روی Deckهای مربوطه اعمال می‌کند.</p>
+            <p className="text-xs opacity-80">
+              اگر بعد از اجرا یک هشدار قرمز دیدی، یعنی برای deckِ Rahnama باید دو interval را دستی در Anki بررسی/تنظیم
+              کنی.
+            </p>
+          </div>
+        ),
+      },
+      step3: {
+        title: "Step 3: Ensure Note Type",
+        body: (
+          <div className="space-y-2 text-sm leading-6">
+            <p>Note Type با نام {WordAnkiConstants.noteTypes.META_LEX_VR9} را می‌سازد/بررسی می‌کند.</p>
+            <p>
+              سپس فیلدها را دقیقاً مطابق{" "}
+              <span className="font-mono">WordAnkiConstants.noteFields.META_LEX_VR9</span> سینک می‌کند: فیلد اضافه را
+              حذف می‌کند، فیلدهای کم را اضافه می‌کند و ترتیب را هم دقیقاً همان ترتیب ثابت‌ها قرار می‌دهد.
+            </p>
+            <p className="text-xs opacity-80">
+              اگر یک فیلد جدید (مثلاً <span className="font-mono">other_meanings_fa</span>) به noteFields اضافه کردی،
+              همین Step را اجرا کن تا در Anki هم ساخته شود.
+            </p>
+          </div>
+        ),
+      },
+      step4: {
+        title: "Step 4: Ensure Templates",
+        body: (
+          <div className="space-y-2 text-sm leading-6">
+            <p>Templateهای کارت‌ها (EnToFa / FaToEn / Emla / Rahnama) را برای Note Type تنظیم/ایجاد می‌کند.</p>
+            <p className="text-xs opacity-80">اگر خروجی کارت‌ها درست نیست، بعد از Step 3 معمولاً اجرای Step 4 کافی است.</p>
+          </div>
+        ),
+      },
+    } as const;
+  }, []);
+
   return (
     <div className="grid gap-6">
       <PageHeader title="Structure Builder" subtitle="Build structure + log output." />
@@ -540,46 +607,95 @@ export default function StructureBuilderPage() {
           </div>
 
           <div className="flex flex-col gap-2 sm:flex-row">
-            <button
-              type="button"
-              onClick={handleCreateStructure}
-              disabled={isRunning}
-              className="h-11 rounded-xl bg-[var(--primary)] px-4 text-sm font-semibold text-[var(--primary-foreground)] shadow-elevated transition hover:opacity-95 disabled:opacity-60"
-            >
-              {isRunning ? "..." : "Create Structure"}
-            </button>
-            <button
-              type="button"
-              onClick={step1EnsureDecks}
-              disabled={isRunning}
-              className="h-11 rounded-xl border border-card bg-background px-4 text-sm font-semibold text-foreground shadow-elevated transition hover:opacity-95 disabled:opacity-60"
-            >
-              {isRunning ? "..." : "Step 1: Ensure Decks"}
-            </button>
-            <button
-              type="button"
-              onClick={step2EnsureDeckConfigs}
-              disabled={isRunning}
-              className="h-11 rounded-xl border border-card bg-background px-4 text-sm font-semibold text-foreground shadow-elevated transition hover:opacity-95 disabled:opacity-60"
-            >
-              {isRunning ? "..." : "Step 2: Ensure Deck Configs"}
-            </button>
-            <button
-              type="button"
-              onClick={step3EnsureMetaLexVr9NoteType}
-              disabled={isRunning}
-              className="h-11 rounded-xl border border-card bg-background px-4 text-sm font-semibold text-foreground shadow-elevated transition hover:opacity-95 disabled:opacity-60"
-            >
-              {isRunning ? "..." : "Step 3: Ensure Note Type"}
-            </button>
-            <button
-              type="button"
-              onClick={step4EnsureMetaLexVr9Templates}
-              disabled={isRunning}
-              className="h-11 rounded-xl border border-card bg-background px-4 text-sm font-semibold text-foreground shadow-elevated transition hover:opacity-95 disabled:opacity-60"
-            >
-              {isRunning ? "..." : "Step 4: Ensure Templates"}
-            </button>
+            <div className="flex flex-col gap-1">
+              <button
+                type="button"
+                onClick={() => setHelpKey("create")}
+                className="h-7 self-end rounded-lg border border-card bg-background px-2 text-xs font-semibold text-foreground hover:bg-black/5 dark:hover:bg-white/5"
+              >
+                Help
+              </button>
+              <button
+                type="button"
+                onClick={handleCreateStructure}
+                disabled={isRunning}
+                className="h-11 rounded-xl bg-[var(--primary)] px-4 text-sm font-semibold text-[var(--primary-foreground)] shadow-elevated transition hover:opacity-95 disabled:opacity-60"
+              >
+                {isRunning ? "..." : "Create Structure"}
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <button
+                type="button"
+                onClick={() => setHelpKey("step1")}
+                className="h-7 self-end rounded-lg border border-card bg-background px-2 text-xs font-semibold text-foreground hover:bg-black/5 dark:hover:bg-white/5"
+              >
+                Help
+              </button>
+              <button
+                type="button"
+                onClick={step1EnsureDecks}
+                disabled={isRunning}
+                className="h-11 rounded-xl border border-card bg-background px-4 text-sm font-semibold text-foreground shadow-elevated transition hover:opacity-95 disabled:opacity-60"
+              >
+                {isRunning ? "..." : "Step 1: Ensure Decks"}
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <button
+                type="button"
+                onClick={() => setHelpKey("step2")}
+                className="h-7 self-end rounded-lg border border-card bg-background px-2 text-xs font-semibold text-foreground hover:bg-black/5 dark:hover:bg-white/5"
+              >
+                Help
+              </button>
+              <button
+                type="button"
+                onClick={step2EnsureDeckConfigs}
+                disabled={isRunning}
+                className="h-11 rounded-xl border border-card bg-background px-4 text-sm font-semibold text-foreground shadow-elevated transition hover:opacity-95 disabled:opacity-60"
+              >
+                {isRunning ? "..." : "Step 2: Ensure Deck Configs"}
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <button
+                type="button"
+                onClick={() => setHelpKey("step3")}
+                className="h-7 self-end rounded-lg border border-card bg-background px-2 text-xs font-semibold text-foreground hover:bg-black/5 dark:hover:bg-white/5"
+              >
+                Help
+              </button>
+              <button
+                type="button"
+                onClick={step3EnsureMetaLexVr9NoteType}
+                disabled={isRunning}
+                className="h-11 rounded-xl border border-card bg-background px-4 text-sm font-semibold text-foreground shadow-elevated transition hover:opacity-95 disabled:opacity-60"
+              >
+                {isRunning ? "..." : "Step 3: Ensure Note Type"}
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <button
+                type="button"
+                onClick={() => setHelpKey("step4")}
+                className="h-7 self-end rounded-lg border border-card bg-background px-2 text-xs font-semibold text-foreground hover:bg-black/5 dark:hover:bg-white/5"
+              >
+                Help
+              </button>
+              <button
+                type="button"
+                onClick={step4EnsureMetaLexVr9Templates}
+                disabled={isRunning}
+                className="h-11 rounded-xl border border-card bg-background px-4 text-sm font-semibold text-foreground shadow-elevated transition hover:opacity-95 disabled:opacity-60"
+              >
+                {isRunning ? "..." : "Step 4: Ensure Templates"}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -620,6 +736,42 @@ export default function StructureBuilderPage() {
           </div>
         </div>
       </section>
+
+      {helpKey ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" role="dialog" aria-modal="true">
+          <div
+            dir="rtl"
+            lang="fa"
+            className="flex w-full max-w-2xl flex-col rounded-2xl border border-card bg-background p-4 text-right shadow-lg"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <div className="text-base font-semibold">راهنما</div>
+                <div className="mt-1 text-xs opacity-80">{helpContent[helpKey].title}</div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setHelpKey(null)}
+                className="rounded-lg border border-card bg-background px-2 py-1 text-sm hover:bg-black/5 dark:hover:bg-white/5"
+              >
+                Close
+              </button>
+            </div>
+
+            <div className="mt-4">{helpContent[helpKey].body}</div>
+
+            <div className="mt-5 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setHelpKey(null)}
+                className="rounded-xl border border-card bg-background px-3 py-2 text-sm font-semibold hover:bg-black/5 dark:hover:bg-white/5"
+              >
+                بستن
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
