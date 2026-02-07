@@ -84,7 +84,7 @@ export async function POST() {
   }
 
   const oldValue = note.fields?.sentence_en?.value ?? "";
-  const newValue = WORD_ANKI_FIELD_GENERATORS.sentence_en(word);
+  const newValue = await WORD_ANKI_FIELD_GENERATORS.sentence_en(word);
 
   if (oldValue === newValue) {
     return NextResponse.json(
@@ -176,4 +176,3 @@ export async function POST() {
     { status: 200 },
   );
 }
-

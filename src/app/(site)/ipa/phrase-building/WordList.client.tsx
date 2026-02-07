@@ -19,20 +19,66 @@ type WordRow = {
   match?: MatchSymbols | null;
 };
 
-function formatMatch(match: MatchSymbols | null | undefined): string {
+function matchHasAnyValue(match: MatchSymbols | null | undefined): boolean {
+  if (!match) return false;
+  return Boolean(
+    match.person?.fa ||
+    match.person?.en ||
+    match.job?.fa ||
+    match.job?.en ||
+    match.adj?.fa ||
+    match.adj?.en ||
+    match.persianImage?.fa ||
+    match.persianImage?.en,
+  );
+}
+
+function formatFaEnLine(
+  label: string,
+  value: FaEn | null | undefined,
+): string | null {
+  if (!value) return null;
+  const fa = String(value.fa ?? "").trim();
+  const en = String(value.en ?? "").trim();
+  if (!fa && !en) return null;
+  if (fa && en) return `${label}: ${fa} / ${en}`;
+  return `${label}: ${fa || en}`;
+}
+
+function matchAsText(match: MatchSymbols | null | undefined): string {
   if (!match) return "";
-  const parts: string[] = [];
-  if (match.person?.fa || match.person?.en)
-    parts.push(`person: ${match.person?.fa ?? ""} / ${match.person?.en ?? ""}`.trim());
-  if (match.job?.fa || match.job?.en)
-    parts.push(`job: ${match.job?.fa ?? ""} / ${match.job?.en ?? ""}`.trim());
-  if (match.adj?.fa || match.adj?.en)
-    parts.push(`adj: ${match.adj?.fa ?? ""} / ${match.adj?.en ?? ""}`.trim());
-  if (match.persianImage?.fa || match.persianImage?.en)
-    parts.push(
-      `persianImage: ${match.persianImage?.fa ?? ""} / ${match.persianImage?.en ?? ""}`.trim()
-    );
-  return parts.join(" | ");
+
+  const lines = [
+    formatFaEnLine("person", match.person),
+    formatFaEnLine("job", match.job),
+    formatFaEnLine("adj", match.adj),
+    formatFaEnLine("persianImage", match.persianImage ?? undefined),
+  ].filter((v): v is string => Boolean(v));
+
+  if (lines.length <= 3) return lines.join("\n");
+
+  const extra = lines.length - 3;
+  const top = lines.slice(0, 3);
+  top[2] = `${top[2]} …(+${extra})`;
+  return top.join("\n");
+}
+
+function isMatchMissingPerson(match: MatchSymbols | null | undefined): boolean {
+  if (!match) return false;
+  return !(match.person?.fa || match.person?.en);
+}
+
+function matchHasNoFa(match: MatchSymbols | null | undefined): boolean {
+  const values = [match?.person, match?.job, match?.adj, match?.persianImage];
+  for (const value of values) {
+    if (value === null || value === undefined) continue;
+    if (String(value.fa ?? "").trim() === "noFa") return true;
+  }
+  return false;
+}
+
+function matchHasPersianImageNull(match: MatchSymbols | null | undefined): boolean {
+  return match?.persianImage === null;
 }
 
 export function WordListClient() {
@@ -47,31 +93,65 @@ export function WordListClient() {
   const [onlySpaced, setOnlySpaced] = useState(false);
   const [onlyEmptyMatch, setOnlyEmptyMatch] = useState(false);
   const [onlyNoJob, setOnlyNoJob] = useState(false);
-  const [progress, setProgress] = useState<null | { done: number; total: number }>(null);
+  const [progress, setProgress] = useState<null | {
+    done: number;
+    total: number;
+  }>(null);
   const [sortBy, setSortBy] = useState<
     "base_form" | "phonetic_us_normalized" | "meaning_fa"
   >("base_form");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [data, setData] = useState<
-    null | {
+  const [data, setData] = useState<null | {
+    total: number;
+    rows: WordRow[];
+    matchStats?: null | {
+      matched: number;
+      empty: number;
       total: number;
-      rows: WordRow[];
-      matchStats?: null | {
-        matched: number;
-        empty: number;
-        total: number;
-        noJob: number;
-        jobEnIsJob: number;
-      };
-    }
-  >(null);
+      noJob: number;
+      jobEnIsJob: number;
+    };
+  }>(null);
 
   const totalPages = useMemo(() => {
     const total = data?.total ?? 0;
     return Math.max(1, Math.ceil(total / pageSize));
   }, [data?.total, pageSize]);
+
+  const rowsForRender = useMemo(() => {
+    const rows = data?.rows ?? [];
+    const decorated = rows.map((row) => {
+      const matchText = matchAsText(row.match);
+      const matchHasSomething =
+        matchHasAnyValue(row.match) || matchHasPersianImageNull(row.match);
+      const needsPersonHighlight = matchHasSomething && isMatchMissingPerson(row.match);
+      const needsNoFaHighlight = matchHasSomething && matchHasNoFa(row.match);
+      const needsPersianImageNullHighlight =
+        matchHasSomething && matchHasPersianImageNull(row.match);
+      return {
+        row,
+        matchText,
+        needsPersonHighlight,
+        needsNoFaHighlight,
+        needsPersianImageNullHighlight,
+      };
+    });
+
+    const missingPerson = decorated.filter((r) => r.needsPersonHighlight);
+    const orange = decorated.filter(
+      (r) =>
+        !r.needsPersonHighlight &&
+        (r.needsNoFaHighlight || r.needsPersianImageNullHighlight)
+    );
+    const rest = decorated.filter(
+      (r) =>
+        !r.needsPersonHighlight &&
+        !(r.needsNoFaHighlight || r.needsPersianImageNullHighlight)
+    );
+    return [...missingPerson, ...orange, ...rest];
+  }, [data?.rows]);
 
   const clampedPage = Math.min(Math.max(page, 1), totalPages);
   const shouldLoad =
@@ -96,18 +176,18 @@ export function WordListClient() {
           loadAll
             ? ""
             : only2CharPhonetic
-            ? "&phoneticLen=2"
-            : only3CharPhonetic
-              ? "&phoneticLen=3"
-              : only4CharPhonetic
-                ? "&phoneticLen=4&includeSpacedFiveForFour=1"
-                : only5CharPhonetic
-                  ? "&phoneticLen=5&includeSpacedSixForFive=1"
-                  : onlyOver6CharPhonetic
-                    ? "&phoneticLenGt=6"
-                  : ""
+              ? "&phoneticLen=2"
+              : only3CharPhonetic
+                ? "&phoneticLen=3"
+                : only4CharPhonetic
+                  ? "&phoneticLen=4&includeSpacedFiveForFour=1"
+                  : only5CharPhonetic
+                    ? "&phoneticLen=5&includeSpacedSixForFive=1"
+                    : onlyOver6CharPhonetic
+                      ? "&phoneticLenGt=6"
+                      : ""
         }${!loadAll && onlySpaced ? "&onlySpaced=1" : ""}${!loadAll && onlyEmptyMatch ? "&onlyEmptyMatch=1" : ""}${!loadAll && onlyNoJob ? "&onlyNoJob=1" : ""}`,
-        { cache: "no-store" }
+        { cache: "no-store" },
       );
       if (!res.ok) {
         const msg = await res.text();
@@ -131,11 +211,15 @@ export function WordListClient() {
           const evt = JSON.parse(line) as
             | { type: "start"; total: number }
             | { type: "progress"; done: number; total: number }
-            | { type: "done"; payload: { total: number; rows: WordRow[]; matchStats: null } }
+            | {
+                type: "done";
+                payload: { total: number; rows: WordRow[]; matchStats: null };
+              }
             | { type: "error"; error: string };
 
           if (evt.type === "start") setProgress({ done: 0, total: evt.total });
-          if (evt.type === "progress") setProgress({ done: evt.done, total: evt.total });
+          if (evt.type === "progress")
+            setProgress({ done: evt.done, total: evt.total });
           if (evt.type === "error") throw new Error(evt.error);
           if (evt.type === "done") {
             setData({
@@ -190,7 +274,9 @@ export function WordListClient() {
             {data?.matchStats
               ? `${data.matchStats.matched} filled / ${data.matchStats.empty} empty (total)`
               : "—"}
-            {progress ? ` • processing: ${progress.done}/${progress.total}` : ""}
+            {progress
+              ? ` • processing: ${progress.done}/${progress.total}`
+              : ""}
           </div>
           {data?.matchStats ? (
             <div className="text-xs text-muted tabular-nums">
@@ -396,7 +482,7 @@ export function WordListClient() {
             className="h-10 rounded-md border border-border/60 bg-background px-3 text-sm text-foreground disabled:opacity-60"
             aria-label="Page size"
           >
-            {[25, 50, 100, 200].map((n) => (
+            {[25, 50, 100, 200, 500].map((n) => (
               <option key={n} value={n}>
                 {n}/page
               </option>
@@ -422,7 +508,11 @@ export function WordListClient() {
                     setPage(1);
                     setSortBy("base_form");
                     setSortDir((d) =>
-                      sortBy === "base_form" ? (d === "asc" ? "desc" : "asc") : "asc"
+                      sortBy === "base_form"
+                        ? d === "asc"
+                          ? "desc"
+                          : "asc"
+                        : "asc",
                     );
                   }}
                   className="inline-flex items-center gap-1 hover:underline"
@@ -430,7 +520,9 @@ export function WordListClient() {
                 >
                   <span>base_form</span>
                   {sortBy === "base_form" ? (
-                    <span className="text-[10px]">{sortDir === "asc" ? "▲" : "▼"}</span>
+                    <span className="text-[10px]">
+                      {sortDir === "asc" ? "▲" : "▼"}
+                    </span>
                   ) : null}
                 </button>
               </th>
@@ -445,7 +537,7 @@ export function WordListClient() {
                         ? d === "asc"
                           ? "desc"
                           : "asc"
-                        : "asc"
+                        : "asc",
                     );
                   }}
                   className="inline-flex items-center gap-1 hover:underline"
@@ -453,7 +545,9 @@ export function WordListClient() {
                 >
                   <span>phonetic_us_normalized</span>
                   {sortBy === "phonetic_us_normalized" ? (
-                    <span className="text-[10px]">{sortDir === "asc" ? "▲" : "▼"}</span>
+                    <span className="text-[10px]">
+                      {sortDir === "asc" ? "▲" : "▼"}
+                    </span>
                   ) : null}
                 </button>
               </th>
@@ -464,7 +558,11 @@ export function WordListClient() {
                     setPage(1);
                     setSortBy("meaning_fa");
                     setSortDir((d) =>
-                      sortBy === "meaning_fa" ? (d === "asc" ? "desc" : "asc") : "asc"
+                      sortBy === "meaning_fa"
+                        ? d === "asc"
+                          ? "desc"
+                          : "asc"
+                        : "asc",
                     );
                   }}
                   className="inline-flex items-center gap-1 hover:underline"
@@ -472,39 +570,56 @@ export function WordListClient() {
                 >
                   <span>meaning_fa</span>
                   {sortBy === "meaning_fa" ? (
-                    <span className="text-[10px]">{sortDir === "asc" ? "▲" : "▼"}</span>
+                    <span className="text-[10px]">
+                      {sortDir === "asc" ? "▲" : "▼"}
+                    </span>
                   ) : null}
                 </button>
               </th>
-              <th className="border-b border-border/60 px-3 py-2">
-                match
-              </th>
+              <th className="border-b border-border/60 px-3 py-2">match</th>
               <th className="border-b border-border/60 px-3 py-2">
                 meaning_fa_IPA_normalized
               </th>
             </tr>
           </thead>
           <tbody>
-            {data?.rows?.length ? (
-              data.rows.map((row) => (
-                <tr key={row.id} className="align-top">
-                  <td className="border-b border-border/30 px-3 py-2 font-medium text-foreground">
-                    {row.base_form}
-                  </td>
-                  <td className="border-b border-border/30 px-3 py-2 font-mono text-foreground">
-                    {row.phonetic_us_normalized ?? ""}
-                  </td>
-                  <td className="border-b border-border/30 px-3 py-2 text-foreground">
-                    {row.meaning_fa}
-                  </td>
-                  <td className="border-b border-border/30 px-3 py-2 font-mono text-xs text-foreground">
-                    {formatMatch(row.match)}
-                  </td>
-                  <td className="border-b border-border/30 px-3 py-2 font-mono text-foreground">
-                    {row.meaning_fa_IPA_normalized}
-                  </td>
-                </tr>
-              ))
+            {rowsForRender.length ? (
+              rowsForRender.map(
+                ({
+                  row,
+                  matchText,
+                  needsPersonHighlight,
+                  needsNoFaHighlight,
+                  needsPersianImageNullHighlight,
+                }) => {
+                const rowClassName = needsPersonHighlight
+                  ? "align-top bg-amber-500/10 hover:bg-amber-500/15"
+                  : needsNoFaHighlight || needsPersianImageNullHighlight
+                    ? "align-top bg-orange-500/10 hover:bg-orange-500/15"
+                  : "align-top";
+
+                return (
+                  <tr key={row.id} className={rowClassName}>
+                    <td className="border-b border-border/30 px-3 py-2 font-medium text-foreground">
+                      {row.base_form}
+                    </td>
+                    <td className="border-b border-border/30 px-3 py-2 font-mono text-foreground">
+                      {row.phonetic_us_normalized ?? ""}
+                    </td>
+                    <td className="border-b border-border/30 px-3 py-2 text-foreground">
+                      {row.meaning_fa}
+                    </td>
+                    <td className="border-b border-border/30 px-3 py-2 font-mono text-xs text-foreground">
+                      <pre className="whitespace-pre-wrap break-words leading-5">
+                        {matchText}
+                      </pre>
+                    </td>
+                    <td className="border-b border-border/30 px-3 py-2 font-mono text-foreground">
+                      {row.meaning_fa_IPA_normalized}
+                    </td>
+                  </tr>
+                );
+              })
             ) : (
               <tr>
                 <td

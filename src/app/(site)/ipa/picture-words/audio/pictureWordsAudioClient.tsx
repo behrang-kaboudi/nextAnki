@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import { buildPictureWordAudioFilename } from "@/lib/audio/pictureWordAudioNaming";
+
 const LS_PLAY_VOL = "audio.playVolume";
 const LS_MIC_GAIN = "audio.micGain";
 const LS_NORMALIZE = "audio.normalizeOnUpload";
@@ -105,6 +107,17 @@ async function apiUpdateIpa(id: number, ipa_fa: string) {
   return json;
 }
 
+async function apiTts(text: string, filename: string) {
+  const res = await fetch("/api/tts", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ text, filename, provider: "azure" }),
+  });
+  const json = (await res.json()) as { ok?: boolean; publicPath?: string; error?: string };
+  if (!res.ok || !json.ok) throw new Error(json.error || `TTS failed (${res.status})`);
+  return json;
+}
+
 function KeyRow({
   item,
   onRefresh,
@@ -122,6 +135,7 @@ function KeyRow({
 }) {
   const [isRecording, setIsRecording] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState("");
 
   const recorderRef = useRef<MediaRecorder | null>(null);
@@ -299,6 +313,31 @@ function KeyRow({
     }
   }
 
+  async function generateTts() {
+    if (isUploading || isRecording || isGenerating) return;
+    setIsGenerating(true);
+    setError("");
+    try {
+      const base = buildPictureWordAudioFilename({
+        phinglish: item.phinglish,
+        en: item.en,
+        timestampMs: Date.now(),
+        rmsDb: null,
+        peakDb: null,
+        ext: "mp3",
+      });
+      const filename = `pictureWord/${base}`;
+      const res = await apiTts(item.fa, filename);
+      setLocalAudioUrl(res.publicPath || "");
+      setLocalLoudness({ rmsDb: null, peakDb: null });
+      onRefresh();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "TTS error");
+    } finally {
+      setIsGenerating(false);
+    }
+  }
+
   return (
     <div className={`rounded-2xl border border-card bg-card p-4 shadow-elevated ${item.hasAudio ? "" : "bg-red-50/40"}`}>
       <div className="flex flex-col gap-2">
@@ -330,14 +369,14 @@ function KeyRow({
             onClick={() => void deleteAudio()}
             className="whitespace-nowrap rounded-xl border border-card bg-background px-3 py-2 text-sm font-semibold text-red-700 disabled:opacity-50"
             title="Delete audio"
-            disabled={isUploading || isRecording || (!item.hasAudio && !localAudioUrl)}
+            disabled={isUploading || isRecording || isGenerating || (!item.hasAudio && !localAudioUrl)}
           >
             Delete audio
           </button>
           <button
             type="button"
             onClick={() => void play()}
-            disabled={(!isRecording && !localAudioUrl) || isUploading}
+            disabled={(!isRecording && !localAudioUrl) || isUploading || isGenerating}
             className="whitespace-nowrap rounded-xl bg-[var(--primary)] px-4 py-2 text-sm font-semibold text-[var(--primary-foreground)] disabled:opacity-60"
           >
             Play
@@ -345,10 +384,19 @@ function KeyRow({
           <button
             type="button"
             onClick={() => (isRecording ? stopRecording() : void startRecording())}
-            disabled={isUploading}
+            disabled={isUploading || isGenerating}
             className={`whitespace-nowrap rounded-xl px-4 py-2 text-sm font-semibold text-white disabled:opacity-60 ${isRecording ? "bg-orange-500" : "bg-purple-600"}`}
           >
             {isRecording ? "Stop" : "Record"}
+          </button>
+          <button
+            type="button"
+            onClick={() => void generateTts()}
+            disabled={isUploading || isRecording || isGenerating}
+            className="whitespace-nowrap rounded-xl border border-card bg-background px-3 py-2 text-sm font-semibold text-foreground disabled:opacity-50"
+            title="Generate audio via TTS (saves as a new file)"
+          >
+            {isGenerating ? "TTS…" : "TTS"}
           </button>
           {isRecording ? (
             <button
@@ -382,6 +430,10 @@ export function PictureWordsAudioClient() {
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [sortMode, setSortMode] = useState<SortMode>("missingAudio");
+  const [ttsAllBusy, setTtsAllBusy] = useState(false);
+  const [ttsAllProgress, setTtsAllProgress] = useState<{ done: number; total: number }>({ done: 0, total: 0 });
+  const [ttsAllError, setTtsAllError] = useState<string | null>(null);
+  const ttsAllCancelRef = useRef(false);
 
   const [playVolume, setPlayVolume] = useState(() => loadNumber(LS_PLAY_VOL, 1));
   const [micGain, setMicGain] = useState(() => loadNumber(LS_MIC_GAIN, 3));
@@ -437,6 +489,65 @@ export function PictureWordsAudioClient() {
     return { total, withAudio };
   }, [filtered]);
 
+  async function ttsAllMissing() {
+    if (ttsAllBusy) return;
+    const missing = filtered.filter((r) => !r.hasAudio);
+    const total = missing.length;
+    if (!total) return;
+
+    const ok = window.confirm(`Generate TTS for ${total} items missing audio?`);
+    if (!ok) return;
+
+    ttsAllCancelRef.current = false;
+    setTtsAllBusy(true);
+    setTtsAllError(null);
+    setTtsAllProgress({ done: 0, total });
+
+    const startedAt = Date.now();
+    const failures: Array<{ id: number; err: string }> = [];
+
+    try {
+      for (let i = 0; i < missing.length; i++) {
+        if (ttsAllCancelRef.current) break;
+        const item = missing[i];
+        const text = String(item.fa ?? "").trim();
+        if (!text) {
+          failures.push({ id: item.id, err: "Missing fa text" });
+          setTtsAllProgress({ done: i + 1, total });
+          continue;
+        }
+
+        try {
+          const base = buildPictureWordAudioFilename({
+            phinglish: item.phinglish,
+            en: item.en,
+            timestampMs: startedAt + i,
+            rmsDb: null,
+            peakDb: null,
+            ext: "mp3",
+          });
+          const filename = `pictureWord/${base}`;
+          await apiTts(text, filename);
+        } catch (e) {
+          failures.push({ id: item.id, err: e instanceof Error ? e.message : String(e) });
+        } finally {
+          setTtsAllProgress({ done: i + 1, total });
+        }
+
+        // small pacing to reduce provider throttling
+        await new Promise((r) => setTimeout(r, 120));
+      }
+    } finally {
+      setTtsAllBusy(false);
+      await load();
+      if (ttsAllCancelRef.current) {
+        setTtsAllError("Canceled.");
+      } else if (failures.length) {
+        setTtsAllError(`Failed for ${failures.length}/${total} items (first: #${failures[0].id} — ${failures[0].err}).`);
+      }
+    }
+  }
+
   return (
     <div className="grid gap-6">
       <div className="flex flex-wrap items-center gap-3">
@@ -449,6 +560,26 @@ export function PictureWordsAudioClient() {
         >
           Refresh
         </button>
+        <button
+          type="button"
+          onClick={() => void ttsAllMissing()}
+          disabled={loading || ttsAllBusy}
+          className="rounded-xl bg-[var(--primary)] px-3 py-2 text-sm font-semibold text-[var(--primary-foreground)] disabled:opacity-60"
+          title="Generate audio for all rows missing audio"
+        >
+          {ttsAllBusy ? `TTS All… (${ttsAllProgress.done}/${ttsAllProgress.total})` : "TTS All (missing)"}
+        </button>
+        {ttsAllBusy ? (
+          <button
+            type="button"
+            onClick={() => {
+              ttsAllCancelRef.current = true;
+            }}
+            className="rounded-xl border border-card bg-background px-3 py-2 text-sm font-semibold text-red-700"
+          >
+            Stop
+          </button>
+        ) : null}
         {loading ? <div className="text-sm text-muted">Loading…</div> : null}
         <div className="ml-auto text-sm text-muted">
           Total: {stats.total} | With audio: {stats.withAudio} | Missing: {stats.total - stats.withAudio}
@@ -546,6 +677,9 @@ export function PictureWordsAudioClient() {
       </div>
 
       {error ? <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-700">{error}</div> : null}
+      {ttsAllError ? (
+        <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-700">{ttsAllError}</div>
+      ) : null}
 
       <div className="grid gap-3">
         {filtered.map((item) => (

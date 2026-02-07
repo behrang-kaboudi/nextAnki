@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 
 import type { Word } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { pickPictureSymbolsForPhoneticNormalized } from "@/lib/ipa/setPictures/setForAny";
+import { pickPictureSymbolsForWord } from "@/lib/ipa/setPictures/setForAny";
 import { normalizeJsonHintForCompare } from "@/lib/words/jsonHint";
 
 export const runtime = "nodejs";
@@ -49,7 +49,7 @@ export async function POST(req: Request) {
     for (const row of rows) {
       const match =
         (row.phonetic_us_normalized ?? "").trim() !== ""
-          ? await pickPictureSymbolsForPhoneticNormalized(row as unknown as Word)
+          ? await pickPictureSymbolsForWord(row as unknown as Word)
           : null;
 
       const nextComparable = match ? JSON.stringify(match) : null;

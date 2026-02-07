@@ -1,24 +1,30 @@
 import "server-only";
 
-import { PictureWordUsage } from "@prisma/client";
+import { PictureWordUsage, Word } from "@prisma/client";
 
-import type { SetFor2Result } from "./types";
-import { for3Char } from "./forChars";
+import type { WordPictures } from "./types";
+// import { for3Char } from "./forChars";
 import { pickBestFaEn } from "./pickBestFaEn";
 import { placeholderJobPictureWord } from "./placeholders";
-
-export async function setForSpace(
-  phoneticNormalized: string
-): Promise<SetFor2Result> {
-  const parts = (phoneticNormalized ?? "").split(" ");
-  const symbols: SetFor2Result = { person: undefined, job: undefined };
+import { findCandidatesByPartWithS } from "./forChars";
+export async function setForSpace(word: Word): Promise<WordPictures> {
+  const parts = (word.phonetic_us_normalized ?? "").split(" ");
+  const symbols: WordPictures = {};
   const part0 = (parts[0] ?? "").trim();
   const part1 = (parts[1] ?? "").trim();
-
-  const persons = await for3Char(part0, PictureWordUsage.person);
-  symbols.person = pickBestFaEn(persons, phoneticNormalized);
-  const jobs = await for3Char(part1, PictureWordUsage.Job);
-  symbols.job = pickBestFaEn(jobs, phoneticNormalized) || placeholderJobPictureWord();
+  let i = 5;
+  let persons = await findCandidatesByPartWithS(part0.slice(0, 5), word);
+  while (persons.length === 0 && i > 0) {
+    persons = await findCandidatesByPartWithS(part0.slice(0, --i), word);
+  }
+  symbols.person = pickBestFaEn(persons, part0);
+  i = 5;
+  let jobs = await findCandidatesByPartWithS(part1.slice(0, 5), word);
+  while (jobs.length === 0 && i > 0) {
+    jobs = await findCandidatesByPartWithS(part1.slice(0, --i), word);
+  }
+  symbols.job = pickBestFaEn(jobs, part1) || placeholderJobPictureWord();
 
   return symbols;
+  // return {};
 }

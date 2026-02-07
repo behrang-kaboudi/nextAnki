@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import { Prisma, type PictureWord, type Word } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { pickPictureSymbolsForPhoneticNormalized } from "@/lib/ipa/setPictures/setForAny";
+import { pickPictureSymbolsForWord } from "@/lib/ipa/setPictures/setForAny";
 
 export const runtime = "nodejs";
 
@@ -344,7 +344,7 @@ export async function GET(req: Request) {
             await mapWithConcurrency(idsToProcess, 20, async (id) => {
               const word = wordsById.get(id);
               const baseRow = rowById.get(id);
-              const match = word ? await pickPictureSymbolsForPhoneticNormalized(word) : null;
+              const match = word ? await pickPictureSymbolsForWord(word) : null;
               done += 1;
               controller.enqueue(ndjsonLine({ type: "progress", done, total: totalToProcess }));
               if (baseRow) computed.push({ ...baseRow, match });
@@ -409,7 +409,7 @@ export async function GET(req: Request) {
           const word = wordsById.get(row.id);
           const match =
             row.phonetic_us_normalized && word
-              ? await pickPictureSymbolsForPhoneticNormalized(word)
+              ? await pickPictureSymbolsForWord(word)
               : null;
 
           return {
@@ -486,7 +486,7 @@ export async function GET(req: Request) {
           const word = wordsById.get(row.id);
           const match =
             row.phonetic_us_normalized && word
-              ? await pickPictureSymbolsForPhoneticNormalized(word)
+              ? await pickPictureSymbolsForWord(word)
               : null;
           return { ...row, match };
         }
@@ -555,7 +555,7 @@ export async function GET(req: Request) {
               const word = wordsById.get(row.id);
               if (!word) return { hasAny: false, hasJob: false, jobEnIsJob: false };
 
-              const match = await pickPictureSymbolsForPhoneticNormalized(word);
+              const match = await pickPictureSymbolsForWord(word);
 
               const hasAny = hasAnyMatchSymbols(match);
               const hasJob = Boolean(match?.job?.fa || match?.job?.en);

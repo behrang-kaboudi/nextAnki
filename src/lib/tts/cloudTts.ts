@@ -61,7 +61,7 @@ function splitTextForSsml(text: string): string[] {
 
 function createAzureSsml(parts: string[]) {
   const voiceFa = process.env.AZURE_TTS_VOICE_FA ?? "fa-IR-FaridNeural";
-  const voiceEn = process.env.AZURE_TTS_VOICE_EN ?? "en-US-GuyNeural";
+  const voiceEn = process.env.AZURE_TTS_VOICE_EN ?? "en-US-JennyNeural";
 
   let ssml = `<speak xmlns="http://www.w3.org/2001/10/synthesis" version="1.0" xml:lang="fa-IR">`;
   for (const part of parts) {
@@ -177,4 +177,3 @@ export async function generateSpeechFromMixedText(
   if (provider === "openai") return textToMp3OpenAI(text, outputPath);
   return textToMp3Polly(text, outputPath);
 }
-

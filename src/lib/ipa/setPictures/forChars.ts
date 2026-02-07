@@ -1,10 +1,16 @@
 import "server-only";
 
-import { PictureWordUsage } from "@prisma/client";
+import { PictureWordUsage, Word } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
 
-import { addReplaceMentsForEach, filterByUsage, IpaCandidate } from "./shared";
+import {
+  addReplaceMentsForEach,
+  filterByUsage,
+  startsWithSAndNextIsConsonant,
+} from "./shared";
+import type { IpaCandidate } from "./types";
+import { imageabilityBaseThreshold } from "./types";
 
 export async function findPictureWordsByIpaPrefix(
   ipaPrefix: string,
@@ -17,6 +23,7 @@ export async function findPictureWordsByIpaPrefix(
   const pictureRows = await prisma.$queryRaw<
     Array<{
       fa: string;
+      phinglish: string;
       en: string;
       target_ipa: string;
       usage: PictureWordUsage;
@@ -25,6 +32,7 @@ export async function findPictureWordsByIpaPrefix(
     SELECT 
       \`usage\`,
       fa,
+      phinglish,
       en,
       ipa_fa_normalized AS target_ipa
     FROM PictureWord
@@ -36,6 +44,7 @@ export async function findPictureWordsByIpaPrefix(
     Array<{
       fa: string;
       en: string;
+      anki_link_id: string;
       target_ipa: string;
       usage: string | null;
     }>
@@ -43,13 +52,14 @@ export async function findPictureWordsByIpaPrefix(
     SELECT
       meaning_fa AS fa,
       base_form AS en,
+      anki_link_id,
       \`meaning_fa_IPA_normalized\` AS target_ipa,
       pos AS \`usage\`,
       imageability
     FROM Word
     WHERE \`meaning_fa_IPA_normalized\` LIKE ${likePattern}
       AND \`meaning_fa_IPA_normalized\` <> ''
-      AND imageability > 64
+      AND imageability > ${imageabilityBaseThreshold}
       AND pos = 'noun'
     ORDER BY meaning_fa ASC, base_form ASC
   `;
@@ -57,30 +67,34 @@ export async function findPictureWordsByIpaPrefix(
     Array<{
       fa: string;
       en: string;
+      anki_link_id: string;
       target_ipa: string;
       usage: string | null;
+      imageability: number | null;
     }>
   >`
     SELECT
+    
       meaning_fa AS fa,
       base_form AS en,
+      anki_link_id,
       \`phonetic_us_normalized\` AS target_ipa,
       pos AS \`usage\`,
       imageability
     FROM Word
     WHERE \`phonetic_us_normalized\` LIKE ${likePattern}
       AND \`phonetic_us_normalized\` <> ''
-      AND imageability > 64
+      AND imageability > ${imageabilityBaseThreshold}
        AND pos = 'noun'
     ORDER BY meaning_fa ASC, base_form ASC
   `;
-  if (ipaPrefix === "tæh") {
-    console.log(`[forChars.ts:99]`, wordRows);
-  }
+  // if (ipaPrefix === "tæh") {
+  //   console.log(`[forChars.ts:99]`, wordRows);
+  // }
   const out: IpaCandidate[] = [];
   const seen = new Set<string>();
   function pushUnique(it: IpaCandidate) {
-    const key = `${it.source}|${it.fa}|${it.en}|${it.target_ipa}|${it.usage}`;
+    const key = `${it.source}|${it.target_lang ?? ""}|${it.fa}|${it.en}|${it.target_ipa}|${it.usage}|${it.anki_link_id ?? ""}|${it.phinglish ?? ""}`;
     if (seen.has(key)) return;
     seen.add(key);
     out.push(it);
@@ -89,6 +103,7 @@ export async function findPictureWordsByIpaPrefix(
   for (const row of pictureRows) {
     pushUnique({
       fa: row.fa,
+      phinglish: row.phinglish,
       en: row.en,
       target_ipa: row.target_ipa,
       usage: row.usage,
@@ -102,6 +117,7 @@ export async function findPictureWordsByIpaPrefix(
     pushUnique({
       fa: row.fa,
       en: row.en,
+      anki_link_id: row.anki_link_id,
       target_ipa: target,
       usage: (row.usage ?? "word").trim() || "word",
       source: "word",
@@ -113,17 +129,19 @@ export async function findPictureWordsByIpaPrefix(
     pushUnique({
       fa: row.fa,
       en: row.en,
+      anki_link_id: row.anki_link_id,
       target_ipa: target,
       usage: (row.usage ?? "word").trim() || "word",
       source: "word",
       target_lang: "en",
+      imageability: row.imageability || undefined,
     });
   }
 
   return out;
 }
 
-function get2CharPatterns(phoneticNormalized: string): string[] {
+export function get2CharPatterns(phoneticNormalized: string): string[] {
   const a = phoneticNormalized[0] ?? "";
   const b = phoneticNormalized[1] ?? "";
 
@@ -131,7 +149,7 @@ function get2CharPatterns(phoneticNormalized: string): string[] {
     `${phoneticNormalized}`,
     `${a}_${b}`,
     `_${a}${b}`,
-    `_${a}_${b}`,
+    // `_${a}_${b}`,
   ];
   for (const base of [...patterns]) addReplaceMentsForEach(patterns, base);
   patterns.push(`${a}__${b}`);
@@ -141,105 +159,204 @@ function get2CharPatterns(phoneticNormalized: string): string[] {
   // patterns.push(`${a}`);
   return patterns;
 }
-function get3CharPatterns(phoneticNormalized: string): string[] {
+export function get3CharPatterns(phoneticNormalized: string): string[] {
   const a = phoneticNormalized[0] ?? "";
   const b = phoneticNormalized[1] ?? "";
   const c = phoneticNormalized[2] ?? "";
   const patterns = [
-    `${phoneticNormalized}`,
-
     `${a}${b}${c}`,
     `${a}${b}_${c}`,
-    `${a}${b}__${c}`,
-    `${a}${b}___${c}`,
-    `${a}_${b}${c}`,
-    `${a}_${b}_${c}`,
+    // `${a}_${b}${c}`,
+    // `_${a}${b}${c}`,
+
+    // `${a}${b}__${c}`,
+    // `${a}_${b}_${c}`,
+    // `_${a}${b}_${c}`,
+
+    // `${a}${c}${b}`,
+    // `${a}${c}_${b}`,
+
+    // `${a}${b}___${c}`,
   ];
   for (const base of [...patterns]) addReplaceMentsForEach(patterns, base);
   return patterns;
 }
-function get4CharPatterns(phoneticNormalized: string): string[] {
+export function get4CharPatterns(phoneticNormalized: string): string[] {
   const a = phoneticNormalized[0] ?? "";
   const b = phoneticNormalized[1] ?? "";
   const c = phoneticNormalized[2] ?? "";
   const d = phoneticNormalized[3] ?? "";
 
   const patterns = [
-    `${phoneticNormalized}`,
+    // `${phoneticNormalized}`,
 
     `${a}${b}${c}${d}`,
     `${a}${b}${c}_${d}`,
-    `${a}${b}${c}__${d}`,
-    `${a}${b}${c}___${d}`,
+    // `${a}${b}_${c}${d}`,
+    // `${a}_${b}${c}${d}`,
+    // `_${a}${b}${c}${d}`,
+    // `${a}${b}${d}_${c}`,
 
-    `${a}${b}_${c}${d}`,
-    `${a}${b}__${c}${d}`,
-    `${a}${b}___${c}${d}`,
+    // `${a}${b}${c}__${d}`,
+    // `${a}${b}__${c}${d}`,
+    // `${a}${b}_${c}_${d}`,
+    // `${a}_${b}_${c}${d}`,
+    // `_${a}${b}${c}_${d}`,
 
-    `${a}_${b}${c}${d}`,
-    `${a}_${b}_${c}${d}`,
+    // `${a}${b}${d}${c}`,
+
+    // `${a}${d}${b}${c}`,
+    // `${a}${d}${b}_${c}`,
+    // `${a}${c}${b}${d}`,
+    // `${a}${c}_${b}${d}`,
+    // `${a}${c}_${b}_${d}`,
+
+    // `${a}${b}${c}___${d}`,
+    // `${a}${b}_${c}__${d}`,
+    // `${a}_${b}_${c}_${d}`,
   ];
   for (const base of [...patterns]) addReplaceMentsForEach(patterns, base);
   return patterns;
 }
-export async function for2Char(
-  phoneticNormalized: string,
-  preferredUsage: PictureWordUsage | null = null,
-): Promise<IpaCandidate[]> {
-  const patterns = get2CharPatterns(phoneticNormalized);
-  for (const pattern of patterns) {
-    const matches = await findPictureWordsByIpaPrefix(pattern);
-    const filtered = filterByUsage(matches, preferredUsage);
-    if (filtered.length > 0) return filtered;
-  }
-
-  return [];
-}
-
-export async function for3Char(
-  phoneticNormalized: string,
-  preferredUsage: PictureWordUsage | null = null,
-): Promise<IpaCandidate[]> {
-  const a = phoneticNormalized[0] ?? "";
-  const b = phoneticNormalized[1] ?? "";
-  const c = phoneticNormalized[2] ?? "";
-  const patterns = get3CharPatterns(phoneticNormalized);
-  patterns.push(...get2CharPatterns(`${a}${b}`));
-  patterns.push(...get2CharPatterns(`${a}${c}`));
-  for (const pattern of patterns) {
-    const matches = await findPictureWordsByIpaPrefix(pattern);
-    const filtered = filterByUsage(matches, preferredUsage);
-    if (filtered.length > 0) return filtered;
-  }
-
-  return [];
-}
-
-export async function for4Char(
-  phoneticNormalized: string,
-  preferredUsage: PictureWordUsage | null = null,
-): Promise<IpaCandidate[]> {
+export function get5CharPatterns(phoneticNormalized: string): string[] {
   const a = phoneticNormalized[0] ?? "";
   const b = phoneticNormalized[1] ?? "";
   const c = phoneticNormalized[2] ?? "";
   const d = phoneticNormalized[3] ?? "";
-  const patterns = get4CharPatterns(phoneticNormalized);
-  patterns.push(...get3CharPatterns(`${a}${b}${c}`));
-  patterns.push(...get3CharPatterns(`${a}${b}${d}`));
-  patterns.push(...get3CharPatterns(`${a}${c}${d}`));
-  patterns.push(...get2CharPatterns(`${a}${b}`));
-  patterns.push(...get2CharPatterns(`${a}${c}`));
-  patterns.push(...get2CharPatterns(`${a}${d}`));
+  const e = phoneticNormalized[4] ?? "";
+
+  const patterns = [
+    `${a}${b}${c}${d}${e}`,
+    `${a}${b}${c}${d}_${e}`,
+    `${a}${b}${c}_${d}${e}`,
+    // `${a}${b}_${c}${d}${e}`,
+    // `${a}_${b}${c}${d}${e}`,
+    // `_${a}${b}${c}${d}${e}`,
+
+    `${a}${b}${c}${d}__${e}`,
+    `${a}${b}${c}_${d}_${e}`,
+    `${a}${b}${c}__${d}${e}`,
+    // `${a}${b}_${c}_${d}${e}`,
+    // `${a}${b}__${c}${d}${e}`,
+    // `${a}_${b}${c}_${d}${e}`,
+    // `${a}_${b}_${c}${d}${e}`,
+    // `${a}_${b}_${c}_${d}${e}`,
+
+    // `${a}${b}${c}${d}___${e}`,
+    // `${a}${b}${c}_${d}__${e}`,
+    // `${a}${b}${c}__${d}_${e}`,
+    // `${a}${b}_${c}_${d}_${e}`,
+    // `${a}${b}_${c}__${d}${e}`,
+    // `${a}_${b}${c}__${d}${e}`,
+    // `${a}_${b}_${c}_${d}${e}`,
+    // `${a}_${b}__${c}${d}${e}`,
+    // `${a}${b}${c}___${d}${e}`,
+
+    // `${a}_${b}_${c}_${d}_${e}`,
+
+    // `_${a}${b}${c}_${d}_${e}`,
+    // `_${a}${b}${c}__${d}${e}`,
+    // `_${a}${b}_${c}_${d}${e}`,
+
+    // `${a}${b}${c}${e}${d}`,
+    // `${a}${b}${c}${e}_${d}`,
+    // `${a}${b}${c}_${e}${d}`,
+    // `${a}${b}_${c}${e}${d}`,
+    // `${a}${b}${e}${c}${d}`,
+    // `${a}${b}${e}${c}_${d}`,
+    // `${a}${b}${e}_${c}${d}`,
+    // `${a}${b}_${e}${c}${d}`,
+  ];
+
+  for (const base of [...patterns]) addReplaceMentsForEach(patterns, base);
+
+  // looser fallbacks (pattern-style), similar spirit to setFor4
+  // patterns.push(`${a}${b}${c}${d}`);
+  // patterns.push(`${a}${b}${c}${e}`);
+  // patterns.push(`${a}${b}${d}${e}`);
+
+  return patterns;
+}
+
+function getPatternsForPart(phoneticNormalized: string): string[] {
+  const a = phoneticNormalized[0] ?? "";
+  const b = phoneticNormalized[1] ?? "";
+  const c = phoneticNormalized[2] ?? "";
+  const d = phoneticNormalized[3] ?? "";
+  const e = phoneticNormalized[4] ?? "";
+  const patterns: string[] = [];
+  const length = phoneticNormalized.length;
+  if (length < 3) {
+    return get2CharPatterns(phoneticNormalized);
+  }
+  if (length === 3) {
+    patterns.push(...get3CharPatterns(phoneticNormalized));
+    patterns.push(...get3CharPatterns(a + b + c)); // 3-char fallback
+    patterns.push(...get3CharPatterns(a + c)); // 2-char fallback
+  }
+  if (length === 4) {
+    patterns.push(...get4CharPatterns(phoneticNormalized));
+    patterns.push(...get4CharPatterns(a + b + c + d));
+    patterns.push(...get3CharPatterns(a + b + c)); // 3-char fallback
+    patterns.push(...get3CharPatterns(a + b + d)); // 3-char fallback
+    // patterns.push(...get3CharPatterns(a + c + d)); // 3-char fallback
+    // patterns.push(...get3CharPatterns(b + c + d)); // 3-char fallback
+  }
+  if (length === 5) {
+    patterns.push(...get5CharPatterns(phoneticNormalized));
+    patterns.push(...get5CharPatterns(a + b + c + e + d));
+    patterns.push(...get4CharPatterns(a + b + c + d)); // 4-char fallback
+    patterns.push(...get4CharPatterns(a + b + c + e)); // 4-char fallback
+    // patterns.push(...get4CharPatterns(a + b + d + e)); // 4-char fallback
+    // patterns.push(...get4CharPatterns(a + c + d + e)); // 4-char fallback
+    // patterns.push(...get4CharPatterns(b + c + d + e)); // 4-char fallback
+  }
+  return patterns;
+}
+// اگر برای پترن بالایی پیدا شود سایرین جستجو نمیشوند
+async function findCandidatesByPatterns(
+  patterns: string[],
+  word: Word,
+): Promise<IpaCandidate[]> {
+  const length = word.phonetic_us_normalized?.replace(" ", "").length || 0;
   for (const pattern of patterns) {
     const matches = await findPictureWordsByIpaPrefix(pattern);
-    const filtered = filterByUsage(matches, preferredUsage);
-    // if (phoneticNormalized === "ɪeɪʃen") {
-    //   console.log("[setFor6.ts:33]", filtered);
-    // }
-    if (filtered.length > 0) return filtered;
+    const filtered1 = matches.filter(
+      (m) => m.target_ipa != word.phonetic_us_normalized,
+    );
+    const filtered2 = filtered1.filter((m) => {
+      if (!m.target_lang) return true;
+      if (word.imageability < imageabilityBaseThreshold) return true;
+      if (m.target_ipa.length < length) return true;
+      return false;
+      // return true;
+    });
+    const filtered3 = filtered2.filter((m) => m.target_ipa.length < 8);
+    if (filtered3.length > 0) return filtered3;
   }
-
   return [];
+}
+export async function findCandidatesByPart(
+  phoneticNormalizedForPart: string,
+  word: Word,
+): Promise<IpaCandidate[]> {
+  const patterns = getPatternsForPart(phoneticNormalizedForPart);
+  const candidates = await findCandidatesByPatterns(patterns, word);
+  const filtered = filterByUsage(candidates);
+  return filtered;
+}
+export async function findCandidatesByPartWithS(
+  phoneticNormalized: string,
+  word: Word,
+): Promise<IpaCandidate[]> {
+  let matches = await findCandidatesByPart(phoneticNormalized, word);
+  if (
+    matches.length === 0 &&
+    startsWithSAndNextIsConsonant(phoneticNormalized)
+  ) {
+    matches = await findCandidatesByPart(`e${phoneticNormalized}`, word);
+  }
+  return matches;
 }
 
 export async function for1CharAdj(
@@ -249,7 +366,6 @@ export async function for1CharAdj(
   const a = phoneticNormalized[0] ?? "";
 
   const patterns = [`${a}`];
-
   for (const pattern of patterns) {
     const matches = await findPictureWordsByIpaPrefix(pattern);
     const filtered = filterByUsage(matches, preferredUsage);

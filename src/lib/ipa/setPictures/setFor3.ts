@@ -2,67 +2,21 @@ import "server-only";
 
 import type { PictureWordUsage, Word } from "@prisma/client";
 
-import {
-  addReplaceMentsForEach,
-  charsMissingFromBestIpa,
-  filterByUsage,
-  IpaCandidate,
-  startsWithSAndNextIsConsonant,
-} from "./shared";
-import { SetFor2Result } from "./types";
-import { for1CharAdj, findPictureWordsByIpaPrefix } from "./forChars";
+import { charsMissingFromBestIpa, filterByUsage } from "./shared";
+import type { WordPictures, IpaCandidate } from "./types";
+import { for1CharAdj, findCandidatesByPartWithS } from "./forChars";
 
-async function findByPattern(pattern: string): Promise<IpaCandidate[]> {
-  const preferredUsage: PictureWordUsage | null = "person";
-  const matches = await findPictureWordsByIpaPrefix(pattern);
-  return filterByUsage(matches, preferredUsage);
-}
-
-async function findByPatternCandidates(
-  phoneticNormalized: string,
-): Promise<IpaCandidate[]> {
-  const patterns = [
-    `${phoneticNormalized[0]}${phoneticNormalized[1]}${phoneticNormalized[2]}`,
-    `${phoneticNormalized[0]}${phoneticNormalized[1]}_${phoneticNormalized[2]}`,
-    `${phoneticNormalized[0]}${phoneticNormalized[1]}__${phoneticNormalized[2]}`,
-    `${phoneticNormalized[0]}_${phoneticNormalized[1]}${phoneticNormalized[2]}`,
-
-    `${phoneticNormalized[0]}${phoneticNormalized[1]}___${phoneticNormalized[2]}`,
-    `${phoneticNormalized[0]}_${phoneticNormalized[1]}_${phoneticNormalized[2]}`,
-    `_${phoneticNormalized}`,
-  ];
-  for (const base of [...patterns]) addReplaceMentsForEach(patterns, base);
-  patterns.push(`${phoneticNormalized[0]}${phoneticNormalized[1]}`);
-  patterns.push(`${phoneticNormalized[0]}${phoneticNormalized[2]}`);
-  patterns.push(`${phoneticNormalized[0]}_${phoneticNormalized[2]}`);
-  patterns.push(`_${phoneticNormalized[0]}${phoneticNormalized[1]}`);
-  for (const pattern of patterns) {
-    const matches = await findByPattern(pattern);
-    const filtered1 = matches.filter((m) => m.target_ipa != phoneticNormalized);
-    const filtered2 = filtered1.filter((m) => {
-      if (!m.target_lang) return true;
-      if (m.target_ipa.length <= 2) return true;
-      return false;
-    });
-    const filtered3 = filterByUsage(filtered2, null);
-    if (filtered3.length > 0) return filtered3;
-  }
-
-  return [];
-}
-
-export async function setFor3(
-  word: Pick<Word, "phonetic_us_normalized">,
-): Promise<SetFor2Result> {
+export async function setFor3(word: Word): Promise<WordPictures> {
   const phoneticNormalized = (word.phonetic_us_normalized ?? "").trim();
-  let matches = await findByPatternCandidates(phoneticNormalized);
-  if (
-    matches.length === 0 &&
-    startsWithSAndNextIsConsonant(phoneticNormalized)
-  ) {
-    matches = await findByPatternCandidates(`e${phoneticNormalized}`);
+  // first find for the whole 3 chars, then for 2 chars and for 1 char  adj
+  let matches = await findCandidatesByPartWithS(phoneticNormalized, word);
+  if (matches.length === 0) {
+    matches = await findCandidatesByPartWithS(
+      phoneticNormalized.slice(0, 2),
+      word,
+    );
   }
-  const symbols: SetFor2Result = {
+  const symbols: WordPictures = {
     person: pickBestPictureWord(matches, "person"),
   };
   const missedChars = charsMissingFromBestIpa(
@@ -76,7 +30,7 @@ export async function setFor3(
 
     if (!adjCandidate) {
       console.log(
-        `[setFor3] missing chars`,
+        `[setFor3] missing chars 000000000000000000000`,
         phoneticNormalized,
         charsMissingFromBestIpa(phoneticNormalized, symbols.person),
       );

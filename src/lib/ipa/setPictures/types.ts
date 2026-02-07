@@ -1,7 +1,17 @@
-import { IpaCandidate } from "./shared";
+export const imageabilityBaseThreshold = 64;
+export type IpaCandidate = {
+  fa: string;
+  en: string;
+  target_ipa: string;
+  target_lang?: "fa" | "en";
+  usage: string;
+  source: "pictureWord" | "word";
+  imageability?: number;
+  phinglish?: string;
+  anki_link_id?: string;
+};
 
-// Kept name for compatibility with existing callers.
-export type SetFor2Result = {
+export type WordPictures = {
   person?: IpaCandidate;
   job?: IpaCandidate;
   adj?: IpaCandidate;

@@ -7,12 +7,6 @@ import { prisma } from "@/lib/prisma";
 
 export const runtime = "nodejs";
 
-function extractFirstSoundFilename(value: string): string | null {
-  const m = /\[sound:(?<fn>[^\]]+)\]/i.exec(value);
-  const fn = m?.groups?.fn?.trim();
-  return fn ? fn : null;
-}
-
 export async function POST() {
   const anki = createAnkiConnectClient({ timeoutMs: 15_000, retryDelayMs: 750 });
 
@@ -62,11 +56,17 @@ export async function POST() {
     );
   }
 
-  const ankiSentenceEn = note.fields?.sentence_en?.value ?? "";
-  const generatedSentenceEn = await WORD_ANKI_FIELD_GENERATORS.sentence_en(word);
-  const oldMediaFilename = extractFirstSoundFilename(ankiSentenceEn);
-  const newMediaFilename = extractFirstSoundFilename(generatedSentenceEn);
-  const changed = ankiSentenceEn !== generatedSentenceEn;
+  const ankiJsonHint = note.fields?.json_hint?.value ?? "";
+  const generatedJsonHint = await WORD_ANKI_FIELD_GENERATORS.json_hint(word);
+  const jsonHintChanged = ankiJsonHint !== generatedJsonHint;
+
+  const ankiFirstLetterFaHint = note.fields?.first_letter_fa_hint?.value ?? "";
+  const generatedFirstLetterFaHint = await WORD_ANKI_FIELD_GENERATORS.first_letter_fa_hint(word);
+  const firstLetterFaHintChanged = ankiFirstLetterFaHint !== generatedFirstLetterFaHint;
+
+  const ankiFirstLetterEnHint = note.fields?.first_letter_en_hint?.value ?? "";
+  const generatedFirstLetterEnHint = await WORD_ANKI_FIELD_GENERATORS.first_letter_en_hint(word);
+  const firstLetterEnHintChanged = ankiFirstLetterEnHint !== generatedFirstLetterEnHint;
 
   return NextResponse.json(
     {
@@ -74,11 +74,15 @@ export async function POST() {
       modelName,
       noteId,
       ankiLinkId,
-      ankiSentenceEn,
-      generatedSentenceEn,
-      changed,
-      oldMediaFilename,
-      newMediaFilename,
+      ankiJsonHint,
+      generatedJsonHint,
+      jsonHintChanged,
+      ankiFirstLetterFaHint,
+      generatedFirstLetterFaHint,
+      firstLetterFaHintChanged,
+      ankiFirstLetterEnHint,
+      generatedFirstLetterEnHint,
+      firstLetterEnHintChanged,
     },
     { status: 200 },
   );

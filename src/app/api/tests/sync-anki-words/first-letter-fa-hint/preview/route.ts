@@ -7,12 +7,6 @@ import { prisma } from "@/lib/prisma";
 
 export const runtime = "nodejs";
 
-function extractFirstSoundFilename(value: string): string | null {
-  const m = /\[sound:(?<fn>[^\]]+)\]/i.exec(value);
-  const fn = m?.groups?.fn?.trim();
-  return fn ? fn : null;
-}
-
 export async function POST() {
   const anki = createAnkiConnectClient({ timeoutMs: 15_000, retryDelayMs: 750 });
 
@@ -62,11 +56,9 @@ export async function POST() {
     );
   }
 
-  const ankiSentenceEn = note.fields?.sentence_en?.value ?? "";
-  const generatedSentenceEn = await WORD_ANKI_FIELD_GENERATORS.sentence_en(word);
-  const oldMediaFilename = extractFirstSoundFilename(ankiSentenceEn);
-  const newMediaFilename = extractFirstSoundFilename(generatedSentenceEn);
-  const changed = ankiSentenceEn !== generatedSentenceEn;
+  const ankiValue = note.fields?.first_letter_fa_hint?.value ?? "";
+  const generatedValue = await WORD_ANKI_FIELD_GENERATORS.first_letter_fa_hint(word);
+  const changed = ankiValue !== generatedValue;
 
   return NextResponse.json(
     {
@@ -74,11 +66,9 @@ export async function POST() {
       modelName,
       noteId,
       ankiLinkId,
-      ankiSentenceEn,
-      generatedSentenceEn,
+      ankiValue,
+      generatedValue,
       changed,
-      oldMediaFilename,
-      newMediaFilename,
     },
     { status: 200 },
   );

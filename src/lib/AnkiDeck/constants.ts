@@ -22,6 +22,7 @@ export const WordAnkiConstants = {
       "phonetic_us_normalized",
       "learning_depth",
       "imageability",
+      "json_hint",
     ],
   },
   noteTemplates: {

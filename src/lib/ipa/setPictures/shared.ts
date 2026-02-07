@@ -9,14 +9,7 @@ import {
   FA_KEYWORDS_VOWELS_NORMALIZED,
 } from "@/lib/ipa/ipaSets";
 
-export type IpaCandidate = {
-  fa: string;
-  en: string;
-  target_ipa: string;
-  target_lang?: "fa" | "en";
-  usage: string;
-  source: "pictureWord" | "word";
-};
+import type { IpaCandidate } from "./types";
 
 export function getIpaCandidateTargetLang(
   candidate: Pick<IpaCandidate, "target_lang">,
@@ -65,7 +58,7 @@ export async function findPictureWordsWithSameFirstIpaChar(
 
 export function filterByUsage(
   rows: IpaCandidate[],
-  preferredUsage: IpaCandidate["usage"] | null,
+  preferredUsage?: IpaCandidate["usage"] | null,
 ): IpaCandidate[] {
   const ADJ = "adj";
   const wantAdj = String(preferredUsage ?? "").trim() === ADJ;
@@ -75,7 +68,7 @@ export function filterByUsage(
     : rows.filter((row) => String(row.usage).trim() !== ADJ);
 }
 
-export function addReplaceMentsForEach(
+function addReplaceMentsForFirstLetter(
   patterns: string[],
   toChange?: string,
 ): void {
@@ -83,19 +76,56 @@ export function addReplaceMentsForEach(
   if (!source) return;
 
   const existing = new Set(patterns);
+  const chars = Array.from(source);
+  const head = chars[0] ?? "";
+  const tail = chars.slice(1).join("");
+  const replaceFirstChar = (from: string, to: string): string =>
+    head === from ? `${to}${tail}` : source;
   const nextValues = [
-    source.replace("j", "ɪ"),
-    source.replace("ɪ", "j"),
-    source.replace("ɪ", "e"),
-    source.replace("e", "ɪ"),
-    source.replace("ʤ", "ʒ"),
-    source.replace("ʒ", "ʤ"),
-    source.replace("ʤ", "ʧ"),
-    source.replace("ʧ", "ʤ"),
-    source.replace("o", "ʊ"),
-    source.replace("ʊ", "o"),
-    source.replace("æ", "ʌ"),
-    source.replace("ʌ", "æ"),
+    replaceFirstChar("j", "ɪ"),
+    replaceFirstChar("ɪ", "j"),
+    replaceFirstChar("ʤ", "ʒ"),
+    replaceFirstChar("ʒ", "ʤ"),
+    replaceFirstChar("ʤ", "ʧ"),
+    // source.replace("ʧ", "ʤ"),
+    replaceFirstChar("o", "ʊ"),
+    replaceFirstChar("ʊ", "o"),
+  ];
+
+  for (const next of nextValues) {
+    if (existing.has(next)) continue;
+    existing.add(next);
+    patterns.push(next);
+  }
+}
+export function addReplaceMentsForEach(
+  patterns: string[],
+  toChange?: string,
+): void {
+  const source = (toChange ?? patterns[0] ?? "").trim();
+  if (!source) return;
+  addReplaceMentsForFirstLetter(patterns, source);
+
+  const chars = Array.from(source);
+  const head = chars[0] ?? "";
+  const tail = chars.slice(1).join("");
+  const replaceFromSecondChar = (from: string, to: string): string =>
+    tail ? `${head}${tail.replace(from, to)}` : source;
+
+  const existing = new Set(patterns);
+  const nextValues = [
+    replaceFromSecondChar("j", "ɪ"),
+    replaceFromSecondChar("ɪ", "j"),
+    replaceFromSecondChar("ɪ", "e"),
+    // source.replace("e", "ɪ"),
+    replaceFromSecondChar("ʤ", "ʒ"),
+    replaceFromSecondChar("ʒ", "ʤ"),
+    replaceFromSecondChar("ʤ", "ʧ"),
+    // source.replace("ʧ", "ʤ"),
+    replaceFromSecondChar("o", "ʊ"),
+    replaceFromSecondChar("ʊ", "o"),
+    replaceFromSecondChar("æ", "ʌ"),
+    replaceFromSecondChar("ʌ", "æ"),
   ];
 
   for (const next of nextValues) {

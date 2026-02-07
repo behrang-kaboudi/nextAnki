@@ -1,11 +1,22 @@
 import "server-only";
 
+import fs from "node:fs";
+import path from "node:path";
+
 import type { Word } from "@prisma/client";
 
 import type { AnkiNotesInfo } from "@/lib/AnkiConnect";
 import { WordAnkiConstants, type WordNoteFieldName } from "@/lib/AnkiDeck";
+import {
+  parsePictureWordAudioFilename,
+  pictureWordAudioKey,
+} from "@/lib/audio/pictureWordAudioNaming";
 import type { WordAudioFieldKey } from "@/lib/audio/wordFieldAudioNaming";
+import { getWordFieldAudioAbsolutePath } from "@/lib/audio/wordFieldAudioPaths.server";
 import { getLatestWordFieldAudioFile } from "@/lib/words/wordFieldVoice";
+import { prisma } from "@/lib/prisma";
+
+import { IpaCandidate, WordPictures } from "../ipa/setPictures/types";
 
 export const WORD_ANKI_LINK_ID_FIELD = "anki_link_id" as const;
 
@@ -16,13 +27,185 @@ export const WORD_ANKI_LINK_ID_FIELD_ALIASES = [
   "ankiLinkId",
 ] as const;
 
+type PictureWordAudioIndex = Map<
+  string,
+  { filename: string; timestampMs: number; absPath: string }
+>;
+
+function safeSlugPart(input: string) {
+  const s = (input ?? "").trim().toLowerCase();
+  return s
+    .replace(/['"]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 64);
+}
+
+function getPictureWordAudioIndex(): PictureWordAudioIndex {
+  const g = globalThis as unknown as {
+    __pictureWordAudioIndex?: PictureWordAudioIndex;
+  };
+  if (g.__pictureWordAudioIndex) return g.__pictureWordAudioIndex;
+
+  const dir = path.join(process.cwd(), "public", "audio", "pictureWord");
+  let files: string[] = [];
+  try {
+    files = fs.readdirSync(dir).filter((x) => x && !x.startsWith("."));
+  } catch {
+    g.__pictureWordAudioIndex = new Map();
+    return g.__pictureWordAudioIndex;
+  }
+
+  const index: PictureWordAudioIndex = new Map();
+  for (const filename of files) {
+    const parsed = parsePictureWordAudioFilename(filename);
+    if (!parsed.key) continue;
+    const ts = parsed.timestampMs;
+    if (ts == null) continue;
+
+    const prev = index.get(parsed.key);
+    if (prev && prev.timestampMs >= ts) continue;
+
+    const absPath = path.join(dir, filename);
+    let size = 0;
+    try {
+      size = fs.statSync(absPath).size;
+    } catch {
+      continue;
+    }
+    if (size <= 0) continue;
+
+    index.set(parsed.key, { filename, timestampMs: ts, absPath });
+  }
+
+  g.__pictureWordAudioIndex = index;
+  return index;
+}
+
+export async function selectFile(
+  IpaCandidate: IpaCandidate,
+): Promise<string | null> {
+  if (IpaCandidate.source === "pictureWord") {
+    const phinglish = String(IpaCandidate.phinglish ?? "").trim();
+    const en = String(IpaCandidate.en ?? "").trim();
+    if (!en) return null;
+
+    const idx = getPictureWordAudioIndex();
+    if (phinglish) {
+      const key = pictureWordAudioKey(phinglish, en);
+      const best = idx.get(key);
+      if (best?.absPath) return best.absPath;
+    }
+
+    // Fallback: match by English slug only (in case `phinglish` isn't present in `json_hint` yet).
+    const enSlug = safeSlugPart(en);
+    if (!enSlug) return null;
+
+    let best: { timestampMs: number; absPath: string } | null = null;
+    for (const [key, value] of idx.entries()) {
+      if (!key.endsWith(`__${enSlug}`)) continue;
+      if (!best || value.timestampMs > best.timestampMs) {
+        best = { timestampMs: value.timestampMs, absPath: value.absPath };
+      }
+    }
+    return best?.absPath ?? null;
+  }
+
+  const targetLang = IpaCandidate.target_lang ?? "fa";
+  const field: WordAudioFieldKey =
+    targetLang === "en" ? "base_form" : "meaning_fa";
+
+  const fa = String(IpaCandidate.fa ?? "").trim();
+  const en = String(IpaCandidate.en ?? "").trim();
+
+  const strictWhere =
+    field === "base_form"
+      ? { base_form: en, ...(fa ? { meaning_fa: fa } : {}) }
+      : { meaning_fa: fa, ...(en ? { base_form: en } : {}) };
+
+  const looseWhere =
+    field === "base_form" ? { base_form: en } : { meaning_fa: fa };
+
+  const row =
+    en || fa
+      ? ((await prisma.word.findFirst({
+          where: strictWhere,
+          select: { anki_link_id: true, base_form: true },
+        })) ??
+        (await prisma.word.findFirst({
+          where: looseWhere,
+          select: { anki_link_id: true, base_form: true },
+        })))
+      : null;
+
+  const ankiLinkId = row?.anki_link_id ?? null;
+  if (!ankiLinkId) return null;
+
+  const latest = getLatestWordFieldAudioFile({ ankiLinkId, field });
+  console.log(
+    `[wordAnkiMapping.ts:135]`,
+    row?.base_form,
+    latest,
+    ankiLinkId,
+    field,
+  );
+  if (!latest || latest.size <= 0) return null;
+  return getWordFieldAudioAbsolutePath(latest.filename);
+}
+
+function selectFileForLang(
+  candidate: IpaCandidate,
+  lang: "fa" | "en",
+): Promise<string | null> {
+  return selectFile({ ...candidate, target_lang: lang });
+}
+
+function toSoundTagFromAbsPath(absPath: string | null): string {
+  if (!absPath) return "";
+  const filename = path.basename(absPath);
+  return filename ? ` [sound:${filename}]` : "";
+}
+
+function formatFaEnText(candidate: Pick<IpaCandidate, "fa" | "en">): string {
+  const fa = String(candidate.fa ?? "").trim();
+  const en = String(candidate.en ?? "").trim();
+  if (fa && en) return `${fa} — ${en}`;
+  return fa || en || "";
+}
+
+async function buildHintLines(
+  candidates: Array<IpaCandidate | null | undefined>,
+  lang: "fa" | "en",
+): Promise<string> {
+  const out: string[] = [];
+  const seen = new Set<string>();
+
+  for (const cand of candidates) {
+    if (!cand) continue;
+    const key = `${cand.source}|${cand.fa}|${cand.en}|${cand.target_ipa}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+
+    const text = formatFaEnText(cand);
+    if (!text) continue;
+
+    const file = await selectFileForLang(cand, lang);
+    out.push(`${text}${toSoundTagFromAbsPath(file)}`.trim());
+  }
+
+  return out.join("\n").trim();
+}
+
 function asNonEmptyString(value: unknown): string | null {
   if (typeof value !== "string") return null;
   const trimmed = value.trim();
   return trimmed ? trimmed : null;
 }
 
-export function getAnkiLinkIdFromNoteFields(note: AnkiNotesInfo[number]): string | null {
+export function getAnkiLinkIdFromNoteFields(
+  note: AnkiNotesInfo[number],
+): string | null {
   for (const key of WORD_ANKI_LINK_ID_FIELD_ALIASES) {
     const v = asNonEmptyString(note.fields?.[key]?.value);
     if (v) return v;
@@ -30,9 +213,13 @@ export function getAnkiLinkIdFromNoteFields(note: AnkiNotesInfo[number]): string
   return null;
 }
 
-export type WordAnkiFieldGenerator = (word: Word) => string;
+export type WordAnkiFieldGenerator = (word: Word) => string | Promise<string>;
 
-function withLatestAudioTag(text: string, ankiLinkId: string, field: WordAudioFieldKey): string {
+function withLatestAudioTag(
+  text: string,
+  ankiLinkId: string,
+  field: WordAudioFieldKey,
+): string {
   const latest = getLatestWordFieldAudioFile({ ankiLinkId, field });
   if (!latest || latest.size <= 0) return text;
 
@@ -45,35 +232,66 @@ function withLatestAudioTag(text: string, ankiLinkId: string, field: WordAudioFi
 
 export const WORD_ANKI_FIELD_GENERATORS = {
   anki_link_id: (w) => w.anki_link_id,
-  base_form: (w) => withLatestAudioTag(w.base_form, w.anki_link_id, "base_form"),
+  base_form: (w) =>
+    withLatestAudioTag(w.base_form, w.anki_link_id, "base_form"),
   phonetic_us: (w) => w.phonetic_us ?? "",
   pos: (w) => w.pos ?? "",
-  meaning_fa: (w) => withLatestAudioTag(w.meaning_fa, w.anki_link_id, "meaning_fa"),
-  other_meanings_fa: (w) => withLatestAudioTag(w.other_meanings_fa ?? "", w.anki_link_id, "other_meanings_fa"),
+  meaning_fa: (w) =>
+    withLatestAudioTag(w.meaning_fa, w.anki_link_id, "meaning_fa"),
+  other_meanings_fa: (w) =>
+    withLatestAudioTag(
+      w.other_meanings_fa ?? "",
+      w.anki_link_id,
+      "other_meanings_fa",
+    ),
   concept_explained_fa: (w) => w.concept_explained_fa ?? "",
-  sentence_en: (w) => withLatestAudioTag(w.sentence_en ?? "", w.anki_link_id, "sentence_en"),
+  sentence_en: (w) =>
+    withLatestAudioTag(w.sentence_en ?? "", w.anki_link_id, "sentence_en"),
   sentence_en_meaning_fa: (w) =>
-    withLatestAudioTag(w.sentence_en_meaning_fa ?? "", w.anki_link_id, "sentence_en_meaning_fa"),
+    withLatestAudioTag(
+      w.sentence_en_meaning_fa ?? "",
+      w.anki_link_id,
+      "sentence_en_meaning_fa",
+    ),
 
   // TODO: define the source-of-truth for this field (not currently present in DB schema).
   best_translate: () => "",
 
   mixed_sentence: (w) => w.mixed_sentence ?? "",
-  first_letter_fa_hint: (w) => w.first_letter_fa_hint ?? "",
-  first_letter_en_hint: (w) => w.first_letter_en_hint ?? "",
+  first_letter_fa_hint: async (w) => {
+    const obj: WordPictures = JSON.parse(w.json_hint ?? "{}");
+    const cand = obj.persianImage ?? null;
+    if (!cand) return "";
+    const text = formatFaEnText(cand);
+    const file = await selectFileForLang(cand, "fa");
+    return `${text}${toSoundTagFromAbsPath(file)}`.trim();
+  },
+  first_letter_en_hint: async (w) => {
+    const obj: WordPictures = JSON.parse(w.json_hint ?? "{}");
+    return buildHintLines([obj.person, obj.adj, obj.job], "en");
+  },
 
   // Anki field name is `hint_to_select_letters`, but DB field is `hint_to_select`.
-  hint_to_select_letters: (w) => w.hint_to_select ?? "",
+  hint_to_select_letters: (w) => String(w.base_form.length ?? ""),
 
   hint_sentence: (w) => w.hint_sentence ?? "",
   phonetic_us_normalized: (w) => w.phonetic_us_normalized ?? "",
-  learning_depth: (w) => (w.learning_depth == null ? "" : String(w.learning_depth)),
+  learning_depth: (w) =>
+    w.learning_depth == null ? "" : String(w.learning_depth),
+  imageability: (w) => String(w.imageability),
+  json_hint: (w) => w.json_hint ?? "",
 } as const satisfies Record<WordNoteFieldName, WordAnkiFieldGenerator>;
 
-export function generateWordAnkiFieldsForMetaLexVr9(word: Word): Record<WordNoteFieldName, string> {
+export function generateWordAnkiFieldsForMetaLexVr9(
+  word: Word,
+): Promise<Record<WordNoteFieldName, string>> {
   const fields = WordAnkiConstants.noteFields.META_LEX_VR9;
-  return Object.fromEntries(fields.map((f) => [f, WORD_ANKI_FIELD_GENERATORS[f](word)])) as Record<
-    WordNoteFieldName,
-    string
-  >;
+  return Promise.all(
+    fields.map(
+      async (f) => [f, await WORD_ANKI_FIELD_GENERATORS[f](word)] as const,
+    ),
+  ).then(
+    (entries) =>
+      Object.fromEntries(entries) as Record<WordNoteFieldName, string>,
+  );
 }

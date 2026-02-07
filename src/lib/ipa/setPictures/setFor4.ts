@@ -1,87 +1,58 @@
 import "server-only";
 
-import { PictureWordUsage, type Word } from "@prisma/client";
+import { type Word } from "@prisma/client";
 
 import {
-  addReplaceMentsForEach,
-  filterByUsage,
-  startsWithSAndNextIsConsonant,
   charsMissingFromBestIpa,
-  IpaCandidate,
   sortCharsConsonantsThenVowels,
 } from "./shared";
-import type { SetFor2Result } from "./types";
-import { for2Char, for1CharAdj, findPictureWordsByIpaPrefix } from "./forChars";
+import type { WordPictures } from "./types";
+import {
+  for1CharAdj,
+  findCandidatesByPartWithS,
+  findCandidatesByPart,
+} from "./forChars";
 import { pickBestFaEn } from "./pickBestFaEn";
 import { placeholderJobPictureWord } from "./placeholders";
 
-async function findByPattern(pattern: string): Promise<IpaCandidate[]> {
-  const preferredUsage: PictureWordUsage | null = PictureWordUsage.person;
-  const matches = await findPictureWordsByIpaPrefix(pattern);
-  return filterByUsage(matches, preferredUsage);
-}
-
-async function findByPatternCandidates(
-  phoneticNormalized: string,
-): Promise<IpaCandidate[]> {
-  const a = phoneticNormalized[0] ?? "";
-  const b = phoneticNormalized[1] ?? "";
-  const c = phoneticNormalized[2] ?? "";
-  const d = phoneticNormalized[3] ?? "";
-
-  const patterns = [
-    `${a}${b}${c}${d}`,
-    `${a}${b}${c}_${d}`,
-    `${a}${b}_${c}${d}`,
-    `${a}_${b}${c}${d}`,
-
-    `${a}${b}_${c}_${d}`,
-    `${a}_${b}${c}_${d}`,
-    `${a}_${b}_${c}${d}`,
-    `${a}_${b}_${c}_${d}`,
-
-    `${a}${b}${c}__${d}`,
-    `${a}${b}__${c}${d}`,
-    // `${a}__${b}${c}${d}`,
-    `${a}${b}${c}___${d}`,
-    `_${phoneticNormalized}`,
-  ];
-
-  for (const base of [...patterns]) addReplaceMentsForEach(patterns, base);
-
-  // keep a few looser fallbacks similar to setFor3
-  patterns.push(`${a}${b}${c}`);
-  patterns.push(`${a}${b}${d}`);
-  patterns.push(`${a}${b}ـ${d}`);
-  patterns.push(`${a}${c}${d}`);
-  patterns.push(`${a}ـ${c}${d}`);
-
-  for (const pattern of patterns) {
-    const matches = await findByPattern(pattern);
-    const filtered = matches.filter((m) => m.target_ipa != phoneticNormalized);
-    if (filtered.length > 0) return filtered;
-  }
-
-  return [];
-}
-
-export async function setFor4(
-  word: Pick<Word, "phonetic_us_normalized">,
-): Promise<SetFor2Result> {
+export async function setFor4(word: Word): Promise<WordPictures> {
   const phoneticNormalized = (word.phonetic_us_normalized ?? "")
     .trim()
     .replace(" ", "");
-  let matches = await findByPatternCandidates(phoneticNormalized);
-  if (
-    matches.length === 0 &&
-    startsWithSAndNextIsConsonant(phoneticNormalized)
-  ) {
-    matches = await findByPatternCandidates(`e${phoneticNormalized}`);
-  }
-  const symbols: SetFor2Result = {
-    person: pickBestFaEn(matches, phoneticNormalized),
-  };
+  const matches = await findCandidatesByPartWithS(phoneticNormalized, word);
+  // if (matches.length === 0) {
+  //   matches = await findCandidatesByPartWithS(
+  //     phoneticNormalized[0] + phoneticNormalized[1] + phoneticNormalized[2],
+  //     word,
+  //   );
+  // }
+  // if (matches.length === 0) {
+  //   matches = await findCandidatesByPartWithS(
+  //     phoneticNormalized[0] + phoneticNormalized[1] + phoneticNormalized[3],
+  //     word,
+  //   );
+  // }
+  // if (matches.length === 0) {
+  //   matches = await findCandidatesByPartWithS(
+  //     phoneticNormalized[0] + phoneticNormalized[2] + phoneticNormalized[3],
+  //     word,
+  //   );
+  // }
+  // if (matches.length === 0) {
+  //   matches = await findCandidatesByPartWithS(
+  //     phoneticNormalized[0] + phoneticNormalized[2] + phoneticNormalized[3],
+  //     word,
+  //   );
+  // }
+  // if (matches.length === 0) {
+  //   matches = await findCandidatesByPartWithS(
+  //     phoneticNormalized[1] + phoneticNormalized[2] + phoneticNormalized[3],
+  //     word,
+  //   );
+  // }
+  const symbols: WordPictures = {};
   if (matches.length > 0) {
+    symbols.person = pickBestFaEn(matches, phoneticNormalized);
     const missedChars = charsMissingFromBestIpa(
       phoneticNormalized,
       symbols.person,
@@ -101,19 +72,27 @@ export async function setFor4(
     }
   }
   if (matches.length === 0) {
-    const persons = await for2Char(
+    // console.log(
+    //   `[setFor4.ts:123]`,
+    //   "Nooooooooooooooooooooooooooo00000000000000000000000000",
+    //   phoneticNormalized,
+    // );
+    const persons = await findCandidatesByPart(
       phoneticNormalized[0] + phoneticNormalized[1],
-      PictureWordUsage.person,
+      word,
     );
     symbols.person = pickBestFaEn(persons, phoneticNormalized);
-    const jobs = await for2Char(
+    const jobs = await findCandidatesByPart(
       phoneticNormalized[2] + phoneticNormalized[3],
-      PictureWordUsage.Job,
+      word,
     );
     symbols.job =
       pickBestFaEn(jobs, phoneticNormalized) || placeholderJobPictureWord();
     if (symbols.job.en === "job")
-      console.log(`[setFor4.ts:123]`, "Nooooooooooooooooooooooooooo");
+      console.log(
+        `[setFor4.ts:123]`,
+        "NoooooooooooooooooooooooooooJobJobJobJobJobJobJobJobJobJobJobJobJobJob",
+      );
   }
 
   return symbols;

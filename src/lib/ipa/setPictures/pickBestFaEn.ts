@@ -1,6 +1,6 @@
 import "server-only";
 
-import { IpaCandidate } from "./shared";
+import type { IpaCandidate } from "./types";
 
 function charCounts(value: string): Map<string, number> {
   const counts = new Map<string, number>();
@@ -25,7 +25,6 @@ function overlapScore(candidate: string, target: string): number {
   }
   return score;
 }
-
 export function pickBestFaEn(
   matches: IpaCandidate[],
   targetChars: string,
@@ -33,9 +32,13 @@ export function pickBestFaEn(
   const sorted = [...matches].sort((a, b) => {
     const aIpa = a.target_ipa ?? "";
     const bIpa = b.target_ipa ?? "";
+
     const aScore = overlapScore(aIpa, targetChars);
     const bScore = overlapScore(bIpa, targetChars);
     if (aScore !== bScore) return bScore - aScore; // higher overlap first
+
+    if (aIpa.length !== bIpa.length) return aIpa.length - bIpa.length; // shorter IPA first
+
     return String(a.fa ?? "").localeCompare(String(b.fa ?? ""), "fa");
   });
   const best = sorted[0];

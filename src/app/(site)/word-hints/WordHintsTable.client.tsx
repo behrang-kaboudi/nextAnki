@@ -81,7 +81,6 @@ export default function WordHintsTable({ rows }: { rows: Row[] }) {
 
   async function runPreview(ids: number[]) {
     if (ids.length === 0) return;
-    setOnlyChanged(true);
     setError(null);
     setBusyIds((cur) =>
       Object.fromEntries([
@@ -221,6 +220,16 @@ export default function WordHintsTable({ rows }: { rows: Row[] }) {
   return (
     <>
       <div className="mt-4 flex w-full flex-wrap items-center justify-end gap-2">
+        {!viewAllChanged ? (
+          <label className="flex select-text items-center gap-2 text-xs opacity-80">
+            <input
+              type="checkbox"
+              checked={onlyChanged}
+              onChange={(e) => setOnlyChanged(e.target.checked)}
+            />
+            Show only changed (this page)
+          </label>
+        ) : null}
         <label className="flex select-text items-center gap-2 text-xs opacity-80">
           <input
             type="checkbox"
@@ -301,9 +310,10 @@ export default function WordHintsTable({ rows }: { rows: Row[] }) {
             <tbody>
               {visibleRows.map((r) => {
                 const p = preview[String(r.id)];
+                const hasPreview = Boolean(p);
                 const changed = Boolean(p?.changed);
                 const jsonPretty = prettyJson(r.json_hint);
-                const nextPretty = changed ? prettyJson(p?.nextJson ?? null) : null;
+                const nextPretty = hasPreview ? prettyJson(p?.nextJson ?? null) : null;
                 return (
                   <tr
                     key={r.id}
@@ -338,6 +348,8 @@ export default function WordHintsTable({ rows }: { rows: Row[] }) {
                         <pre className="max-h-56 overflow-auto whitespace-pre-wrap break-words font-mono text-[11px] leading-4">
                           {nextPretty}
                         </pre>
+                      ) : hasPreview ? (
+                        <span className="opacity-70">{changed ? "—" : "No change"}</span>
                       ) : (
                         "—"
                       )}
