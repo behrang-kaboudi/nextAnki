@@ -12,6 +12,7 @@ import {
   getLastRevlogByCardIds,
   WordAnkiConstants,
 } from "@/lib/AnkiDeck";
+import { imageabilityBaseThreshold } from "@/lib/ipa/setPictures/types";
 import { PageHeader } from "@/components/page-header";
 
 function buildQueries(ankiLinkId: string) {
@@ -33,6 +34,36 @@ function stripSoundTags(value: string): string {
     .trim();
   return cleaned;
 }
+
+function asFiniteNumber(value: unknown): number | null {
+  if (typeof value === "number") return Number.isFinite(value) ? value : null;
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  const n = Number(trimmed);
+  return Number.isFinite(n) ? n : null;
+}
+
+function phoneticLength(value: unknown): number {
+  const raw = typeof value === "string" ? value : "";
+  const cleaned = raw.trim().replace(/\s+/g, "");
+  return cleaned ? cleaned.length : Number.POSITIVE_INFINITY;
+}
+
+type SyncAllStatus = {
+  jobId: string;
+  running: boolean;
+  done: boolean;
+  error: string | null;
+  stopRequested?: boolean;
+  stoppedEarly?: boolean;
+  total: number;
+  processed: number;
+  updated: number;
+  skipped: number;
+  failed: number;
+  currentNoteId: number | null;
+};
 
 export default function AnkiNotePage() {
   const [ankiLinkId, setAnkiLinkId] = useState("");
@@ -144,6 +175,60 @@ export default function AnkiNotePage() {
     }
   }
 
+  async function fetchSyncAllStatusAndUpdate() {
+    const res = await fetch("/api/anki/hint-sentence/sync-all", {
+      method: "GET",
+    });
+    const data = (await res.json().catch(() => null)) as {
+      ok?: boolean;
+      status?: SyncAllStatus;
+      error?: string;
+    } | null;
+    if (!res.ok || !data?.ok || !data.status)
+      throw new Error(data?.error || "Failed to fetch sync-all status");
+
+    const status = data.status;
+    setSyncAllRunning(Boolean(status.running));
+    setSyncAllError(status.error);
+    const remaining = Math.max(0, (status.total ?? 0) - (status.processed ?? 0));
+    setSyncAllStatusText(
+      `done=${status.processed}/${status.total} remaining=${remaining} currentNoteId=${status.currentNoteId ?? "—"} updated=${status.updated} skipped=${status.skipped} failed=${status.failed} stopRequested=${status.stopRequested ? "yes" : "no"}`,
+    );
+    return status;
+  }
+
+  async function runSyncAllAndWait(label: string, timeoutMs = 30 * 60 * 1000) {
+    const start = Date.now();
+
+    // If already running, just wait for it; otherwise kick it off.
+    if (!syncAllRunning) {
+      setSyncAllError(null);
+      setSyncAllStatusText(null);
+      setSyncAllRunning(true);
+
+      const res = await fetch("/api/anki/hint-sentence/sync-all", {
+        method: "POST",
+      });
+      const data = (await res.json().catch(() => null)) as {
+        ok?: boolean;
+        error?: string;
+      } | null;
+      if (!res.ok || !data?.ok)
+        throw new Error(data?.error || `Request failed (${res.status})`);
+    }
+
+    while (true) {
+      if (Date.now() - start > timeoutMs)
+        throw new Error(`Timeout while waiting for sync (${label}).`);
+
+      const status = await fetchSyncAllStatusAndUpdate();
+      if (status.error) throw new Error(status.error);
+      if (status.done && !status.running) return;
+
+      await new Promise((r) => setTimeout(r, 1000));
+    }
+  }
+
   async function runAllPhases() {
     if (runAllRunning) return;
     if (phase1Running || phase2Running || phase3Running) return;
@@ -153,6 +238,9 @@ export default function AnkiNotePage() {
     setRunAllStatusText("Starting…");
 
     try {
+      setRunAllStatusText("Syncing (before phases)…");
+      await runSyncAllAndWait("before");
+
       setRunAllStatusText("Running phase 1…");
       await runPhase1();
       await new Promise((r) => setTimeout(r, 0));
@@ -179,6 +267,9 @@ export default function AnkiNotePage() {
         setRunAllError(`Phase 3 failed: ${phase3ErrorRef.current}`);
         return;
       }
+
+      setRunAllStatusText("Syncing (after phases)…");
+      await runSyncAllAndWait("after");
 
       setRunAllStatusText("Done.");
     } catch (error) {
@@ -677,7 +768,7 @@ export default function AnkiNotePage() {
       }
 
       setPhase3StatusText(
-        `Loading note info (base_form) for ${tempNoteIds.length} notes…`,
+        `Loading note info (imageability / phonetic_us_normalized) for ${tempNoteIds.length} notes…`,
       );
       const infoRes = await getNotesInfoByIds(tempNoteIds);
       if (!infoRes.ok) {
@@ -687,15 +778,47 @@ export default function AnkiNotePage() {
 
       const candidates = infoRes.notesInfo
         .map((n) => {
-          const baseForm = n.fields?.base_form?.value?.trim() ?? "";
-          const sortLen = baseForm ? baseForm.length : Number.POSITIVE_INFINITY;
-          return { noteId: n.noteId, baseForm, sortLen };
+          const imageability = asFiniteNumber(n.fields?.imageability?.value);
+          const phoneticLen = phoneticLength(
+            n.fields?.phonetic_us_normalized?.value,
+          );
+          return { noteId: n.noteId, imageability, phoneticLen };
         })
-        .sort((a, b) => a.sortLen - b.sortLen || a.noteId - b.noteId);
+        .sort((a, b) => a.phoneticLen - b.phoneticLen || a.noteId - b.noteId);
 
-      const pickedNoteIds = candidates.slice(0, needed).map((c) => c.noteId);
+      const pickedNoteIds: number[] = [];
+      const pickedSet = new Set<number>();
+      const tryPick = (noteId: number) => {
+        if (pickedNoteIds.length >= needed) return;
+        if (pickedSet.has(noteId)) return;
+        pickedSet.add(noteId);
+        pickedNoteIds.push(noteId);
+      };
+
+      // Step 1: Prefer imageability > threshold (how much above doesn't matter),
+      // ordered by shortest `phonetic_us_normalized`.
+      for (const c of candidates) {
+        if (
+          (c.imageability ?? Number.NEGATIVE_INFINITY) >
+          imageabilityBaseThreshold
+        ) {
+          tryPick(c.noteId);
+        }
+        if (pickedNoteIds.length >= needed) break;
+      }
+
+      // Step 2: Fill remaining by shortest `phonetic_us_normalized`.
+      if (pickedNoteIds.length < needed) {
+        for (const c of candidates) {
+          tryPick(c.noteId);
+          if (pickedNoteIds.length >= needed) break;
+        }
+      }
+
       if (pickedNoteIds.length === 0) {
-        setPhase3StatusText("No candidate notes found (missing base_form?).");
+        setPhase3StatusText(
+          "No candidate notes found (missing phonetic_us_normalized?).",
+        );
         return;
       }
 
@@ -948,39 +1071,7 @@ export default function AnkiNotePage() {
   }
 
   async function pollSyncAll() {
-    const res = await fetch("/api/anki/hint-sentence/sync-all", {
-      method: "GET",
-    });
-    const data = (await res.json().catch(() => null)) as {
-      ok?: boolean;
-      status?: {
-        jobId: string;
-        running: boolean;
-        done: boolean;
-        error: string | null;
-        stopRequested?: boolean;
-        stoppedEarly?: boolean;
-        total: number;
-        processed: number;
-        updated: number;
-        skipped: number;
-        failed: number;
-        currentNoteId: number | null;
-      };
-      error?: string;
-    } | null;
-    if (!res.ok || !data?.ok || !data.status)
-      throw new Error(data?.error || "Failed to fetch sync-all status");
-
-    setSyncAllRunning(Boolean(data.status.running));
-    setSyncAllError(data.status.error);
-    const remaining = Math.max(
-      0,
-      (data.status.total ?? 0) - (data.status.processed ?? 0),
-    );
-    setSyncAllStatusText(
-      `done=${data.status.processed}/${data.status.total} remaining=${remaining} currentNoteId=${data.status.currentNoteId ?? "—"} updated=${data.status.updated} skipped=${data.status.skipped} failed=${data.status.failed} stopRequested=${data.status.stopRequested ? "yes" : "no"}`,
-    );
+    await fetchSyncAllStatusAndUpdate();
   }
 
   async function startSyncAll() {
@@ -1340,8 +1431,26 @@ export default function AnkiNotePage() {
                           {WordAnkiConstants.decks.tempRoot} برمی‌دارد.
                         </li>
                         <li>
-                          نوت‌ها فعلاً بر اساس کوتاه‌ترین طول رشته‌ی فیلد
-                          base_form انتخاب می‌شوند.
+                          اولویت اول: نوت‌هایی که مقدار{" "}
+                          <span className="font-mono text-xs">imageability</span>{" "}
+                          آن‌ها از{" "}
+                          <span className="font-mono text-xs">
+                            {imageabilityBaseThreshold}
+                          </span>{" "}
+                          بیشتر است انتخاب می‌شوند و مرتب‌سازی بر اساس کوتاه‌ترین
+                          {" "}
+                          <span className="font-mono text-xs">
+                            phonetic_us_normalized
+                          </span>{" "}
+                          است.
+                        </li>
+                        <li>
+                          اگر تعداد کافی نبود، بقیه‌ی نوت‌ها فقط بر اساس
+                          کوتاه‌ترین{" "}
+                          <span className="font-mono text-xs">
+                            phonetic_us_normalized
+                          </span>{" "}
+                          تکمیل می‌شوند.
                         </li>
                         <li>
                           از نوت‌های انتخاب‌شده کارت‌های نوع EnToFa / FaToEn /

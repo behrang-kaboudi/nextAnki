@@ -16,6 +16,7 @@ type SyncAllStatus = {
   stoppedEarly: boolean;
   total: number;
   processed: number;
+  created?: number;
   updated: number;
   skippedSame: number;
   skippedNoLinkId: number;
@@ -57,6 +58,10 @@ export default function SyncAnkiWordsClient() {
   const [permissionText, setPermissionText] = useState<string | null>(null);
   const [log, setLog] = useState<LogEntry[]>([]);
   const [preview, setPreview] = useState<unknown | null>(null);
+  const [jsonHintStatus, setJsonHintStatus] = useState<SyncAllStatus | null>(null);
+  const [mediaSyncStatus, setMediaSyncStatus] = useState<SyncAllStatus | null>(null);
+  const [fullSyncStatus, setFullSyncStatus] = useState<SyncAllStatus | null>(null);
+  const [dedupStatus, setDedupStatus] = useState<SyncAllStatus | null>(null);
   const [otherMeaningsFaStatus, setOtherMeaningsFaStatus] = useState<SyncAllStatus | null>(null);
   const [sentenceEnStatus, setSentenceEnStatus] = useState<SyncAllStatus | null>(null);
   const [sentenceEnMeaningFaStatus, setSentenceEnMeaningFaStatus] = useState<SyncAllStatus | null>(null);
@@ -76,17 +81,21 @@ export default function SyncAnkiWordsClient() {
     append({ level: "info", message: `Permission: ${permission}` });
   }
 
-  async function previewJsonHint() {
-    if (isRunning) return;
+  async function startSyncJsonHint() {
+    if (isRunning || jsonHintStatus?.running) return;
     setIsRunning(true);
     setPreview(null);
 
     try {
-      append({ level: "info", message: "Preview json_hint (first note)..." });
-      const res = await fetch("/api/tests/sync-anki-words/json-hint/preview", { method: "POST" });
-      const data = (await res.json()) as unknown;
+      append({ level: "info", message: "Starting sync json_hint + first_letter_*_hint (all notes)..." });
+      const res = await fetch("/api/tests/sync-anki-words/json-hint/sync-all/start", { method: "POST" });
+      const data = (await res.json()) as { status?: SyncAllStatus } | unknown;
       setPreview(data);
-      append({ level: res.ok ? "info" : "error", message: "Preview result", data });
+      if (data && typeof data === "object" && "status" in data) {
+        const s = (data as { status?: SyncAllStatus }).status ?? null;
+        setJsonHintStatus(s);
+      }
+      append({ level: res.ok ? "info" : "error", message: "Start result", data });
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       append({ level: "error", message: "Unexpected error", data: message });
@@ -164,33 +173,122 @@ export default function SyncAnkiWordsClient() {
     }
   }
 
+  async function startSyncAllMedia() {
+    if (isRunning || mediaSyncStatus?.running) return;
+    setIsRunning(true);
+    setPreview(null);
+
+    try {
+      append({ level: "info", message: "Starting media copy (pictureWord + words)..." });
+      const res = await fetch("/api/tests/sync-anki-words/media/sync-all/start", { method: "POST" });
+      const data = (await res.json()) as { status?: SyncAllStatus } | unknown;
+      setPreview(data);
+      if (data && typeof data === "object" && "status" in data) {
+        const s = (data as { status?: SyncAllStatus }).status ?? null;
+        setMediaSyncStatus(s);
+      }
+      append({ level: res.ok ? "info" : "error", message: "Start result", data });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      append({ level: "error", message: "Unexpected error", data: message });
+    } finally {
+      setIsRunning(false);
+    }
+  }
+
+  async function startFullSyncAll() {
+    if (isRunning || fullSyncStatus?.running) return;
+    setIsRunning(true);
+    setPreview(null);
+
+    try {
+      append({ level: "info", message: "Starting FULL sync (DB -> Anki)..." });
+      const res = await fetch("/api/tests/sync-anki-words/full/sync-all/start", { method: "POST" });
+      const data = (await res.json()) as { status?: SyncAllStatus } | unknown;
+      setPreview(data);
+      if (data && typeof data === "object" && "status" in data) {
+        const s = (data as { status?: SyncAllStatus }).status ?? null;
+        setFullSyncStatus(s);
+      }
+      append({ level: res.ok ? "info" : "error", message: "Start result", data });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      append({ level: "error", message: "Unexpected error", data: message });
+    } finally {
+      setIsRunning(false);
+    }
+  }
+
+  async function deduplicateAnkiLinkIdKeepOldest() {
+    if (isRunning || dedupStatus?.running) return;
+    setIsRunning(true);
+    setPreview(null);
+
+    try {
+      append({ level: "info", message: "Deduplicating notes by anki_link_id (keep oldest noteId)..." });
+      const res = await fetch("/api/tests/sync-anki-words/anki-link-id/deduplicate/start", { method: "POST" });
+      const data = (await res.json()) as { status?: SyncAllStatus } | unknown;
+      setPreview(data);
+      if (data && typeof data === "object" && "status" in data) {
+        const s = (data as { status?: SyncAllStatus }).status ?? null;
+        setDedupStatus(s);
+      }
+      append({ level: res.ok ? "info" : "error", message: "Start result", data });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      append({ level: "error", message: "Unexpected error", data: message });
+    } finally {
+      setIsRunning(false);
+    }
+  }
+
   useEffect(() => {
     let timer: number | null = null;
     let stopped = false;
 
     async function tick() {
       try {
-        const [otherRes, sentenceEnRes, sentenceMeaningRes] = await Promise.all([
+        const [jsonHintRes, mediaRes, fullRes, dedupRes, otherRes, sentenceEnRes, sentenceMeaningRes] = await Promise.all([
+          fetch("/api/tests/sync-anki-words/json-hint/sync-all/status", { cache: "no-store" }),
+          fetch("/api/tests/sync-anki-words/media/sync-all/status", { cache: "no-store" }),
+          fetch("/api/tests/sync-anki-words/full/sync-all/status", { cache: "no-store" }),
+          fetch("/api/tests/sync-anki-words/anki-link-id/deduplicate/status", { cache: "no-store" }),
           fetch("/api/tests/sync-anki-words/other-meanings-fa/sync-all/status", { cache: "no-store" }),
           fetch("/api/tests/sync-anki-words/sentence-en/sync-all/status", { cache: "no-store" }),
           fetch("/api/tests/sync-anki-words/sentence-en-meaning-fa/sync-all/status", { cache: "no-store" }),
         ]);
 
+        const jsonHintJson = (await jsonHintRes.json()) as { ok?: boolean; status?: SyncAllStatus };
+        const mediaJson = (await mediaRes.json()) as { ok?: boolean; status?: SyncAllStatus };
+        const fullJson = (await fullRes.json()) as { ok?: boolean; status?: SyncAllStatus };
+        const dedupJson = (await dedupRes.json()) as { ok?: boolean; status?: SyncAllStatus };
         const otherJson = (await otherRes.json()) as { ok?: boolean; status?: SyncAllStatus };
         const sentenceEnJson = (await sentenceEnRes.json()) as { ok?: boolean; status?: SyncAllStatus };
         const sentenceMeaningJson = (await sentenceMeaningRes.json()) as { ok?: boolean; status?: SyncAllStatus };
 
+        const jsonHint = jsonHintJson?.status ?? null;
+        const media = mediaJson?.status ?? null;
+        const full = fullJson?.status ?? null;
+        const dedup = dedupJson?.status ?? null;
         const other = otherJson?.status ?? null;
         const sentenceEn = sentenceEnJson?.status ?? null;
         const sentenceMeaning = sentenceMeaningJson?.status ?? null;
+        setJsonHintStatus(jsonHint);
+        setMediaSyncStatus(media);
+        setFullSyncStatus(full);
+        setDedupStatus(dedup);
         setOtherMeaningsFaStatus(other);
         setSentenceEnStatus(sentenceEn);
         setSentenceEnMeaningFaStatus(sentenceMeaning);
 
+        const jsonHintDone = Boolean(jsonHint?.done);
+        const mediaDone = Boolean(media?.done);
+        const fullDone = Boolean(full?.done);
+        const dedupDone = Boolean(dedup?.done);
         const otherDone = Boolean(other?.done);
         const sentenceEnDone = Boolean(sentenceEn?.done);
         const sentenceMeaningDone = Boolean(sentenceMeaning?.done);
-        if (otherDone && sentenceEnDone && sentenceMeaningDone) {
+        if (jsonHintDone && mediaDone && fullDone && dedupDone && otherDone && sentenceEnDone && sentenceMeaningDone) {
           if (timer != null) window.clearInterval(timer);
           timer = null;
         }
@@ -215,6 +313,26 @@ export default function SyncAnkiWordsClient() {
     (sentenceEnStatus?.skippedSame ?? 0) +
     (sentenceEnStatus?.skippedNoLinkId ?? 0) +
     (sentenceEnStatus?.skippedNoWord ?? 0);
+
+  const jsonHintSkippedTotal =
+    (jsonHintStatus?.skippedSame ?? 0) +
+    (jsonHintStatus?.skippedNoLinkId ?? 0) +
+    (jsonHintStatus?.skippedNoWord ?? 0);
+
+  const mediaSkippedTotal =
+    (mediaSyncStatus?.skippedSame ?? 0) +
+    (mediaSyncStatus?.skippedNoLinkId ?? 0) +
+    (mediaSyncStatus?.skippedNoWord ?? 0);
+
+  const fullSkippedTotal =
+    (fullSyncStatus?.skippedSame ?? 0) +
+    (fullSyncStatus?.skippedNoLinkId ?? 0) +
+    (fullSyncStatus?.skippedNoWord ?? 0);
+
+  const dedupSkippedTotal =
+    (dedupStatus?.skippedSame ?? 0) +
+    (dedupStatus?.skippedNoLinkId ?? 0) +
+    (dedupStatus?.skippedNoWord ?? 0);
 
   const otherSkippedTotal =
     (otherMeaningsFaStatus?.skippedSame ?? 0) +
@@ -256,11 +374,35 @@ export default function SyncAnkiWordsClient() {
               </button>
               <button
                 type="button"
-                onClick={() => void previewJsonHint()}
-                disabled={isRunning}
+                onClick={() => void startSyncJsonHint()}
+                disabled={isRunning || Boolean(jsonHintStatus?.running)}
+                className="h-10 rounded-xl bg-foreground px-3 text-sm font-semibold text-background transition disabled:opacity-50"
+              >
+                Sync json_hint + hints
+              </button>
+              <button
+                type="button"
+                onClick={() => void startSyncAllMedia()}
+                disabled={isRunning || Boolean(mediaSyncStatus?.running)}
+                className="h-10 rounded-xl bg-foreground px-3 text-sm font-semibold text-background transition disabled:opacity-50"
+              >
+                Copy all media
+              </button>
+              <button
+                type="button"
+                onClick={() => void startFullSyncAll()}
+                disabled={isRunning || Boolean(fullSyncStatus?.running)}
+                className="h-10 rounded-xl bg-foreground px-3 text-sm font-semibold text-background transition disabled:opacity-50"
+              >
+                Full sync DB → Anki
+              </button>
+              <button
+                type="button"
+                onClick={() => void deduplicateAnkiLinkIdKeepOldest()}
+                disabled={isRunning || Boolean(dedupStatus?.running)}
                 className="h-10 rounded-xl border border-card bg-background px-3 text-sm font-semibold text-foreground transition hover:bg-black/5 dark:hover:bg-white/5 disabled:opacity-50"
               >
-                Preview json_hint
+                Deduplicate (keep oldest)
               </button>
               <button
                 type="button"
@@ -300,6 +442,59 @@ export default function SyncAnkiWordsClient() {
           </div>
 
           <div className="grid gap-1 text-xs text-muted">
+            <div>
+              {jsonHintStatus ? (
+                <span>
+                  json_hint + hints: Processed{" "}
+                  <span className="font-semibold">{jsonHintStatus.processed}/{jsonHintStatus.total}</span> • Updated{" "}
+                  <span className="font-semibold">{jsonHintStatus.updated}</span> • Skipped{" "}
+                  <span className="font-semibold">{jsonHintSkippedTotal}</span> • Failed{" "}
+                  <span className="font-semibold">{jsonHintStatus.failed}</span>
+                </span>
+              ) : (
+                <span>json_hint + hints: Processed 0/0 • Updated 0 • Skipped 0 • Failed 0</span>
+              )}
+            </div>
+            <div>
+              {mediaSyncStatus ? (
+                <span>
+                  media copy: Processed{" "}
+                  <span className="font-semibold">{mediaSyncStatus.processed}/{mediaSyncStatus.total}</span> • Uploaded{" "}
+                  <span className="font-semibold">{mediaSyncStatus.mediaUploaded}</span> • Skipped{" "}
+                  <span className="font-semibold">{mediaSkippedTotal}</span> • Failed{" "}
+                  <span className="font-semibold">{mediaSyncStatus.failed}</span>
+                </span>
+              ) : (
+                <span>media copy: Processed 0/0 • Uploaded 0 • Skipped 0 • Failed 0</span>
+              )}
+            </div>
+            <div>
+              {fullSyncStatus ? (
+                <span>
+                  full sync: Processed{" "}
+                  <span className="font-semibold">{fullSyncStatus.processed}/{fullSyncStatus.total}</span> • Created{" "}
+                  <span className="font-semibold">{fullSyncStatus.created ?? 0}</span> • Updated{" "}
+                  <span className="font-semibold">{fullSyncStatus.updated}</span> • Skipped{" "}
+                  <span className="font-semibold">{fullSkippedTotal}</span> • Failed{" "}
+                  <span className="font-semibold">{fullSyncStatus.failed}</span>
+                </span>
+              ) : (
+                <span>full sync: Processed 0/0 • Created 0 • Updated 0 • Skipped 0 • Failed 0</span>
+              )}
+            </div>
+            <div>
+              {dedupStatus ? (
+                <span>
+                  dedup: Processed{" "}
+                  <span className="font-semibold">{dedupStatus.processed}/{dedupStatus.total}</span> • Deleted{" "}
+                  <span className="font-semibold">{dedupStatus.updated}</span> • Kept{" "}
+                  <span className="font-semibold">{dedupSkippedTotal}</span> • Failed{" "}
+                  <span className="font-semibold">{dedupStatus.failed}</span>
+                </span>
+              ) : (
+                <span>dedup: Processed 0/0 • Deleted 0 • Kept 0 • Failed 0</span>
+              )}
+            </div>
             <div>
               {sentenceEnStatus ? (
                 <span>

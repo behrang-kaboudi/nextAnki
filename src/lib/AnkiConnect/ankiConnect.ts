@@ -110,6 +110,14 @@ export type AnkiConnectActionMap = {
     params: { filename: string };
     result: null;
   };
+  getMediaFilesNames: {
+    params: { pattern: string };
+    result: string[];
+  };
+  getMediaDirPath: {
+    params?: Record<string, never>;
+    result: string;
+  };
 
   deckNames: { params?: Record<string, never>; result: string[] };
   createDeck: { params: { deck: string }; result: number };
