@@ -61,6 +61,17 @@ const sections: Section[] = [
     ],
   },
   {
+    title: "test functions",
+    defaultOpen: true,
+    links: [
+      {
+        href: "/tests/test-functions",
+        label: "Sample Page",
+        note: "Sample page for the test functions group",
+      },
+    ],
+  },
+  {
     title: "Admin",
     links: [
       { href: "/admin/themes", label: "Themes" },

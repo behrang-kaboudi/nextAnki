@@ -96,9 +96,26 @@ function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
 }
 
+function safeStringify(v: unknown, space?: number) {
+  const seen = new WeakSet<object>();
+  return JSON.stringify(
+    v,
+    (_key, value) => {
+      if (typeof value === "bigint") return value.toString();
+      if (typeof value === "object" && value !== null) {
+        if (seen.has(value)) return "[Circular]";
+        seen.add(value);
+      }
+      return value;
+    },
+    space,
+  );
+}
+
 function safeJsonPreview(v: unknown) {
   try {
-    const json = JSON.stringify(v);
+    const json = safeStringify(v);
+    if (!json) return String(v);
     if (json.length <= 80) return json;
     return json.slice(0, 77) + "...";
   } catch {
@@ -111,6 +128,43 @@ function formatCellValue(v: unknown) {
   if (Array.isArray(v)) return v.map((x) => (x === null || x === undefined ? "—" : String(x))).join(", ");
   if (typeof v === "object") return safeJsonPreview(v);
   return String(v);
+}
+
+function formatCellCopyValue(v: unknown) {
+  if (v === null || v === undefined) return "";
+  if (typeof v === "string") return v;
+  if (typeof v === "number" || typeof v === "boolean" || typeof v === "bigint") return String(v);
+  if (v instanceof Date) return v.toISOString();
+  try {
+    const json = safeStringify(v, 2);
+    return json ?? String(v);
+  } catch {
+    return String(v);
+  }
+}
+
+function previewForToast(s: string, maxLen = 120) {
+  if (s.length <= maxLen) return s;
+  return s.slice(0, Math.max(0, maxLen - 1)) + "…";
+}
+
+async function copyToClipboard(text: string) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    // Fallback for environments where Clipboard API is unavailable/blocked.
+  }
+  const el = document.createElement("textarea");
+  el.value = text;
+  el.setAttribute("readonly", "");
+  el.style.position = "fixed";
+  el.style.left = "-9999px";
+  document.body.appendChild(el);
+  el.select();
+  const ok = document.execCommand("copy");
+  document.body.removeChild(el);
+  return ok;
 }
 
 function downloadBlob(filename: string, contentType: string, data: string) {
@@ -1130,6 +1184,30 @@ export default function Page() {
     if (!model) return null;
     return model.fields.find((f) => f.name === model.primaryKey) ?? null;
   }, [model]);
+
+  const copyCell = async (field: string, value: unknown) => {
+    const text = formatCellCopyValue(value);
+    try {
+      const ok = await copyToClipboard(text);
+      if (!ok) throw new Error("Clipboard is unavailable in this browser/context.");
+      try {
+        sessionStorage.setItem("admin.data.lastCopied.v1", JSON.stringify({ field, text, at: Date.now() }));
+      } catch {
+        // ignore
+      }
+      push({
+        type: "success",
+        title: "Copied",
+        description: `${field}: ${previewForToast(text)}`,
+      });
+    } catch (e) {
+      push({
+        type: "error",
+        title: "Copy failed",
+        description: e instanceof Error ? e.message : String(e),
+      });
+    }
+  };
 
   const applied = useMemo(() => {
     if (!model) return null;
@@ -2704,6 +2782,8 @@ export default function Page() {
             <CardContent>
               {error ? <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}</div> : null}
 
+              <div className="mb-2 text-xs text-neutral-600">Tip: double-click a cell to copy its value.</div>
+
               <div className="overflow-x-auto overflow-y-auto rounded-md border border-neutral-200">
 	                <table className="min-w-full w-max border-collapse text-sm">
 	                  <thead className="bg-neutral-50">
@@ -2788,7 +2868,14 @@ export default function Page() {
                               <Checkbox checked={selected} onCheckedChange={(v) => toggleRowSelected(r, v)} aria-label={`Select row ${id || idx}`} />
                             </td>
                             {columns.map((c) => (
-                              <td key={c} className="max-w-[320px] truncate px-3 py-2 text-neutral-800" title={String(formatCellValue(r?.[c]))}>
+                              <td
+                                key={c}
+                                className="max-w-[320px] cursor-copy truncate px-3 py-2 text-neutral-800"
+                                title={`Double-click to copy.\n${String(formatCellValue(r?.[c]))}`}
+                                onDoubleClick={() => {
+                                  void copyCell(c, r?.[c]);
+                                }}
+                              >
                                 {formatCellValue(r?.[c])}
                               </td>
                             ))}
@@ -2869,7 +2956,19 @@ export default function Page() {
                   <div className="text-xs font-semibold text-neutral-700">{f.name}</div>
                   {f.isId ? <Badge variant="outline">PK</Badge> : null}
                 </div>
-                <div className="mt-1 text-sm text-neutral-900">{formatCellValue(viewRow?.[f.name])}</div>
+                {f.kind === "scalar" && f.type === "Json" ? (
+                  <pre className="mt-1 max-h-[320px] overflow-auto whitespace-pre-wrap break-words rounded-md border border-neutral-200 bg-white p-2 font-mono text-xs text-neutral-900">
+                    {(() => {
+                      const raw = viewRow?.[f.name];
+                      if (raw === null || raw === undefined) return "—";
+                      if (typeof raw === "string") return raw;
+                      const json = safeStringify(raw, 2);
+                      return json ?? String(raw);
+                    })()}
+                  </pre>
+                ) : (
+                  <div className="mt-1 text-sm text-neutral-900">{formatCellValue(viewRow?.[f.name])}</div>
+                )}
                 <div className="mt-1 text-[11px] text-neutral-500">
                   {f.kind}:{String(f.type)}
                   {f.isList ? "[]" : ""} {f.isRequired ? "• required" : ""}
@@ -2956,7 +3055,13 @@ export default function Page() {
                         placeholder="Select…"
                       />
                     ) : f.kind === "scalar" && f.type === "Json" ? (
-                      <Textarea value={String(val ?? "")} onChange={(e) => setValue(e.target.value)} placeholder='{"key":"value"}' />
+                      <Textarea
+                        value={String(val ?? "")}
+                        onChange={(e) => setValue(e.target.value)}
+                        placeholder='{"key":"value"}'
+                        spellCheck={false}
+                        className="min-h-[240px] font-mono text-xs"
+                      />
                     ) : f.isList && f.type === "String" ? (
                       <Input value={String(val ?? "")} onChange={(e) => setValue(e.target.value)} placeholder="tag1, tag2" />
                     ) : f.kind === "scalar" && (f.type === "Int" || f.type === "Float") ? (

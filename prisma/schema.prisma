@@ -77,7 +77,7 @@ model Word {
   first_letter_en_hint             String?
   first_letter_fa_hint             String?
   hint_to_select                   String?
-  json_hint                        String?  @db.Text
+  json_hint                        String?  @db.LongText
   word_note                        String?
   common_error                     String?
   /// Score 0-100: how imageable/visual the word is (default 10).
@@ -103,18 +103,18 @@ model IpaKeyword {
 }
 
 model PictureWord {
-  id          Int             @id @default(autoincrement())
-  fa          String
-  ipa_fa      String
-  ipa_fa_normalized String    @default("")
-  phinglish   String
-  en          String
-  type        PictureWordType @default(noun)
-  usage       PictureWordUsage @default(notSet)
-  canBePersonal Boolean       @default(false)
-  ipaVerified Boolean         @default(false)
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
+  id                Int              @id @default(autoincrement())
+  fa                String
+  ipa_fa            String
+  ipa_fa_normalized String           @default("")
+  phinglish         String
+  en                String
+  type              PictureWordType  @default(noun)
+  usage             PictureWordUsage @default(notSet)
+  canBePersonal     Boolean          @default(false)
+  ipaVerified       Boolean          @default(false)
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
 
   @@unique([fa, en])
   @@index([fa])
@@ -122,15 +122,15 @@ model PictureWord {
 }
 
 model User {
-  id             String       @id @default(cuid())
+  id             String     @id @default(cuid())
   name           String?
-  email          String       @unique
+  email          String     @unique
   emailVerified  DateTime?
   image          String?
   hashedPassword String?
-  status         UserStatus   @default(active)
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  status         UserStatus @default(active)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
 
   accounts       Account[]
   sessions       Session[]
@@ -178,12 +178,12 @@ model VerificationToken {
 }
 
 model PasswordResetToken {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   userId    String
-  token     String   @unique
+  token     String    @unique
   expiresAt DateTime
   usedAt    DateTime?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -191,24 +191,24 @@ model PasswordResetToken {
 }
 
 model Role {
-  id          String           @id @default(cuid())
-  name        String           @unique
+  id          String   @id @default(cuid())
+  name        String   @unique
   description String?
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   users       UserRole[]
   permissions RolePermission[]
 }
 
 model Permission {
-  id          String           @id @default(cuid())
-  name        String           @unique
+  id          String   @id @default(cuid())
+  name        String   @unique
   description String?
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  roles       RolePermission[]
+  roles RolePermission[]
 }
 
 model UserRole {

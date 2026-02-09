@@ -270,6 +270,9 @@ export default function AnkiNotePage() {
         return;
       }
 
+      setRunAllStatusText("Syncing with AnkiWeb (after phase 3)…");
+      await syncWithAnkiWebOrAlert("بعد از فاز ۳");
+
       setRunAllStatusText("Done.");
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
@@ -729,54 +732,27 @@ export default function AnkiNotePage() {
       const emlaDeck = WordAnkiConstants.decks.Emla;
       const tempRootDeck = WordAnkiConstants.decks.tempRoot;
 
-      setPhase3StatusText(`Counting due cards in ${enToFaDeck} (is:due)…`);
+      setPhase3StatusText(
+        `Counting available cards in ${enToFaDeck} (is:new OR is:due)…`,
+      );
       const dueRes = await ankiRequestDetailed("findCards", {
-        query: `deck:"${escapeAnkiQueryValue(enToFaDeck)}" is:due`,
+        query: `deck:"${escapeAnkiQueryValue(enToFaDeck)}" (is:new OR is:due)`,
       });
       if (!dueRes.ok) {
         setPhase3Error(dueRes.error);
         return;
       }
-      const dueNowCardIds = dueRes.result ?? [];
-      const dueTotalCount = dueNowCardIds.length;
+      const availableNowCardIds = dueRes.result ?? [];
+      const availableTotalCount = availableNowCardIds.length;
 
-      setPhase3StatusText(
-        `Filtering ${dueTotalCount} due cards by revlog (last ivl > 0)…`,
-      );
-      let dueReviewCount = 0;
-      outer: for (const chunk of chunkArray(dueNowCardIds, 100)) {
-        const reviewsRes = await ankiRequestDetailed("getReviewsOfCards", {
-          cards: chunk,
-        });
-        if (!reviewsRes.ok) {
-          setPhase3Error(reviewsRes.error);
-          return;
-        }
-        const byCardId = reviewsRes.result ?? {};
-
-        for (const cardId of chunk) {
-          const reviews = (byCardId[String(cardId)] ?? []) as Array<{
-            id: number;
-            ivl: number;
-          }>;
-          const last = reviews.reduce<(typeof reviews)[number] | null>(
-            (best, r) => (best === null || r.id > best.id ? r : best),
-            null,
-          );
-          const ivl = Number(last?.ivl);
-          if (Number.isFinite(ivl) && ivl > 0) dueReviewCount += 1;
-          if (dueReviewCount >= desiredCount) break outer;
-        }
-      }
-
-      if (dueReviewCount >= desiredCount) {
+      if (availableTotalCount >= desiredCount) {
         setPhase3StatusText(
-          `OK. Due(review ivl>0) = ${dueReviewCount} (>= ${desiredCount}). Total due = ${dueTotalCount}.`,
+          `OK. Available = ${availableTotalCount} (>= ${desiredCount}).`,
         );
         return;
       }
 
-      const needed = desiredCount - dueReviewCount;
+      const needed = desiredCount - availableTotalCount;
 
       setPhase3StatusText(
         `Need ${needed} more note(s). Finding EnToFa cards in ${tempRootDeck}…`,
@@ -988,7 +964,7 @@ export default function AnkiNotePage() {
       }
 
       setPhase3StatusText(
-        `Done. Due(review ivl>0): ${dueReviewCount}/${desiredCount} (total due=${dueTotalCount}). Picked notes: ${pickedNoteIds.length}. Requested moves: EnToFa=${moveEnToFa.length}, FaToEn=${moveFaToEn.length}, Emla=${moveEmla.length}.`,
+        `Done. Available(before)=${availableTotalCount}/${desiredCount}. Picked notes: ${pickedNoteIds.length}. Requested moves: EnToFa=${moveEnToFa.length}, FaToEn=${moveFaToEn.length}, Emla=${moveEmla.length}.`,
       );
     } finally {
       setPhase3Running(false);
