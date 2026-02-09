@@ -1,13 +1,69 @@
 import "server-only";
 
+import fs from "node:fs";
+import path from "node:path";
+
 import { createAnkiConnectClient } from "@/lib/AnkiConnect";
 import { WordAnkiConstants } from "@/lib/AnkiDeck/constants";
-import { syncHintSentenceForAnkiNote } from "@/lib/anki/hintSentenceSync";
+import { prisma } from "@/lib/prisma";
+import { getAnkiLinkIdFromNoteFields } from "@/lib/anki/ankiLink";
+import { buildLatestHintSentenceAudioIndex } from "@/lib/words/hintSentenceVoice";
 
 function chunk<T>(arr: T[], size: number): T[][] {
   const out: T[][] = [];
   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
   return out;
+}
+
+function asNonEmptyString(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const t = value.trim();
+  return t ? t : null;
+}
+
+function extractFirstSoundFilename(value: string): string | null {
+  const m = /\[sound:(?<fn>[^\]]+)\]/i.exec(value);
+  const fn = m?.groups?.fn?.trim();
+  return fn ? fn : null;
+}
+
+function parseHintAudioTimestampFromFilename(wordId: number, filename: string): number | null {
+  const re = new RegExp(`^${wordId}_hint_(?<ts>\\d{8,})\\.mp3$`, "i");
+  const m = re.exec(filename);
+  const ts = Number(m?.groups?.ts);
+  return Number.isFinite(ts) ? Math.trunc(ts) : null;
+}
+
+function upsertSoundTag(current: string, newFilename: string, wordId: number): string {
+  const tag = `[sound:${newFilename}]`;
+  const cur = current ?? "";
+  const existing = extractFirstSoundFilename(cur);
+
+  if (!existing) {
+    const base = cur.trim();
+    return base ? `${base} ${tag}` : tag;
+  }
+
+  const existingTs = parseHintAudioTimestampFromFilename(wordId, existing);
+  const newTs = parseHintAudioTimestampFromFilename(wordId, newFilename);
+
+  // If existing isn't our format, keep it and append ours.
+  if (existingTs == null || newTs == null) {
+    const base = cur.trim();
+    if (base.includes(tag)) return base;
+    return base ? `${base} ${tag}` : tag;
+  }
+
+  // Replace the first sound tag if ours is newer.
+  if (newTs > existingTs) {
+    return cur.replace(/\[sound:[^\]]+\]/i, tag);
+  }
+
+  return cur;
+}
+
+function asHintSentenceString(value: unknown): string {
+  return typeof value === "string" ? value : String(value ?? "");
 }
 
 async function runWithConcurrency<T>(
@@ -108,32 +164,127 @@ async function runJob(state: State) {
   const ids = idsRes.result ?? [];
   state.total = ids.length;
 
-  // Preload current hint_sentence values to avoid an extra notesInfo call per note.
-  const beforeByNoteId = new Map<number, string>();
+  const noteById = new Map<number, { ankiLinkId: string | null; currentHint: string }>();
+  const allAnkiLinkIds: string[] = [];
   for (const batch of chunk(ids, 250)) {
     const infoRes = await anki.requestDetailed("notesInfo", { notes: batch });
     if (!infoRes.ok) throw new Error(infoRes.error);
     for (const n of infoRes.result ?? []) {
-      beforeByNoteId.set(n.noteId, String(n.fields?.hint_sentence?.value ?? ""));
+      const ankiLinkId = getAnkiLinkIdFromNoteFields(n);
+      const currentHint = asHintSentenceString(n.fields?.hint_sentence?.value ?? "");
+      noteById.set(n.noteId, { ankiLinkId, currentHint });
+      if (ankiLinkId) allAnkiLinkIds.push(ankiLinkId);
     }
   }
 
-  const concurrency = 20;
+  const uniqueAnkiLinkIds = Array.from(new Set(allAnkiLinkIds));
+  const wordByAnkiLinkId = new Map<string, { id: number; hint_sentence: string | null }>();
+  for (const batch of chunk(uniqueAnkiLinkIds, 500)) {
+    const rows = await prisma.word.findMany({
+      where: { anki_link_id: { in: batch } },
+      select: { id: true, anki_link_id: true, hint_sentence: true },
+    });
+    for (const w of rows) wordByAnkiLinkId.set(w.anki_link_id, { id: w.id, hint_sentence: w.hint_sentence });
+  }
+
+  const latestAudioByWordId = buildLatestHintSentenceAudioIndex();
+  const uploaded = new Set<string>();
+  const uploadInFlight = new Map<string, Promise<{ ok: true } | { ok: false; error: string }>>();
+
+  const ensureUploaded = (filename: string) => {
+    if (uploaded.has(filename)) return Promise.resolve({ ok: true } as const);
+    const existing = uploadInFlight.get(filename);
+    if (existing) return existing;
+
+    const p = (async () => {
+      const absPath = path.join(process.cwd(), "public", "audio", filename);
+      let bytes: Buffer;
+      try {
+        bytes = fs.readFileSync(absPath);
+      } catch (e) {
+        return { ok: false as const, error: `Failed to read local audio: ${filename} (${e instanceof Error ? e.message : String(e)})` };
+      }
+      if (bytes.length === 0) return { ok: false as const, error: `Local audio is zero-byte: ${filename}` };
+
+      const data = bytes.toString("base64");
+      const mediaRes = await anki.requestDetailed("storeMediaFile", {
+        filename,
+        data,
+        deleteExisting: true,
+      });
+      if (!mediaRes.ok) return { ok: false as const, error: mediaRes.error };
+      uploaded.add(filename);
+      return { ok: true as const };
+    })().finally(() => {
+      uploadInFlight.delete(filename);
+    });
+
+    uploadInFlight.set(filename, p);
+    return p;
+  };
+
+  const concurrency = 8;
   await runWithConcurrency(ids, concurrency, async (noteId) => {
     if (state.stopRequested) return;
     state.currentNoteId = noteId;
 
-    const synced = await syncHintSentenceForAnkiNote(noteId);
-    if (!synced.ok) {
+    const note = noteById.get(noteId);
+    if (!note) {
       state.failed += 1;
       state.processed += 1;
       return;
     }
 
-    const before = beforeByNoteId.get(noteId) ?? "";
-    const after = String(synced.note.fields?.hint_sentence?.value ?? "");
-    if (after !== before) state.updated += 1;
-    else state.skipped += 1;
+    const ankiLinkId = note.ankiLinkId;
+    if (!ankiLinkId) {
+      state.failed += 1;
+      state.processed += 1;
+      return;
+    }
+
+    const word = wordByAnkiLinkId.get(ankiLinkId);
+    if (!word) {
+      state.failed += 1;
+      state.processed += 1;
+      return;
+    }
+
+    const current = note.currentHint;
+    const dbHint = asNonEmptyString(word.hint_sentence) ?? "";
+    const hasHint = Boolean(asNonEmptyString(current));
+    let nextValue = current;
+
+    if (!hasHint) nextValue = dbHint || "";
+
+    const latest = latestAudioByWordId.get(word.id) ?? null;
+    if (latest && latest.size > 0) {
+      const maybeUpdated = upsertSoundTag(nextValue, latest.filename, word.id);
+      if (maybeUpdated !== nextValue) {
+        if (state.stopRequested) return;
+        const upload = await ensureUploaded(latest.filename);
+        if (!upload.ok) {
+          state.failed += 1;
+          state.processed += 1;
+          return;
+        }
+        nextValue = maybeUpdated;
+      }
+    }
+
+    if (nextValue !== current) {
+      if (state.stopRequested) return;
+      const updRes = await anki.requestDetailed("updateNoteFields", {
+        note: { id: noteId, fields: { hint_sentence: nextValue } },
+      });
+      if (!updRes.ok) {
+        state.failed += 1;
+        state.processed += 1;
+        return;
+      }
+      state.updated += 1;
+    } else {
+      state.skipped += 1;
+    }
 
     state.processed += 1;
   });

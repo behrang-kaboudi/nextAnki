@@ -5,6 +5,7 @@ import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import {
   ankiRequest,
   ankiRequestDetailed,
+  createAnkiConnectClient,
   type AnkiNotesInfo,
 } from "@/lib/AnkiConnect";
 import {
@@ -110,6 +111,10 @@ export default function AnkiNotePage() {
     () => Array.from({ length: 100 }, (_, i) => i + 1),
     [],
   );
+  const ankiSyncClient = useMemo(
+    () => createAnkiConnectClient({ timeoutMs: 120_000, retryDelayMs: 1000 }),
+    [],
+  );
 
   const phase1RunningRef = useRef(false);
   const phase2RunningRef = useRef(false);
@@ -167,10 +172,33 @@ export default function AnkiNotePage() {
     return value.replaceAll('"', '\\"');
   }
 
-  async function waitUntilFalse(runningRef: { current: boolean }, timeoutMs = 10 * 60 * 1000) {
+  async function syncWithAnkiWebOrAlert(label: string) {
+    if (
+      typeof navigator !== "undefined" &&
+      "onLine" in navigator &&
+      !navigator.onLine
+    ) {
+      const msg = "اتصال اینترنت قطع است؛ سینک با AnkiWeb امکان‌پذیر نیست.";
+      window.alert(msg);
+      throw new Error(msg);
+    }
+
+    const res = await ankiSyncClient.requestDetailed("sync");
+    if (!res.ok) {
+      const msg = `سینک با AnkiWeb ناموفق بود (${label}): ${res.error}`;
+      window.alert(msg);
+      throw new Error(msg);
+    }
+  }
+
+  async function waitUntilFalse(
+    runningRef: { current: boolean },
+    timeoutMs = 10 * 60 * 1000,
+  ) {
     const start = Date.now();
     while (runningRef.current) {
-      if (Date.now() - start > timeoutMs) throw new Error("Timeout while waiting for phase to finish.");
+      if (Date.now() - start > timeoutMs)
+        throw new Error("Timeout while waiting for phase to finish.");
       await new Promise((r) => setTimeout(r, 75));
     }
   }
@@ -190,43 +218,14 @@ export default function AnkiNotePage() {
     const status = data.status;
     setSyncAllRunning(Boolean(status.running));
     setSyncAllError(status.error);
-    const remaining = Math.max(0, (status.total ?? 0) - (status.processed ?? 0));
+    const remaining = Math.max(
+      0,
+      (status.total ?? 0) - (status.processed ?? 0),
+    );
     setSyncAllStatusText(
       `done=${status.processed}/${status.total} remaining=${remaining} currentNoteId=${status.currentNoteId ?? "—"} updated=${status.updated} skipped=${status.skipped} failed=${status.failed} stopRequested=${status.stopRequested ? "yes" : "no"}`,
     );
     return status;
-  }
-
-  async function runSyncAllAndWait(label: string, timeoutMs = 30 * 60 * 1000) {
-    const start = Date.now();
-
-    // If already running, just wait for it; otherwise kick it off.
-    if (!syncAllRunning) {
-      setSyncAllError(null);
-      setSyncAllStatusText(null);
-      setSyncAllRunning(true);
-
-      const res = await fetch("/api/anki/hint-sentence/sync-all", {
-        method: "POST",
-      });
-      const data = (await res.json().catch(() => null)) as {
-        ok?: boolean;
-        error?: string;
-      } | null;
-      if (!res.ok || !data?.ok)
-        throw new Error(data?.error || `Request failed (${res.status})`);
-    }
-
-    while (true) {
-      if (Date.now() - start > timeoutMs)
-        throw new Error(`Timeout while waiting for sync (${label}).`);
-
-      const status = await fetchSyncAllStatusAndUpdate();
-      if (status.error) throw new Error(status.error);
-      if (status.done && !status.running) return;
-
-      await new Promise((r) => setTimeout(r, 1000));
-    }
   }
 
   async function runAllPhases() {
@@ -238,8 +237,8 @@ export default function AnkiNotePage() {
     setRunAllStatusText("Starting…");
 
     try {
-      setRunAllStatusText("Syncing (before phases)…");
-      await runSyncAllAndWait("before");
+      setRunAllStatusText("Syncing with AnkiWeb (before phase 1)…");
+      await syncWithAnkiWebOrAlert("قبل از فاز ۱");
 
       setRunAllStatusText("Running phase 1…");
       await runPhase1();
@@ -249,6 +248,9 @@ export default function AnkiNotePage() {
         setRunAllError(`Phase 1 failed: ${phase1ErrorRef.current}`);
         return;
       }
+
+      setRunAllStatusText("Syncing with AnkiWeb (after phase 1)…");
+      await syncWithAnkiWebOrAlert("بعد از فاز ۱");
 
       setRunAllStatusText("Running phase 2…");
       await runPhase2();
@@ -267,9 +269,6 @@ export default function AnkiNotePage() {
         setRunAllError(`Phase 3 failed: ${phase3ErrorRef.current}`);
         return;
       }
-
-      setRunAllStatusText("Syncing (after phases)…");
-      await runSyncAllAndWait("after");
 
       setRunAllStatusText("Done.");
     } catch (error) {
@@ -391,11 +390,14 @@ export default function AnkiNotePage() {
       for (const cardId of cardIds) {
         const last = revlogRes.value.get(cardId) ?? null;
         const interval = Number(last?.ivl);
-        if (Number.isFinite(interval) && interval > 1) intervalFiltered.push(cardId);
+        if (Number.isFinite(interval) && interval > 1)
+          intervalFiltered.push(cardId);
       }
 
       if (intervalFiltered.length === 0) {
-        setPhase1StatusText("No Rahnama cards matched interval > 1 day (from revlog).");
+        setPhase1StatusText(
+          "No Rahnama cards matched interval > 1 day (from revlog).",
+        );
         return;
       }
 
@@ -404,7 +406,9 @@ export default function AnkiNotePage() {
         intervalFiltered,
       );
 
-      setPhase1StatusText(`Moving ${intervalFiltered.length} cards to ${targetDeck}…`);
+      setPhase1StatusText(
+        `Moving ${intervalFiltered.length} cards to ${targetDeck}…`,
+      );
       const moveRes = await ankiRequestDetailed("changeDeck", {
         cards: intervalFiltered,
         deck: targetDeck,
@@ -414,7 +418,9 @@ export default function AnkiNotePage() {
         return;
       }
 
-      setPhase1StatusText(`Finding related notes for ${intervalFiltered.length} cards…`);
+      setPhase1StatusText(
+        `Finding related notes for ${intervalFiltered.length} cards…`,
+      );
       const noteIdsRes = await getNoteIdsForCardIds(intervalFiltered);
       if (!noteIdsRes.ok) {
         setPhase1Error(noteIdsRes.error);
@@ -426,27 +432,36 @@ export default function AnkiNotePage() {
         return;
       }
 
-      setPhase1StatusText(`Finding EnToFa/FaToEn cards for ${uniqueNoteIds.length} notes…`);
+      setPhase1StatusText(
+        `Finding EnToFa/FaToEn cards for ${uniqueNoteIds.length} notes…`,
+      );
       const siblingCardIds = new Set<number>();
       for (const noteId of uniqueNoteIds) {
         const noteQuery = `nid:${noteId} (deck:"${escapeAnkiQueryValue(enToFaDeck)}" OR deck:"${escapeAnkiQueryValue(
           faToEnDeck,
         )}")`;
-        const cardIdsRes = await ankiRequestDetailed("findCards", { query: noteQuery });
+        const cardIdsRes = await ankiRequestDetailed("findCards", {
+          query: noteQuery,
+        });
         if (!cardIdsRes.ok) {
           setPhase1Error(cardIdsRes.error);
           return;
         }
-        for (const cardId of cardIdsRes.result ?? []) siblingCardIds.add(cardId);
+        for (const cardId of cardIdsRes.result ?? [])
+          siblingCardIds.add(cardId);
       }
 
       const siblingIds = Array.from(siblingCardIds);
       if (siblingIds.length === 0) {
-        setPhase1StatusText("No related EnToFa/FaToEn cards found (nothing to reschedule).");
+        setPhase1StatusText(
+          "No related EnToFa/FaToEn cards found (nothing to reschedule).",
+        );
         return;
       }
 
-      setPhase1StatusText(`Checking last answer (Again) for ${siblingIds.length} cards…`);
+      setPhase1StatusText(
+        `Checking last answer (Again) for ${siblingIds.length} cards…`,
+      );
       const againRes = await filterCardIdsWhereLastAnswerAgain(siblingIds);
       if (!againRes.ok) {
         setPhase1Error(againRes.error);
@@ -454,15 +469,25 @@ export default function AnkiNotePage() {
       }
       const againCardIds = againRes.cardIds;
       if (againCardIds.length === 0) {
-        setPhase1StatusText("No related EnToFa/FaToEn cards had last answer = Again (nothing to reschedule).");
+        setPhase1StatusText(
+          "No related EnToFa/FaToEn cards had last answer = Again (nothing to reschedule).",
+        );
         return;
       }
 
-      appendPhaseLogIds("فاز ۱: کارت‌های EnToFa/FaToEn با آخرین پاسخ Again (cardIds)", againCardIds);
+      appendPhaseLogIds(
+        "فاز ۱: کارت‌های EnToFa/FaToEn با آخرین پاسخ Again (cardIds)",
+        againCardIds,
+      );
 
-      setPhase1StatusText(`Setting due date to today for ${againCardIds.length} cards…`);
+      setPhase1StatusText(
+        `Setting due date to today for ${againCardIds.length} cards…`,
+      );
       for (const chunk of chunkArray(againCardIds, 200)) {
-        const dueRes = await ankiRequestDetailed("setDueDate", { cards: chunk, days: "0" });
+        const dueRes = await ankiRequestDetailed("setDueDate", {
+          cards: chunk,
+          days: "0",
+        });
         if (!dueRes.ok) {
           setPhase1Error(dueRes.error);
           return;
@@ -471,7 +496,9 @@ export default function AnkiNotePage() {
 
       setPhase1StatusText(`Resetting (forget) ${againCardIds.length} cards…`);
       for (const chunk of chunkArray(againCardIds, 200)) {
-        const forgetRes = await ankiRequestDetailed("forgetCards", { cards: chunk });
+        const forgetRes = await ankiRequestDetailed("forgetCards", {
+          cards: chunk,
+        });
         if (!forgetRes.ok) {
           setPhase1Error(forgetRes.error);
           return;
@@ -710,7 +737,6 @@ export default function AnkiNotePage() {
         setPhase3Error(dueRes.error);
         return;
       }
-
       const dueNowCardIds = dueRes.result ?? [];
       const dueTotalCount = dueNowCardIds.length;
 
@@ -751,19 +777,48 @@ export default function AnkiNotePage() {
       }
 
       const needed = desiredCount - dueReviewCount;
-      setPhase3StatusText(`Need ${needed} more note(s) from ${tempRootDeck}…`);
 
-      const tempNotesRes = await ankiRequestDetailed("findNotes", {
+      setPhase3StatusText(
+        `Need ${needed} more note(s). Finding EnToFa cards in ${tempRootDeck}…`,
+      );
+
+      const tempCardRes = await ankiRequestDetailed("findCards", {
         query: `deck:"${escapeAnkiQueryValue(tempRootDeck)}"`,
       });
-      if (!tempNotesRes.ok) {
-        setPhase3Error(tempNotesRes.error);
+      if (!tempCardRes.ok) {
+        setPhase3Error(tempCardRes.error);
         return;
       }
 
-      const tempNoteIds = tempNotesRes.result ?? [];
+      const tempCardIds = tempCardRes.result ?? [];
+      if (tempCardIds.length === 0) {
+        setPhase3StatusText(`No cards found in ${tempRootDeck}.`);
+        return;
+      }
+
+      setPhase3StatusText(
+        `Loading temp cards info to extract EnToFa notes… (${tempCardIds.length} cards)`,
+      );
+      const tempEnToFaNoteIdsSet = new Set<number>();
+      for (const chunk of chunkArray(tempCardIds, 200)) {
+        const cardsInfoRes = await ankiRequestDetailed("cardsInfo", {
+          cards: chunk,
+        });
+        if (!cardsInfoRes.ok) {
+          setPhase3Error(cardsInfoRes.error);
+          return;
+        }
+
+        for (const card of cardsInfoRes.result ?? []) {
+          if (card.ord === 0) tempEnToFaNoteIdsSet.add(card.note);
+        }
+      }
+
+      const tempNoteIds = Array.from(tempEnToFaNoteIdsSet);
       if (tempNoteIds.length === 0) {
-        setPhase3StatusText(`No notes found in ${tempRootDeck}.`);
+        setPhase3StatusText(
+          `No EnToFa cards found in ${tempRootDeck} (ord=0).`,
+        );
         return;
       }
 
@@ -806,7 +861,6 @@ export default function AnkiNotePage() {
         }
         if (pickedNoteIds.length >= needed) break;
       }
-
       // Step 2: Fill remaining by shortest `phonetic_us_normalized`.
       if (pickedNoteIds.length < needed) {
         for (const c of candidates) {
@@ -814,7 +868,15 @@ export default function AnkiNotePage() {
           if (pickedNoteIds.length >= needed) break;
         }
       }
-
+      for (const noteId of pickedNoteIds) {
+        const notesInfoRes = await getNotesInfoByIds([noteId]);
+        if (notesInfoRes.ok) {
+          console.log(
+            `[AnkiNotePage.client.tsx] Note ${noteId}:`,
+            notesInfoRes.notesInfo[0],
+          );
+        }
+      }
       if (pickedNoteIds.length === 0) {
         setPhase3StatusText(
           "No candidate notes found (missing phonetic_us_normalized?).",
@@ -858,8 +920,20 @@ export default function AnkiNotePage() {
       }
 
       const candidateEnToFaIds = Array.from(candidateEnToFa);
+      // remove
+      for (const chunk of chunkArray(candidateEnToFaIds, 200)) {
+        const cardsInfoRes = await ankiRequestDetailed("cardsInfo", {
+          cards: chunk,
+        });
+        if (!cardsInfoRes.ok) {
+          setPhase3Error(cardsInfoRes.error);
+          return;
+        }
+        console.log("candidateEnToFaIds cardsInfo:", cardsInfoRes.result);
+      }
       const candidateFaToEnIds = Array.from(candidateFaToEn);
       const candidateEmlaIds = Array.from(candidateEmla);
+
       if (
         candidateEnToFaIds.length === 0 &&
         candidateFaToEnIds.length === 0 &&
@@ -871,81 +945,50 @@ export default function AnkiNotePage() {
         return;
       }
 
-      setPhase3StatusText("Checking current deck of selected cards…");
-      const allCandidateIds = Array.from(
-        new Set([
-          ...candidateEnToFaIds,
-          ...candidateFaToEnIds,
-          ...candidateEmlaIds,
-        ]),
-      );
-      const currentDeckByCardId = new Map<number, string>();
-      for (const chunk of chunkArray(allCandidateIds, 200)) {
-        const infoRes = await ankiRequestDetailed("cardsInfo", { cards: chunk });
-        if (!infoRes.ok) {
-          setPhase3Error(infoRes.error);
-          return;
-        }
-        for (const c of infoRes.result ?? []) {
-          currentDeckByCardId.set(c.cardId, c.deckName);
-        }
-      }
-
-      const moveEnToFa = candidateEnToFaIds.filter(
-        (id) => (currentDeckByCardId.get(id) ?? "") !== enToFaDeck,
-      );
-      const moveFaToEn = candidateFaToEnIds.filter(
-        (id) => (currentDeckByCardId.get(id) ?? "") !== faToEnDeck,
-      );
-      const moveEmla = candidateEmlaIds.filter(
-        (id) => (currentDeckByCardId.get(id) ?? "") !== emlaDeck,
-      );
-
-      const alreadyInEnToFa = candidateEnToFaIds.length - moveEnToFa.length;
-      const alreadyInFaToEn = candidateFaToEnIds.length - moveFaToEn.length;
-      const alreadyInEmla = candidateEmlaIds.length - moveEmla.length;
-
-      if (!moveEnToFa.length && !moveFaToEn.length && !moveEmla.length) {
-        setPhase3StatusText(
-          `Done. Due(review ivl>0): ${dueReviewCount}/${desiredCount} (total due=${dueTotalCount}). Picked notes: ${pickedNoteIds.length}. No cards needed moving (already in target decks).`,
-        );
-        return;
-      }
+      const moveEnToFa = candidateEnToFaIds;
+      const moveFaToEn = candidateFaToEnIds;
+      const moveEmla = candidateEmlaIds;
 
       setPhase3StatusText("Moving cards to target decks…");
       if (moveEnToFa.length) {
-        const res = await ankiRequestDetailed("changeDeck", {
-          cards: moveEnToFa,
-          deck: enToFaDeck,
-        });
-        if (!res.ok) {
-          setPhase3Error(res.error);
-          return;
+        for (const chunk of chunkArray(moveEnToFa, 200)) {
+          const res = await ankiRequestDetailed("changeDeck", {
+            cards: chunk,
+            deck: enToFaDeck,
+          });
+          if (!res.ok) {
+            setPhase3Error(res.error);
+            return;
+          }
         }
       }
       if (moveFaToEn.length) {
-        const res = await ankiRequestDetailed("changeDeck", {
-          cards: moveFaToEn,
-          deck: faToEnDeck,
-        });
-        if (!res.ok) {
-          setPhase3Error(res.error);
-          return;
+        for (const chunk of chunkArray(moveFaToEn, 200)) {
+          const res = await ankiRequestDetailed("changeDeck", {
+            cards: chunk,
+            deck: faToEnDeck,
+          });
+          if (!res.ok) {
+            setPhase3Error(res.error);
+            return;
+          }
         }
       }
       if (moveEmla.length) {
-        const res = await ankiRequestDetailed("changeDeck", {
-          cards: moveEmla,
-          deck: emlaDeck,
-        });
-        if (!res.ok) {
-          setPhase3Error(res.error);
-          return;
+        for (const chunk of chunkArray(moveEmla, 200)) {
+          const res = await ankiRequestDetailed("changeDeck", {
+            cards: chunk,
+            deck: emlaDeck,
+          });
+          if (!res.ok) {
+            setPhase3Error(res.error);
+            return;
+          }
         }
       }
 
       setPhase3StatusText(
-        `Done. Due(review ivl>0): ${dueReviewCount}/${desiredCount} (total due=${dueTotalCount}). Picked notes: ${pickedNoteIds.length}. Moved cards: EnToFa=${moveEnToFa.length}, FaToEn=${moveFaToEn.length}, Emla=${moveEmla.length}. Already in deck: EnToFa=${alreadyInEnToFa}, FaToEn=${alreadyInFaToEn}, Emla=${alreadyInEmla}.`,
+        `Done. Due(review ivl>0): ${dueReviewCount}/${desiredCount} (total due=${dueTotalCount}). Picked notes: ${pickedNoteIds.length}. Requested moves: EnToFa=${moveEnToFa.length}, FaToEn=${moveFaToEn.length}, Emla=${moveEmla.length}.`,
       );
     } finally {
       setPhase3Running(false);
@@ -1263,11 +1306,15 @@ export default function AnkiNotePage() {
           </div>
 
           <div className="w-full sm:w-auto">
-            <div className="mb-1 text-xs font-semibold text-muted">اجرای خودکار</div>
+            <div className="mb-1 text-xs font-semibold text-muted">
+              اجرای خودکار
+            </div>
             <button
               type="button"
               onClick={() => void runAllPhases()}
-              disabled={runAllRunning || phase1Running || phase2Running || phase3Running}
+              disabled={
+                runAllRunning || phase1Running || phase2Running || phase3Running
+              }
               className="h-11 w-full rounded-xl bg-[var(--primary)] px-4 text-sm font-semibold text-[var(--primary-foreground)] shadow-elevated transition hover:opacity-95 disabled:opacity-60 sm:w-auto"
             >
               {runAllRunning ? "در حال انجام..." : "اجرای فاز ۱ تا ۳"}
@@ -1314,35 +1361,35 @@ export default function AnkiNotePage() {
                       {phase1Running ? "در حال انجام..." : "اجرای فاز ۱"}
                     </button>
 
-	                    <div dir="rtl" className="grid gap-2 text-right">
-	                      <ol className="list-decimal space-y-1 ps-5 text-xs text-muted">
-	                        <li>
-	                          آیدی کارت‌های deck {WordAnkiConstants.decks.Rahnama}{" "}
-	                          پیدا می‌شود.
-	                        </li>
-	                        <li>
-	                          از روی revlog (آخرین ivl) فقط کارت‌های Rahnama با
-	                          interval&gt;1 جدا می‌شوند.
-	                        </li>
-	                        <li>
-	                          آن کارت‌ها به deck {WordAnkiConstants.decks.tempRoot}{" "}
-	                          منتقل می‌شوند.
-	                        </li>
-	                        <li>نوت‌های معادلِ آن کارت‌ها پیدا می‌شوند.</li>
-	                        <li>
-	                          از همان نوت‌ها کارت‌های مرتبطِ deck های{" "}
-	                          {WordAnkiConstants.decks.EnToFa} و{" "}
-	                          {WordAnkiConstants.decks.FaToEn} پیدا می‌شوند.
-	                        </li>
-	                        <li>
-	                          اگر آخرین پاسخ آن کارت‌ها Again نبود هیچ کاری انجام
-	                          نمی‌شود.
-	                        </li>
-	                        <li>
-	                          اگر آخرین پاسخ Again بود، زمان مرورشان به امروز تغییر
-	                          می‌کند و بعد forget می‌خورند تا ریست شوند.
-	                        </li>
-	                      </ol>
+                    <div dir="rtl" className="grid gap-2 text-right">
+                      <ol className="list-decimal space-y-1 ps-5 text-xs text-muted">
+                        <li>
+                          آیدی کارت‌های deck {WordAnkiConstants.decks.Rahnama}{" "}
+                          پیدا می‌شود.
+                        </li>
+                        <li>
+                          از روی revlog (آخرین ivl) فقط کارت‌های Rahnama با
+                          interval&gt;1 جدا می‌شوند.
+                        </li>
+                        <li>
+                          آن کارت‌ها به deck {WordAnkiConstants.decks.tempRoot}{" "}
+                          منتقل می‌شوند.
+                        </li>
+                        <li>نوت‌های معادلِ آن کارت‌ها پیدا می‌شوند.</li>
+                        <li>
+                          از همان نوت‌ها کارت‌های مرتبطِ deck های{" "}
+                          {WordAnkiConstants.decks.EnToFa} و{" "}
+                          {WordAnkiConstants.decks.FaToEn} پیدا می‌شوند.
+                        </li>
+                        <li>
+                          اگر آخرین پاسخ آن کارت‌ها Again نبود هیچ کاری انجام
+                          نمی‌شود.
+                        </li>
+                        <li>
+                          اگر آخرین پاسخ Again بود، زمان مرورشان به امروز تغییر
+                          می‌کند و بعد forget می‌خورند تا ریست شوند.
+                        </li>
+                      </ol>
 
                       {phase1StatusText ? (
                         <div className="text-xs text-foreground/80">
@@ -1432,13 +1479,15 @@ export default function AnkiNotePage() {
                         </li>
                         <li>
                           اولویت اول: نوت‌هایی که مقدار{" "}
-                          <span className="font-mono text-xs">imageability</span>{" "}
+                          <span className="font-mono text-xs">
+                            imageability
+                          </span>{" "}
                           آن‌ها از{" "}
                           <span className="font-mono text-xs">
                             {imageabilityBaseThreshold}
                           </span>{" "}
-                          بیشتر است انتخاب می‌شوند و مرتب‌سازی بر اساس کوتاه‌ترین
-                          {" "}
+                          بیشتر است انتخاب می‌شوند و مرتب‌سازی بر اساس
+                          کوتاه‌ترین{" "}
                           <span className="font-mono text-xs">
                             phonetic_us_normalized
                           </span>{" "}

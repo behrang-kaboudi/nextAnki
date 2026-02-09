@@ -54,6 +54,41 @@ export function getLatestHintSentenceAudioFileForId(id: number): HintSentenceAud
   return listHintSentenceAudioFilesForId(id)[0] ?? null;
 }
 
+export function buildLatestHintSentenceAudioIndex(): Map<number, HintSentenceAudioFileMatch> {
+  const dir = path.join(process.cwd(), "public", "audio");
+  let entries: string[] = [];
+  try {
+    entries = fs.readdirSync(dir);
+  } catch {
+    return new Map();
+  }
+
+  const re = /^(?<id>\d+)_hint_(?<ts>\d{8,})\.mp3$/i;
+  const latestById = new Map<number, HintSentenceAudioFileMatch>();
+
+  for (const filename of entries) {
+    const m = re.exec(filename);
+    const id = Number(m?.groups?.id);
+    const ts = Number(m?.groups?.ts);
+    if (!Number.isFinite(id) || !Number.isFinite(ts)) continue;
+
+    const absPath = path.join(dir, filename);
+    let size = 0;
+    try {
+      size = fs.statSync(absPath).size;
+    } catch {
+      size = 0;
+    }
+
+    const prev = latestById.get(id);
+    if (!prev || ts > prev.timestampMs) {
+      latestById.set(id, { filename, timestampMs: Math.trunc(ts), size });
+    }
+  }
+
+  return latestById;
+}
+
 export type EnsureHintSentenceVoiceResult =
   | { action: "skipped_no_text" }
   | { action: "skipped_exists"; filename: string }
