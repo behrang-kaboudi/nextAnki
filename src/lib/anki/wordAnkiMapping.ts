@@ -3,7 +3,7 @@ import "server-only";
 import fs from "node:fs";
 import path from "node:path";
 
-import type { Word } from "@prisma/client";
+import type { Prisma, Word } from "@prisma/client";
 
 import type { AnkiNotesInfo } from "@/lib/AnkiConnect";
 import { WordAnkiConstants, type WordNoteFieldName } from "@/lib/AnkiDeck";
@@ -119,25 +119,24 @@ export async function selectFile(
   const fa = String(IpaCandidate.fa ?? "").trim();
   const en = String(IpaCandidate.en ?? "").trim();
 
-  const strictWhere =
-    field === "base_form"
-      ? { base_form: en, ...(fa ? { meaning_fa: fa } : {}) }
-      : { meaning_fa: fa, ...(en ? { base_form: en } : {}) };
+  const whereCandidates: Prisma.WordWhereInput[] = [];
 
-  const looseWhere =
-    field === "base_form" ? { base_form: en } : { meaning_fa: fa };
+  // Prefer strict match when we have both sides.
+  if (en && fa) whereCandidates.push({ base_form: en, meaning_fa: fa });
 
-  const row =
-    en || fa
-      ? ((await prisma.word.findFirst({
-          where: strictWhere,
-          select: { anki_link_id: true, base_form: true },
-        })) ??
-        (await prisma.word.findFirst({
-          where: looseWhere,
-          select: { anki_link_id: true, base_form: true },
-        })))
-      : null;
+  // Fallback to whichever side is present. This is important because `target_lang`
+  // controls which audio field we *want*, but the DB row can still be found via the other side.
+  if (en) whereCandidates.push({ base_form: en });
+  if (fa) whereCandidates.push({ meaning_fa: fa });
+
+  let row: Pick<Word, "anki_link_id" | "base_form"> | null = null;
+  for (const where of whereCandidates) {
+    row = await prisma.word.findFirst({
+      where,
+      select: { anki_link_id: true, base_form: true },
+    });
+    if (row) break;
+  }
 
   const ankiLinkId = row?.anki_link_id ?? null;
   if (!ankiLinkId) return null;
@@ -152,13 +151,6 @@ export async function selectFile(
   // );
   if (!latest || latest.size <= 0) return null;
   return getWordFieldAudioAbsolutePath(latest.filename);
-}
-
-function selectFileForLang(
-  candidate: IpaCandidate,
-  lang: "fa" | "en",
-): Promise<string | null> {
-  return selectFile({ ...candidate, target_lang: lang });
 }
 
 function toSoundTagFromAbsPath(absPath: string | null): string {
@@ -176,7 +168,6 @@ function formatFaEnText(candidate: Pick<IpaCandidate, "fa" | "en">): string {
 
 async function buildHintLines(
   candidates: Array<IpaCandidate | null | undefined>,
-  lang: "fa" | "en",
 ): Promise<string> {
   const out: string[] = [];
   const seen = new Set<string>();
@@ -190,7 +181,7 @@ async function buildHintLines(
     const text = formatFaEnText(cand);
     if (!text) continue;
 
-    const file = await selectFileForLang(cand, lang);
+    const file = await selectFile(cand);
     out.push(`${text}${toSoundTagFromAbsPath(file)}`.trim());
   }
 
@@ -259,16 +250,16 @@ export const WORD_ANKI_FIELD_GENERATORS = {
 
   mixed_sentence: (w) => w.mixed_sentence ?? "",
   first_letter_fa_hint: async (w) => {
-    const obj: WordPictures = JSON.parse(w.json_hint ?? "{}");
+    const obj = JSON.parse(w.json_hint ?? "{}") as WordPictures;
     const cand = obj.persianImage ?? null;
     if (!cand) return "";
     const text = formatFaEnText(cand);
-    const file = await selectFileForLang(cand, "fa");
+    const file = await selectFile(cand);
     return `${text}${toSoundTagFromAbsPath(file)}`.trim();
   },
   first_letter_en_hint: async (w) => {
-    const obj: WordPictures = JSON.parse(w.json_hint ?? "{}");
-    return buildHintLines([obj.person, obj.adj, obj.job], "en");
+    const obj = JSON.parse(w.json_hint ?? "{}") as WordPictures;
+    return buildHintLines([obj.person, obj.adj, obj.job]);
   },
 
   // Anki field name is `hint_to_select_letters`, but DB field is `hint_to_select`.

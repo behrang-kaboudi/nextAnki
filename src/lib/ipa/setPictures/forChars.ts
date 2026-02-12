@@ -94,7 +94,7 @@ export async function findPictureWordsByIpaPrefix(
   const out: IpaCandidate[] = [];
   const seen = new Set<string>();
   function pushUnique(it: IpaCandidate) {
-    const key = `${it.source}|${it.target_lang ?? ""}|${it.fa}|${it.en}|${it.target_ipa}|${it.usage}|${it.anki_link_id ?? ""}|${it.phinglish ?? ""}`;
+    const key = `${it.source}|${it.target_lang}|${it.fa}|${it.en}|${it.target_ipa}|${it.usage}|${it.anki_link_id ?? ""}|${it.phinglish ?? ""}`;
     if (seen.has(key)) return;
     seen.add(key);
     out.push(it);
@@ -106,6 +106,7 @@ export async function findPictureWordsByIpaPrefix(
       phinglish: row.phinglish,
       en: row.en,
       target_ipa: row.target_ipa,
+      target_lang: "fa",
       usage: row.usage,
       source: "pictureWord",
     });
@@ -119,6 +120,7 @@ export async function findPictureWordsByIpaPrefix(
       en: row.en,
       anki_link_id: row.anki_link_id,
       target_ipa: target,
+      target_lang: "fa",
       usage: (row.usage ?? "word").trim() || "word",
       source: "word",
     });
@@ -325,7 +327,7 @@ async function findCandidatesByPatterns(
       (m) => m.target_ipa != word.phonetic_us_normalized,
     );
     const filtered2 = filtered1.filter((m) => {
-      if (!m.target_lang) return true;
+      if (m.target_lang === "fa") return true;
       if (word.imageability < imageabilityBaseThreshold) return true;
       if (m.target_ipa.length < length) return true;
       return false;

@@ -14,7 +14,7 @@ import type { IpaCandidate } from "./types";
 export function getIpaCandidateTargetLang(
   candidate: Pick<IpaCandidate, "target_lang">,
 ): "fa" | "en" {
-  return candidate.target_lang ?? "fa";
+  return candidate.target_lang;
 }
 
 function firstNonSpaceChar(value: string): string | null {

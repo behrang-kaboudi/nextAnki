@@ -5,6 +5,7 @@ export function placeholderJobPictureWord(): IpaCandidate {
     fa: "noFa",
     en: "noEn",
     target_ipa: "__________",
+    target_lang: "fa",
     usage: "job",
     source: "pictureWord",
   };

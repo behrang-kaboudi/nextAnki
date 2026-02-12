@@ -7,7 +7,46 @@ import { prisma } from "@/lib/prisma";
 
 export const runtime = "nodejs";
 
-export async function POST() {
+export async function POST(req: Request) {
+  const body = await req.json().catch(() => null);
+  const ankiLinkIdOverride =
+    body && typeof body === "object" && "ankiLinkId" in body
+      ? String((body as { ankiLinkId?: unknown }).ankiLinkId ?? "").trim()
+      : "";
+
+  if (ankiLinkIdOverride) {
+    const word = await prisma.word.findUnique({ where: { anki_link_id: ankiLinkIdOverride } });
+    if (!word) {
+      return NextResponse.json(
+        { ok: false as const, error: `DB word not found for anki_link_id=${ankiLinkIdOverride}` },
+        { status: 404 },
+      );
+    }
+
+    const generatedJsonHint = await WORD_ANKI_FIELD_GENERATORS.json_hint(word);
+    const generatedFirstLetterFaHint = await WORD_ANKI_FIELD_GENERATORS.first_letter_fa_hint(word);
+    const generatedFirstLetterEnHint = await WORD_ANKI_FIELD_GENERATORS.first_letter_en_hint(word);
+
+    return NextResponse.json(
+      {
+        ok: true as const,
+        modelName: null as const,
+        noteId: null as const,
+        ankiLinkId: ankiLinkIdOverride,
+        ankiJsonHint: null as const,
+        generatedJsonHint,
+        jsonHintChanged: null as const,
+        ankiFirstLetterFaHint: null as const,
+        generatedFirstLetterFaHint,
+        firstLetterFaHintChanged: null as const,
+        ankiFirstLetterEnHint: null as const,
+        generatedFirstLetterEnHint,
+        firstLetterEnHintChanged: null as const,
+      },
+      { status: 200 },
+    );
+  }
+
   const anki = createAnkiConnectClient({ timeoutMs: 15_000, retryDelayMs: 750 });
 
   const modelName = WordAnkiConstants.noteTypes.META_LEX_VR9;

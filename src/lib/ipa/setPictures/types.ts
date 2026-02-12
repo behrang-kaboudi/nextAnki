@@ -3,7 +3,7 @@ export type IpaCandidate = {
   fa: string;
   en: string;
   target_ipa: string;
-  target_lang?: "fa" | "en";
+  target_lang: "fa" | "en";
   usage: string;
   source: "pictureWord" | "word";
   imageability?: number;
