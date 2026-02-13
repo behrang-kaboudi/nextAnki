@@ -9,7 +9,7 @@ import { getWordFieldAudioAbsoluteDir, getWordFieldAudioAbsolutePath } from "@/l
 import { getAnkiLinkIdFromNoteFields } from "@/lib/anki/wordAnkiMapping";
 import { prisma } from "@/lib/prisma";
 
-export type SentenceEnMeaningFaSyncAllStatus = {
+export type MeaningFaSyncAllStatus = {
   jobId: string;
   running: boolean;
   done: boolean;
@@ -32,7 +32,7 @@ export type SentenceEnMeaningFaSyncAllStatus = {
   currentNoteId: number | null;
 };
 
-type State = SentenceEnMeaningFaSyncAllStatus & { _started: boolean };
+type State = MeaningFaSyncAllStatus & { _started: boolean };
 
 function nowIso() {
   return new Date().toISOString();
@@ -63,10 +63,10 @@ async function runWithConcurrency<T>(
 }
 
 function getState(): State {
-  const g = globalThis as unknown as { __sentenceEnMeaningFaSyncAll?: State };
-  if (!g.__sentenceEnMeaningFaSyncAll) {
-    g.__sentenceEnMeaningFaSyncAll = {
-      jobId: `sentence_en_meaning_fa_sync_${Date.now()}`,
+  const g = globalThis as unknown as { __meaningFaSyncAll?: State };
+  if (!g.__meaningFaSyncAll) {
+    g.__meaningFaSyncAll = {
+      jobId: `meaning_fa_sync_${Date.now()}`,
       running: false,
       done: false,
       startedAt: null,
@@ -87,10 +87,10 @@ function getState(): State {
       _started: false,
     };
   }
-  return g.__sentenceEnMeaningFaSyncAll;
+  return g.__meaningFaSyncAll;
 }
 
-export function getSentenceEnMeaningFaSyncAllStatus(): SentenceEnMeaningFaSyncAllStatus {
+export function getMeaningFaSyncAllStatus(): MeaningFaSyncAllStatus {
   const s = getState();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { _started: _ignored, ...pub } = s;
@@ -99,7 +99,11 @@ export function getSentenceEnMeaningFaSyncAllStatus(): SentenceEnMeaningFaSyncAl
 
 type ExistingFileInfo = { filename: string; timestampMs: number; size: number };
 
-function indexLatestAudioForSentenceEnMeaningFa(): Map<string, ExistingFileInfo> {
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function indexLatestAudioForMeaningFa(): Map<string, ExistingFileInfo> {
   const dir = getWordFieldAudioAbsoluteDir();
   let entries: string[] = [];
   try {
@@ -108,9 +112,9 @@ function indexLatestAudioForSentenceEnMeaningFa(): Map<string, ExistingFileInfo>
     return new Map();
   }
 
-  const sep = WORD_AUDIO_FILENAME_SEPARATOR.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const reNew = new RegExp(`^(?<anki>.+?)${sep}sentence_en_meaning_fa${sep}(?<ts>\\d{8,})\\.mp3$`);
-  const reLegacy = new RegExp(`^(?<anki>.+)_sentence_en_meaning_fa_(?<ts>\\d{8,})\\.mp3$`);
+  const sep = escapeRegExp(WORD_AUDIO_FILENAME_SEPARATOR);
+  const reNew = new RegExp(`^(?<anki>.+?)${sep}meaning_fa${sep}(?<ts>\\d{8,})\\.mp3$`);
+  const reLegacy = new RegExp(`^(?<anki>.+)_meaning_fa_(?<ts>\\d{8,})\\.mp3$`);
 
   const latestById = new Map<string, ExistingFileInfo>();
   for (const filename of entries) {
@@ -135,7 +139,7 @@ function indexLatestAudioForSentenceEnMeaningFa(): Map<string, ExistingFileInfo>
   return latestById;
 }
 
-function generateSentenceEnMeaningFaValue(
+function generateMeaningFaValue(
   dbValue: string,
   ankiLinkId: string,
   audioIndex: Map<string, ExistingFileInfo>
@@ -152,7 +156,7 @@ function generateSentenceEnMeaningFaValue(
 
 async function updateNoteField(noteId: number, value: string, anki: ReturnType<typeof createAnkiConnectClient>) {
   const res = await anki.requestDetailed("updateNoteFields", {
-    note: { id: noteId, fields: { sentence_en_meaning_fa: value } },
+    note: { id: noteId, fields: { meaning_fa: value } },
   });
   if (!res.ok) return { ok: false as const, error: res.error };
   return { ok: true as const };
@@ -186,41 +190,39 @@ async function runJob(state: State) {
   const ids = idsRes.result ?? [];
   state.total = ids.length;
 
-  const audioIndex = indexLatestAudioForSentenceEnMeaningFa();
+  const audioIndex = indexLatestAudioForMeaningFa();
 
-  // Preload current field values + anki_link_id to avoid extra notesInfo per note.
   const beforeByNoteId = new Map<number, { ankiLinkId: string | null; value: string }>();
   for (const batch of chunk(ids, 250)) {
     const infoRes = await ankiFinder.requestDetailed("notesInfo", { notes: batch });
     if (!infoRes.ok) throw new Error(infoRes.error);
     for (const n of infoRes.result ?? []) {
       const ankiLinkId = getAnkiLinkIdFromNoteFields(n);
-      const value = String(n.fields?.sentence_en_meaning_fa?.value ?? "");
+      const value = String(n.fields?.meaning_fa?.value ?? "");
       beforeByNoteId.set(n.noteId, { ankiLinkId, value });
     }
   }
 
-  // Preload DB words (read-only) for faster bulk processing.
   const allIds = Array.from(
     new Set(
       Array.from(beforeByNoteId.values())
         .map((x) => x.ankiLinkId)
-        .filter((x): x is string => Boolean(x)),
-    ),
+        .filter((x): x is string => Boolean(x))
+    )
   );
 
   const dbValueByAnkiLinkId = new Map<string, string>();
   for (const group of chunk(allIds, 1000)) {
     const rows = await prisma.word.findMany({
       where: { anki_link_id: { in: group } },
-      select: { anki_link_id: true, sentence_en_meaning_fa: true },
+      select: { anki_link_id: true, meaning_fa: true },
     });
-    for (const r of rows) dbValueByAnkiLinkId.set(r.anki_link_id, r.sentence_en_meaning_fa ?? "");
+    for (const r of rows) dbValueByAnkiLinkId.set(r.anki_link_id, r.meaning_fa);
   }
 
   const concurrency = 20;
   const clients = Array.from({ length: concurrency }, () =>
-    createAnkiConnectClient({ timeoutMs: 30000, retryDelayMs: 1000 }),
+    createAnkiConnectClient({ timeoutMs: 30000, retryDelayMs: 1000 })
   );
 
   await runWithConcurrency(ids, concurrency, async (noteId) => {
@@ -244,7 +246,7 @@ async function runJob(state: State) {
       return;
     }
 
-    const newValue = generateSentenceEnMeaningFaValue(dbValue, ankiLinkId, audioIndex);
+    const newValue = generateMeaningFaValue(dbValue, ankiLinkId, audioIndex);
     if (newValue === oldValue) {
       state.skippedSame += 1;
       state.processed += 1;
@@ -274,12 +276,12 @@ async function runJob(state: State) {
   state.currentNoteId = null;
 }
 
-export function startSentenceEnMeaningFaSyncAllIfNeeded(): SentenceEnMeaningFaSyncAllStatus {
+export function startMeaningFaSyncAllIfNeeded(): MeaningFaSyncAllStatus {
   const state = getState();
-  if (state.running) return getSentenceEnMeaningFaSyncAllStatus();
-  if (state._started && !state.done) return getSentenceEnMeaningFaSyncAllStatus();
+  if (state.running) return getMeaningFaSyncAllStatus();
+  if (state._started && !state.done) return getMeaningFaSyncAllStatus();
 
-  state.jobId = `sentence_en_meaning_fa_sync_${Date.now()}`;
+  state.jobId = `meaning_fa_sync_${Date.now()}`;
   state._started = true;
   state.stopRequested = false;
   state.stoppedEarly = false;
@@ -292,12 +294,11 @@ export function startSentenceEnMeaningFaSyncAllIfNeeded(): SentenceEnMeaningFaSy
     state.currentNoteId = null;
   });
 
-  return getSentenceEnMeaningFaSyncAllStatus();
+  return getMeaningFaSyncAllStatus();
 }
 
-export function requestStopSentenceEnMeaningFaSyncAll(): SentenceEnMeaningFaSyncAllStatus {
+export function requestStopMeaningFaSyncAll(): MeaningFaSyncAllStatus {
   const state = getState();
   state.stopRequested = true;
-  return getSentenceEnMeaningFaSyncAllStatus();
+  return getMeaningFaSyncAllStatus();
 }
-

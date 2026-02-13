@@ -97,12 +97,6 @@ export function getSentenceEnSyncAllStatus(): SentenceEnSyncAllStatus {
   return pub;
 }
 
-function extractFirstSoundFilename(value: string): string | null {
-  const m = /\[sound:(?<fn>[^\]]+)\]/i.exec(value);
-  const fn = m?.groups?.fn?.trim();
-  return fn ? fn : null;
-}
-
 type ExistingFileInfo = { filename: string; timestampMs: number; size: number };
 
 function indexLatestAudioForSentenceEn(): Map<string, ExistingFileInfo> {
@@ -150,18 +144,6 @@ function generateSentenceEnValue(dbSentenceEn: string, ankiLinkId: string, audio
   if (text.includes(tag)) return text;
   const base = text.trim();
   return base ? `${base} ${tag}` : tag;
-}
-
-async function storeMediaFile(filename: string, dataB64: string, anki: ReturnType<typeof createAnkiConnectClient>) {
-  const res = await anki.requestDetailed("storeMediaFile", { filename, data: dataB64, deleteExisting: true });
-  if (!res.ok) return { ok: false as const, error: res.error };
-  return { ok: true as const };
-}
-
-async function deleteMediaFile(filename: string, anki: ReturnType<typeof createAnkiConnectClient>) {
-  const res = await anki.requestDetailed("deleteMediaFile", { filename });
-  if (!res.ok) return { ok: false as const, error: res.error };
-  return { ok: true as const };
 }
 
 async function updateNoteSentenceEn(noteId: number, value: string, anki: ReturnType<typeof createAnkiConnectClient>) {
@@ -235,45 +217,6 @@ async function runJob(state: State) {
     createAnkiConnectClient({ timeoutMs: 30000, retryDelayMs: 1000 }),
   );
 
-  const mediaDataCache = new Map<string, string>();
-  const mediaUploadInflight = new Map<string, Promise<{ ok: true } | { ok: false; error: string }>>();
-
-  async function ensureUploaded(
-    filename: string,
-    anki: ReturnType<typeof createAnkiConnectClient>
-  ): Promise<{ ok: true; uploaded: boolean } | { ok: false; error: string }> {
-    const existing = mediaUploadInflight.get(filename);
-    if (existing) {
-      const out = await existing;
-      return out.ok ? { ok: true as const, uploaded: false } : out;
-    }
-
-    const task = (async () => {
-      let dataB64 = mediaDataCache.get(filename);
-      if (!dataB64) {
-        const abs = getWordFieldAudioAbsolutePath(filename);
-        let stSize = 0;
-        try {
-          stSize = fs.statSync(abs).size;
-        } catch {
-          return { ok: false as const, error: `Local audio not found: ${filename}` };
-        }
-        if (stSize <= 0) return { ok: false as const, error: `Local audio is zero-byte: ${filename}` };
-        const bytes = fs.readFileSync(abs);
-        dataB64 = bytes.toString("base64");
-        mediaDataCache.set(filename, dataB64);
-      }
-
-      const res = await storeMediaFile(filename, dataB64, anki);
-      if (!res.ok) return { ok: false as const, error: res.error };
-      return { ok: true as const };
-    })();
-
-    mediaUploadInflight.set(filename, task);
-    const out = await task;
-    return out.ok ? { ok: true as const, uploaded: true } : out;
-  }
-
   await runWithConcurrency(
     ids,
     concurrency,
@@ -307,32 +250,11 @@ async function runJob(state: State) {
 
       const client = clients[noteId % clients.length]!;
 
-      const oldFilename = extractFirstSoundFilename(oldValue);
-      const newFilename = extractFirstSoundFilename(newValue);
-
-      // Upload new media first (safer) if present.
-      if (newFilename) {
-        const up = await ensureUploaded(newFilename, client);
-        if (!up.ok) {
-          state.failed += 1;
-          state.processed += 1;
-          return;
-        }
-        if (up.uploaded) state.mediaUploaded += 1;
-      }
-
       const upd = await updateNoteSentenceEn(noteId, newValue, client);
       if (!upd.ok) {
         state.failed += 1;
         state.processed += 1;
         return;
-      }
-
-      if (oldFilename && oldFilename !== newFilename) {
-        const del = await deleteMediaFile(oldFilename, client);
-        if (del.ok) {
-          state.mediaDeleted += 1;
-        }
       }
 
       state.updated += 1;

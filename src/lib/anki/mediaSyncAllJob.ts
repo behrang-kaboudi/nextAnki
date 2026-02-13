@@ -207,19 +207,14 @@ async function runJob(state: State) {
 
       const outPath = path.join(mediaDir, file.filename);
       try {
-        if (fs.existsSync(outPath)) {
+        fs.copyFileSync(file.absPath, outPath, fs.constants.COPYFILE_EXCL);
+      } catch (e) {
+        const code = (e as NodeJS.ErrnoException | null)?.code ?? "";
+        if (code === "EEXIST") {
           state.skippedSame += 1;
-          state.processed += 1;
-          return;
+        } else {
+          state.failed += 1;
         }
-      } catch {
-        // ignore
-      }
-
-      try {
-        fs.copyFileSync(file.absPath, outPath);
-      } catch {
-        state.failed += 1;
         state.processed += 1;
         return;
       }

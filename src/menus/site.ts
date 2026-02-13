@@ -12,6 +12,13 @@ export const siteMenu: Menu = {
     },
     {
       type: "link",
+      href: "/how-to-do",
+      label: "How to do?",
+      icon: "app",
+      description: "How-to guides and walkthroughs",
+    },
+    {
+      type: "link",
       href: "/tests",
       label: "Tests",
       icon: "tools",
