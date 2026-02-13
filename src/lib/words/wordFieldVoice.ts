@@ -1,6 +1,7 @@
 import "server-only";
 
 import fs from "node:fs";
+import path from "node:path";
 
 import {
   type WordAudioFieldKey,
@@ -128,4 +129,38 @@ export function getWordFieldAudioFileInfo(filename: string): { absPath: string; 
   } catch {
     return { absPath, exists: false, size: 0 };
   }
+}
+
+export async function deleteAllWordFieldAudioFiles({
+  ankiLinkId,
+  field,
+}: {
+  ankiLinkId: string;
+  field: WordAudioFieldKey;
+}): Promise<{ deleted: number; failed: number; deletedBytes: number }> {
+  const dir = getWordFieldAudioAbsoluteDir();
+  const dirResolved = path.resolve(dir);
+
+  const matches = listWordFieldAudioFiles({ ankiLinkId, field });
+  let deleted = 0;
+  let failed = 0;
+  let deletedBytes = 0;
+
+  for (const m of matches) {
+    const abs = getWordFieldAudioAbsolutePath(m.filename);
+    const absResolved = path.resolve(abs);
+    if (!absResolved.startsWith(dirResolved + path.sep)) {
+      failed += 1;
+      continue;
+    }
+    try {
+      await fs.promises.unlink(absResolved);
+      deleted += 1;
+      deletedBytes += m.size;
+    } catch {
+      failed += 1;
+    }
+  }
+
+  return { deleted, failed, deletedBytes };
 }

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import BatchWordFieldVoiceGenerate from "../BatchWordFieldVoiceGenerate.client";
 import AudioHelpModal from "../AudioHelpModal.client";
+import WordFieldVoiceDuplicatesModal from "../WordFieldVoiceDuplicatesModal.client";
 import WordFieldVoiceCell from "../WordFieldVoiceCell.client";
 
 export const metadata = {
@@ -77,6 +78,7 @@ export default async function WordHintsAudioPage({
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="text-xl font-semibold">Audio</h1>
             <AudioHelpModal />
+            <WordFieldVoiceDuplicatesModal />
           </div>
           <p className="mt-1 text-sm opacity-80">
             UI for generating audio for <span className="font-mono">base_form</span>,{" "}

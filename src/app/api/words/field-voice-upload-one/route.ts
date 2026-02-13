@@ -11,6 +11,7 @@ import { spawn } from "node:child_process";
 
 import { WORD_AUDIO_FIELDS, buildWordFieldAudioFilename, getWordFieldAudioPublicPath } from "@/lib/audio/wordFieldAudioNaming";
 import { getWordFieldAudioAbsoluteDir, getWordFieldAudioAbsolutePath } from "@/lib/audio/wordFieldAudioPaths.server";
+import { deleteAllWordFieldAudioFiles } from "@/lib/words/wordFieldVoice";
 
 export const runtime = "nodejs";
 
@@ -72,6 +73,10 @@ export async function POST(req: Request) {
     const buf = Buffer.from(await audio.arrayBuffer());
     await fsp.writeFile(tmpInput, buf);
 
+    // Replace behavior: if there's existing audio for this (ankiLinkId + field), remove it before saving the new one.
+    // This avoids multiple versions when recording/uploading repeatedly.
+    await deleteAllWordFieldAudioFiles({ ankiLinkId, field: field as never });
+
     const filename = buildWordFieldAudioFilename({
       ankiLinkId,
       field: field as never,
@@ -125,4 +130,3 @@ export async function POST(req: Request) {
     );
   }
 }
-

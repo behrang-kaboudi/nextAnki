@@ -95,6 +95,36 @@ export default function WordFieldVoiceCell({
     }
   }, [ankiLinkId, busy, enabled, field, normalized, recording]);
 
+  const deleteAll = useCallback(async () => {
+    if (!enabled || busy || recording) return;
+    const ok = window.confirm("تمام فایل‌های صوت این فیلد حذف شود؟");
+    if (!ok) return;
+
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/words/field-voice-delete-all", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ankiLinkId, field }),
+      });
+      const data = (await res.json().catch(() => null)) as
+        | { ok?: boolean; error?: string; deleted?: number; failed?: number }
+        | null;
+      if (!res.ok || data?.ok !== true) throw new Error(data?.error || `Request failed (${res.status})`);
+
+      setPublicPath(null);
+      setExists(false);
+      setSize(0);
+      window.dispatchEvent(new CustomEvent("wordFieldVoice:updated", { detail: { ankiLinkId, field } }));
+      void fetchLatest();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setBusy(false);
+    }
+  }, [ankiLinkId, busy, enabled, fetchLatest, field, recording]);
+
   const stopRecording = useCallback((opts?: { skipRecorderStop?: boolean }) => {
     if (!opts?.skipRecorderStop) {
       try {
@@ -279,6 +309,16 @@ export default function WordFieldVoiceCell({
         className="inline-flex items-center rounded border p-1.5 text-[11px] hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5"
       >
         <ActionIcon name={recording ? "stop" : "mic"} className="size-4" />
+      </button>
+      <button
+        type="button"
+        onClick={() => void deleteAll()}
+        disabled={busy || recording || !publicPath}
+        aria-label="Delete all audio files"
+        title="Delete all audio files for this field"
+        className="inline-flex items-center rounded border p-1.5 text-[11px] hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5"
+      >
+        <ActionIcon name="trash" className="size-4" />
       </button>
       {error ? (
         <span className="max-w-[240px] truncate text-[11px] text-red-600" title={error}>
