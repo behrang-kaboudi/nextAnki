@@ -13,6 +13,7 @@ const allowedFields = [
   "sentence_en_meaning_fa",
   "pos",
   "other_meanings_fa",
+  "concept_explained_fa",
 ] as const;
 type AllowedField = (typeof allowedFields)[number];
 
@@ -82,15 +83,25 @@ export async function GET(req: Request) {
                     ORDER BY id DESC
                     LIMIT 20
                   `) ?? []
-                : (await prisma.$queryRaw<
-                    Array<{ id: number; base_form: string; meaning_fa: string; sentence_en: string }>
-                  >`
-                    SELECT id, base_form, meaning_fa, sentence_en
-                    FROM Word
-                    WHERE other_meanings_fa IS NULL OR other_meanings_fa = ''
-                    ORDER BY id DESC
-                    LIMIT 20
-                  `) ?? [];
+                : field === "other_meanings_fa"
+                  ? (await prisma.$queryRaw<
+                      Array<{ id: number; base_form: string; meaning_fa: string; sentence_en: string }>
+                    >`
+                      SELECT id, base_form, meaning_fa, sentence_en
+                      FROM Word
+                      WHERE other_meanings_fa IS NULL OR other_meanings_fa = ''
+                      ORDER BY id DESC
+                      LIMIT 20
+                    `) ?? []
+                  : (await prisma.$queryRaw<
+                      Array<{ id: number; base_form: string; meaning_fa: string; sentence_en: string }>
+                    >`
+                      SELECT id, base_form, meaning_fa, sentence_en
+                      FROM Word
+                      WHERE concept_explained_fa IS NULL OR concept_explained_fa = ''
+                      ORDER BY id DESC
+                      LIMIT 20
+                    `) ?? [];
 
     return NextResponse.json({ ok: true, items: rows });
   } catch (e) {

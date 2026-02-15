@@ -15,6 +15,7 @@ type PayloadItem = {
   sentence_en_meaning_fa?: string;
   pos?: string;
   other_meanings_fa?: string | null;
+  concept_explained_fa?: string;
 };
 
 const requiredKeys = ["id"] as const;
@@ -25,6 +26,7 @@ const optionalKeys = [
   "sentence_en_meaning_fa",
   "pos",
   "other_meanings_fa",
+  "concept_explained_fa",
 ] as const;
 const allowedKeySet = new Set<string>([...requiredKeys, ...optionalKeys]);
 
@@ -119,6 +121,14 @@ function validateItem(value: unknown): { ok: true; item: PayloadItem } | { ok: f
     issues.push("other_meanings_fa must be a string (can be empty) or null");
   }
 
+  const hasConceptExplainedFa = "concept_explained_fa" in value;
+  const concept_explained_fa = hasConceptExplainedFa
+    ? asNonEmptyString((value as Record<string, unknown>).concept_explained_fa)
+    : undefined;
+  if (hasConceptExplainedFa && !concept_explained_fa) {
+    issues.push("concept_explained_fa must be a non-empty string");
+  }
+
   if (issues.length) return { ok: false, issues };
 
   return {
@@ -131,6 +141,7 @@ function validateItem(value: unknown): { ok: true; item: PayloadItem } | { ok: f
       ...(sentence_en_meaning_fa === undefined ? {} : { sentence_en_meaning_fa }),
       ...(pos === undefined ? {} : { pos }),
       ...(other_meanings_fa === undefined ? {} : { other_meanings_fa }),
+      ...(concept_explained_fa === undefined ? {} : { concept_explained_fa }),
     },
   };
 }
@@ -165,7 +176,7 @@ export async function POST(req: Request) {
         {
           ok: false,
           error:
-            "Invalid input items (must be { id } plus one or more of: phonetic_us, imageability, learning_depth, sentence_en_meaning_fa, pos, other_meanings_fa)",
+            "Invalid input items (must be { id } plus one or more of: phonetic_us, imageability, learning_depth, sentence_en_meaning_fa, pos, other_meanings_fa, concept_explained_fa)",
           errors,
         },
         { status: 400 }
@@ -183,6 +194,7 @@ export async function POST(req: Request) {
           sentence_en_meaning_fa?: string;
           pos?: string;
           other_meanings_fa?: string | null;
+          concept_explained_fa?: string;
         }
       | { ok: false; id: number; error: string }
     > = [];
@@ -202,6 +214,7 @@ export async function POST(req: Request) {
         if (item.sentence_en_meaning_fa !== undefined) patch.sentence_en_meaning_fa = item.sentence_en_meaning_fa;
         if (item.pos !== undefined) patch.pos = item.pos;
         if (item.other_meanings_fa !== undefined) patch.other_meanings_fa = item.other_meanings_fa;
+        if (item.concept_explained_fa !== undefined) patch.concept_explained_fa = item.concept_explained_fa;
 
         const row = await prisma.word.update({
           where: { id: item.id },
@@ -220,6 +233,7 @@ export async function POST(req: Request) {
           ...(item.sentence_en_meaning_fa === undefined ? {} : { sentence_en_meaning_fa: item.sentence_en_meaning_fa }),
           ...(item.pos === undefined ? {} : { pos: item.pos }),
           ...(item.other_meanings_fa === undefined ? {} : { other_meanings_fa: item.other_meanings_fa }),
+          ...(item.concept_explained_fa === undefined ? {} : { concept_explained_fa: item.concept_explained_fa }),
         });
       } catch (e) {
         results.push({ ok: false, id: item.id, error: e instanceof Error ? e.message : String(e) });

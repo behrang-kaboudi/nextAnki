@@ -945,7 +945,7 @@ export default function WordExtractionPage() {
         <div className="grid gap-3 rounded-2xl border border-card bg-background/60 p-4 backdrop-blur lg:grid-cols-2">
           <div className="grid gap-3 rounded-xl border border-card bg-background/70 p-3">
             <div className="text-xs font-semibold tracking-wide text-muted">
-              PHASE 3 — PHONETIC_US + IMAGEABILITY + LEARNING_DEPTH + SENTENCE_EN_MEANING_FA + POS + OTHER_MEANINGS_FA
+              PHASE 3 — PHONETIC_US + IMAGEABILITY + LEARNING_DEPTH + SENTENCE_EN_MEANING_FA + POS + OTHER_MEANINGS_FA + CONCEPT_EXPLAINED_FA
             </div>
             <div className="grid gap-3">
               <div className="flex items-stretch gap-2">
@@ -955,7 +955,7 @@ export default function WordExtractionPage() {
                   onClick={openBase2PromptModal}
                   disabled={isBase2ModalLoading}
                 >
-                  3.1 PROMPT FOR: PHONETIC_US + IMAGEABILITY + LEARNING_DEPTH + SENTENCE_EN_MEANING_FA + POS + OTHER_MEANINGS_FA
+                  3.1 PROMPT FOR: PHONETIC_US + IMAGEABILITY + LEARNING_DEPTH + SENTENCE_EN_MEANING_FA + POS + OTHER_MEANINGS_FA + CONCEPT_EXPLAINED_FA
                 </button>
                 <input
                   type="number"
