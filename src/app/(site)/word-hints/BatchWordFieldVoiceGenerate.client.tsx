@@ -148,6 +148,18 @@ export default function BatchWordFieldVoiceGenerate({
     void poll().catch(() => null);
   }, [poll]);
 
+  // refresh/poll when other components start jobs for this field
+  useEffect(() => {
+    const onUpdated = (evt: Event) => {
+      const detail = (evt as CustomEvent<{ field?: unknown; all?: unknown }>).detail;
+      if (!detail) return;
+      if (detail.field !== field) return;
+      if (detail.all === true) void poll().catch(() => null);
+    };
+    window.addEventListener("wordFieldVoice:updated", onUpdated);
+    return () => window.removeEventListener("wordFieldVoice:updated", onUpdated);
+  }, [field, poll]);
+
   useEffect(() => {
     if (!running) return;
     const t = setInterval(() => void poll().catch(() => null), 1000);

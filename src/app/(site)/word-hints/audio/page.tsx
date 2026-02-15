@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { prisma } from "@/lib/prisma";
 import BatchWordFieldVoiceGenerate from "../BatchWordFieldVoiceGenerate.client";
+import BatchWordFieldVoiceGenerateAllFields from "../BatchWordFieldVoiceGenerateAllFields.client";
 import AudioHelpModal from "../AudioHelpModal.client";
 import WordFieldVoiceDuplicatesModal from "../WordFieldVoiceDuplicatesModal.client";
 import WordFieldVoiceCell from "../WordFieldVoiceCell.client";
@@ -77,8 +78,10 @@ export default async function WordHintsAudioPage({
         <div>
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="text-xl font-semibold">Audio</h1>
-            <AudioHelpModal />
             <WordFieldVoiceDuplicatesModal />
+            <span aria-hidden="true" className="mx-1 h-6 w-px bg-black/20 dark:bg-white/20" />
+            <BatchWordFieldVoiceGenerateAllFields />
+            <AudioHelpModal />
           </div>
           <p className="mt-1 text-sm opacity-80">
             UI for generating audio for <span className="font-mono">base_form</span>,{" "}

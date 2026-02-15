@@ -34,6 +34,8 @@ export async function GET(req: Request) {
     // - strings: NULL or '' (empty)
     // - numbers: NULL (shouldn't happen for imageability) or <= 0
     // - learning_depth: NULL
+    // NOTE (per user request): `other_meanings_fa` is allowed to be empty and
+    // MUST NOT be used as a "missing" criterion here.
     const missingWhere = Prisma.sql`
       (phonetic_us IS NULL OR phonetic_us = '')
          OR (imageability IS NULL OR imageability <= 0)
