@@ -77,6 +77,7 @@ export default function SyncAnkiWordsClient() {
     | "sentence_en_meaning_fa"
     | "meaning_fa"
     | "other_meanings_fa"
+    | "concept_explained_fa"
     | "clear_log"
   >(null);
   const [permissionText, setPermissionText] = useState<string | null>(null);
@@ -90,6 +91,7 @@ export default function SyncAnkiWordsClient() {
   const [meaningFaStatus, setMeaningFaStatus] = useState<SyncAllStatus | null>(null);
   const [sentenceEnStatus, setSentenceEnStatus] = useState<SyncAllStatus | null>(null);
   const [sentenceEnMeaningFaStatus, setSentenceEnMeaningFaStatus] = useState<SyncAllStatus | null>(null);
+  const [conceptExplainedFaStatus, setConceptExplainedFaStatus] = useState<SyncAllStatus | null>(null);
 
   const helpContent = useMemo(() => {
     return {
@@ -468,6 +470,42 @@ export default function SyncAnkiWordsClient() {
           </div>
         ),
       },
+      concept_explained_fa: {
+        title: "Sync concept_explained_fa",
+        body: (
+          <div className="space-y-3">
+            <div className="text-sm">
+              سینک یک‌فیلد برای <Code>concept_explained_fa</Code> (DB → Anki) با قوانین مشابه: فقط وقتی مقدار جدید با مقدار
+              فعلی متفاوت باشد update می‌کند.
+            </div>
+
+            <section className="rounded border p-3">
+              <div className="text-xs font-semibold">شرایط Update/Skip</div>
+              <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">
+                <li>بدون <Code>anki_link_id</Code> → skippedNoLinkId</li>
+                <li>بدون DB row → skippedNoWord</li>
+                <li>بدون تغییر → skippedSame</li>
+              </ul>
+            </section>
+
+            <section className="rounded border p-3">
+              <div className="text-xs font-semibold">صوت + Media</div>
+              <div className="mt-2 text-sm">
+                اگر صوت محلی برای <Code>concept_explained_fa</Code> موجود و size&gt;0 باشد، <Code>[sound:...]</Code> اضافه
+                می‌شود. این دکمه فایل را آپلود/حذف نمی‌کند و باید با <Code>Copy all media</Code> انجام شود.
+              </div>
+            </section>
+
+            <section className="rounded border p-3">
+              <div className="text-xs font-semibold">API</div>
+              <div className="mt-2 text-sm">
+                <Code>/api/tests/sync-anki-words/concept-explained-fa/sync-all/start</Code> •{" "}
+                <Code>/status</Code> • <Code>/stop</Code>
+              </div>
+            </section>
+          </div>
+        ),
+      },
       clear_log: {
         title: "Clear log",
         body: (
@@ -610,6 +648,29 @@ export default function SyncAnkiWordsClient() {
     }
   }
 
+  async function startSyncConceptExplainedFa() {
+    if (isRunning || conceptExplainedFaStatus?.running) return;
+    setIsRunning(true);
+    setPreview(null);
+
+    try {
+      append({ level: "info", message: "Starting sync concept_explained_fa (all notes)..." });
+      const res = await fetch("/api/tests/sync-anki-words/concept-explained-fa/sync-all/start", { method: "POST" });
+      const data = (await res.json()) as { status?: SyncAllStatus } | unknown;
+      setPreview(data);
+      if (data && typeof data === "object" && "status" in data) {
+        const s = (data as { status?: SyncAllStatus }).status ?? null;
+        setConceptExplainedFaStatus(s);
+      }
+      append({ level: res.ok ? "info" : "error", message: "Start result", data });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      append({ level: "error", message: "Unexpected error", data: message });
+    } finally {
+      setIsRunning(false);
+    }
+  }
+
   async function startSyncMeaningFa() {
     if (isRunning || meaningFaStatus?.running) return;
     setIsRunning(true);
@@ -708,12 +769,23 @@ export default function SyncAnkiWordsClient() {
 
     async function tick() {
       try {
-        const [jsonHintRes, mediaRes, fullRes, dedupRes, otherRes, meaningRes, sentenceEnRes, sentenceMeaningRes] = await Promise.all([
+        const [
+          jsonHintRes,
+          mediaRes,
+          fullRes,
+          dedupRes,
+          otherRes,
+          conceptRes,
+          meaningRes,
+          sentenceEnRes,
+          sentenceMeaningRes,
+        ] = await Promise.all([
           fetch("/api/tests/sync-anki-words/json-hint/sync-all/status", { cache: "no-store" }),
           fetch("/api/tests/sync-anki-words/media/sync-all/status", { cache: "no-store" }),
           fetch("/api/tests/sync-anki-words/full/sync-all/status", { cache: "no-store" }),
           fetch("/api/tests/sync-anki-words/anki-link-id/deduplicate/status", { cache: "no-store" }),
           fetch("/api/tests/sync-anki-words/other-meanings-fa/sync-all/status", { cache: "no-store" }),
+          fetch("/api/tests/sync-anki-words/concept-explained-fa/sync-all/status", { cache: "no-store" }),
           fetch("/api/tests/sync-anki-words/meaning-fa/sync-all/status", { cache: "no-store" }),
           fetch("/api/tests/sync-anki-words/sentence-en/sync-all/status", { cache: "no-store" }),
           fetch("/api/tests/sync-anki-words/sentence-en-meaning-fa/sync-all/status", { cache: "no-store" }),
@@ -724,6 +796,7 @@ export default function SyncAnkiWordsClient() {
         const fullJson = (await fullRes.json()) as { ok?: boolean; status?: SyncAllStatus };
         const dedupJson = (await dedupRes.json()) as { ok?: boolean; status?: SyncAllStatus };
         const otherJson = (await otherRes.json()) as { ok?: boolean; status?: SyncAllStatus };
+        const conceptJson = (await conceptRes.json()) as { ok?: boolean; status?: SyncAllStatus };
         const meaningJson = (await meaningRes.json()) as { ok?: boolean; status?: SyncAllStatus };
         const sentenceEnJson = (await sentenceEnRes.json()) as { ok?: boolean; status?: SyncAllStatus };
         const sentenceMeaningJson = (await sentenceMeaningRes.json()) as { ok?: boolean; status?: SyncAllStatus };
@@ -733,6 +806,7 @@ export default function SyncAnkiWordsClient() {
         const full = fullJson?.status ?? null;
         const dedup = dedupJson?.status ?? null;
         const other = otherJson?.status ?? null;
+        const concept = conceptJson?.status ?? null;
         const meaning = meaningJson?.status ?? null;
         const sentenceEn = sentenceEnJson?.status ?? null;
         const sentenceMeaning = sentenceMeaningJson?.status ?? null;
@@ -741,6 +815,7 @@ export default function SyncAnkiWordsClient() {
         setFullSyncStatus(full);
         setDedupStatus(dedup);
         setOtherMeaningsFaStatus(other);
+        setConceptExplainedFaStatus(concept);
         setMeaningFaStatus(meaning);
         setSentenceEnStatus(sentenceEn);
         setSentenceEnMeaningFaStatus(sentenceMeaning);
@@ -750,10 +825,11 @@ export default function SyncAnkiWordsClient() {
         const fullDone = Boolean(full?.done);
         const dedupDone = Boolean(dedup?.done);
         const otherDone = Boolean(other?.done);
+        const conceptDone = Boolean(concept?.done);
         const meaningDone = Boolean(meaning?.done);
         const sentenceEnDone = Boolean(sentenceEn?.done);
         const sentenceMeaningDone = Boolean(sentenceMeaning?.done);
-        if (jsonHintDone && mediaDone && fullDone && dedupDone && otherDone && meaningDone && sentenceEnDone && sentenceMeaningDone) {
+        if (jsonHintDone && mediaDone && fullDone && dedupDone && otherDone && conceptDone && meaningDone && sentenceEnDone && sentenceMeaningDone) {
           if (timer != null) window.clearInterval(timer);
           timer = null;
         }
@@ -798,6 +874,11 @@ export default function SyncAnkiWordsClient() {
     (dedupStatus?.skippedSame ?? 0) +
     (dedupStatus?.skippedNoLinkId ?? 0) +
     (dedupStatus?.skippedNoWord ?? 0);
+
+  const conceptSkippedTotal =
+    (conceptExplainedFaStatus?.skippedSame ?? 0) +
+    (conceptExplainedFaStatus?.skippedNoLinkId ?? 0) +
+    (conceptExplainedFaStatus?.skippedNoWord ?? 0);
 
   const otherSkippedTotal =
     (otherMeaningsFaStatus?.skippedSame ?? 0) +
@@ -932,6 +1013,17 @@ export default function SyncAnkiWordsClient() {
                   Sync other_meanings_fa
                 </button>
                 <HelpButton id="other_meanings_fa" />
+              </div>
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => void startSyncConceptExplainedFa()}
+                  disabled={isRunning || Boolean(conceptExplainedFaStatus?.running)}
+                  className="h-10 rounded-xl bg-foreground px-3 text-sm font-semibold text-background transition disabled:opacity-50"
+                >
+                  Sync concept_explained_fa
+                </button>
+                <HelpButton id="concept_explained_fa" />
               </div>
               <div className="flex items-center gap-1">
                 <button
@@ -1077,6 +1169,21 @@ export default function SyncAnkiWordsClient() {
                 </span>
               ) : (
                 <span>meaning_fa: Processed 0/0 • Updated 0 • Skipped 0 • Failed 0</span>
+              )}
+            </div>
+            <div>
+              {conceptExplainedFaStatus ? (
+                <span>
+                  concept_explained_fa: Processed{" "}
+                  <span className="font-semibold">
+                    {conceptExplainedFaStatus.processed}/{conceptExplainedFaStatus.total}
+                  </span>{" "}
+                  • Updated <span className="font-semibold">{conceptExplainedFaStatus.updated}</span> • Skipped{" "}
+                  <span className="font-semibold">{conceptSkippedTotal}</span> • Failed{" "}
+                  <span className="font-semibold">{conceptExplainedFaStatus.failed}</span>
+                </span>
+              ) : (
+                <span>concept_explained_fa: Processed 0/0 • Updated 0 • Skipped 0 • Failed 0</span>
               )}
             </div>
             <div>

@@ -39,6 +39,27 @@ function nowIso() {
   return new Date().toISOString();
 }
 
+function createInitialState(field: WordAudioFieldKey): JobState {
+  return {
+    jobId: `word_field_voice_${field}_${Date.now()}`,
+    field,
+    running: false,
+    done: false,
+    startedAt: null,
+    finishedAt: null,
+    error: null,
+    totalCandidates: 0,
+    processedCandidates: 0,
+    generated: 0,
+    skippedExists: 0,
+    skippedNoText: 0,
+    zeroByteFound: 0,
+    regeneratedZeroByte: 0,
+    currentId: null,
+    _started: false,
+  };
+}
+
 function asNonEmptyString(value: unknown): string | null {
   if (typeof value !== "string") return null;
   const trimmed = value.trim();
@@ -49,34 +70,25 @@ function getAllStates(): Record<WordAudioFieldKey, JobState> {
   const g = globalThis as unknown as { __wordFieldVoiceJobs?: Record<WordAudioFieldKey, JobState> };
   if (!g.__wordFieldVoiceJobs) {
     g.__wordFieldVoiceJobs = Object.fromEntries(
-      WORD_AUDIO_FIELDS.map((field) => [
-        field,
-        {
-          jobId: `word_field_voice_${field}_${Date.now()}`,
-          field,
-          running: false,
-          done: false,
-          startedAt: null,
-          finishedAt: null,
-          error: null,
-          totalCandidates: 0,
-          processedCandidates: 0,
-          generated: 0,
-          skippedExists: 0,
-          skippedNoText: 0,
-          zeroByteFound: 0,
-          regeneratedZeroByte: 0,
-          currentId: null,
-          _started: false,
-        } satisfies JobState,
-      ])
+      WORD_AUDIO_FIELDS.map((field) => [field, createInitialState(field)])
     ) as Record<WordAudioFieldKey, JobState>;
+    return g.__wordFieldVoiceJobs;
+  }
+
+  // Dev/HMR-friendly: keep existing job states, but add any newly introduced fields.
+  for (const field of WORD_AUDIO_FIELDS) {
+    if (!g.__wordFieldVoiceJobs[field]) g.__wordFieldVoiceJobs[field] = createInitialState(field);
   }
   return g.__wordFieldVoiceJobs;
 }
 
 function getState(field: WordAudioFieldKey): JobState {
-  return getAllStates()[field];
+  const all = getAllStates();
+  const existing = all[field];
+  if (existing) return existing;
+  const created = createInitialState(field);
+  all[field] = created;
+  return created;
 }
 
 export function getWordFieldVoiceJobStatus(field: WordAudioFieldKey): WordFieldVoiceJobStatus {

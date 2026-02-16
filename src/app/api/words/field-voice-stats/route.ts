@@ -44,6 +44,12 @@ export async function GET(req: Request) {
           });
           return rows.map((r) => ({ anki_link_id: r.anki_link_id, text: r.other_meanings_fa }));
         }
+        case "concept_explained_fa": {
+          const rows = await prisma.word.findMany({
+            select: { anki_link_id: true, concept_explained_fa: true },
+          });
+          return rows.map((r) => ({ anki_link_id: r.anki_link_id, text: r.concept_explained_fa }));
+        }
         case "sentence_en": {
           const rows = await prisma.word.findMany({ select: { anki_link_id: true, sentence_en: true } });
           return rows.map((r) => ({ anki_link_id: r.anki_link_id, text: r.sentence_en }));
