@@ -60,7 +60,7 @@ export async function findPictureWordsByIpaPrefix(
     WHERE \`meaning_fa_IPA_normalized\` LIKE ${likePattern}
       AND \`meaning_fa_IPA_normalized\` <> ''
       AND imageability > ${imageabilityBaseThreshold}
-      AND pos = 'noun'
+      AND (pos = 'noun' OR pos = 'adjective')
     ORDER BY meaning_fa ASC, base_form ASC
   `;
   const wordRowsEn = await prisma.$queryRaw<
@@ -85,9 +85,10 @@ export async function findPictureWordsByIpaPrefix(
     WHERE \`phonetic_us_normalized\` LIKE ${likePattern}
       AND \`phonetic_us_normalized\` <> ''
       AND imageability > ${imageabilityBaseThreshold}
-       AND pos = 'noun'
+       AND (pos = 'noun' OR pos = 'adjective')
     ORDER BY meaning_fa ASC, base_form ASC
   `;
+  console.log('likePattern', likePattern, wordRowsEn)
   // if (ipaPrefix === "tæh") {
   //   console.log(`[forChars.ts:99]`, wordRows);
   // }
@@ -343,6 +344,7 @@ export async function findCandidatesByPart(
   word: Word,
 ): Promise<IpaCandidate[]> {
   const patterns = getPatternsForPart(phoneticNormalizedForPart);
+  // console.log('[findCandidatesByPart]', patterns, word);
   const candidates = await findCandidatesByPatterns(patterns, word);
   const filtered = filterByUsage(candidates);
   return filtered;

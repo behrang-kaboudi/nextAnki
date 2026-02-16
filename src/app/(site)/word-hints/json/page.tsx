@@ -22,16 +22,17 @@ function parsePositiveInt(value: string | null, fallback: number) {
 export default async function WordHintsJsonPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; page?: string; pageSize?: string }>;
+  searchParams: Promise<{ q?: string; page?: string; pageSize?: string; noEn?: string }>;
 }) {
   const sp = await searchParams;
   const q = String(sp.q ?? "").trim();
+  const noEnOnly = String(sp.noEn ?? "") === "1";
   const page = parsePositiveInt(sp.page ?? null, 1);
   const pageSizeRaw = parsePositiveInt(sp.pageSize ?? null, 50);
   const pageSize = Math.min(Math.max(pageSizeRaw, 10), 200);
   const skip = (page - 1) * pageSize;
 
-  const where = q
+  const qWhere = q
     ? {
         OR: [
           { base_form: { contains: q } },
@@ -40,6 +41,17 @@ export default async function WordHintsJsonPage({
         ],
       }
     : undefined;
+
+  const noEnWhere = noEnOnly
+    ? {
+        OR: [
+          { json_hint: { contains: `"en": "noEn"` } },
+          { json_hint: { contains: `"en":"noEn"` } },
+        ],
+      }
+    : undefined;
+
+  const where = qWhere && noEnWhere ? { AND: [qWhere, noEnWhere] } : (qWhere ?? noEnWhere);
 
   const [total, rows] = await Promise.all([
     prisma.word.count({ where }),
@@ -70,6 +82,7 @@ export default async function WordHintsJsonPage({
 
   const queryBase = new URLSearchParams();
   if (q) queryBase.set("q", q);
+  if (noEnOnly) queryBase.set("noEn", "1");
   queryBase.set("pageSize", String(pageSize));
 
   const prevHref = `/word-hints/json?${new URLSearchParams({ ...Object.fromEntries(queryBase), page: String(prevPage) }).toString()}`;
@@ -97,6 +110,10 @@ export default async function WordHintsJsonPage({
             placeholder="Search base_form / meaning_fa / anki_link_id…"
             className="w-full rounded border px-3 py-2 text-sm sm:w-[26rem]"
           />
+          <label className="flex items-center gap-2 rounded border px-3 py-2 text-sm">
+            <input name="noEn" type="checkbox" value="1" defaultChecked={noEnOnly} />
+            <span className="whitespace-nowrap font-mono">"en":"noEn"</span>
+          </label>
           <input type="hidden" name="pageSize" value={String(pageSize)} />
           <button
             type="submit"
@@ -106,7 +123,7 @@ export default async function WordHintsJsonPage({
           </button>
           {q ? (
             <Link
-              href={`/word-hints/json?pageSize=${pageSize}`}
+              href={`/word-hints/json?${new URLSearchParams({ pageSize: String(pageSize), ...(noEnOnly ? { noEn: "1" } : {}) }).toString()}`}
               className="rounded border px-3 py-2 text-sm hover:bg-black/5 dark:hover:bg-white/5"
             >
               Clear

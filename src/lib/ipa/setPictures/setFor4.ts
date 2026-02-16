@@ -86,6 +86,7 @@ export async function setFor4(word: Word): Promise<WordPictures> {
       phoneticNormalized[2] + phoneticNormalized[3],
       word,
     );
+
     symbols.job =
       pickBestFaEn(jobs, phoneticNormalized) || placeholderJobPictureWord();
     if (symbols.job.en === "job")
