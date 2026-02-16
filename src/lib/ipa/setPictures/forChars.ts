@@ -60,7 +60,7 @@ export async function findPictureWordsByIpaPrefix(
     WHERE \`meaning_fa_IPA_normalized\` LIKE ${likePattern}
       AND \`meaning_fa_IPA_normalized\` <> ''
       AND imageability > ${imageabilityBaseThreshold}
-      AND (pos = 'noun' OR pos = 'adjective')
+      AND (pos = 'noun' OR pos = 'adjective' OR pos = 'verb')
     ORDER BY meaning_fa ASC, base_form ASC
   `;
   const wordRowsEn = await prisma.$queryRaw<
@@ -85,7 +85,7 @@ export async function findPictureWordsByIpaPrefix(
     WHERE \`phonetic_us_normalized\` LIKE ${likePattern}
       AND \`phonetic_us_normalized\` <> ''
       AND imageability > ${imageabilityBaseThreshold}
-       AND (pos = 'noun' OR pos = 'adjective')
+       AND (pos = 'noun' OR pos = 'adjective' OR pos = 'verb')
     ORDER BY meaning_fa ASC, base_form ASC
   `;
   console.log('likePattern', likePattern, wordRowsEn)
@@ -329,7 +329,7 @@ async function findCandidatesByPatterns(
     );
     const filtered2 = filtered1.filter((m) => {
       if (m.target_lang === "fa") return true;
-      if (word.imageability < imageabilityBaseThreshold) return true;
+      if ((word.imageability ?? 0) < imageabilityBaseThreshold) return true;
       if (m.target_ipa.length < length) return true;
       return false;
       // return true;

@@ -269,7 +269,7 @@ export const WORD_ANKI_FIELD_GENERATORS = {
   phonetic_us_normalized: (w) => w.phonetic_us_normalized ?? "",
   learning_depth: (w) =>
     w.learning_depth == null ? "" : String(w.learning_depth),
-  imageability: (w) => String(w.imageability),
+  imageability: (w) => (w.imageability == null ? "" : String(w.imageability)),
   json_hint: (w) => w.json_hint ?? "",
 } as const satisfies Record<WordNoteFieldName, WordAnkiFieldGenerator>;
 

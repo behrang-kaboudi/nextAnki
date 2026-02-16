@@ -236,7 +236,8 @@ export async function POST(req: Request) {
   const primaryKey = getPrimaryKey(model);
   const searchableFields = getSearchableFields(model);
 
-  const pageSize = Math.min(200, Math.max(1, Number(body.pageSize ?? 20)));
+  // Keep in sync with UI page size options in `/admin/data`.
+  const pageSize = Math.min(500, Math.max(1, Number(body.pageSize ?? 20)));
   const page = Math.max(1, Number(body.page ?? 1));
   const skip = (page - 1) * pageSize;
   const take = pageSize;

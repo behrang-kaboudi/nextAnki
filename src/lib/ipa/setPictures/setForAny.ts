@@ -15,7 +15,7 @@ export async function pickPictureSymbolsForWord(
 ): Promise<WordPictures | null> {
   const normalized = (word.phonetic_us_normalized ?? "").trim();
   let persianImage: IpaCandidate | null;
-  if (word.imageability! < imageabilityBaseThreshold) {
+  if ((word.imageability ?? 0) < imageabilityBaseThreshold) {
     persianImage = await setForPersian(word);
     if (!persianImage)
       console.log(

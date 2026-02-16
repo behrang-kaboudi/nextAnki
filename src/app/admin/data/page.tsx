@@ -1390,15 +1390,6 @@ export default function Page() {
   const [importOpen, setImportOpen] = useState(false);
   const [updateByKeysOpen, setUpdateByKeysOpen] = useState(false);
   const [copyBusy, setCopyBusy] = useState(false);
-  const [copyScope, setCopyScope] = useState<"page" | "limit" | "all">("page");
-  const [copyLimitText, setCopyLimitText] = useState("200");
-  const copyLimit = useMemo(() => {
-    const trimmed = copyLimitText.trim();
-    if (!trimmed) return null;
-    const n = Number(trimmed);
-    if (!Number.isFinite(n)) return null;
-    return Math.max(0, Math.trunc(n));
-  }, [copyLimitText]);
 
   const [updateByKeysModelName, setUpdateByKeysModelName] = useState<string>("");
   const updateByKeysModel = useMemo(
@@ -2100,61 +2091,17 @@ export default function Page() {
     });
   }, [savedViews, currentViewFingerprint]);
 
-  async function fetchRowsForCopy(opts: { limit: number | null }) {
-    if (!model) return [];
-    const cols = Array.from(new Set(columns));
-    const pageSize = 200;
-    const target = opts.limit === null ? Number.POSITIVE_INFINITY : Math.max(0, Math.trunc(opts.limit));
-    const allRows: Array<Record<string, unknown>> = [];
-
-    let page = 1;
-    while (allRows.length < target) {
-      const res = await apiPost<ListResponse>("/api/admin/data/list", {
-        model: model.name,
-        searchText: applied?.searchText ?? undefined,
-        filters: applied?.filters ?? [],
-        filterMode: applied?.filterMode ?? draftFilterMode,
-        sqlWhere: applied?.sqlWhere,
-        sqlParams: applied?.sqlParams,
-        sort: applied?.sort,
-        page,
-        pageSize,
-        visibleColumns: cols,
-      });
-
-      const chunk = (res.rows ?? []).map((r) => {
-        const obj: Record<string, unknown> = {};
-        for (const c of cols) obj[c] = (r as Record<string, unknown>)?.[c];
-        return obj;
-      });
-
-      if (!chunk.length) break;
-      const remaining = target - allRows.length;
-      allRows.push(...chunk.slice(0, Math.max(0, remaining)));
-      if (chunk.length < pageSize) break;
-      page += 1;
-    }
-
-    return allRows;
-  }
-
   async function copyVisibleJson(opts: { compact: boolean }) {
     if (copyBusy) return;
     if (!model) return;
     try {
-      const payload =
-        copyScope === "page"
-          ? (() => {
-              const cols = Array.from(new Set(columns));
-              return rows.map((r) => {
-                const obj: Record<string, unknown> = {};
-                for (const c of cols) obj[c] = r?.[c];
-                return obj;
-              });
-            })()
-          : await fetchRowsForCopy({
-              limit: copyScope === "all" ? null : (copyLimit ?? 0),
-            });
+      // Always copy exactly what is currently visible in the UI (current view/page).
+      const cols = Array.from(new Set(columns));
+      const payload = rows.map((r) => {
+        const obj: Record<string, unknown> = {};
+        for (const c of cols) obj[c] = r?.[c];
+        return obj;
+      });
 
       const text = opts.compact ? JSON.stringify(payload) : JSON.stringify(payload, null, 2);
       await navigator.clipboard.writeText(text);
@@ -2167,12 +2114,7 @@ export default function Page() {
     }
   }
 
-  const copyCountLabel = useMemo(() => {
-    if (copyScope === "page") return rows.length;
-    if (copyScope === "all") return total;
-    const n = copyLimit ?? 0;
-    return total ? Math.min(n, total) : n;
-  }, [copyScope, rows.length, total, copyLimit]);
+  const copyCountLabel = rows.length;
 
   const canRender = !!model;
 
@@ -2614,34 +2556,12 @@ export default function Page() {
                       <div className="px-2 text-xs font-medium text-emerald-900">
                         Copy JSON ({copyCountLabel})
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Select
-                          value={copyScope}
-                          onChange={(v) => setCopyScope(v as "page" | "limit" | "all")}
-                          options={[
-                            { value: "page", label: "page" },
-                            { value: "limit", label: "first N" },
-                            { value: "all", label: "all (query)" },
-                          ]}
-                          className="w-28 bg-white text-xs"
-                        />
-                        {copyScope === "limit" ? (
-                          <input
-                            value={copyLimitText}
-                            onChange={(e) => setCopyLimitText(e.target.value)}
-                            inputMode="numeric"
-                            className="h-8 w-20 rounded-md border border-emerald-200 bg-white px-2 text-xs text-emerald-900"
-                            placeholder="N"
-                            disabled={copyBusy}
-                          />
-                        ) : null}
-                      </div>
                       <div className="flex items-center gap-1">
                         <Button
                           size="icon"
                           variant="outline"
                           onClick={() => copyVisibleJson({ compact: false })}
-                          disabled={!rows.length || copyBusy || (copyScope === "limit" && copyLimit === null)}
+                          disabled={!rows.length || copyBusy}
                           title="Copy pretty JSON"
                           className="!border-emerald-200 !bg-emerald-50 !text-emerald-900 hover:!bg-emerald-100"
                         >
@@ -2651,7 +2571,7 @@ export default function Page() {
                           size="icon"
                           variant="outline"
                           onClick={() => copyVisibleJson({ compact: true })}
-                          disabled={!rows.length || copyBusy || (copyScope === "limit" && copyLimit === null)}
+                          disabled={!rows.length || copyBusy}
                           title="Copy compact JSON"
                           className="!border-emerald-200 !bg-emerald-50 !text-emerald-900 hover:!bg-emerald-100"
                         >

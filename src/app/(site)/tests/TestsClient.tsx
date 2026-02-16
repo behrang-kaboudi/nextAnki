@@ -28,6 +28,7 @@ const sections: Section[] = [
     links: [
       { href: "/word-hints/json", label: "Word Hints — json_hint", note: "Preview & compare" },
       { href: "/word-hints/audio", label: "Word Hints — Audio", note: "Generate & manage" },
+      { href: "/tests/word/clear-fields", label: "Clear Word fields", note: "Bulk clear selected nullable fields (DB)" },
       { href: "/words/sentence-fields", label: "Sentence Fields", note: "TEMP: sentence_en + sentence_en_meaning_fa" },
       { href: "/word-extraction", label: "Word Extraction" },
       { href: "/words/word-cleanup", label: "Missing in DB" },

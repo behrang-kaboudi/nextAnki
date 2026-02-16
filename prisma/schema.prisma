@@ -80,8 +80,8 @@ model Word {
   json_hint                        String?  @db.LongText
   word_note                        String?
   common_error                     String?
-  /// Score 0-100: how imageable/visual the word is (default 10).
-  imageability                     Int      @default(10)
+  /// Score 0-100: how imageable/visual the word is (NULL means unset).
+  imageability                     Int?
   createdAt                        DateTime @default(now())
   updatedAt                        DateTime @updatedAt
 
