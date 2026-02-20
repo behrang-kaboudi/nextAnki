@@ -89,7 +89,7 @@ function setGraduatingAndEasyIntervals(
 export default function StructureBuilderPage() {
   const [isRunning, setIsRunning] = useState(false);
   const [logs, setLogs] = useState<string[]>([]);
-  const [manualRahnamaIntervalsRequired, setManualRahnamaIntervalsRequired] = useState(false);
+  const [manualIntervalsRequiredDecks, setManualIntervalsRequiredDecks] = useState<string[]>([]);
   const [helpKey, setHelpKey] = useState<null | "create" | "step1" | "step2" | "step3" | "step4">(null);
   const logBoxRef = useRef<HTMLDivElement | null>(null);
 
@@ -111,6 +111,7 @@ export default function StructureBuilderPage() {
       WordAnkiConstants.decks.FaToEn,
       WordAnkiConstants.decks.Emla,
       WordAnkiConstants.decks.Rahnama,
+      WordAnkiConstants.decks.Rahnama2,
     ],
     [],
   );
@@ -166,12 +167,13 @@ export default function StructureBuilderPage() {
       { deck: WordAnkiConstants.decks.FaToEn, configName: "WordsForNewStudyFaToEn" as const },
       { deck: WordAnkiConstants.decks.Emla, configName: "WordsForNewStudyEmla" as const },
       { deck: WordAnkiConstants.decks.Rahnama, configName: "WordsForNewStudyRahnama" as const },
+      { deck: WordAnkiConstants.decks.Rahnama2, configName: "WordsForNewStudyRahnama2" as const },
     ] as const;
   }
 
   async function step2EnsureDeckConfigs() {
     appendLog("Step 2: Ensure deck configs (create + apply)...");
-    setManualRahnamaIntervalsRequired(true);
+    setManualIntervalsRequiredDecks([WordAnkiConstants.decks.Rahnama, WordAnkiConstants.decks.Rahnama2]);
 
     const deckNamesRes = await loadDeckNames();
     if (!deckNamesRes.ok) {
@@ -412,6 +414,7 @@ export default function StructureBuilderPage() {
         { Name: "FaToEn", Front: templates.FaToEn.Front, Back: templates.FaToEn.Back },
         { Name: "Emla", Front: templates.Emla.Front, Back: templates.Emla.Back },
         { Name: "Rahnama", Front: templates.Rahnama.Front, Back: templates.Rahnama.Back },
+        { Name: "Rahnama2", Front: templates.Rahnama2.Front, Back: templates.Rahnama2.Back },
       ];
       const createRes = await ankiRequestDetailed("createModel", {
         modelName,
@@ -515,6 +518,7 @@ export default function StructureBuilderPage() {
     setIsRunning(true);
     try {
       appendLog("Create Structure: started.");
+      setManualIntervalsRequiredDecks([]);
       const s1 = await step1EnsureDecks();
       if (!s1.ok) return;
       const s2 = await step2EnsureDeckConfigs();
@@ -702,13 +706,13 @@ export default function StructureBuilderPage() {
         <div className="mt-4 grid gap-2">
           <div className="text-sm font-semibold text-foreground">Log</div>
 
-          {manualRahnamaIntervalsRequired ? (
+          {manualIntervalsRequiredDecks.length ? (
             <div
               dir="rtl"
               className="rounded-xl border border-red-500/30 bg-red-600/10 p-3 text-sm font-semibold text-red-700"
             >
               بعد از اجرای Step 2 باید این دو مورد را برای دک{" "}
-              <span className="font-mono">{WordAnkiConstants.decks.Rahnama}</span> به صورت دستی در Anki تنظیم/بررسی کنی:
+              <span className="font-mono">{manualIntervalsRequiredDecks.join(" , ")}</span> به صورت دستی در Anki تنظیم/بررسی کنی:
               <div dir="ltr" className="mt-2 font-normal text-left">
                 <span className="font-mono">New Cards -&gt; Graduating interval</span>:{" "}
                 <span className="font-mono">5</span>

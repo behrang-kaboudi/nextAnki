@@ -110,15 +110,30 @@ export const WordAnkiConstants = {
       },
       Rahnama: {
         Front: `<div style='display:none'>[sound:rec1765049893.mp3]</div>{{base_form}}{{phonetic_us}}
-<div style='display:none'>[sound:6s_Stop.mp3]</div>
-<div style=";text-align:right">
-{{meaning_fa}}
-<div style='display:none'>[sound:rec1765049893.mp3]</div></div>`,
-        Back: `<div style='display:none'>[sound:rec1765049893.mp3]</div>
-  </div>
-</div>
 
-<div style='font-family: "Arial"; font-size: 20px;'>{{hint_sentence}}</div>`,
+<div style='display:none'>
+[sound:rec1771027001.mp3]
+
+[sound:6s_Stop.mp3]</div>
+
+`,
+        Back: `{{FrontSide}}
+
+
+<div style='font-family: "Arial"; font-size: 20px;'>{{first_letter_en_hint}}</div>
+
+
+`,
+      },
+      Rahnama2: {
+        Front: `<div style='font-family: "Arial"; font-size: 20px;'>{{first_letter_en_hint}}</div>
+
+`,
+        Back: `{{FrontSide}}
+	
+<div style=";text-align:right">
+	{{meaning_fa}}
+	<div style='display:none'>[sound:rec1765049893.mp3]</div></div>`,
       },
     },
   },
@@ -127,6 +142,7 @@ export const WordAnkiConstants = {
     FaToEn: "FaToEn",
     Emla: "Emla",
     Rahnama: "Rahnama",
+    Rahnama2: "Rahnama2",
   },
   decks: {
     tempRoot: "TempFor1WordsForNewStudy",
@@ -135,6 +151,7 @@ export const WordAnkiConstants = {
     FaToEn: "WordsForNewStudy::FaToEn",
     Emla: "WordsForNewStudy::Emla",
     Rahnama: "WordsForNewStudy::Rahnama",
+    Rahnama2: "WordsForNewStudy::Rahnama2",
   },
 } as const;
 
@@ -160,6 +177,13 @@ export const WordDeckConfigs = {
     StartingEase: "3.50",
   },
   WordsForNewStudyRahnama: {
+    newCardsPerDay: 2000,
+    maximumReviewsPerDay: 9999,
+    learningSteps: "1m 5m 10m 5d",
+    graduatingInterval: "5",
+    easyInterval: "6",
+  },
+  WordsForNewStudyRahnama2: {
     newCardsPerDay: 2000,
     maximumReviewsPerDay: 9999,
     learningSteps: "1m 5m 10m 5d",
@@ -192,4 +216,5 @@ export const WordDeckByCardType = {
   FaToEn: WordAnkiConstants.decks.FaToEn,
   Emla: WordAnkiConstants.decks.Emla,
   Rahnama: WordAnkiConstants.decks.Rahnama,
+  Rahnama2: WordAnkiConstants.decks.Rahnama2,
 } as const satisfies Record<WordCardType, WordDeckName>;
