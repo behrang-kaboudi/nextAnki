@@ -134,6 +134,9 @@ export async function textToMp3Polly(text: string, outputPath: string) {
   });
 
   const response = await polly.send(command);
+  if (!response.AudioStream) {
+    throw new Error("AWS Polly returned empty AudioStream");
+  }
   fs.writeFileSync(
     outputPath,
     Buffer.from(await response.AudioStream.transformToByteArray())
@@ -151,7 +154,7 @@ export async function textToMp3OpenAI(text: string, outputPath: string) {
   const response = await client.audio.speech.create({
     model: "gpt-4o-mini-tts",
     voice: "nova",
-    format: "mp3",
+    response_format: "mp3",
     input: raw,
   });
 

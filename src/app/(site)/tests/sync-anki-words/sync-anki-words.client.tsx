@@ -66,6 +66,7 @@ export default function SyncAnkiWordsClient() {
   );
 
   const [isRunning, setIsRunning] = useState(false);
+  const [pollingEnabled, setPollingEnabled] = useState(true);
   const [helpOpen, setHelpOpen] = useState<
     | null
     | "permission"
@@ -558,6 +559,7 @@ export default function SyncAnkiWordsClient() {
 
   async function startSyncJsonHint() {
     if (isRunning || jsonHintStatus?.running) return;
+    setPollingEnabled(true);
     setIsRunning(true);
     setPreview(null);
 
@@ -581,6 +583,7 @@ export default function SyncAnkiWordsClient() {
 
   async function startSyncSentenceEn() {
     if (isRunning || sentenceEnStatus?.running) return;
+    setPollingEnabled(true);
     setIsRunning(true);
     setPreview(null);
 
@@ -604,6 +607,7 @@ export default function SyncAnkiWordsClient() {
 
   async function startSyncSentenceEnMeaningFa() {
     if (isRunning || sentenceEnMeaningFaStatus?.running) return;
+    setPollingEnabled(true);
     setIsRunning(true);
     setPreview(null);
 
@@ -627,6 +631,7 @@ export default function SyncAnkiWordsClient() {
 
   async function startSyncOtherMeaningsFa() {
     if (isRunning || otherMeaningsFaStatus?.running) return;
+    setPollingEnabled(true);
     setIsRunning(true);
     setPreview(null);
 
@@ -650,6 +655,7 @@ export default function SyncAnkiWordsClient() {
 
   async function startSyncConceptExplainedFa() {
     if (isRunning || conceptExplainedFaStatus?.running) return;
+    setPollingEnabled(true);
     setIsRunning(true);
     setPreview(null);
 
@@ -673,6 +679,7 @@ export default function SyncAnkiWordsClient() {
 
   async function startSyncMeaningFa() {
     if (isRunning || meaningFaStatus?.running) return;
+    setPollingEnabled(true);
     setIsRunning(true);
     setPreview(null);
 
@@ -696,6 +703,7 @@ export default function SyncAnkiWordsClient() {
 
   async function startSyncAllMedia() {
     if (isRunning || mediaSyncStatus?.running) return;
+    setPollingEnabled(true);
     setIsRunning(true);
     setPreview(null);
 
@@ -719,6 +727,7 @@ export default function SyncAnkiWordsClient() {
 
   async function startFullSyncAll() {
     if (isRunning || fullSyncStatus?.running) return;
+    setPollingEnabled(true);
     setIsRunning(true);
     setPreview(null);
 
@@ -742,6 +751,7 @@ export default function SyncAnkiWordsClient() {
 
   async function deduplicateAnkiLinkIdKeepOldest() {
     if (isRunning || dedupStatus?.running) return;
+    setPollingEnabled(true);
     setIsRunning(true);
     setPreview(null);
 
@@ -764,6 +774,7 @@ export default function SyncAnkiWordsClient() {
   }
 
   useEffect(() => {
+    if (!pollingEnabled) return;
     let timer: number | null = null;
     let stopped = false;
 
@@ -829,9 +840,22 @@ export default function SyncAnkiWordsClient() {
         const meaningDone = Boolean(meaning?.done);
         const sentenceEnDone = Boolean(sentenceEn?.done);
         const sentenceMeaningDone = Boolean(sentenceMeaning?.done);
-        if (jsonHintDone && mediaDone && fullDone && dedupDone && otherDone && conceptDone && meaningDone && sentenceEnDone && sentenceMeaningDone) {
+        const anyRunning = Boolean(
+          jsonHint?.running ||
+            media?.running ||
+            full?.running ||
+            dedup?.running ||
+            other?.running ||
+            concept?.running ||
+            meaning?.running ||
+            sentenceEn?.running ||
+            sentenceMeaning?.running,
+        );
+
+        if (!anyRunning && jsonHintDone && mediaDone && fullDone && dedupDone && otherDone && conceptDone && meaningDone && sentenceEnDone && sentenceMeaningDone) {
           if (timer != null) window.clearInterval(timer);
           timer = null;
+          if (!stopped) setPollingEnabled(false);
         }
       } catch {
         // ignore transient errors while polling
@@ -848,7 +872,7 @@ export default function SyncAnkiWordsClient() {
       stopped = true;
       if (timer != null) window.clearInterval(timer);
     };
-  }, []);
+  }, [pollingEnabled]);
 
   const sentenceEnSkippedTotal =
     (sentenceEnStatus?.skippedSame ?? 0) +

@@ -35,9 +35,10 @@ export default async function RootLayout({
   };
 
   return (
-    <html lang="en" dir="ltr" data-theme={activeTheme.slug}>
+    <html lang="en" dir="ltr" data-theme={activeTheme.slug} suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}
+        suppressHydrationWarning
       >
         <style
           dangerouslySetInnerHTML={{

@@ -71,7 +71,7 @@ function getState(): State {
     g.__mediaSyncAll = {
       jobId: `media_sync_${Date.now()}`,
       running: false,
-      done: false,
+      done: true,
       startedAt: null,
       finishedAt: null,
       error: null,

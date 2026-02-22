@@ -115,7 +115,7 @@ function getState(): State {
     g.__hintSentenceSyncAll = {
       jobId: `hint_sync_${Date.now()}`,
       running: false,
-      done: false,
+      done: true,
       startedAt: null,
       finishedAt: null,
       error: null,

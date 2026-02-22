@@ -68,7 +68,7 @@ function getState(): State {
     g.__sentenceEnSyncAll = {
       jobId: `sentence_en_sync_${Date.now()}`,
       running: false,
-      done: false,
+      done: true,
       startedAt: null,
       finishedAt: null,
       error: null,

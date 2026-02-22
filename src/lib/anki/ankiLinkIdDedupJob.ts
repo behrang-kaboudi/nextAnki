@@ -45,7 +45,7 @@ function getState(): State {
     g.__ankiLinkIdDedup = {
       jobId: `anki_link_id_dedup_${Date.now()}`,
       running: false,
-      done: false,
+      done: true,
       startedAt: null,
       finishedAt: null,
       error: null,

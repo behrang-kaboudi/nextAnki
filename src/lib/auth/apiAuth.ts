@@ -17,20 +17,24 @@ function withDevAdmin(session: unknown) {
   };
 }
 
-export async function requireApiAuth() {
+export type ApiAuthOk = { ok: true; session: ReturnType<typeof withDevAdmin> };
+export type ApiAuthError = { ok: false; status: number };
+export type ApiAuthResult = ApiAuthOk | ApiAuthError;
+
+export async function requireApiAuth(): Promise<ApiAuthResult> {
   // Auth is currently disabled: treat every request as an authenticated admin.
   const session = withDevAdmin(await auth());
   return { ok: true as const, session };
 }
 
-export async function requireApiRole(role: string) {
+export async function requireApiRole(role: string): Promise<ApiAuthResult> {
   const res = await requireApiAuth();
   if (!res.ok) return res;
   if (!hasRole(res.session.user?.roles, role)) return { ok: false as const, status: 403 as const };
   return res;
 }
 
-export async function requireApiPermission(permission: string) {
+export async function requireApiPermission(permission: string): Promise<ApiAuthResult> {
   const res = await requireApiAuth();
   if (!res.ok) return res;
   if (!hasPermission(res.session.user?.permissions, permission)) {

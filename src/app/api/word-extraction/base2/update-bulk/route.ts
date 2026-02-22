@@ -130,18 +130,19 @@ function validateItem(value: unknown): { ok: true; item: PayloadItem } | { ok: f
   }
 
   if (issues.length) return { ok: false, issues };
+  if (!id) return { ok: false, issues: ["Invalid input"] };
 
   return {
     ok: true,
     item: {
       id,
-      ...(phonetic_us === undefined ? {} : { phonetic_us }),
-      ...(imageability === undefined ? {} : { imageability }),
-      ...(learning_depth === undefined ? {} : { learning_depth }),
-      ...(sentence_en_meaning_fa === undefined ? {} : { sentence_en_meaning_fa }),
-      ...(pos === undefined ? {} : { pos }),
+      ...(phonetic_us == null ? {} : { phonetic_us }),
+      ...(imageability == null ? {} : { imageability }),
+      ...(learning_depth == null ? {} : { learning_depth }),
+      ...(sentence_en_meaning_fa == null ? {} : { sentence_en_meaning_fa }),
+      ...(pos == null ? {} : { pos }),
       ...(other_meanings_fa === undefined ? {} : { other_meanings_fa }),
-      ...(concept_explained_fa === undefined ? {} : { concept_explained_fa }),
+      ...(concept_explained_fa == null ? {} : { concept_explained_fa }),
     },
   };
 }

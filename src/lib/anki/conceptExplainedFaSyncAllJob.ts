@@ -68,7 +68,7 @@ function getState(): State {
     g.__conceptExplainedFaSyncAll = {
       jobId: `concept_explained_fa_sync_${Date.now()}`,
       running: false,
-      done: false,
+      done: true,
       startedAt: null,
       finishedAt: null,
       error: null,
@@ -298,4 +298,3 @@ export function requestStopConceptExplainedFaSyncAll(): ConceptExplainedFaSyncAl
   state.stopRequested = true;
   return getConceptExplainedFaSyncAllStatus();
 }
-

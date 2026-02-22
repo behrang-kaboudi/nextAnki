@@ -1,5 +1,5 @@
 {
-  "createdAt": "2026-02-20T14:00:20.339Z",
+  "createdAt": "2026-02-22T14:08:58.225Z",
   "data": {
     "theme": [
       {
@@ -83493,6 +83493,38 @@
         "imageability": 35,
         "createdAt": "2026-02-16T10:49:32.922Z",
         "updatedAt": "2026-02-16T14:23:13.308Z"
+      },
+      {
+        "id": 3456,
+        "anki_link_id": "3456_1771681161163",
+        "base_form": "snack",
+        "phonetic_us": "ˈsnæk",
+        "phonetic_us_normalized": "snæk",
+        "meaning_fa": "میان وعده",
+        "meaning_fa_IPA": "mijɑːn væʔde",
+        "meaning_fa_IPA_normalized": "mɪjʌn væde",
+        "pos": "noun",
+        "concept_explained": null,
+        "concept_explained_fa": "خوراکیِ کوچکی است که معمولاً بین وعده‌های اصلی برای رفع گرسنگی کوتاه‌مدت خورده می‌شود.",
+        "word_hint_story": null,
+        "sentence_en": "I grabbed a quick snack between meetings.",
+        "sentence_en_meaning_fa": "من یک میان وعدهٔ سریع بین جلسه‌ها گرفتم.",
+        "explanation_for_sentence_meaning": null,
+        "learning_depth": 0.65,
+        "mixed_sentence": null,
+        "other_meanings_fa": "اسنک*خوراکی",
+        "category": null,
+        "typeOfWordInDb": "temp",
+        "hint_sentence": null,
+        "first_letter_en_hint": null,
+        "first_letter_fa_hint": null,
+        "hint_to_select": null,
+        "json_hint": null,
+        "word_note": null,
+        "common_error": null,
+        "imageability": 75,
+        "createdAt": "2026-02-21T13:39:21.143Z",
+        "updatedAt": "2026-02-21T13:43:01.541Z"
       }
     ],
     "ipaKeyword": [

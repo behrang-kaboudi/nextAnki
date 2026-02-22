@@ -235,7 +235,12 @@ export const WORD_ANKI_FIELD_GENERATORS = {
       w.anki_link_id,
       "other_meanings_fa",
     ),
-  concept_explained_fa: (w) => w.concept_explained_fa ?? "",
+  concept_explained_fa: (w) =>
+    withLatestAudioTag(
+      w.concept_explained_fa ?? "",
+      w.anki_link_id,
+      "concept_explained_fa",
+    ),
   sentence_en: (w) =>
     withLatestAudioTag(w.sentence_en ?? "", w.anki_link_id, "sentence_en"),
   sentence_en_meaning_fa: (w) =>

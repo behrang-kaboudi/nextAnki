@@ -70,6 +70,8 @@ function validateItem(value: unknown): { ok: true; item: PayloadItem } | { ok: f
   if (!sentence_en) issues.push("sentence_en must be a non-empty string");
 
   if (issues.length) return { ok: false, issues };
+  if (!base_form || !meaning_fa_raw || !sentence_en) return { ok: false, issues: ["Invalid input"] };
+
   const meaning_fa = normalizeMeaningFaForStore(meaning_fa_raw);
   if (!meaning_fa) return { ok: false, issues: ["meaning_fa is empty after normalization"] };
   return { ok: true, item: { base_form, meaning_fa, sentence_en } };

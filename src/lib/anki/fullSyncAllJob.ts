@@ -78,7 +78,7 @@ function getState(): State {
     g.__fullSyncAll = {
       jobId: `full_sync_${Date.now()}`,
       running: false,
-      done: false,
+      done: true,
       startedAt: null,
       finishedAt: null,
       error: null,

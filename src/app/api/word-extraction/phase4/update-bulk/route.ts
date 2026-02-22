@@ -71,6 +71,7 @@ function validateItem(
   }
 
   if (issues.length) return { ok: false, issues };
+  if (!id || !sentence_en_meaning_fa || !pos) return { ok: false, issues: ["Invalid input"] };
 
   return {
     ok: true,

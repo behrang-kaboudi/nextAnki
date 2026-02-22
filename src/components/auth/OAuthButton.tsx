@@ -37,8 +37,7 @@ export function OAuthButton({
         }
         setLoading(true);
         try {
-          const res = await signIn(providerId, { callbackUrl, redirect: true });
-          if (res?.error) onError?.(res.error);
+          await signIn(providerId, { callbackUrl, redirect: true });
         } catch {
           onError?.("Authentication failed");
         } finally {

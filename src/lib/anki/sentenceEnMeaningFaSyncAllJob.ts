@@ -68,7 +68,7 @@ function getState(): State {
     g.__sentenceEnMeaningFaSyncAll = {
       jobId: `sentence_en_meaning_fa_sync_${Date.now()}`,
       running: false,
-      done: false,
+      done: true,
       startedAt: null,
       finishedAt: null,
       error: null,
