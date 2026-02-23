@@ -18,13 +18,7 @@ async function main() {
     where: { type: { in: targetTypes }, usage: "person" },
   });
 
-  console.log(
-    JSON.stringify(
-      { targetTypes, matchedBefore: before, updated: res.count, matchedAfter: after },
-      null,
-      2,
-    ),
-  );
+
 }
 
 main()

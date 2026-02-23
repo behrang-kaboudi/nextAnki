@@ -12,7 +12,19 @@ import { verifyPassword } from "@/lib/auth/password";
 import { providerCatalog } from "@/lib/providers/providerCatalog";
 import { sendEmail } from "@/lib/auth/emailSender";
 
+const configuredAuthUrl = String(
+  process.env.AUTH_URL ?? process.env.NEXTAUTH_URL ?? "",
+).trim();
+
+// Auth.js v5 requires either a trusted host or an explicit URL.
+// When running `next start` locally, `NODE_ENV=production` but the host is still localhost.
+const trustHost =
+  process.env.AUTH_TRUST_HOST === "true" ||
+  process.env.NODE_ENV !== "production" ||
+  !configuredAuthUrl;
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  trustHost,
   secret: process.env.AUTH_SECRET,
   adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt" },

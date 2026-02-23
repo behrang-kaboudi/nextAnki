@@ -28,13 +28,6 @@ export async function setFor3(word: Word): Promise<WordPictures> {
     const adjCandidate = pickBestPictureWord(adjMatches, "adj");
     symbols.adj = adjCandidate;
 
-    if (!adjCandidate) {
-      console.log(
-        `[setFor3] missing chars 000000000000000000000`,
-        phoneticNormalized,
-        charsMissingFromBestIpa(phoneticNormalized, symbols.person),
-      );
-    }
   }
 
   return symbols;

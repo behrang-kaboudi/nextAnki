@@ -88,10 +88,7 @@ export async function findPictureWordsByIpaPrefix(
        AND (pos = 'noun' OR pos = 'adjective' OR pos = 'verb')
     ORDER BY meaning_fa ASC, base_form ASC
   `;
-  console.log('likePattern', likePattern, wordRowsEn)
-  // if (ipaPrefix === "tæh") {
-  //   console.log(`[forChars.ts:99]`, wordRows);
-  // }
+
   const out: IpaCandidate[] = [];
   const seen = new Set<string>();
   function pushUnique(it: IpaCandidate) {
@@ -344,7 +341,7 @@ export async function findCandidatesByPart(
   word: Word,
 ): Promise<IpaCandidate[]> {
   const patterns = getPatternsForPart(phoneticNormalizedForPart);
-  // console.log('[findCandidatesByPart]', patterns, word);
+
   const candidates = await findCandidatesByPatterns(patterns, word);
   const filtered = filterByUsage(candidates);
   return filtered;

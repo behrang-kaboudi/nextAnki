@@ -1,5 +1,5 @@
 {
-  "createdAt": "2026-02-22T14:08:58.225Z",
+  "createdAt": "2026-02-23T23:35:38.086Z",
   "data": {
     "theme": [
       {
@@ -83039,7 +83039,7 @@
         "first_letter_en_hint": null,
         "first_letter_fa_hint": null,
         "hint_to_select": null,
-        "json_hint": "{\"person\":{\"fa\":\"برف\",\"en\":\"snow\",\"anki_link_id\":\"3265_1770146906441\",\"target_ipa\":\"sno\",\"usage\":\"noun\",\"source\":\"word\",\"target_lang\":\"en\",\"imageability\":95},\"job\":{\"fa\":\"اکسیر\",\"phinglish\":\"eksir\",\"en\":\"elixir\",\"target_ipa\":\"eksɪr\",\"target_lang\":\"fa\",\"usage\":\"person\",\"source\":\"pictureWord\"},\"generatedAtMs\":1771254934757}",
+        "json_hint": "{\"person\":{\"fa\":\"میان وعده\",\"en\":\"snack\",\"anki_link_id\":\"3456_1771681161163\",\"target_ipa\":\"snæk\",\"usage\":\"noun\",\"source\":\"word\",\"target_lang\":\"en\",\"imageability\":75},\"job\":{\"fa\":\"اکسیر\",\"phinglish\":\"eksir\",\"en\":\"elixir\",\"target_ipa\":\"eksɪr\",\"target_lang\":\"fa\",\"usage\":\"person\",\"source\":\"pictureWord\"},\"generatedAtMs\":1771774252777}",
         "word_note": null,
         "common_error": null,
         "imageability": 97,
@@ -83519,12 +83519,44 @@
         "first_letter_en_hint": null,
         "first_letter_fa_hint": null,
         "hint_to_select": null,
-        "json_hint": null,
+        "json_hint": "{\"person\":{\"fa\":\"اسنوکر\",\"en\":\"snooker\",\"anki_link_id\":\"2994_1770145426858\",\"target_ipa\":\"esnʊker\",\"target_lang\":\"fa\",\"usage\":\"noun\",\"source\":\"word\"},\"adj\":{\"fa\":\"اخمو\",\"phinglish\":\"akhmu\",\"en\":\"grumpy\",\"target_ipa\":\"æxmʊ\",\"target_lang\":\"fa\",\"usage\":\"adj\",\"source\":\"pictureWord\"},\"generatedAtMs\":1771774253824}",
         "word_note": null,
         "common_error": null,
         "imageability": 75,
         "createdAt": "2026-02-21T13:39:21.143Z",
         "updatedAt": "2026-02-21T13:43:01.541Z"
+      },
+      {
+        "id": 3457,
+        "anki_link_id": "3457_1771787458406",
+        "base_form": "rubber band",
+        "phonetic_us": "rʌbər bænd",
+        "phonetic_us_normalized": "rʌber bænd",
+        "meaning_fa": "کش",
+        "meaning_fa_IPA": "keʃ",
+        "meaning_fa_IPA_normalized": "keʃ",
+        "pos": "noun",
+        "concept_explained": null,
+        "concept_explained_fa": "نوار حلقه‌ای انعطاف‌پذیر از جنس لاستیک که برای بستن و نگه‌داشتن چند شیء کنار هم کشیده می‌شود.",
+        "word_hint_story": null,
+        "sentence_en": "She wrapped a rubber band around the papers.",
+        "sentence_en_meaning_fa": "او یک کش را دور کاغذها پیچید.",
+        "explanation_for_sentence_meaning": null,
+        "learning_depth": 0.72,
+        "mixed_sentence": null,
+        "other_meanings_fa": "نوارکش",
+        "category": null,
+        "typeOfWordInDb": "temp",
+        "hint_sentence": null,
+        "first_letter_en_hint": null,
+        "first_letter_fa_hint": null,
+        "hint_to_select": null,
+        "json_hint": null,
+        "word_note": null,
+        "common_error": null,
+        "imageability": 95,
+        "createdAt": "2026-02-22T19:10:58.390Z",
+        "updatedAt": "2026-02-22T19:12:56.418Z"
       }
     ],
     "ipaKeyword": [

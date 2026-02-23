@@ -142,13 +142,7 @@ export async function selectFile(
   if (!ankiLinkId) return null;
 
   const latest = getLatestWordFieldAudioFile({ ankiLinkId, field });
-  // console.log(
-  //   `[wordAnkiMapping.ts:135]`,
-  //   row?.base_form,
-  //   latest,
-  //   ankiLinkId,
-  //   field,
-  // );
+
   if (!latest || latest.size <= 0) return null;
   return getWordFieldAudioAbsolutePath(latest.filename);
 }

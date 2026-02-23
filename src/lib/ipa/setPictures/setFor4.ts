@@ -66,17 +66,11 @@ export async function setFor4(word: Word): Promise<WordPictures> {
       // }
       const adjCandidate = pickBestFaEn(adjMatches, phoneticNormalized);
       symbols.adj = adjCandidate;
-      if (!adjCandidate) {
-        console.log(`[setFor4] missing chars`, phoneticNormalized);
-      }
+
     }
   }
   if (matches.length === 0) {
-    // console.log(
-    //   `[setFor4.ts:123]`,
-    //   "Nooooooooooooooooooooooooooo00000000000000000000000000",
-    //   phoneticNormalized,
-    // );
+
     const persons = await findCandidatesByPart(
       phoneticNormalized[0] + phoneticNormalized[1],
       word,

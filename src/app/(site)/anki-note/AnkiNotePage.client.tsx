@@ -381,13 +381,25 @@ export default function AnkiNotePage() {
     return { ok: true as const, lastByCardId: out };
   }
 
-  async function filterCardIdsWhereLastAnswerAgain(cardIds: number[]) {
+  async function filterCardIdsWhereLastAnswerAgain(
+    cardIds: number[],
+    opts?: { minIvlDays?: number | null },
+  ) {
     const lastRes = await getLastReviewsByCardId(cardIds);
     if (!lastRes.ok) return lastRes;
     const out: number[] = [];
+    const minIvlDays =
+      typeof opts?.minIvlDays === "number" && Number.isFinite(opts.minIvlDays)
+        ? Math.trunc(opts.minIvlDays)
+        : null;
     for (const cardId of cardIds) {
       const last = lastRes.lastByCardId.get(cardId) ?? null;
-      if (last?.ease === 1) out.push(cardId);
+      if (last?.ease !== 1) continue;
+      if (minIvlDays != null) {
+        const ivl = Number(last?.ivl);
+        if (!Number.isFinite(ivl) || ivl < minIvlDays) continue;
+      }
+      out.push(cardId);
     }
     return {
       ok: true as const,
@@ -423,19 +435,27 @@ export default function AnkiNotePage() {
         return;
       }
 
-      setPhase0StatusText(`Filtering last answer = Again for ${candidateIds.length} cards…`);
-      const againRes = await filterCardIdsWhereLastAnswerAgain(candidateIds);
+      const phase0FilterLabel = "Again + ivl>=2";
+      setPhase0StatusText(
+        `Filtering last answer = ${phase0FilterLabel} for ${candidateIds.length} cards…`,
+      );
+      const againRes = await filterCardIdsWhereLastAnswerAgain(candidateIds, {
+        minIvlDays: 2,
+      });
       if (!againRes.ok) {
         setPhase0Error(againRes.error);
         return;
       }
       const againCardIds = againRes.cardIds;
       if (againCardIds.length === 0) {
-        setPhase0StatusText("No cards matched last answer = Again.");
+        setPhase0StatusText("No cards matched the Phase 0 filter.");
         return;
       }
 
-      appendPhaseLogIds("فاز ۰: کارت‌های EnToFa/FaToEn با آخرین پاسخ Again (cardIds)", againCardIds);
+      appendPhaseLogIds(
+        `فاز ۰: کارت‌های EnToFa/FaToEn با فیلتر «${phase0FilterLabel}» (cardIds)`,
+        againCardIds,
+      );
 
       setPhase0StatusText(`Moving ${againCardIds.length} cards to ${tempDeck}…`);
       const moveMainsRes = await ankiRequestDetailed("changeDeck", { cards: againCardIds, deck: tempDeck });
@@ -1382,15 +1402,25 @@ export default function AnkiNotePage() {
 	                      {phase0Running ? "در حال انجام..." : "اجرای فاز ۰"}
 	                    </button>
 
-	                    <div dir="rtl" className="grid gap-2 text-right">
+   	                <div dir="rtl" className="grid gap-2 text-right">
 	                      <ol className="list-decimal space-y-1 ps-5 text-xs text-muted">
 	                        <li>
 	                          کارت‌های deck های {WordAnkiConstants.decks.EnToFa} و{" "}
 	                          {WordAnkiConstants.decks.FaToEn} پیدا می‌شوند.
 	                        </li>
 	                        <li>
-	                          از بین آن‌ها کارت‌هایی که آخرین پاسخشان Again بوده
-	                          انتخاب می‌شوند.
+	                          از بین آن‌ها کارت‌هایی که آخرین پاسخشان{" "}
+	                          <span className="font-mono text-xs">Again</span> بوده
+	                          و{" "}
+	                          <span className="font-mono text-xs">ivl&gt;=2</span>{" "}
+	                          دارند انتخاب می‌شوند.
+	                        </li>
+	                        <li>
+	                          این شرطِ ترکیبی کمک می‌کند کارت‌هایی که تازه Again
+	                          خورده‌اند (نویز) وارد چرخه‌ی قرنطینه نشوند، و همچنین
+	                          کارت‌هایی که فاز ۳ به deckهای اصلی برمی‌گرداند (اما
+	                          آخرین پاسخشان هنوز Again است) دوباره در فاز ۰
+	                          انتخاب نشوند.
 	                        </li>
 	                        <li>
 	                          آن کارت‌ها به deck {WordAnkiConstants.decks.tempRoot}{" "}

@@ -32,9 +32,6 @@ export async function setFor5(word: Word): Promise<WordPictures> {
       const adjMatches = await for1CharAdj(sortedMissed[0]);
       const adjCandidate = pickBestFaEn(adjMatches, phoneticNormalized);
       symbols.adj = adjCandidate;
-      if (!adjCandidate) {
-        console.log(`[setFor4] missing chars`, phoneticNormalized);
-      }
     }
   }
 
@@ -60,9 +57,7 @@ export async function setFor5(word: Word): Promise<WordPictures> {
     }
     const job = pickBestFaEn(jobs, phoneticNormalized);
     symbols.job = job || placeholderJobPictureWord();
-    if (!job) {
-      console.log(`[setFor5.ts:63] couldn't find job for`, part2);
-    }
+
   }
 
   return symbols;
