@@ -2,6 +2,7 @@ import "server-only";
 
 import { createAnkiConnectClient } from "@/lib/AnkiConnect";
 import { WordAnkiConstants, type WordNoteFieldName } from "@/lib/AnkiDeck";
+import { ensureMetaLexVr9ModelFields } from "@/lib/anki/ensureMetaLexVr9ModelFields";
 import { generateWordAnkiFieldsForMetaLexVr9, getAnkiLinkIdFromNoteFields } from "@/lib/anki/wordAnkiMapping";
 import { prisma } from "@/lib/prisma";
 
@@ -70,6 +71,10 @@ function normalizeFieldValueForCompare(value: string): string {
     .map((line) => line.trimEnd())
     .join("\n")
     .trim();
+}
+
+function wordUpdatedAtForAnkiField(updatedAt: Date): string {
+  return updatedAt.toISOString();
 }
 
 function getState(): State {
@@ -176,6 +181,9 @@ async function runJob(state: State) {
   // Ensure temp deck exists (no-op if already created).
   await ankiFinder.requestDetailed("createDeck", { deck: WordAnkiConstants.decks.tempRoot });
 
+  // Ensure the note type exists and has the expected fields (including `updatedAt`).
+  await ensureMetaLexVr9ModelFields(ankiFinder);
+
   const idsRes = await ankiFinder.requestDetailed("findNotes", { query });
   if (!idsRes.ok) throw new Error(idsRes.error);
   const noteIds = idsRes.result ?? [];
@@ -222,6 +230,18 @@ async function runJob(state: State) {
 
       const existing = noteByAnkiLinkId.get(word.anki_link_id) ?? null;
       state.currentNoteId = existing?.noteId ?? null;
+
+      // Fast path: If our `updatedAt` field matches, treat the note as up-to-date and skip.
+      // This avoids generating and comparing every field on every run.
+      if (existing) {
+        const prevUpdatedAt = normalizeFieldValueForCompare(String(existing.fieldsByName.updatedAt ?? ""));
+        const nextUpdatedAt = normalizeFieldValueForCompare(wordUpdatedAtForAnkiField(word.updatedAt));
+        if (prevUpdatedAt && prevUpdatedAt === nextUpdatedAt) {
+          state.skippedSame += 1;
+          state.processed += 1;
+          return;
+        }
+      }
 
       const fields = await generateWordAnkiFieldsForMetaLexVr9(word);
 

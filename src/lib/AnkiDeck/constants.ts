@@ -23,6 +23,7 @@ export const WordAnkiConstants = {
       "learning_depth",
       "imageability",
       "json_hint",
+      "updatedAt",
     ],
   },
   noteTemplates: {

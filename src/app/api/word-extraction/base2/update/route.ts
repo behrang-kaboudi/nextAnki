@@ -3,7 +3,7 @@ import "server-only";
 import { NextResponse } from "next/server";
 
 import { normalizeIpaForDb } from "@/lib/ipa/normalize";
-import { prisma } from "@/lib/prisma";
+import { updateWord } from "@/lib/words/wordRepo";
 
 export const runtime = "nodejs";
 
@@ -41,7 +41,7 @@ export async function POST(req: Request) {
 
     const phonetic_us_normalized = normalizeIpaForDb(phonetic_us, 2000);
 
-    const updated = await prisma.word.update({
+    const updated = await updateWord({
       where: { id },
       data: { phonetic_us, phonetic_us_normalized, imageability },
       select: { id: true, phonetic_us: true, phonetic_us_normalized: true, imageability: true },

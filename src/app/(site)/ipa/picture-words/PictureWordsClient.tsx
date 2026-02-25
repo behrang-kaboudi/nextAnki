@@ -1,6 +1,7 @@
 "use client";
 
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { SpecialCharactersBar } from "@/components/ipa/SpecialCharactersBar";
 
 function TrashIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -1345,104 +1346,10 @@ export function PictureWordsClient() {
           Showing {filtered.length} of {rows.length}
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-card bg-card p-3 shadow-elevated">
-          <div className="text-sm font-semibold text-foreground">
-            Special characters
-          </div>
-          <button
-            type="button"
-            onMouseDown={(e) => {
-              e.preventDefault();
-              insertSpecialChar("æ");
-            }}
-            className="rounded-xl border border-card bg-background px-3 py-1.5 text-sm font-semibold text-foreground transition hover:bg-card"
-          >
-            æ
-          </button>
-          <button
-            type="button"
-            onMouseDown={(e) => {
-              e.preventDefault();
-              insertSpecialChar("x");
-            }}
-            className="rounded-xl border border-card bg-background px-3 py-1.5 text-sm font-semibold text-foreground transition hover:bg-card"
-          >
-            x
-          </button>
-          <button
-            type="button"
-            onMouseDown={(e) => {
-              e.preventDefault();
-              insertSpecialChar("ɪ");
-            }}
-            className="rounded-xl border border-card bg-background px-3 py-1.5 text-sm font-semibold text-foreground transition hover:bg-card"
-          >
-            ɪ
-          </button>
-          <button
-            type="button"
-            onMouseDown={(e) => {
-              e.preventDefault();
-              insertSpecialChar("ɜ");
-            }}
-            className="rounded-xl border border-card bg-background px-3 py-1.5 text-sm font-semibold text-foreground transition hover:bg-card"
-          >
-            ɜ
-          </button>
-          <button
-            type="button"
-            onMouseDown={(e) => {
-              e.preventDefault();
-              insertSpecialChar("ə");
-            }}
-            className="rounded-xl border border-card bg-background px-3 py-1.5 text-sm font-semibold text-foreground transition hover:bg-card"
-          >
-            ə
-          </button>
-          <button
-            type="button"
-            onMouseDown={(e) => {
-              e.preventDefault();
-              insertSpecialChar("ʊ");
-            }}
-            className="rounded-xl border border-card bg-background px-3 py-1.5 text-sm font-semibold text-foreground transition hover:bg-card"
-          >
-            ʊ
-          </button>
-          <button
-            type="button"
-            onMouseDown={(e) => {
-              e.preventDefault();
-              insertSpecialChar("ʌ");
-            }}
-            className="rounded-xl border border-card bg-background px-3 py-1.5 text-sm font-semibold text-foreground transition hover:bg-card"
-          >
-            ʌ
-          </button>
-          <button
-            type="button"
-            onMouseDown={(e) => {
-              e.preventDefault();
-              insertSpecialChar("ʔ");
-            }}
-            className="rounded-xl border border-card bg-background px-3 py-1.5 text-sm font-semibold text-foreground transition hover:bg-card"
-          >
-            ʔ
-          </button>
-          <button
-            type="button"
-            onMouseDown={(e) => {
-              e.preventDefault();
-              insertSpecialChar("j");
-            }}
-            className="rounded-xl border border-card bg-background px-3 py-1.5 text-sm font-semibold text-foreground transition hover:bg-card"
-          >
-            j
-          </button>
-          <div className="ml-auto text-xs text-muted">
-            Click a field, then click a character.
-          </div>
-        </div>
+        <SpecialCharactersBar
+          characters={["æ", "x", "ɪ", "ɜ", "ə", "ʊ", "ʌ", "ʔ", "j"]}
+          onPick={insertSpecialChar}
+        />
 
         {tableError ? (
           <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-700">

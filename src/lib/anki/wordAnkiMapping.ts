@@ -270,6 +270,7 @@ export const WORD_ANKI_FIELD_GENERATORS = {
     w.learning_depth == null ? "" : String(w.learning_depth),
   imageability: (w) => (w.imageability == null ? "" : String(w.imageability)),
   json_hint: (w) => w.json_hint ?? "",
+  updatedAt: (w) => w.updatedAt.toISOString(),
 } as const satisfies Record<WordNoteFieldName, WordAnkiFieldGenerator>;
 
 export function generateWordAnkiFieldsForMetaLexVr9(

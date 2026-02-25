@@ -1,5 +1,5 @@
 {
-  "createdAt": "2026-02-25T14:24:09.503Z",
+  "createdAt": "2026-02-25T20:16:59.101Z",
   "data": {
     "theme": [
       {
@@ -1919,7 +1919,7 @@
         "first_letter_en_hint": null,
         "first_letter_fa_hint": "100047200",
         "hint_to_select": null,
-        "json_hint": "{\"person\":{\"fa\":\"کنیسه\",\"phinglish\":\"kenise\",\"en\":\"synagogue\",\"target_ipa\":\"kenɪse\",\"target_lang\":\"fa\",\"usage\":\"notSet\",\"source\":\"pictureWord\"},\"job\":{\"fa\":\"عصا\",\"en\":\"cane\",\"anki_link_id\":\"69407756a97a8681bac58c53\",\"target_ipa\":\"keɪn\",\"usage\":\"noun\",\"source\":\"word\",\"target_lang\":\"en\",\"imageability\":95},\"persianImage\":{\"fa\":\"محصول\",\"en\":\"crop\",\"anki_link_id\":\"694079f4a97a8681bac58ebc\",\"target_ipa\":\"mæhsʊl\",\"target_lang\":\"fa\",\"usage\":\"noun\",\"source\":\"word\"},\"generatedAtMs\":1770863951938}",
+        "json_hint": "{\"person\":{\"fa\":\"کنیسه\",\"phinglish\":\"kenise\",\"en\":\"synagogue\",\"target_ipa\":\"kenɪse\",\"target_lang\":\"fa\",\"usage\":\"notSet\",\"source\":\"pictureWord\"},\"job\":{\"fa\":\"کش\",\"en\":\"rubber band\",\"anki_link_id\":\"3457_1771787458406\",\"target_ipa\":\"keʃ\",\"target_lang\":\"fa\",\"usage\":\"noun\",\"source\":\"word\"},\"persianImage\":{\"fa\":\"محصول\",\"en\":\"crop\",\"anki_link_id\":\"694079f4a97a8681bac58ebc\",\"target_ipa\":\"mæhsʊl\",\"target_lang\":\"fa\",\"usage\":\"noun\",\"source\":\"word\"},\"generatedAtMs\":1772029802720}",
         "word_note": null,
         "common_error": null,
         "imageability": 50,
@@ -13023,7 +13023,7 @@
         "first_letter_en_hint": null,
         "first_letter_fa_hint": "100007801",
         "hint_to_select": null,
-        "json_hint": "{\"person\":{\"fa\":\"حشره\",\"en\":\"insect\",\"anki_link_id\":\"3001_1770145687812\",\"target_ipa\":\"ɪnsekt\",\"usage\":\"noun\",\"source\":\"word\",\"target_lang\":\"en\",\"imageability\":85},\"job\":{\"fa\":\"عصا\",\"en\":\"cane\",\"anki_link_id\":\"69407756a97a8681bac58c53\",\"target_ipa\":\"keɪn\",\"usage\":\"noun\",\"source\":\"word\",\"target_lang\":\"en\",\"imageability\":95},\"persianImage\":{\"fa\":\"بازار\",\"phinglish\":\"bazar\",\"en\":\"market\",\"target_ipa\":\"bʌzʌr\",\"target_lang\":\"fa\",\"usage\":\"notSet\",\"source\":\"pictureWord\"},\"generatedAtMs\":1771254360396}",
+        "json_hint": "{\"person\":{\"fa\":\"حشره\",\"en\":\"insect\",\"anki_link_id\":\"3001_1770145687812\",\"target_ipa\":\"ɪnsekt\",\"usage\":\"noun\",\"source\":\"word\",\"target_lang\":\"en\",\"imageability\":85},\"job\":{\"fa\":\"کش\",\"en\":\"rubber band\",\"anki_link_id\":\"3457_1771787458406\",\"target_ipa\":\"keʃ\",\"target_lang\":\"fa\",\"usage\":\"noun\",\"source\":\"word\"},\"persianImage\":{\"fa\":\"بازار\",\"phinglish\":\"bazar\",\"en\":\"market\",\"target_ipa\":\"bʌzʌr\",\"target_lang\":\"fa\",\"usage\":\"notSet\",\"source\":\"pictureWord\"},\"generatedAtMs\":1772029950462}",
         "word_note": null,
         "common_error": null,
         "imageability": 60,
@@ -46335,7 +46335,7 @@
         "first_letter_en_hint": null,
         "first_letter_fa_hint": null,
         "hint_to_select": null,
-        "json_hint": "{\"person\":{\"fa\":\"شوت\",\"en\":\"chute\",\"anki_link_id\":\"69409e4fa97a8681bac597bf\",\"target_ipa\":\"ʃʊt\",\"target_lang\":\"fa\",\"usage\":\"noun\",\"source\":\"word\"},\"generatedAtMs\":1770866171855}",
+        "json_hint": "{\"person\":{\"fa\":\"شورا\",\"en\":\"council\",\"anki_link_id\":\"6940a3dba97a8681bac59970\",\"target_ipa\":\"ʃʊrʌ\",\"target_lang\":\"fa\",\"usage\":\"noun\",\"source\":\"word\"},\"generatedAtMs\":1772030416551}",
         "word_note": null,
         "common_error": null,
         "imageability": 97,
@@ -83519,7 +83519,7 @@
         "first_letter_en_hint": null,
         "first_letter_fa_hint": null,
         "hint_to_select": null,
-        "json_hint": null,
+        "json_hint": "{\"person\":{\"fa\":\"لاستیک\",\"en\":\"rubber\",\"anki_link_id\":\"2738_1770144215043\",\"target_ipa\":\"rʌber\",\"usage\":\"noun\",\"source\":\"word\",\"target_lang\":\"en\",\"imageability\":85},\"job\":{\"fa\":\"بند\",\"phinglish\":\"band\",\"en\":\"strap\",\"target_ipa\":\"bænd\",\"target_lang\":\"fa\",\"usage\":\"person\",\"source\":\"pictureWord\"},\"generatedAtMs\":1772030574866}",
         "word_note": null,
         "common_error": null,
         "imageability": 95,
