@@ -6,6 +6,7 @@
 - When touching DB behavior, consider both `schema.prisma` and any code paths that write to the DB.
 - Reuse-first: before creating a new component/helper, search the project for an existing equivalent and prefer using it.
 - If unsure which existing component/helper to use (or whether one exists), ask the user before implementing.
+- When adding a new internal/dev page, also add its link to the central hub at `/tests` (`src/app/(site)/tests/TestsClient.tsx`), under the most relevant section.
 
 ## Where To Look
 - Prisma + migrations + `schema.prisma`: `prisma/AGENTS.md`
