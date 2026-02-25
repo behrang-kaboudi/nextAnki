@@ -30,7 +30,7 @@ export default async function Home() {
               href="/admin/themes"
               className="inline-flex items-center justify-center rounded-xl border border-card bg-background px-4 py-3 text-sm font-semibold text-foreground shadow-elevated transition hover:opacity-95"
             >
-              Admin
+              Theme Settings
             </Link>
           </RoleGate>
         </div>

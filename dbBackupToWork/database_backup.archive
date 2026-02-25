@@ -1,5 +1,5 @@
 {
-  "createdAt": "2026-02-23T23:35:38.086Z",
+  "createdAt": "2026-02-25T14:24:09.503Z",
   "data": {
     "theme": [
       {
@@ -40005,38 +40005,6 @@
         "imageability": 35,
         "createdAt": "2025-12-31T04:30:59.750Z",
         "updatedAt": "2026-02-16T14:54:16.619Z"
-      },
-      {
-        "id": 2031,
-        "anki_link_id": "69409e4fa97a8681bac597bf",
-        "base_form": "chute",
-        "phonetic_us": "ʃuːt",
-        "phonetic_us_normalized": "ʃʊt",
-        "meaning_fa": "شوت",
-        "meaning_fa_IPA": "/ʃuːt/",
-        "meaning_fa_IPA_normalized": "ʃʊt",
-        "pos": "noun",
-        "concept_explained": "vertical disposal tube",
-        "concept_explained_fa": "لولهٔ عمودی دفع زباله، ناودان",
-        "word_hint_story": null,
-        "sentence_en": "He threw the trash down the chute.",
-        "sentence_en_meaning_fa": "او زباله‌ها را به داخل شوت انداخت.",
-        "explanation_for_sentence_meaning": "",
-        "learning_depth": 0.58,
-        "mixed_sentence": null,
-        "other_meanings_fa": null,
-        "category": "daily_life",
-        "typeOfWordInDb": "base",
-        "hint_sentence": "شتر اولویه خور",
-        "first_letter_en_hint": null,
-        "first_letter_fa_hint": "100043400",
-        "hint_to_select": null,
-        "json_hint": "{\"person\":{\"fa\":\"شتر\",\"phinglish\":\"shotor\",\"en\":\"camel\",\"target_ipa\":\"ʃotor\",\"target_lang\":\"fa\",\"usage\":\"person\",\"source\":\"pictureWord\"},\"adj\":{\"fa\":\"اولویه خور\",\"phinglish\":\"olviye khor\",\"en\":\"salad-eater\",\"target_ipa\":\"ʊlvɪje xor\",\"target_lang\":\"fa\",\"usage\":\"adj\",\"source\":\"pictureWord\"},\"generatedAtMs\":1770866104346}",
-        "word_note": null,
-        "common_error": null,
-        "imageability": 75,
-        "createdAt": "2025-12-31T04:30:59.750Z",
-        "updatedAt": "2026-02-16T14:54:16.625Z"
       },
       {
         "id": 2032,

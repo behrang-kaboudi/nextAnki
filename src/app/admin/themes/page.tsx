@@ -8,7 +8,7 @@ import { parseThemeVariables } from "@/lib/theme/parseThemeVariables";
 import { DeleteThemeForm } from "@/components/admin/DeleteThemeForm";
 
 export const metadata = {
-  title: "Designs | Admin",
+  title: "Theme Settings | Admin",
 };
 
 export default async function AdminThemesPage() {
@@ -44,10 +44,10 @@ export default async function AdminThemesPage() {
     <div className="grid gap-8">
       <div className="grid gap-2">
         <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-          Designs
+          Theme Settings
         </h1>
         <p className="max-w-3xl text-sm leading-7 text-muted">
-          Three distinct designs (including layout) are available. Choose the default design here.
+          Manage the available themes and choose the default theme for the app.
         </p>
       </div>
 

@@ -75,7 +75,7 @@ const sections: Section[] = [
   {
     title: "Admin",
     links: [
-      { href: "/admin/themes", label: "Themes" },
+      { href: "/admin/themes", label: "Theme Settings" },
       { href: "/admin/data", label: "Data" },
       { href: "/admin/word/imageability", label: "Word Sentences" },
     ],
