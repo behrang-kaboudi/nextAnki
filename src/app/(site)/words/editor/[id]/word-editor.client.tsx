@@ -1,8 +1,39 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState, type FocusEvent } from "react";
 
 import WordFieldVoiceCell from "@/app/(site)/word-hints/WordFieldVoiceCell.client";
+import { SpecialCharactersBar } from "@/components/ipa/SpecialCharactersBar";
+import JsonHintPreviewModal from "./JsonHintPreviewModal.client";
+
+const WORD_AUDIO_FIELDS = [
+  "base_form",
+  "meaning_fa",
+  "other_meanings_fa",
+  "concept_explained_fa",
+  "sentence_en",
+  "sentence_en_meaning_fa",
+] as const;
+
+const IPA_SPECIAL_CHARACTERS = [
+  "æ",
+  "ɪ",
+  "ɜ",
+  "ə",
+  "ʊ",
+  "ʌ",
+  "ʔ",
+  "ʧ",
+  "ʤ",
+  "ɑ",
+  "ɔ",
+  "ŋ",
+  "θ",
+  "ð",
+  "ʃ",
+  "ʒ",
+  "ɡ",
+] as const;
 
 type WordEditorState = {
   id: number;
@@ -39,6 +70,34 @@ type WordEditorState = {
   updatedAt: string;
 };
 
+type EditableFieldKey =
+  | "base_form"
+  | "phonetic_us"
+  | "meaning_fa"
+  | "meaning_fa_IPA"
+  | "pos"
+  | "sentence_en"
+  | "sentence_en_meaning_fa"
+  | "other_meanings_fa"
+  | "concept_explained_fa"
+  | "phonetic_us_normalized"
+  | "meaning_fa_IPA_normalized"
+  | "phonetic_us_normalized"
+  | "learning_depth"
+  | "imageability"
+  | "typeOfWordInDb"
+  | "category"
+  | "mixed_sentence"
+  | "hint_sentence"
+  | "word_hint_story"
+  | "concept_explained"
+  | "explanation_for_sentence_meaning"
+  | "first_letter_en_hint"
+  | "first_letter_fa_hint"
+  | "hint_to_select"
+  | "common_error"
+  | "word_note";
+
 function InputRow({
   label,
   children,
@@ -71,16 +130,71 @@ export default function WordEditorClient({ initial }: { initial: WordEditorState
   const [word, setWord] = useState<WordEditorState>(initial);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [warning, setWarning] = useState<string | null>(null);
   const [savedAt, setSavedAt] = useState<string | null>(null);
+  const [activeField, setActiveField] = useState<EditableFieldKey | null>(null);
+  const lastFocusedInputRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
 
   const dirty = useMemo(() => JSON.stringify(word) !== JSON.stringify(baseline), [word, baseline]);
+
+  function normalizeAudioText(value: string | null | undefined) {
+    return String(value ?? "").trim();
+  }
+
+  const registerFieldFocus = useCallback((field: EditableFieldKey) => {
+    return (e: FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      lastFocusedInputRef.current = e.currentTarget;
+      setActiveField(field);
+    };
+  }, []);
+
+  const insertSpecialChar = useCallback(
+    (character: string) => {
+      const element = lastFocusedInputRef.current;
+      const field = activeField;
+      if (!element || !field) return;
+
+      const start = element.selectionStart ?? element.value.length;
+      const end = element.selectionEnd ?? element.value.length;
+      const nextValue = element.value.slice(0, start) + character + element.value.slice(end);
+      const nextCursor = start + character.length;
+
+      setWord((prev) => {
+        const cur = prev as unknown as Record<string, unknown>;
+        const existing = cur[field];
+        if (typeof existing === "number") {
+          const n = Number(nextValue);
+          return { ...prev, [field]: Number.isFinite(n) ? n : existing } as WordEditorState;
+        }
+        if (existing === null) return { ...prev, [field]: nextValue } as WordEditorState;
+        return { ...prev, [field]: nextValue } as WordEditorState;
+      });
+
+      requestAnimationFrame(() => {
+        try {
+          element.focus();
+          element.setSelectionRange(nextCursor, nextCursor);
+        } catch {
+          // ignore
+        }
+      });
+    },
+    [activeField],
+  );
 
   async function save() {
     if (saving) return;
     setSaving(true);
     setError(null);
+    setWarning(null);
     setSavedAt(null);
     try {
+      const audioFieldsChanged = WORD_AUDIO_FIELDS.filter((field) => {
+        const before = normalizeAudioText((baseline as unknown as Record<string, string | null | undefined>)[field]);
+        const after = normalizeAudioText((word as unknown as Record<string, string | null | undefined>)[field]);
+        return before !== after;
+      });
+
       const res = await fetch("/api/words/editor/update", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -89,10 +203,8 @@ export default function WordEditorClient({ initial }: { initial: WordEditorState
           data: {
             base_form: word.base_form,
             phonetic_us: word.phonetic_us,
-            phonetic_us_normalized: word.phonetic_us_normalized,
             meaning_fa: word.meaning_fa,
             meaning_fa_IPA: word.meaning_fa_IPA,
-            meaning_fa_IPA_normalized: word.meaning_fa_IPA_normalized,
             pos: word.pos,
             concept_explained: word.concept_explained,
             concept_explained_fa: word.concept_explained_fa,
@@ -109,7 +221,6 @@ export default function WordEditorClient({ initial }: { initial: WordEditorState
             first_letter_en_hint: word.first_letter_en_hint,
             first_letter_fa_hint: word.first_letter_fa_hint,
             hint_to_select: word.hint_to_select,
-            json_hint: word.json_hint,
             word_note: word.word_note,
             common_error: word.common_error,
             imageability: word.imageability,
@@ -117,16 +228,55 @@ export default function WordEditorClient({ initial }: { initial: WordEditorState
         }),
       });
       const json = (await res.json().catch(() => null)) as
-        | { ok?: boolean; item?: { updatedAt?: string } | null; error?: string }
+        | {
+            ok?: boolean;
+            item?:
+              | {
+                  updatedAt?: string;
+                  phonetic_us_normalized?: string | null;
+                  meaning_fa_IPA_normalized?: string;
+                }
+              | null;
+            error?: string;
+          }
         | null;
       if (!res.ok || json?.ok !== true) throw new Error(json?.error || `Request failed (${res.status})`);
       const updatedAt = String(json?.item?.updatedAt ?? "");
+      const phonetic_us_normalized =
+        json?.item && "phonetic_us_normalized" in json.item ? (json.item.phonetic_us_normalized ?? null) : null;
+      const meaning_fa_IPA_normalized =
+        json?.item && "meaning_fa_IPA_normalized" in json.item
+          ? String(json.item.meaning_fa_IPA_normalized ?? "")
+          : "";
+
       if (updatedAt) {
-        setWord((prev) => ({ ...prev, updatedAt }));
-        setBaseline((prev) => ({ ...prev, ...word, updatedAt }));
+        setWord((prev) => ({ ...prev, updatedAt, phonetic_us_normalized, meaning_fa_IPA_normalized }));
+        setBaseline({ ...word, updatedAt, phonetic_us_normalized, meaning_fa_IPA_normalized });
       } else {
-        setBaseline(word);
+        setBaseline({ ...word, phonetic_us_normalized, meaning_fa_IPA_normalized });
       }
+
+      if (audioFieldsChanged.length) {
+        const results = await Promise.allSettled(
+          audioFieldsChanged.map(async (field) => {
+            const delRes = await fetch("/api/words/field-voice-delete-all", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ ankiLinkId: word.anki_link_id, field }),
+            });
+            const delJson = (await delRes.json().catch(() => null)) as { ok?: boolean; error?: string } | null;
+            if (!delRes.ok || delJson?.ok !== true) {
+              throw new Error(delJson?.error || `Audio delete failed (${delRes.status}) for ${field}`);
+            }
+            window.dispatchEvent(new CustomEvent("wordFieldVoice:updated", { detail: { ankiLinkId: word.anki_link_id, field } }));
+          }),
+        );
+        const failed = results.filter((r) => r.status === "rejected");
+        if (failed.length) {
+          setWarning(`Saved, but failed to delete some audio files (${failed.length}).`);
+        }
+      }
+
       setSavedAt(new Date().toISOString());
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
@@ -136,13 +286,19 @@ export default function WordEditorClient({ initial }: { initial: WordEditorState
   }
 
   return (
-    <div className="grid gap-4">
+    <div className="grid gap-4 pb-24">
       <div className="rounded-2xl border border-card bg-background p-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="text-sm">
             <div className="font-mono text-xs opacity-80">anki_link_id: {word.anki_link_id}</div>
             <div className="font-mono text-xs opacity-80">createdAt: {word.createdAt}</div>
             <div className="font-mono text-xs opacity-80">updatedAt: {word.updatedAt}</div>
+            <div className="font-mono text-xs opacity-80">
+              phonetic_us_normalized: {word.phonetic_us_normalized ?? "—"}
+            </div>
+            <div className="font-mono text-xs opacity-80">
+              meaning_fa_IPA_normalized: {word.meaning_fa_IPA_normalized}
+            </div>
           </div>
 
           <div className="flex items-center gap-2">
@@ -170,11 +326,45 @@ export default function WordEditorClient({ initial }: { initial: WordEditorState
             {error}
           </div>
         ) : null}
+        {warning ? (
+          <div className="mt-3 rounded border border-yellow-500/30 bg-yellow-600/10 p-3 text-sm text-yellow-800 dark:text-yellow-200">
+            {warning}
+          </div>
+        ) : null}
         {savedAt ? <div className="mt-3 text-xs opacity-70">Saved at {savedAt}</div> : null}
+      </div>
+
+      <div className="fixed bottom-4 right-4 z-40 flex items-center gap-2 rounded-2xl border border-card bg-background/95 p-2 shadow-elevated backdrop-blur">
+        <div className="hidden text-xs opacity-70 sm:block">
+          {saving ? "Saving…" : dirty ? "Unsaved changes" : "Saved"}
+        </div>
+        <button
+          type="button"
+          onClick={() => setWord(baseline)}
+          disabled={saving || !dirty}
+          className="rounded-xl border px-3 py-2 text-sm hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5"
+        >
+          Reset
+        </button>
+        <button
+          type="button"
+          onClick={() => void save()}
+          disabled={saving}
+          className="rounded-xl bg-foreground px-4 py-2 text-sm font-semibold text-background disabled:opacity-50"
+        >
+          {saving ? "Saving…" : "Save"}
+        </button>
       </div>
 
       <div className="grid gap-4 rounded-2xl border border-card bg-background p-4">
         <div className="text-sm font-semibold">Main fields</div>
+
+        <SpecialCharactersBar
+          characters={IPA_SPECIAL_CHARACTERS}
+          onPick={insertSpecialChar}
+          title="Special characters"
+          helpText="Click a field, then click a character."
+        />
 
         <div className="grid gap-4 md:grid-cols-2">
           <InputRow label="base_form">
@@ -182,6 +372,7 @@ export default function WordEditorClient({ initial }: { initial: WordEditorState
               <input
                 value={word.base_form}
                 onChange={(e) => setWord((p) => ({ ...p, base_form: e.target.value }))}
+                onFocus={registerFieldFocus("base_form")}
                 className="w-full rounded border px-3 py-2 text-sm"
               />
               <WordFieldVoiceCell field="base_form" ankiLinkId={word.anki_link_id} text={word.base_form} />
@@ -192,6 +383,7 @@ export default function WordEditorClient({ initial }: { initial: WordEditorState
             <input
               value={word.phonetic_us ?? ""}
               onChange={(e) => setWord((p) => ({ ...p, phonetic_us: asNullableString(e.target.value) }))}
+              onFocus={registerFieldFocus("phonetic_us")}
               className="w-full rounded border px-3 py-2 text-sm"
               placeholder="(nullable)"
             />
@@ -202,6 +394,7 @@ export default function WordEditorClient({ initial }: { initial: WordEditorState
               <input
                 value={word.meaning_fa}
                 onChange={(e) => setWord((p) => ({ ...p, meaning_fa: e.target.value }))}
+                onFocus={registerFieldFocus("meaning_fa")}
                 className="w-full rounded border px-3 py-2 text-sm"
               />
               <WordFieldVoiceCell field="meaning_fa" ankiLinkId={word.anki_link_id} text={word.meaning_fa} />
@@ -212,8 +405,28 @@ export default function WordEditorClient({ initial }: { initial: WordEditorState
             <input
               value={word.pos ?? ""}
               onChange={(e) => setWord((p) => ({ ...p, pos: asNullableString(e.target.value) }))}
+              onFocus={registerFieldFocus("pos")}
               className="w-full rounded border px-3 py-2 text-sm"
               placeholder="(nullable)"
+            />
+          </InputRow>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          <InputRow label="meaning_fa_IPA">
+            <textarea
+              value={word.meaning_fa_IPA}
+              onChange={(e) => setWord((p) => ({ ...p, meaning_fa_IPA: e.target.value }))}
+              onFocus={registerFieldFocus("meaning_fa_IPA")}
+              className="min-h-[84px] w-full rounded border px-3 py-2 text-sm"
+            />
+          </InputRow>
+
+          <InputRow label="meaning_fa_IPA_normalized (auto)">
+            <textarea
+              value={word.meaning_fa_IPA_normalized}
+              readOnly
+              className="min-h-[84px] w-full rounded border bg-black/5 px-3 py-2 text-sm dark:bg-white/10"
             />
           </InputRow>
         </div>
@@ -224,6 +437,7 @@ export default function WordEditorClient({ initial }: { initial: WordEditorState
               <textarea
                 value={word.sentence_en}
                 onChange={(e) => setWord((p) => ({ ...p, sentence_en: e.target.value }))}
+                onFocus={registerFieldFocus("sentence_en")}
                 className="min-h-[84px] w-full rounded border px-3 py-2 text-sm"
               />
               <WordFieldVoiceCell field="sentence_en" ankiLinkId={word.anki_link_id} text={word.sentence_en} />
@@ -235,6 +449,7 @@ export default function WordEditorClient({ initial }: { initial: WordEditorState
               <textarea
                 value={word.sentence_en_meaning_fa ?? ""}
                 onChange={(e) => setWord((p) => ({ ...p, sentence_en_meaning_fa: asNullableString(e.target.value, { trim: false }) }))}
+                onFocus={registerFieldFocus("sentence_en_meaning_fa")}
                 className="min-h-[84px] w-full rounded border px-3 py-2 text-sm"
                 placeholder="(nullable)"
               />
@@ -246,70 +461,67 @@ export default function WordEditorClient({ initial }: { initial: WordEditorState
             </div>
           </InputRow>
         </div>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          <InputRow label="other_meanings_fa">
+            <div className="flex items-center gap-2">
+              <textarea
+                value={word.other_meanings_fa ?? ""}
+                onChange={(e) => setWord((p) => ({ ...p, other_meanings_fa: asNullableString(e.target.value, { trim: false }) }))}
+                onFocus={registerFieldFocus("other_meanings_fa")}
+                className="min-h-[84px] w-full rounded border px-3 py-2 text-sm"
+                placeholder="(nullable)"
+              />
+              <WordFieldVoiceCell
+                field="other_meanings_fa"
+                ankiLinkId={word.anki_link_id}
+                text={word.other_meanings_fa}
+              />
+            </div>
+          </InputRow>
+
+          <InputRow label="concept_explained_fa">
+            <div className="flex items-center gap-2">
+              <textarea
+                value={word.concept_explained_fa ?? ""}
+                onChange={(e) => setWord((p) => ({ ...p, concept_explained_fa: asNullableString(e.target.value, { trim: false }) }))}
+                onFocus={registerFieldFocus("concept_explained_fa")}
+                className="min-h-[84px] w-full rounded border px-3 py-2 text-sm"
+                placeholder="(nullable)"
+              />
+              <WordFieldVoiceCell
+                field="concept_explained_fa"
+                ankiLinkId={word.anki_link_id}
+                text={word.concept_explained_fa}
+              />
+            </div>
+          </InputRow>
+        </div>
       </div>
 
       <details className="rounded-2xl border border-card bg-background p-4">
         <summary className="cursor-pointer text-sm font-semibold">More fields</summary>
         <div className="mt-4 grid gap-4">
-          <div className="grid gap-4 md:grid-cols-2">
-            <InputRow label="other_meanings_fa">
-              <div className="flex items-center gap-2">
-                <textarea
-                  value={word.other_meanings_fa ?? ""}
-                  onChange={(e) => setWord((p) => ({ ...p, other_meanings_fa: asNullableString(e.target.value, { trim: false }) }))}
-                  className="min-h-[84px] w-full rounded border px-3 py-2 text-sm"
-                  placeholder="(nullable)"
-                />
-                <WordFieldVoiceCell
-                  field="other_meanings_fa"
-                  ankiLinkId={word.anki_link_id}
-                  text={word.other_meanings_fa}
-                />
-              </div>
-            </InputRow>
-
-            <InputRow label="concept_explained_fa">
-              <div className="flex items-center gap-2">
-                <textarea
-                  value={word.concept_explained_fa ?? ""}
-                  onChange={(e) => setWord((p) => ({ ...p, concept_explained_fa: asNullableString(e.target.value, { trim: false }) }))}
-                  className="min-h-[84px] w-full rounded border px-3 py-2 text-sm"
-                  placeholder="(nullable)"
-                />
-                <WordFieldVoiceCell
-                  field="concept_explained_fa"
-                  ankiLinkId={word.anki_link_id}
-                  text={word.concept_explained_fa}
-                />
-              </div>
-            </InputRow>
+          <div className="grid gap-1">
+            <div className="flex items-center justify-between gap-2">
+              <div className="text-xs font-semibold text-muted">json_hint (LongText) (read-only)</div>
+              <JsonHintPreviewModal wordId={word.id} currentJsonHint={word.json_hint} />
+            </div>
+            <textarea
+              value={word.json_hint ?? ""}
+              readOnly
+              className="min-h-[220px] w-full rounded border bg-black/5 px-3 py-2 font-mono text-xs dark:bg-white/10"
+              placeholder="(nullable JSON)"
+            />
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
-            <InputRow label="meaning_fa_IPA">
-              <textarea
-                value={word.meaning_fa_IPA}
-                onChange={(e) => setWord((p) => ({ ...p, meaning_fa_IPA: e.target.value }))}
-                className="min-h-[84px] w-full rounded border px-3 py-2 text-sm"
-              />
-            </InputRow>
-
-            <InputRow label="meaning_fa_IPA_normalized">
-              <textarea
-                value={word.meaning_fa_IPA_normalized}
-                onChange={(e) => setWord((p) => ({ ...p, meaning_fa_IPA_normalized: e.target.value }))}
-                className="min-h-[84px] w-full rounded border px-3 py-2 text-sm"
-              />
-            </InputRow>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <InputRow label="phonetic_us_normalized">
+            <InputRow label="phonetic_us_normalized (auto)">
               <input
                 value={word.phonetic_us_normalized ?? ""}
-                onChange={(e) => setWord((p) => ({ ...p, phonetic_us_normalized: asNullableString(e.target.value) }))}
-                className="w-full rounded border px-3 py-2 text-sm"
-                placeholder="(nullable)"
+                readOnly
+                className="w-full rounded border bg-black/5 px-3 py-2 text-sm dark:bg-white/10"
+                placeholder="(auto)"
               />
             </InputRow>
 
@@ -317,6 +529,7 @@ export default function WordEditorClient({ initial }: { initial: WordEditorState
               <input
                 value={word.learning_depth == null ? "" : String(word.learning_depth)}
                 onChange={(e) => setWord((p) => ({ ...p, learning_depth: asNullableNumber(e.target.value) }))}
+                onFocus={registerFieldFocus("learning_depth")}
                 className="w-full rounded border px-3 py-2 text-sm"
                 placeholder="(nullable number)"
               />
@@ -328,6 +541,7 @@ export default function WordEditorClient({ initial }: { initial: WordEditorState
               <input
                 value={word.imageability == null ? "" : String(word.imageability)}
                 onChange={(e) => setWord((p) => ({ ...p, imageability: asNullableNumber(e.target.value) }))}
+                onFocus={registerFieldFocus("imageability")}
                 className="w-full rounded border px-3 py-2 text-sm"
                 placeholder="(nullable number)"
               />
@@ -337,6 +551,7 @@ export default function WordEditorClient({ initial }: { initial: WordEditorState
               <input
                 value={word.typeOfWordInDb}
                 onChange={(e) => setWord((p) => ({ ...p, typeOfWordInDb: e.target.value }))}
+                onFocus={registerFieldFocus("typeOfWordInDb")}
                 className="w-full rounded border px-3 py-2 text-sm"
               />
             </InputRow>
@@ -347,6 +562,7 @@ export default function WordEditorClient({ initial }: { initial: WordEditorState
               <input
                 value={word.category ?? ""}
                 onChange={(e) => setWord((p) => ({ ...p, category: asNullableString(e.target.value) }))}
+                onFocus={registerFieldFocus("category")}
                 className="w-full rounded border px-3 py-2 text-sm"
                 placeholder="(nullable)"
               />
@@ -356,6 +572,7 @@ export default function WordEditorClient({ initial }: { initial: WordEditorState
               <input
                 value={word.mixed_sentence ?? ""}
                 onChange={(e) => setWord((p) => ({ ...p, mixed_sentence: asNullableString(e.target.value, { trim: false }) }))}
+                onFocus={registerFieldFocus("mixed_sentence")}
                 className="w-full rounded border px-3 py-2 text-sm"
                 placeholder="(nullable)"
               />
@@ -367,6 +584,7 @@ export default function WordEditorClient({ initial }: { initial: WordEditorState
               <textarea
                 value={word.hint_sentence ?? ""}
                 onChange={(e) => setWord((p) => ({ ...p, hint_sentence: asNullableString(e.target.value, { trim: false }) }))}
+                onFocus={registerFieldFocus("hint_sentence")}
                 className="min-h-[84px] w-full rounded border px-3 py-2 text-sm"
                 placeholder="(nullable)"
               />
@@ -376,6 +594,7 @@ export default function WordEditorClient({ initial }: { initial: WordEditorState
               <textarea
                 value={word.word_hint_story ?? ""}
                 onChange={(e) => setWord((p) => ({ ...p, word_hint_story: asNullableString(e.target.value, { trim: false }) }))}
+                onFocus={registerFieldFocus("word_hint_story")}
                 className="min-h-[84px] w-full rounded border px-3 py-2 text-sm"
                 placeholder="(nullable)"
               />
@@ -387,6 +606,7 @@ export default function WordEditorClient({ initial }: { initial: WordEditorState
               <textarea
                 value={word.concept_explained ?? ""}
                 onChange={(e) => setWord((p) => ({ ...p, concept_explained: asNullableString(e.target.value, { trim: false }) }))}
+                onFocus={registerFieldFocus("concept_explained")}
                 className="min-h-[84px] w-full rounded border px-3 py-2 text-sm"
                 placeholder="(nullable)"
               />
@@ -401,6 +621,7 @@ export default function WordEditorClient({ initial }: { initial: WordEditorState
                     explanation_for_sentence_meaning: asNullableString(e.target.value, { trim: false }),
                   }))
                 }
+                onFocus={registerFieldFocus("explanation_for_sentence_meaning")}
                 className="min-h-[84px] w-full rounded border px-3 py-2 text-sm"
                 placeholder="(nullable)"
               />
@@ -412,6 +633,7 @@ export default function WordEditorClient({ initial }: { initial: WordEditorState
               <textarea
                 value={word.first_letter_en_hint ?? ""}
                 onChange={(e) => setWord((p) => ({ ...p, first_letter_en_hint: asNullableString(e.target.value, { trim: false }) }))}
+                onFocus={registerFieldFocus("first_letter_en_hint")}
                 className="min-h-[84px] w-full rounded border px-3 py-2 text-sm"
                 placeholder="(nullable)"
               />
@@ -421,6 +643,7 @@ export default function WordEditorClient({ initial }: { initial: WordEditorState
               <textarea
                 value={word.first_letter_fa_hint ?? ""}
                 onChange={(e) => setWord((p) => ({ ...p, first_letter_fa_hint: asNullableString(e.target.value, { trim: false }) }))}
+                onFocus={registerFieldFocus("first_letter_fa_hint")}
                 className="min-h-[84px] w-full rounded border px-3 py-2 text-sm"
                 placeholder="(nullable)"
               />
@@ -432,6 +655,7 @@ export default function WordEditorClient({ initial }: { initial: WordEditorState
               <input
                 value={word.hint_to_select ?? ""}
                 onChange={(e) => setWord((p) => ({ ...p, hint_to_select: asNullableString(e.target.value, { trim: false }) }))}
+                onFocus={registerFieldFocus("hint_to_select")}
                 className="w-full rounded border px-3 py-2 text-sm"
                 placeholder="(nullable)"
               />
@@ -441,6 +665,7 @@ export default function WordEditorClient({ initial }: { initial: WordEditorState
               <input
                 value={word.common_error ?? ""}
                 onChange={(e) => setWord((p) => ({ ...p, common_error: asNullableString(e.target.value, { trim: false }) }))}
+                onFocus={registerFieldFocus("common_error")}
                 className="w-full rounded border px-3 py-2 text-sm"
                 placeholder="(nullable)"
               />
@@ -452,17 +677,9 @@ export default function WordEditorClient({ initial }: { initial: WordEditorState
               <textarea
                 value={word.word_note ?? ""}
                 onChange={(e) => setWord((p) => ({ ...p, word_note: asNullableString(e.target.value, { trim: false }) }))}
+                onFocus={registerFieldFocus("word_note")}
                 className="min-h-[84px] w-full rounded border px-3 py-2 text-sm"
                 placeholder="(nullable)"
-              />
-            </InputRow>
-
-            <InputRow label="json_hint (LongText)">
-              <textarea
-                value={word.json_hint ?? ""}
-                onChange={(e) => setWord((p) => ({ ...p, json_hint: asNullableString(e.target.value, { trim: false }) }))}
-                className="min-h-[160px] w-full rounded border px-3 py-2 font-mono text-xs"
-                placeholder="(nullable JSON)"
               />
             </InputRow>
           </div>

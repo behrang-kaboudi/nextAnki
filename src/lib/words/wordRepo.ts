@@ -22,3 +22,6 @@ export async function updateManyWords(args: Prisma.WordUpdateManyArgs) {
   return prisma.word.updateMany(args);
 }
 
+export async function deleteWord(args: Prisma.WordDeleteArgs) {
+  return prisma.word.delete(args);
+}

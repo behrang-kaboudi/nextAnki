@@ -3,6 +3,8 @@ import Link from "next/link";
 import { PageHeader } from "@/components/page-header";
 import { prisma } from "@/lib/prisma";
 
+import DeleteWordButton from "./DeleteWordButton.client";
+
 export const metadata = {
   title: "Words — Editor",
 };
@@ -124,7 +126,7 @@ export default async function WordsEditorIndexPage({
                 <th className="whitespace-nowrap px-3 py-2 font-semibold">meaning_fa</th>
                 <th className="whitespace-nowrap px-3 py-2 font-semibold">anki_link_id</th>
                 <th className="whitespace-nowrap px-3 py-2 font-semibold">updatedAt</th>
-                <th className="whitespace-nowrap px-3 py-2 font-semibold">edit</th>
+                <th className="whitespace-nowrap px-3 py-2 font-semibold">actions</th>
               </tr>
             </thead>
             <tbody>
@@ -148,12 +150,15 @@ export default async function WordsEditorIndexPage({
                   </td>
                   <td className="whitespace-nowrap px-3 py-2 font-mono">{r.updatedAt.toISOString()}</td>
                   <td className="whitespace-nowrap px-3 py-2">
+                    <div className="flex items-center gap-2">
                     <Link
                       href={`/words/editor/${r.id}`}
                       className="rounded border px-2 py-1 text-[11px] hover:bg-black/5 dark:hover:bg-white/5"
                     >
                       Open
                     </Link>
+                      <DeleteWordButton id={r.id} label={r.base_form} />
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -171,4 +176,3 @@ export default async function WordsEditorIndexPage({
     </main>
   );
 }
-

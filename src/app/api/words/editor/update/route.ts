@@ -2,6 +2,7 @@ import "server-only";
 
 import { NextResponse } from "next/server";
 
+import { normalizeIpaForDb } from "@/lib/ipa/normalize";
 import { updateWord } from "@/lib/words/wordRepo";
 
 export const runtime = "nodejs";
@@ -57,7 +58,6 @@ export async function POST(req: Request) {
     const base_form = normalizeRequiredString(d.base_form);
     const meaning_fa = normalizeRequiredString(d.meaning_fa);
     const meaning_fa_IPA = normalizeRequiredString(d.meaning_fa_IPA);
-    const meaning_fa_IPA_normalized = normalizeRequiredString(d.meaning_fa_IPA_normalized);
     const sentence_en = normalizeRequiredString(d.sentence_en);
     const typeOfWordInDb = normalizeRequiredString(d.typeOfWordInDb);
 
@@ -65,7 +65,6 @@ export async function POST(req: Request) {
       base_form == null ||
       meaning_fa == null ||
       meaning_fa_IPA == null ||
-      meaning_fa_IPA_normalized == null ||
       sentence_en == null ||
       typeOfWordInDb == null
     ) {
@@ -75,12 +74,16 @@ export async function POST(req: Request) {
       );
     }
 
+    const phonetic_us = normalizeNullableString(d.phonetic_us) ?? null;
+    const phonetic_us_normalized = phonetic_us ? normalizeIpaForDb(phonetic_us, 2000) : null;
+    const meaning_fa_IPA_normalized = normalizeIpaForDb(meaning_fa_IPA, 2000);
+
     const updated = await updateWord({
       where: { id },
       data: {
         base_form,
-        phonetic_us: normalizeNullableString(d.phonetic_us),
-        phonetic_us_normalized: normalizeNullableString(d.phonetic_us_normalized),
+        phonetic_us,
+        phonetic_us_normalized,
         meaning_fa,
         meaning_fa_IPA,
         meaning_fa_IPA_normalized,
@@ -105,10 +108,18 @@ export async function POST(req: Request) {
         common_error: normalizeNullableString(d.common_error),
         imageability: normalizeNullableNumber(d.imageability),
       },
-      select: { id: true, updatedAt: true },
+      select: { id: true, updatedAt: true, phonetic_us_normalized: true, meaning_fa_IPA_normalized: true },
     });
 
-    return NextResponse.json({ ok: true as const, item: { id: updated.id, updatedAt: updated.updatedAt.toISOString() } });
+    return NextResponse.json({
+      ok: true as const,
+      item: {
+        id: updated.id,
+        updatedAt: updated.updatedAt.toISOString(),
+        phonetic_us_normalized: updated.phonetic_us_normalized,
+        meaning_fa_IPA_normalized: updated.meaning_fa_IPA_normalized,
+      },
+    });
   } catch (e) {
     return NextResponse.json(
       { ok: false, error: e instanceof Error ? e.message : String(e) },
@@ -116,4 +127,3 @@ export async function POST(req: Request) {
     );
   }
 }
-
