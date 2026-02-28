@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState, type FocusEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type FocusEvent } from "react";
 
 import WordFieldVoiceCell from "@/app/(site)/word-hints/WordFieldVoiceCell.client";
 import { SpecialCharactersBar } from "@/components/ipa/SpecialCharactersBar";
@@ -126,20 +126,38 @@ function asNullableNumber(raw: string) {
 }
 
 export default function WordEditorClient({ initial }: { initial: WordEditorState }) {
+  type SaveOptions = { force?: boolean; audioUpdatedField?: (typeof WORD_AUDIO_FIELDS)[number] };
+
   const [baseline, setBaseline] = useState<WordEditorState>(initial);
   const [word, setWord] = useState<WordEditorState>(initial);
   const [saving, setSaving] = useState(false);
+  const savingRef = useRef(false);
+  const pendingAudioSaveRef = useRef<{ field?: (typeof WORD_AUDIO_FIELDS)[number] } | null>(null);
+  const saveRef = useRef<((opts?: SaveOptions) => Promise<void>) | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [warning, setWarning] = useState<string | null>(null);
   const [savedAt, setSavedAt] = useState<string | null>(null);
   const [activeField, setActiveField] = useState<EditableFieldKey | null>(null);
   const lastFocusedInputRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
+  const lastUrlRef = useRef<string>("");
 
   const dirty = useMemo(() => JSON.stringify(word) !== JSON.stringify(baseline), [word, baseline]);
 
   function normalizeAudioText(value: string | null | undefined) {
     return String(value ?? "").trim();
   }
+
+  const missingRequiredFields = useMemo(() => {
+    const missing: string[] = [];
+    if (!word.base_form.trim()) missing.push("base_form");
+    if (!word.meaning_fa.trim()) missing.push("meaning_fa");
+    if (!word.meaning_fa_IPA.trim()) missing.push("meaning_fa_IPA");
+    if (!word.sentence_en.trim()) missing.push("sentence_en");
+    if (!word.typeOfWordInDb.trim()) missing.push("typeOfWordInDb");
+    return missing;
+  }, [word.base_form, word.meaning_fa, word.meaning_fa_IPA, word.sentence_en, word.typeOfWordInDb]);
+
+  const requiredOk = missingRequiredFields.length === 0;
 
   const registerFieldFocus = useCallback((field: EditableFieldKey) => {
     return (e: FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -182,8 +200,19 @@ export default function WordEditorClient({ initial }: { initial: WordEditorState
     [activeField],
   );
 
-  async function save() {
-    if (saving) return;
+  async function save(opts?: SaveOptions) {
+    if (savingRef.current) {
+      if (opts?.force) pendingAudioSaveRef.current = { field: opts.audioUpdatedField };
+      return;
+    }
+    if (!opts?.force && (!dirty || !requiredOk)) {
+      if (dirty && !requiredOk) {
+        setWarning(`Please fill required fields before saving: ${missingRequiredFields.join(", ")}`);
+      }
+      return;
+    }
+
+    savingRef.current = true;
     setSaving(true);
     setError(null);
     setWarning(null);
@@ -194,6 +223,9 @@ export default function WordEditorClient({ initial }: { initial: WordEditorState
         const after = normalizeAudioText((word as unknown as Record<string, string | null | undefined>)[field]);
         return before !== after;
       });
+      const audioFieldsToDelete = opts?.audioUpdatedField
+        ? audioFieldsChanged.filter((f) => f !== opts.audioUpdatedField)
+        : audioFieldsChanged;
 
       const res = await fetch("/api/words/editor/update", {
         method: "POST",
@@ -256,9 +288,9 @@ export default function WordEditorClient({ initial }: { initial: WordEditorState
         setBaseline({ ...word, phonetic_us_normalized, meaning_fa_IPA_normalized });
       }
 
-      if (audioFieldsChanged.length) {
+      if (audioFieldsToDelete.length) {
         const results = await Promise.allSettled(
-          audioFieldsChanged.map(async (field) => {
+          audioFieldsToDelete.map(async (field) => {
             const delRes = await fetch("/api/words/field-voice-delete-all", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -268,7 +300,11 @@ export default function WordEditorClient({ initial }: { initial: WordEditorState
             if (!delRes.ok || delJson?.ok !== true) {
               throw new Error(delJson?.error || `Audio delete failed (${delRes.status}) for ${field}`);
             }
-            window.dispatchEvent(new CustomEvent("wordFieldVoice:updated", { detail: { ankiLinkId: word.anki_link_id, field } }));
+            window.dispatchEvent(
+              new CustomEvent("wordFieldVoice:updated", {
+                detail: { ankiLinkId: word.anki_link_id, field, source: "wordEditor:saveCleanup" },
+              }),
+            );
           }),
         );
         const failed = results.filter((r) => r.status === "rejected");
@@ -281,9 +317,125 @@ export default function WordEditorClient({ initial }: { initial: WordEditorState
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
+      savingRef.current = false;
       setSaving(false);
+      const pending = pendingAudioSaveRef.current;
+      pendingAudioSaveRef.current = null;
+      if (pending) {
+        queueMicrotask(() => void save({ force: true, audioUpdatedField: pending.field }));
+      }
     }
   }
+
+  useEffect(() => {
+    saveRef.current = save;
+  });
+
+  useEffect(() => {
+    lastUrlRef.current = window.location.href;
+
+    const onBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (!dirty) return;
+      e.preventDefault();
+      e.returnValue = "";
+    };
+
+    const onDocumentClickCapture = (e: MouseEvent) => {
+      if (!dirty) return;
+      if (e.defaultPrevented) return;
+
+      const target = e.target as HTMLElement | null;
+      const anchor = target?.closest?.("a") as HTMLAnchorElement | null;
+      if (!anchor) return;
+      if (anchor.target === "_blank") return;
+      if (anchor.hasAttribute("download")) return;
+      if (anchor.getAttribute("href")?.startsWith("#")) return;
+
+      let url: URL | null = null;
+      try {
+        url = new URL(anchor.href);
+      } catch {
+        return;
+      }
+      if (url.origin !== window.location.origin) return;
+
+      const ok = window.confirm("You have unsaved changes. Leave without saving?");
+      if (!ok) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    };
+
+    const onPopState = () => {
+      if (!dirty) {
+        lastUrlRef.current = window.location.href;
+        return;
+      }
+      const ok = window.confirm("You have unsaved changes. Leave without saving?");
+      if (ok) {
+        lastUrlRef.current = window.location.href;
+        return;
+      }
+      try {
+        history.pushState(null, "", lastUrlRef.current || window.location.href);
+      } catch {
+        // ignore
+      }
+    };
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.altKey) return;
+      const isSave = (e.ctrlKey || e.metaKey) && (e.key === "s" || e.key === "S");
+      if (!isSave) return;
+
+      e.preventDefault();
+      if (!dirty) return;
+      void saveRef.current?.();
+    };
+
+    window.addEventListener("beforeunload", onBeforeUnload);
+    document.addEventListener("click", onDocumentClickCapture, true);
+    window.addEventListener("popstate", onPopState);
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      window.removeEventListener("beforeunload", onBeforeUnload);
+      document.removeEventListener("click", onDocumentClickCapture, true);
+      window.removeEventListener("popstate", onPopState);
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [dirty]);
+
+  useEffect(() => {
+    const onAudioUpdated = (evt: Event) => {
+      const detail = (evt as CustomEvent<{ ankiLinkId?: unknown; field?: unknown; source?: unknown }>).detail;
+      if (!detail) return;
+      if (detail.source === "wordEditor:saveCleanup") return;
+      if (detail.ankiLinkId !== word.anki_link_id) return;
+      const fieldRaw = detail.field;
+      const field = typeof fieldRaw === "string" && (WORD_AUDIO_FIELDS as readonly string[]).includes(fieldRaw) ? fieldRaw : null;
+      void saveRef.current?.({ force: true, audioUpdatedField: field as SaveOptions["audioUpdatedField"] });
+    };
+
+    window.addEventListener("wordFieldVoice:updated", onAudioUpdated);
+    return () => window.removeEventListener("wordFieldVoice:updated", onAudioUpdated);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [word.anki_link_id]);
+
+  const statusText = saving
+    ? "Saving…"
+    : dirty
+      ? requiredOk
+        ? "Unsaved changes"
+        : "Unsaved (required fields missing)"
+      : "Saved";
+
+  const statusMetaText = saving
+    ? null
+    : dirty
+      ? requiredOk
+        ? null
+        : `missing: ${missingRequiredFields.join(", ")}`
+      : `updatedAt: ${word.updatedAt}`;
 
   return (
     <div className="grid gap-4 pb-24">
@@ -313,7 +465,7 @@ export default function WordEditorClient({ initial }: { initial: WordEditorState
             <button
               type="button"
               onClick={() => void save()}
-              disabled={saving}
+              disabled={saving || !dirty || !requiredOk}
               className="rounded bg-foreground px-4 py-2 text-sm font-semibold text-background disabled:opacity-50"
             >
               {saving ? "Saving…" : "Save"}
@@ -335,8 +487,9 @@ export default function WordEditorClient({ initial }: { initial: WordEditorState
       </div>
 
       <div className="fixed bottom-4 right-4 z-40 flex items-center gap-2 rounded-2xl border border-card bg-background/95 p-2 shadow-elevated backdrop-blur">
-        <div className="hidden text-xs opacity-70 sm:block">
-          {saving ? "Saving…" : dirty ? "Unsaved changes" : "Saved"}
+        <div className="hidden max-w-[34rem] text-xs opacity-70 sm:block">
+          <div className="truncate">{statusText}</div>
+          {statusMetaText ? <div className="truncate text-[11px] opacity-70">{statusMetaText}</div> : null}
         </div>
         <button
           type="button"
@@ -349,7 +502,7 @@ export default function WordEditorClient({ initial }: { initial: WordEditorState
         <button
           type="button"
           onClick={() => void save()}
-          disabled={saving}
+          disabled={saving || !dirty || !requiredOk}
           className="rounded-xl bg-foreground px-4 py-2 text-sm font-semibold text-background disabled:opacity-50"
         >
           {saving ? "Saving…" : "Save"}

@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function HowToDoPage() {
   return (
     <main dir="rtl" lang="fa" className="mx-auto w-full max-w-3xl p-4 text-right">
@@ -18,18 +20,11 @@ export default function HowToDoPage() {
           </p>
           <ol className="mt-3 list-decimal space-y-2 ps-6 text-sm leading-7">
             <li>
-              رکورد/آپلود صدا از صفحه‌ی{" "}
-              <a className="underline" href="/word-hints/audio">
-                /word-hints/audio
-              </a>
-              .
-            </li>
-            <li>
-              رکورد/آپلود صدا از صفحه‌ی{" "}
-              <a className="underline" href="/ipa/picture-words/audio">
-                /ipa/picture-words/audio
-              </a>
-              .
+              ویرایش (Generate/Record/Upload/Delete) صوت‌ها از صفحه‌ی{" "}
+              <Link className="underline" href="/words/editor">
+                /words/editor
+              </Link>{" "}
+              انجام شود (با این کار فیلد <span className="font-mono">updatedAt</span> هم به‌روز می‌شود).
             </li>
             <li>
               سینک فایل‌های صوتی از صفحه‌ی{" "}
@@ -49,14 +44,9 @@ export default function HowToDoPage() {
           </p>
           <ul className="mt-3 list-disc space-y-2 ps-6 text-sm leading-7">
             <li>
-              <a className="underline" href="/word-hints/audio">
-                /word-hints/audio
-              </a>
-            </li>
-            <li>
-              <a className="underline" href="/ipa/picture-words/audio">
-                /ipa/picture-words/audio
-              </a>
+              <Link className="underline" href="/words/editor">
+                /words/editor
+              </Link>
             </li>
             <li>
               <a className="underline" href="/tests/sync-anki-words">

@@ -1,5 +1,5 @@
 {
-  "createdAt": "2026-02-26T12:04:36.594Z",
+  "createdAt": "2026-02-28T03:15:02.009Z",
   "data": {
     "theme": [
       {
@@ -20629,7 +20629,7 @@
         "word_hint_story": null,
         "sentence_en": "The bird pulled a long worm out of the garden soil.",
         "sentence_en_meaning_fa": "پرنده یک کرم دراز را از خاک باغچه بیرون کشید.",
-        "explanation_for_sentence_meaning": "",
+        "explanation_for_sentence_meaning": null,
         "learning_depth": 0.78,
         "mixed_sentence": null,
         "other_meanings_fa": null,
@@ -20644,7 +20644,7 @@
         "common_error": null,
         "imageability": 95,
         "createdAt": "2025-12-31T04:30:59.671Z",
-        "updatedAt": "2026-02-16T14:43:45.480Z"
+        "updatedAt": "2026-02-27T12:02:53.843Z"
       },
       {
         "id": 1283,
@@ -48120,7 +48120,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.45,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -48132,7 +48132,7 @@
         "common_error": null,
         "imageability": 98,
         "createdAt": "2026-02-03T12:34:24.573Z",
-        "updatedAt": "2026-02-16T14:48:43.138Z"
+        "updatedAt": "2026-02-27T11:39:50.188Z"
       },
       {
         "id": 2352,
@@ -59192,7 +59192,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.25,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -59204,7 +59204,7 @@
         "common_error": null,
         "imageability": 95,
         "createdAt": "2026-02-03T13:58:47.332Z",
-        "updatedAt": "2026-02-16T14:54:18.081Z"
+        "updatedAt": "2026-02-27T11:32:51.978Z"
       },
       {
         "id": 2698,
@@ -62520,7 +62520,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.6,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -62532,7 +62532,7 @@
         "common_error": null,
         "imageability": 90,
         "createdAt": "2026-02-03T18:55:24.973Z",
-        "updatedAt": "2026-02-16T14:56:12.705Z"
+        "updatedAt": "2026-02-27T11:50:41.575Z"
       },
       {
         "id": 2802,
@@ -62820,7 +62820,7 @@
         "common_error": null,
         "imageability": 90,
         "createdAt": "2026-02-03T18:55:24.993Z",
-        "updatedAt": "2026-02-16T14:56:12.750Z"
+        "updatedAt": "2026-02-27T11:50:24.288Z"
       },
       {
         "id": 2811,
@@ -77073,14 +77073,14 @@
         "meaning_fa_IPA_normalized": "sʌɣe pʌ",
         "pos": "noun",
         "concept_explained": null,
-        "concept_explained_fa": "بخش پشتی پایین پا میان زانو و مچ.",
+        "concept_explained_fa": "بخش پشتی پایین پا میان زانو و مچ. که بهش دو قلو های پا هم میگن",
         "word_hint_story": null,
         "sentence_en": "My calf cramped halfway through the run.",
         "sentence_en_meaning_fa": "ساق پام وسط دویدن گرفت.",
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.55,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -77092,7 +77092,7 @@
         "common_error": null,
         "imageability": 98,
         "createdAt": "2026-02-03T19:28:26.434Z",
-        "updatedAt": "2026-02-16T14:56:13.544Z"
+        "updatedAt": "2026-02-27T11:49:05.945Z"
       },
       {
         "id": 3257,
