@@ -204,6 +204,19 @@ export default function AnkiNotePage() {
     return { ok: true as const };
   }
 
+  async function pressKnownOnce(cardIds: number[]) {
+    if (!cardIds.length) return { ok: true as const };
+
+    for (const chunk of chunkArray(cardIds, 200)) {
+      const res = await ankiRequestDetailed("answerCards", {
+        answers: chunk.map((cardId) => ({ cardId, ease: 3 as const })),
+      });
+      if (!res.ok) return { ok: false as const, error: res.error };
+    }
+
+    return { ok: true as const };
+  }
+
   async function syncWithAnkiWebOrAlert(label: string) {
     if (
       typeof navigator !== "undefined" &&
@@ -381,24 +394,13 @@ export default function AnkiNotePage() {
     return { ok: true as const, lastByCardId: out };
   }
 
-  async function filterCardIdsWhereLastAnswerAgain(
-    cardIds: number[],
-    opts?: { minIvlDays?: number | null },
-  ) {
+  async function filterCardIdsWhereLastAnswerAgain(cardIds: number[]) {
     const lastRes = await getLastReviewsByCardId(cardIds);
     if (!lastRes.ok) return lastRes;
     const out: number[] = [];
-    const minIvlDays =
-      typeof opts?.minIvlDays === "number" && Number.isFinite(opts.minIvlDays)
-        ? Math.trunc(opts.minIvlDays)
-        : null;
     for (const cardId of cardIds) {
       const last = lastRes.lastByCardId.get(cardId) ?? null;
       if (last?.ease !== 1) continue;
-      if (minIvlDays != null) {
-        const ivl = Number(last?.ivl);
-        if (!Number.isFinite(ivl) || ivl < minIvlDays) continue;
-      }
       out.push(cardId);
     }
     return {
@@ -435,13 +437,11 @@ export default function AnkiNotePage() {
         return;
       }
 
-      const phase0FilterLabel = "Again + ivl>=2";
+      const phase0FilterLabel = "Again";
       setPhase0StatusText(
         `Filtering last answer = ${phase0FilterLabel} for ${candidateIds.length} cards…`,
       );
-      const againRes = await filterCardIdsWhereLastAnswerAgain(candidateIds, {
-        minIvlDays: 2,
-      });
+      const againRes = await filterCardIdsWhereLastAnswerAgain(candidateIds);
       if (!againRes.ok) {
         setPhase0Error(againRes.error);
         return;
@@ -763,6 +763,18 @@ export default function AnkiNotePage() {
         const resetRes = await resetCardsToToday(faToEnIds);
         if (!resetRes.ok) {
           setPhase2Error(resetRes.error);
+          return;
+        }
+      }
+
+      const returnedCardIds = Array.from(new Set([...enToFaIds, ...faToEnIds]));
+      if (returnedCardIds.length) {
+        setPhase2StatusText(
+          `Pressing “بلدم” once for ${returnedCardIds.length} returned cards…`,
+        );
+        const pressRes = await pressKnownOnce(returnedCardIds);
+        if (!pressRes.ok) {
+          setPhase2Error(pressRes.error);
           return;
         }
       }
@@ -1411,16 +1423,14 @@ export default function AnkiNotePage() {
 	                        <li>
 	                          از بین آن‌ها کارت‌هایی که آخرین پاسخشان{" "}
 	                          <span className="font-mono text-xs">Again</span> بوده
-	                          و{" "}
-	                          <span className="font-mono text-xs">ivl&gt;=2</span>{" "}
-	                          دارند انتخاب می‌شوند.
+	                          انتخاب می‌شوند.
 	                        </li>
 	                        <li>
-	                          این شرطِ ترکیبی کمک می‌کند کارت‌هایی که تازه Again
-	                          خورده‌اند (نویز) وارد چرخه‌ی قرنطینه نشوند، و همچنین
-	                          کارت‌هایی که فاز ۳ به deckهای اصلی برمی‌گرداند (اما
-	                          آخرین پاسخشان هنوز Again است) دوباره در فاز ۰
-	                          انتخاب نشوند.
+	                          برای جلوگیری از این‌که کارت‌هایی که فاز ۲ به deckهای
+	                          اصلی برمی‌گرداند (اما آخرین پاسخشان هنوز Again است)
+	                          دوباره در فاز ۰ انتخاب شوند، در فاز ۲ بعد از ریست
+	                          یک بار هم «بلدم» زده می‌شود تا آخرین پاسخشان Again
+	                          نباشد.
 	                        </li>
 	                        <li>
 	                          آن کارت‌ها به deck {WordAnkiConstants.decks.tempRoot}{" "}
@@ -1535,7 +1545,8 @@ export default function AnkiNotePage() {
 	                        </li>
 	                        <li>
 	                          کارت‌های پیدا‌شده به deckهای اصلی‌شان برگردانده می‌شوند
-	                          و ریست می‌شوند (due=today سپس forget).
+	                          و ریست می‌شوند (due=today سپس forget)، و سپس یک بار هم
+	                          «بلدم» زده می‌شود تا آخرین پاسخشان Again نباشد.
 	                        </li>
 	                      </ol>
 
