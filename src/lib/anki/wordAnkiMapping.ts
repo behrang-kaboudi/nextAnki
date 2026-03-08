@@ -261,6 +261,9 @@ export const WORD_ANKI_FIELD_GENERATORS = {
     return buildHintLines([obj.person, obj.adj, obj.job]);
   },
 
+  // User-managed in Anki (personal notes); intentionally not sourced from DB.
+  selfGuide: () => "",
+
   // Anki field name is `hint_to_select_letters`, but DB field is `hint_to_select`.
   hint_to_select_letters: (w) => String(w.base_form.length ?? ""),
 

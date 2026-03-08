@@ -487,14 +487,9 @@ export default function StructureBuilderPage() {
       appendLog(`✗ modelTemplates failed: ${templatesRes.ok ? "null result" : templatesRes.error}`);
       return { ok: false as const };
     }
-    const existingNames = new Set(Object.keys(templatesRes.result));
+    const existing = templatesRes.result;
+    const existingNames = new Set(Object.keys(existing));
     const missing = desiredNames.filter((name) => !existingNames.has(String(name)));
-
-    if (!missing.length) {
-      appendLog("✓ All required templates already exist.");
-      appendLog("Step 4: Done.");
-      return { ok: true as const };
-    }
 
     for (const name of missing) {
       appendLog(`Adding template: ${String(name)} ...`);
@@ -509,7 +504,30 @@ export default function StructureBuilderPage() {
       }
     }
 
-    appendLog("✓ Templates ensured.");
+    const updates: Record<string, { Front: string; Back: string }> = {};
+    for (const name of desiredNames) {
+      const tpl = desired[name];
+      const curr = existing[String(name)] ?? null;
+      if (!curr) continue; // just added above (or doesn't exist yet); no need to update
+      if (curr.Front !== tpl.Front || curr.Back !== tpl.Back) {
+        updates[String(name)] = { Front: tpl.Front, Back: tpl.Back };
+      }
+    }
+
+    const updateNames = Object.keys(updates);
+    if (updateNames.length) {
+      appendLog(`Updating templates: ${updateNames.join(", ")} ...`);
+      const updateRes = await ankiRequestDetailed("updateModelTemplates", {
+        model: { name: modelName, templates: updates },
+      });
+      if (!updateRes.ok) {
+        appendLog(`✗ updateModelTemplates failed: ${updateRes.error}`);
+        return { ok: false as const };
+      }
+    }
+
+    if (!missing.length && !updateNames.length) appendLog("✓ Templates already up-to-date.");
+    else appendLog("✓ Templates ensured.");
     appendLog("Step 4: Done.");
     return { ok: true as const };
   }

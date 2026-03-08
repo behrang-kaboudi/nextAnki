@@ -50,5 +50,40 @@ export async function ensureMetaLexVr9ModelFields(
     const addRes = await anki.requestDetailed("modelFieldAdd", { modelName, fieldName: f });
     if (!addRes.ok) throw new Error(addRes.error);
   }
-}
 
+  // Keep card templates in sync as well (especially important for existing users/models).
+  const desiredTemplates = WordAnkiConstants.noteTemplates.META_LEX_VR9;
+  const desiredByName: Record<string, { Front: string; Back: string }> = {
+    Rahnama: desiredTemplates.Rahnama,
+    Rahnama2: desiredTemplates.Rahnama2,
+  };
+
+  const currentTemplatesRes = await anki.requestDetailed("modelTemplates", { modelName });
+  if (!currentTemplatesRes.ok) throw new Error(currentTemplatesRes.error);
+  const currentTemplates = currentTemplatesRes.result;
+  if (!currentTemplates) throw new Error("AnkiConnect returned null for modelTemplates.");
+
+  const updates: Record<string, { Front: string; Back: string }> = {};
+  for (const [name, desired] of Object.entries(desiredByName)) {
+    const current = currentTemplates[name] ?? null;
+    if (!current) {
+      const addRes = await anki.requestDetailed("modelTemplateAdd", {
+        modelName,
+        template: { Name: name, Front: desired.Front, Back: desired.Back },
+      });
+      if (!addRes.ok) throw new Error(addRes.error);
+      continue;
+    }
+
+    if (current.Front !== desired.Front || current.Back !== desired.Back) {
+      updates[name] = { Front: desired.Front, Back: desired.Back };
+    }
+  }
+
+  if (Object.keys(updates).length) {
+    const updateRes = await anki.requestDetailed("updateModelTemplates", {
+      model: { name: modelName, templates: updates },
+    });
+    if (!updateRes.ok) throw new Error(updateRes.error);
+  }
+}

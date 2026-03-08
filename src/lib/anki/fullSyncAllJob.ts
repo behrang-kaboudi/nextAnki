@@ -115,7 +115,7 @@ export function getFullSyncAllStatus(): FullSyncAllStatus {
 
 async function updateNoteFields(
   noteId: number,
-  fields: Record<WordNoteFieldName, string>,
+  fields: Partial<Record<WordNoteFieldName, string>>,
   anki: ReturnType<typeof createAnkiConnectClient>,
 ) {
   const res = await anki.requestDetailed("updateNoteFields", { note: { id: noteId, fields } });
@@ -190,6 +190,9 @@ async function runJob(state: State) {
 
   const noteByAnkiLinkId = new Map<string, ExistingAnkiNoteInfo>();
   const wantedFields = WordAnkiConstants.noteFields.META_LEX_VR9;
+  const managedFields = wantedFields.filter(
+    (f) => f !== "selfGuide",
+  ) as WordNoteFieldName[];
 
   for (const batch of chunk(noteIds, 250)) {
     const infoRes = await ankiFinder.requestDetailed("notesInfo", { notes: batch });
@@ -200,7 +203,7 @@ async function runJob(state: State) {
       if (noteByAnkiLinkId.has(ankiLinkId)) continue;
 
       const fieldsByName: Partial<Record<WordNoteFieldName, string>> = {};
-      for (const f of wantedFields) {
+      for (const f of managedFields) {
         fieldsByName[f] = normalizeFieldValueForCompare(String(n.fields?.[f]?.value ?? ""));
       }
       noteByAnkiLinkId.set(ankiLinkId, { noteId: n.noteId, fieldsByName });
@@ -256,7 +259,7 @@ async function runJob(state: State) {
 
       const before = existing.fieldsByName;
       let same = true;
-      for (const f of wantedFields) {
+      for (const f of managedFields) {
         const prev = normalizeFieldValueForCompare(String(before[f] ?? ""));
         const next = normalizeFieldValueForCompare(String(fields[f] ?? ""));
         if (prev !== next) {
@@ -272,7 +275,10 @@ async function runJob(state: State) {
       }
 
       const client = clients[Math.abs(existing.noteId) % clients.length]!;
-      const updated = await updateNoteFields(existing.noteId, fields, client);
+      const managedUpdateFields = Object.fromEntries(
+        managedFields.map((f) => [f, fields[f]] as const),
+      ) as Partial<Record<WordNoteFieldName, string>>;
+      const updated = await updateNoteFields(existing.noteId, managedUpdateFields, client);
       if (!updated.ok) state.failed += 1;
       else state.updated += 1;
 

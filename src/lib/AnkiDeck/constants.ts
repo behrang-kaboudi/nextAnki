@@ -17,6 +17,7 @@ export const WordAnkiConstants = {
       "mixed_sentence",
       "first_letter_fa_hint",
       "first_letter_en_hint",
+      "selfGuide",
       "hint_to_select_letters",
       "hint_sentence",
       "phonetic_us_normalized",
@@ -121,20 +122,18 @@ export const WordAnkiConstants = {
         Back: `{{FrontSide}}
 
 
-<div style='font-family: "Arial"; font-size: 20px;'>{{first_letter_en_hint}}</div>
-
+{{#selfGuide}}<div style='font-family: "Arial"; font-size: 20px;'>{{selfGuide}}</div>{{/selfGuide}}{{^selfGuide}}<div style='font-family: "Arial"; font-size: 20px;'>{{first_letter_en_hint}}</div>{{/selfGuide}}
 
 `,
       },
       Rahnama2: {
-        Front: `<div style='font-family: "Arial"; font-size: 20px;'>{{first_letter_en_hint}}</div>
+        Front: `{{#selfGuide}}<div style='font-family: "Arial"; font-size: 20px;'>{{selfGuide}}</div>{{/selfGuide}}{{^selfGuide}}<div style='font-family: "Arial"; font-size: 20px;'>{{first_letter_en_hint}}</div>{{/selfGuide}}
 
 `,
         Back: `{{FrontSide}}
-	
 <div style=";text-align:right">
 	{{meaning_fa}}
-	<div style='display:none'>[sound:rec1765049893.mp3]</div></div>`,
+</div>`,
       },
     },
   },
