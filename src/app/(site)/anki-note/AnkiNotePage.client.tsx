@@ -89,6 +89,7 @@ export default function AnkiNotePage() {
   const [runAllRunning, setRunAllRunning] = useState(false);
   const [runAllStatusText, setRunAllStatusText] = useState<string | null>(null);
   const [runAllError, setRunAllError] = useState<string | null>(null);
+  const [phaseActionsEnabled, setPhaseActionsEnabled] = useState(false);
   const [browseLimit, setBrowseLimit] = useState(50);
   const [browseQueryExtra, setBrowseQueryExtra] = useState("");
   const [openNoteIds, setOpenNoteIds] = useState<Record<number, boolean>>({});
@@ -1356,10 +1357,20 @@ export default function AnkiNotePage() {
             <div className="mb-1 text-xs font-semibold text-muted">
               اجرای خودکار
             </div>
+            <label className="mb-2 flex items-center gap-2 text-xs text-muted">
+              <input
+                type="checkbox"
+                checked={phaseActionsEnabled}
+                onChange={(e) => setPhaseActionsEnabled(e.target.checked)}
+                className="h-4 w-4 rounded border border-card"
+              />
+              فعال شدن دکمه‌های فاز ۰، ۱، ۲ و اجرای کامل
+            </label>
 	            <button
 	              type="button"
 	              onClick={() => void runAllPhases()}
 	              disabled={
+	                !phaseActionsEnabled ||
 	                runAllRunning ||
 	                phase0Running ||
 	                phase1Running ||
@@ -1408,7 +1419,7 @@ export default function AnkiNotePage() {
 	                    <button
 	                      type="button"
 	                      onClick={() => void runPhase0()}
-	                      disabled={phase0Running}
+	                      disabled={!phaseActionsEnabled || phase0Running}
 	                      className="h-11 rounded-xl bg-[var(--primary)] px-4 text-sm font-semibold text-[var(--primary-foreground)] shadow-elevated transition hover:opacity-95 disabled:opacity-60"
 	                    >
 	                      {phase0Running ? "در حال انجام..." : "اجرای فاز ۰"}
@@ -1465,7 +1476,7 @@ export default function AnkiNotePage() {
 	                    <button
 	                      type="button"
 	                      onClick={() => void runPhase1()}
-                      disabled={phase1Running}
+                      disabled={!phaseActionsEnabled || phase1Running}
                       className="h-11 rounded-xl bg-[var(--primary)] px-4 text-sm font-semibold text-[var(--primary-foreground)] shadow-elevated transition hover:opacity-95 disabled:opacity-60"
                     >
                       {phase1Running ? "در حال انجام..." : "اجرای فاز ۱"}
@@ -1517,7 +1528,7 @@ export default function AnkiNotePage() {
                     <button
                       type="button"
                       onClick={() => void runPhase2()}
-                      disabled={phase2Running}
+                      disabled={!phaseActionsEnabled || phase2Running}
                       className="h-11 rounded-xl bg-[var(--primary)] px-4 text-sm font-semibold text-[var(--primary-foreground)] shadow-elevated transition hover:opacity-95 disabled:opacity-60"
                     >
                       {phase2Running ? "در حال انجام..." : "اجرای فاز ۲"}
