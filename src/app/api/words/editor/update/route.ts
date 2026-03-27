@@ -1,8 +1,12 @@
 import "server-only";
 
+import type { Word } from "@prisma/client";
 import { NextResponse } from "next/server";
 
+import { prisma } from "@/lib/prisma";
 import { normalizeIpaForDb } from "@/lib/ipa/normalize";
+import { pickPictureSymbolsForWord } from "@/lib/ipa/setPictures/setForAny";
+import { stringifyJsonHintWithTimestamp } from "@/lib/words/jsonHint";
 import { updateWord } from "@/lib/words/wordRepo";
 
 export const runtime = "nodejs";
@@ -77,6 +81,35 @@ export async function POST(req: Request) {
     const phonetic_us = normalizeNullableString(d.phonetic_us) ?? null;
     const phonetic_us_normalized = phonetic_us ? normalizeIpaForDb(phonetic_us, 2000) : null;
     const meaning_fa_IPA_normalized = normalizeIpaForDb(meaning_fa_IPA, 2000);
+    const existing = await prisma.word.findUnique({
+      where: { id },
+    });
+
+    if (!existing) {
+      return NextResponse.json({ ok: false, error: `Word ${id} not found.` }, { status: 404 });
+    }
+
+    const shouldRefreshJsonHint =
+      existing.phonetic_us !== phonetic_us || existing.meaning_fa_IPA !== meaning_fa_IPA;
+
+    const json_hint = shouldRefreshJsonHint
+      ? (() => {
+          const nextWord = {
+            ...existing,
+            base_form,
+            phonetic_us,
+            phonetic_us_normalized,
+            meaning_fa,
+            meaning_fa_IPA,
+            meaning_fa_IPA_normalized,
+          } satisfies Word;
+          return nextWord.phonetic_us_normalized?.trim()
+            ? pickPictureSymbolsForWord(nextWord).then((match) =>
+                match ? stringifyJsonHintWithTimestamp(match) : null,
+              )
+            : Promise.resolve(null);
+        })()
+      : Promise.resolve(normalizeNullableString(d.json_hint));
 
     const updated = await updateWord({
       where: { id },
@@ -103,12 +136,18 @@ export async function POST(req: Request) {
         first_letter_en_hint: normalizeNullableString(d.first_letter_en_hint),
         first_letter_fa_hint: normalizeNullableString(d.first_letter_fa_hint),
         hint_to_select: normalizeNullableString(d.hint_to_select),
-        json_hint: normalizeNullableString(d.json_hint),
+        json_hint: await json_hint,
         word_note: normalizeNullableString(d.word_note),
         common_error: normalizeNullableString(d.common_error),
         imageability: normalizeNullableNumber(d.imageability),
       },
-      select: { id: true, updatedAt: true, phonetic_us_normalized: true, meaning_fa_IPA_normalized: true },
+      select: {
+        id: true,
+        updatedAt: true,
+        phonetic_us_normalized: true,
+        meaning_fa_IPA_normalized: true,
+        json_hint: true,
+      },
     });
 
     return NextResponse.json({
@@ -118,6 +157,7 @@ export async function POST(req: Request) {
         updatedAt: updated.updatedAt.toISOString(),
         phonetic_us_normalized: updated.phonetic_us_normalized,
         meaning_fa_IPA_normalized: updated.meaning_fa_IPA_normalized,
+        json_hint: updated.json_hint,
       },
     });
   } catch (e) {

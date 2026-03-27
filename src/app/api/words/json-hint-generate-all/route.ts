@@ -2,10 +2,11 @@ import "server-only";
 
 import { NextResponse } from "next/server";
 
-import { Prisma, type Word } from "@prisma/client";
+import type { Word } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { pickPictureSymbolsForWord } from "@/lib/ipa/setPictures/setForAny";
 import { normalizeJsonHintForCompare, stringifyJsonHintWithTimestamp } from "@/lib/words/jsonHint";
+import { updateWord } from "@/lib/words/wordRepo";
 
 export const runtime = "nodejs";
 
@@ -124,19 +125,13 @@ export async function POST(req: Request) {
 
     let updated = 0;
     if (updates.length) {
-      const ids = updates.map((u) => u.id);
-      const cases = updates.map((u) => Prisma.sql`WHEN ${u.id} THEN ${u.json_hint}`);
-
-      updated = await prisma.$executeRaw(
-        Prisma.sql`
-          UPDATE \`Word\`
-          SET json_hint = CASE id
-            ${Prisma.join(cases, " ")}
-            ELSE json_hint
-          END
-          WHERE id IN (${Prisma.join(ids)})
-        `
-      );
+      await mapWithConcurrency(updates, concurrency, async (item) => {
+        await updateWord({
+          where: { id: item.id },
+          data: { json_hint: item.json_hint },
+        });
+      });
+      updated = updates.length;
     }
 
     return NextResponse.json({

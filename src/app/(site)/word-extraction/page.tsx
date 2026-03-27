@@ -67,6 +67,7 @@ export default function WordExtractionPage() {
   const [phoneticModalTailLimitApplied, setPhoneticModalTailLimitApplied] = useState(20);
   const [isMeaningIpaModalOpen, setIsMeaningIpaModalOpen] = useState(false);
   const [meaningIpaModalError, setMeaningIpaModalError] = useState<string | null>(null);
+  const [isMeaningIpaBulkSaving, setIsMeaningIpaBulkSaving] = useState(false);
   const [meaningIpaRows, setMeaningIpaRows] = useState<
     Array<{
       id: number;
@@ -108,6 +109,68 @@ export default function WordExtractionPage() {
   }, []);
 
   const [rightDir, setRightDir] = useState<"rtl" | "ltr">("rtl");
+
+  const parseJsonArrayFromText = useCallback((text: string): unknown[] => {
+    const trimmed = text.trim();
+    const tryParse = (candidate: string): unknown | null => {
+      try {
+        return JSON.parse(candidate) as unknown;
+      } catch {
+        return null;
+      }
+    };
+
+    const direct = tryParse(trimmed);
+    if (Array.isArray(direct)) return direct;
+
+    for (let start = 0; start < trimmed.length; start++) {
+      if (trimmed[start] !== "[") continue;
+
+      let depth = 0;
+      let inString = false;
+      let escaped = false;
+
+      for (let end = start; end < trimmed.length; end++) {
+        const ch = trimmed[end];
+
+        if (inString) {
+          if (escaped) {
+            escaped = false;
+            continue;
+          }
+          if (ch === "\\") {
+            escaped = true;
+            continue;
+          }
+          if (ch === "\"") {
+            inString = false;
+          }
+          continue;
+        }
+
+        if (ch === "\"") {
+          inString = true;
+          continue;
+        }
+
+        if (ch === "[") {
+          depth += 1;
+          continue;
+        }
+
+        if (ch === "]") {
+          depth -= 1;
+          if (depth === 0) {
+            const sliced = tryParse(trimmed.slice(start, end + 1));
+            if (Array.isArray(sliced)) return sliced;
+            break;
+          }
+        }
+      }
+    }
+
+    throw new Error("Input must contain a JSON array");
+  }, []);
 
   const openBasePromptModal = useCallback(async () => {
     setIsBaseModalOpen(true);
@@ -210,9 +273,11 @@ export default function WordExtractionPage() {
     setMeaningIpaRows([]);
 
     try {
-      const parsed = JSON.parse(promptText) as unknown;
-      if (!Array.isArray(parsed)) {
-        throw new Error("Input must be a JSON array: [{ id, meaning_fa_IPA }]");
+      let parsed: unknown[];
+      try {
+        parsed = parseJsonArrayFromText(promptText);
+      } catch {
+        parsed = parseJsonArrayFromText(rightText);
       }
 
       const seen = new Set<number>();
@@ -290,7 +355,7 @@ export default function WordExtractionPage() {
     } catch (e) {
       setMeaningIpaModalError(e instanceof Error ? e.message : String(e));
     }
-  }, [promptText]);
+  }, [parseJsonArrayFromText, promptText, rightText]);
 
   const helperSpecs = WORD_EXTRACTION_PROMPTS_PHASE3;
   const helperDefaultActiveId =
@@ -654,6 +719,85 @@ export default function WordExtractionPage() {
       setMeaningIpaRows((cur) =>
         cur.map((r) => (r.id === id ? { ...r, saving: false, saveError: msg, saved: false } : r)),
       );
+    }
+  }
+
+  async function saveAllMeaningIpa() {
+    if (meaningIpaRows.length === 0) return;
+
+    setIsMeaningIpaBulkSaving(true);
+    setMeaningIpaRows((cur) =>
+      cur.map((r) => ({
+        ...r,
+        saving: true,
+        saveError: null,
+        saved: false,
+      })),
+    );
+
+    try {
+      const payload = meaningIpaRows.map((r) => ({
+        id: r.id,
+        meaning_fa_IPA: r.inputMeaningIpa.trim(),
+      }));
+
+      const res = await fetch("/api/word-extraction/meaning-fa-ipa/update-bulk", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const json = (await res.json().catch(() => null)) as
+        | {
+            ok?: boolean;
+            error?: string;
+            total?: number;
+            updated?: number;
+            results?: Array<
+              | { ok: true; id: number; meaning_fa_IPA: string; meaning_fa_IPA_normalized: string }
+              | { ok: false; id: number; error: string }
+            >;
+          }
+        | null;
+      if (!res.ok || !json?.ok) throw new Error(json?.error ?? `Request failed (${res.status})`);
+
+      const resultById = new Map((json.results ?? []).map((item) => [item.id, item]));
+
+      setMeaningIpaRows((cur) =>
+        cur.map((r) => {
+          const result = resultById.get(r.id);
+          if (!result) {
+            return {
+              ...r,
+              saving: false,
+              saveError: "No result returned for this row",
+              saved: false,
+            };
+          }
+          if (!result.ok) {
+            return { ...r, saving: false, saveError: result.error, saved: false };
+          }
+          return {
+            ...r,
+            dbMeaningIpa: result.meaning_fa_IPA,
+            dbMeaningIpaNormalized: result.meaning_fa_IPA_normalized,
+            saving: false,
+            saveError: null,
+            saved: true,
+          };
+        }),
+      );
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      setMeaningIpaRows((cur) =>
+        cur.map((r) => ({
+          ...r,
+          saving: false,
+          saveError: r.saveError ?? msg,
+          saved: false,
+        })),
+      );
+    } finally {
+      setIsMeaningIpaBulkSaving(false);
     }
   }
 
@@ -1215,13 +1359,24 @@ export default function WordExtractionPage() {
                   Paste JSON in Prompt (left): [{"{"}id, meaning_fa_IPA{"}"}] then open this modal.
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={() => setIsMeaningIpaModalOpen(false)}
-                className="rounded border px-2 py-1 text-sm hover:bg-black/5 dark:hover:bg-white/5"
-              >
-                Close
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => void saveAllMeaningIpa()}
+                  disabled={isMeaningIpaBulkSaving || meaningIpaRows.length === 0}
+                  className="rounded border px-3 py-1 text-sm hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5"
+                  title="Updates meaning_fa_IPA and meaning_fa_IPA_normalized for all loaded rows"
+                >
+                  {isMeaningIpaBulkSaving ? "Updating all..." : "Update all"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsMeaningIpaModalOpen(false)}
+                  className="rounded border px-2 py-1 text-sm hover:bg-black/5 dark:hover:bg-white/5"
+                >
+                  Close
+                </button>
+              </div>
             </div>
 
             {meaningIpaModalError ? (

@@ -267,6 +267,7 @@ export default function WordEditorClient({ initial }: { initial: WordEditorState
                   updatedAt?: string;
                   phonetic_us_normalized?: string | null;
                   meaning_fa_IPA_normalized?: string;
+                  json_hint?: string | null;
                 }
               | null;
             error?: string;
@@ -280,12 +281,13 @@ export default function WordEditorClient({ initial }: { initial: WordEditorState
         json?.item && "meaning_fa_IPA_normalized" in json.item
           ? String(json.item.meaning_fa_IPA_normalized ?? "")
           : "";
+      const json_hint = json?.item && "json_hint" in json.item ? (json.item.json_hint ?? null) : null;
 
       if (updatedAt) {
-        setWord((prev) => ({ ...prev, updatedAt, phonetic_us_normalized, meaning_fa_IPA_normalized }));
-        setBaseline({ ...word, updatedAt, phonetic_us_normalized, meaning_fa_IPA_normalized });
+        setWord((prev) => ({ ...prev, updatedAt, phonetic_us_normalized, meaning_fa_IPA_normalized, json_hint }));
+        setBaseline({ ...word, updatedAt, phonetic_us_normalized, meaning_fa_IPA_normalized, json_hint });
       } else {
-        setBaseline({ ...word, phonetic_us_normalized, meaning_fa_IPA_normalized });
+        setBaseline({ ...word, phonetic_us_normalized, meaning_fa_IPA_normalized, json_hint });
       }
 
       if (audioFieldsToDelete.length) {
@@ -418,7 +420,6 @@ export default function WordEditorClient({ initial }: { initial: WordEditorState
 
     window.addEventListener("wordFieldVoice:updated", onAudioUpdated);
     return () => window.removeEventListener("wordFieldVoice:updated", onAudioUpdated);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [word.anki_link_id]);
 
   const statusText = saving
