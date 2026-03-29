@@ -34,6 +34,22 @@ type LogEntry = {
   data?: unknown;
 };
 
+type MissingAnkiNote = {
+  noteId: number;
+  modelName: string;
+  anki_link_id: string;
+  base_form: string;
+  meaning_fa: string;
+};
+
+type MissingAnkiNotesResponse = {
+  query?: string;
+  totalNotes?: number;
+  checkedNotes?: number;
+  missing?: MissingAnkiNote[];
+  error?: string;
+};
+
 function nowIso() {
   return new Date().toISOString();
 }
@@ -93,6 +109,14 @@ export default function SyncAnkiWordsClient() {
   const [sentenceEnStatus, setSentenceEnStatus] = useState<SyncAllStatus | null>(null);
   const [sentenceEnMeaningFaStatus, setSentenceEnMeaningFaStatus] = useState<SyncAllStatus | null>(null);
   const [conceptExplainedFaStatus, setConceptExplainedFaStatus] = useState<SyncAllStatus | null>(null);
+  const [missingDeleteModalOpen, setMissingDeleteModalOpen] = useState(false);
+  const [missingDeleteLoading, setMissingDeleteLoading] = useState(false);
+  const [missingDeleteDeleting, setMissingDeleteDeleting] = useState(false);
+  const [missingDeleteError, setMissingDeleteError] = useState<string | null>(null);
+  const [missingDeleteQuery, setMissingDeleteQuery] = useState<string | null>(null);
+  const [missingDeleteTotalNotes, setMissingDeleteTotalNotes] = useState<number | null>(null);
+  const [missingDeleteCheckedNotes, setMissingDeleteCheckedNotes] = useState<number | null>(null);
+  const [missingDeleteItems, setMissingDeleteItems] = useState<MissingAnkiNote[]>([]);
 
   const helpContent = useMemo(() => {
     return {
@@ -534,13 +558,13 @@ export default function SyncAnkiWordsClient() {
   );
 
   useEffect(() => {
-    if (!helpOpen) return;
+    if (!helpOpen && !missingDeleteModalOpen) return;
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = prev;
     };
-  }, [helpOpen]);
+  }, [helpOpen, missingDeleteModalOpen]);
 
   function append(entry: Omit<LogEntry, "ts">) {
     setLog((prev) => [...prev, { ts: nowIso(), ...entry }]);
@@ -773,6 +797,87 @@ export default function SyncAnkiWordsClient() {
     }
   }
 
+  async function loadMissingAnkiNotes() {
+    setMissingDeleteLoading(true);
+    setMissingDeleteDeleting(false);
+    setMissingDeleteError(null);
+
+    try {
+      const res = await fetch("/api/word/anki-missing", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ limit: 5000 }),
+      });
+      const data = (await res.json().catch(() => ({}))) as MissingAnkiNotesResponse;
+      if (!res.ok) throw new Error(data.error ?? `Request failed (${res.status})`);
+
+      const missing = Array.isArray(data.missing) ? data.missing : [];
+      setMissingDeleteQuery(data.query ?? null);
+      setMissingDeleteTotalNotes(typeof data.totalNotes === "number" ? data.totalNotes : null);
+      setMissingDeleteCheckedNotes(typeof data.checkedNotes === "number" ? data.checkedNotes : null);
+      setMissingDeleteItems(missing);
+      setPreview(data);
+      append({
+        level: "info",
+        message: `Loaded ${missing.length} Anki note(s) missing in DB.`,
+        data: {
+          query: data.query ?? null,
+          totalNotes: data.totalNotes ?? null,
+          checkedNotes: data.checkedNotes ?? null,
+        },
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      setMissingDeleteError(message);
+      append({ level: "error", message: "Failed to load Anki notes missing in DB", data: message });
+    } finally {
+      setMissingDeleteLoading(false);
+    }
+  }
+
+  async function openMissingDeleteModal() {
+    if (missingDeleteLoading || missingDeleteDeleting) return;
+    setMissingDeleteModalOpen(true);
+    setMissingDeleteItems([]);
+    setMissingDeleteQuery(null);
+    setMissingDeleteTotalNotes(null);
+    setMissingDeleteCheckedNotes(null);
+    await loadMissingAnkiNotes();
+  }
+
+  async function deleteMissingAnkiNotes() {
+    if (!missingDeleteItems.length || missingDeleteDeleting) return;
+    const ok = window.confirm(
+      `Delete ${missingDeleteItems.length} Anki note(s) that do not exist in the local DB? This cannot be undone.`,
+    );
+    if (!ok) return;
+
+    setMissingDeleteDeleting(true);
+    setMissingDeleteError(null);
+    try {
+      const res = await fetch("/api/word/anki-missing/delete", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ noteIds: missingDeleteItems.map((item) => item.noteId) }),
+      });
+      const data = (await res.json().catch(() => ({}))) as { deleted?: number; error?: string };
+      if (!res.ok) throw new Error(data.error ?? `Request failed (${res.status})`);
+
+      append({
+        level: "info",
+        message: `Deleted ${data.deleted ?? 0} Anki note(s) missing in DB.`,
+        data,
+      });
+      await loadMissingAnkiNotes();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      setMissingDeleteError(message);
+      append({ level: "error", message: "Failed to delete Anki notes missing in DB", data: message });
+    } finally {
+      setMissingDeleteDeleting(false);
+    }
+  }
+
   useEffect(() => {
     if (!pollingEnabled) return;
     let timer: number | null = null;
@@ -997,6 +1102,16 @@ export default function SyncAnkiWordsClient() {
               <div className="flex items-center gap-1">
                 <button
                   type="button"
+                  onClick={() => void openMissingDeleteModal()}
+                  disabled={missingDeleteLoading || missingDeleteDeleting}
+                  className="h-10 rounded-xl border border-red-500/30 bg-red-600/10 px-3 text-sm font-semibold text-red-700 transition hover:bg-red-600/15 disabled:opacity-50 dark:text-red-300"
+                >
+                  Delete Anki notes missing in DB
+                </button>
+              </div>
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
                   onClick={() => void startSyncSentenceEn()}
                   disabled={isRunning || Boolean(sentenceEnStatus?.running)}
                   className="h-10 rounded-xl bg-foreground px-3 text-sm font-semibold text-background transition disabled:opacity-50"
@@ -1093,6 +1208,105 @@ export default function SyncAnkiWordsClient() {
                 </div>
                 <div className="min-h-0 flex-1 overflow-auto pt-3 text-sm leading-6">
                   <div className="space-y-3">{helpContent[helpOpen].body}</div>
+                </div>
+              </div>
+            </div>
+          ) : null}
+
+          {missingDeleteModalOpen ? (
+            <div
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+              role="dialog"
+              aria-modal="true"
+            >
+              <div
+                dir="rtl"
+                lang="fa"
+                className="flex max-h-[85vh] w-full max-w-5xl flex-col rounded border bg-background p-4 text-right shadow-lg"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="space-y-1">
+                    <div className="text-base font-semibold">حذف نوت‌های Anki که در دیتابیس نیستند</div>
+                    <div className="text-xs opacity-80">
+                      پیدا شده: <span className="font-semibold">{missingDeleteItems.length}</span>
+                      {" "}• بررسی‌شده: <span className="font-semibold">{missingDeleteCheckedNotes ?? "—"}</span>
+                      {" "}• کل نوت‌های query: <span className="font-semibold">{missingDeleteTotalNotes ?? "—"}</span>
+                    </div>
+                    {missingDeleteQuery ? (
+                      <div className="text-xs opacity-80">
+                        Query: <Code>{missingDeleteQuery}</Code>
+                      </div>
+                    ) : null}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => void loadMissingAnkiNotes()}
+                      disabled={missingDeleteLoading || missingDeleteDeleting}
+                      className="rounded border px-3 py-1.5 text-sm hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5"
+                    >
+                      {missingDeleteLoading ? "در حال بارگذاری..." : "بازخوانی"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setMissingDeleteModalOpen(false)}
+                      disabled={missingDeleteDeleting}
+                      className="rounded border px-3 py-1.5 text-sm hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5"
+                    >
+                      بستن
+                    </button>
+                  </div>
+                </div>
+
+                {missingDeleteError ? (
+                  <div className="mt-3 rounded border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800">
+                    {missingDeleteError}
+                  </div>
+                ) : null}
+
+                <div className="mt-3 min-h-0 flex-1 overflow-auto rounded border">
+                  {missingDeleteLoading ? (
+                    <div className="p-4 text-sm text-muted">در حال دریافت لیست...</div>
+                  ) : missingDeleteItems.length ? (
+                    <table className="w-full text-right text-xs">
+                      <thead className="sticky top-0 bg-background">
+                        <tr className="border-b border-card">
+                          <th className="whitespace-nowrap px-3 py-2 font-semibold text-neutral-700">noteId</th>
+                          <th className="whitespace-nowrap px-3 py-2 font-semibold text-neutral-700">anki_link_id</th>
+                          <th className="whitespace-nowrap px-3 py-2 font-semibold text-neutral-700">لغت</th>
+                          <th className="px-3 py-2 font-semibold text-neutral-700">معنی</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {missingDeleteItems.map((item) => (
+                          <tr key={`${item.noteId}-${item.anki_link_id}`} className="border-b border-card align-top">
+                            <td className="whitespace-nowrap px-3 py-2 font-mono text-neutral-700">{item.noteId}</td>
+                            <td className="whitespace-nowrap px-3 py-2 font-mono text-neutral-800">{item.anki_link_id}</td>
+                            <td className="whitespace-nowrap px-3 py-2 text-neutral-900">{item.base_form || "—"}</td>
+                            <td className="min-w-[18rem] px-3 py-2 text-neutral-900">{item.meaning_fa || "—"}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  ) : (
+                    <div className="p-4 text-sm text-muted">هیچ نوتی برای حذف پیدا نشد.</div>
+                  )}
+                </div>
+
+                <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t pt-3">
+                  <div className="text-xs text-muted">
+                    این عملیات نوت‌های پیدا شده را از Anki پاک می‌کند و قابل بازگشت نیست.
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => void deleteMissingAnkiNotes()}
+                    disabled={missingDeleteLoading || missingDeleteDeleting || !missingDeleteItems.length}
+                    className="rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700 disabled:opacity-50"
+                  >
+                    {missingDeleteDeleting
+                      ? "در حال حذف..."
+                      : `حذف همه از Anki (${missingDeleteItems.length})`}
+                  </button>
                 </div>
               </div>
             </div>

@@ -7,7 +7,7 @@ import { requireApiAuth } from "@/lib/auth/apiAuth";
 import { createAnkiConnectClient } from "@/lib/AnkiConnect";
 import { WordAnkiConstants } from "@/lib/AnkiDeck/constants";
 
-const DEFAULT_QUERY = `note:"${WordAnkiConstants.noteTypes.META_LEX_VR9}" deck:"${WordAnkiConstants.decks.root}"`;
+const DEFAULT_QUERY = `note:"${WordAnkiConstants.noteTypes.META_LEX_VR9}"`;
 
 function chunk<T>(arr: T[], size: number) {
   const out: T[][] = [];

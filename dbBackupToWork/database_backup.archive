@@ -1,5 +1,5 @@
 {
-  "createdAt": "2026-03-27T01:56:38.740Z",
+  "createdAt": "2026-03-29T01:56:39.552Z",
   "data": {
     "theme": [
       {
@@ -61304,7 +61304,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.55,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -61316,7 +61316,7 @@
         "common_error": null,
         "imageability": 95,
         "createdAt": "2026-02-03T18:43:35.086Z",
-        "updatedAt": "2026-02-16T14:56:12.518Z"
+        "updatedAt": "2026-03-27T09:11:00.178Z"
       },
       {
         "id": 2765,
@@ -66917,38 +66917,6 @@
         "imageability": 85,
         "createdAt": "2026-02-03T19:03:46.795Z",
         "updatedAt": "2026-02-16T14:50:28.095Z"
-      },
-      {
-        "id": 2940,
-        "anki_link_id": "2940_1770145426796",
-        "base_form": "polo",
-        "phonetic_us": "ˈpoʊloʊ",
-        "phonetic_us_normalized": "polo",
-        "meaning_fa": "پولو",
-        "meaning_fa_IPA": "polo",
-        "meaning_fa_IPA_normalized": "polo",
-        "pos": "noun",
-        "concept_explained": null,
-        "concept_explained_fa": "ورزشی تیمی سوار بر اسب که بازیکنان با چوب بلند توپ را هدایت می‌کنند.",
-        "word_hint_story": null,
-        "sentence_en": "He watched polo at the club and took photos.",
-        "sentence_en_meaning_fa": "او در باشگاه پولو تماشا کرد و عکس گرفت.",
-        "explanation_for_sentence_meaning": null,
-        "learning_depth": 0.3,
-        "mixed_sentence": null,
-        "other_meanings_fa": "",
-        "category": null,
-        "typeOfWordInDb": "temp",
-        "hint_sentence": null,
-        "first_letter_en_hint": null,
-        "first_letter_fa_hint": null,
-        "hint_to_select": null,
-        "json_hint": "{\"person\":{\"fa\":\"پلوپز\",\"en\":\"rice cooker\",\"anki_link_id\":\"2358_1770122064588\",\"target_ipa\":\"polopæz\",\"target_lang\":\"fa\",\"usage\":\"noun\",\"source\":\"word\"},\"generatedAtMs\":1770866229309}",
-        "word_note": null,
-        "common_error": null,
-        "imageability": 85,
-        "createdAt": "2026-02-03T19:03:46.796Z",
-        "updatedAt": "2026-02-16T14:50:28.101Z"
       },
       {
         "id": 2941,
@@ -75256,7 +75224,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.6,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -75268,7 +75236,7 @@
         "common_error": null,
         "imageability": 95,
         "createdAt": "2026-02-03T19:28:26.382Z",
-        "updatedAt": "2026-02-16T14:50:29.339Z"
+        "updatedAt": "2026-03-27T08:40:44.604Z"
       },
       {
         "id": 3202,
@@ -83576,7 +83544,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.2,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -83588,7 +83556,7 @@
         "common_error": null,
         "imageability": 96,
         "createdAt": "2026-03-09T09:35:50.064Z",
-        "updatedAt": "2026-03-17T04:40:31.617Z"
+        "updatedAt": "2026-03-27T09:09:48.780Z"
       },
       {
         "id": 3462,
@@ -104440,7 +104408,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.55,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -104452,7 +104420,7 @@
         "common_error": null,
         "imageability": 78,
         "createdAt": "2026-03-10T03:47:21.817Z",
-        "updatedAt": "2026-03-16T03:33:21.371Z"
+        "updatedAt": "2026-03-27T09:11:20.214Z"
       },
       {
         "id": 4125,
