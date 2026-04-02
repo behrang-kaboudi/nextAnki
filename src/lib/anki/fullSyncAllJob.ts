@@ -13,6 +13,7 @@ export type FullSyncAllStatus = {
   startedAt: string | null;
   finishedAt: string | null;
   error: string | null;
+  ignoreUpdatedAt: boolean;
 
   stopRequested: boolean;
   stoppedEarly: boolean;
@@ -87,6 +88,7 @@ function getState(): State {
       startedAt: null,
       finishedAt: null,
       error: null,
+      ignoreUpdatedAt: false,
       stopRequested: false,
       stoppedEarly: false,
       total: 0,
@@ -155,6 +157,7 @@ async function runJob(state: State) {
   state.running = true;
   state.done = false;
   state.error = null;
+  state.ignoreUpdatedAt = Boolean(state.ignoreUpdatedAt);
   state.stopRequested = false;
   state.stoppedEarly = false;
   state.startedAt = nowIso();
@@ -236,7 +239,7 @@ async function runJob(state: State) {
 
       // Fast path: If our `updatedAt` field matches, treat the note as up-to-date and skip.
       // This avoids generating and comparing every field on every run.
-      if (existing) {
+      if (existing && !state.ignoreUpdatedAt) {
         const prevUpdatedAt = normalizeFieldValueForCompare(String(existing.fieldsByName.updatedAt ?? ""));
         const nextUpdatedAt = normalizeFieldValueForCompare(wordUpdatedAtForAnkiField(word.updatedAt));
         if (prevUpdatedAt && prevUpdatedAt === nextUpdatedAt) {
@@ -296,13 +299,14 @@ async function runJob(state: State) {
   state.currentNoteId = null;
 }
 
-export function startFullSyncAllIfNeeded(): FullSyncAllStatus {
+export function startFullSyncAllIfNeeded(opts?: { ignoreUpdatedAt?: boolean }): FullSyncAllStatus {
   const state = getState();
   if (state.running) return getFullSyncAllStatus();
   if (state._started && !state.done) return getFullSyncAllStatus();
 
   state.jobId = `full_sync_${Date.now()}`;
   state._started = true;
+  state.ignoreUpdatedAt = Boolean(opts?.ignoreUpdatedAt);
   state.stopRequested = false;
   state.stoppedEarly = false;
 

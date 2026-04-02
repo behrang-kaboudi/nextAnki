@@ -12,6 +12,7 @@ type SyncAllStatus = {
   startedAt: string | null;
   finishedAt: string | null;
   error: string | null;
+  ignoreUpdatedAt?: boolean;
   stopRequested: boolean;
   stoppedEarly: boolean;
   total: number;
@@ -103,6 +104,7 @@ export default function SyncAnkiWordsClient() {
   const [jsonHintStatus, setJsonHintStatus] = useState<SyncAllStatus | null>(null);
   const [mediaSyncStatus, setMediaSyncStatus] = useState<SyncAllStatus | null>(null);
   const [fullSyncStatus, setFullSyncStatus] = useState<SyncAllStatus | null>(null);
+  const [fullSyncIgnoreUpdatedAt, setFullSyncIgnoreUpdatedAt] = useState(false);
   const [dedupStatus, setDedupStatus] = useState<SyncAllStatus | null>(null);
   const [otherMeaningsFaStatus, setOtherMeaningsFaStatus] = useState<SyncAllStatus | null>(null);
   const [meaningFaStatus, setMeaningFaStatus] = useState<SyncAllStatus | null>(null);
@@ -261,6 +263,10 @@ export default function SyncAnkiWordsClient() {
                 <li>اگر رکورد DB وجود نداشته باشد → skip (skippedNoWord)</li>
                 <li>اگر <Code>anki_link_id</Code> نداشته باشد → skip (skippedNoLinkId)</li>
                 <li>اگر فیلد تولیدی با مقدار فعلی یکی باشد → skip (skippedSame)</li>
+                <li>
+                  اگر گزینه‌ی <Code>Ignore updatedAt and sync all</Code> روشن باشد، fast-path مبتنی بر{" "}
+                  <Code>updatedAt</Code> غیرفعال می‌شود و همه‌ی رکوردها کامل بررسی می‌شوند.
+                </li>
                 <li>در غیر این صورت → updateNoteFields (updated/created)</li>
               </ul>
             </section>
@@ -756,8 +762,17 @@ export default function SyncAnkiWordsClient() {
     setPreview(null);
 
     try {
-      append({ level: "info", message: "Starting FULL sync (DB -> Anki)..." });
-      const res = await fetch("/api/tests/sync-anki-words/full/sync-all/start", { method: "POST" });
+      append({
+        level: "info",
+        message: fullSyncIgnoreUpdatedAt
+          ? "Starting FULL sync (DB -> Anki) with updatedAt fast-path disabled..."
+          : "Starting FULL sync (DB -> Anki)...",
+      });
+      const res = await fetch("/api/tests/sync-anki-words/full/sync-all/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ignoreUpdatedAt: fullSyncIgnoreUpdatedAt }),
+      });
       const data = (await res.json()) as { status?: SyncAllStatus } | unknown;
       setPreview(data);
       if (data && typeof data === "object" && "status" in data) {
@@ -1086,6 +1101,15 @@ export default function SyncAnkiWordsClient() {
                 >
                   Full sync DB → Anki
                 </button>
+                <label className="mr-2 inline-flex items-center gap-2 text-xs text-foreground/80">
+                  <input
+                    type="checkbox"
+                    checked={fullSyncIgnoreUpdatedAt}
+                    onChange={(e) => setFullSyncIgnoreUpdatedAt(e.target.checked)}
+                    disabled={isRunning || Boolean(fullSyncStatus?.running)}
+                  />
+                  Ignore updatedAt and sync all
+                </label>
                 <HelpButton id="full_sync" />
               </div>
               <div className="flex items-center gap-1">
@@ -1348,6 +1372,7 @@ export default function SyncAnkiWordsClient() {
                   <span className="font-semibold">{fullSyncStatus.updated}</span> • Skipped{" "}
                   <span className="font-semibold">{fullSkippedTotal}</span> • Failed{" "}
                   <span className="font-semibold">{fullSyncStatus.failed}</span>
+                  {fullSyncStatus.ignoreUpdatedAt ? " • Mode: ignore updatedAt" : ""}
                 </span>
               ) : (
                 <span>full sync: Processed 0/0 • Created 0 • Updated 0 • Skipped 0 • Failed 0</span>
