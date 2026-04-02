@@ -1,5 +1,5 @@
 {
-  "createdAt": "2026-03-29T01:56:39.552Z",
+  "createdAt": "2026-04-02T21:49:43.407Z",
   "data": {
     "theme": [
       {
@@ -10389,7 +10389,7 @@
         "word_hint_story": null,
         "sentence_en": "These chips taste stale, so I’m throwing them out.",
         "sentence_en_meaning_fa": "این چیپس‌ها بیات مزه می‌دهند، پس دارم آن‌ها را دور می‌اندازم.",
-        "explanation_for_sentence_meaning": "",
+        "explanation_for_sentence_meaning": null,
         "learning_depth": 0.78,
         "mixed_sentence": null,
         "other_meanings_fa": "کهنه",
@@ -10404,7 +10404,7 @@
         "common_error": null,
         "imageability": 70,
         "createdAt": "2025-12-31T04:30:59.619Z",
-        "updatedAt": "2026-02-16T14:28:35.080Z"
+        "updatedAt": "2026-03-31T23:21:23.370Z"
       },
       {
         "id": 671,
@@ -18165,7 +18165,7 @@
         "word_hint_story": null,
         "sentence_en": "She chopped up some cabbage to make a fresh salad for dinner.",
         "sentence_en_meaning_fa": "او مقداری کلم خرد کرد تا یک سالاد تازه برای شام درست کند.",
-        "explanation_for_sentence_meaning": "",
+        "explanation_for_sentence_meaning": null,
         "learning_depth": 0.78,
         "mixed_sentence": null,
         "other_meanings_fa": "کلم‌برگ*کلم‌پیچ",
@@ -18180,7 +18180,7 @@
         "common_error": null,
         "imageability": 95,
         "createdAt": "2025-12-31T04:30:59.671Z",
-        "updatedAt": "2026-02-16T14:43:45.109Z"
+        "updatedAt": "2026-03-31T23:44:11.388Z"
       },
       {
         "id": 1163,
@@ -22116,7 +22116,7 @@
         "common_error": null,
         "imageability": 70,
         "createdAt": "2025-12-31T04:30:59.671Z",
-        "updatedAt": "2026-02-16T14:43:45.708Z"
+        "updatedAt": "2026-04-01T06:40:08.843Z"
       },
       {
         "id": 1351,
@@ -22188,12 +22188,12 @@
         "base_form": "footage",
         "phonetic_us": "ˈfʊtɪdʒ",
         "phonetic_us_normalized": "fʊtɪʤ",
-        "meaning_fa": "فیلم خام",
+        "meaning_fa": "فیلم بدون تدوین",
         "meaning_fa_IPA": "/film-e xɑːm/",
         "meaning_fa_IPA_normalized": "fɪlme xʌm",
         "pos": "noun",
         "concept_explained": "raw video material",
-        "concept_explained_fa": "مواد ویدئویی خام، کلیپ، تصاویر ویدئویی",
+        "concept_explained_fa": "فیلم خام اولیه بدون تدوین، کلیپ، تصاویر ویدئویی",
         "word_hint_story": null,
         "sentence_en": "The police are reviewing the security camera footage from the bank.",
         "sentence_en_meaning_fa": "پلیس در حال بازبینی فیلم خام دوربین‌های امنیتی بانک است.",
@@ -22212,7 +22212,7 @@
         "common_error": null,
         "imageability": 65,
         "createdAt": "2025-12-31T04:30:59.671Z",
-        "updatedAt": "2026-02-16T14:43:45.722Z"
+        "updatedAt": "2026-03-31T23:20:49.465Z"
       },
       {
         "id": 1354,
@@ -39061,7 +39061,7 @@
         "word_hint_story": null,
         "sentence_en": "She gets along surprisingly well with her co-wife.",
         "sentence_en_meaning_fa": "او به طرز عجیبی با هووی خود به خوبی کنار می‌آید.",
-        "explanation_for_sentence_meaning": "",
+        "explanation_for_sentence_meaning": null,
         "learning_depth": 0.35,
         "mixed_sentence": null,
         "other_meanings_fa": null,
@@ -39076,7 +39076,7 @@
         "common_error": null,
         "imageability": 70,
         "createdAt": "2025-12-31T04:30:59.750Z",
-        "updatedAt": "2026-02-16T14:54:16.440Z"
+        "updatedAt": "2026-04-01T00:09:45.583Z"
       },
       {
         "id": 2002,
@@ -52632,7 +52632,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.55,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -52644,7 +52644,7 @@
         "common_error": null,
         "imageability": 95,
         "createdAt": "2026-02-03T13:27:45.365Z",
-        "updatedAt": "2026-02-16T14:48:43.845Z"
+        "updatedAt": "2026-03-31T23:18:55.022Z"
       },
       {
         "id": 2494,
@@ -53668,7 +53668,7 @@
         "common_error": null,
         "imageability": 95,
         "createdAt": "2026-02-03T13:27:45.422Z",
-        "updatedAt": "2026-02-16T14:48:44.007Z"
+        "updatedAt": "2026-03-31T23:55:48.846Z"
       },
       {
         "id": 2526,
@@ -53828,7 +53828,7 @@
         "common_error": null,
         "imageability": 100,
         "createdAt": "2026-02-03T13:27:45.430Z",
-        "updatedAt": "2026-02-16T14:48:44.029Z"
+        "updatedAt": "2026-04-01T01:38:23.141Z"
       },
       {
         "id": 2531,
@@ -55000,7 +55000,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.25,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -55012,7 +55012,7 @@
         "common_error": null,
         "imageability": 90,
         "createdAt": "2026-02-03T13:36:42.351Z",
-        "updatedAt": "2026-02-16T14:48:44.209Z"
+        "updatedAt": "2026-03-31T23:46:40.848Z"
       },
       {
         "id": 2568,
@@ -57208,7 +57208,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.25,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -57220,7 +57220,7 @@
         "common_error": null,
         "imageability": 95,
         "createdAt": "2026-02-03T13:58:47.214Z",
-        "updatedAt": "2026-02-16T14:54:17.771Z"
+        "updatedAt": "2026-04-01T06:51:55.661Z"
       },
       {
         "id": 2637,
@@ -58232,7 +58232,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.25,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -58244,7 +58244,7 @@
         "common_error": null,
         "imageability": 95,
         "createdAt": "2026-02-03T13:58:47.276Z",
-        "updatedAt": "2026-02-16T14:54:17.945Z"
+        "updatedAt": "2026-03-31T23:50:54.825Z"
       },
       {
         "id": 2669,
@@ -59448,7 +59448,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.4,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -59460,7 +59460,7 @@
         "common_error": null,
         "imageability": 95,
         "createdAt": "2026-02-03T13:58:47.349Z",
-        "updatedAt": "2026-02-16T14:54:18.118Z"
+        "updatedAt": "2026-04-01T06:46:27.792Z"
       },
       {
         "id": 2707,
@@ -60216,7 +60216,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.3,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -60228,7 +60228,7 @@
         "common_error": null,
         "imageability": 80,
         "createdAt": "2026-02-03T18:43:35.029Z",
-        "updatedAt": "2026-02-16T14:56:12.358Z"
+        "updatedAt": "2026-03-31T23:59:11.719Z"
       },
       {
         "id": 2731,
@@ -60280,7 +60280,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.25,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -60292,7 +60292,7 @@
         "common_error": null,
         "imageability": 75,
         "createdAt": "2026-02-03T18:43:35.033Z",
-        "updatedAt": "2026-02-16T14:56:12.368Z"
+        "updatedAt": "2026-03-31T23:56:57.689Z"
       },
       {
         "id": 2733,
@@ -60388,7 +60388,7 @@
         "common_error": null,
         "imageability": 75,
         "createdAt": "2026-02-03T18:43:35.038Z",
-        "updatedAt": "2026-03-22T12:46:14.906Z"
+        "updatedAt": "2026-03-31T23:02:18.856Z"
       },
       {
         "id": 2736,
@@ -60908,9 +60908,9 @@
         "base_form": "stairs",
         "phonetic_us": "stɛrz",
         "phonetic_us_normalized": "sterz",
-        "meaning_fa": "پله",
-        "meaning_fa_IPA": "pele",
-        "meaning_fa_IPA_normalized": "pele",
+        "meaning_fa": "پله کان",
+        "meaning_fa_IPA": "pele kan",
+        "meaning_fa_IPA_normalized": "pele kʌn",
         "pos": "noun",
         "concept_explained": null,
         "concept_explained_fa": "سازه پله‌ای برای جابه‌جایی عمودی بین طبقات.",
@@ -60927,12 +60927,12 @@
         "first_letter_en_hint": null,
         "first_letter_fa_hint": null,
         "hint_to_select": null,
-        "json_hint": "{\"person\":{\"fa\":\"هم زدن\",\"en\":\"stir\",\"anki_link_id\":\"69407b21a97a8681bac5909d\",\"target_ipa\":\"ster\",\"usage\":\"verb\",\"source\":\"word\",\"target_lang\":\"en\",\"imageability\":65},\"generatedAtMs\":1773859084149}",
+        "json_hint": "{\"person\":{\"fa\":\"هم زدن\",\"en\":\"stir\",\"anki_link_id\":\"69407b21a97a8681bac5909d\",\"target_ipa\":\"ster\",\"usage\":\"verb\",\"source\":\"word\",\"target_lang\":\"en\",\"imageability\":65},\"generatedAtMs\":1775001860859}",
         "word_note": null,
         "common_error": null,
         "imageability": 97,
         "createdAt": "2026-02-03T18:43:35.069Z",
-        "updatedAt": "2026-02-16T14:56:12.465Z"
+        "updatedAt": "2026-04-01T00:04:20.861Z"
       },
       {
         "id": 2753,
@@ -62360,7 +62360,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.4,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -62372,7 +62372,7 @@
         "common_error": null,
         "imageability": 95,
         "createdAt": "2026-02-03T18:55:24.965Z",
-        "updatedAt": "2026-02-16T14:56:12.685Z"
+        "updatedAt": "2026-03-31T23:56:10.509Z"
       },
       {
         "id": 2798,
@@ -62584,7 +62584,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.45,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -62596,7 +62596,7 @@
         "common_error": null,
         "imageability": 95,
         "createdAt": "2026-02-03T18:55:24.982Z",
-        "updatedAt": "2026-02-16T14:56:12.721Z"
+        "updatedAt": "2026-03-31T23:56:36.381Z"
       },
       {
         "id": 2805,
@@ -69144,7 +69144,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.45,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -69156,7 +69156,7 @@
         "common_error": null,
         "imageability": 95,
         "createdAt": "2026-02-03T19:08:07.837Z",
-        "updatedAt": "2026-02-16T14:50:28.423Z"
+        "updatedAt": "2026-04-01T00:07:47.764Z"
       },
       {
         "id": 3011,
@@ -69272,7 +69272,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.85,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -69284,7 +69284,7 @@
         "common_error": null,
         "imageability": 95,
         "createdAt": "2026-02-03T19:08:07.846Z",
-        "updatedAt": "2026-02-16T14:50:28.443Z"
+        "updatedAt": "2026-03-31T23:48:56.727Z"
       },
       {
         "id": 3015,
@@ -72036,39 +72036,7 @@
         "common_error": null,
         "imageability": 98,
         "createdAt": "2026-02-03T19:28:26.262Z",
-        "updatedAt": "2026-02-16T14:50:28.870Z"
-      },
-      {
-        "id": 3101,
-        "anki_link_id": "3101_1770146906264",
-        "base_form": "dotar",
-        "phonetic_us": "doʊˈtɑr",
-        "phonetic_us_normalized": "dotʌr",
-        "meaning_fa": "دوتار",
-        "meaning_fa_IPA": "dotɑːɾ",
-        "meaning_fa_IPA_normalized": "dotʌr",
-        "pos": "noun",
-        "concept_explained": null,
-        "concept_explained_fa": "ساز زهی محلی با دو سیم که در موسیقی نواحی خراسان کاربرد دارد.",
-        "word_hint_story": null,
-        "sentence_en": "He tuned his dotar and started playing softly.",
-        "sentence_en_meaning_fa": "او دوتارش را کوک کرد و آرام شروع به نواختن کرد.",
-        "explanation_for_sentence_meaning": null,
-        "learning_depth": 0.3,
-        "mixed_sentence": null,
-        "other_meanings_fa": "",
-        "category": null,
-        "typeOfWordInDb": "temp",
-        "hint_sentence": null,
-        "first_letter_en_hint": null,
-        "first_letter_fa_hint": null,
-        "hint_to_select": null,
-        "json_hint": "{\"person\":{\"fa\":\"دوچرخه\",\"en\":\"bicycle\",\"anki_link_id\":\"2500_1770125265376\",\"target_ipa\":\"doʧʌrxe\",\"target_lang\":\"fa\",\"usage\":\"noun\",\"source\":\"word\"},\"job\":{\"fa\":\"تار\",\"en\":\"tar\",\"anki_link_id\":\"3099_1770146906260\",\"target_ipa\":\"tʌr\",\"target_lang\":\"fa\",\"usage\":\"noun\",\"source\":\"word\"},\"generatedAtMs\":1773859133391}",
-        "word_note": null,
-        "common_error": null,
-        "imageability": 98,
-        "createdAt": "2026-02-03T19:28:26.264Z",
-        "updatedAt": "2026-02-16T14:50:28.875Z"
+        "updatedAt": "2026-04-01T00:10:19.442Z"
       },
       {
         "id": 3102,
@@ -72184,7 +72152,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.35,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -72196,7 +72164,7 @@
         "common_error": null,
         "imageability": 98,
         "createdAt": "2026-02-03T19:28:26.271Z",
-        "updatedAt": "2026-02-16T14:50:28.893Z"
+        "updatedAt": "2026-04-01T03:25:44.683Z"
       },
       {
         "id": 3106,
@@ -72408,7 +72376,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.3,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -72420,7 +72388,7 @@
         "common_error": null,
         "imageability": 95,
         "createdAt": "2026-02-03T19:28:26.282Z",
-        "updatedAt": "2026-02-16T14:50:28.924Z"
+        "updatedAt": "2026-03-31T23:03:07.501Z"
       },
       {
         "id": 3113,
@@ -72568,7 +72536,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.35,
         "mixed_sentence": null,
-        "other_meanings_fa": "پیک",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -72580,7 +72548,7 @@
         "common_error": null,
         "imageability": 85,
         "createdAt": "2026-02-03T19:28:26.291Z",
-        "updatedAt": "2026-02-16T14:50:28.950Z"
+        "updatedAt": "2026-04-01T06:40:55.251Z"
       },
       {
         "id": 3119,
@@ -73976,7 +73944,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.35,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -73988,7 +73956,7 @@
         "common_error": null,
         "imageability": 100,
         "createdAt": "2026-02-03T19:28:26.345Z",
-        "updatedAt": "2026-02-16T14:50:29.143Z"
+        "updatedAt": "2026-04-01T03:30:11.683Z"
       },
       {
         "id": 3163,
@@ -74968,7 +74936,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.85,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -74980,7 +74948,7 @@
         "common_error": null,
         "imageability": 95,
         "createdAt": "2026-02-03T19:28:26.373Z",
-        "updatedAt": "2026-02-16T14:50:29.300Z"
+        "updatedAt": "2026-03-31T22:56:38.148Z"
       },
       {
         "id": 3194,
@@ -76743,38 +76711,6 @@
         "updatedAt": "2026-02-16T14:56:13.496Z"
       },
       {
-        "id": 3249,
-        "anki_link_id": "3249_1770146906427",
-        "base_form": "wrist",
-        "phonetic_us": "rɪst",
-        "phonetic_us_normalized": "rɪst",
-        "meaning_fa": "مچ دست",
-        "meaning_fa_IPA": "motʃe dæst",
-        "meaning_fa_IPA_normalized": "moʧe dæst",
-        "pos": "noun",
-        "concept_explained": null,
-        "concept_explained_fa": "مفصل اتصال ساعد به دست که حرکت چرخشی دارد.",
-        "word_hint_story": null,
-        "sentence_en": "My wrist is sore from typing all day.",
-        "sentence_en_meaning_fa": "مچ دستم از تمام روز تایپ کردن درد می‌کند.",
-        "explanation_for_sentence_meaning": null,
-        "learning_depth": 0.6,
-        "mixed_sentence": null,
-        "other_meanings_fa": "",
-        "category": null,
-        "typeOfWordInDb": "temp",
-        "hint_sentence": null,
-        "first_letter_en_hint": null,
-        "first_letter_fa_hint": null,
-        "hint_to_select": null,
-        "json_hint": "{\"person\":{\"fa\":\"ریسمان\",\"en\":\"rope\",\"anki_link_id\":\"3687_1773108697841\",\"target_ipa\":\"rɪsmʌn\",\"target_lang\":\"fa\",\"usage\":\"noun\",\"source\":\"word\"},\"generatedAtMs\":1773859142390}",
-        "word_note": null,
-        "common_error": null,
-        "imageability": 98,
-        "createdAt": "2026-02-03T19:28:26.428Z",
-        "updatedAt": "2026-02-16T14:56:13.501Z"
-      },
-      {
         "id": 3250,
         "anki_link_id": "3250_1770146906428",
         "base_form": "hand",
@@ -77752,7 +77688,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.4,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -77764,7 +77700,7 @@
         "common_error": null,
         "imageability": 80,
         "createdAt": "2026-02-03T19:28:26.484Z",
-        "updatedAt": "2026-02-16T14:56:13.674Z"
+        "updatedAt": "2026-03-31T23:24:21.895Z"
       },
       {
         "id": 3281,
@@ -79512,7 +79448,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.45,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -79524,7 +79460,7 @@
         "common_error": null,
         "imageability": 98,
         "createdAt": "2026-02-03T19:28:26.528Z",
-        "updatedAt": "2026-02-16T14:56:13.936Z"
+        "updatedAt": "2026-04-01T06:53:55.210Z"
       },
       {
         "id": 3336,
@@ -79544,7 +79480,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.35,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -79556,7 +79492,7 @@
         "common_error": null,
         "imageability": 98,
         "createdAt": "2026-02-03T19:28:26.529Z",
-        "updatedAt": "2026-02-16T14:56:13.941Z"
+        "updatedAt": "2026-04-01T06:53:45.261Z"
       },
       {
         "id": 3337,
@@ -80056,7 +79992,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.7,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -80068,7 +80004,7 @@
         "common_error": null,
         "imageability": 98,
         "createdAt": "2026-02-03T19:28:26.543Z",
-        "updatedAt": "2026-02-16T14:56:14.012Z"
+        "updatedAt": "2026-04-01T01:33:16.259Z"
       },
       {
         "id": 3353,
@@ -84231,38 +84167,6 @@
         "updatedAt": "2026-03-17T04:40:31.491Z"
       },
       {
-        "id": 3483,
-        "anki_link_id": "3483_1773095427945",
-        "base_form": "apple",
-        "phonetic_us": "ˈæpəl",
-        "phonetic_us_normalized": "æpel",
-        "meaning_fa": "اپل",
-        "meaning_fa_IPA": "æˈpel",
-        "meaning_fa_IPA_normalized": "æpel",
-        "pos": "noun",
-        "concept_explained": null,
-        "concept_explained_fa": "میوه‌ای گرد و شیرین یا ترش است که یکی از شناخته‌شده‌ترین خوراکی‌های درختی به شمار می‌آید.",
-        "word_hint_story": null,
-        "sentence_en": "He ate a fresh apple during his break.",
-        "sentence_en_meaning_fa": "او در زمان استراحتش یک اپل تازه خورد.",
-        "explanation_for_sentence_meaning": null,
-        "learning_depth": 0.86,
-        "mixed_sentence": null,
-        "other_meanings_fa": "",
-        "category": null,
-        "typeOfWordInDb": "temp",
-        "hint_sentence": null,
-        "first_letter_en_hint": null,
-        "first_letter_fa_hint": null,
-        "hint_to_select": null,
-        "json_hint": "{\"person\":{\"fa\":\"لپه\",\"en\":\"split pea\",\"anki_link_id\":\"3611_1773108551503\",\"target_ipa\":\"læpe\",\"target_lang\":\"fa\",\"usage\":\"noun\",\"source\":\"word\"},\"job\":{\"fa\":\"ابلیس\",\"en\":\"devil\",\"anki_link_id\":\"3821_1773111552815\",\"target_ipa\":\"eblɪs\",\"target_lang\":\"fa\",\"usage\":\"noun\",\"source\":\"word\"},\"generatedAtMs\":1773859174334}",
-        "word_note": null,
-        "common_error": null,
-        "imageability": 99,
-        "createdAt": "2026-03-09T22:30:27.945Z",
-        "updatedAt": "2026-03-17T04:40:31.487Z"
-      },
-      {
         "id": 3484,
         "anki_link_id": "3484_1773095427953",
         "base_form": "tomato",
@@ -84681,9 +84585,9 @@
       {
         "id": 3497,
         "anki_link_id": "3497_1773095428084",
-        "base_form": "phone",
-        "phonetic_us": "foʊn",
-        "phonetic_us_normalized": "fon",
+        "base_form": "Iphone",
+        "phonetic_us": "aifoʊn",
+        "phonetic_us_normalized": "ʌɪfon",
         "meaning_fa": "آیفون",
         "meaning_fa_IPA": "ɒːjˈfon",
         "meaning_fa_IPA_normalized": "ʌjfon",
@@ -84696,19 +84600,19 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.41,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
         "first_letter_en_hint": null,
         "first_letter_fa_hint": null,
         "hint_to_select": null,
-        "json_hint": "{\"person\":{\"fa\":\"فک\",\"en\":\"seal\",\"anki_link_id\":\"3890_1773111990480\",\"target_ipa\":\"fok\",\"target_lang\":\"fa\",\"usage\":\"noun\",\"source\":\"word\"},\"generatedAtMs\":1773859175878}",
+        "json_hint": "{\"person\":{\"fa\":\"آیفون\",\"en\":\"Iphone\",\"anki_link_id\":\"3497_1773095428084\",\"target_ipa\":\"ʌjfon\",\"target_lang\":\"fa\",\"usage\":\"noun\",\"source\":\"word\"},\"generatedAtMs\":1775007572547}",
         "word_note": null,
         "common_error": null,
         "imageability": 88,
         "createdAt": "2026-03-09T22:30:28.084Z",
-        "updatedAt": "2026-03-17T04:40:31.418Z"
+        "updatedAt": "2026-04-01T01:39:32.548Z"
       },
       {
         "id": 3498,
@@ -84888,7 +84792,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.39,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -84900,7 +84804,7 @@
         "common_error": null,
         "imageability": 95,
         "createdAt": "2026-03-09T22:30:28.188Z",
-        "updatedAt": "2026-03-17T04:40:31.391Z"
+        "updatedAt": "2026-04-01T06:46:36.667Z"
       },
       {
         "id": 3504,
@@ -84920,7 +84824,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.49,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -84932,7 +84836,7 @@
         "common_error": null,
         "imageability": 94,
         "createdAt": "2026-03-09T22:30:28.200Z",
-        "updatedAt": "2026-03-17T04:40:31.385Z"
+        "updatedAt": "2026-04-01T01:36:50.148Z"
       },
       {
         "id": 3505,
@@ -84952,7 +84856,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.72,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -84964,7 +84868,7 @@
         "common_error": null,
         "imageability": 95,
         "createdAt": "2026-03-09T22:30:28.211Z",
-        "updatedAt": "2026-03-17T04:40:31.379Z"
+        "updatedAt": "2026-04-01T06:46:17.676Z"
       },
       {
         "id": 3506,
@@ -85336,7 +85240,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.29,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -85348,7 +85252,7 @@
         "common_error": null,
         "imageability": 94,
         "createdAt": "2026-03-09T22:34:48.043Z",
-        "updatedAt": "2026-03-17T04:40:31.319Z"
+        "updatedAt": "2026-04-01T06:53:35.869Z"
       },
       {
         "id": 3518,
@@ -86372,7 +86276,7 @@
         "common_error": null,
         "imageability": 78,
         "createdAt": "2026-03-09T22:36:59.006Z",
-        "updatedAt": "2026-03-17T04:34:01.668Z"
+        "updatedAt": "2026-03-31T23:46:29.021Z"
       },
       {
         "id": 3550,
@@ -86648,7 +86552,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.34,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -86660,39 +86564,7 @@
         "common_error": null,
         "imageability": 95,
         "createdAt": "2026-03-09T22:36:59.101Z",
-        "updatedAt": "2026-03-17T04:31:09.035Z"
-      },
-      {
-        "id": 3559,
-        "anki_link_id": "3559_1773095819110",
-        "base_form": "drill-bit",
-        "phonetic_us": "ˈdrɪl bɪt",
-        "phonetic_us_normalized": "drɪl bɪt",
-        "meaning_fa": "مته",
-        "meaning_fa_IPA": "mætte",
-        "meaning_fa_IPA_normalized": "mæte",
-        "pos": "noun",
-        "concept_explained": null,
-        "concept_explained_fa": "قطعهٔ برنده‌ای است که به دریل وصل می‌شود تا سوراخ ایجاد کند.",
-        "word_hint_story": null,
-        "sentence_en": "He changed the drill-bit before drilling the hole.",
-        "sentence_en_meaning_fa": "او پیش از سوراخ‌کردن، مته را عوض کرد.",
-        "explanation_for_sentence_meaning": null,
-        "learning_depth": 0.22,
-        "mixed_sentence": null,
-        "other_meanings_fa": "",
-        "category": null,
-        "typeOfWordInDb": "temp",
-        "hint_sentence": null,
-        "first_letter_en_hint": null,
-        "first_letter_fa_hint": null,
-        "hint_to_select": null,
-        "json_hint": "{\"person\":{\"fa\":\"دریل\",\"en\":\"drill\",\"anki_link_id\":\"2667_1770127127273\",\"target_ipa\":\"drɪl\",\"usage\":\"noun\",\"source\":\"word\",\"target_lang\":\"en\",\"imageability\":98},\"job\":{\"fa\":\"سوسک\",\"en\":\"beetle\",\"anki_link_id\":\"3010_1770145687837\",\"target_ipa\":\"bɪtel\",\"usage\":\"noun\",\"source\":\"word\",\"target_lang\":\"en\",\"imageability\":95},\"generatedAtMs\":1773859186890}",
-        "word_note": null,
-        "common_error": null,
-        "imageability": 84,
-        "createdAt": "2026-03-09T22:36:59.110Z",
-        "updatedAt": "2026-03-17T04:31:09.031Z"
+        "updatedAt": "2026-04-01T03:22:53.519Z"
       },
       {
         "id": 3560,
@@ -86712,7 +86584,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.24,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -86724,7 +86596,7 @@
         "common_error": null,
         "imageability": 90,
         "createdAt": "2026-03-09T22:36:59.118Z",
-        "updatedAt": "2026-03-17T04:31:09.026Z"
+        "updatedAt": "2026-04-01T03:23:38.414Z"
       },
       {
         "id": 3561,
@@ -87256,7 +87128,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.14,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -87268,7 +87140,7 @@
         "common_error": null,
         "imageability": 90,
         "createdAt": "2026-03-10T02:09:11.109Z",
-        "updatedAt": "2026-03-17T04:31:08.938Z"
+        "updatedAt": "2026-04-01T06:54:54.290Z"
       },
       {
         "id": 3578,
@@ -88120,7 +87992,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.38,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -88132,7 +88004,7 @@
         "common_error": null,
         "imageability": 97,
         "createdAt": "2026-03-10T02:09:11.399Z",
-        "updatedAt": "2026-03-17T04:31:08.774Z"
+        "updatedAt": "2026-04-01T10:08:23.733Z"
       },
       {
         "id": 3605,
@@ -89816,7 +89688,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.58,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -89828,7 +89700,7 @@
         "common_error": null,
         "imageability": 92,
         "createdAt": "2026-03-10T02:11:37.564Z",
-        "updatedAt": "2026-03-17T04:31:08.499Z"
+        "updatedAt": "2026-04-01T03:24:37.397Z"
       },
       {
         "id": 3658,
@@ -90488,7 +90360,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.18,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -90500,7 +90372,7 @@
         "common_error": null,
         "imageability": 84,
         "createdAt": "2026-03-10T02:11:37.763Z",
-        "updatedAt": "2026-03-17T04:31:08.319Z"
+        "updatedAt": "2026-03-31T23:56:19.339Z"
       },
       {
         "id": 3679,
@@ -92329,9 +92201,9 @@
       {
         "id": 3736,
         "anki_link_id": "3736_1773108912369",
-        "base_form": "cola",
-        "phonetic_us": "ˈkoʊlə",
-        "phonetic_us_normalized": "kole",
+        "base_form": "pepsi",
+        "phonetic_us": "pepsi",
+        "phonetic_us_normalized": "pepsɪ",
         "meaning_fa": "پپسی",
         "meaning_fa_IPA": "pepsiː",
         "meaning_fa_IPA_normalized": "pepsɪ",
@@ -92351,12 +92223,12 @@
         "first_letter_en_hint": null,
         "first_letter_fa_hint": null,
         "hint_to_select": null,
-        "json_hint": "{\"person\":{\"fa\":\"کلبه\",\"en\":\"cabin\",\"anki_link_id\":\"3879_1773111990340\",\"target_ipa\":\"kolbe\",\"target_lang\":\"fa\",\"usage\":\"noun\",\"source\":\"word\"},\"generatedAtMs\":1773859209751}",
+        "json_hint": "{\"person\":{\"fa\":\"پنس\",\"en\":\"tweezers\",\"anki_link_id\":\"2832_1770144925040\",\"target_ipa\":\"pens\",\"target_lang\":\"fa\",\"usage\":\"noun\",\"source\":\"word\"},\"job\":{\"fa\":\"پیاله\",\"en\":\"bowl\",\"anki_link_id\":\"3541_1773095747174\",\"target_ipa\":\"pɪʌle\",\"target_lang\":\"fa\",\"usage\":\"noun\",\"source\":\"word\"},\"generatedAtMs\":1775014062340}",
         "word_note": null,
         "common_error": null,
         "imageability": 90,
         "createdAt": "2026-03-10T02:15:12.369Z",
-        "updatedAt": "2026-03-17T04:31:07.992Z"
+        "updatedAt": "2026-04-01T03:27:59.183Z"
       },
       {
         "id": 3737,
@@ -93127,38 +92999,6 @@
         "updatedAt": "2026-03-16T04:43:48.161Z"
       },
       {
-        "id": 3761,
-        "anki_link_id": "3761_1773111552247",
-        "base_form": "knot",
-        "phonetic_us": "nɑt",
-        "phonetic_us_normalized": "nʌt",
-        "meaning_fa": "عقده",
-        "meaning_fa_IPA": "oɣde",
-        "meaning_fa_IPA_normalized": "oɣde",
-        "pos": "noun",
-        "concept_explained": null,
-        "concept_explained_fa": "پیچ‌خوردگی بسته‌ای در طناب یا نخ که دو بخش را محکم می‌کند.",
-        "word_hint_story": null,
-        "sentence_en": "She struggled to untie the tight knot in the rope.",
-        "sentence_en_meaning_fa": "او برای باز کردن عقده سفت طناب تقلا کرد.",
-        "explanation_for_sentence_meaning": null,
-        "learning_depth": 0.4,
-        "mixed_sentence": null,
-        "other_meanings_fa": "گره",
-        "category": null,
-        "typeOfWordInDb": "temp",
-        "hint_sentence": null,
-        "first_letter_en_hint": null,
-        "first_letter_fa_hint": null,
-        "hint_to_select": null,
-        "json_hint": "{\"person\":{\"fa\":\"نفت\",\"en\":\"oil\",\"anki_link_id\":\"3768_1773111552322\",\"target_ipa\":\"næft\",\"target_lang\":\"fa\",\"usage\":\"noun\",\"source\":\"word\"},\"generatedAtMs\":1773859216080}",
-        "word_note": null,
-        "common_error": null,
-        "imageability": 88,
-        "createdAt": "2026-03-10T02:59:12.246Z",
-        "updatedAt": "2026-03-16T04:43:48.153Z"
-      },
-      {
         "id": 3762,
         "anki_link_id": "3762_1773111552260",
         "base_form": "ink",
@@ -93252,7 +93092,7 @@
         "common_error": null,
         "imageability": 86,
         "createdAt": "2026-03-10T02:59:12.280Z",
-        "updatedAt": "2026-03-16T04:43:48.129Z"
+        "updatedAt": "2026-04-01T03:29:07.278Z"
       },
       {
         "id": 3765,
@@ -94456,7 +94296,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.29,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -94468,7 +94308,7 @@
         "common_error": null,
         "imageability": 76,
         "createdAt": "2026-03-10T02:59:12.650Z",
-        "updatedAt": "2026-03-16T04:43:47.811Z"
+        "updatedAt": "2026-03-31T23:04:05.846Z"
       },
       {
         "id": 3803,
@@ -94584,7 +94424,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.14,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -94596,7 +94436,7 @@
         "common_error": null,
         "imageability": 58,
         "createdAt": "2026-03-10T02:59:12.686Z",
-        "updatedAt": "2026-03-16T04:43:47.778Z"
+        "updatedAt": "2026-03-31T23:56:27.839Z"
       },
       {
         "id": 3807,
@@ -95207,38 +95047,6 @@
         "updatedAt": "2026-03-16T04:43:47.622Z"
       },
       {
-        "id": 3827,
-        "anki_link_id": "3827_1773111851287",
-        "base_form": "boat",
-        "phonetic_us": "boʊt",
-        "phonetic_us_normalized": "bot",
-        "meaning_fa": "لنچ",
-        "meaning_fa_IPA": "lentʃ",
-        "meaning_fa_IPA_normalized": "lenʧ",
-        "pos": "noun",
-        "concept_explained": null,
-        "concept_explained_fa": "قایق موتوری نسبتاً بزرگ‌تری که برای جابه‌جایی روی آب استفاده می‌شود.",
-        "word_hint_story": null,
-        "sentence_en": "The small boat moved slowly across the lake.",
-        "sentence_en_meaning_fa": "لنچ کوچک آرام روی دریاچه حرکت کرد.",
-        "explanation_for_sentence_meaning": null,
-        "learning_depth": 0.16,
-        "mixed_sentence": null,
-        "other_meanings_fa": "",
-        "category": null,
-        "typeOfWordInDb": "temp",
-        "hint_sentence": null,
-        "first_letter_en_hint": null,
-        "first_letter_fa_hint": null,
-        "hint_to_select": null,
-        "json_hint": "{\"person\":{\"fa\":\"بتن\",\"en\":\"concrete\",\"anki_link_id\":\"2765_1770144215088\",\"target_ipa\":\"boton\",\"target_lang\":\"fa\",\"usage\":\"noun\",\"source\":\"word\"},\"generatedAtMs\":1773859229941}",
-        "word_note": null,
-        "common_error": null,
-        "imageability": 94,
-        "createdAt": "2026-03-10T03:04:11.286Z",
-        "updatedAt": "2026-03-16T04:43:47.606Z"
-      },
-      {
         "id": 3828,
         "anki_link_id": "3828_1773111851296",
         "base_form": "chips",
@@ -95352,7 +95160,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.09,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -95364,7 +95172,7 @@
         "common_error": null,
         "imageability": 95,
         "createdAt": "2026-03-10T03:04:11.325Z",
-        "updatedAt": "2026-03-16T04:43:47.575Z"
+        "updatedAt": "2026-04-01T03:24:00.474Z"
       },
       {
         "id": 3832,
@@ -95928,7 +95736,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.27,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -95940,7 +95748,7 @@
         "common_error": null,
         "imageability": 96,
         "createdAt": "2026-03-10T03:04:11.529Z",
-        "updatedAt": "2026-03-16T04:43:47.301Z"
+        "updatedAt": "2026-04-01T03:24:09.183Z"
       },
       {
         "id": 3854,
@@ -96952,7 +96760,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.36,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -96964,7 +96772,7 @@
         "common_error": null,
         "imageability": 97,
         "createdAt": "2026-03-10T03:06:30.423Z",
-        "updatedAt": "2026-03-16T04:43:46.986Z"
+        "updatedAt": "2026-04-01T03:30:02.739Z"
       },
       {
         "id": 3886,
@@ -97048,7 +96856,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.08,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -97060,7 +96868,7 @@
         "common_error": null,
         "imageability": 95,
         "createdAt": "2026-03-10T03:06:30.451Z",
-        "updatedAt": "2026-03-16T04:43:46.961Z"
+        "updatedAt": "2026-04-01T03:30:39.327Z"
       },
       {
         "id": 3889,
@@ -97208,7 +97016,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.52,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -97220,7 +97028,7 @@
         "common_error": null,
         "imageability": 97,
         "createdAt": "2026-03-10T03:06:30.521Z",
-        "updatedAt": "2026-03-16T04:43:46.915Z"
+        "updatedAt": "2026-04-01T00:07:56.314Z"
       },
       {
         "id": 3894,
@@ -97316,7 +97124,7 @@
         "common_error": null,
         "imageability": 88,
         "createdAt": "2026-03-10T03:06:30.547Z",
-        "updatedAt": "2026-03-16T04:43:46.887Z"
+        "updatedAt": "2026-04-01T06:47:14.514Z"
       },
       {
         "id": 3897,
@@ -100408,7 +100216,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.45,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -100420,7 +100228,7 @@
         "common_error": null,
         "imageability": 85,
         "createdAt": "2026-03-10T03:41:49.545Z",
-        "updatedAt": "2026-03-16T03:33:22.141Z"
+        "updatedAt": "2026-03-31T18:43:44.921Z"
       },
       {
         "id": 3994,
@@ -100952,7 +100760,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.55,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -100964,7 +100772,7 @@
         "common_error": null,
         "imageability": 95,
         "createdAt": "2026-03-10T03:41:49.728Z",
-        "updatedAt": "2026-03-16T03:33:22.034Z"
+        "updatedAt": "2026-04-01T03:11:19.204Z"
       },
       {
         "id": 4011,
@@ -101368,7 +101176,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.55,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -101380,7 +101188,7 @@
         "common_error": null,
         "imageability": 88,
         "createdAt": "2026-03-10T03:44:14.584Z",
-        "updatedAt": "2026-03-16T03:33:21.957Z"
+        "updatedAt": "2026-04-01T06:48:22.889Z"
       },
       {
         "id": 4024,
@@ -101624,7 +101432,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.6,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -101636,7 +101444,7 @@
         "common_error": null,
         "imageability": 75,
         "createdAt": "2026-03-10T03:44:14.707Z",
-        "updatedAt": "2026-03-16T03:33:21.915Z"
+        "updatedAt": "2026-04-01T06:48:52.470Z"
       },
       {
         "id": 4032,
@@ -101688,7 +101496,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.8,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -101700,7 +101508,7 @@
         "common_error": null,
         "imageability": 92,
         "createdAt": "2026-03-10T03:44:14.730Z",
-        "updatedAt": "2026-03-16T03:33:21.904Z"
+        "updatedAt": "2026-03-31T23:03:30.685Z"
       },
       {
         "id": 4034,
@@ -102053,38 +101861,6 @@
         "imageability": 78,
         "createdAt": "2026-03-10T03:44:14.933Z",
         "updatedAt": "2026-03-16T03:33:21.844Z"
-      },
-      {
-        "id": 4045,
-        "anki_link_id": "4045_1773114254948",
-        "base_form": "eagle",
-        "phonetic_us": "ˈiɡəl",
-        "phonetic_us_normalized": "ɪɡel",
-        "meaning_fa": "ایگل",
-        "meaning_fa_IPA": "igel",
-        "meaning_fa_IPA_normalized": "ɪɡel",
-        "pos": "noun",
-        "concept_explained": null,
-        "concept_explained_fa": "ایگل پرنده‌ای شکاری و نیرومند با دید بسیار تیز است.",
-        "word_hint_story": null,
-        "sentence_en": "An eagle soared above the mountains.",
-        "sentence_en_meaning_fa": "یک ایگل بالای کوه‌ها اوج گرفت.",
-        "explanation_for_sentence_meaning": null,
-        "learning_depth": 0.55,
-        "mixed_sentence": null,
-        "other_meanings_fa": "",
-        "category": null,
-        "typeOfWordInDb": "temp",
-        "hint_sentence": null,
-        "first_letter_en_hint": null,
-        "first_letter_fa_hint": null,
-        "hint_to_select": null,
-        "json_hint": "{\"person\":{\"fa\":\"انجیر\",\"en\":\"fig\",\"anki_link_id\":\"3300_1770146906500\",\"target_ipa\":\"fɪɡ\",\"usage\":\"noun\",\"source\":\"word\",\"target_lang\":\"en\",\"imageability\":98},\"job\":{\"fa\":\"ابلیس\",\"en\":\"devil\",\"anki_link_id\":\"3821_1773111552815\",\"target_ipa\":\"eblɪs\",\"target_lang\":\"fa\",\"usage\":\"noun\",\"source\":\"word\"},\"generatedAtMs\":1773859271927}",
-        "word_note": null,
-        "common_error": null,
-        "imageability": 95,
-        "createdAt": "2026-03-10T03:44:14.948Z",
-        "updatedAt": "2026-03-16T03:33:21.837Z"
       },
       {
         "id": 4046,
@@ -102885,38 +102661,6 @@
         "imageability": 60,
         "createdAt": "2026-03-10T03:44:15.299Z",
         "updatedAt": "2026-03-16T03:33:21.682Z"
-      },
-      {
-        "id": 4072,
-        "anki_link_id": "4072_1773114255312",
-        "base_form": "office",
-        "phonetic_us": "ˈɑfəs",
-        "phonetic_us_normalized": "ʌfes",
-        "meaning_fa": "آفیس",
-        "meaning_fa_IPA": "ɑːfis",
-        "meaning_fa_IPA_normalized": "ʌfɪs",
-        "pos": "noun",
-        "concept_explained": null,
-        "concept_explained_fa": "آفیس محل کار اداری و انجام امور رسمی است.",
-        "word_hint_story": null,
-        "sentence_en": "He works in a small office downtown.",
-        "sentence_en_meaning_fa": "او در یک آفیس کوچک در مرکز شهر کار می کند.",
-        "explanation_for_sentence_meaning": null,
-        "learning_depth": 0.55,
-        "mixed_sentence": null,
-        "other_meanings_fa": "",
-        "category": null,
-        "typeOfWordInDb": "temp",
-        "hint_sentence": null,
-        "first_letter_en_hint": null,
-        "first_letter_fa_hint": null,
-        "hint_to_select": null,
-        "json_hint": "{\"person\":{\"fa\":\"آفیس\",\"en\":\"office\",\"anki_link_id\":\"4072_1773114255312\",\"target_ipa\":\"ʌfɪs\",\"target_lang\":\"fa\",\"usage\":\"noun\",\"source\":\"word\"},\"generatedAtMs\":1773859274647}",
-        "word_note": null,
-        "common_error": null,
-        "imageability": 90,
-        "createdAt": "2026-03-10T03:44:15.312Z",
-        "updatedAt": "2026-03-16T03:33:21.676Z"
       },
       {
         "id": 4073,
@@ -104133,38 +103877,6 @@
         "imageability": 60,
         "createdAt": "2026-03-10T03:47:21.643Z",
         "updatedAt": "2026-03-16T03:33:21.455Z"
-      },
-      {
-        "id": 4112,
-        "anki_link_id": "4112_1773114441656",
-        "base_form": "boat maker",
-        "phonetic_us": "ˈboʊtˌmeɪkər",
-        "phonetic_us_normalized": "botmeɪker",
-        "meaning_fa": "لنچ ساز",
-        "meaning_fa_IPA": "lentʃ sɑːz",
-        "meaning_fa_IPA_normalized": "lenʧ sʌz",
-        "pos": "noun",
-        "concept_explained": null,
-        "concept_explained_fa": "لنچ ساز به فردی گفته می‌شود که این نقش یا کار را انجام می‌دهد.",
-        "word_hint_story": null,
-        "sentence_en": "The boat maker repaired wooden fishing boats.",
-        "sentence_en_meaning_fa": "لنچ ساز قایق های ماهیگیری چوبی را تعمیر کرد.",
-        "explanation_for_sentence_meaning": null,
-        "learning_depth": 0.55,
-        "mixed_sentence": null,
-        "other_meanings_fa": "",
-        "category": null,
-        "typeOfWordInDb": "temp",
-        "hint_sentence": null,
-        "first_letter_en_hint": null,
-        "first_letter_fa_hint": null,
-        "hint_to_select": null,
-        "json_hint": "{\"person\":{\"fa\":\"قایقران\",\"en\":\"boatman\",\"anki_link_id\":\"4089_1773114441337\",\"target_ipa\":\"botmen\",\"usage\":\"noun\",\"source\":\"word\",\"target_lang\":\"en\",\"imageability\":78},\"job\":{\"fa\":\"زرد\",\"en\":\"yellow\",\"anki_link_id\":\"4033_1773114254730\",\"target_ipa\":\"jelo\",\"usage\":\"adjective\",\"source\":\"word\",\"target_lang\":\"en\",\"imageability\":92},\"generatedAtMs\":1773859297025}",
-        "word_note": null,
-        "common_error": null,
-        "imageability": 78,
-        "createdAt": "2026-03-10T03:47:21.656Z",
-        "updatedAt": "2026-03-16T03:33:21.449Z"
       },
       {
         "id": 4113,

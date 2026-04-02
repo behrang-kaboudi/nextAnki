@@ -22,6 +22,13 @@ export async function updateManyWords(args: Prisma.WordUpdateManyArgs) {
   return prisma.word.updateMany(args);
 }
 
+export async function touchWordByAnkiLinkId(ankiLinkId: string) {
+  return prisma.word.update({
+    where: { anki_link_id: ankiLinkId },
+    data: { anki_link_id: ankiLinkId },
+  });
+}
+
 export async function deleteWord(args: Prisma.WordDeleteArgs) {
   return prisma.word.delete(args);
 }

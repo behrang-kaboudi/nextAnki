@@ -13,6 +13,7 @@ import {
 } from "@/lib/audio/wordFieldAudioNaming";
 import { generateSpeechFromMixedText } from "@/lib/tts/cloudTts";
 import { getWordFieldAudioAbsolutePath } from "@/lib/audio/wordFieldAudioPaths.server";
+import { touchWordByAnkiLinkId } from "@/lib/words/wordRepo";
 
 export const runtime = "nodejs";
 
@@ -50,6 +51,7 @@ export async function POST(req: Request) {
 
   try {
     await generateSpeechFromMixedText(text, outputFileUnderPublicAudio, "azure");
+    await touchWordByAnkiLinkId(ankiLinkId);
     let size = 0;
     try {
       size = fs.statSync(getWordFieldAudioAbsolutePath(filename)).size;

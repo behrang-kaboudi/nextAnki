@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 
 import { WORD_AUDIO_FIELDS } from "@/lib/audio/wordFieldAudioNaming";
 import { deleteAllWordFieldAudioFiles } from "@/lib/words/wordFieldVoice";
+import { touchWordByAnkiLinkId } from "@/lib/words/wordRepo";
 
 export const runtime = "nodejs";
 
@@ -32,6 +33,8 @@ export async function POST(req: Request) {
   }
 
   const res = await deleteAllWordFieldAudioFiles({ ankiLinkId, field: field as never });
+  if (res.deleted > 0) {
+    await touchWordByAnkiLinkId(ankiLinkId);
+  }
   return NextResponse.json({ ok: true, ...res });
 }
-

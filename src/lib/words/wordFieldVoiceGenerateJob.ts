@@ -5,6 +5,7 @@ import path from "node:path";
 
 import { prisma } from "@/lib/prisma";
 import { generateSpeechFromMixedText } from "@/lib/tts/cloudTts";
+import { touchWordByAnkiLinkId } from "@/lib/words/wordRepo";
 import {
   WORD_AUDIO_FIELDS,
   type WordAudioFieldKey,
@@ -186,6 +187,7 @@ async function runJob(state: JobState) {
           state.zeroByteFound += 1;
           await generateSpeechFromMixedText(text, path.join("words", existing.filename), "azure");
           state.regeneratedZeroByte += 1;
+          await touchWordByAnkiLinkId(ankiLinkId);
         } else {
           state.skippedExists += 1;
         }
@@ -194,6 +196,7 @@ async function runJob(state: JobState) {
         await generateSpeechFromMixedText(text, path.join("words", filename), "azure");
         state.generated += 1;
         existingIndex.set(key, { filename, timestampMs: Date.now(), size: 1 });
+        await touchWordByAnkiLinkId(ankiLinkId);
       }
 
       state.processedCandidates += 1;

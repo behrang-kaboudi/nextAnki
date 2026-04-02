@@ -12,6 +12,7 @@ import { spawn } from "node:child_process";
 import { WORD_AUDIO_FIELDS, buildWordFieldAudioFilename, getWordFieldAudioPublicPath } from "@/lib/audio/wordFieldAudioNaming";
 import { getWordFieldAudioAbsoluteDir, getWordFieldAudioAbsolutePath } from "@/lib/audio/wordFieldAudioPaths.server";
 import { deleteAllWordFieldAudioFiles } from "@/lib/words/wordFieldVoice";
+import { touchWordByAnkiLinkId } from "@/lib/words/wordRepo";
 
 export const runtime = "nodejs";
 
@@ -103,6 +104,7 @@ export async function POST(req: Request) {
       ]);
 
       await fsp.copyFile(tmpOutput, outAbs);
+      await touchWordByAnkiLinkId(ankiLinkId);
 
       let size = 0;
       try {
