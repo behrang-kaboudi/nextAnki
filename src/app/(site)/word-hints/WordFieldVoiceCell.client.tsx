@@ -12,15 +12,19 @@ import { ActionIcon } from "@/components/icons";
 
 export default function WordFieldVoiceCell({
   field,
-  ankiLinkId,
+  audioKey,
   text,
 }: {
   field: WordAudioFieldKey;
-  ankiLinkId: string;
+  audioKey: string | null;
   text: string | null;
 }) {
   const normalized = useMemo(() => String(text ?? "").trim(), [text]);
-  const enabled = Boolean(normalized);
+  const normalizedAudioKey = useMemo(() => {
+    const value = typeof audioKey === "string" ? audioKey.trim() : "";
+    return value ? value : null;
+  }, [audioKey]);
+  const enabled = Boolean(normalized && normalizedAudioKey);
 
   const [busy, setBusy] = useState(false);
   const [recording, setRecording] = useState(false);
@@ -35,14 +39,20 @@ export default function WordFieldVoiceCell({
   const chunksRef = useRef<BlobPart[]>([]);
 
   const exampleFilename = useMemo(
-    () => buildWordFieldAudioFilenameTemplate({ ankiLinkId, field }),
-    [ankiLinkId, field]
+    () => buildWordFieldAudioFilenameTemplate({ audioKey: normalizedAudioKey ?? undefined, field }),
+    [normalizedAudioKey, field]
   );
 
   const fetchLatest = useCallback(async () => {
+    if (!normalizedAudioKey) {
+      setPublicPath(null);
+      setExists(false);
+      setSize(0);
+      return;
+    }
     try {
       const res = await fetch(
-        `/api/words/field-voice-file?ankiLinkId=${encodeURIComponent(ankiLinkId)}&field=${encodeURIComponent(field)}`,
+        `/api/words/field-voice-file?audioKey=${encodeURIComponent(normalizedAudioKey)}&field=${encodeURIComponent(field)}`,
         { method: "GET" }
       );
       const data = (await res.json().catch(() => null)) as
@@ -59,7 +69,7 @@ export default function WordFieldVoiceCell({
       setExists(false);
       setSize(0);
     }
-  }, [ankiLinkId, field]);
+  }, [normalizedAudioKey, field]);
 
   const generate = useCallback(async () => {
     if (!enabled || busy || recording) return;
@@ -69,7 +79,7 @@ export default function WordFieldVoiceCell({
       const res = await fetch("/api/words/field-voice-generate-one", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ankiLinkId, field, text: normalized }),
+        body: JSON.stringify({ audioKey: normalizedAudioKey, field, text: normalized }),
       });
       const data = (await res.json().catch(() => null)) as
         | { ok?: boolean; error?: string; filename?: string; publicPath?: string; size?: number }
@@ -85,15 +95,15 @@ export default function WordFieldVoiceCell({
       const nextSize = typeof data.size === "number" ? data.size : 0;
       setSize(nextSize);
       setExists(Boolean(nextPublicPath) && nextSize > 0);
-      window.dispatchEvent(
-        new CustomEvent("wordFieldVoice:updated", { detail: { ankiLinkId, field } })
+        window.dispatchEvent(
+        new CustomEvent("wordFieldVoice:updated", { detail: { audioKey: normalizedAudioKey, field } })
       );
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
       setBusy(false);
     }
-  }, [ankiLinkId, busy, enabled, field, normalized, recording]);
+  }, [normalizedAudioKey, busy, enabled, field, normalized, recording]);
 
   const deleteAll = useCallback(async () => {
     if (!enabled || busy || recording) return;
@@ -106,7 +116,7 @@ export default function WordFieldVoiceCell({
       const res = await fetch("/api/words/field-voice-delete-all", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ankiLinkId, field }),
+        body: JSON.stringify({ audioKey, field }),
       });
       const data = (await res.json().catch(() => null)) as
         | { ok?: boolean; error?: string; deleted?: number; failed?: number }
@@ -116,14 +126,14 @@ export default function WordFieldVoiceCell({
       setPublicPath(null);
       setExists(false);
       setSize(0);
-      window.dispatchEvent(new CustomEvent("wordFieldVoice:updated", { detail: { ankiLinkId, field } }));
+      window.dispatchEvent(new CustomEvent("wordFieldVoice:updated", { detail: { audioKey: normalizedAudioKey, field } }));
       void fetchLatest();
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
       setBusy(false);
     }
-  }, [ankiLinkId, busy, enabled, fetchLatest, field, recording]);
+  }, [normalizedAudioKey, busy, enabled, fetchLatest, field, recording]);
 
   const stopRecording = useCallback((opts?: { skipRecorderStop?: boolean }) => {
     if (!opts?.skipRecorderStop) {
@@ -151,7 +161,8 @@ export default function WordFieldVoiceCell({
       setError(null);
       try {
         const form = new FormData();
-        form.set("ankiLinkId", ankiLinkId);
+        if (!normalizedAudioKey) throw new Error("Missing audioKey");
+        form.set("audioKey", normalizedAudioKey);
         form.set("field", field);
         form.set("audio", blob, "recording.webm");
 
@@ -176,14 +187,14 @@ export default function WordFieldVoiceCell({
         setSize(nextSize);
         setExists(Boolean(nextPublicPath) && nextSize > 0);
 
-        window.dispatchEvent(new CustomEvent("wordFieldVoice:updated", { detail: { ankiLinkId, field } }));
+        window.dispatchEvent(new CustomEvent("wordFieldVoice:updated", { detail: { audioKey: normalizedAudioKey, field } }));
       } catch (e) {
         setError(e instanceof Error ? e.message : String(e));
       } finally {
         setBusy(false);
       }
     },
-    [ankiLinkId, enabled, field]
+    [normalizedAudioKey, enabled, field]
   );
 
   const startRecording = useCallback(async () => {
@@ -243,16 +254,16 @@ export default function WordFieldVoiceCell({
   useEffect(() => {
     if (!enabled) return;
     const onUpdated = (evt: Event) => {
-      const detail = (evt as CustomEvent<{ ankiLinkId?: unknown; field?: unknown; all?: unknown }>).detail;
+      const detail = (evt as CustomEvent<{ audioKey?: unknown; field?: unknown; all?: unknown }>).detail;
       if (!detail) return;
       if (detail.field !== field) return;
-      if (detail.all === true || detail.ankiLinkId === ankiLinkId) {
+      if (detail.all === true || detail.audioKey === audioKey) {
         void fetchLatest();
       }
     };
     window.addEventListener("wordFieldVoice:updated", onUpdated);
     return () => window.removeEventListener("wordFieldVoice:updated", onUpdated);
-  }, [ankiLinkId, enabled, fetchLatest, field]);
+  }, [audioKey, enabled, fetchLatest, field]);
 
   useEffect(() => {
     return () => stopRecording();

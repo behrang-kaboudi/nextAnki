@@ -154,11 +154,16 @@ export async function POST(req: Request) {
       sentence_en,
       sentence_en_meaning_fa: normalizeNullableString(d.sentence_en_meaning_fa) ?? null,
     });
+    const sentence = await prisma.sentence.findUnique({
+      where: { anki_link_id: existing.anki_link_id },
+      select: { id: true },
+    });
 
     return NextResponse.json({
       ok: true as const,
       item: {
         id: updated.id,
+        sentenceRecordId: sentence?.id ?? null,
         updatedAt: updated.updatedAt.toISOString(),
         phonetic_us_normalized: updated.phonetic_us_normalized,
         meaning_fa_IPA_normalized: updated.meaning_fa_IPA_normalized,

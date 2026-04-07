@@ -23,11 +23,16 @@ export const WORD_AUDIO_PUBLIC_URL_PREFIX = "/audio/words";
 export const WORD_AUDIO_FILENAME_SEPARATOR = "__";
 
 export type WordFieldAudioFilenameOptions = {
-  ankiLinkId: string;
+  audioKey?: string;
+  ankiLinkId?: string;
   field: WordAudioFieldKey;
   timestampMs?: number;
   ext?: "mp3";
 };
+
+function getAudioKeyValue({ audioKey, ankiLinkId }: { audioKey?: string; ankiLinkId?: string }): string {
+  return String(audioKey ?? ankiLinkId ?? "").trim();
+}
 
 export function sanitizeWordAudioFilenamePart(value: string): string {
   const trimmed = String(value ?? "").trim();
@@ -43,22 +48,24 @@ export function sanitizeWordAudioFilenamePart(value: string): string {
 }
 
 export function buildWordFieldAudioFilename({
+  audioKey,
   ankiLinkId,
   field,
   timestampMs = Date.now(),
   ext = "mp3",
 }: WordFieldAudioFilenameOptions): string {
   const ts = Number.isFinite(timestampMs) ? Math.trunc(timestampMs) : Date.now();
-  const id = sanitizeWordAudioFilenamePart(ankiLinkId);
+  const id = sanitizeWordAudioFilenamePart(getAudioKeyValue({ audioKey, ankiLinkId }));
   return `${id}${WORD_AUDIO_FILENAME_SEPARATOR}${field}${WORD_AUDIO_FILENAME_SEPARATOR}${ts}.${ext}`;
 }
 
 export function buildWordFieldAudioFilenameTemplate({
+  audioKey,
   ankiLinkId,
   field,
   ext = "mp3",
 }: Omit<WordFieldAudioFilenameOptions, "timestampMs">): string {
-  const id = sanitizeWordAudioFilenamePart(ankiLinkId);
+  const id = sanitizeWordAudioFilenamePart(getAudioKeyValue({ audioKey, ankiLinkId }));
   return `${id}${WORD_AUDIO_FILENAME_SEPARATOR}${field}${WORD_AUDIO_FILENAME_SEPARATOR}Date.now().${ext}`;
 }
 

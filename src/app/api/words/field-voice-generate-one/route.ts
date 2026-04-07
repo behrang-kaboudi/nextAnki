@@ -13,7 +13,6 @@ import {
 } from "@/lib/audio/wordFieldAudioNaming";
 import { generateSpeechFromMixedText } from "@/lib/tts/cloudTts";
 import { getWordFieldAudioAbsolutePath } from "@/lib/audio/wordFieldAudioPaths.server";
-import { touchWordByAnkiLinkId } from "@/lib/words/wordRepo";
 
 export const runtime = "nodejs";
 
@@ -25,15 +24,15 @@ function asNonEmptyString(value: unknown): string | null {
 
 export async function POST(req: Request) {
   const body = (await req.json().catch(() => null)) as
-    | { ankiLinkId?: unknown; field?: unknown; text?: unknown }
+    | { audioKey?: unknown; field?: unknown; text?: unknown }
     | null;
 
-  const ankiLinkId = asNonEmptyString(body?.ankiLinkId);
+  const audioKey = asNonEmptyString(body?.audioKey);
   const fieldRaw = body?.field;
   const text = asNonEmptyString(body?.text);
 
-  if (!ankiLinkId) {
-    return NextResponse.json({ ok: false, error: "Invalid ankiLinkId" }, { status: 400 });
+  if (!audioKey) {
+    return NextResponse.json({ ok: false, error: "Invalid audioKey" }, { status: 400 });
   }
   if (typeof fieldRaw !== "string" || !WORD_AUDIO_FIELDS.includes(fieldRaw as WordAudioFieldKey)) {
     return NextResponse.json(
@@ -46,12 +45,11 @@ export async function POST(req: Request) {
   }
 
   const field: WordAudioFieldKey = fieldRaw as WordAudioFieldKey;
-  const filename = buildWordFieldAudioFilename({ ankiLinkId, field, timestampMs: Date.now() });
+  const filename = buildWordFieldAudioFilename({ audioKey, field, timestampMs: Date.now() });
   const outputFileUnderPublicAudio = path.join("words", filename);
 
   try {
     await generateSpeechFromMixedText(text, outputFileUnderPublicAudio, "azure");
-    await touchWordByAnkiLinkId(ankiLinkId);
     let size = 0;
     try {
       size = fs.statSync(getWordFieldAudioAbsolutePath(filename)).size;

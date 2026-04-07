@@ -38,6 +38,7 @@ const IPA_SPECIAL_CHARACTERS = [
 type WordEditorState = {
   id: number;
   anki_link_id: string;
+  sentenceRecordId: number | null;
 
   base_form: string;
   phonetic_us: string | null;
@@ -264,6 +265,7 @@ export default function WordEditorClient({ initial }: { initial: WordEditorState
             ok?: boolean;
             item?:
               | {
+                  sentenceRecordId?: number | null;
                   updatedAt?: string;
                   phonetic_us_normalized?: string | null;
                   meaning_fa_IPA_normalized?: string;
@@ -282,21 +284,46 @@ export default function WordEditorClient({ initial }: { initial: WordEditorState
           ? String(json.item.meaning_fa_IPA_normalized ?? "")
           : "";
       const json_hint = json?.item && "json_hint" in json.item ? (json.item.json_hint ?? null) : null;
+      const sentenceRecordId =
+        json?.item && "sentenceRecordId" in json.item ? (json.item.sentenceRecordId ?? null) : word.sentenceRecordId;
 
       if (updatedAt) {
-        setWord((prev) => ({ ...prev, updatedAt, phonetic_us_normalized, meaning_fa_IPA_normalized, json_hint }));
-        setBaseline({ ...word, updatedAt, phonetic_us_normalized, meaning_fa_IPA_normalized, json_hint });
+        setWord((prev) => ({
+          ...prev,
+          sentenceRecordId,
+          updatedAt,
+          phonetic_us_normalized,
+          meaning_fa_IPA_normalized,
+          json_hint,
+        }));
+        setBaseline({
+          ...word,
+          sentenceRecordId,
+          updatedAt,
+          phonetic_us_normalized,
+          meaning_fa_IPA_normalized,
+          json_hint,
+        });
       } else {
-        setBaseline({ ...word, phonetic_us_normalized, meaning_fa_IPA_normalized, json_hint });
+        setBaseline({ ...word, sentenceRecordId, phonetic_us_normalized, meaning_fa_IPA_normalized, json_hint });
       }
+
+      const getAudioKeyForField = (field: (typeof WORD_AUDIO_FIELDS)[number]) =>
+        field === "sentence_en" || field === "sentence_en_meaning_fa"
+          ? sentenceRecordId != null
+            ? String(sentenceRecordId)
+            : null
+          : word.anki_link_id;
 
       if (audioFieldsToDelete.length) {
         const results = await Promise.allSettled(
           audioFieldsToDelete.map(async (field) => {
+            const audioKey = getAudioKeyForField(field);
+            if (!audioKey) return;
             const delRes = await fetch("/api/words/field-voice-delete-all", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ ankiLinkId: word.anki_link_id, field }),
+              body: JSON.stringify({ audioKey, field }),
             });
             const delJson = (await delRes.json().catch(() => null)) as { ok?: boolean; error?: string } | null;
             if (!delRes.ok || delJson?.ok !== true) {
@@ -304,7 +331,7 @@ export default function WordEditorClient({ initial }: { initial: WordEditorState
             }
             window.dispatchEvent(
               new CustomEvent("wordFieldVoice:updated", {
-                detail: { ankiLinkId: word.anki_link_id, field, source: "wordEditor:saveCleanup" },
+                detail: { audioKey, field, source: "wordEditor:saveCleanup" },
               }),
             );
           }),
@@ -409,18 +436,25 @@ export default function WordEditorClient({ initial }: { initial: WordEditorState
 
   useEffect(() => {
     const onAudioUpdated = (evt: Event) => {
-      const detail = (evt as CustomEvent<{ ankiLinkId?: unknown; field?: unknown; source?: unknown }>).detail;
+      const detail = (evt as CustomEvent<{ audioKey?: unknown; field?: unknown; source?: unknown }>).detail;
       if (!detail) return;
       if (detail.source === "wordEditor:saveCleanup") return;
-      if (detail.ankiLinkId !== word.anki_link_id) return;
       const fieldRaw = detail.field;
       const field = typeof fieldRaw === "string" && (WORD_AUDIO_FIELDS as readonly string[]).includes(fieldRaw) ? fieldRaw : null;
+      if (!field) return;
+      const expectedAudioKey =
+        field === "sentence_en" || field === "sentence_en_meaning_fa"
+          ? word.sentenceRecordId != null
+            ? String(word.sentenceRecordId)
+            : null
+          : word.anki_link_id;
+      if (!expectedAudioKey || detail.audioKey !== expectedAudioKey) return;
       void saveRef.current?.({ force: true, audioUpdatedField: field as SaveOptions["audioUpdatedField"] });
     };
 
     window.addEventListener("wordFieldVoice:updated", onAudioUpdated);
     return () => window.removeEventListener("wordFieldVoice:updated", onAudioUpdated);
-  }, [word.anki_link_id]);
+  }, [word.anki_link_id, word.sentenceRecordId]);
 
   const statusText = saving
     ? "Saving…"
@@ -529,7 +563,7 @@ export default function WordEditorClient({ initial }: { initial: WordEditorState
                 onFocus={registerFieldFocus("base_form")}
                 className="w-full rounded border px-3 py-2 text-sm"
               />
-              <WordFieldVoiceCell field="base_form" ankiLinkId={word.anki_link_id} text={word.base_form} />
+              <WordFieldVoiceCell field="base_form" audioKey={word.anki_link_id} text={word.base_form} />
             </div>
           </InputRow>
 
@@ -551,7 +585,7 @@ export default function WordEditorClient({ initial }: { initial: WordEditorState
                 onFocus={registerFieldFocus("meaning_fa")}
                 className="w-full rounded border px-3 py-2 text-sm"
               />
-              <WordFieldVoiceCell field="meaning_fa" ankiLinkId={word.anki_link_id} text={word.meaning_fa} />
+              <WordFieldVoiceCell field="meaning_fa" audioKey={word.anki_link_id} text={word.meaning_fa} />
             </div>
           </InputRow>
 
@@ -594,7 +628,11 @@ export default function WordEditorClient({ initial }: { initial: WordEditorState
                 onFocus={registerFieldFocus("sentence_en")}
                 className="min-h-[84px] w-full rounded border px-3 py-2 text-sm"
               />
-              <WordFieldVoiceCell field="sentence_en" ankiLinkId={word.anki_link_id} text={word.sentence_en} />
+              <WordFieldVoiceCell
+                field="sentence_en"
+                audioKey={word.sentenceRecordId != null ? String(word.sentenceRecordId) : null}
+                text={word.sentence_en}
+              />
             </div>
           </InputRow>
 
@@ -609,7 +647,7 @@ export default function WordEditorClient({ initial }: { initial: WordEditorState
               />
               <WordFieldVoiceCell
                 field="sentence_en_meaning_fa"
-                ankiLinkId={word.anki_link_id}
+                audioKey={word.sentenceRecordId != null ? String(word.sentenceRecordId) : null}
                 text={word.sentence_en_meaning_fa}
               />
             </div>
@@ -628,7 +666,7 @@ export default function WordEditorClient({ initial }: { initial: WordEditorState
               />
               <WordFieldVoiceCell
                 field="other_meanings_fa"
-                ankiLinkId={word.anki_link_id}
+                audioKey={word.anki_link_id}
                 text={word.other_meanings_fa}
               />
             </div>
@@ -645,7 +683,7 @@ export default function WordEditorClient({ initial }: { initial: WordEditorState
               />
               <WordFieldVoiceCell
                 field="concept_explained_fa"
-                ankiLinkId={word.anki_link_id}
+                audioKey={word.anki_link_id}
                 text={word.concept_explained_fa}
               />
             </div>

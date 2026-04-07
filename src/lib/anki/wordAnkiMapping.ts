@@ -203,9 +203,10 @@ export type WordAnkiFieldGenerator = (word: Word) => string | Promise<string>;
 async function getSentenceFields(ankiLinkId: string) {
   const sentence = await prisma.sentence.findUnique({
     where: { anki_link_id: ankiLinkId },
-    select: { sentence_en: true, sentence_en_meaning_fa: true },
+    select: { id: true, sentence_en: true, sentence_en_meaning_fa: true },
   });
   return {
+    id: sentence?.id ?? null,
     sentence_en: sentence?.sentence_en ?? "",
     sentence_en_meaning_fa: sentence?.sentence_en_meaning_fa ?? "",
   };
@@ -213,10 +214,10 @@ async function getSentenceFields(ankiLinkId: string) {
 
 function withLatestAudioTag(
   text: string,
-  ankiLinkId: string,
+  audioKey: string,
   field: WordAudioFieldKey,
 ): string {
-  const latest = getLatestWordFieldAudioFile({ ankiLinkId, field });
+  const latest = getLatestWordFieldAudioFile({ audioKey, ankiLinkId: audioKey, field });
   if (!latest || latest.size <= 0) return text;
 
   const tag = `[sound:${latest.filename}]`;
@@ -248,15 +249,19 @@ export const WORD_ANKI_FIELD_GENERATORS = {
     ),
   sentence_en: async (w) => {
     const sentence = await getSentenceFields(w.anki_link_id);
-    return withLatestAudioTag(sentence.sentence_en, w.anki_link_id, "sentence_en");
+    return sentence.id != null
+      ? withLatestAudioTag(sentence.sentence_en, String(sentence.id), "sentence_en")
+      : sentence.sentence_en;
   },
   sentence_en_meaning_fa: async (w) => {
     const sentence = await getSentenceFields(w.anki_link_id);
-    return withLatestAudioTag(
-      sentence.sentence_en_meaning_fa,
-      w.anki_link_id,
-      "sentence_en_meaning_fa",
-    );
+    return sentence.id != null
+      ? withLatestAudioTag(
+          sentence.sentence_en_meaning_fa,
+          String(sentence.id),
+          "sentence_en_meaning_fa",
+        )
+      : sentence.sentence_en_meaning_fa;
   },
 
   // TODO: define the source-of-truth for this field (not currently present in DB schema).

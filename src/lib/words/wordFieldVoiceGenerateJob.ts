@@ -35,6 +35,7 @@ export type WordFieldVoiceJobStatus = {
 };
 
 type JobState = WordFieldVoiceJobStatus & { _started: boolean };
+type CandidateRow = { id: number; anki_link_id: string; audioKey: string | null; value: string | null };
 
 function nowIso() {
   return new Date().toISOString();
@@ -174,29 +175,30 @@ async function runJob(state: JobState) {
       state.currentId = r.id;
 
       const ankiLinkId = asNonEmptyString(r.anki_link_id);
+      const audioKey = asNonEmptyString(r.audioKey);
       const text = asNonEmptyString(r.value);
-      if (!ankiLinkId || !text) {
+      if (!audioKey || !text) {
         state.skippedNoText += 1;
         continue;
       }
 
-      const key = `${sanitizeWordAudioFilenamePart(ankiLinkId)}::${field}`;
+      const key = `${sanitizeWordAudioFilenamePart(audioKey)}::${field}`;
       const existing = existingIndex.get(key);
       if (existing) {
         if (existing.size === 0) {
           state.zeroByteFound += 1;
           await generateSpeechFromMixedText(text, path.join("words", existing.filename), "azure");
           state.regeneratedZeroByte += 1;
-          await touchWordByAnkiLinkId(ankiLinkId);
+          if (ankiLinkId) await touchWordByAnkiLinkId(ankiLinkId);
         } else {
           state.skippedExists += 1;
         }
       } else {
-        const filename = buildWordFieldAudioFilename({ ankiLinkId, field, timestampMs: Date.now() });
+        const filename = buildWordFieldAudioFilename({ audioKey, field, timestampMs: Date.now() });
         await generateSpeechFromMixedText(text, path.join("words", filename), "azure");
         state.generated += 1;
         existingIndex.set(key, { filename, timestampMs: Date.now(), size: 1 });
-        await touchWordByAnkiLinkId(ankiLinkId);
+        if (ankiLinkId) await touchWordByAnkiLinkId(ankiLinkId);
       }
 
       state.processedCandidates += 1;
@@ -210,8 +212,6 @@ async function runJob(state: JobState) {
   state.finishedAt = nowIso();
   state.currentId = null;
 }
-
-type CandidateRow = { id: number; anki_link_id: string; value: string | null };
 
 async function countCandidates(field: WordAudioFieldKey): Promise<number> {
   if (field === "other_meanings_fa") {
@@ -255,25 +255,25 @@ async function fetchBatch(
 
   if (field === "base_form") {
     const rows = await prisma.word.findMany({ ...base, select: { id: true, anki_link_id: true, base_form: true } });
-    return rows.map((r) => ({ id: r.id, anki_link_id: r.anki_link_id, value: r.base_form }));
+    return rows.map((r) => ({ id: r.id, anki_link_id: r.anki_link_id, audioKey: r.anki_link_id, value: r.base_form }));
   }
   if (field === "meaning_fa") {
     const rows = await prisma.word.findMany({ ...base, select: { id: true, anki_link_id: true, meaning_fa: true } });
-    return rows.map((r) => ({ id: r.id, anki_link_id: r.anki_link_id, value: r.meaning_fa }));
+    return rows.map((r) => ({ id: r.id, anki_link_id: r.anki_link_id, audioKey: r.anki_link_id, value: r.meaning_fa }));
   }
   if (field === "other_meanings_fa") {
     const rows = await prisma.word.findMany({
       ...base,
       select: { id: true, anki_link_id: true, other_meanings_fa: true },
     });
-    return rows.map((r) => ({ id: r.id, anki_link_id: r.anki_link_id, value: r.other_meanings_fa ?? null }));
+    return rows.map((r) => ({ id: r.id, anki_link_id: r.anki_link_id, audioKey: r.anki_link_id, value: r.other_meanings_fa ?? null }));
   }
   if (field === "concept_explained_fa") {
     const rows = await prisma.word.findMany({
       ...base,
       select: { id: true, anki_link_id: true, concept_explained_fa: true },
     });
-    return rows.map((r) => ({ id: r.id, anki_link_id: r.anki_link_id, value: r.concept_explained_fa ?? null }));
+    return rows.map((r) => ({ id: r.id, anki_link_id: r.anki_link_id, audioKey: r.anki_link_id, value: r.concept_explained_fa ?? null }));
   }
   if (field === "sentence_en") {
     const rows = await prisma.word.findMany({
@@ -281,12 +281,13 @@ async function fetchBatch(
       select: {
         id: true,
         anki_link_id: true,
-        sentenceRecord: { select: { sentence_en: true } },
+        sentenceRecord: { select: { id: true, sentence_en: true } },
       },
     });
     return rows.map((r) => ({
       id: r.id,
       anki_link_id: r.anki_link_id,
+      audioKey: r.sentenceRecord ? String(r.sentenceRecord.id) : null,
       value: r.sentenceRecord?.sentence_en ?? null,
     }));
   }
@@ -297,12 +298,13 @@ async function fetchBatch(
       select: {
         id: true,
         anki_link_id: true,
-        sentenceRecord: { select: { sentence_en_meaning_fa: true } },
+        sentenceRecord: { select: { id: true, sentence_en_meaning_fa: true } },
       },
     });
     return rows.map((r) => ({
       id: r.id,
       anki_link_id: r.anki_link_id,
+      audioKey: r.sentenceRecord ? String(r.sentenceRecord.id) : null,
       value: r.sentenceRecord?.sentence_en_meaning_fa ?? null,
     }));
   }

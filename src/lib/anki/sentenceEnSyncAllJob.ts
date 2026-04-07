@@ -135,9 +135,9 @@ function indexLatestAudioForSentenceEn(): Map<string, ExistingFileInfo> {
   return latestById;
 }
 
-function generateSentenceEnValue(dbSentenceEn: string, ankiLinkId: string, audioIndex: Map<string, ExistingFileInfo>): string {
+function generateSentenceEnValue(dbSentenceEn: string, audioKey: string, audioIndex: Map<string, ExistingFileInfo>): string {
   const text = String(dbSentenceEn ?? "");
-  const key = sanitizeWordAudioFilenamePart(ankiLinkId);
+  const key = sanitizeWordAudioFilenamePart(audioKey);
   const audio = audioIndex.get(key);
   if (!audio || audio.size <= 0) return text;
   const tag = `[sound:${audio.filename}]`;
@@ -203,13 +203,16 @@ async function runJob(state: State) {
     ),
   );
 
-  const dbSentenceByAnkiLinkId = new Map<string, string>();
+  const dbSentenceByAnkiLinkId = new Map<string, { sentenceEn: string; audioKey: string }>();
   for (const group of chunk(allIds, 1000)) {
     const rows = await prisma.sentence.findMany({
       where: { anki_link_id: { in: group } },
-      select: { anki_link_id: true, sentence_en: true },
+      select: { id: true, anki_link_id: true, sentence_en: true },
     });
-    for (const r of rows) dbSentenceByAnkiLinkId.set(r.anki_link_id, r.sentence_en);
+    for (const r of rows) {
+      if (!r.anki_link_id) continue;
+      dbSentenceByAnkiLinkId.set(r.anki_link_id, { sentenceEn: r.sentence_en, audioKey: String(r.id) });
+    }
   }
 
   const concurrency = 20;
@@ -234,14 +237,14 @@ async function runJob(state: State) {
         return;
       }
 
-      const dbSentenceEn = dbSentenceByAnkiLinkId.get(ankiLinkId);
-      if (!dbSentenceEn) {
+      const dbSentence = dbSentenceByAnkiLinkId.get(ankiLinkId);
+      if (!dbSentence) {
         state.skippedNoWord += 1;
         state.processed += 1;
         return;
       }
 
-      const newValue = generateSentenceEnValue(dbSentenceEn, ankiLinkId, audioIndex);
+      const newValue = generateSentenceEnValue(dbSentence.sentenceEn, dbSentence.audioKey, audioIndex);
       if (newValue === oldValue) {
         state.skippedSame += 1;
         state.processed += 1;

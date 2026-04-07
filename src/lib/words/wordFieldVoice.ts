@@ -69,9 +69,11 @@ export function listWordFieldAudioIdsWithAnyNonZeroAudio(field: WordAudioFieldKe
 }
 
 export function listWordFieldAudioFiles({
+  audioKey,
   ankiLinkId,
   field,
 }: {
+  audioKey?: string;
   ankiLinkId: string;
   field: WordAudioFieldKey;
 }): WordFieldAudioFileMatch[] {
@@ -83,7 +85,7 @@ export function listWordFieldAudioFiles({
     return [];
   }
 
-  const id = sanitizeWordAudioFilenamePart(ankiLinkId);
+  const id = sanitizeWordAudioFilenamePart(audioKey ?? ankiLinkId);
   const sep = escapeRegExp(WORD_AUDIO_FILENAME_SEPARATOR);
   const reNew = new RegExp(`^${escapeRegExp(id)}${sep}${escapeRegExp(field)}${sep}(?<ts>\\d{8,})\\.mp3$`);
   const reLegacy = new RegExp(`^${escapeRegExp(id)}_${escapeRegExp(field)}_(?<ts>\\d{8,})\\.mp3$`);
@@ -108,13 +110,15 @@ export function listWordFieldAudioFiles({
 }
 
 export function getLatestWordFieldAudioFile({
+  audioKey,
   ankiLinkId,
   field,
 }: {
+  audioKey?: string;
   ankiLinkId: string;
   field: WordAudioFieldKey;
 }): WordFieldAudioFileMatch | null {
-  return listWordFieldAudioFiles({ ankiLinkId, field })[0] ?? null;
+  return listWordFieldAudioFiles({ audioKey, ankiLinkId, field })[0] ?? null;
 }
 
 export function getWordFieldAudioPublicPathFromFilename(filename: string): string {
@@ -132,16 +136,18 @@ export function getWordFieldAudioFileInfo(filename: string): { absPath: string; 
 }
 
 export async function deleteAllWordFieldAudioFiles({
+  audioKey,
   ankiLinkId,
   field,
 }: {
+  audioKey?: string;
   ankiLinkId: string;
   field: WordAudioFieldKey;
 }): Promise<{ deleted: number; failed: number; deletedBytes: number }> {
   const dir = getWordFieldAudioAbsoluteDir();
   const dirResolved = path.resolve(dir);
 
-  const matches = listWordFieldAudioFiles({ ankiLinkId, field });
+  const matches = listWordFieldAudioFiles({ audioKey, ankiLinkId, field });
   let deleted = 0;
   let failed = 0;
   let deletedBytes = 0;

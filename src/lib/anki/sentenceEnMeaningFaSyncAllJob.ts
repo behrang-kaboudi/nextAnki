@@ -137,11 +137,11 @@ function indexLatestAudioForSentenceEnMeaningFa(): Map<string, ExistingFileInfo>
 
 function generateSentenceEnMeaningFaValue(
   dbValue: string,
-  ankiLinkId: string,
+  audioKey: string,
   audioIndex: Map<string, ExistingFileInfo>
 ): string {
   const text = String(dbValue ?? "");
-  const key = sanitizeWordAudioFilenamePart(ankiLinkId);
+  const key = sanitizeWordAudioFilenamePart(audioKey);
   const audio = audioIndex.get(key);
   if (!audio || audio.size <= 0) return text;
   const tag = `[sound:${audio.filename}]`;
@@ -209,13 +209,19 @@ async function runJob(state: State) {
     ),
   );
 
-  const dbValueByAnkiLinkId = new Map<string, string>();
+  const dbValueByAnkiLinkId = new Map<string, { value: string; audioKey: string }>();
   for (const group of chunk(allIds, 1000)) {
     const rows = await prisma.sentence.findMany({
       where: { anki_link_id: { in: group } },
-      select: { anki_link_id: true, sentence_en_meaning_fa: true },
+      select: { id: true, anki_link_id: true, sentence_en_meaning_fa: true },
     });
-    for (const r of rows) dbValueByAnkiLinkId.set(r.anki_link_id, r.sentence_en_meaning_fa ?? "");
+    for (const r of rows) {
+      if (!r.anki_link_id) continue;
+      dbValueByAnkiLinkId.set(r.anki_link_id, {
+        value: r.sentence_en_meaning_fa ?? "",
+        audioKey: String(r.id),
+      });
+    }
   }
 
   const concurrency = 20;
@@ -244,7 +250,7 @@ async function runJob(state: State) {
       return;
     }
 
-    const newValue = generateSentenceEnMeaningFaValue(dbValue, ankiLinkId, audioIndex);
+    const newValue = generateSentenceEnMeaningFaValue(dbValue.value, dbValue.audioKey, audioIndex);
     if (newValue === oldValue) {
       state.skippedSame += 1;
       state.processed += 1;

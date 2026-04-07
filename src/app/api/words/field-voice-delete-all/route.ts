@@ -4,7 +4,6 @@ import { NextResponse } from "next/server";
 
 import { WORD_AUDIO_FIELDS } from "@/lib/audio/wordFieldAudioNaming";
 import { deleteAllWordFieldAudioFiles } from "@/lib/words/wordFieldVoice";
-import { touchWordByAnkiLinkId } from "@/lib/words/wordRepo";
 
 export const runtime = "nodejs";
 
@@ -16,14 +15,14 @@ function asNonEmptyString(value: unknown): string | null {
 
 export async function POST(req: Request) {
   const body = (await req.json().catch(() => null)) as
-    | { ankiLinkId?: unknown; field?: unknown }
+    | { audioKey?: unknown; field?: unknown }
     | null;
 
-  const ankiLinkId = asNonEmptyString(body?.ankiLinkId);
+  const audioKey = asNonEmptyString(body?.audioKey);
   const field = body?.field;
 
-  if (!ankiLinkId) {
-    return NextResponse.json({ ok: false, error: "Invalid ankiLinkId" }, { status: 400 });
+  if (!audioKey) {
+    return NextResponse.json({ ok: false, error: "Invalid audioKey" }, { status: 400 });
   }
   if (typeof field !== "string" || !WORD_AUDIO_FIELDS.includes(field as never)) {
     return NextResponse.json(
@@ -32,9 +31,6 @@ export async function POST(req: Request) {
     );
   }
 
-  const res = await deleteAllWordFieldAudioFiles({ ankiLinkId, field: field as never });
-  if (res.deleted > 0) {
-    await touchWordByAnkiLinkId(ankiLinkId);
-  }
+  const res = await deleteAllWordFieldAudioFiles({ audioKey, ankiLinkId: audioKey, field: field as never });
   return NextResponse.json({ ok: true, ...res });
 }

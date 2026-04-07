@@ -30,3 +30,9 @@ export async function findSentenceByAnkiLinkId(ankiLinkId: string) {
     where: { anki_link_id: ankiLinkId },
   });
 }
+
+export function getSentenceAudioKey(sentenceId: number | string | null | undefined): string | null {
+  if (sentenceId == null) return null;
+  const value = String(sentenceId).trim();
+  return value.length ? value : null;
+}

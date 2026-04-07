@@ -15,11 +15,11 @@ function asNonEmptyString(value: unknown): string | null {
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
-  const ankiLinkId = asNonEmptyString(searchParams.get("ankiLinkId"));
+  const audioKey = asNonEmptyString(searchParams.get("audioKey"));
   const field = searchParams.get("field");
 
-  if (!ankiLinkId) {
-    return NextResponse.json({ ok: false, error: "Invalid ankiLinkId" }, { status: 400 });
+  if (!audioKey) {
+    return NextResponse.json({ ok: false, error: "Invalid audioKey" }, { status: 400 });
   }
   if (typeof field !== "string" || !WORD_AUDIO_FIELDS.includes(field as never)) {
     return NextResponse.json(
@@ -28,11 +28,10 @@ export async function GET(req: Request) {
     );
   }
 
-  const latest = getLatestWordFieldAudioFile({ ankiLinkId, field: field as never });
+  const latest = getLatestWordFieldAudioFile({ audioKey, ankiLinkId: audioKey, field: field as never });
   const filename = latest?.filename ?? null;
   const size = latest?.size ?? 0;
   const publicPath = filename ? getWordFieldAudioPublicPathFromFilename(filename) : null;
 
   return NextResponse.json({ ok: true, filename, publicPath, size });
 }
-

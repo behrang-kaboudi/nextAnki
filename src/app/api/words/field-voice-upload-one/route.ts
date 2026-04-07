@@ -12,7 +12,6 @@ import { spawn } from "node:child_process";
 import { WORD_AUDIO_FIELDS, buildWordFieldAudioFilename, getWordFieldAudioPublicPath } from "@/lib/audio/wordFieldAudioNaming";
 import { getWordFieldAudioAbsoluteDir, getWordFieldAudioAbsolutePath } from "@/lib/audio/wordFieldAudioPaths.server";
 import { deleteAllWordFieldAudioFiles } from "@/lib/words/wordFieldVoice";
-import { touchWordByAnkiLinkId } from "@/lib/words/wordRepo";
 
 export const runtime = "nodejs";
 
@@ -41,12 +40,12 @@ export async function POST(req: Request) {
   try {
     const form = await req.formData();
 
-    const ankiLinkId = asNonEmptyString(form.get("ankiLinkId"));
+    const audioKey = asNonEmptyString(form.get("audioKey"));
     const field = form.get("field");
     const audio = form.get("audio");
 
-    if (!ankiLinkId) {
-      return NextResponse.json({ ok: false, error: "Invalid ankiLinkId" }, { status: 400 });
+    if (!audioKey) {
+      return NextResponse.json({ ok: false, error: "Invalid audioKey" }, { status: 400 });
     }
     if (typeof field !== "string" || !WORD_AUDIO_FIELDS.includes(field as never)) {
       return NextResponse.json(
@@ -76,10 +75,10 @@ export async function POST(req: Request) {
 
     // Replace behavior: if there's existing audio for this (ankiLinkId + field), remove it before saving the new one.
     // This avoids multiple versions when recording/uploading repeatedly.
-    await deleteAllWordFieldAudioFiles({ ankiLinkId, field: field as never });
+    await deleteAllWordFieldAudioFiles({ audioKey, ankiLinkId: audioKey, field: field as never });
 
     const filename = buildWordFieldAudioFilename({
-      ankiLinkId,
+      audioKey,
       field: field as never,
       timestampMs: Date.now(),
       ext: "mp3",
@@ -104,7 +103,6 @@ export async function POST(req: Request) {
       ]);
 
       await fsp.copyFile(tmpOutput, outAbs);
-      await touchWordByAnkiLinkId(ankiLinkId);
 
       let size = 0;
       try {

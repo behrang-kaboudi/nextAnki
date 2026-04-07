@@ -90,13 +90,14 @@ model Word {
 }
 
 model Sentence {
-  anki_link_id           String   @id
+  id                     Int      @id @default(autoincrement())
+  anki_link_id           String?  @unique
   sentence_en            String
   sentence_en_meaning_fa String?
   createdAt              DateTime @default(now())
   updatedAt              DateTime @updatedAt
 
-  word Word @relation(fields: [anki_link_id], references: [anki_link_id], onDelete: Cascade)
+  word Word? @relation(fields: [anki_link_id], references: [anki_link_id], onDelete: Cascade)
 }
 
 model IpaKeyword {

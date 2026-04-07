@@ -219,7 +219,7 @@ export default function BatchWordFieldVoiceGenerate({
         Folder: <span className="font-mono">public/{WORD_AUDIO_PUBLIC_DIR_RELATIVE}</span> •
         name:{" "}
         <span className="font-mono">
-          anki_link_id{WORD_AUDIO_FILENAME_SEPARATOR}field{WORD_AUDIO_FILENAME_SEPARATOR}Date.now().mp3
+          audioKey{WORD_AUDIO_FILENAME_SEPARATOR}field{WORD_AUDIO_FILENAME_SEPARATOR}Date.now().mp3
         </span>
       </div>
     </div>

@@ -167,12 +167,13 @@ export async function POST(req: Request) {
           { status: 500 }
         );
       }
+      const word = item.word;
 
       const provider = "gemini";
       if (!process.env.GEMINI_API_KEY) {
         // Release claim before failing.
         await prisma.sentence.updateMany({
-          where: { anki_link_id: item.word.anki_link_id, sentence_en: claimToken },
+          where: { anki_link_id: word.anki_link_id, sentence_en: claimToken },
           data: { sentence_en: "" },
         });
         return NextResponse.json(
@@ -183,12 +184,12 @@ export async function POST(req: Request) {
 
       const modelInput = JSON.stringify([
         {
-          id: item.word.id,
-          base_form: item.word.base_form,
-          meaning_fa: item.word.meaning_fa,
-          pos: item.word.pos ?? null,
+          id: word.id,
+          base_form: word.base_form,
+          meaning_fa: word.meaning_fa,
+          pos: word.pos ?? null,
           sentence_en_meaning_fa: item.sentence_en_meaning_fa ?? null,
-          other_meanings_fa: item.word.other_meanings_fa ?? null,
+          other_meanings_fa: word.other_meanings_fa ?? null,
         },
       ]);
 
@@ -210,10 +211,10 @@ export async function POST(req: Request) {
           : null) as Record<string, unknown> | null;
 
         const returnedId = typeof first?.id === "number" ? first.id : Number(first?.id);
-        if (!first || !Number.isFinite(returnedId) || returnedId !== item.word.id) {
+        if (!first || !Number.isFinite(returnedId) || returnedId !== word.id) {
           // Release claim so another attempt can retry.
           await prisma.sentence.updateMany({
-            where: { anki_link_id: item.word.anki_link_id, sentence_en: claimToken },
+            where: { anki_link_id: word.anki_link_id, sentence_en: claimToken },
             data: { sentence_en: "" },
           });
           return NextResponse.json({
@@ -247,14 +248,14 @@ export async function POST(req: Request) {
         const updated = await prisma.$transaction(async (tx) => {
           if (nextOtherMeaningsFa !== null) {
             await tx.word.update({
-              where: { id: item.word.id },
+              where: { id: word.id },
               data: { other_meanings_fa: nextOtherMeaningsFa === "" ? null : nextOtherMeaningsFa },
             });
           }
 
           const savedSentence = Object.keys(sentenceData).length
             ? await tx.sentence.update({
-                where: { anki_link_id: item.word.anki_link_id },
+                where: { anki_link_id: word.anki_link_id },
                 data: sentenceData,
                 select: {
                   sentence_en: true,
@@ -262,7 +263,7 @@ export async function POST(req: Request) {
                 },
               })
             : await tx.sentence.update({
-                where: { anki_link_id: item.word.anki_link_id },
+                where: { anki_link_id: word.anki_link_id },
                 data: { sentence_en: "" },
                 select: {
                   sentence_en: true,
@@ -271,7 +272,7 @@ export async function POST(req: Request) {
               });
 
           const savedWord = await tx.word.findUnique({
-            where: { id: item.word.id },
+            where: { id: word.id },
             select: {
               id: true,
               base_form: true,
@@ -281,12 +282,12 @@ export async function POST(req: Request) {
           });
 
           return {
-            id: savedWord?.id ?? item.word.id,
-            base_form: savedWord?.base_form ?? item.word.base_form,
-            meaning_fa: savedWord?.meaning_fa ?? item.word.meaning_fa,
+            id: savedWord?.id ?? word.id,
+            base_form: savedWord?.base_form ?? word.base_form,
+            meaning_fa: savedWord?.meaning_fa ?? word.meaning_fa,
             sentence_en: savedSentence.sentence_en,
             sentence_en_meaning_fa: savedSentence.sentence_en_meaning_fa,
-            other_meanings_fa: savedWord?.other_meanings_fa ?? item.word.other_meanings_fa,
+            other_meanings_fa: savedWord?.other_meanings_fa ?? word.other_meanings_fa,
           };
         });
 
@@ -303,7 +304,7 @@ export async function POST(req: Request) {
       } catch (e) {
         // Ensure the claimed row doesn't get stuck in PROCESSING state.
         await prisma.sentence.updateMany({
-          where: { anki_link_id: item.word.anki_link_id, sentence_en: claimToken },
+          where: { anki_link_id: word.anki_link_id, sentence_en: claimToken },
           data: { sentence_en: "" },
         });
         throw e;

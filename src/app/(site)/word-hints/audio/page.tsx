@@ -58,6 +58,7 @@ export default async function WordHintsAudioPage({
         concept_explained_fa: true,
         sentenceRecord: {
           select: {
+            id: true,
             sentence_en: true,
             sentence_en_meaning_fa: true,
           },
@@ -193,7 +194,7 @@ export default async function WordHintsAudioPage({
                       </span>
                       <WordFieldVoiceCell
                         field="base_form"
-                        ankiLinkId={r.anki_link_id}
+                        audioKey={r.anki_link_id}
                         text={r.base_form}
                       />
                     </div>
@@ -205,7 +206,7 @@ export default async function WordHintsAudioPage({
                       </span>
                       <WordFieldVoiceCell
                         field="meaning_fa"
-                        ankiLinkId={r.anki_link_id}
+                        audioKey={r.anki_link_id}
                         text={r.meaning_fa}
                       />
                     </div>
@@ -217,7 +218,7 @@ export default async function WordHintsAudioPage({
                       </span>
                       <WordFieldVoiceCell
                         field="other_meanings_fa"
-                        ankiLinkId={r.anki_link_id}
+                        audioKey={r.anki_link_id}
                         text={r.other_meanings_fa}
                       />
                     </div>
@@ -229,7 +230,7 @@ export default async function WordHintsAudioPage({
                       </span>
                       <WordFieldVoiceCell
                         field="concept_explained_fa"
-                        ankiLinkId={r.anki_link_id}
+                        audioKey={r.anki_link_id}
                         text={r.concept_explained_fa}
                       />
                     </div>
@@ -241,7 +242,7 @@ export default async function WordHintsAudioPage({
                       </span>
                       <WordFieldVoiceCell
                         field="sentence_en"
-                        ankiLinkId={r.anki_link_id}
+                        audioKey={r.sentenceRecord ? String(r.sentenceRecord.id) : null}
                         text={r.sentenceRecord?.sentence_en ?? null}
                       />
                     </div>
@@ -256,7 +257,7 @@ export default async function WordHintsAudioPage({
                       </span>
                       <WordFieldVoiceCell
                         field="sentence_en_meaning_fa"
-                        ankiLinkId={r.anki_link_id}
+                        audioKey={r.sentenceRecord ? String(r.sentenceRecord.id) : null}
                         text={r.sentenceRecord?.sentence_en_meaning_fa ?? null}
                       />
                     </div>

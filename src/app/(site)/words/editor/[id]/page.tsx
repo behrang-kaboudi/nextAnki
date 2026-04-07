@@ -53,6 +53,7 @@ export default async function WordEditorPage({
             concept_explained: word.concept_explained,
             concept_explained_fa: word.concept_explained_fa,
             word_hint_story: word.word_hint_story,
+            sentenceRecordId: word.sentenceRecord?.id ?? null,
             sentence_en: word.sentenceRecord?.sentence_en ?? "",
             sentence_en_meaning_fa: word.sentenceRecord?.sentence_en_meaning_fa ?? null,
             explanation_for_sentence_meaning: word.explanation_for_sentence_meaning,
