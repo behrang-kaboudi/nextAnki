@@ -19,9 +19,16 @@ export default async function WordEditorPage({
 
   const word = await prisma.word.findUnique({
     where: { id },
-    include: { sentenceRecord: true },
+    include: {
+      sentenceLinks: {
+        where: { isPrimary: true },
+        take: 1,
+        include: { sentence: true },
+      },
+    },
   });
   if (!word) notFound();
+  const primarySentence = word.sentenceLinks[0]?.sentence ?? null;
 
   return (
     <main className="mx-auto w-full max-w-6xl p-4">
@@ -53,9 +60,9 @@ export default async function WordEditorPage({
             concept_explained: word.concept_explained,
             concept_explained_fa: word.concept_explained_fa,
             word_hint_story: word.word_hint_story,
-            sentenceRecordId: word.sentenceRecord?.id ?? null,
-            sentence_en: word.sentenceRecord?.sentence_en ?? "",
-            sentence_en_meaning_fa: word.sentenceRecord?.sentence_en_meaning_fa ?? null,
+            sentenceRecordId: primarySentence?.id ?? null,
+            sentence_en: primarySentence?.sentence_en ?? "",
+            sentence_en_meaning_fa: primarySentence?.sentence_en_meaning_fa ?? null,
             explanation_for_sentence_meaning: word.explanation_for_sentence_meaning,
             learning_depth: word.learning_depth,
             mixed_sentence: word.mixed_sentence,

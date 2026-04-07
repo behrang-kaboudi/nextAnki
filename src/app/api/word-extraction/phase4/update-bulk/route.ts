@@ -3,7 +3,10 @@ import "server-only";
 import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
-import { upsertSentenceByAnkiLinkId } from "@/lib/sentences/sentenceRepo";
+import {
+  findPrimarySentenceByAnkiLinkId,
+  upsertPrimarySentenceByAnkiLinkId,
+} from "@/lib/sentences/sentenceRepo";
 
 export const runtime = "nodejs";
 
@@ -138,12 +141,10 @@ export async function POST(req: Request) {
           },
           select: { id: true, anki_link_id: true },
         });
-        await upsertSentenceByAnkiLinkId({
+        const existingSentence = await findPrimarySentenceByAnkiLinkId(row.anki_link_id);
+        await upsertPrimarySentenceByAnkiLinkId({
           ankiLinkId: row.anki_link_id,
-          sentence_en: (await prisma.sentence.findUnique({
-            where: { anki_link_id: row.anki_link_id },
-            select: { sentence_en: true },
-          }))?.sentence_en ?? "",
+          sentence_en: existingSentence?.sentence_en ?? "",
           sentence_en_meaning_fa: item.sentence_en_meaning_fa,
         });
         updated += 1;

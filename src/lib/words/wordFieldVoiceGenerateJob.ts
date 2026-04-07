@@ -4,6 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 import { prisma } from "@/lib/prisma";
+import { listPrimarySentencesByAnkiLinkIds } from "@/lib/sentences/sentenceRepo";
 import { generateSpeechFromMixedText } from "@/lib/tts/cloudTts";
 import { touchWordByAnkiLinkId } from "@/lib/words/wordRepo";
 import {
@@ -240,7 +241,26 @@ async function countCandidates(field: WordAudioFieldKey): Promise<number> {
   }
   if (field === "base_form") return prisma.word.count({ where: { base_form: { notIn: [""] } } });
   if (field === "meaning_fa") return prisma.word.count({ where: { meaning_fa: { notIn: [""] } } });
-  return prisma.sentence.count({ where: { sentence_en: { notIn: [""] } } });
+  return prisma.word.count({
+    where:
+      field === "sentence_en"
+        ? {
+            sentenceLinks: {
+              some: {
+                isPrimary: true,
+                sentence: { sentence_en: { notIn: [""] } },
+              },
+            },
+          }
+        : {
+            sentenceLinks: {
+              some: {
+                isPrimary: true,
+                sentence: { sentence_en_meaning_fa: { not: null, notIn: [""] } },
+              },
+            },
+          },
+  });
 }
 
 async function fetchBatch(
@@ -278,34 +298,28 @@ async function fetchBatch(
   if (field === "sentence_en") {
     const rows = await prisma.word.findMany({
       ...base,
-      select: {
-        id: true,
-        anki_link_id: true,
-        sentenceRecord: { select: { id: true, sentence_en: true } },
-      },
+      select: { id: true, anki_link_id: true },
     });
+    const sentenceMap = await listPrimarySentencesByAnkiLinkIds(rows.map((r) => r.anki_link_id));
     return rows.map((r) => ({
       id: r.id,
       anki_link_id: r.anki_link_id,
-      audioKey: r.sentenceRecord ? String(r.sentenceRecord.id) : null,
-      value: r.sentenceRecord?.sentence_en ?? null,
+      audioKey: sentenceMap.get(r.anki_link_id)?.id != null ? String(sentenceMap.get(r.anki_link_id)?.id) : null,
+      value: sentenceMap.get(r.anki_link_id)?.sentence_en ?? null,
     }));
   }
 
   if (field === "sentence_en_meaning_fa") {
     const rows = await prisma.word.findMany({
       ...base,
-      select: {
-        id: true,
-        anki_link_id: true,
-        sentenceRecord: { select: { id: true, sentence_en_meaning_fa: true } },
-      },
+      select: { id: true, anki_link_id: true },
     });
+    const sentenceMap = await listPrimarySentencesByAnkiLinkIds(rows.map((r) => r.anki_link_id));
     return rows.map((r) => ({
       id: r.id,
       anki_link_id: r.anki_link_id,
-      audioKey: r.sentenceRecord ? String(r.sentenceRecord.id) : null,
-      value: r.sentenceRecord?.sentence_en_meaning_fa ?? null,
+      audioKey: sentenceMap.get(r.anki_link_id)?.id != null ? String(sentenceMap.get(r.anki_link_id)?.id) : null,
+      value: sentenceMap.get(r.anki_link_id)?.sentence_en_meaning_fa ?? null,
     }));
   }
   return [];

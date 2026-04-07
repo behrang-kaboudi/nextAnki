@@ -15,6 +15,7 @@ import type { WordAudioFieldKey } from "@/lib/audio/wordFieldAudioNaming";
 import { getWordFieldAudioAbsolutePath } from "@/lib/audio/wordFieldAudioPaths.server";
 import { getLatestWordFieldAudioFile } from "@/lib/words/wordFieldVoice";
 import { prisma } from "@/lib/prisma";
+import { findPrimarySentenceByAnkiLinkId } from "@/lib/sentences/sentenceRepo";
 
 import { IpaCandidate, WordPictures } from "../ipa/setPictures/types";
 
@@ -201,10 +202,7 @@ export function getAnkiLinkIdFromNoteFields(
 export type WordAnkiFieldGenerator = (word: Word) => string | Promise<string>;
 
 async function getSentenceFields(ankiLinkId: string) {
-  const sentence = await prisma.sentence.findUnique({
-    where: { anki_link_id: ankiLinkId },
-    select: { id: true, sentence_en: true, sentence_en_meaning_fa: true },
-  });
+  const sentence = await findPrimarySentenceByAnkiLinkId(ankiLinkId);
   return {
     id: sentence?.id ?? null,
     sentence_en: sentence?.sentence_en ?? "",

@@ -168,10 +168,18 @@ export async function POST(req: Request) {
             select: { id: true },
           });
 
-          await tx.sentence.create({
+          const sentence = await tx.sentence.create({
             data: {
-              anki_link_id: code,
               sentence_en: item.sentence_en,
+            },
+            select: { id: true },
+          });
+
+          await tx.sentenceWordLink.create({
+            data: {
+              sentenceId: sentence.id,
+              wordId: pending.id,
+              isPrimary: true,
             },
           });
 

@@ -82,7 +82,7 @@ model Word {
   imageability                     Int?
   createdAt                        DateTime @default(now())
   updatedAt                        DateTime @updatedAt
-  sentenceRecord                   Sentence?
+  sentenceLinks                    SentenceWordLink[]
 
   @@index([base_form], map: "Word_base_form_idx")
   @@index([typeOfWordInDb], map: "Word_typeOfWordInDb_idx")
@@ -91,13 +91,27 @@ model Word {
 
 model Sentence {
   id                     Int      @id @default(autoincrement())
-  anki_link_id           String?  @unique
-  sentence_en            String
+  sentence_en            String   @unique
   sentence_en_meaning_fa String?
   createdAt              DateTime @default(now())
   updatedAt              DateTime @updatedAt
 
-  word Word? @relation(fields: [anki_link_id], references: [anki_link_id], onDelete: Cascade)
+  wordLinks SentenceWordLink[]
+}
+
+model SentenceWordLink {
+  sentenceId Int
+  wordId     Int
+  isPrimary  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  sentence Sentence @relation(fields: [sentenceId], references: [id], onDelete: Cascade)
+  word     Word     @relation(fields: [wordId], references: [id], onDelete: Cascade)
+
+  @@id([sentenceId, wordId])
+  @@index([wordId, isPrimary])
+  @@index([sentenceId, isPrimary])
 }
 
 model IpaKeyword {

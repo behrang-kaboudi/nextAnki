@@ -75,13 +75,15 @@ export async function GET() {
     const [missingSentenceEnRow, processingRow] = await Promise.all([
       prisma.$queryRaw<Array<{ c: bigint }>>`
         SELECT COUNT(*) as c
-        FROM Sentence
-        WHERE sentence_en IS NULL OR TRIM(sentence_en) = ''
+        FROM Sentence s
+        INNER JOIN SentenceWordLink sw ON sw.sentenceId = s.id AND sw.isPrimary = true
+        WHERE s.sentence_en IS NULL OR TRIM(s.sentence_en) = ''
       `,
       prisma.$queryRaw<Array<{ c: bigint }>>`
         SELECT COUNT(*) as c
-        FROM Sentence
-        WHERE sentence_en LIKE ${`${PROCESSING_PREFIX}%`}
+        FROM Sentence s
+        INNER JOIN SentenceWordLink sw ON sw.sentenceId = s.id AND sw.isPrimary = true
+        WHERE s.sentence_en LIKE ${`${PROCESSING_PREFIX}%`}
       `,
     ]);
 
@@ -132,48 +134,72 @@ export async function POST(req: Request) {
     if (mode === "next_missing_sentence_en") {
       const claimToken = `${PROCESSING_PREFIX}${crypto.randomUUID()}`;
 
-      const claimed = await prisma.$executeRaw`
-        UPDATE Sentence
-        SET sentence_en = ${claimToken}
-        WHERE sentence_en IS NULL OR TRIM(sentence_en) = ''
-        ORDER BY anki_link_id ASC
+      const nextCandidate = await prisma.$queryRaw<
+        Array<{ sentenceId: number; wordId: number; anki_link_id: string }>
+      >`
+        SELECT s.id as sentenceId, w.id as wordId, w.anki_link_id
+        FROM Sentence s
+        INNER JOIN SentenceWordLink sw ON sw.sentenceId = s.id AND sw.isPrimary = true
+        INNER JOIN word w ON w.id = sw.wordId
+        WHERE s.sentence_en IS NULL OR TRIM(s.sentence_en) = ''
+        ORDER BY w.anki_link_id ASC
         LIMIT 1
       `;
 
-      if (!claimed) {
+      const candidate = nextCandidate[0] ?? null;
+      if (!candidate) {
         return NextResponse.json({ ok: true, done: true });
       }
 
+      const claimed = await prisma.sentence.updateMany({
+        where: {
+          id: candidate.sentenceId,
+          sentence_en: "",
+        },
+        data: { sentence_en: claimToken },
+      });
+
+      if (!claimed.count) {
+        return NextResponse.json({ ok: true, done: false, skipped: true });
+      }
+
       const item = await prisma.sentence.findFirst({
-        where: { sentence_en: claimToken },
+        where: { id: candidate.sentenceId, sentence_en: claimToken },
         select: {
+          id: true,
           sentence_en_meaning_fa: true,
-          word: {
+          wordLinks: {
+            where: { isPrimary: true },
+            take: 1,
             select: {
-              id: true,
-              anki_link_id: true,
-              base_form: true,
-              meaning_fa: true,
-              pos: true,
-              other_meanings_fa: true,
+              word: {
+                select: {
+                  id: true,
+                  anki_link_id: true,
+                  base_form: true,
+                  meaning_fa: true,
+                  pos: true,
+                  other_meanings_fa: true,
+                },
+              },
             },
           },
         },
       });
 
-      if (!item?.word) {
+      const word = item?.wordLinks[0]?.word ?? null;
+      if (!item || !word) {
         return NextResponse.json(
           { ok: false, error: "Claimed a row but failed to load it (unexpected)" },
           { status: 500 }
         );
       }
-      const word = item.word;
 
       const provider = "gemini";
       if (!process.env.GEMINI_API_KEY) {
         // Release claim before failing.
         await prisma.sentence.updateMany({
-          where: { anki_link_id: word.anki_link_id, sentence_en: claimToken },
+          where: { id: item.id, sentence_en: claimToken },
           data: { sentence_en: "" },
         });
         return NextResponse.json(
@@ -214,7 +240,7 @@ export async function POST(req: Request) {
         if (!first || !Number.isFinite(returnedId) || returnedId !== word.id) {
           // Release claim so another attempt can retry.
           await prisma.sentence.updateMany({
-            where: { anki_link_id: word.anki_link_id, sentence_en: claimToken },
+            where: { id: item.id, sentence_en: claimToken },
             data: { sentence_en: "" },
           });
           return NextResponse.json({
@@ -255,7 +281,7 @@ export async function POST(req: Request) {
 
           const savedSentence = Object.keys(sentenceData).length
             ? await tx.sentence.update({
-                where: { anki_link_id: word.anki_link_id },
+                where: { id: item.id },
                 data: sentenceData,
                 select: {
                   sentence_en: true,
@@ -263,7 +289,7 @@ export async function POST(req: Request) {
                 },
               })
             : await tx.sentence.update({
-                where: { anki_link_id: word.anki_link_id },
+                where: { id: item.id },
                 data: { sentence_en: "" },
                 select: {
                   sentence_en: true,
@@ -304,7 +330,7 @@ export async function POST(req: Request) {
       } catch (e) {
         // Ensure the claimed row doesn't get stuck in PROCESSING state.
         await prisma.sentence.updateMany({
-          where: { anki_link_id: word.anki_link_id, sentence_en: claimToken },
+          where: { id: item.id, sentence_en: claimToken },
           data: { sentence_en: "" },
         });
         throw e;

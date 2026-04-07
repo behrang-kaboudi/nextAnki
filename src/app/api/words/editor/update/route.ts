@@ -6,7 +6,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { normalizeIpaForDb } from "@/lib/ipa/normalize";
 import { pickPictureSymbolsForWord } from "@/lib/ipa/setPictures/setForAny";
-import { upsertSentenceByAnkiLinkId } from "@/lib/sentences/sentenceRepo";
+import { upsertPrimarySentenceByAnkiLinkId } from "@/lib/sentences/sentenceRepo";
 import { stringifyJsonHintWithTimestamp } from "@/lib/words/jsonHint";
 import { updateWord } from "@/lib/words/wordRepo";
 
@@ -149,21 +149,17 @@ export async function POST(req: Request) {
       },
     });
 
-    await upsertSentenceByAnkiLinkId({
+    const sentence = await upsertPrimarySentenceByAnkiLinkId({
       ankiLinkId: existing.anki_link_id,
       sentence_en,
       sentence_en_meaning_fa: normalizeNullableString(d.sentence_en_meaning_fa) ?? null,
-    });
-    const sentence = await prisma.sentence.findUnique({
-      where: { anki_link_id: existing.anki_link_id },
-      select: { id: true },
     });
 
     return NextResponse.json({
       ok: true as const,
       item: {
         id: updated.id,
-        sentenceRecordId: sentence?.id ?? null,
+        sentenceRecordId: sentence.id,
         updatedAt: updated.updatedAt.toISOString(),
         phonetic_us_normalized: updated.phonetic_us_normalized,
         meaning_fa_IPA_normalized: updated.meaning_fa_IPA_normalized,

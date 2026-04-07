@@ -39,7 +39,8 @@ export async function GET(req: Request) {
           >`
             SELECT w.id, w.base_form, w.meaning_fa, COALESCE(s.sentence_en, '') AS sentence_en
             FROM word w
-            LEFT JOIN Sentence s ON s.anki_link_id = w.anki_link_id
+            LEFT JOIN SentenceWordLink sw ON sw.wordId = w.id AND sw.isPrimary = true
+            LEFT JOIN Sentence s ON s.id = sw.sentenceId
             WHERE w.phonetic_us IS NULL OR w.phonetic_us = ''
             ORDER BY w.id DESC
             LIMIT 20
@@ -50,7 +51,8 @@ export async function GET(req: Request) {
             >`
               SELECT w.id, w.base_form, w.meaning_fa, COALESCE(s.sentence_en, '') AS sentence_en
               FROM word w
-              LEFT JOIN Sentence s ON s.anki_link_id = w.anki_link_id
+              LEFT JOIN SentenceWordLink sw ON sw.wordId = w.id AND sw.isPrimary = true
+              LEFT JOIN Sentence s ON s.id = sw.sentenceId
               WHERE w.imageability IS NULL OR w.imageability <= 0
               ORDER BY w.id DESC
               LIMIT 20
@@ -61,7 +63,8 @@ export async function GET(req: Request) {
               >`
                 SELECT w.id, w.base_form, w.meaning_fa, COALESCE(s.sentence_en, '') AS sentence_en
                 FROM word w
-                LEFT JOIN Sentence s ON s.anki_link_id = w.anki_link_id
+                LEFT JOIN SentenceWordLink sw ON sw.wordId = w.id AND sw.isPrimary = true
+                LEFT JOIN Sentence s ON s.id = sw.sentenceId
                 WHERE w.learning_depth IS NULL
                 ORDER BY w.id DESC
                 LIMIT 20
@@ -72,7 +75,8 @@ export async function GET(req: Request) {
                 >`
                   SELECT w.id, w.base_form, w.meaning_fa, COALESCE(s.sentence_en, '') AS sentence_en
                   FROM word w
-                  LEFT JOIN Sentence s ON s.anki_link_id = w.anki_link_id
+                  LEFT JOIN SentenceWordLink sw ON sw.wordId = w.id AND sw.isPrimary = true
+                  LEFT JOIN Sentence s ON s.id = sw.sentenceId
                   WHERE s.sentence_en_meaning_fa IS NULL OR s.sentence_en_meaning_fa = ''
                   ORDER BY w.id DESC
                   LIMIT 20
@@ -83,7 +87,8 @@ export async function GET(req: Request) {
                   >`
                     SELECT w.id, w.base_form, w.meaning_fa, COALESCE(s.sentence_en, '') AS sentence_en
                     FROM word w
-                    LEFT JOIN Sentence s ON s.anki_link_id = w.anki_link_id
+                    LEFT JOIN SentenceWordLink sw ON sw.wordId = w.id AND sw.isPrimary = true
+                    LEFT JOIN Sentence s ON s.id = sw.sentenceId
                     WHERE w.pos IS NULL OR w.pos = ''
                     ORDER BY w.id DESC
                     LIMIT 20
@@ -94,7 +99,8 @@ export async function GET(req: Request) {
                     >`
                       SELECT w.id, w.base_form, w.meaning_fa, COALESCE(s.sentence_en, '') AS sentence_en
                       FROM word w
-                      LEFT JOIN Sentence s ON s.anki_link_id = w.anki_link_id
+                      LEFT JOIN SentenceWordLink sw ON sw.wordId = w.id AND sw.isPrimary = true
+                      LEFT JOIN Sentence s ON s.id = sw.sentenceId
                       WHERE w.other_meanings_fa IS NULL OR w.other_meanings_fa = ''
                       ORDER BY w.id DESC
                       LIMIT 20
@@ -104,7 +110,8 @@ export async function GET(req: Request) {
                     >`
                       SELECT w.id, w.base_form, w.meaning_fa, COALESCE(s.sentence_en, '') AS sentence_en
                       FROM word w
-                      LEFT JOIN Sentence s ON s.anki_link_id = w.anki_link_id
+                      LEFT JOIN SentenceWordLink sw ON sw.wordId = w.id AND sw.isPrimary = true
+                      LEFT JOIN Sentence s ON s.id = sw.sentenceId
                       WHERE w.concept_explained_fa IS NULL OR w.concept_explained_fa = ''
                       ORDER BY w.id DESC
                       LIMIT 20

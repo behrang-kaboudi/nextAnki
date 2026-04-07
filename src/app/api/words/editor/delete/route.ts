@@ -25,18 +25,28 @@ export async function POST(req: Request) {
 
     const word = await prisma.word.findUnique({
       where: { id },
-      select: { id: true, anki_link_id: true, sentenceRecord: { select: { id: true } } },
+      select: {
+        id: true,
+        anki_link_id: true,
+        sentenceLinks: {
+          where: { isPrimary: true },
+          take: 1,
+          select: { sentence: { select: { id: true } } },
+        },
+      },
     });
     if (!word) {
       return NextResponse.json({ ok: false, error: "Word not found" }, { status: 404 });
     }
 
+    const primarySentenceId = word.sentenceLinks[0]?.sentence.id ?? null;
+
     const audio = await Promise.all(
       WORD_AUDIO_FIELDS.map(async (field) => {
         const audioKey =
           field === "sentence_en" || field === "sentence_en_meaning_fa"
-            ? word.sentenceRecord
-              ? String(word.sentenceRecord.id)
+            ? primarySentenceId != null
+              ? String(primarySentenceId)
               : word.anki_link_id
             : word.anki_link_id;
         const res = await deleteAllWordFieldAudioFiles({ audioKey, ankiLinkId: audioKey, field });
@@ -45,6 +55,14 @@ export async function POST(req: Request) {
     );
 
     await deleteWord({ where: { id } });
+    if (primarySentenceId != null) {
+      await prisma.sentence.deleteMany({
+        where: {
+          id: primarySentenceId,
+          wordLinks: { none: {} },
+        },
+      });
+    }
 
     return NextResponse.json({ ok: true as const, deletedId: id, deletedAudio: audio });
   } catch (e) {

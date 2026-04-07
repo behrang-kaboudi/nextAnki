@@ -7,7 +7,7 @@ import { WordAnkiConstants } from "@/lib/AnkiDeck";
 import { sanitizeWordAudioFilenamePart, WORD_AUDIO_FILENAME_SEPARATOR } from "@/lib/audio/wordFieldAudioNaming";
 import { getWordFieldAudioAbsoluteDir, getWordFieldAudioAbsolutePath } from "@/lib/audio/wordFieldAudioPaths.server";
 import { getAnkiLinkIdFromNoteFields } from "@/lib/anki/wordAnkiMapping";
-import { prisma } from "@/lib/prisma";
+import { listPrimarySentencesByAnkiLinkIds } from "@/lib/sentences/sentenceRepo";
 
 export type SentenceEnSyncAllStatus = {
   jobId: string;
@@ -205,13 +205,12 @@ async function runJob(state: State) {
 
   const dbSentenceByAnkiLinkId = new Map<string, { sentenceEn: string; audioKey: string }>();
   for (const group of chunk(allIds, 1000)) {
-    const rows = await prisma.sentence.findMany({
-      where: { anki_link_id: { in: group } },
-      select: { id: true, anki_link_id: true, sentence_en: true },
-    });
-    for (const r of rows) {
-      if (!r.anki_link_id) continue;
-      dbSentenceByAnkiLinkId.set(r.anki_link_id, { sentenceEn: r.sentence_en, audioKey: String(r.id) });
+    const rows = await listPrimarySentencesByAnkiLinkIds(group);
+    for (const [ankiLinkId, sentence] of rows.entries()) {
+      dbSentenceByAnkiLinkId.set(ankiLinkId, {
+        sentenceEn: sentence.sentence_en,
+        audioKey: String(sentence.id),
+      });
     }
   }
 

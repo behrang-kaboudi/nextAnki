@@ -56,16 +56,26 @@ export default async function WordHintsAudioPage({
         meaning_fa: true,
         other_meanings_fa: true,
         concept_explained_fa: true,
-        sentenceRecord: {
+        sentenceLinks: {
+          where: { isPrimary: true },
+          take: 1,
           select: {
-            id: true,
-            sentence_en: true,
-            sentence_en_meaning_fa: true,
+            sentence: {
+              select: {
+                id: true,
+                sentence_en: true,
+                sentence_en_meaning_fa: true,
+              },
+            },
           },
         },
       },
     }),
   ]);
+  const mappedRows = rows.map((r) => ({
+    ...r,
+    sentenceRecord: r.sentenceLinks[0]?.sentence ?? null,
+  }));
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const prevPage = Math.max(1, page - 1);
@@ -184,7 +194,7 @@ export default async function WordHintsAudioPage({
               </tr>
             </thead>
             <tbody>
-              {rows.map((r) => (
+              {mappedRows.map((r) => (
                 <tr key={r.id} className="border-b">
                   <td className="whitespace-nowrap px-3 py-2 font-mono">{r.id}</td>
                   <td className="max-w-[280px] px-3 py-2">

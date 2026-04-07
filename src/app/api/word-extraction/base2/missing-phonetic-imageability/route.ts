@@ -39,7 +39,8 @@ export async function GET(req: Request) {
     const totalRows = (await prisma.$queryRaw<Array<{ count: unknown }>>(Prisma.sql`
       SELECT COUNT(*) AS count
       FROM word w
-      LEFT JOIN Sentence s ON s.anki_link_id = w.anki_link_id
+      LEFT JOIN SentenceWordLink sw ON sw.wordId = w.id AND sw.isPrimary = true
+      LEFT JOIN Sentence s ON s.id = sw.sentenceId
       WHERE ${missingWhere}
     `)) ?? [];
     const total = numberFromUnknownCount(totalRows[0]?.count);
@@ -54,7 +55,8 @@ export async function GET(req: Request) {
     >(Prisma.sql`
       SELECT w.id, w.base_form, w.meaning_fa, COALESCE(s.sentence_en, '') AS sentence_en
       FROM word w
-      LEFT JOIN Sentence s ON s.anki_link_id = w.anki_link_id
+      LEFT JOIN SentenceWordLink sw ON sw.wordId = w.id AND sw.isPrimary = true
+      LEFT JOIN Sentence s ON s.id = sw.sentenceId
       WHERE ${missingWhere}
       ORDER BY w.id DESC
       LIMIT ${limit}
