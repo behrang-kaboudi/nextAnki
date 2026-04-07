@@ -54,7 +54,7 @@ enum PictureWordUsage {
 
 model Word {
   id                               Int      @id @default(autoincrement())
-  anki_link_id                     String   @unique
+  anki_link_id                     String   @unique(map: "Word_anki_link_id_key")
   base_form                        String
   phonetic_us                      String?
   phonetic_us_normalized           String?
@@ -84,9 +84,21 @@ model Word {
   imageability                     Int?
   createdAt                        DateTime @default(now())
   updatedAt                        DateTime @updatedAt
+  sentenceRecord                   Sentence?
 
-  @@index([base_form])
-  @@index([typeOfWordInDb])
+  @@index([base_form], map: "Word_base_form_idx")
+  @@index([typeOfWordInDb], map: "Word_typeOfWordInDb_idx")
+  @@map("word")
+}
+
+model Sentence {
+  anki_link_id           String   @id
+  sentence_en            String
+  sentence_en_meaning_fa String?
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  word Word @relation(fields: [anki_link_id], references: [anki_link_id], onDelete: Cascade)
 }
 
 model IpaKeyword {
