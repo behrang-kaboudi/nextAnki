@@ -51,11 +51,11 @@ export async function GET(req: Request) {
           return rows.map((r) => ({ anki_link_id: r.anki_link_id, text: r.concept_explained_fa }));
         }
         case "sentence_en": {
-          const rows = await prisma.word.findMany({ select: { anki_link_id: true, sentence_en: true } });
+          const rows = await prisma.sentence.findMany({ select: { anki_link_id: true, sentence_en: true } });
           return rows.map((r) => ({ anki_link_id: r.anki_link_id, text: r.sentence_en }));
         }
         case "sentence_en_meaning_fa": {
-          const rows = await prisma.word.findMany({
+          const rows = await prisma.sentence.findMany({
             select: { anki_link_id: true, sentence_en_meaning_fa: true },
           });
           return rows.map((r) => ({ anki_link_id: r.anki_link_id, text: r.sentence_en_meaning_fa }));

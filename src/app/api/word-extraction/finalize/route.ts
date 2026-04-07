@@ -21,7 +21,8 @@ export async function POST() {
           { meaning_fa: { equals: "" } },
           { meaning_fa_IPA: { equals: "" } },
           { meaning_fa_IPA_normalized: { equals: "" } },
-          { sentence_en: { equals: "" } },
+          { sentenceRecord: { is: null } },
+          { sentenceRecord: { is: { sentence_en: { equals: "" } } } },
 
           { phonetic_us: null },
           { phonetic_us: { equals: "" } },
@@ -29,8 +30,8 @@ export async function POST() {
           { phonetic_us_normalized: { equals: "" } },
           { pos: null },
           { pos: { equals: "" } },
-          { sentence_en_meaning_fa: null },
-          { sentence_en_meaning_fa: { equals: "" } },
+          { sentenceRecord: { is: { sentence_en_meaning_fa: null } } },
+          { sentenceRecord: { is: { sentence_en_meaning_fa: { equals: "" } } } },
         ],
       },
       select: {
@@ -42,8 +43,12 @@ export async function POST() {
         meaning_fa_IPA: true,
         meaning_fa_IPA_normalized: true,
         pos: true,
-        sentence_en: true,
-        sentence_en_meaning_fa: true,
+        sentenceRecord: {
+          select: {
+            sentence_en: true,
+            sentence_en_meaning_fa: true,
+          },
+        },
       },
       orderBy: { id: "asc" },
       take: 200,
@@ -56,7 +61,8 @@ export async function POST() {
           { meaning_fa: { equals: "" } },
           { meaning_fa_IPA: { equals: "" } },
           { meaning_fa_IPA_normalized: { equals: "" } },
-          { sentence_en: { equals: "" } },
+          { sentenceRecord: { is: null } },
+          { sentenceRecord: { is: { sentence_en: { equals: "" } } } },
 
           { phonetic_us: null },
           { phonetic_us: { equals: "" } },
@@ -64,8 +70,8 @@ export async function POST() {
           { phonetic_us_normalized: { equals: "" } },
           { pos: null },
           { pos: { equals: "" } },
-          { sentence_en_meaning_fa: null },
-          { sentence_en_meaning_fa: { equals: "" } },
+          { sentenceRecord: { is: { sentence_en_meaning_fa: null } } },
+          { sentenceRecord: { is: { sentence_en_meaning_fa: { equals: "" } } } },
         ],
       },
     });
@@ -80,8 +86,8 @@ export async function POST() {
         if (isBlank(r.meaning_fa_IPA)) missing.push("meaning_fa_IPA");
         if (isBlank(r.meaning_fa_IPA_normalized)) missing.push("meaning_fa_IPA_normalized");
         if (isBlank(r.pos)) missing.push("pos");
-        if (isBlank(r.sentence_en)) missing.push("sentence_en");
-        if (isBlank(r.sentence_en_meaning_fa)) missing.push("sentence_en_meaning_fa");
+        if (isBlank(r.sentenceRecord?.sentence_en)) missing.push("sentence_en");
+        if (isBlank(r.sentenceRecord?.sentence_en_meaning_fa)) missing.push("sentence_en_meaning_fa");
         return { id: r.id, missing };
       });
 

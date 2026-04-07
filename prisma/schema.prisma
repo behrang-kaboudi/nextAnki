@@ -65,8 +65,6 @@ model Word {
   concept_explained                String?
   concept_explained_fa             String?
   word_hint_story                  String?
-  sentence_en                      String
-  sentence_en_meaning_fa           String?
   explanation_for_sentence_meaning String?
   learning_depth                   Float?
   mixed_sentence                   String?

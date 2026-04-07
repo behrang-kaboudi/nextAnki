@@ -229,7 +229,7 @@ async function countCandidates(field: WordAudioFieldKey): Promise<number> {
     });
   }
   if (field === "sentence_en_meaning_fa") {
-    return prisma.word.count({
+    return prisma.sentence.count({
       where: {
         AND: [
           { sentence_en_meaning_fa: { not: null } },
@@ -240,7 +240,7 @@ async function countCandidates(field: WordAudioFieldKey): Promise<number> {
   }
   if (field === "base_form") return prisma.word.count({ where: { base_form: { notIn: [""] } } });
   if (field === "meaning_fa") return prisma.word.count({ where: { meaning_fa: { notIn: [""] } } });
-  return prisma.word.count({ where: { sentence_en: { notIn: [""] } } });
+  return prisma.sentence.count({ where: { sentence_en: { notIn: [""] } } });
 }
 
 async function fetchBatch(
@@ -276,15 +276,37 @@ async function fetchBatch(
     return rows.map((r) => ({ id: r.id, anki_link_id: r.anki_link_id, value: r.concept_explained_fa ?? null }));
   }
   if (field === "sentence_en") {
-    const rows = await prisma.word.findMany({ ...base, select: { id: true, anki_link_id: true, sentence_en: true } });
-    return rows.map((r) => ({ id: r.id, anki_link_id: r.anki_link_id, value: r.sentence_en }));
+    const rows = await prisma.word.findMany({
+      ...base,
+      select: {
+        id: true,
+        anki_link_id: true,
+        sentenceRecord: { select: { sentence_en: true } },
+      },
+    });
+    return rows.map((r) => ({
+      id: r.id,
+      anki_link_id: r.anki_link_id,
+      value: r.sentenceRecord?.sentence_en ?? null,
+    }));
   }
 
-  const rows = await prisma.word.findMany({
-    ...base,
-    select: { id: true, anki_link_id: true, sentence_en_meaning_fa: true },
-  });
-  return rows.map((r) => ({ id: r.id, anki_link_id: r.anki_link_id, value: r.sentence_en_meaning_fa ?? null }));
+  if (field === "sentence_en_meaning_fa") {
+    const rows = await prisma.word.findMany({
+      ...base,
+      select: {
+        id: true,
+        anki_link_id: true,
+        sentenceRecord: { select: { sentence_en_meaning_fa: true } },
+      },
+    });
+    return rows.map((r) => ({
+      id: r.id,
+      anki_link_id: r.anki_link_id,
+      value: r.sentenceRecord?.sentence_en_meaning_fa ?? null,
+    }));
+  }
+  return [];
 }
 
 export function startWordFieldVoiceJobIfNeeded(field: WordAudioFieldKey): WordFieldVoiceJobStatus {

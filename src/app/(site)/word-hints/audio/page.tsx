@@ -56,8 +56,12 @@ export default async function WordHintsAudioPage({
         meaning_fa: true,
         other_meanings_fa: true,
         concept_explained_fa: true,
-        sentence_en: true,
-        sentence_en_meaning_fa: true,
+        sentenceRecord: {
+          select: {
+            sentence_en: true,
+            sentence_en_meaning_fa: true,
+          },
+        },
       },
     }),
   ]);
@@ -232,25 +236,28 @@ export default async function WordHintsAudioPage({
                   </td>
                   <td className="max-w-[360px] px-3 py-2">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="truncate" title={r.sentence_en}>
-                        {r.sentence_en}
+                      <span className="truncate" title={r.sentenceRecord?.sentence_en ?? ""}>
+                        {r.sentenceRecord?.sentence_en ?? "—"}
                       </span>
                       <WordFieldVoiceCell
                         field="sentence_en"
                         ankiLinkId={r.anki_link_id}
-                        text={r.sentence_en}
+                        text={r.sentenceRecord?.sentence_en ?? null}
                       />
                     </div>
                   </td>
                   <td className="max-w-[360px] px-3 py-2">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="truncate" title={String(r.sentence_en_meaning_fa ?? "")}>
-                        {r.sentence_en_meaning_fa ?? "—"}
+                      <span
+                        className="truncate"
+                        title={String(r.sentenceRecord?.sentence_en_meaning_fa ?? "")}
+                      >
+                        {r.sentenceRecord?.sentence_en_meaning_fa ?? "—"}
                       </span>
                       <WordFieldVoiceCell
                         field="sentence_en_meaning_fa"
                         ankiLinkId={r.anki_link_id}
-                        text={r.sentence_en_meaning_fa}
+                        text={r.sentenceRecord?.sentence_en_meaning_fa ?? null}
                       />
                     </div>
                   </td>

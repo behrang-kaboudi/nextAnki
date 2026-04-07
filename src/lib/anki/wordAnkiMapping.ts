@@ -200,6 +200,17 @@ export function getAnkiLinkIdFromNoteFields(
 
 export type WordAnkiFieldGenerator = (word: Word) => string | Promise<string>;
 
+async function getSentenceFields(ankiLinkId: string) {
+  const sentence = await prisma.sentence.findUnique({
+    where: { anki_link_id: ankiLinkId },
+    select: { sentence_en: true, sentence_en_meaning_fa: true },
+  });
+  return {
+    sentence_en: sentence?.sentence_en ?? "",
+    sentence_en_meaning_fa: sentence?.sentence_en_meaning_fa ?? "",
+  };
+}
+
 function withLatestAudioTag(
   text: string,
   ankiLinkId: string,
@@ -235,14 +246,18 @@ export const WORD_ANKI_FIELD_GENERATORS = {
       w.anki_link_id,
       "concept_explained_fa",
     ),
-  sentence_en: (w) =>
-    withLatestAudioTag(w.sentence_en ?? "", w.anki_link_id, "sentence_en"),
-  sentence_en_meaning_fa: (w) =>
-    withLatestAudioTag(
-      w.sentence_en_meaning_fa ?? "",
+  sentence_en: async (w) => {
+    const sentence = await getSentenceFields(w.anki_link_id);
+    return withLatestAudioTag(sentence.sentence_en, w.anki_link_id, "sentence_en");
+  },
+  sentence_en_meaning_fa: async (w) => {
+    const sentence = await getSentenceFields(w.anki_link_id);
+    return withLatestAudioTag(
+      sentence.sentence_en_meaning_fa,
       w.anki_link_id,
       "sentence_en_meaning_fa",
-    ),
+    );
+  },
 
   // TODO: define the source-of-truth for this field (not currently present in DB schema).
   best_translate: () => "",

@@ -19,6 +19,7 @@ export default async function WordEditorPage({
 
   const word = await prisma.word.findUnique({
     where: { id },
+    include: { sentenceRecord: true },
   });
   if (!word) notFound();
 
@@ -52,8 +53,8 @@ export default async function WordEditorPage({
             concept_explained: word.concept_explained,
             concept_explained_fa: word.concept_explained_fa,
             word_hint_story: word.word_hint_story,
-            sentence_en: word.sentence_en,
-            sentence_en_meaning_fa: word.sentence_en_meaning_fa,
+            sentence_en: word.sentenceRecord?.sentence_en ?? "",
+            sentence_en_meaning_fa: word.sentenceRecord?.sentence_en_meaning_fa ?? null,
             explanation_for_sentence_meaning: word.explanation_for_sentence_meaning,
             learning_depth: word.learning_depth,
             mixed_sentence: word.mixed_sentence,
@@ -76,4 +77,3 @@ export default async function WordEditorPage({
     </main>
   );
 }
-

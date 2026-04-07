@@ -211,7 +211,7 @@ async function runJob(state: State) {
 
   const dbValueByAnkiLinkId = new Map<string, string>();
   for (const group of chunk(allIds, 1000)) {
-    const rows = await prisma.word.findMany({
+    const rows = await prisma.sentence.findMany({
       where: { anki_link_id: { in: group } },
       select: { anki_link_id: true, sentence_en_meaning_fa: true },
     });
@@ -300,4 +300,3 @@ export function requestStopSentenceEnMeaningFaSyncAll(): SentenceEnMeaningFaSync
   state.stopRequested = true;
   return getSentenceEnMeaningFaSyncAllStatus();
 }
-

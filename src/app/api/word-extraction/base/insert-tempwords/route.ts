@@ -157,7 +157,6 @@ export async function POST(req: Request) {
               meaning_fa: item.meaning_fa,
               // Keep empty so phase 2.1 can fill it later.
               meaning_fa_IPA: "",
-              sentence_en: item.sentence_en,
             },
             select: { id: true },
           });
@@ -167,6 +166,13 @@ export async function POST(req: Request) {
             where: { id: pending.id },
             data: { anki_link_id: code },
             select: { id: true },
+          });
+
+          await tx.sentence.create({
+            data: {
+              anki_link_id: code,
+              sentence_en: item.sentence_en,
+            },
           });
 
           return pending;

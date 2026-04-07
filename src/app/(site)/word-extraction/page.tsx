@@ -1490,12 +1490,14 @@ export default function WordExtractionPage() {
             <div className="flex items-start justify-between gap-3">
 	              <div>
 	                <div className="text-base font-semibold">
-	                  Phase 3 — phonetic_us + imageability + learning_depth + sentence meaning + pos + other meanings
+	                  Phase 3 — phonetic_us
 	                </div>
 	                <div className="mt-1 text-xs opacity-70">
-	                  مبنای استخراج: اگر حداقل یکی از این فیلدها خالی/نامعتبر باشد:
-	                  phonetic_us (NULL/empty)، imageability (NULL/≤0)، learning_depth (NULL)،
-	                  sentence_en_meaning_fa (NULL/empty)، pos (NULL/empty).
+	                  مبنای استخراج: فقط رکوردهایی واکشی می‌شوند که
+	                  <span className="font-mono"> phonetic_us </span>
+	                  آن‌ها
+	                  <span className="font-mono"> NULL </span>
+	                  یا خالی باشد.
 	                  <br />
 	                  کل رکوردهای دارای شرایط:{" "}
 	                  {typeof base2ModalTotalCount === "number" ? base2ModalTotalCount : "—"} — واکشی‌شده:{" "}

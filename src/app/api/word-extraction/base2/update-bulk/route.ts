@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 
 import { normalizeIpaForDb } from "@/lib/ipa/normalize";
 import { prisma } from "@/lib/prisma";
+import { upsertSentenceByAnkiLinkId } from "@/lib/sentences/sentenceRepo";
 
 export const runtime = "nodejs";
 
@@ -212,7 +213,6 @@ export async function POST(req: Request) {
         }
         if (item.imageability !== undefined) patch.imageability = item.imageability;
         if (item.learning_depth !== undefined) patch.learning_depth = item.learning_depth;
-        if (item.sentence_en_meaning_fa !== undefined) patch.sentence_en_meaning_fa = item.sentence_en_meaning_fa;
         if (item.pos !== undefined) patch.pos = item.pos;
         if (item.other_meanings_fa !== undefined) patch.other_meanings_fa = item.other_meanings_fa;
         if (item.concept_explained_fa !== undefined) patch.concept_explained_fa = item.concept_explained_fa;
@@ -222,8 +222,18 @@ export async function POST(req: Request) {
           data: {
             ...patch,
           },
-          select: { id: true },
+          select: { id: true, anki_link_id: true },
         });
+        if (item.sentence_en_meaning_fa !== undefined) {
+          await upsertSentenceByAnkiLinkId({
+            ankiLinkId: row.anki_link_id,
+            sentence_en: (await prisma.sentence.findUnique({
+              where: { anki_link_id: row.anki_link_id },
+              select: { sentence_en: true },
+            }))?.sentence_en ?? "",
+            sentence_en_meaning_fa: item.sentence_en_meaning_fa,
+          });
+        }
         updated += 1;
         results.push({
           ok: true,

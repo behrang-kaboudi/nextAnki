@@ -30,23 +30,16 @@ export async function GET(req: Request) {
     const url = new URL(req.url);
     const limit = parseLimit(url.searchParams.get("limit"), 20);
 
-    // Extraction basis (Phase 3):
-    // - strings: NULL or '' (empty)
-    // - numbers: NULL (shouldn't happen for imageability) or <= 0
-    // - learning_depth: NULL
-    // NOTE (per user request): `other_meanings_fa` is allowed to be empty and
-    // MUST NOT be used as a "missing" criterion here.
+    // Extraction basis for this modal:
+    // only rows with missing phonetic_us should be selected.
     const missingWhere = Prisma.sql`
-      (phonetic_us IS NULL OR phonetic_us = '')
-         OR (imageability IS NULL OR imageability <= 0)
-         OR (learning_depth IS NULL)
-         OR (sentence_en_meaning_fa IS NULL OR sentence_en_meaning_fa = '')
-         OR (pos IS NULL OR pos = '')
+      (w.phonetic_us IS NULL OR w.phonetic_us = '')
     `;
 
     const totalRows = (await prisma.$queryRaw<Array<{ count: unknown }>>(Prisma.sql`
       SELECT COUNT(*) AS count
-      FROM Word
+      FROM word w
+      LEFT JOIN Sentence s ON s.anki_link_id = w.anki_link_id
       WHERE ${missingWhere}
     `)) ?? [];
     const total = numberFromUnknownCount(totalRows[0]?.count);
@@ -59,25 +52,19 @@ export async function GET(req: Request) {
         sentence_en: string;
       }>
     >(Prisma.sql`
-      SELECT id, base_form, meaning_fa, sentence_en
-      FROM Word
+      SELECT w.id, w.base_form, w.meaning_fa, COALESCE(s.sentence_en, '') AS sentence_en
+      FROM word w
+      LEFT JOIN Sentence s ON s.anki_link_id = w.anki_link_id
       WHERE ${missingWhere}
-      ORDER BY id DESC
+      ORDER BY w.id DESC
       LIMIT ${limit}
     `)) ?? [];
 
     return NextResponse.json({
       ok: true,
       basis: {
-        fields: [
-          "phonetic_us",
-          "imageability",
-          "learning_depth",
-          "sentence_en_meaning_fa",
-          "pos",
-        ],
-        rule:
-          "Includes a row if ANY of the Phase 3 fields is missing (string: NULL/empty, number: NULL/<=0).",
+        fields: ["phonetic_us"],
+        rule: "Includes a row only if phonetic_us is NULL or empty.",
         orderBy: "id DESC",
       },
       total,

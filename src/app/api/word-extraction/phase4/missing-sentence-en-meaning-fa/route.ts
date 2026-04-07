@@ -16,10 +16,11 @@ export async function GET() {
         sentence_en: string;
       }>
     >`
-      SELECT id, base_form, meaning_fa, sentence_en
-      FROM Word
-      WHERE sentence_en_meaning_fa IS NULL OR sentence_en_meaning_fa = ''
-      ORDER BY id DESC
+      SELECT w.id, w.base_form, w.meaning_fa, COALESCE(s.sentence_en, '') AS sentence_en
+      FROM word w
+      LEFT JOIN Sentence s ON s.anki_link_id = w.anki_link_id
+      WHERE s.sentence_en_meaning_fa IS NULL OR s.sentence_en_meaning_fa = ''
+      ORDER BY w.id DESC
       LIMIT 20
     `) ?? [];
 
@@ -31,4 +32,3 @@ export async function GET() {
     );
   }
 }
-

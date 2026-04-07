@@ -6,6 +6,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { normalizeIpaForDb } from "@/lib/ipa/normalize";
 import { pickPictureSymbolsForWord } from "@/lib/ipa/setPictures/setForAny";
+import { upsertSentenceByAnkiLinkId } from "@/lib/sentences/sentenceRepo";
 import { stringifyJsonHintWithTimestamp } from "@/lib/words/jsonHint";
 import { updateWord } from "@/lib/words/wordRepo";
 
@@ -124,8 +125,6 @@ export async function POST(req: Request) {
         concept_explained: normalizeNullableString(d.concept_explained),
         concept_explained_fa: normalizeNullableString(d.concept_explained_fa),
         word_hint_story: normalizeNullableString(d.word_hint_story),
-        sentence_en,
-        sentence_en_meaning_fa: normalizeNullableString(d.sentence_en_meaning_fa),
         explanation_for_sentence_meaning: normalizeNullableString(d.explanation_for_sentence_meaning),
         learning_depth: normalizeNullableNumber(d.learning_depth),
         mixed_sentence: normalizeNullableString(d.mixed_sentence),
@@ -148,6 +147,12 @@ export async function POST(req: Request) {
         meaning_fa_IPA_normalized: true,
         json_hint: true,
       },
+    });
+
+    await upsertSentenceByAnkiLinkId({
+      ankiLinkId: existing.anki_link_id,
+      sentence_en,
+      sentence_en_meaning_fa: normalizeNullableString(d.sentence_en_meaning_fa) ?? null,
     });
 
     return NextResponse.json({
