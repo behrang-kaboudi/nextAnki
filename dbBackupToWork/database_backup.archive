@@ -1,5 +1,5 @@
 {
-  "createdAt": "2026-04-05T05:03:29.459Z",
+  "createdAt": "2026-04-07T14:01:31.224Z",
   "data": {
     "theme": [
       {
@@ -21752,7 +21752,7 @@
         "explanation_for_sentence_meaning": "بستن شیر به‌عنوان وسیله کنترل، باعث قطع شدن جریان آب می‌شود.",
         "learning_depth": 0.66,
         "mixed_sentence": null,
-        "other_meanings_fa": "شیرفلکه*سوپاپ*والو",
+        "other_meanings_fa": "شیرفلکه*سوپاپ",
         "category": "technology_engineering",
         "typeOfWordInDb": "base",
         "hint_sentence": "ورق لواش فروش",
@@ -21764,7 +21764,7 @@
         "common_error": null,
         "imageability": 90,
         "createdAt": "2025-12-31T04:30:59.671Z",
-        "updatedAt": "2026-02-16T14:43:45.656Z"
+        "updatedAt": "2026-04-05T05:06:08.796Z"
       },
       {
         "id": 1338,
@@ -65752,7 +65752,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.8,
         "mixed_sentence": null,
-        "other_meanings_fa": "پاستا",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -65764,7 +65764,7 @@
         "common_error": null,
         "imageability": 95,
         "createdAt": "2026-02-03T19:03:46.705Z",
-        "updatedAt": "2026-02-16T14:56:13.234Z"
+        "updatedAt": "2026-04-05T05:12:23.993Z"
       },
       {
         "id": 2904,
@@ -88856,7 +88856,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.24,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -88868,7 +88868,7 @@
         "common_error": null,
         "imageability": 79,
         "createdAt": "2026-03-10T02:09:11.709Z",
-        "updatedAt": "2026-03-17T04:31:08.640Z"
+        "updatedAt": "2026-04-05T05:04:21.754Z"
       },
       {
         "id": 3632,
