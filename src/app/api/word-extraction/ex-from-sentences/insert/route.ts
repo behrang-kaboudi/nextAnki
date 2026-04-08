@@ -196,12 +196,13 @@ export async function POST(req: Request) {
         },
       });
       sentencesUpserted += 1;
+      const linkedAnkiIds: string[] = [];
 
       for (const item of row.items) {
         try {
           const candidates = await prisma.word.findMany({
             where: { base_form: item.base_form },
-            select: { id: true, meaning_fa: true },
+            select: { id: true, anki_link_id: true, meaning_fa: true },
           });
 
           const targetMeaning = normalizeMeaningFaForCompare(item.meaning_fa);
@@ -211,6 +212,7 @@ export async function POST(req: Request) {
 
           if (existing) {
             skippedExisting += 1;
+            linkedAnkiIds.push(existing.anki_link_id);
             results.push({
               ok: true,
               sentence_en: row.sentence_en,
@@ -249,6 +251,7 @@ export async function POST(req: Request) {
           });
 
           inserted += 1;
+          linkedAnkiIds.push(created.anki_link_id);
           results.push({
             ok: true,
             sentence_en: row.sentence_en,
@@ -268,6 +271,12 @@ export async function POST(req: Request) {
           });
         }
       }
+
+      const uniqueLinkedAnkiIds = Array.from(new Set(linkedAnkiIds));
+      await prisma.sentence.update({
+        where: { sentence_en: row.sentence_en },
+        data: { items: uniqueLinkedAnkiIds },
+      });
     }
 
     return NextResponse.json({

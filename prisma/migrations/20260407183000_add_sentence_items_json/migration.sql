@@ -1,0 +1,2 @@
+ALTER TABLE `Sentence`
+ADD COLUMN `items` JSON NULL;

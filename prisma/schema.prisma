@@ -94,6 +94,7 @@ model Sentence {
   sentence_en            String   @unique
   sentence_en_meaning_fa String?
   mentionedWordsJson     Json?
+  items                  Json?
   createdAt              DateTime @default(now())
   updatedAt              DateTime @updatedAt
 
