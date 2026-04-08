@@ -50,6 +50,20 @@ export default function WordExtractionPage() {
     { path: string; text: string }[]
   >([]);
   const [baseModalCopied, setBaseModalCopied] = useState(false);
+  const [isSentenceExtractModalOpen, setIsSentenceExtractModalOpen] = useState(false);
+  const [isSentenceExtractModalLoading, setIsSentenceExtractModalLoading] = useState(false);
+  const [sentenceExtractModalError, setSentenceExtractModalError] = useState<string | null>(null);
+  const [sentenceExtractModalItems, setSentenceExtractModalItems] = useState<
+    { path: string; text: string }[]
+  >([]);
+  const [sentenceExtractModalCopied, setSentenceExtractModalCopied] = useState(false);
+  const [sentenceExtractModalPromptCopied, setSentenceExtractModalPromptCopied] = useState(false);
+  const [sentenceExtractModalDataCopied, setSentenceExtractModalDataCopied] = useState(false);
+  const [sentenceExtractModalTailJson, setSentenceExtractModalTailJson] = useState<string>("");
+  const [sentenceExtractTailLimit, setSentenceExtractTailLimit] = useState<string>("20");
+  const [sentenceExtractModalTailCount, setSentenceExtractModalTailCount] = useState(0);
+  const [sentenceExtractModalTailLimitApplied, setSentenceExtractModalTailLimitApplied] = useState(20);
+  const [isSentenceInsertBusy, setIsSentenceInsertBusy] = useState(false);
   const [isPhoneticModalOpen, setIsPhoneticModalOpen] = useState(false);
   const [isPhoneticModalLoading, setIsPhoneticModalLoading] = useState(false);
   const [phoneticModalError, setPhoneticModalError] = useState<string | null>(
@@ -205,6 +219,60 @@ export default function WordExtractionPage() {
       setIsBaseModalLoading(false);
     }
   }, []);
+
+  const openSentenceExtractPromptModal = useCallback(async () => {
+    setIsSentenceExtractModalOpen(true);
+    setIsSentenceExtractModalLoading(true);
+    setSentenceExtractModalError(null);
+    setSentenceExtractModalCopied(false);
+    setSentenceExtractModalPromptCopied(false);
+    setSentenceExtractModalDataCopied(false);
+    setSentenceExtractModalTailJson("");
+    setSentenceExtractModalTailCount(0);
+    try {
+      const path = "src/prompts/word-extraction/exFromSentencess/rulseV1.md";
+      const res = await fetch(
+        `/api/ai/prompt-file?path=${encodeURIComponent(path)}`,
+        { method: "GET" },
+      );
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        throw new Error(text || `Request failed: ${res.status}`);
+      }
+      const data = (await res.json()) as { path: string; text: string };
+      setSentenceExtractModalItems([{ path: data.path, text: data.text }]);
+
+      const limitParsed = Number.parseInt(sentenceExtractTailLimit, 10);
+      const limit =
+        Number.isFinite(limitParsed) && limitParsed > 0
+          ? Math.min(Math.floor(limitParsed), 500)
+          : 20;
+      setSentenceExtractModalTailLimitApplied(limit);
+
+      const missingRes = await fetch(
+        `/api/word-extraction/ex-from-sentences/missing-mentioned?limit=${encodeURIComponent(
+          String(limit),
+        )}`,
+        { method: "GET" },
+      );
+      const missingJson = (await missingRes.json().catch(() => null)) as
+        | { ok?: boolean; error?: string; items?: unknown }
+        | null;
+      if (!missingRes.ok || !missingJson?.ok) {
+        throw new Error(
+          missingJson?.error ??
+            `Failed to load missing sentence rows (${missingRes.status})`,
+        );
+      }
+      const items = Array.isArray(missingJson.items) ? missingJson.items : [];
+      setSentenceExtractModalTailCount(items.length);
+      setSentenceExtractModalTailJson(JSON.stringify(items, null, 2));
+    } catch (error) {
+      setSentenceExtractModalError(error instanceof Error ? error.message : String(error));
+    } finally {
+      setIsSentenceExtractModalLoading(false);
+    }
+  }, [sentenceExtractTailLimit]);
 
   const openPhoneticPromptModal = useCallback(async () => {
     setIsPhoneticModalOpen(true);
@@ -928,12 +996,96 @@ export default function WordExtractionPage() {
     }
   }, [promptText]);
 
+  const insertWordsFromSentenceJson = useCallback(async () => {
+    setIsSentenceInsertBusy(true);
+    setInsertReport(null);
+    try {
+      const parsed = parseJsonArrayFromText(promptText);
+      const res = await fetch("/api/word-extraction/ex-from-sentences/insert", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(parsed),
+      });
+      const json = (await res.json().catch(() => null)) as
+        | {
+            ok?: boolean;
+            error?: string;
+            totalRows?: number;
+            totalItems?: number;
+            sentencesUpserted?: number;
+            inserted?: number;
+            skippedExisting?: number;
+            results?: unknown;
+          }
+        | null;
+
+      if (!res.ok || !json?.ok) {
+        throw new Error(json?.error ?? `Request failed (${res.status})`);
+      }
+
+      setInsertReport(
+        `Sentences: ${json.sentencesUpserted ?? 0} • Inserted: ${json.inserted ?? 0} • Skipped (exists): ${json.skippedExisting ?? 0} • Items: ${json.totalItems ?? 0}`,
+      );
+      setRightText(
+        `Sentences upserted: ${json.sentencesUpserted ?? 0}\nInserted: ${json.inserted ?? 0}\nSkipped (exists): ${json.skippedExisting ?? 0}\nRows: ${json.totalRows ?? 0}\nItems: ${json.totalItems ?? 0}\n\n` +
+          JSON.stringify(json.results ?? null, null, 2),
+      );
+    } catch (error) {
+      setInsertReport("Sentence insert failed");
+      setRightText(
+        `خطا در INSERT از جملات.\n\n${error instanceof Error ? error.message : String(error)}`,
+      );
+    } finally {
+      setIsSentenceInsertBusy(false);
+    }
+  }, [parseJsonArrayFromText, promptText]);
+
   return (
     <div className="grid gap-8">
       <PageHeader
         title="Word Extraction"
         subtitle="پرامپت و راهنما را از فایل‌ها می‌خواند (فعلاً فقط base)."
       />
+
+      <div className="grid gap-3 rounded-2xl border border-card bg-background/60 p-4 backdrop-blur">
+        <div className="text-xs font-semibold tracking-wide text-muted">
+          TOOLS
+        </div>
+        <div className="grid gap-3 sm:grid-cols-3">
+          <button
+            type="button"
+            className={`${buttonBase} bg-gradient-to-r from-green-700 to-emerald-600 text-white`}
+            onClick={copyPromptToClipboard}
+            disabled={isClipboardBusy}
+          >
+            {isClipboardBusy ? "WORKING..." : "COPY TO CLIPBOARD"}
+          </button>
+          <button
+            type="button"
+            className={`${buttonBase} bg-gradient-to-r from-green-700 to-emerald-600 text-white`}
+            onClick={pastePromptFromClipboard}
+            disabled={isClipboardBusy}
+          >
+            {isClipboardBusy ? "WORKING..." : "PASTE"}
+          </button>
+          <button
+            type="button"
+            className={`${buttonBase} bg-gradient-to-r from-slate-700 to-slate-600 text-white`}
+            onClick={openHelpModal}
+            disabled={isHelpModalLoading}
+          >
+            {isHelpModalLoading ? "LOADING..." : "HELP"}
+          </button>
+        </div>
+        <button
+          type="button"
+          className={`${buttonBase} w-full bg-gradient-to-r from-amber-600 to-orange-600 text-white`}
+          onClick={finalize}
+          disabled={isFinalizeBusy}
+        >
+          {isFinalizeBusy ? "FINALIZING..." : "FINALIZE"}
+        </button>
+      </div>
 
       <div className="grid gap-6 rounded-2xl border border-card bg-gradient-to-br from-card to-background p-6 shadow-elevated">
         <div className="grid gap-6 lg:grid-cols-2">
@@ -992,97 +1144,105 @@ export default function WordExtractionPage() {
           </div>
         </div>
 
-        <div className="grid gap-3 rounded-2xl border border-card bg-background/60 p-4 backdrop-blur lg:grid-cols-[1fr_1fr]">
+        <div className="grid gap-3 rounded-2xl border border-card bg-background/60 p-4 backdrop-blur lg:grid-cols-3">
           <div className="grid gap-3 rounded-xl border border-card bg-background/70 p-3">
             <div className="text-xs font-semibold tracking-wide text-muted">
-              PHASE 1–2
+              فاز ۱ استخراج از کلمات
             </div>
-            <div className="grid gap-3 sm:grid-cols-2">
-            <button
-              type="button"
-              className={`${buttonBase} bg-gradient-to-r from-purple-700 to-fuchsia-600 text-white`}
-              onClick={openBasePromptModal}
-              disabled={isBaseModalLoading}
-            >
-              1.1 PROMPT FOR: CONVERT WORDS TO GET BASEDATA FROM AI
-            </button>
-            <div className="flex items-stretch gap-2">
+            <div className="text-xs opacity-70">
+              فقط برای کلمات است؛ یعنی مرتب‌سازی و استخراج داده‌ی پایه‌ی کلمات، نه پردازش‌های بعدی.
+            </div>
+            <div className="grid gap-3">
               <button
                 type="button"
-                className={`${buttonBase} flex-1 bg-gradient-to-r from-blue-700 to-cyan-600 text-white`}
-                onClick={openPhoneticPromptModal}
-                disabled={isPhoneticModalLoading}
+                className={`${buttonBase} bg-gradient-to-r from-purple-700 to-fuchsia-600 text-white`}
+                onClick={openBasePromptModal}
+                disabled={isBaseModalLoading}
               >
-                2.1 PROMPT FOR: EXTRACT MEANING_FA_IPA
+                1.1 PROMPT FOR: CONVERT WORDS TO GET BASEDATA FROM AI
               </button>
-              <input
-                type="number"
-                inputMode="numeric"
-                min={1}
-                max={500}
-                value={meaningFaIpaTailLimit}
-                onChange={(event) => setMeaningFaIpaTailLimit(event.target.value)}
-                className="h-11 w-20 rounded-xl border border-card bg-background px-3 text-xs font-semibold text-foreground shadow-elevated outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[color-mix(in_oklab,var(--primary),transparent_70%)]"
-                aria-label="Count (meaning_fa_IPA tail rows)"
-                title="تعداد رکوردهای انتهای پرامپت (meaning_fa_IPA)"
-              />
-            </div>
-            <button
-              type="button"
-              className={`${buttonBase} bg-gradient-to-r from-purple-700 to-fuchsia-600 text-white`}
-              onClick={insertTempWordsFromJson}
-              disabled={isInsertBusy}
-            >
-              {isInsertBusy ? "INSERTING..." : "1.2 INSERT BASE FORTEMPWORDS"}
-            </button>
-            <button
-              type="button"
-              className={`${buttonBase} bg-gradient-to-r from-blue-700 to-cyan-600 text-white`}
-              onClick={openMeaningIpaUpdateModal}
-            >
-              2.2 APPLY MEANING_FA_IPA (per row)
-            </button>
+              <button
+                type="button"
+                className={`${buttonBase} bg-gradient-to-r from-purple-700 to-fuchsia-600 text-white`}
+                onClick={insertTempWordsFromJson}
+                disabled={isInsertBusy}
+              >
+                {isInsertBusy ? "INSERTING..." : "1.2 INSERT BASE FORTEMPWORDS"}
+              </button>
             </div>
           </div>
 
           <div className="grid gap-3 rounded-xl border border-card bg-background/70 p-3">
             <div className="text-xs font-semibold tracking-wide text-muted">
-              TOOLS
+              فاز ۱ استخراج از جملات
             </div>
-            <div className="grid gap-3 sm:grid-cols-3">
+            <div className="grid gap-3">
+              <div className="flex items-stretch gap-2">
+                <button
+                  type="button"
+                  className={`${buttonBase} flex-1 bg-gradient-to-r from-violet-700 to-indigo-600 text-white`}
+                  onClick={openSentenceExtractPromptModal}
+                  disabled={isSentenceExtractModalLoading}
+                >
+                  1.S.1 PROMPT FOR: EXTRACT FROM SENTENCES
+                </button>
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  min={1}
+                  max={500}
+                  value={sentenceExtractTailLimit}
+                  onChange={(event) => setSentenceExtractTailLimit(event.target.value)}
+                  className="h-11 w-20 rounded-xl border border-card bg-background px-3 text-xs font-semibold text-foreground shadow-elevated outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[color-mix(in_oklab,var(--primary),transparent_70%)]"
+                  aria-label="Count (sentence extraction tail rows)"
+                  title="تعداد جمله‌های بدون mentionedWordsJson"
+                />
+              </div>
               <button
                 type="button"
-                className={`${buttonBase} bg-gradient-to-r from-green-700 to-emerald-600 text-white`}
-                onClick={copyPromptToClipboard}
-                disabled={isClipboardBusy}
+                className={`${buttonBase} bg-gradient-to-r from-violet-700 to-indigo-600 text-white`}
+                onClick={insertWordsFromSentenceJson}
+                disabled={isSentenceInsertBusy}
               >
-                {isClipboardBusy ? "WORKING..." : "COPY TO CLIPBOARD"}
-              </button>
-              <button
-                type="button"
-                className={`${buttonBase} bg-gradient-to-r from-green-700 to-emerald-600 text-white`}
-                onClick={pastePromptFromClipboard}
-                disabled={isClipboardBusy}
-              >
-                {isClipboardBusy ? "WORKING..." : "PASTE"}
-              </button>
-              <button
-                type="button"
-                className={`${buttonBase} bg-gradient-to-r from-slate-700 to-slate-600 text-white`}
-                onClick={openHelpModal}
-                disabled={isHelpModalLoading}
-              >
-                {isHelpModalLoading ? "LOADING..." : "HELP"}
+                {isSentenceInsertBusy ? "INSERTING..." : "1.S.2 INSERT BASE FOR TEMPWORDS FROM SENTENCES"}
               </button>
             </div>
-            <button
-              type="button"
-              className={`${buttonBase} w-full bg-gradient-to-r from-amber-600 to-orange-600 text-white`}
-              onClick={finalize}
-              disabled={isFinalizeBusy}
-            >
-              {isFinalizeBusy ? "FINALIZING..." : "FINALIZE"}
-            </button>
+          </div>
+
+          <div className="grid gap-3 rounded-xl border border-card bg-background/70 p-3">
+            <div className="text-xs font-semibold tracking-wide text-muted">
+              PHASE 2
+            </div>
+            <div className="grid gap-3">
+              <div className="flex items-stretch gap-2">
+                <button
+                  type="button"
+                  className={`${buttonBase} flex-1 bg-gradient-to-r from-blue-700 to-cyan-600 text-white`}
+                  onClick={openPhoneticPromptModal}
+                  disabled={isPhoneticModalLoading}
+                >
+                  2.1 PROMPT FOR: EXTRACT MEANING_FA_IPA
+                </button>
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  min={1}
+                  max={500}
+                  value={meaningFaIpaTailLimit}
+                  onChange={(event) => setMeaningFaIpaTailLimit(event.target.value)}
+                  className="h-11 w-20 rounded-xl border border-card bg-background px-3 text-xs font-semibold text-foreground shadow-elevated outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[color-mix(in_oklab,var(--primary),transparent_70%)]"
+                  aria-label="Count (meaning_fa_IPA tail rows)"
+                  title="تعداد رکوردهای انتهای پرامپت (meaning_fa_IPA)"
+                />
+              </div>
+              <button
+                type="button"
+                className={`${buttonBase} bg-gradient-to-r from-blue-700 to-cyan-600 text-white`}
+                onClick={openMeaningIpaUpdateModal}
+              >
+                2.2 APPLY MEANING_FA_IPA (per row)
+              </button>
+            </div>
           </div>
         </div>
 
@@ -1214,6 +1374,118 @@ export default function WordExtractionPage() {
                   value={baseModalItems
                     .map((item) => item.text.trim())
                     .join("\n\n")}
+                  className="min-h-0 flex-1 resize-none rounded border bg-transparent p-3 font-mono text-xs"
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      ) : null}
+
+      {isSentenceExtractModalOpen ? (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div className="flex h-[85vh] w-full max-w-5xl flex-col gap-4 rounded-2xl border border-card bg-background p-6 shadow-elevated">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <div className="text-base font-semibold">
+                  Sentence Extraction Prompt
+                </div>
+                <div className="mt-1 text-xs opacity-70">
+                  Prompt file + {sentenceExtractModalTailCount} sentence rows (limit {sentenceExtractModalTailLimitApplied})
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsSentenceExtractModalOpen(false)}
+                className="rounded border px-2 py-1 text-sm hover:bg-black/5 dark:hover:bg-white/5"
+              >
+                Close
+              </button>
+            </div>
+
+            {sentenceExtractModalError ? (
+              <div className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-900">
+                {sentenceExtractModalError}
+              </div>
+            ) : null}
+
+            {isSentenceExtractModalLoading ? (
+              <div className="text-sm opacity-70">Loading…</div>
+            ) : (
+              <div className="flex min-h-0 flex-1 flex-col gap-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="text-xs opacity-70">
+                    {sentenceExtractModalItems.length} file(s)
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const combined = sentenceExtractModalItems
+                          .map((item) => item.text.trim())
+                          .join("\n\n");
+                        void navigator.clipboard.writeText(combined).then(() => {
+                          setSentenceExtractModalPromptCopied(true);
+                          setSentenceExtractModalCopied(false);
+                          setSentenceExtractModalDataCopied(false);
+                          window.setTimeout(() => setSentenceExtractModalPromptCopied(false), 1200);
+                        });
+                      }}
+                      className={`rounded border px-3 py-2 text-sm transition hover:bg-black/5 dark:hover:bg-white/5 ${
+                        sentenceExtractModalPromptCopied ? "border-emerald-500/40 bg-emerald-500/10" : ""
+                      }`}
+                    >
+                      {sentenceExtractModalPromptCopied ? "Copied" : "Copy prompt"}
+                    </button>
+                    <button
+                      type="button"
+                      disabled={!sentenceExtractModalTailJson}
+                      onClick={() => {
+                        if (!sentenceExtractModalTailJson) return;
+                        void navigator.clipboard.writeText(sentenceExtractModalTailJson).then(() => {
+                          setSentenceExtractModalDataCopied(true);
+                          setSentenceExtractModalCopied(false);
+                          setSentenceExtractModalPromptCopied(false);
+                          window.setTimeout(() => setSentenceExtractModalDataCopied(false), 1200);
+                        });
+                      }}
+                      className={`rounded border px-3 py-2 text-sm transition hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5 ${
+                        sentenceExtractModalDataCopied ? "border-emerald-500/40 bg-emerald-500/10" : ""
+                      }`}
+                    >
+                      {sentenceExtractModalDataCopied ? "Copied" : "Copy data"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const combined = sentenceExtractModalItems
+                          .map((item) => item.text.trim())
+                          .join("\n\n");
+                        const tail = sentenceExtractModalTailJson ? `\n\n${sentenceExtractModalTailJson}` : "";
+                        void navigator.clipboard.writeText(`${combined}${tail}`).then(() => {
+                          setSentenceExtractModalCopied(true);
+                          setSentenceExtractModalPromptCopied(false);
+                          setSentenceExtractModalDataCopied(false);
+                          window.setTimeout(() => setSentenceExtractModalCopied(false), 1200);
+                        });
+                      }}
+                      className={`rounded border px-3 py-2 text-sm transition hover:bg-black/5 dark:hover:bg-white/5 ${
+                        sentenceExtractModalCopied ? "border-emerald-500/40 bg-emerald-500/10" : ""
+                      }`}
+                    >
+                      {sentenceExtractModalCopied ? "Copied" : "Copy all"}
+                    </button>
+                  </div>
+                </div>
+                <textarea
+                  readOnly
+                  value={`${sentenceExtractModalItems
+                    .map((item) => item.text.trim())
+                    .join("\n\n")}${sentenceExtractModalTailJson ? `\n\n${sentenceExtractModalTailJson}` : ""}`}
                   className="min-h-0 flex-1 resize-none rounded border bg-transparent p-3 font-mono text-xs"
                 />
               </div>
