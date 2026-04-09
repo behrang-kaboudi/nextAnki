@@ -2,7 +2,18 @@
 // Uses Prisma to truncate tables and bulk insert backup rows.
 const fs = require("fs");
 const path = require("path");
+const dotenv = require("dotenv");
 const { PrismaClient } = require("@prisma/client");
+
+function loadEnv() {
+  const cwd = process.cwd();
+  const envLocal = path.join(cwd, ".env.local");
+  const env = path.join(cwd, ".env");
+  if (fs.existsSync(envLocal)) dotenv.config({ path: envLocal });
+  if (fs.existsSync(env)) dotenv.config({ path: env });
+}
+
+loadEnv();
 
 const prisma = new PrismaClient();
 const CHUNK_SIZE = 300;
@@ -30,6 +41,16 @@ function withDates(rows) {
     createdAt: row.createdAt ? new Date(row.createdAt) : undefined,
     updatedAt: row.updatedAt ? new Date(row.updatedAt) : undefined,
   }));
+}
+
+function withDateKeys(rows, keys) {
+  return rows.map((row) => {
+    const next = { ...row };
+    for (const key of keys) {
+      if (next[key]) next[key] = new Date(next[key]);
+    }
+    return next;
+  });
 }
 
 function pickKeys(row, allowedKeys) {
@@ -77,10 +98,20 @@ async function main() {
 
   console.log("Clearing existing data…");
   await prisma.$transaction([
-    prisma.theme.deleteMany(),
+    prisma.sentenceWordLink.deleteMany(),
+    prisma.account.deleteMany(),
+    prisma.session.deleteMany(),
+    prisma.passwordResetToken.deleteMany(),
+    prisma.userRole.deleteMany(),
+    prisma.rolePermission.deleteMany(),
+    prisma.verificationToken.deleteMany(),
+    prisma.sentence.deleteMany(),
     prisma.word.deleteMany(),
+    prisma.theme.deleteMany(),
     prisma.ipaKeyword.deleteMany(),
     prisma.pictureWord.deleteMany(),
+    prisma.role.deleteMany(),
+    prisma.permission.deleteMany(),
     prisma.user.deleteMany(),
   ]);
 
@@ -93,18 +124,70 @@ async function main() {
     prisma.ipaKeyword.createMany({ data: rows, skipDuplicates: true })
   );
 
+  await createMany("Permission", withDates(data.permission ?? []), (rows) =>
+    prisma.permission.createMany({ data: rows, skipDuplicates: true })
+  );
+
+  await createMany("Role", withDates(data.role ?? []), (rows) =>
+    prisma.role.createMany({ data: rows, skipDuplicates: true })
+  );
+
   await createMany(
     "PictureWord",
     sanitizePictureWord(withDates(data.pictureWord ?? [])),
     (rows) => prisma.pictureWord.createMany({ data: rows, skipDuplicates: true })
   );
 
+  await createMany(
+    "User",
+    withDateKeys(data.user ?? [], ["createdAt", "updatedAt", "emailVerified"]),
+    (rows) => prisma.user.createMany({ data: rows, skipDuplicates: true })
+  );
+
   await createMany("Word", withDates(data.word ?? []), (rows) =>
     prisma.word.createMany({ data: rows, skipDuplicates: true })
   );
 
-  await createMany("User", withDates(data.user ?? []), (rows) =>
-    prisma.user.createMany({ data: rows, skipDuplicates: true })
+  await createMany(
+    "Sentence",
+    withDates(data.sentence ?? []),
+    (rows) => prisma.sentence.createMany({ data: rows, skipDuplicates: true })
+  );
+
+  await createMany(
+    "SentenceWordLink",
+    withDates(data.sentenceWordLink ?? []),
+    (rows) => prisma.sentenceWordLink.createMany({ data: rows, skipDuplicates: true })
+  );
+
+  await createMany("Account", data.account ?? [], (rows) =>
+    prisma.account.createMany({ data: rows, skipDuplicates: true })
+  );
+
+  await createMany(
+    "Session",
+    withDateKeys(data.session ?? [], ["expires"]),
+    (rows) => prisma.session.createMany({ data: rows, skipDuplicates: true })
+  );
+
+  await createMany(
+    "VerificationToken",
+    withDateKeys(data.verificationToken ?? [], ["expires"]),
+    (rows) => prisma.verificationToken.createMany({ data: rows, skipDuplicates: true })
+  );
+
+  await createMany(
+    "PasswordResetToken",
+    withDateKeys(data.passwordResetToken ?? [], ["createdAt", "expiresAt", "usedAt"]),
+    (rows) => prisma.passwordResetToken.createMany({ data: rows, skipDuplicates: true })
+  );
+
+  await createMany("UserRole", data.userRole ?? [], (rows) =>
+    prisma.userRole.createMany({ data: rows, skipDuplicates: true })
+  );
+
+  await createMany("RolePermission", data.rolePermission ?? [], (rows) =>
+    prisma.rolePermission.createMany({ data: rows, skipDuplicates: true })
   );
 
   console.log("Restore complete.");

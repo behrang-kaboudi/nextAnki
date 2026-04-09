@@ -22,9 +22,19 @@ async function main() {
       data: {
         theme: await prisma.theme.findMany(),
         word: await prisma.word.findMany(),
+        sentence: await prisma.sentence.findMany(),
+        sentenceWordLink: await prisma.sentenceWordLink.findMany(),
         ipaKeyword: await prisma.ipaKeyword.findMany(),
         pictureWord: await prisma.pictureWord.findMany(),
         user: await prisma.user.findMany(),
+        account: await prisma.account.findMany(),
+        session: await prisma.session.findMany(),
+        verificationToken: await prisma.verificationToken.findMany(),
+        passwordResetToken: await prisma.passwordResetToken.findMany(),
+        role: await prisma.role.findMany(),
+        permission: await prisma.permission.findMany(),
+        userRole: await prisma.userRole.findMany(),
+        rolePermission: await prisma.rolePermission.findMany(),
       },
     };
 
@@ -41,4 +51,3 @@ main().catch((err) => {
   process.stderr.write(`${err?.stack || err}\n`);
   process.exitCode = 1;
 });
-
