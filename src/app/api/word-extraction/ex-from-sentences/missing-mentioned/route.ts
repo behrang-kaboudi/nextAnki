@@ -21,7 +21,7 @@ export async function GET(req: Request) {
     const limit = parseLimit(url.searchParams.get("limit"), 20);
 
     const items = await prisma.sentence.findMany({
-      where: { mentionedWordsJson: { equals: Prisma.DbNull } },
+      where: { mentionedWordsJson: { equals: Prisma.AnyNull } },
       orderBy: { id: "asc" },
       take: limit,
       select: {
