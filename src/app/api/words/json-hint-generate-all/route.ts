@@ -48,16 +48,28 @@ export async function POST(req: Request) {
       const raw = (url.searchParams.get("includeTotal") ?? "").trim().toLowerCase();
       return raw === "1" || raw === "true" || raw === "yes";
     })();
+    const onlyEmptyJsonHint = (() => {
+      const raw = (url.searchParams.get("onlyEmptyJsonHint") ?? "").trim().toLowerCase();
+      return raw === "1" || raw === "true" || raw === "yes";
+    })();
 
-    const whereFilter = q
-      ? {
-          OR: [
-            { base_form: { contains: q } },
-            { meaning_fa: { contains: q } },
-            { anki_link_id: { contains: q } },
-          ],
-        }
-      : undefined;
+    const whereParts = [];
+    if (q) {
+      whereParts.push({
+        OR: [
+          { base_form: { contains: q } },
+          { meaning_fa: { contains: q } },
+          { anki_link_id: { contains: q } },
+        ],
+      });
+    }
+    if (onlyEmptyJsonHint) {
+      whereParts.push({
+        OR: [{ json_hint: null }, { json_hint: "" }],
+      });
+    }
+
+    const whereFilter = whereParts.length > 0 ? { AND: whereParts } : undefined;
 
     const total = includeTotal ? await prisma.word.count({ where: whereFilter }) : null;
     const rows = await prisma.word.findMany({

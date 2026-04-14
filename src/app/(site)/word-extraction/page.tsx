@@ -1,4 +1,4 @@
- "use client";
+"use client";
 
 import { PageHeader } from "@/components/page-header";
 import { useCallback, useRef, useState } from "react";
@@ -50,19 +50,20 @@ export default function WordExtractionPage() {
     { path: string; text: string }[]
   >([]);
   const [baseModalCopied, setBaseModalCopied] = useState(false);
-  const [isSentenceExtractModalOpen, setIsSentenceExtractModalOpen] = useState(false);
-  const [isSentenceExtractModalLoading, setIsSentenceExtractModalLoading] = useState(false);
-  const [sentenceExtractModalError, setSentenceExtractModalError] = useState<string | null>(null);
+  const [isSentenceExtractModalOpen, setIsSentenceExtractModalOpen] =
+    useState(false);
+  const [isSentenceExtractModalLoading, setIsSentenceExtractModalLoading] =
+    useState(false);
+  const [sentenceExtractModalError, setSentenceExtractModalError] = useState<
+    string | null
+  >(null);
   const [sentenceExtractModalItems, setSentenceExtractModalItems] = useState<
     { path: string; text: string }[]
   >([]);
-  const [sentenceExtractModalCopied, setSentenceExtractModalCopied] = useState(false);
-  const [sentenceExtractModalPromptCopied, setSentenceExtractModalPromptCopied] = useState(false);
-  const [sentenceExtractModalDataCopied, setSentenceExtractModalDataCopied] = useState(false);
-  const [sentenceExtractModalTailJson, setSentenceExtractModalTailJson] = useState<string>("");
-  const [sentenceExtractTailLimit, setSentenceExtractTailLimit] = useState<string>("20");
-  const [sentenceExtractModalTailCount, setSentenceExtractModalTailCount] = useState(0);
-  const [sentenceExtractModalTailLimitApplied, setSentenceExtractModalTailLimitApplied] = useState(20);
+  const [
+    sentenceExtractModalPromptCopied,
+    setSentenceExtractModalPromptCopied,
+  ] = useState(false);
   const [isSentenceInsertBusy, setIsSentenceInsertBusy] = useState(false);
   const [isPhoneticModalOpen, setIsPhoneticModalOpen] = useState(false);
   const [isPhoneticModalLoading, setIsPhoneticModalLoading] = useState(false);
@@ -72,15 +73,21 @@ export default function WordExtractionPage() {
   const [phoneticModalItems, setPhoneticModalItems] = useState<
     { path: string; text: string }[]
   >([]);
-  const [phoneticModalTailJson, setPhoneticModalTailJson] = useState<string>("");
+  const [phoneticModalTailJson, setPhoneticModalTailJson] =
+    useState<string>("");
   const [phoneticModalCopied, setPhoneticModalCopied] = useState(false);
-  const [phoneticModalPromptCopied, setPhoneticModalPromptCopied] = useState(false);
+  const [phoneticModalPromptCopied, setPhoneticModalPromptCopied] =
+    useState(false);
   const [phoneticModalDataCopied, setPhoneticModalDataCopied] = useState(false);
-  const [meaningFaIpaTailLimit, setMeaningFaIpaTailLimit] = useState<string>("20");
+  const [meaningFaIpaTailLimit, setMeaningFaIpaTailLimit] =
+    useState<string>("20");
   const [phoneticModalTailCount, setPhoneticModalTailCount] = useState(0);
-  const [phoneticModalTailLimitApplied, setPhoneticModalTailLimitApplied] = useState(20);
+  const [phoneticModalTailLimitApplied, setPhoneticModalTailLimitApplied] =
+    useState(20);
   const [isMeaningIpaModalOpen, setIsMeaningIpaModalOpen] = useState(false);
-  const [meaningIpaModalError, setMeaningIpaModalError] = useState<string | null>(null);
+  const [meaningIpaModalError, setMeaningIpaModalError] = useState<
+    string | null
+  >(null);
   const [isMeaningIpaBulkSaving, setIsMeaningIpaBulkSaving] = useState(false);
   const [meaningIpaRows, setMeaningIpaRows] = useState<
     Array<{
@@ -91,6 +98,7 @@ export default function WordExtractionPage() {
       dbMeaningIpaNormalized: string;
       inputMeaningIpa: string;
       saving: boolean;
+      deleting: boolean;
       saveError: string | null;
       saved: boolean;
     }>
@@ -103,12 +111,18 @@ export default function WordExtractionPage() {
     const id = lastFocusedMeaningIpaIdRef.current;
     if (!el || !id) return;
 
-    const start = typeof el.selectionStart === "number" ? el.selectionStart : el.value.length;
-    const end = typeof el.selectionEnd === "number" ? el.selectionEnd : el.value.length;
+    const start =
+      typeof el.selectionStart === "number"
+        ? el.selectionStart
+        : el.value.length;
+    const end =
+      typeof el.selectionEnd === "number" ? el.selectionEnd : el.value.length;
     const nextValue = `${el.value.slice(0, start)}${ch}${el.value.slice(end)}`;
 
     setMeaningIpaRows((cur) =>
-      cur.map((r) => (r.id === id ? { ...r, inputMeaningIpa: nextValue, saved: false } : r)),
+      cur.map((r) =>
+        r.id === id ? { ...r, inputMeaningIpa: nextValue, saved: false } : r,
+      ),
     );
 
     requestAnimationFrame(() => {
@@ -156,13 +170,13 @@ export default function WordExtractionPage() {
             escaped = true;
             continue;
           }
-          if (ch === "\"") {
+          if (ch === '"') {
             inString = false;
           }
           continue;
         }
 
-        if (ch === "\"") {
+        if (ch === '"') {
           inString = true;
           continue;
         }
@@ -224,11 +238,7 @@ export default function WordExtractionPage() {
     setIsSentenceExtractModalOpen(true);
     setIsSentenceExtractModalLoading(true);
     setSentenceExtractModalError(null);
-    setSentenceExtractModalCopied(false);
     setSentenceExtractModalPromptCopied(false);
-    setSentenceExtractModalDataCopied(false);
-    setSentenceExtractModalTailJson("");
-    setSentenceExtractModalTailCount(0);
     try {
       const path = "src/prompts/word-extraction/exFromSentencess/rulseV1.md";
       const res = await fetch(
@@ -241,38 +251,14 @@ export default function WordExtractionPage() {
       }
       const data = (await res.json()) as { path: string; text: string };
       setSentenceExtractModalItems([{ path: data.path, text: data.text }]);
-
-      const limitParsed = Number.parseInt(sentenceExtractTailLimit, 10);
-      const limit =
-        Number.isFinite(limitParsed) && limitParsed > 0
-          ? Math.min(Math.floor(limitParsed), 500)
-          : 20;
-      setSentenceExtractModalTailLimitApplied(limit);
-
-      const missingRes = await fetch(
-        `/api/word-extraction/ex-from-sentences/missing-mentioned?limit=${encodeURIComponent(
-          String(limit),
-        )}`,
-        { method: "GET" },
-      );
-      const missingJson = (await missingRes.json().catch(() => null)) as
-        | { ok?: boolean; error?: string; items?: unknown }
-        | null;
-      if (!missingRes.ok || !missingJson?.ok) {
-        throw new Error(
-          missingJson?.error ??
-            `Failed to load missing sentence rows (${missingRes.status})`,
-        );
-      }
-      const items = Array.isArray(missingJson.items) ? missingJson.items : [];
-      setSentenceExtractModalTailCount(items.length);
-      setSentenceExtractModalTailJson(JSON.stringify(items, null, 2));
     } catch (error) {
-      setSentenceExtractModalError(error instanceof Error ? error.message : String(error));
+      setSentenceExtractModalError(
+        error instanceof Error ? error.message : String(error),
+      );
     } finally {
       setIsSentenceExtractModalLoading(false);
     }
-  }, [sentenceExtractTailLimit]);
+  }, []);
 
   const openPhoneticPromptModal = useCallback(async () => {
     setIsPhoneticModalOpen(true);
@@ -314,22 +300,26 @@ export default function WordExtractionPage() {
         `/api/word-extraction/phonetic-us/missing-meaning-fa-ipa?limit=${encodeURIComponent(
           String(limit),
         )}`,
-        { method: "GET" }
+        { method: "GET" },
       );
-      const missingJson = (await missingRes.json().catch(() => null)) as
-        | { ok?: boolean; error?: string; items?: unknown }
-        | null;
+      const missingJson = (await missingRes.json().catch(() => null)) as {
+        ok?: boolean;
+        error?: string;
+        items?: unknown;
+      } | null;
       if (!missingRes.ok || !missingJson?.ok) {
         throw new Error(
           missingJson?.error ??
-            `Failed to load missing meaning_fa_IPA rows (${missingRes.status})`
+            `Failed to load missing meaning_fa_IPA rows (${missingRes.status})`,
         );
       }
       const items = Array.isArray(missingJson.items) ? missingJson.items : [];
       setPhoneticModalTailCount(items.length);
       setPhoneticModalTailJson(JSON.stringify(items, null, 2));
     } catch (error) {
-      setPhoneticModalError(error instanceof Error ? error.message : String(error));
+      setPhoneticModalError(
+        error instanceof Error ? error.message : String(error),
+      );
     } finally {
       setIsPhoneticModalLoading(false);
     }
@@ -368,10 +358,20 @@ export default function WordExtractionPage() {
           );
         }
 
-        const id = typeof obj.id === "number" && Number.isFinite(obj.id) ? Math.trunc(obj.id) : null;
-        const meaning = typeof obj.meaning_fa_IPA === "string" ? obj.meaning_fa_IPA.trim() : "";
-        if (!id || id <= 0) throw new Error(`item[${i}].id must be a positive number`);
-        if (!meaning) throw new Error(`item[${i}].meaning_fa_IPA must be a non-empty string`);
+        const id =
+          typeof obj.id === "number" && Number.isFinite(obj.id)
+            ? Math.trunc(obj.id)
+            : null;
+        const meaning =
+          typeof obj.meaning_fa_IPA === "string"
+            ? obj.meaning_fa_IPA.trim()
+            : "";
+        if (!id || id <= 0)
+          throw new Error(`item[${i}].id must be a positive number`);
+        if (!meaning)
+          throw new Error(
+            `item[${i}].meaning_fa_IPA must be a non-empty string`,
+          );
         if (seen.has(id)) throw new Error(`Duplicate id in input: ${id}`);
         seen.add(id);
         inputPairs.push({ id, meaning_fa_IPA: meaning });
@@ -383,20 +383,19 @@ export default function WordExtractionPage() {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ ids }),
       });
-      const json = (await res.json().catch(() => null)) as
-        | {
-            ok?: boolean;
-            error?: string;
-            items?: Array<{
-              id: number;
-              base_form: string;
-              meaning_fa: string;
-              meaning_fa_IPA: string;
-              meaning_fa_IPA_normalized: string;
-            }>;
-          }
-        | null;
-      if (!res.ok || !json?.ok) throw new Error(json?.error ?? `Request failed (${res.status})`);
+      const json = (await res.json().catch(() => null)) as {
+        ok?: boolean;
+        error?: string;
+        items?: Array<{
+          id: number;
+          base_form: string;
+          meaning_fa: string;
+          meaning_fa_IPA: string;
+          meaning_fa_IPA_normalized: string;
+        }>;
+      } | null;
+      if (!res.ok || !json?.ok)
+        throw new Error(json?.error ?? `Request failed (${res.status})`);
 
       const items = Array.isArray(json.items) ? json.items : [];
       const byId = new Map(items.map((it) => [it.id, it]));
@@ -414,6 +413,7 @@ export default function WordExtractionPage() {
           dbMeaningIpaNormalized: db.meaning_fa_IPA_normalized,
           inputMeaningIpa: p.meaning_fa_IPA,
           saving: false,
+          deleting: false,
           saveError: null,
           saved: false,
         };
@@ -434,51 +434,70 @@ export default function WordExtractionPage() {
   const [isBase2ModalOpen, setIsBase2ModalOpen] = useState(false);
   const [isBase2ModalLoading, setIsBase2ModalLoading] = useState(false);
   const [base2ModalError, setBase2ModalError] = useState<string | null>(null);
-  const [base2ModalItems, setBase2ModalItems] = useState<{ path: string; text: string }[]>([]);
+  const [base2ModalItems, setBase2ModalItems] = useState<
+    { path: string; text: string }[]
+  >([]);
   const [base2ModalTailJson, setBase2ModalTailJson] = useState<string>("");
   const [base2ModalCopied, setBase2ModalCopied] = useState(false);
   const [base2ModalPromptCopied, setBase2ModalPromptCopied] = useState(false);
   const [base2ModalDataCopied, setBase2ModalDataCopied] = useState(false);
   const [phase3TailLimit, setPhase3TailLimit] = useState<string>("20");
   const [base2ModalTailCount, setBase2ModalTailCount] = useState(0);
-  const [base2ModalTotalCount, setBase2ModalTotalCount] = useState<number | null>(null);
-  const [base2ModalTailLimitApplied, setBase2ModalTailLimitApplied] = useState(20);
+  const [base2ModalTotalCount, setBase2ModalTotalCount] = useState<
+    number | null
+  >(null);
+  const [base2ModalTailLimitApplied, setBase2ModalTailLimitApplied] =
+    useState(20);
   const [isBase2ApplyBusy, setIsBase2ApplyBusy] = useState(false);
   const [isPhase4ApplyBusy, setIsPhase4ApplyBusy] = useState(false);
   const [isPhase4PromptModalOpen, setIsPhase4PromptModalOpen] = useState(false);
-  const [isPhase4PromptModalLoading, setIsPhase4PromptModalLoading] = useState(false);
+  const [isPhase4PromptModalLoading, setIsPhase4PromptModalLoading] =
+    useState(false);
   const [isPhase4MissingLoading, setIsPhase4MissingLoading] = useState(false);
-  const [phase4PromptModalError, setPhase4PromptModalError] = useState<string | null>(null);
-  const [phase4PromptModalItems, setPhase4PromptModalItems] = useState<{ path: string; text: string }[]>([]);
-  const [phase4PromptModalTailJson, setPhase4PromptModalTailJson] = useState<string>("");
+  const [phase4PromptModalError, setPhase4PromptModalError] = useState<
+    string | null
+  >(null);
+  const [phase4PromptModalItems, setPhase4PromptModalItems] = useState<
+    { path: string; text: string }[]
+  >([]);
+  const [phase4PromptModalTailJson, setPhase4PromptModalTailJson] =
+    useState<string>("");
   const [phase4PromptModalCopied, setPhase4PromptModalCopied] = useState(false);
-  const [phase4Checked, setPhase4Checked] = useState<Record<string, boolean>>(() =>
-    Object.fromEntries(
-      helperSpecs.map((spec) => [spec.id, spec.id === "base" || spec.id === helperDefaultActiveId]),
-    ),
+  const [phase4Checked, setPhase4Checked] = useState<Record<string, boolean>>(
+    () =>
+      Object.fromEntries(
+        helperSpecs.map((spec) => [
+          spec.id,
+          spec.id === "base" || spec.id === helperDefaultActiveId,
+        ]),
+      ),
   );
-  const [phase4ActiveId, setPhase4ActiveId] = useState<string>(helperDefaultActiveId);
+  const [phase4ActiveId, setPhase4ActiveId] = useState<string>(
+    helperDefaultActiveId,
+  );
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
   const [isHelpModalLoading, setIsHelpModalLoading] = useState(false);
   const [isHelpModalSaving, setIsHelpModalSaving] = useState(false);
   const [helpModalError, setHelpModalError] = useState<string | null>(null);
   const [helpModalText, setHelpModalText] = useState("");
   const [helpModalSavedText, setHelpModalSavedText] = useState("");
-  const [helpModalSaveError, setHelpModalSaveError] = useState<string | null>(null);
+  const [helpModalSaveError, setHelpModalSaveError] = useState<string | null>(
+    null,
+  );
   const [helpModalSaveOk, setHelpModalSaveOk] = useState(false);
 
   const openBase2PromptModal = useCallback(async () => {
     setIsBase2ModalOpen(true);
     setIsBase2ModalLoading(true);
-	    setBase2ModalError(null);
-	    setBase2ModalTailJson("");
-	    setBase2ModalTailCount(0);
-	    setBase2ModalTotalCount(null);
-	    setBase2ModalCopied(false);
-	    setBase2ModalPromptCopied(false);
-	    setBase2ModalDataCopied(false);
-	    try {
-	      const paths = WORD_EXTRACTION_PROMPTS_PHASE3.map((spec) => spec.path);
+    setBase2ModalError(null);
+    setBase2ModalTailJson("");
+    setBase2ModalTailCount(0);
+    setBase2ModalTotalCount(null);
+    setBase2ModalCopied(false);
+    setBase2ModalPromptCopied(false);
+    setBase2ModalDataCopied(false);
+    try {
+      const paths = WORD_EXTRACTION_PROMPTS_PHASE3.map((spec) => spec.path);
       const results = await Promise.all(
         paths.map(async (path) => {
           const res = await fetch(
@@ -506,31 +525,41 @@ export default function WordExtractionPage() {
           String(limit),
         )}`,
         { method: "GET" },
-	      );
-	      const missingJson = (await missingRes.json().catch(() => null)) as
-	        | { ok?: boolean; error?: string; items?: unknown; total?: unknown; fetched?: unknown; limit?: unknown }
-	        | null;
-	      if (!missingRes.ok || !missingJson?.ok) {
-	        throw new Error(
-	          missingJson?.error ??
-	            `Failed to load Phase 3 missing rows (${missingRes.status})`,
-	        );
-	      }
-	      const items = Array.isArray(missingJson.items) ? missingJson.items : [];
-	      const total =
-	        typeof missingJson.total === "number" && Number.isFinite(missingJson.total)
-	          ? missingJson.total
-	          : typeof missingJson.total === "string"
-	            ? Number.parseInt(missingJson.total, 10)
-	            : typeof missingJson.total === "bigint"
-	              ? Number(missingJson.total)
-	              : null;
-	      setBase2ModalTotalCount(Number.isFinite(total ?? NaN) ? (total as number) : null);
-	      setBase2ModalTailCount(items.length);
-	      setBase2ModalTailJson(JSON.stringify(items, null, 2));
-	    } catch (error) {
-	      setBase2ModalError(error instanceof Error ? error.message : String(error));
-	    } finally {
+      );
+      const missingJson = (await missingRes.json().catch(() => null)) as {
+        ok?: boolean;
+        error?: string;
+        items?: unknown;
+        total?: unknown;
+        fetched?: unknown;
+        limit?: unknown;
+      } | null;
+      if (!missingRes.ok || !missingJson?.ok) {
+        throw new Error(
+          missingJson?.error ??
+            `Failed to load Phase 3 missing rows (${missingRes.status})`,
+        );
+      }
+      const items = Array.isArray(missingJson.items) ? missingJson.items : [];
+      const total =
+        typeof missingJson.total === "number" &&
+        Number.isFinite(missingJson.total)
+          ? missingJson.total
+          : typeof missingJson.total === "string"
+            ? Number.parseInt(missingJson.total, 10)
+            : typeof missingJson.total === "bigint"
+              ? Number(missingJson.total)
+              : null;
+      setBase2ModalTotalCount(
+        Number.isFinite(total ?? NaN) ? (total as number) : null,
+      );
+      setBase2ModalTailCount(items.length);
+      setBase2ModalTailJson(JSON.stringify(items, null, 2));
+    } catch (error) {
+      setBase2ModalError(
+        error instanceof Error ? error.message : String(error),
+      );
+    } finally {
       setIsBase2ModalLoading(false);
     }
   }, [phase3TailLimit]);
@@ -571,18 +600,24 @@ export default function WordExtractionPage() {
         `/api/word-extraction/helper/missing-by-field?field=${encodeURIComponent(active.fieldKey)}`,
         { method: "GET" },
       );
-      const missingJson = (await missingRes.json().catch(() => null)) as
-        | { ok?: boolean; error?: string; items?: unknown }
-        | null;
+      const missingJson = (await missingRes.json().catch(() => null)) as {
+        ok?: boolean;
+        error?: string;
+        items?: unknown;
+      } | null;
       if (!missingRes.ok || !missingJson?.ok) {
         throw new Error(
           missingJson?.error ??
             `Failed to load missing helper rows (${missingRes.status})`,
         );
       }
-      setPhase4PromptModalTailJson(JSON.stringify(missingJson.items ?? [], null, 2));
+      setPhase4PromptModalTailJson(
+        JSON.stringify(missingJson.items ?? [], null, 2),
+      );
     } catch (error) {
-      setPhase4PromptModalError(error instanceof Error ? error.message : String(error));
+      setPhase4PromptModalError(
+        error instanceof Error ? error.message : String(error),
+      );
     } finally {
       setIsPhase4MissingLoading(false);
       setIsPhase4PromptModalLoading(false);
@@ -597,42 +632,57 @@ export default function WordExtractionPage() {
         `/api/word-extraction/helper/missing-by-field?field=${encodeURIComponent(fieldKey)}`,
         { method: "GET" },
       );
-      const missingJson = (await missingRes.json().catch(() => null)) as
-        | { ok?: boolean; error?: string; items?: unknown }
-        | null;
+      const missingJson = (await missingRes.json().catch(() => null)) as {
+        ok?: boolean;
+        error?: string;
+        items?: unknown;
+      } | null;
       if (!missingRes.ok || !missingJson?.ok) {
         throw new Error(
           missingJson?.error ??
             `Failed to load missing helper rows (${missingRes.status})`,
         );
       }
-      setPhase4PromptModalTailJson(JSON.stringify(missingJson.items ?? [], null, 2));
+      setPhase4PromptModalTailJson(
+        JSON.stringify(missingJson.items ?? [], null, 2),
+      );
     } catch (error) {
-      setPhase4PromptModalError(error instanceof Error ? error.message : String(error));
+      setPhase4PromptModalError(
+        error instanceof Error ? error.message : String(error),
+      );
     } finally {
       setIsPhase4MissingLoading(false);
     }
   }, []);
 
-  const buildHelperPromptText = useCallback(
-    () => {
-      const checkedSpecs = helperSpecs.filter((s) => Boolean(phase4Checked[s.id]));
-      const activeSpec = helperSpecs.find((s) => s.id === phase4ActiveId) ?? null;
-      const ordered =
-        activeSpec && phase4Checked[activeSpec.id]
-          ? [activeSpec, ...checkedSpecs.filter((s) => s.id !== activeSpec.id)]
-          : checkedSpecs;
+  const buildHelperPromptText = useCallback(() => {
+    const checkedSpecs = helperSpecs.filter((s) =>
+      Boolean(phase4Checked[s.id]),
+    );
+    const activeSpec = helperSpecs.find((s) => s.id === phase4ActiveId) ?? null;
+    const ordered =
+      activeSpec && phase4Checked[activeSpec.id]
+        ? [activeSpec, ...checkedSpecs.filter((s) => s.id !== activeSpec.id)]
+        : checkedSpecs;
 
-      const combined = ordered
-        .map((spec) => phase4PromptModalItems.find((it) => it.path === spec.path)?.text.trim())
-        .filter((t): t is string => Boolean(t && t.length))
-        .join("\n\n");
+    const combined = ordered
+      .map((spec) =>
+        phase4PromptModalItems.find((it) => it.path === spec.path)?.text.trim(),
+      )
+      .filter((t): t is string => Boolean(t && t.length))
+      .join("\n\n");
 
-      const tail = phase4PromptModalTailJson ? `\n\n${phase4PromptModalTailJson}` : "";
-      return `${combined}${tail}`;
-    },
-    [helperSpecs, phase4ActiveId, phase4Checked, phase4PromptModalItems, phase4PromptModalTailJson],
-  );
+    const tail = phase4PromptModalTailJson
+      ? `\n\n${phase4PromptModalTailJson}`
+      : "";
+    return `${combined}${tail}`;
+  }, [
+    helperSpecs,
+    phase4ActiveId,
+    phase4Checked,
+    phase4PromptModalItems,
+    phase4PromptModalTailJson,
+  ]);
 
   const openHelpModal = useCallback(async () => {
     setIsHelpModalOpen(true);
@@ -670,12 +720,17 @@ export default function WordExtractionPage() {
       const res = await fetch("/api/help-file", {
         method: "PUT",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ path: "wordExtraction.md", text: helpModalText }),
+        body: JSON.stringify({
+          path: "wordExtraction.md",
+          text: helpModalText,
+        }),
       });
-      const json = (await res.json().catch(() => null)) as
-        | { ok?: boolean; error?: string }
-        | null;
-      if (!res.ok || !json?.ok) throw new Error(json?.error ?? `Request failed (${res.status})`);
+      const json = (await res.json().catch(() => null)) as {
+        ok?: boolean;
+        error?: string;
+      } | null;
+      if (!res.ok || !json?.ok)
+        throw new Error(json?.error ?? `Request failed (${res.status})`);
       setHelpModalSavedText(helpModalText);
       setHelpModalSaveOk(true);
       window.setTimeout(() => setHelpModalSaveOk(false), 1200);
@@ -701,14 +756,21 @@ export default function WordExtractionPage() {
         headers: { "content-type": "application/json" },
         body: JSON.stringify(parsed),
       });
-      const json = (await res.json().catch(() => null)) as
-        | { ok?: boolean; error?: string; total?: number; updated?: number; results?: unknown }
-        | null;
-      if (!res.ok || !json?.ok) throw new Error(json?.error ?? `Request failed (${res.status})`);
+      const json = (await res.json().catch(() => null)) as {
+        ok?: boolean;
+        error?: string;
+        total?: number;
+        updated?: number;
+        results?: unknown;
+      } | null;
+      if (!res.ok || !json?.ok)
+        throw new Error(json?.error ?? `Request failed (${res.status})`);
 
       const report = `Updated: ${json.updated ?? 0}/${json.total ?? 0}`;
       setInsertReport(report);
-      setRightText(`${report}\n\n${JSON.stringify(json.results ?? null, null, 2)}`);
+      setRightText(
+        `${report}\n\n${JSON.stringify(json.results ?? null, null, 2)}`,
+      );
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       setInsertReport("Update failed");
@@ -733,14 +795,21 @@ export default function WordExtractionPage() {
         headers: { "content-type": "application/json" },
         body: JSON.stringify(parsed),
       });
-      const json = (await res.json().catch(() => null)) as
-        | { ok?: boolean; error?: string; total?: number; updated?: number; results?: unknown }
-        | null;
-      if (!res.ok || !json?.ok) throw new Error(json?.error ?? `Request failed (${res.status})`);
+      const json = (await res.json().catch(() => null)) as {
+        ok?: boolean;
+        error?: string;
+        total?: number;
+        updated?: number;
+        results?: unknown;
+      } | null;
+      if (!res.ok || !json?.ok)
+        throw new Error(json?.error ?? `Request failed (${res.status})`);
 
       const report = `Updated: ${json.updated ?? 0}/${json.total ?? 0}`;
       setInsertReport(report);
-      setRightText(`${report}\n\n${JSON.stringify(json.results ?? null, null, 2)}`);
+      setRightText(
+        `${report}\n\n${JSON.stringify(json.results ?? null, null, 2)}`,
+      );
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       setInsertReport("Update failed");
@@ -752,7 +821,15 @@ export default function WordExtractionPage() {
   async function saveMeaningIpa(id: number, valueRaw: string) {
     setMeaningIpaRows((cur) =>
       cur.map((r) =>
-        r.id === id ? { ...r, saving: true, saveError: null, saved: false } : r,
+        r.id === id
+          ? {
+              ...r,
+              saving: true,
+              deleting: false,
+              saveError: null,
+              saved: false,
+            }
+          : r,
       ),
     );
 
@@ -763,10 +840,13 @@ export default function WordExtractionPage() {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ id, meaning_fa_IPA: value }),
       });
-      const json = (await res.json().catch(() => null)) as
-        | { ok?: boolean; error?: string; item?: { meaning_fa_IPA: string; meaning_fa_IPA_normalized: string } }
-        | null;
-      if (!res.ok || !json?.ok) throw new Error(json?.error ?? `Request failed (${res.status})`);
+      const json = (await res.json().catch(() => null)) as {
+        ok?: boolean;
+        error?: string;
+        item?: { meaning_fa_IPA: string; meaning_fa_IPA_normalized: string };
+      } | null;
+      if (!res.ok || !json?.ok)
+        throw new Error(json?.error ?? `Request failed (${res.status})`);
 
       setMeaningIpaRows((cur) =>
         cur.map((r) =>
@@ -774,8 +854,11 @@ export default function WordExtractionPage() {
             ? {
                 ...r,
                 dbMeaningIpa: json.item?.meaning_fa_IPA ?? r.dbMeaningIpa,
-                dbMeaningIpaNormalized: json.item?.meaning_fa_IPA_normalized ?? r.dbMeaningIpaNormalized,
+                dbMeaningIpaNormalized:
+                  json.item?.meaning_fa_IPA_normalized ??
+                  r.dbMeaningIpaNormalized,
                 saving: false,
+                deleting: false,
                 saveError: null,
                 saved: true,
               }
@@ -785,7 +868,75 @@ export default function WordExtractionPage() {
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       setMeaningIpaRows((cur) =>
-        cur.map((r) => (r.id === id ? { ...r, saving: false, saveError: msg, saved: false } : r)),
+        cur.map((r) =>
+          r.id === id
+            ? {
+                ...r,
+                saving: false,
+                deleting: false,
+                saveError: msg,
+                saved: false,
+              }
+            : r,
+        ),
+      );
+    }
+  }
+
+  async function deleteMeaningIpaRow(id: number, label: string) {
+    const ok = window.confirm(
+      `Delete this word?\n\n#${id} — ${label}\n\nThis will also delete its word audio files.`,
+    );
+    if (!ok) return;
+
+    setMeaningIpaRows((cur) =>
+      cur.map((r) =>
+        r.id === id
+          ? {
+              ...r,
+              deleting: true,
+              saving: false,
+              saveError: null,
+              saved: false,
+            }
+          : r,
+      ),
+    );
+
+    try {
+      const res = await fetch("/api/words/editor/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      const json = (await res.json().catch(() => null)) as {
+        ok?: boolean;
+        error?: string;
+      } | null;
+      if (!res.ok || json?.ok !== true) {
+        throw new Error(json?.error ?? `Request failed (${res.status})`);
+      }
+
+      if (lastFocusedMeaningIpaIdRef.current === id) {
+        lastFocusedMeaningIpaIdRef.current = null;
+        lastFocusedMeaningIpaInputRef.current = null;
+      }
+
+      setMeaningIpaRows((cur) => cur.filter((r) => r.id !== id));
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      setMeaningIpaRows((cur) =>
+        cur.map((r) =>
+          r.id === id
+            ? {
+                ...r,
+                deleting: false,
+                saving: false,
+                saveError: msg,
+                saved: false,
+              }
+            : r,
+        ),
       );
     }
   }
@@ -798,6 +949,7 @@ export default function WordExtractionPage() {
       cur.map((r) => ({
         ...r,
         saving: true,
+        deleting: false,
         saveError: null,
         saved: false,
       })),
@@ -809,26 +961,35 @@ export default function WordExtractionPage() {
         meaning_fa_IPA: r.inputMeaningIpa.trim(),
       }));
 
-      const res = await fetch("/api/word-extraction/meaning-fa-ipa/update-bulk", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      const json = (await res.json().catch(() => null)) as
-        | {
-            ok?: boolean;
-            error?: string;
-            total?: number;
-            updated?: number;
-            results?: Array<
-              | { ok: true; id: number; meaning_fa_IPA: string; meaning_fa_IPA_normalized: string }
-              | { ok: false; id: number; error: string }
-            >;
-          }
-        | null;
-      if (!res.ok || !json?.ok) throw new Error(json?.error ?? `Request failed (${res.status})`);
+      const res = await fetch(
+        "/api/word-extraction/meaning-fa-ipa/update-bulk",
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(payload),
+        },
+      );
+      const json = (await res.json().catch(() => null)) as {
+        ok?: boolean;
+        error?: string;
+        total?: number;
+        updated?: number;
+        results?: Array<
+          | {
+              ok: true;
+              id: number;
+              meaning_fa_IPA: string;
+              meaning_fa_IPA_normalized: string;
+            }
+          | { ok: false; id: number; error: string }
+        >;
+      } | null;
+      if (!res.ok || !json?.ok)
+        throw new Error(json?.error ?? `Request failed (${res.status})`);
 
-      const resultById = new Map((json.results ?? []).map((item) => [item.id, item]));
+      const resultById = new Map(
+        (json.results ?? []).map((item) => [item.id, item]),
+      );
 
       setMeaningIpaRows((cur) =>
         cur.map((r) => {
@@ -837,18 +998,26 @@ export default function WordExtractionPage() {
             return {
               ...r,
               saving: false,
+              deleting: false,
               saveError: "No result returned for this row",
               saved: false,
             };
           }
           if (!result.ok) {
-            return { ...r, saving: false, saveError: result.error, saved: false };
+            return {
+              ...r,
+              saving: false,
+              deleting: false,
+              saveError: result.error,
+              saved: false,
+            };
           }
           return {
             ...r,
             dbMeaningIpa: result.meaning_fa_IPA,
             dbMeaningIpaNormalized: result.meaning_fa_IPA_normalized,
             saving: false,
+            deleting: false,
             saveError: null,
             saved: true,
           };
@@ -860,6 +1029,7 @@ export default function WordExtractionPage() {
         cur.map((r) => ({
           ...r,
           saving: false,
+          deleting: false,
           saveError: r.saveError ?? msg,
           saved: false,
         })),
@@ -902,9 +1072,14 @@ export default function WordExtractionPage() {
     setIsFinalizeBusy(true);
     setInsertReport(null);
     try {
-      const res = await fetch("/api/word-extraction/finalize", { method: "POST" });
+      const res = await fetch("/api/word-extraction/finalize", {
+        method: "POST",
+      });
       const json = (await res.json().catch(() => null)) as unknown;
-      const obj = json && typeof json === "object" ? (json as Record<string, unknown>) : null;
+      const obj =
+        json && typeof json === "object"
+          ? (json as Record<string, unknown>)
+          : null;
       const ok = obj?.ok === true;
       const errorText = typeof obj?.error === "string" ? obj.error : null;
 
@@ -949,15 +1124,23 @@ export default function WordExtractionPage() {
         }
         const keys = Object.keys(row as Record<string, unknown>);
         const extra = keys.filter((k) => !allowedKeySet.has(k));
-        const missing = allowedKeys.filter((k) => !(k in (row as Record<string, unknown>)));
+        const missing = allowedKeys.filter(
+          (k) => !(k in (row as Record<string, unknown>)),
+        );
         if (keys.length !== allowedKeys.length) {
-          issues.push(`item[${i}]: must have exactly ${allowedKeys.length} fields`);
+          issues.push(
+            `item[${i}]: must have exactly ${allowedKeys.length} fields`,
+          );
         }
-        if (extra.length) issues.push(`item[${i}]: extra field(s): ${extra.join(", ")}`);
-        if (missing.length) issues.push(`item[${i}]: missing field(s): ${missing.join(", ")}`);
+        if (extra.length)
+          issues.push(`item[${i}]: extra field(s): ${extra.join(", ")}`);
+        if (missing.length)
+          issues.push(`item[${i}]: missing field(s): ${missing.join(", ")}`);
       }
       if (issues.length) {
-        throw new Error(`Invalid items:\n${issues.slice(0, 20).join("\n")}${issues.length > 20 ? "\n..." : ""}`);
+        throw new Error(
+          `Invalid items:\n${issues.slice(0, 20).join("\n")}${issues.length > 20 ? "\n..." : ""}`,
+        );
       }
 
       const res = await fetch("/api/word-extraction/base/insert-tempwords", {
@@ -965,16 +1148,14 @@ export default function WordExtractionPage() {
         headers: { "content-type": "application/json" },
         body: JSON.stringify(parsed),
       });
-      const json = (await res.json().catch(() => null)) as
-        | {
-            ok?: boolean;
-            error?: string;
-            inserted?: number;
-            skippedExisting?: number;
-            total?: number;
-            results?: unknown;
-          }
-        | null;
+      const json = (await res.json().catch(() => null)) as {
+        ok?: boolean;
+        error?: string;
+        inserted?: number;
+        skippedExisting?: number;
+        total?: number;
+        results?: unknown;
+      } | null;
       if (!res.ok || !json?.ok) {
         throw new Error(json?.error ?? `Request failed (${res.status})`);
       }
@@ -1006,18 +1187,16 @@ export default function WordExtractionPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(parsed),
       });
-      const json = (await res.json().catch(() => null)) as
-        | {
-            ok?: boolean;
-            error?: string;
-            totalRows?: number;
-            totalItems?: number;
-            sentencesUpserted?: number;
-            inserted?: number;
-            skippedExisting?: number;
-            results?: unknown;
-          }
-        | null;
+      const json = (await res.json().catch(() => null)) as {
+        ok?: boolean;
+        error?: string;
+        totalRows?: number;
+        totalItems?: number;
+        sentencesUpserted?: number;
+        inserted?: number;
+        skippedExisting?: number;
+        results?: unknown;
+      } | null;
 
       if (!res.ok || !json?.ok) {
         throw new Error(json?.error ?? `Request failed (${res.status})`);
@@ -1046,46 +1225,6 @@ export default function WordExtractionPage() {
         title="Word Extraction"
         subtitle="پرامپت و راهنما را از فایل‌ها می‌خواند (فعلاً فقط base)."
       />
-
-      <div className="grid gap-3 rounded-2xl border border-card bg-background/60 p-4 backdrop-blur">
-        <div className="text-xs font-semibold tracking-wide text-muted">
-          TOOLS
-        </div>
-        <div className="grid gap-3 sm:grid-cols-3">
-          <button
-            type="button"
-            className={`${buttonBase} bg-gradient-to-r from-green-700 to-emerald-600 text-white`}
-            onClick={copyPromptToClipboard}
-            disabled={isClipboardBusy}
-          >
-            {isClipboardBusy ? "WORKING..." : "COPY TO CLIPBOARD"}
-          </button>
-          <button
-            type="button"
-            className={`${buttonBase} bg-gradient-to-r from-green-700 to-emerald-600 text-white`}
-            onClick={pastePromptFromClipboard}
-            disabled={isClipboardBusy}
-          >
-            {isClipboardBusy ? "WORKING..." : "PASTE"}
-          </button>
-          <button
-            type="button"
-            className={`${buttonBase} bg-gradient-to-r from-slate-700 to-slate-600 text-white`}
-            onClick={openHelpModal}
-            disabled={isHelpModalLoading}
-          >
-            {isHelpModalLoading ? "LOADING..." : "HELP"}
-          </button>
-        </div>
-        <button
-          type="button"
-          className={`${buttonBase} w-full bg-gradient-to-r from-amber-600 to-orange-600 text-white`}
-          onClick={finalize}
-          disabled={isFinalizeBusy}
-        >
-          {isFinalizeBusy ? "FINALIZING..." : "FINALIZE"}
-        </button>
-      </div>
 
       <div className="grid gap-6 rounded-2xl border border-card bg-gradient-to-br from-card to-background p-6 shadow-elevated">
         <div className="grid gap-6 lg:grid-cols-2">
@@ -1124,7 +1263,9 @@ export default function WordExtractionPage() {
               <input
                 type="checkbox"
                 checked={rightDir === "rtl"}
-                onChange={(event) => setRightDir(event.target.checked ? "rtl" : "ltr")}
+                onChange={(event) =>
+                  setRightDir(event.target.checked ? "rtl" : "ltr")
+                }
                 className="h-4 w-4 rounded border border-card bg-background accent-[var(--primary)]"
               />
               RTL (Right-to-left)
@@ -1143,14 +1284,63 @@ export default function WordExtractionPage() {
             />
           </div>
         </div>
-
+        <div className="grid gap-3 rounded-2xl border border-card bg-background/60 p-4 backdrop-blur">
+          <div className="text-xs font-semibold tracking-wide text-muted">
+            TOOLS
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+            <button
+              type="button"
+              className={`${buttonBase} bg-gradient-to-r from-green-700 to-emerald-600 text-white`}
+              onClick={copyPromptToClipboard}
+              disabled={isClipboardBusy}
+            >
+              {isClipboardBusy ? "WORKING..." : "COPY TO CLIPBOARD"}
+            </button>
+            <button
+              type="button"
+              className={`${buttonBase} bg-gradient-to-r from-green-700 to-emerald-600 text-white`}
+              onClick={pastePromptFromClipboard}
+              disabled={isClipboardBusy}
+            >
+              {isClipboardBusy ? "WORKING..." : "PASTE"}
+            </button>
+            <button
+              type="button"
+              className={`${buttonBase} bg-gradient-to-r from-slate-700 to-slate-600 text-white`}
+              onClick={openHelpModal}
+              disabled={isHelpModalLoading}
+            >
+              {isHelpModalLoading ? "LOADING..." : "HELP"}
+            </button>
+            <button
+              type="button"
+              className={`${buttonBase} bg-gradient-to-r from-violet-700 to-indigo-600 text-white`}
+              onClick={openSentenceExtractPromptModal}
+              disabled={isSentenceExtractModalLoading}
+            >
+              {isSentenceExtractModalLoading
+                ? "LOADING..."
+                : "PROMPT FROM SENTENCES"}
+            </button>
+            <button
+              type="button"
+              className={`${buttonBase} w-full bg-gradient-to-r from-amber-600 to-orange-600 text-white`}
+              onClick={finalize}
+              disabled={isFinalizeBusy}
+            >
+              {isFinalizeBusy ? "FINALIZING..." : "FINALIZE"}
+            </button>
+          </div>
+        </div>
         <div className="grid gap-3 rounded-2xl border border-card bg-background/60 p-4 backdrop-blur lg:grid-cols-3">
           <div className="grid gap-3 rounded-xl border border-card bg-background/70 p-3">
             <div className="text-xs font-semibold tracking-wide text-muted">
               فاز ۱ استخراج از کلمات
             </div>
             <div className="text-xs opacity-70">
-              فقط برای کلمات است؛ یعنی مرتب‌سازی و استخراج داده‌ی پایه‌ی کلمات، نه پردازش‌های بعدی.
+              فقط برای کلمات است؛ یعنی مرتب‌سازی و استخراج داده‌ی پایه‌ی کلمات،
+              نه پردازش‌های بعدی.
             </div>
             <div className="grid gap-3">
               <button
@@ -1177,34 +1367,23 @@ export default function WordExtractionPage() {
               فاز ۱ استخراج از جملات
             </div>
             <div className="grid gap-3">
-              <div className="flex items-stretch gap-2">
-                <button
-                  type="button"
-                  className={`${buttonBase} flex-1 bg-gradient-to-r from-violet-700 to-indigo-600 text-white`}
-                  onClick={openSentenceExtractPromptModal}
-                  disabled={isSentenceExtractModalLoading}
-                >
-                  1.S.1 PROMPT FOR: EXTRACT FROM SENTENCES
-                </button>
-                <input
-                  type="number"
-                  inputMode="numeric"
-                  min={1}
-                  max={500}
-                  value={sentenceExtractTailLimit}
-                  onChange={(event) => setSentenceExtractTailLimit(event.target.value)}
-                  className="h-11 w-20 rounded-xl border border-card bg-background px-3 text-xs font-semibold text-foreground shadow-elevated outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[color-mix(in_oklab,var(--primary),transparent_70%)]"
-                  aria-label="Count (sentence extraction tail rows)"
-                  title="تعداد جمله‌های بدون mentionedWordsJson"
-                />
-              </div>
+              <button
+                type="button"
+                className={`${buttonBase} bg-gradient-to-r from-violet-700 to-indigo-600 text-white`}
+                onClick={openSentenceExtractPromptModal}
+                disabled={isSentenceExtractModalLoading}
+              >
+                1.S.1 PROMPT FOR: EXTRACT FROM SENTENCES
+              </button>
               <button
                 type="button"
                 className={`${buttonBase} bg-gradient-to-r from-violet-700 to-indigo-600 text-white`}
                 onClick={insertWordsFromSentenceJson}
                 disabled={isSentenceInsertBusy}
               >
-                {isSentenceInsertBusy ? "INSERTING..." : "1.S.2 INSERT BASE FOR TEMPWORDS FROM SENTENCES"}
+                {isSentenceInsertBusy
+                  ? "INSERTING..."
+                  : "1.S.2 INSERT BASE FOR TEMPWORDS FROM SENTENCES"}
               </button>
             </div>
           </div>
@@ -1229,7 +1408,9 @@ export default function WordExtractionPage() {
                   min={1}
                   max={500}
                   value={meaningFaIpaTailLimit}
-                  onChange={(event) => setMeaningFaIpaTailLimit(event.target.value)}
+                  onChange={(event) =>
+                    setMeaningFaIpaTailLimit(event.target.value)
+                  }
                   className="h-11 w-20 rounded-xl border border-card bg-background px-3 text-xs font-semibold text-foreground shadow-elevated outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[color-mix(in_oklab,var(--primary),transparent_70%)]"
                   aria-label="Count (meaning_fa_IPA tail rows)"
                   title="تعداد رکوردهای انتهای پرامپت (meaning_fa_IPA)"
@@ -1249,7 +1430,9 @@ export default function WordExtractionPage() {
         <div className="grid gap-3 rounded-2xl border border-card bg-background/60 p-4 backdrop-blur lg:grid-cols-2">
           <div className="grid gap-3 rounded-xl border border-card bg-background/70 p-3">
             <div className="text-xs font-semibold tracking-wide text-muted">
-              PHASE 3 — PHONETIC_US + IMAGEABILITY + LEARNING_DEPTH + SENTENCE_EN_MEANING_FA + POS + OTHER_MEANINGS_FA + CONCEPT_EXPLAINED_FA
+              PHASE 3 — PHONETIC_US + IMAGEABILITY + LEARNING_DEPTH +
+              SENTENCE_EN_MEANING_FA + POS + OTHER_MEANINGS_FA +
+              CONCEPT_EXPLAINED_FA
             </div>
             <div className="grid gap-3">
               <div className="flex items-stretch gap-2">
@@ -1259,7 +1442,9 @@ export default function WordExtractionPage() {
                   onClick={openBase2PromptModal}
                   disabled={isBase2ModalLoading}
                 >
-                  3.1 PROMPT FOR: PHONETIC_US + IMAGEABILITY + LEARNING_DEPTH + SENTENCE_EN_MEANING_FA + POS + OTHER_MEANINGS_FA + CONCEPT_EXPLAINED_FA
+                  3.1 PROMPT FOR: PHONETIC_US + IMAGEABILITY + LEARNING_DEPTH +
+                  SENTENCE_EN_MEANING_FA + POS + OTHER_MEANINGS_FA +
+                  CONCEPT_EXPLAINED_FA
                 </button>
                 <input
                   type="number"
@@ -1279,9 +1464,7 @@ export default function WordExtractionPage() {
                 onClick={applyBase2FromJson}
                 disabled={isBase2ApplyBusy}
               >
-                {isBase2ApplyBusy
-                  ? "UPDATING..."
-                  : "3.2 APPLY PHASE 3 (ALL)"}
+                {isBase2ApplyBusy ? "UPDATING..." : "3.2 APPLY PHASE 3 (ALL)"}
               </button>
             </div>
           </div>
@@ -1321,9 +1504,7 @@ export default function WordExtractionPage() {
           <div className="flex h-[85vh] w-full max-w-5xl flex-col gap-4 rounded-2xl border border-card bg-background p-6 shadow-elevated">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <div className="text-base font-semibold">
-                  Base Prompt Files
-                </div>
+                <div className="text-base font-semibold">Base Prompt Files</div>
                 <div className="mt-1 text-xs opacity-70">
                   3 files loaded in order
                 </div>
@@ -1359,11 +1540,16 @@ export default function WordExtractionPage() {
                         .join("\n\n");
                       void navigator.clipboard.writeText(combined).then(() => {
                         setBaseModalCopied(true);
-                        window.setTimeout(() => setBaseModalCopied(false), 1200);
+                        window.setTimeout(
+                          () => setBaseModalCopied(false),
+                          1200,
+                        );
                       });
                     }}
                     className={`rounded border px-3 py-2 text-sm transition hover:bg-black/5 dark:hover:bg-white/5 ${
-                      baseModalCopied ? "border-emerald-500/40 bg-emerald-500/10" : ""
+                      baseModalCopied
+                        ? "border-emerald-500/40 bg-emerald-500/10"
+                        : ""
                     }`}
                   >
                     {baseModalCopied ? "Copied" : "Copy all"}
@@ -1395,7 +1581,7 @@ export default function WordExtractionPage() {
                   Sentence Extraction Prompt
                 </div>
                 <div className="mt-1 text-xs opacity-70">
-                  Prompt file + {sentenceExtractModalTailCount} sentence rows (limit {sentenceExtractModalTailLimitApplied})
+                  src/prompts/word-extraction/exFromSentencess/rulseV1.md
                 </div>
               </div>
               <button
@@ -1428,64 +1614,33 @@ export default function WordExtractionPage() {
                         const combined = sentenceExtractModalItems
                           .map((item) => item.text.trim())
                           .join("\n\n");
-                        void navigator.clipboard.writeText(combined).then(() => {
-                          setSentenceExtractModalPromptCopied(true);
-                          setSentenceExtractModalCopied(false);
-                          setSentenceExtractModalDataCopied(false);
-                          window.setTimeout(() => setSentenceExtractModalPromptCopied(false), 1200);
-                        });
+                        void navigator.clipboard
+                          .writeText(combined)
+                          .then(() => {
+                            setSentenceExtractModalPromptCopied(true);
+                            window.setTimeout(
+                              () => setSentenceExtractModalPromptCopied(false),
+                              1200,
+                            );
+                          });
                       }}
                       className={`rounded border px-3 py-2 text-sm transition hover:bg-black/5 dark:hover:bg-white/5 ${
-                        sentenceExtractModalPromptCopied ? "border-emerald-500/40 bg-emerald-500/10" : ""
+                        sentenceExtractModalPromptCopied
+                          ? "border-emerald-500/40 bg-emerald-500/10"
+                          : ""
                       }`}
                     >
-                      {sentenceExtractModalPromptCopied ? "Copied" : "Copy prompt"}
-                    </button>
-                    <button
-                      type="button"
-                      disabled={!sentenceExtractModalTailJson}
-                      onClick={() => {
-                        if (!sentenceExtractModalTailJson) return;
-                        void navigator.clipboard.writeText(sentenceExtractModalTailJson).then(() => {
-                          setSentenceExtractModalDataCopied(true);
-                          setSentenceExtractModalCopied(false);
-                          setSentenceExtractModalPromptCopied(false);
-                          window.setTimeout(() => setSentenceExtractModalDataCopied(false), 1200);
-                        });
-                      }}
-                      className={`rounded border px-3 py-2 text-sm transition hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5 ${
-                        sentenceExtractModalDataCopied ? "border-emerald-500/40 bg-emerald-500/10" : ""
-                      }`}
-                    >
-                      {sentenceExtractModalDataCopied ? "Copied" : "Copy data"}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const combined = sentenceExtractModalItems
-                          .map((item) => item.text.trim())
-                          .join("\n\n");
-                        const tail = sentenceExtractModalTailJson ? `\n\n${sentenceExtractModalTailJson}` : "";
-                        void navigator.clipboard.writeText(`${combined}${tail}`).then(() => {
-                          setSentenceExtractModalCopied(true);
-                          setSentenceExtractModalPromptCopied(false);
-                          setSentenceExtractModalDataCopied(false);
-                          window.setTimeout(() => setSentenceExtractModalCopied(false), 1200);
-                        });
-                      }}
-                      className={`rounded border px-3 py-2 text-sm transition hover:bg-black/5 dark:hover:bg-white/5 ${
-                        sentenceExtractModalCopied ? "border-emerald-500/40 bg-emerald-500/10" : ""
-                      }`}
-                    >
-                      {sentenceExtractModalCopied ? "Copied" : "Copy all"}
+                      {sentenceExtractModalPromptCopied
+                        ? "Copied"
+                        : "Copy prompt"}
                     </button>
                   </div>
                 </div>
                 <textarea
                   readOnly
-                  value={`${sentenceExtractModalItems
+                  value={sentenceExtractModalItems
                     .map((item) => item.text.trim())
-                    .join("\n\n")}${sentenceExtractModalTailJson ? `\n\n${sentenceExtractModalTailJson}` : ""}`}
+                    .join("\n\n")}
                   className="min-h-0 flex-1 resize-none rounded border bg-transparent p-3 font-mono text-xs"
                 />
               </div>
@@ -1507,7 +1662,8 @@ export default function WordExtractionPage() {
                   meaning_fa_IPA Prompt
                 </div>
                 <div className="mt-1 text-xs opacity-70">
-                  Prompt files + {phoneticModalTailCount} missing rows (limit {phoneticModalTailLimitApplied})
+                  Prompt files + {phoneticModalTailCount} missing rows (limit{" "}
+                  {phoneticModalTailLimitApplied})
                 </div>
               </div>
               <button
@@ -1529,84 +1685,103 @@ export default function WordExtractionPage() {
               <div className="text-sm opacity-70">Loading…</div>
             ) : (
               <div className="flex min-h-0 flex-1 flex-col gap-3">
-	                <div className="flex flex-wrap items-center justify-between gap-2">
-	                  <div className="text-xs opacity-70">
-	                    {phoneticModalItems.length} file(s)
-	                  </div>
-	                  <div className="flex items-center gap-2">
-	                    <button
-	                      type="button"
-	                      onClick={() => {
-	                        const combined = phoneticModalItems
-	                          .map((item) => item.text.trim())
-	                          .join("\n\n");
-	                        void navigator.clipboard.writeText(combined).then(() => {
-	                          setPhoneticModalPromptCopied(true);
-	                          setPhoneticModalCopied(false);
-	                          setPhoneticModalDataCopied(false);
-	                          window.setTimeout(() => setPhoneticModalPromptCopied(false), 1200);
-	                        });
-	                      }}
-	                      className={`rounded border px-3 py-2 text-sm transition hover:bg-black/5 dark:hover:bg-white/5 ${
-	                        phoneticModalPromptCopied
-	                          ? "border-emerald-500/40 bg-emerald-500/10"
-	                          : ""
-	                      }`}
-	                      title="Copies prompt files only (no JSON array)"
-	                    >
-	                      {phoneticModalPromptCopied ? "Copied" : "Copy prompt"}
-	                    </button>
-	                    <button
-	                      type="button"
-	                      disabled={!phoneticModalTailJson}
-	                      onClick={() => {
-	                        if (!phoneticModalTailJson) return;
-	                        void navigator.clipboard.writeText(phoneticModalTailJson).then(() => {
-	                          setPhoneticModalDataCopied(true);
-	                          setPhoneticModalCopied(false);
-	                          setPhoneticModalPromptCopied(false);
-	                          window.setTimeout(() => setPhoneticModalDataCopied(false), 1200);
-	                        });
-	                      }}
-	                      className={`rounded border px-3 py-2 text-sm transition hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5 ${
-	                        phoneticModalDataCopied
-	                          ? "border-emerald-500/40 bg-emerald-500/10"
-	                          : ""
-	                      }`}
-	                      title="Copies JSON array only"
-	                    >
-	                      {phoneticModalDataCopied ? "Copied" : "Copy data"}
-	                    </button>
-	                    <button
-	                      type="button"
-	                      onClick={() => {
-	                        const combined = phoneticModalItems
-	                          .map((item) => item.text.trim())
-	                          .join("\n\n");
-	                        const tail = phoneticModalTailJson
-	                          ? `\n\n${phoneticModalTailJson}`
-	                          : "";
-	                        void navigator.clipboard.writeText(`${combined}${tail}`).then(() => {
-	                          setPhoneticModalCopied(true);
-	                          setPhoneticModalPromptCopied(false);
-	                          setPhoneticModalDataCopied(false);
-	                          window.setTimeout(() => setPhoneticModalCopied(false), 1200);
-	                        });
-	                      }}
-	                      className={`rounded border px-3 py-2 text-sm transition hover:bg-black/5 dark:hover:bg-white/5 ${
-	                        phoneticModalCopied ? "border-emerald-500/40 bg-emerald-500/10" : ""
-	                      }`}
-	                      title="Copies prompt + JSON array"
-	                    >
-	                      {phoneticModalCopied ? "Copied" : "Copy all"}
-	                    </button>
-	                  </div>
-	                </div>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="text-xs opacity-70">
+                    {phoneticModalItems.length} file(s)
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const combined = phoneticModalItems
+                          .map((item) => item.text.trim())
+                          .join("\n\n");
+                        void navigator.clipboard
+                          .writeText(combined)
+                          .then(() => {
+                            setPhoneticModalPromptCopied(true);
+                            setPhoneticModalCopied(false);
+                            setPhoneticModalDataCopied(false);
+                            window.setTimeout(
+                              () => setPhoneticModalPromptCopied(false),
+                              1200,
+                            );
+                          });
+                      }}
+                      className={`rounded border px-3 py-2 text-sm transition hover:bg-black/5 dark:hover:bg-white/5 ${
+                        phoneticModalPromptCopied
+                          ? "border-emerald-500/40 bg-emerald-500/10"
+                          : ""
+                      }`}
+                      title="Copies prompt files only (no JSON array)"
+                    >
+                      {phoneticModalPromptCopied ? "Copied" : "Copy prompt"}
+                    </button>
+                    <button
+                      type="button"
+                      disabled={!phoneticModalTailJson}
+                      onClick={() => {
+                        if (!phoneticModalTailJson) return;
+                        void navigator.clipboard
+                          .writeText(phoneticModalTailJson)
+                          .then(() => {
+                            setPhoneticModalDataCopied(true);
+                            setPhoneticModalCopied(false);
+                            setPhoneticModalPromptCopied(false);
+                            window.setTimeout(
+                              () => setPhoneticModalDataCopied(false),
+                              1200,
+                            );
+                          });
+                      }}
+                      className={`rounded border px-3 py-2 text-sm transition hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5 ${
+                        phoneticModalDataCopied
+                          ? "border-emerald-500/40 bg-emerald-500/10"
+                          : ""
+                      }`}
+                      title="Copies JSON array only"
+                    >
+                      {phoneticModalDataCopied ? "Copied" : "Copy data"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const combined = phoneticModalItems
+                          .map((item) => item.text.trim())
+                          .join("\n\n");
+                        const tail = phoneticModalTailJson
+                          ? `\n\n${phoneticModalTailJson}`
+                          : "";
+                        void navigator.clipboard
+                          .writeText(`${combined}${tail}`)
+                          .then(() => {
+                            setPhoneticModalCopied(true);
+                            setPhoneticModalPromptCopied(false);
+                            setPhoneticModalDataCopied(false);
+                            window.setTimeout(
+                              () => setPhoneticModalCopied(false),
+                              1200,
+                            );
+                          });
+                      }}
+                      className={`rounded border px-3 py-2 text-sm transition hover:bg-black/5 dark:hover:bg-white/5 ${
+                        phoneticModalCopied
+                          ? "border-emerald-500/40 bg-emerald-500/10"
+                          : ""
+                      }`}
+                      title="Copies prompt + JSON array"
+                    >
+                      {phoneticModalCopied ? "Copied" : "Copy all"}
+                    </button>
+                  </div>
+                </div>
                 <textarea
                   readOnly
                   value={`${phoneticModalItems
                     .map((item) => item.text.trim())
-                    .join("\n\n")}${phoneticModalTailJson ? `\n\n${phoneticModalTailJson}` : ""}`}
+                    .join(
+                      "\n\n",
+                    )}${phoneticModalTailJson ? `\n\n${phoneticModalTailJson}` : ""}`}
                   className="min-h-0 flex-1 resize-none rounded border bg-transparent p-3 font-mono text-xs"
                 />
               </div>
@@ -1628,14 +1803,17 @@ export default function WordExtractionPage() {
                   Apply meaning_fa_IPA (per row)
                 </div>
                 <div className="mt-1 text-xs opacity-70">
-                  Paste JSON in Prompt (left): [{"{"}id, meaning_fa_IPA{"}"}] then open this modal.
+                  Paste JSON in Prompt (left): [{"{"}id, meaning_fa_IPA{"}"}]
+                  then open this modal.
                 </div>
               </div>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => void saveAllMeaningIpa()}
-                  disabled={isMeaningIpaBulkSaving || meaningIpaRows.length === 0}
+                  disabled={
+                    isMeaningIpaBulkSaving || meaningIpaRows.length === 0
+                  }
                   className="rounded border px-3 py-1 text-sm hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5"
                   title="Updates meaning_fa_IPA and meaning_fa_IPA_normalized for all loaded rows"
                 >
@@ -1684,23 +1862,45 @@ export default function WordExtractionPage() {
               <table className="w-full text-left text-xs">
                 <thead className="sticky top-0 bg-background">
                   <tr className="border-b">
-                    <th className="whitespace-nowrap px-3 py-2 font-semibold">id</th>
-                    <th className="whitespace-nowrap px-3 py-2 font-semibold">base_form</th>
-                    <th className="whitespace-nowrap px-3 py-2 font-semibold">meaning_fa</th>
-                    <th className="whitespace-nowrap px-3 py-2 font-semibold">meaning_fa_IPA (DB)</th>
-                    <th className="whitespace-nowrap px-3 py-2 font-semibold">meaning_fa_IPA (input/edit)</th>
-                    <th className="whitespace-nowrap px-3 py-2 font-semibold">action</th>
+                    <th className="whitespace-nowrap px-3 py-2 font-semibold">
+                      id
+                    </th>
+                    <th className="whitespace-nowrap px-3 py-2 font-semibold">
+                      base_form
+                    </th>
+                    <th className="whitespace-nowrap px-3 py-2 font-semibold">
+                      meaning_fa
+                    </th>
+                    <th className="whitespace-nowrap px-3 py-2 font-semibold">
+                      meaning_fa_IPA (DB)
+                    </th>
+                    <th className="whitespace-nowrap px-3 py-2 font-semibold">
+                      meaning_fa_IPA (input/edit)
+                    </th>
+                    <th className="whitespace-nowrap px-3 py-2 font-semibold">
+                      action
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {meaningIpaRows.map((r) => (
                     <tr key={r.id} className="border-b">
-                      <td className="whitespace-nowrap px-3 py-2 font-mono">{r.id}</td>
-                      <td className="whitespace-nowrap px-3 py-2">{r.base_form}</td>
-                      <td className="max-w-[320px] truncate px-3 py-2" title={r.meaning_fa}>
+                      <td className="whitespace-nowrap px-3 py-2 font-mono">
+                        {r.id}
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-2">
+                        {r.base_form}
+                      </td>
+                      <td
+                        className="max-w-[320px] truncate px-3 py-2"
+                        title={r.meaning_fa}
+                      >
                         {r.meaning_fa}
                       </td>
-                      <td className="max-w-[260px] truncate px-3 py-2 font-mono" title={r.dbMeaningIpa}>
+                      <td
+                        className="max-w-[260px] truncate px-3 py-2 font-mono"
+                        title={r.dbMeaningIpa}
+                      >
                         {r.dbMeaningIpa || "—"}
                       </td>
                       <td className="px-3 py-2">
@@ -1709,38 +1909,68 @@ export default function WordExtractionPage() {
                           onChange={(e) => {
                             const v = e.target.value;
                             setMeaningIpaRows((cur) =>
-                              cur.map((x) => (x.id === r.id ? { ...x, inputMeaningIpa: v, saved: false } : x)),
+                              cur.map((x) =>
+                                x.id === r.id
+                                  ? { ...x, inputMeaningIpa: v, saved: false }
+                                  : x,
+                              ),
                             );
                           }}
                           onFocus={(e) => {
-                            lastFocusedMeaningIpaInputRef.current = e.currentTarget;
+                            lastFocusedMeaningIpaInputRef.current =
+                              e.currentTarget;
                             lastFocusedMeaningIpaIdRef.current = r.id;
                           }}
                           className="h-9 w-[320px] rounded border border-card bg-background px-3 font-mono text-xs outline-none focus:ring-2 focus:ring-[var(--primary)]"
                         />
                         {r.saveError ? (
-                          <div className="mt-1 max-w-[360px] truncate text-[11px] text-red-600" title={r.saveError}>
+                          <div
+                            className="mt-1 max-w-[360px] truncate text-[11px] text-red-600"
+                            title={r.saveError}
+                          >
                             {r.saveError}
                           </div>
                         ) : null}
-                        {r.saved ? <div className="mt-1 text-[11px] text-green-700">Saved</div> : null}
+                        {r.saved ? (
+                          <div className="mt-1 text-[11px] text-green-700">
+                            Saved
+                          </div>
+                        ) : null}
                       </td>
                       <td className="whitespace-nowrap px-3 py-2">
-                        <button
-                          type="button"
-                          onClick={() => void saveMeaningIpa(r.id, r.inputMeaningIpa)}
-                          disabled={r.saving}
-                          className="rounded border px-2 py-1 text-[11px] hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5"
-                          title="Updates meaning_fa_IPA and meaning_fa_IPA_normalized for this row"
-                        >
-                          {r.saving ? "Saving…" : "Update"}
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              void saveMeaningIpa(r.id, r.inputMeaningIpa)
+                            }
+                            disabled={r.saving || r.deleting}
+                            className="rounded border px-2 py-1 text-[11px] hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5"
+                            title="Updates meaning_fa_IPA and meaning_fa_IPA_normalized for this row"
+                          >
+                            {r.saving ? "Saving…" : "Update"}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              void deleteMeaningIpaRow(r.id, r.base_form)
+                            }
+                            disabled={r.saving || r.deleting}
+                            className="rounded border border-red-500/30 bg-red-600/10 px-2 py-1 text-[11px] font-semibold text-red-700 hover:bg-red-600/15 disabled:opacity-50 dark:text-red-300"
+                            title="Delete this word from the database"
+                          >
+                            {r.deleting ? "Deleting…" : "Delete"}
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
                   {meaningIpaRows.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="px-3 py-6 text-center text-sm opacity-70">
+                      <td
+                        colSpan={5}
+                        className="px-3 py-6 text-center text-sm opacity-70"
+                      >
                         No rows loaded.
                       </td>
                     </tr>
@@ -1760,25 +1990,29 @@ export default function WordExtractionPage() {
         >
           <div className="flex h-[85vh] w-full max-w-5xl flex-col gap-4 rounded-2xl border border-card bg-background p-6 shadow-elevated">
             <div className="flex items-start justify-between gap-3">
-	              <div>
-	                <div className="text-base font-semibold">
-	                  Phase 3 — phonetic_us
-	                </div>
-	                <div className="mt-1 text-xs opacity-70">
-	                  مبنای استخراج: فقط رکوردهایی واکشی می‌شوند که
-	                  <span className="font-mono"> phonetic_us </span>
-	                  آن‌ها
-	                  <span className="font-mono"> NULL </span>
-	                  یا خالی باشد.
-	                  <br />
-	                  کل رکوردهای دارای شرایط:{" "}
-	                  {typeof base2ModalTotalCount === "number" ? base2ModalTotalCount : "—"} — واکشی‌شده:{" "}
-	                  {base2ModalTailCount} (limit {base2ModalTailLimitApplied}) (id/base_form/meaning_fa/sentence_en)
-	                </div>
-	              </div>
-	              <button
-	                type="button"
-	                onClick={() => setIsBase2ModalOpen(false)}
+              <div>
+                <div className="text-base font-semibold">
+                  Phase 3 — phonetic_us
+                </div>
+                <div className="mt-1 text-xs opacity-70">
+                  مبنای استخراج: فقط رکوردهایی واکشی می‌شوند که
+                  <span className="font-mono"> phonetic_us </span>
+                  آن‌ها
+                  <span className="font-mono"> NULL </span>
+                  یا خالی باشد.
+                  <br />
+                  کل رکوردهای دارای شرایط:{" "}
+                  {typeof base2ModalTotalCount === "number"
+                    ? base2ModalTotalCount
+                    : "—"}{" "}
+                  — واکشی‌شده: {base2ModalTailCount} (limit{" "}
+                  {base2ModalTailLimitApplied})
+                  (id/base_form/meaning_fa/sentence_en)
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsBase2ModalOpen(false)}
                 className="rounded border px-2 py-1 text-sm hover:bg-black/5 dark:hover:bg-white/5"
               >
                 Close
@@ -1795,78 +2029,103 @@ export default function WordExtractionPage() {
               <div className="text-sm opacity-70">Loading…</div>
             ) : (
               <div className="flex min-h-0 flex-1 flex-col gap-3">
-	                <div className="flex flex-wrap items-center justify-between gap-2">
-	                  <div className="text-xs opacity-70">
-	                    {base2ModalItems.length} file(s)
-	                  </div>
-	                  <div className="flex items-center gap-2">
-	                    <button
-	                      type="button"
-	                      onClick={() => {
-	                        const combined = base2ModalItems
-	                          .map((item) => item.text.trim())
-	                          .join("\n\n");
-	                        void navigator.clipboard.writeText(combined).then(() => {
-	                          setBase2ModalPromptCopied(true);
-	                          setBase2ModalCopied(false);
-	                          setBase2ModalDataCopied(false);
-	                          window.setTimeout(() => setBase2ModalPromptCopied(false), 1200);
-	                        });
-	                      }}
-	                      className={`rounded border px-3 py-2 text-sm transition hover:bg-black/5 dark:hover:bg-white/5 ${
-	                        base2ModalPromptCopied ? "border-emerald-500/40 bg-emerald-500/10" : ""
-	                      }`}
-	                      title="Copies prompt files only (no JSON array)"
-	                    >
-	                      {base2ModalPromptCopied ? "Copied" : "Copy prompt"}
-	                    </button>
-	                    <button
-	                      type="button"
-	                      disabled={!base2ModalTailJson}
-	                      onClick={() => {
-	                        if (!base2ModalTailJson) return;
-	                        void navigator.clipboard.writeText(base2ModalTailJson).then(() => {
-	                          setBase2ModalDataCopied(true);
-	                          setBase2ModalCopied(false);
-	                          setBase2ModalPromptCopied(false);
-	                          window.setTimeout(() => setBase2ModalDataCopied(false), 1200);
-	                        });
-	                      }}
-	                      className={`rounded border px-3 py-2 text-sm transition hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5 ${
-	                        base2ModalDataCopied ? "border-emerald-500/40 bg-emerald-500/10" : ""
-	                      }`}
-	                      title="Copies JSON array only"
-	                    >
-	                      {base2ModalDataCopied ? "Copied" : "Copy data"}
-	                    </button>
-	                    <button
-	                      type="button"
-	                      onClick={() => {
-	                        const combined = base2ModalItems
-	                          .map((item) => item.text.trim())
-	                          .join("\n\n");
-	                        const tail = base2ModalTailJson ? `\n\n${base2ModalTailJson}` : "";
-	                        void navigator.clipboard.writeText(`${combined}${tail}`).then(() => {
-	                          setBase2ModalCopied(true);
-	                          setBase2ModalPromptCopied(false);
-	                          setBase2ModalDataCopied(false);
-	                          window.setTimeout(() => setBase2ModalCopied(false), 1200);
-	                        });
-	                      }}
-	                      className={`rounded border px-3 py-2 text-sm transition hover:bg-black/5 dark:hover:bg-white/5 ${
-	                        base2ModalCopied ? "border-emerald-500/40 bg-emerald-500/10" : ""
-	                      }`}
-	                      title="Copies prompt + JSON array"
-	                    >
-	                      {base2ModalCopied ? "Copied" : "Copy all"}
-	                    </button>
-	                  </div>
-	                </div>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="text-xs opacity-70">
+                    {base2ModalItems.length} file(s)
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const combined = base2ModalItems
+                          .map((item) => item.text.trim())
+                          .join("\n\n");
+                        void navigator.clipboard
+                          .writeText(combined)
+                          .then(() => {
+                            setBase2ModalPromptCopied(true);
+                            setBase2ModalCopied(false);
+                            setBase2ModalDataCopied(false);
+                            window.setTimeout(
+                              () => setBase2ModalPromptCopied(false),
+                              1200,
+                            );
+                          });
+                      }}
+                      className={`rounded border px-3 py-2 text-sm transition hover:bg-black/5 dark:hover:bg-white/5 ${
+                        base2ModalPromptCopied
+                          ? "border-emerald-500/40 bg-emerald-500/10"
+                          : ""
+                      }`}
+                      title="Copies prompt files only (no JSON array)"
+                    >
+                      {base2ModalPromptCopied ? "Copied" : "Copy prompt"}
+                    </button>
+                    <button
+                      type="button"
+                      disabled={!base2ModalTailJson}
+                      onClick={() => {
+                        if (!base2ModalTailJson) return;
+                        void navigator.clipboard
+                          .writeText(base2ModalTailJson)
+                          .then(() => {
+                            setBase2ModalDataCopied(true);
+                            setBase2ModalCopied(false);
+                            setBase2ModalPromptCopied(false);
+                            window.setTimeout(
+                              () => setBase2ModalDataCopied(false),
+                              1200,
+                            );
+                          });
+                      }}
+                      className={`rounded border px-3 py-2 text-sm transition hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5 ${
+                        base2ModalDataCopied
+                          ? "border-emerald-500/40 bg-emerald-500/10"
+                          : ""
+                      }`}
+                      title="Copies JSON array only"
+                    >
+                      {base2ModalDataCopied ? "Copied" : "Copy data"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const combined = base2ModalItems
+                          .map((item) => item.text.trim())
+                          .join("\n\n");
+                        const tail = base2ModalTailJson
+                          ? `\n\n${base2ModalTailJson}`
+                          : "";
+                        void navigator.clipboard
+                          .writeText(`${combined}${tail}`)
+                          .then(() => {
+                            setBase2ModalCopied(true);
+                            setBase2ModalPromptCopied(false);
+                            setBase2ModalDataCopied(false);
+                            window.setTimeout(
+                              () => setBase2ModalCopied(false),
+                              1200,
+                            );
+                          });
+                      }}
+                      className={`rounded border px-3 py-2 text-sm transition hover:bg-black/5 dark:hover:bg-white/5 ${
+                        base2ModalCopied
+                          ? "border-emerald-500/40 bg-emerald-500/10"
+                          : ""
+                      }`}
+                      title="Copies prompt + JSON array"
+                    >
+                      {base2ModalCopied ? "Copied" : "Copy all"}
+                    </button>
+                  </div>
+                </div>
                 <textarea
                   readOnly
                   value={`${base2ModalItems
                     .map((item) => item.text.trim())
-                    .join("\n\n")}${base2ModalTailJson ? `\n\n${base2ModalTailJson}` : ""}`}
+                    .join(
+                      "\n\n",
+                    )}${base2ModalTailJson ? `\n\n${base2ModalTailJson}` : ""}`}
                   className="min-h-0 flex-1 resize-none rounded border bg-transparent p-3 font-mono text-xs"
                 />
               </div>
@@ -1888,7 +2147,8 @@ export default function WordExtractionPage() {
                   Helper — prompt files + missing rows
                 </div>
                 <div className="mt-1 text-xs opacity-70">
-                  Select a field to load 20 missing rows; check files to include in the shown prompt text.
+                  Select a field to load 20 missing rows; check files to include
+                  in the shown prompt text.
                 </div>
               </div>
               <button
@@ -1916,7 +2176,8 @@ export default function WordExtractionPage() {
                       FIELDS / FILES
                     </div>
                     <div className="text-[11px] opacity-70">
-                      {helperSpecs.filter((s) => phase4Checked[s.id]).length} checked
+                      {helperSpecs.filter((s) => phase4Checked[s.id]).length}{" "}
+                      checked
                     </div>
                   </div>
                   <div className="min-h-0 flex-1 overflow-auto p-2">
@@ -1934,14 +2195,20 @@ export default function WordExtractionPage() {
                           <div
                             key={spec.id}
                             className={`group flex cursor-pointer items-start gap-2 rounded-xl border px-2 py-2 text-[11px] transition hover:bg-black/5 dark:hover:bg-white/5 ${
-                              isActive ? "border-emerald-500/30 bg-emerald-500/5" : "border-transparent"
+                              isActive
+                                ? "border-emerald-500/30 bg-emerald-500/5"
+                                : "border-transparent"
                             }`}
                             onClick={() => {
                               setPhase4ActiveId(spec.id);
                               if (!checked) {
-                                setPhase4Checked((cur) => ({ ...cur, [spec.id]: true }));
+                                setPhase4Checked((cur) => ({
+                                  ...cur,
+                                  [spec.id]: true,
+                                }));
                               }
-                              if (spec.fieldKey) void loadPhase4Missing(spec.fieldKey);
+                              if (spec.fieldKey)
+                                void loadPhase4Missing(spec.fieldKey);
                             }}
                             title={spec.path}
                           >
@@ -1950,21 +2217,35 @@ export default function WordExtractionPage() {
                               checked={checked}
                               onChange={(e) => {
                                 const next = e.target.checked;
-                                setPhase4Checked((cur) => ({ ...cur, [spec.id]: next }));
+                                setPhase4Checked((cur) => ({
+                                  ...cur,
+                                  [spec.id]: next,
+                                }));
                                 setPhase4ActiveId(spec.id);
-                                if (next && spec.fieldKey) void loadPhase4Missing(spec.fieldKey);
+                                if (next && spec.fieldKey)
+                                  void loadPhase4Missing(spec.fieldKey);
                               }}
                               onClick={(e) => e.stopPropagation()}
                               className="mt-0.5"
                             />
                             <div className="min-w-0">
                               <div className="flex flex-wrap items-center gap-2">
-                                <span className={`${isActive ? "font-semibold" : ""}`}>{spec.label}</span>
-                                <span className="opacity-60">{spec.fieldKey ? spec.fieldKey : "base"}</span>
+                                <span
+                                  className={`${isActive ? "font-semibold" : ""}`}
+                                >
+                                  {spec.label}
+                                </span>
+                                <span className="opacity-60">
+                                  {spec.fieldKey ? spec.fieldKey : "base"}
+                                </span>
                               </div>
                               <div className="truncate text-[10px] opacity-60">
-                                <span className="hidden group-hover:inline">{spec.path}</span>
-                                <span className="group-hover:hidden">{shortName}</span>
+                                <span className="hidden group-hover:inline">
+                                  {spec.path}
+                                </span>
+                                <span className="group-hover:hidden">
+                                  {shortName}
+                                </span>
                               </div>
                             </div>
                           </div>
@@ -1977,18 +2258,27 @@ export default function WordExtractionPage() {
                 <div className="min-h-0 flex-1 overflow-hidden rounded-2xl border">
                   <div className="flex flex-wrap items-center justify-between gap-2 border-b px-3 py-2">
                     <div className="text-xs opacity-70">
-                      {isPhase4MissingLoading ? "Loading missing rows…" : "Prompt + missing rows"}
+                      {isPhase4MissingLoading
+                        ? "Loading missing rows…"
+                        : "Prompt + missing rows"}
                     </div>
                     <button
                       type="button"
                       onClick={() => {
-                        void navigator.clipboard.writeText(buildHelperPromptText()).then(() => {
-                          setPhase4PromptModalCopied(true);
-                          window.setTimeout(() => setPhase4PromptModalCopied(false), 1200);
-                        });
+                        void navigator.clipboard
+                          .writeText(buildHelperPromptText())
+                          .then(() => {
+                            setPhase4PromptModalCopied(true);
+                            window.setTimeout(
+                              () => setPhase4PromptModalCopied(false),
+                              1200,
+                            );
+                          });
                       }}
                       className={`rounded border px-3 py-2 text-sm transition hover:bg-black/5 dark:hover:bg-white/5 ${
-                        phase4PromptModalCopied ? "border-emerald-500/40 bg-emerald-500/10" : ""
+                        phase4PromptModalCopied
+                          ? "border-emerald-500/40 bg-emerald-500/10"
+                          : ""
                       }`}
                     >
                       {phase4PromptModalCopied ? "Copied" : "Copy all"}
@@ -2015,8 +2305,12 @@ export default function WordExtractionPage() {
           <div className="flex h-[85vh] w-full max-w-4xl flex-col gap-4 rounded-2xl border border-card bg-background p-6 shadow-elevated">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <div className="text-base font-semibold">Word Extraction — help</div>
-                <div className="mt-1 text-xs opacity-70">src/helps/wordExtraction.md</div>
+                <div className="text-base font-semibold">
+                  Word Extraction — help
+                </div>
+                <div className="mt-1 text-xs opacity-70">
+                  src/helps/wordExtraction.md
+                </div>
               </div>
               <div className="flex items-center gap-2">
                 <button
@@ -2028,11 +2322,17 @@ export default function WordExtractionPage() {
                     helpModalText === helpModalSavedText
                   }
                   className={`rounded border px-3 py-1 text-sm transition hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5 ${
-                    helpModalSaveOk ? "border-emerald-500/40 bg-emerald-500/10" : ""
+                    helpModalSaveOk
+                      ? "border-emerald-500/40 bg-emerald-500/10"
+                      : ""
                   }`}
                   title="Save changes to src/helps/wordExtraction.md"
                 >
-                  {isHelpModalSaving ? "Saving…" : helpModalSaveOk ? "Saved" : "Save"}
+                  {isHelpModalSaving
+                    ? "Saving…"
+                    : helpModalSaveOk
+                      ? "Saved"
+                      : "Save"}
                 </button>
                 <button
                   type="button"
@@ -2069,7 +2369,6 @@ export default function WordExtractionPage() {
           </div>
         </div>
       ) : null}
-
     </div>
   );
 }

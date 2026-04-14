@@ -23,6 +23,7 @@ export default function JsonHintGenerateAllButton({ q }: { q: string }) {
   const abortRef = useRef(false);
   const [running, setRunning] = useState(false);
   const [stopping, setStopping] = useState(false);
+  const [onlyEmptyJsonHint, setOnlyEmptyJsonHint] = useState(false);
   const [scanBatch, setScanBatch] = useState(50);
   const [cursorId, setCursorId] = useState(0);
   const [processed, setProcessed] = useState(0);
@@ -61,6 +62,7 @@ export default function JsonHintGenerateAllButton({ q }: { q: string }) {
         params.set("cursorId", String(cursor));
         params.set("scanBatch", String(Math.max(10, Math.min(500, Math.trunc(scanBatch || 0) || 50))));
         if (totalLocal == null) params.set("includeTotal", "1");
+        if (onlyEmptyJsonHint) params.set("onlyEmptyJsonHint", "1");
 
         const res = await fetch(`/api/words/json-hint-generate-all?${params.toString()}`, {
           method: "POST",
@@ -115,49 +117,63 @@ export default function JsonHintGenerateAllButton({ q }: { q: string }) {
     .join(" • ");
 
   return (
-    <div className="flex flex-wrap items-end gap-2">
-      <button
-        type="button"
-        onClick={() => void runAll()}
-        disabled={running}
-        className="rounded border px-3 py-2 text-sm hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5"
-      >
-        {running ? "Generating json_hint…" : "Generate json_hint (DB)"}
-      </button>
-
-      <button
-        type="button"
-        onClick={stop}
-        disabled={!running || stopping}
-        className="rounded border px-3 py-2 text-sm hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5"
-      >
-        Stop
-      </button>
-
-      <label className="flex flex-col gap-1 text-xs">
-        Batch size
-        <input
-          type="number"
-          min={10}
-          max={500}
-          value={scanBatch}
-          onChange={(e) => {
-            const raw = Number(e.target.value);
-            const next = Number.isFinite(raw) ? Math.trunc(raw) : 50;
-            setScanBatch(Math.max(10, Math.min(500, next)));
-          }}
+    <>
+      <div className="flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          onClick={() => void runAll()}
           disabled={running}
-          className="w-28 rounded border px-2 py-1 text-sm disabled:opacity-50"
-        />
-      </label>
+          className="rounded border px-3 py-2 text-sm hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5"
+        >
+          {running ? "Generating json_hint…" : "Generate json_hint (DB)"}
+        </button>
 
-      <div className="text-xs opacity-80">{progressText}</div>
-      {q.trim() ? (
-        <div className="text-xs opacity-80">
-          Filter: <span className="font-mono">{q.trim()}</span>
-        </div>
-      ) : null}
-      {error ? <div className="text-xs text-red-600">{error}</div> : null}
-    </div>
+        <button
+          type="button"
+          onClick={stop}
+          disabled={!running || stopping}
+          className="rounded border px-3 py-2 text-sm hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5"
+        >
+          Stop
+        </button>
+
+        <label className="inline-flex h-[42px] items-center gap-2 rounded border px-3 text-sm">
+          <input
+            type="checkbox"
+            checked={onlyEmptyJsonHint}
+            onChange={(e) => setOnlyEmptyJsonHint(e.target.checked)}
+            disabled={running}
+            className="h-4 w-4 rounded"
+          />
+          <span className="whitespace-nowrap leading-none">
+            Only empty `json_hint`
+          </span>
+        </label>
+
+        <label className="flex h-[42px] flex-row items-center gap-2 rounded border px-3 text-sm">
+          <span className="whitespace-nowrap text-xs">Batch size</span>
+          <input
+            type="number"
+            min={10}
+            max={500}
+            value={scanBatch}
+            onChange={(e) => {
+              const raw = Number(e.target.value);
+              const next = Number.isFinite(raw) ? Math.trunc(raw) : 50;
+              setScanBatch(Math.max(10, Math.min(500, next)));
+            }}
+            disabled={running}
+            className="h-9 w-24 rounded border px-2 text-sm disabled:opacity-50"
+          />
+        </label>
+      </div>
+
+      <div className="basis-full text-xs opacity-80">
+        {[progressText, q.trim() ? `Filter: ${q.trim()}` : null, onlyEmptyJsonHint ? "Mode: only null/empty json_hint" : null]
+          .filter(Boolean)
+          .join(" • ")}
+      </div>
+      {error ? <div className="basis-full text-xs text-red-600">{error}</div> : null}
+    </>
   );
 }
