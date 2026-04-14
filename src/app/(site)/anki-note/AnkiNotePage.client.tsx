@@ -66,6 +66,32 @@ type SyncAllStatus = {
   currentNoteId: number | null;
 };
 
+const DEFAULT_BASE_FORM_LOOKUP_JSON = `[
+  { "base_form": "default", "meaning_fa": "پیش‌فرض" },
+  { "base_form": "layout", "meaning_fa": "چیدمان" },
+  { "base_form": "page", "meaning_fa": "صفحه" },
+  { "base_form": "Server Component", "meaning_fa": "کامپوننت سمت سرور" },
+  { "base_form": "fetch", "meaning_fa": "دریافت کردن" },
+  { "base_form": "data", "meaning_fa": "داده" },
+  { "base_form": "render", "meaning_fa": "رندر کردن" },
+  { "base_form": "part", "meaning_fa": "بخش" },
+  { "base_form": "optionally", "meaning_fa": "به‌صورت اختیاری" },
+  { "base_form": "cache", "meaning_fa": "ذخیره موقت" },
+  { "base_form": "result", "meaning_fa": "نتیجه" },
+  { "base_form": "stream", "meaning_fa": "ارسال تدریجی" },
+  { "base_form": "client", "meaning_fa": "کاربر" },
+  { "base_form": "interactivity", "meaning_fa": "تعامل‌پذیری" },
+  { "base_form": "browser", "meaning_fa": "مرورگر" },
+  { "base_form": "Client Component", "meaning_fa": "کامپوننت سمت کلاینت" },
+  { "base_form": "layer", "meaning_fa": "افزودن لایه‌ای" },
+  { "base_form": "functionality", "meaning_fa": "قابلیت" },
+  { "base_form": "explain", "meaning_fa": "توضیح دادن" },
+  { "base_form": "work", "meaning_fa": "کار کردن" },
+  { "base_form": "compose", "meaning_fa": "ترکیب کردن" },
+  { "base_form": "together", "meaning_fa": "با هم" },
+  { "base_form": "application", "meaning_fa": "برنامه" }
+]`;
+
 export default function AnkiNotePage() {
   const [ankiLinkId, setAnkiLinkId] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -108,6 +134,15 @@ export default function AnkiNotePage() {
   );
   const [syncAllRunning, setSyncAllRunning] = useState(false);
   const [syncAllError, setSyncAllError] = useState<string | null>(null);
+  const [baseFormLookupModalOpen, setBaseFormLookupModalOpen] = useState(false);
+  const [baseFormLookupJson, setBaseFormLookupJson] = useState(
+    DEFAULT_BASE_FORM_LOOKUP_JSON,
+  );
+  const [baseFormLookupLoading, setBaseFormLookupLoading] = useState(false);
+  const [baseFormLookupError, setBaseFormLookupError] = useState<string | null>(
+    null,
+  );
+  const [baseFormLookupLog, setBaseFormLookupLog] = useState("[]");
 
   const queries = useMemo(() => buildQueries(ankiLinkId), [ankiLinkId]);
   const phaseCount = 4;
@@ -1313,12 +1348,52 @@ export default function AnkiNotePage() {
     }
   }
 
+  async function runBaseFormLookup() {
+    setBaseFormLookupLoading(true);
+    setBaseFormLookupError(null);
+    try {
+      const parsed = JSON.parse(baseFormLookupJson) as unknown;
+      if (!Array.isArray(parsed)) {
+        throw new Error("JSON must be an array.");
+      }
+
+      const res = await fetch("/api/anki-note/base-form-note-ids", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(parsed),
+      });
+      const data = (await res.json().catch(() => null)) as
+        | { ok?: boolean; error?: string; noteIds?: string[] }
+        | null;
+      if (!res.ok || !data?.ok) {
+        throw new Error(data?.error || `Request failed (${res.status})`);
+      }
+
+      setBaseFormLookupLog(JSON.stringify(data.noteIds ?? [], null, 2));
+    } catch (e) {
+      setBaseFormLookupError(e instanceof Error ? e.message : String(e));
+      setBaseFormLookupLog("[]");
+    } finally {
+      setBaseFormLookupLoading(false);
+    }
+  }
+
   return (
     <div className="grid gap-6">
       <PageHeader
         title="Card Management"
         subtitle="AnkiConnect must be running (port 8765). Searches by `anki_link_id` (or `AnkiLinkId`)."
       />
+
+      <div>
+        <button
+          type="button"
+          onClick={() => setBaseFormLookupModalOpen(true)}
+          className="rounded-xl border border-card bg-card px-4 py-2 text-sm text-foreground shadow-elevated transition hover:bg-accent"
+        >
+          باز کردن مدال آرایه کلمات
+        </button>
+      </div>
 
       <div
         dir="rtl"
@@ -1835,6 +1910,80 @@ export default function AnkiNotePage() {
               ) : (
                 <div className="text-sm text-muted">No fields loaded.</div>
               )}
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {baseFormLookupModalOpen ? (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div className="flex h-[85vh] w-full max-w-5xl flex-col rounded-2xl border border-card bg-card p-5 shadow-elevated">
+            <div className="flex items-start justify-between gap-3">
+              <div className="text-right">
+                <div className="text-base font-semibold text-foreground">
+                  تبدیل آرایه کلمات به آرایه note
+                </div>
+                <div className="mt-1 text-xs text-muted">
+                  برای هر <code>base_form</code> در جدول <code>Word</code> جستجو می‌شود و فقط
+                  آرایه <code>anki_link_id</code>ها در لاگ نمایش داده می‌شود.
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setBaseFormLookupModalOpen(false)}
+                className="h-9 rounded-xl border border-card bg-background px-3 text-sm font-semibold text-foreground transition hover:bg-black/5 dark:hover:bg-white/5"
+              >
+                بستن
+              </button>
+            </div>
+
+            {baseFormLookupError ? (
+              <div className="mt-3 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-700">
+                {baseFormLookupError}
+              </div>
+            ) : null}
+
+            <div className="mt-4 grid min-h-0 flex-1 gap-4 lg:grid-cols-2">
+              <div className="flex min-h-0 flex-col gap-2">
+                <div className="text-xs font-semibold text-muted">آرایه ورودی</div>
+                <textarea
+                  dir="ltr"
+                  value={baseFormLookupJson}
+                  onChange={(e) => setBaseFormLookupJson(e.target.value)}
+                  className="min-h-[18rem] flex-1 resize-none rounded-xl border border-card bg-background p-3 font-mono text-xs text-foreground outline-none focus:ring-2 focus:ring-[var(--ring)]"
+                />
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => void runBaseFormLookup()}
+                    disabled={baseFormLookupLoading}
+                    className="h-11 rounded-xl bg-[var(--primary)] px-4 text-sm font-semibold text-[var(--primary-foreground)] shadow-elevated transition hover:opacity-95 disabled:opacity-60"
+                  >
+                    {baseFormLookupLoading ? "در حال جستجو..." : "ساختن آرایه note"}
+                  </button>
+                  <button
+                    type="button"
+                    disabled
+                    className="h-11 rounded-xl border border-card bg-background px-4 text-sm font-semibold text-foreground opacity-50"
+                  >
+                    قراردادن در صفحه مطالعه
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex min-h-0 flex-col gap-2">
+                <div className="text-xs font-semibold text-muted">لاگ</div>
+                <textarea
+                  dir="ltr"
+                  readOnly
+                  value={baseFormLookupLog}
+                  className="min-h-[18rem] flex-1 resize-none rounded-xl border border-card bg-background p-3 font-mono text-xs text-foreground"
+                />
+              </div>
             </div>
           </div>
         </div>
