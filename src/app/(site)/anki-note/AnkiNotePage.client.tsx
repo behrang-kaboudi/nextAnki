@@ -143,6 +143,9 @@ export default function AnkiNotePage() {
     null,
   );
   const [baseFormLookupLog, setBaseFormLookupLog] = useState("[]");
+  const [baseFormLookupNoteIds, setBaseFormLookupNoteIds] = useState<string[]>([]);
+  const [baseFormQueueLoading, setBaseFormQueueLoading] = useState(false);
+  const [baseFormQueueStatus, setBaseFormQueueStatus] = useState<string | null>(null);
 
   const queries = useMemo(() => buildQueries(ankiLinkId), [ankiLinkId]);
   const phaseCount = 4;
@@ -1369,12 +1372,135 @@ export default function AnkiNotePage() {
         throw new Error(data?.error || `Request failed (${res.status})`);
       }
 
-      setBaseFormLookupLog(JSON.stringify(data.noteIds ?? [], null, 2));
+      const noteIds = data.noteIds ?? [];
+      setBaseFormLookupNoteIds(noteIds);
+      setBaseFormLookupLog(JSON.stringify(noteIds, null, 2));
     } catch (e) {
       setBaseFormLookupError(e instanceof Error ? e.message : String(e));
+      setBaseFormLookupNoteIds([]);
       setBaseFormLookupLog("[]");
     } finally {
       setBaseFormLookupLoading(false);
+    }
+  }
+
+  async function addLookupNotesToStudyQueue() {
+    if (baseFormQueueLoading) return;
+    if (baseFormLookupNoteIds.length === 0) {
+      setBaseFormQueueStatus("ابتدا آرایه note را بساز.");
+      return;
+    }
+
+    setBaseFormQueueLoading(true);
+    setBaseFormLookupError(null);
+    setBaseFormQueueStatus("Finding Anki notes by anki_link_id…");
+
+    try {
+      const ankiNoteIdsSet = new Set<number>();
+
+      for (const ankiLinkId of baseFormLookupNoteIds) {
+        const queries = buildQueries(ankiLinkId);
+        let matchedNoteIds: number[] = [];
+
+        for (const query of queries) {
+          const res = await ankiRequestDetailed("findNotes", { query });
+          if (!res.ok) {
+            throw new Error(res.error);
+          }
+          matchedNoteIds = res.result ?? [];
+          if (matchedNoteIds.length > 0) break;
+        }
+
+        for (const noteId of matchedNoteIds) {
+          ankiNoteIdsSet.add(noteId);
+        }
+      }
+
+      const ankiNoteIds = Array.from(ankiNoteIdsSet);
+      if (ankiNoteIds.length === 0) {
+        setBaseFormQueueStatus("No Anki notes found for extracted anki_link_id values.");
+        return;
+      }
+
+      setBaseFormQueueStatus(`Selecting cards from ${ankiNoteIds.length} note(s)…`);
+
+      const candidateEnToFa = new Set<number>();
+      const candidateFaToEn = new Set<number>();
+      const candidateEmla = new Set<number>();
+
+      for (const noteId of ankiNoteIds) {
+        const enRes = await ankiRequestDetailed("findCards", {
+          query: `nid:${noteId} card:"EnToFa"`,
+        });
+        if (!enRes.ok) throw new Error(enRes.error);
+        for (const id of enRes.result ?? []) candidateEnToFa.add(id);
+
+        const faRes = await ankiRequestDetailed("findCards", {
+          query: `nid:${noteId} card:"FaToEn"`,
+        });
+        if (!faRes.ok) throw new Error(faRes.error);
+        for (const id of faRes.result ?? []) candidateFaToEn.add(id);
+
+        const emlaRes = await ankiRequestDetailed("findCards", {
+          query: `nid:${noteId} card:"Emla"`,
+        });
+        if (!emlaRes.ok) throw new Error(emlaRes.error);
+        for (const id of emlaRes.result ?? []) candidateEmla.add(id);
+      }
+
+      const moveEnToFa = Array.from(candidateEnToFa);
+      const moveFaToEn = Array.from(candidateFaToEn);
+      const moveEmla = Array.from(candidateEmla);
+
+      if (
+        moveEnToFa.length === 0 &&
+        moveFaToEn.length === 0 &&
+        moveEmla.length === 0
+      ) {
+        setBaseFormQueueStatus("No EnToFa/FaToEn/Emla cards found for extracted notes.");
+        return;
+      }
+
+      setBaseFormQueueStatus("Moving cards to target decks…");
+
+      if (moveEnToFa.length) {
+        for (const chunk of chunkArray(moveEnToFa, 200)) {
+          const res = await ankiRequestDetailed("changeDeck", {
+            cards: chunk,
+            deck: WordAnkiConstants.decks.EnToFa,
+          });
+          if (!res.ok) throw new Error(res.error);
+        }
+      }
+
+      if (moveFaToEn.length) {
+        for (const chunk of chunkArray(moveFaToEn, 200)) {
+          const res = await ankiRequestDetailed("changeDeck", {
+            cards: chunk,
+            deck: WordAnkiConstants.decks.FaToEn,
+          });
+          if (!res.ok) throw new Error(res.error);
+        }
+      }
+
+      if (moveEmla.length) {
+        for (const chunk of chunkArray(moveEmla, 200)) {
+          const res = await ankiRequestDetailed("changeDeck", {
+            cards: chunk,
+            deck: WordAnkiConstants.decks.Emla,
+          });
+          if (!res.ok) throw new Error(res.error);
+        }
+      }
+
+      setBaseFormQueueStatus(
+        `Done. Notes=${ankiNoteIds.length}. Moves: EnToFa=${moveEnToFa.length}, FaToEn=${moveFaToEn.length}, Emla=${moveEmla.length}.`,
+      );
+    } catch (e) {
+      setBaseFormLookupError(e instanceof Error ? e.message : String(e));
+      setBaseFormQueueStatus(null);
+    } finally {
+      setBaseFormQueueLoading(false);
     }
   }
 
@@ -1388,10 +1514,13 @@ export default function AnkiNotePage() {
       <div>
         <button
           type="button"
-          onClick={() => setBaseFormLookupModalOpen(true)}
+          onClick={() => {
+            setBaseFormLookupModalOpen(true);
+            setBaseFormQueueStatus(null);
+          }}
           className="rounded-xl border border-card bg-card px-4 py-2 text-sm text-foreground shadow-elevated transition hover:bg-accent"
         >
-          باز کردن مدال آرایه کلمات
+          افزودن آرایه کلمات به صف مطالعه
         </button>
       </div>
 
@@ -1925,7 +2054,7 @@ export default function AnkiNotePage() {
             <div className="flex items-start justify-between gap-3">
               <div className="text-right">
                 <div className="text-base font-semibold text-foreground">
-                  تبدیل آرایه کلمات به آرایه note
+                  قرار دادن در صف مطالعه
                 </div>
                 <div className="mt-1 text-xs text-muted">
                   برای هر <code>base_form</code> در جدول <code>Word</code> جستجو می‌شود و فقط
@@ -1967,12 +2096,16 @@ export default function AnkiNotePage() {
                   </button>
                   <button
                     type="button"
-                    disabled
-                    className="h-11 rounded-xl border border-card bg-background px-4 text-sm font-semibold text-foreground opacity-50"
+                    onClick={() => void addLookupNotesToStudyQueue()}
+                    disabled={baseFormQueueLoading || baseFormLookupNoteIds.length === 0}
+                    className="h-11 rounded-xl border border-card bg-background px-4 text-sm font-semibold text-foreground transition hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5"
                   >
-                    قراردادن در صفحه مطالعه
+                    {baseFormQueueLoading ? "در حال افزودن..." : "افزودن به صف مطالعه"}
                   </button>
                 </div>
+                {baseFormQueueStatus ? (
+                  <div className="text-xs text-muted">{baseFormQueueStatus}</div>
+                ) : null}
               </div>
 
               <div className="flex min-h-0 flex-col gap-2">
