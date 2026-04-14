@@ -14,8 +14,8 @@ CORE RULES:
 
 1. WORD SELECTION:
 
-- Extract ONLY words or phrases with length ≥ 4 characters.
-- Ignore all words shorter than 4 characters completely.
+- Extract ONLY words or phrases with length ≥ 3 characters.
+- Ignore all words shorter than 3 characters completely.
 - Focus on meaningful vocabulary (nouns, verbs, adjectives, adverbs).
 - Avoid extracting purely grammatical/function words unless meaningful.
 
