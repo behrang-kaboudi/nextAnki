@@ -1,5 +1,5 @@
 {
-  "createdAt": "2026-04-20T03:27:40.626Z",
+  "createdAt": "2026-04-20T21:25:16.130Z",
   "data": {
     "theme": [
       {
@@ -50901,12 +50901,12 @@
         "meaning_fa_IPA_normalized": "tæbl",
         "pos": "noun",
         "concept_explained": null,
-        "concept_explained_fa": "ساز کوبه‌ای با پوست کشیده روی بدنه که با ضربه صدا تولید می‌کند.",
+        "concept_explained_fa": "ساز کوبه‌ای با پوست کشیده روی بدنه که با ضربه صدا تولید می‌کند. درام",
         "word_hint_story": null,
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.45,
         "mixed_sentence": null,
-        "other_meanings_fa": "درام",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -50918,7 +50918,7 @@
         "common_error": null,
         "imageability": 95,
         "createdAt": "2026-02-03T13:36:42.313Z",
-        "updatedAt": "2026-02-16T14:48:44.104Z"
+        "updatedAt": "2026-04-20T03:32:17.855Z"
       },
       {
         "id": 2546,
@@ -134742,7 +134742,7 @@
           "4866_1775771344734"
         ],
         "createdAt": "2026-04-07T15:10:50.228Z",
-        "updatedAt": "2026-04-09T23:33:10.125Z"
+        "updatedAt": "2026-04-20T03:32:17.873Z"
       },
       {
         "id": 243,

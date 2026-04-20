@@ -55,6 +55,7 @@ type StudyCandidateRow = {
   anki_link_id: string;
   base_form: string;
   meaning_fa: string;
+  learning_depth?: number | null;
   sentence_en: string;
   sentence_en_meaning_fa: string;
 };
@@ -171,6 +172,8 @@ export default function AnkiNotePage() {
   const [studyCandidatesApplyStatus, setStudyCandidatesApplyStatus] = useState<string | null>(
     null,
   );
+  const [topLearningDepthLoading, setTopLearningDepthLoading] = useState(false);
+  const [topLearningDepthStatus, setTopLearningDepthStatus] = useState<string | null>(null);
 
   const queries = useMemo(() => buildQueries(ankiLinkId), [ankiLinkId]);
   const phaseCount = 4;
@@ -1590,56 +1593,7 @@ export default function AnkiNotePage() {
       }
 
       const dbItems = data.items ?? [];
-      const resolvedRows: StudyCandidateResolvedRow[] = [];
-
-      for (const item of dbItems) {
-        const queries = buildQueries(item.anki_link_id);
-        let matchedNoteIds: number[] = [];
-
-        for (const query of queries) {
-          const noteRes = await ankiRequestDetailed("findNotes", { query });
-          if (!noteRes.ok) throw new Error(noteRes.error);
-          matchedNoteIds = noteRes.result ?? [];
-          if (matchedNoteIds.length > 0) break;
-        }
-        if (matchedNoteIds.length === 0) continue;
-
-        for (const noteId of matchedNoteIds) {
-          const noteInfoRes = await ankiRequestDetailed("notesInfo", {
-            notes: [noteId],
-          });
-          if (!noteInfoRes.ok) throw new Error(noteInfoRes.error);
-          const noteInfo = noteInfoRes.result?.[0];
-          if (noteInfo?.modelName !== WordAnkiConstants.noteTypes.META_LEX_VR9) {
-            continue;
-          }
-
-          const cardIdsRes = await ankiRequestDetailed("findCards", {
-            query: `nid:${noteId}`,
-          });
-          if (!cardIdsRes.ok) throw new Error(cardIdsRes.error);
-          const cardIds = cardIdsRes.result ?? [];
-          if (cardIds.length === 0) continue;
-
-          const cardsInfoRes = await ankiRequestDetailed("cardsInfo", {
-            cards: cardIds,
-          });
-          if (!cardsInfoRes.ok) throw new Error(cardsInfoRes.error);
-          const cardsInfo = cardsInfoRes.result ?? [];
-          const hasAnyStudyDeckCard = cardsInfo.some(
-            (card) =>
-              card.deckName === WordAnkiConstants.decks.EnToFa ||
-              card.deckName === WordAnkiConstants.decks.FaToEn,
-          );
-          if (hasAnyStudyDeckCard) continue;
-
-          resolvedRows.push({
-            ...item,
-            noteId,
-          });
-          break;
-        }
-      }
+      const resolvedRows = await resolveEligibleStudyCandidateRows(dbItems);
 
       setStudyCandidates(resolvedRows);
       setStudyCandidatesStatus(
@@ -1652,6 +1606,113 @@ export default function AnkiNotePage() {
       setStudyCandidatesStatus(null);
     } finally {
       setStudyCandidatesLoading(false);
+    }
+  }
+
+  async function resolveEligibleStudyCandidateRows(
+    dbItems: StudyCandidateRow[],
+    desiredCount?: number,
+  ) {
+    const resolvedRows: StudyCandidateResolvedRow[] = [];
+
+    for (const item of dbItems) {
+      const queries = buildQueries(item.anki_link_id);
+      let matchedNoteIds: number[] = [];
+
+      for (const query of queries) {
+        const noteRes = await ankiRequestDetailed("findNotes", { query });
+        if (!noteRes.ok) throw new Error(noteRes.error);
+        matchedNoteIds = noteRes.result ?? [];
+        if (matchedNoteIds.length > 0) break;
+      }
+      if (matchedNoteIds.length === 0) continue;
+
+      for (const noteId of matchedNoteIds) {
+        const noteInfoRes = await ankiRequestDetailed("notesInfo", {
+          notes: [noteId],
+        });
+        if (!noteInfoRes.ok) throw new Error(noteInfoRes.error);
+        const noteInfo = noteInfoRes.result?.[0];
+        if (noteInfo?.modelName !== WordAnkiConstants.noteTypes.META_LEX_VR9) {
+          continue;
+        }
+
+        const cardIdsRes = await ankiRequestDetailed("findCards", {
+          query: `nid:${noteId}`,
+        });
+        if (!cardIdsRes.ok) throw new Error(cardIdsRes.error);
+        const cardIds = cardIdsRes.result ?? [];
+        if (cardIds.length === 0) continue;
+
+        const cardsInfoRes = await ankiRequestDetailed("cardsInfo", {
+          cards: cardIds,
+        });
+        if (!cardsInfoRes.ok) throw new Error(cardsInfoRes.error);
+        const cardsInfo = cardsInfoRes.result ?? [];
+        const hasAnyStudyDeckCard = cardsInfo.some(
+          (card) =>
+            card.deckName === WordAnkiConstants.decks.EnToFa ||
+            card.deckName === WordAnkiConstants.decks.FaToEn ||
+            card.deckName === WordAnkiConstants.decks.Emla,
+        );
+        if (hasAnyStudyDeckCard) continue;
+
+        resolvedRows.push({
+          ...item,
+          noteId,
+        });
+        break;
+      }
+
+      if (desiredCount != null && resolvedRows.length >= desiredCount) {
+        break;
+      }
+    }
+
+    return resolvedRows;
+  }
+
+  async function addTopLearningDepthNotesToStudyQueue() {
+    if (topLearningDepthLoading) return;
+
+    setTopLearningDepthLoading(true);
+    setTopLearningDepthStatus("در حال پیدا کردن نوت‌های با learning_depth بالاتر…");
+    setStudyCandidatesError(null);
+
+    try {
+      const url = new URL("/api/anki-note/study-candidate-notes", window.location.origin);
+      url.searchParams.set("mode", "top-learning-depth");
+      url.searchParams.set("limit", "80");
+
+      const res = await fetch(url.toString());
+      const data = (await res.json().catch(() => null)) as
+        | { ok?: boolean; error?: string; items?: StudyCandidateRow[] }
+        | null;
+      if (!res.ok || !data?.ok) {
+        throw new Error(data?.error || `Request failed (${res.status})`);
+      }
+
+      const resolvedRows = await resolveEligibleStudyCandidateRows(
+        data.items ?? [],
+        10,
+      );
+      if (resolvedRows.length === 0) {
+        setTopLearningDepthStatus("هیچ نوت واجد شرایطی پیدا نشد.");
+        return;
+      }
+
+      setTopLearningDepthStatus(
+        `۱۰ نوت برتر پیدا شد (${resolvedRows.length}). در حال اعمال ساختار درختی…`,
+      );
+      await addAnkiLinkIdsToStudyQueue(
+        resolvedRows.map((row) => row.anki_link_id),
+        setTopLearningDepthStatus,
+      );
+    } catch (e) {
+      setStudyCandidatesError(e instanceof Error ? e.message : String(e));
+      setTopLearningDepthStatus(null);
+    } finally {
+      setTopLearningDepthLoading(false);
     }
   }
 
@@ -1722,6 +1783,21 @@ export default function AnkiNotePage() {
         >
           افزودن نوت‌های Meta-LEX-vR9 به صف مطالعه
         </button>
+        <button
+          type="button"
+          onClick={() => void addTopLearningDepthNotesToStudyQueue()}
+          disabled={topLearningDepthLoading}
+          className="rounded-xl border border-card bg-card px-4 py-2 text-sm text-foreground shadow-elevated transition hover:bg-accent disabled:opacity-60"
+        >
+          {topLearningDepthLoading
+            ? "در حال انتخاب..."
+            : "افزودن ۱۰ نوت با learning_depth بالاتر"}
+        </button>
+        {topLearningDepthStatus ? (
+          <div className="flex items-center text-xs text-muted">
+            {topLearningDepthStatus}
+          </div>
+        ) : null}
       </div>
 
       <div

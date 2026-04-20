@@ -61,37 +61,86 @@ async function countOrNull(getter: () => Promise<number>) {
 }
 
 export async function getDbFingerprint(prisma: PrismaClient) {
-  const [themeMax, themeCount] = await Promise.all([
-    maxDateOrNull(async () => (await prisma.theme.aggregate({ _max: { updatedAt: true } }))._max.updatedAt ?? null),
+  const [
+    themeCount,
+    themeMax,
+    wordCount,
+    wordMax,
+    sentenceCount,
+    sentenceMax,
+    sentenceWordLinkCount,
+    sentenceWordLinkMax,
+    ipaKeywordCount,
+    ipaKeywordMax,
+    pictureWordCount,
+    pictureWordMax,
+    userCount,
+    userMax,
+    accountCount,
+    sessionCount,
+    verificationTokenCount,
+    passwordResetTokenCount,
+    passwordResetTokenMax,
+    roleCount,
+    roleMax,
+    permissionCount,
+    permissionMax,
+    userRoleCount,
+    rolePermissionCount,
+  ] = await Promise.all([
     countOrNull(() => prisma.theme.count()),
-  ]);
-
-  const [wordMax, wordCount] = await Promise.all([
-    maxDateOrNull(async () => (await prisma.word.aggregate({ _max: { updatedAt: true } }))._max.updatedAt ?? null),
+    maxDateOrNull(async () => (await prisma.theme.aggregate({ _max: { updatedAt: true } }))._max.updatedAt ?? null),
     countOrNull(() => prisma.word.count()),
-  ]);
-
-  const [ipaMax, ipaCount] = await Promise.all([
-    maxDateOrNull(async () => (await prisma.ipaKeyword.aggregate({ _max: { updatedAt: true } }))._max.updatedAt ?? null),
+    maxDateOrNull(async () => (await prisma.word.aggregate({ _max: { updatedAt: true } }))._max.updatedAt ?? null),
+    countOrNull(() => prisma.sentence.count()),
+    maxDateOrNull(async () => (await prisma.sentence.aggregate({ _max: { updatedAt: true } }))._max.updatedAt ?? null),
+    countOrNull(() => prisma.sentenceWordLink.count()),
+    maxDateOrNull(
+      async () =>
+        (await prisma.sentenceWordLink.aggregate({ _max: { updatedAt: true } }))._max.updatedAt ?? null
+    ),
     countOrNull(() => prisma.ipaKeyword.count()),
-  ]);
-
-  const [pictureMax, pictureCount] = await Promise.all([
-    maxDateOrNull(async () => (await prisma.pictureWord.aggregate({ _max: { updatedAt: true } }))._max.updatedAt ?? null),
+    maxDateOrNull(async () => (await prisma.ipaKeyword.aggregate({ _max: { updatedAt: true } }))._max.updatedAt ?? null),
     countOrNull(() => prisma.pictureWord.count()),
-  ]);
-
-  const [userMax, userCount] = await Promise.all([
-    maxDateOrNull(async () => (await prisma.user.aggregate({ _max: { createdAt: true } }))._max.createdAt ?? null),
+    maxDateOrNull(
+      async () => (await prisma.pictureWord.aggregate({ _max: { updatedAt: true } }))._max.updatedAt ?? null
+    ),
     countOrNull(() => prisma.user.count()),
+    maxDateOrNull(async () => (await prisma.user.aggregate({ _max: { updatedAt: true } }))._max.updatedAt ?? null),
+    countOrNull(() => prisma.account.count()),
+    countOrNull(() => prisma.session.count()),
+    countOrNull(() => prisma.verificationToken.count()),
+    countOrNull(() => prisma.passwordResetToken.count()),
+    maxDateOrNull(
+      async () =>
+        (await prisma.passwordResetToken.aggregate({ _max: { createdAt: true } }))._max.createdAt ?? null
+    ),
+    countOrNull(() => prisma.role.count()),
+    maxDateOrNull(async () => (await prisma.role.aggregate({ _max: { updatedAt: true } }))._max.updatedAt ?? null),
+    countOrNull(() => prisma.permission.count()),
+    maxDateOrNull(
+      async () => (await prisma.permission.aggregate({ _max: { updatedAt: true } }))._max.updatedAt ?? null
+    ),
+    countOrNull(() => prisma.userRole.count()),
+    countOrNull(() => prisma.rolePermission.count()),
   ]);
 
   const fingerprint = {
     theme: { count: themeCount, max: themeMax?.toISOString() ?? null },
     word: { count: wordCount, max: wordMax?.toISOString() ?? null },
-    ipaKeyword: { count: ipaCount, max: ipaMax?.toISOString() ?? null },
-    pictureWord: { count: pictureCount, max: pictureMax?.toISOString() ?? null },
+    sentence: { count: sentenceCount, max: sentenceMax?.toISOString() ?? null },
+    sentenceWordLink: { count: sentenceWordLinkCount, max: sentenceWordLinkMax?.toISOString() ?? null },
+    ipaKeyword: { count: ipaKeywordCount, max: ipaKeywordMax?.toISOString() ?? null },
+    pictureWord: { count: pictureWordCount, max: pictureWordMax?.toISOString() ?? null },
     user: { count: userCount, max: userMax?.toISOString() ?? null },
+    account: { count: accountCount },
+    session: { count: sessionCount },
+    verificationToken: { count: verificationTokenCount },
+    passwordResetToken: { count: passwordResetTokenCount, max: passwordResetTokenMax?.toISOString() ?? null },
+    role: { count: roleCount, max: roleMax?.toISOString() ?? null },
+    permission: { count: permissionCount, max: permissionMax?.toISOString() ?? null },
+    userRole: { count: userRoleCount },
+    rolePermission: { count: rolePermissionCount },
   };
 
   return JSON.stringify(fingerprint);
@@ -160,9 +209,19 @@ async function writeJsonBackup(prisma: PrismaClient, outputFile: string) {
     data: {
       theme: await prisma.theme.findMany(),
       word: await prisma.word.findMany(),
+      sentence: await prisma.sentence.findMany(),
+      sentenceWordLink: await prisma.sentenceWordLink.findMany(),
       ipaKeyword: await prisma.ipaKeyword.findMany(),
       pictureWord: await prisma.pictureWord.findMany(),
       user: await prisma.user.findMany(),
+      account: await prisma.account.findMany(),
+      session: await prisma.session.findMany(),
+      verificationToken: await prisma.verificationToken.findMany(),
+      passwordResetToken: await prisma.passwordResetToken.findMany(),
+      role: await prisma.role.findMany(),
+      permission: await prisma.permission.findMany(),
+      userRole: await prisma.userRole.findMany(),
+      rolePermission: await prisma.rolePermission.findMany(),
     },
   };
   fs.writeFileSync(outputFile, JSON.stringify(snapshot, null, 2));
