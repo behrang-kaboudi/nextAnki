@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 
 type LookupInputItem = {
   base_form?: unknown;
+  anki_link_id?: unknown;
 };
 
 type JsonHintCandidate = {
@@ -74,8 +75,11 @@ export async function POST(req: Request) {
     const baseForms = items
       .map((item) => asTrimmedString(item?.base_form))
       .filter(Boolean);
+    const directAnkiLinkIds = items
+      .map((item) => asTrimmedString(item?.anki_link_id))
+      .filter(Boolean);
 
-    if (!baseForms.length) {
+    if (!baseForms.length && !directAnkiLinkIds.length) {
       return NextResponse.json({ ok: true, noteIds: [] });
     }
 
@@ -96,6 +100,16 @@ export async function POST(req: Request) {
     const seenNoteIds = new Set<string>();
     const pendingAnkiLinkIds: string[] = [];
     const queuedAnkiLinkIds = new Set<string>();
+
+    for (const ankiLinkId of directAnkiLinkIds) {
+      if (seenNoteIds.has(ankiLinkId)) continue;
+      seenNoteIds.add(ankiLinkId);
+      noteIds.push(ankiLinkId);
+      if (queuedAnkiLinkIds.has(ankiLinkId)) continue;
+      queuedAnkiLinkIds.add(ankiLinkId);
+      pendingAnkiLinkIds.push(ankiLinkId);
+    }
+
     for (const item of items) {
       const baseForm = asTrimmedString(item?.base_form);
       if (!baseForm) continue;
