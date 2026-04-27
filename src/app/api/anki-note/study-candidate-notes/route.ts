@@ -61,7 +61,7 @@ export async function GET(req: Request) {
         mode === "top-learning-depth"
           ? [{ learning_depth: "desc" }, { id: "asc" }]
           : [{ base_form: "asc" }, { id: "asc" }],
-      take: limit,
+      take: mode === "top-learning-depth" ? undefined : limit,
     });
 
     return NextResponse.json({

@@ -174,6 +174,7 @@ export default function AnkiNotePage() {
   );
   const [topLearningDepthLoading, setTopLearningDepthLoading] = useState(false);
   const [topLearningDepthStatus, setTopLearningDepthStatus] = useState<string | null>(null);
+  const [topLearningDepthCount, setTopLearningDepthCount] = useState(10);
 
   const queries = useMemo(() => buildQueries(ankiLinkId), [ankiLinkId]);
   const phaseCount = 4;
@@ -1412,6 +1413,23 @@ export default function AnkiNotePage() {
     }
   }
 
+  async function pasteBaseFormLookupJson() {
+    setBaseFormLookupError(null);
+    try {
+      if (!navigator.clipboard?.readText) {
+        throw new Error("Clipboard read is not available in this browser.");
+      }
+
+      const text = await navigator.clipboard.readText();
+      setBaseFormLookupJson(text);
+      setBaseFormLookupNoteIds([]);
+      setBaseFormLookupLog("[]");
+      setBaseFormQueueStatus(null);
+    } catch (e) {
+      setBaseFormLookupError(e instanceof Error ? e.message : String(e));
+    }
+  }
+
   async function addAnkiLinkIdsToStudyQueue(
     inputAnkiLinkIds: string[],
     setStatus: (value: string | null) => void,
@@ -1674,6 +1692,7 @@ export default function AnkiNotePage() {
 
   async function addTopLearningDepthNotesToStudyQueue() {
     if (topLearningDepthLoading) return;
+    const desiredCount = Math.max(1, Math.min(100, Math.trunc(topLearningDepthCount) || 10));
 
     setTopLearningDepthLoading(true);
     setTopLearningDepthStatus("در حال پیدا کردن نوت‌های با learning_depth بالاتر…");
@@ -1682,7 +1701,6 @@ export default function AnkiNotePage() {
     try {
       const url = new URL("/api/anki-note/study-candidate-notes", window.location.origin);
       url.searchParams.set("mode", "top-learning-depth");
-      url.searchParams.set("limit", "80");
 
       const res = await fetch(url.toString());
       const data = (await res.json().catch(() => null)) as
@@ -1694,7 +1712,7 @@ export default function AnkiNotePage() {
 
       const resolvedRows = await resolveEligibleStudyCandidateRows(
         data.items ?? [],
-        10,
+        desiredCount,
       );
       if (resolvedRows.length === 0) {
         setTopLearningDepthStatus("هیچ نوت واجد شرایطی پیدا نشد.");
@@ -1702,7 +1720,7 @@ export default function AnkiNotePage() {
       }
 
       setTopLearningDepthStatus(
-        `۱۰ نوت برتر پیدا شد (${resolvedRows.length}). در حال اعمال ساختار درختی…`,
+        `${desiredCount} نوت برتر پیدا شد (${resolvedRows.length}). در حال اعمال ساختار درختی…`,
       );
       await addAnkiLinkIdsToStudyQueue(
         resolvedRows.map((row) => row.anki_link_id),
@@ -1783,16 +1801,31 @@ export default function AnkiNotePage() {
         >
           افزودن نوت‌های Meta-LEX-vR9 به صف مطالعه
         </button>
-        <button
-          type="button"
-          onClick={() => void addTopLearningDepthNotesToStudyQueue()}
-          disabled={topLearningDepthLoading}
-          className="rounded-xl border border-card bg-card px-4 py-2 text-sm text-foreground shadow-elevated transition hover:bg-accent disabled:opacity-60"
-        >
-          {topLearningDepthLoading
-            ? "در حال انتخاب..."
-            : "افزودن ۱۰ نوت با learning_depth بالاتر"}
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <input
+            type="number"
+            min={1}
+            max={100}
+            step={1}
+            value={topLearningDepthCount}
+            onChange={(e) =>
+              setTopLearningDepthCount(
+                Math.max(1, Math.min(100, Math.trunc(Number(e.target.value) || 1))),
+              )
+            }
+            className="w-20 rounded-xl border border-card bg-background px-3 py-2 text-sm text-foreground shadow-elevated outline-none transition focus:border-foreground/30"
+          />
+          <button
+            type="button"
+            onClick={() => void addTopLearningDepthNotesToStudyQueue()}
+            disabled={topLearningDepthLoading}
+            className="rounded-xl border border-card bg-card px-4 py-2 text-sm text-foreground shadow-elevated transition hover:bg-accent disabled:opacity-60"
+          >
+            {topLearningDepthLoading
+              ? "در حال انتخاب..."
+              : "افزودن ۱۰ نوت با learning_depth بالاتر"}
+          </button>
+        </div>
         {topLearningDepthStatus ? (
           <div className="flex items-center text-xs text-muted">
             {topLearningDepthStatus}
@@ -2362,6 +2395,13 @@ export default function AnkiNotePage() {
                   className="min-h-[18rem] flex-1 resize-none rounded-xl border border-card bg-background p-3 font-mono text-xs text-foreground outline-none focus:ring-2 focus:ring-[var(--ring)]"
                 />
                 <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => void pasteBaseFormLookupJson()}
+                    className="h-11 rounded-xl border border-card bg-background px-4 text-sm font-semibold text-foreground transition hover:bg-black/5 dark:hover:bg-white/5"
+                  >
+                    پیست
+                  </button>
                   <button
                     type="button"
                     onClick={() => void runBaseFormLookup()}
