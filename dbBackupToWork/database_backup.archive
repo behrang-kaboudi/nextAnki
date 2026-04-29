@@ -1,5 +1,5 @@
 {
-  "createdAt": "2026-04-27T12:29:50.623Z",
+  "createdAt": "2026-04-29T08:33:19.427Z",
   "data": {
     "theme": [
       {
@@ -130976,7 +130976,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.75,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -130988,7 +130988,7 @@
         "common_error": null,
         "imageability": 25,
         "createdAt": "2026-04-22T00:37:36.812Z",
-        "updatedAt": "2026-04-22T22:52:44.253Z"
+        "updatedAt": "2026-04-28T07:00:20.973Z"
       },
       {
         "id": 5271,
@@ -174281,7 +174281,7 @@
         "mentionedWordsJson": null,
         "items": null,
         "createdAt": "2026-04-22T00:37:36.817Z",
-        "updatedAt": "2026-04-22T02:39:57.441Z"
+        "updatedAt": "2026-04-28T07:00:20.996Z"
       },
       {
         "id": 3762,

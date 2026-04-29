@@ -211,7 +211,13 @@ export default function WordFieldVoiceCell({
     }
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          autoGainControl: false,
+          echoCancellation: false,
+          noiseSuppression: false,
+        },
+      });
       mediaStreamRef.current = stream;
       chunksRef.current = [];
 
