@@ -1,5 +1,5 @@
 {
-  "createdAt": "2026-04-29T10:10:43.673Z",
+  "createdAt": "2026-05-01T04:38:50.534Z",
   "data": {
     "theme": [
       {
@@ -127666,9 +127666,9 @@
         "base_form": "custom",
         "phonetic_us": "ˈkʌstəm",
         "phonetic_us_normalized": "kʌstem",
-        "meaning_fa": "سفارش",
-        "meaning_fa_IPA": "sefʌːreʃ",
-        "meaning_fa_IPA_normalized": "sefʌreʃ",
+        "meaning_fa": "سفارشی",
+        "meaning_fa_IPA": "sefʌːreʃi",
+        "meaning_fa_IPA_normalized": "sefʌreʃɪ",
         "pos": "noun",
         "concept_explained": null,
         "concept_explained_fa": "درخواستی که مشتری برای ساخت یا تهیه چیزی مطابق نیاز خود ثبت می‌کند.",
@@ -127676,19 +127676,19 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.7,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
         "first_letter_en_hint": null,
         "first_letter_fa_hint": null,
         "hint_to_select": null,
-        "json_hint": "{\"person\":{\"fa\":\"کاسه\",\"en\":\"bowl\",\"anki_link_id\":\"2343_1770122064551\",\"target_ipa\":\"kʌse\",\"target_lang\":\"fa\",\"usage\":\"noun\",\"source\":\"word\"},\"job\":{\"fa\":\"تمساح\",\"en\":\"alligator\",\"anki_link_id\":\"3447_1770146906618\",\"target_ipa\":\"temsʌh\",\"target_lang\":\"fa\",\"usage\":\"noun\",\"source\":\"word\"},\"persianImage\":{\"fa\":\"سفید\",\"en\":\"white\",\"anki_link_id\":\"4550_1775618505440\",\"target_ipa\":\"sefɪd\",\"target_lang\":\"fa\",\"usage\":\"adjective\",\"source\":\"word\"},\"generatedAtMs\":1776827699411}",
+        "json_hint": "{\"person\":{\"fa\":\"کاسه\",\"en\":\"bowl\",\"anki_link_id\":\"2343_1770122064551\",\"target_ipa\":\"kʌse\",\"target_lang\":\"fa\",\"usage\":\"noun\",\"source\":\"word\"},\"job\":{\"fa\":\"تمساح\",\"en\":\"alligator\",\"anki_link_id\":\"3447_1770146906618\",\"target_ipa\":\"temsʌh\",\"target_lang\":\"fa\",\"usage\":\"noun\",\"source\":\"word\"},\"persianImage\":{\"fa\":\"سفید\",\"en\":\"white\",\"anki_link_id\":\"4550_1775618505440\",\"target_ipa\":\"sefɪd\",\"target_lang\":\"fa\",\"usage\":\"adjective\",\"source\":\"word\"},\"generatedAtMs\":1777464595014}",
         "word_note": null,
         "common_error": null,
         "imageability": 55,
         "createdAt": "2026-04-22T00:23:07.348Z",
-        "updatedAt": "2026-04-22T22:51:31.459Z"
+        "updatedAt": "2026-04-29T12:09:55.016Z"
       },
       {
         "id": 5154,
@@ -129086,7 +129086,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.5,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -129098,7 +129098,7 @@
         "common_error": null,
         "imageability": 90,
         "createdAt": "2026-04-22T00:29:10.789Z",
-        "updatedAt": "2026-04-22T22:52:03.054Z"
+        "updatedAt": "2026-04-29T12:09:08.147Z"
       },
       {
         "id": 5207,
@@ -174701,7 +174701,7 @@
         "mentionedWordsJson": null,
         "items": null,
         "createdAt": "2026-04-22T00:23:07.352Z",
-        "updatedAt": "2026-04-22T02:51:37.362Z"
+        "updatedAt": "2026-04-29T12:09:55.027Z"
       },
       {
         "id": 3645,
@@ -175124,7 +175124,7 @@
         "mentionedWordsJson": null,
         "items": null,
         "createdAt": "2026-04-22T00:29:10.793Z",
-        "updatedAt": "2026-04-22T02:44:27.935Z"
+        "updatedAt": "2026-04-29T12:09:08.160Z"
       },
       {
         "id": 3698,
