@@ -1,5 +1,5 @@
 {
-  "createdAt": "2026-05-06T23:32:24.527Z",
+  "createdAt": "2026-05-20T18:44:15.601Z",
   "data": {
     "theme": [
       {
@@ -81866,7 +81866,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.12,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -81878,7 +81878,7 @@
         "common_error": null,
         "imageability": 90,
         "createdAt": "2026-03-10T02:09:11.180Z",
-        "updatedAt": "2026-03-17T04:31:08.902Z"
+        "updatedAt": "2026-05-12T04:35:00.530Z"
       },
       {
         "id": 3584,
@@ -86186,7 +86186,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.5,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -86198,7 +86198,7 @@
         "common_error": null,
         "imageability": 96,
         "createdAt": "2026-03-10T02:15:12.290Z",
-        "updatedAt": "2026-03-17T04:31:08.039Z"
+        "updatedAt": "2026-05-12T04:35:28.077Z"
       },
       {
         "id": 3728,
@@ -128386,9 +128386,9 @@
         "base_form": "summarize",
         "phonetic_us": "ˈsʌməˌraɪz",
         "phonetic_us_normalized": "sʌmerʌɪz",
-        "meaning_fa": "summarize",
-        "meaning_fa_IPA": "sæmərɑːjz",
-        "meaning_fa_IPA_normalized": "sæmerʌjz",
+        "meaning_fa": "خلاصه کردن",
+        "meaning_fa_IPA": "xolɑːse kæɾdæn",
+        "meaning_fa_IPA_normalized": "xolʌse kærdæn",
         "pos": "verb",
         "concept_explained": null,
         "concept_explained_fa": "بیان کوتاه و فشرده از مهم‌ترین بخش‌های یک موضوع بدون جزئیات اضافی است.",
@@ -128396,19 +128396,19 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.8,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
         "first_letter_en_hint": null,
         "first_letter_fa_hint": null,
         "hint_to_select": null,
-        "json_hint": "{\"person\":{\"fa\":\"سالمون\",\"en\":\"salmon\",\"anki_link_id\":\"3433_1770146906606\",\"target_ipa\":\"sæmen\",\"usage\":\"noun\",\"source\":\"word\",\"target_lang\":\"en\",\"imageability\":97},\"job\":{\"fa\":\"بالا آمدن\",\"en\":\"rise\",\"anki_link_id\":\"4767_1775618815801\",\"target_ipa\":\"rʌɪz\",\"usage\":\"verb\",\"source\":\"word\",\"target_lang\":\"en\",\"imageability\":72},\"persianImage\":{\"fa\":\"سماور\",\"en\":\"samovar\",\"anki_link_id\":\"3774_1773111552385\",\"target_ipa\":\"sæmʌver\",\"target_lang\":\"fa\",\"usage\":\"noun\",\"source\":\"word\"},\"generatedAtMs\":1776827707321}",
+        "json_hint": "{\"person\":{\"fa\":\"سالمون\",\"en\":\"salmon\",\"anki_link_id\":\"3433_1770146906606\",\"target_ipa\":\"sæmen\",\"usage\":\"noun\",\"source\":\"word\",\"target_lang\":\"en\",\"imageability\":97},\"job\":{\"fa\":\"بالا آمدن\",\"en\":\"rise\",\"anki_link_id\":\"4767_1775618815801\",\"target_ipa\":\"rʌɪz\",\"usage\":\"verb\",\"source\":\"word\",\"target_lang\":\"en\",\"imageability\":72},\"persianImage\":{\"fa\":\"خفاش\",\"en\":\"bat\",\"anki_link_id\":\"4010_1773114109728\",\"target_ipa\":\"xofʌʃ\",\"target_lang\":\"fa\",\"usage\":\"noun\",\"source\":\"word\"},\"generatedAtMs\":1778560893751}",
         "word_note": null,
         "common_error": null,
         "imageability": 25,
         "createdAt": "2026-04-22T00:23:07.896Z",
-        "updatedAt": "2026-04-22T22:51:50.196Z"
+        "updatedAt": "2026-05-12T04:41:33.753Z"
       },
       {
         "id": 5185,
@@ -132656,7 +132656,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.75,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -132668,7 +132668,7 @@
         "common_error": null,
         "imageability": 58,
         "createdAt": "2026-04-23T01:51:50.578Z",
-        "updatedAt": "2026-04-23T02:00:02.016Z"
+        "updatedAt": "2026-05-12T04:42:01.458Z"
       },
       {
         "id": 5330,
@@ -132686,7 +132686,7 @@
         "explanation_for_sentence_meaning": null,
         "learning_depth": 0.75,
         "mixed_sentence": null,
-        "other_meanings_fa": "",
+        "other_meanings_fa": null,
         "category": null,
         "typeOfWordInDb": "temp",
         "hint_sentence": null,
@@ -132698,7 +132698,7 @@
         "common_error": null,
         "imageability": 60,
         "createdAt": "2026-04-23T01:51:50.595Z",
-        "updatedAt": "2026-04-23T02:00:02.017Z"
+        "updatedAt": "2026-05-12T04:42:11.507Z"
       },
       {
         "id": 5331,
@@ -166311,7 +166311,7 @@
         "mentionedWordsJson": null,
         "items": null,
         "createdAt": "2026-04-07T15:10:50.723Z",
-        "updatedAt": "2026-04-07T15:10:50.723Z"
+        "updatedAt": "2026-05-12T04:35:00.566Z"
       },
       {
         "id": 1275,
@@ -167607,7 +167607,7 @@
         "mentionedWordsJson": null,
         "items": null,
         "createdAt": "2026-04-07T15:10:50.777Z",
-        "updatedAt": "2026-04-07T15:10:50.777Z"
+        "updatedAt": "2026-05-12T04:35:28.089Z"
       },
       {
         "id": 1420,
@@ -187835,7 +187835,7 @@
         "mentionedWordsJson": null,
         "items": null,
         "createdAt": "2026-04-22T00:23:07.901Z",
-        "updatedAt": "2026-04-22T02:44:28.403Z"
+        "updatedAt": "2026-05-12T04:41:33.790Z"
       },
       {
         "id": 3676,
@@ -189113,7 +189113,7 @@
         "mentionedWordsJson": null,
         "items": null,
         "createdAt": "2026-04-23T01:51:50.586Z",
-        "updatedAt": "2026-04-23T01:59:27.527Z"
+        "updatedAt": "2026-05-12T04:42:01.473Z"
       },
       {
         "id": 3821,
@@ -189122,7 +189122,7 @@
         "mentionedWordsJson": null,
         "items": null,
         "createdAt": "2026-04-23T01:51:50.604Z",
-        "updatedAt": "2026-04-23T01:59:27.509Z"
+        "updatedAt": "2026-05-12T04:42:11.520Z"
       },
       {
         "id": 3822,
