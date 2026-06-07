@@ -21,6 +21,22 @@ function shortList(values: Array<string | null | undefined>) {
   return values.filter(Boolean).join(" / ") || "—";
 }
 
+function formatDate(value: string | null) {
+  if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleString("en-CA", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+    timeZoneName: "short",
+  });
+}
+
 export default async function AdminDbComparePage() {
   const [db, git] = await Promise.all([
     buildDbFingerprintSnapshot(prisma),
@@ -46,7 +62,7 @@ export default async function AdminDbComparePage() {
             {git.error}
           </div>
         ) : null}
-        <div className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
           <div className="rounded-xl border border-card bg-background p-3">
             <div className="text-xs text-muted">Branch / upstream</div>
             <div className="mt-1 font-mono text-sm text-foreground">
@@ -63,6 +79,15 @@ export default async function AdminDbComparePage() {
             <div className="text-xs text-muted">GitHub HEAD</div>
             <div className="mt-1 font-mono text-sm text-foreground">
               {git.githubHead ?? git.upstreamHead ?? "—"}
+            </div>
+          </div>
+          <div className="rounded-xl border border-card bg-background p-3">
+            <div className="text-xs text-muted">GitHub updated</div>
+            <div className="mt-1 text-sm text-foreground">
+              {formatDate(git.githubCommittedAt)}
+            </div>
+            <div className="mt-1 text-xs text-muted">
+              Local: {formatDate(git.localCommittedAt)}
             </div>
           </div>
           <div className="rounded-xl border border-card bg-background p-3">
