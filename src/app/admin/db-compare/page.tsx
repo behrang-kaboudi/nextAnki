@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { buildDbFingerprintSnapshot } from "@/lib/dbCompare/dbFingerprint";
 import { getGitComparison } from "@/lib/dbCompare/gitCompare";
+import { DatabaseFingerprintActions } from "./DatabaseFingerprintActions";
 import { VersionCompareReportButton } from "./VersionCompareReportButton";
 
 export const dynamic = "force-dynamic";
@@ -118,11 +119,14 @@ export default async function AdminDbComparePage() {
               stable record order, and sorted object keys.
             </p>
           </div>
-          <div className="rounded-xl border border-card bg-background px-3 py-2">
-            <div className="text-xs text-muted">Whole DB</div>
-            <div className="mt-1 select-all font-mono text-xs text-foreground">
-              {db.databaseSha256}
+          <div className="grid gap-2">
+            <div className="rounded-xl border border-card bg-background px-3 py-2">
+              <div className="text-xs text-muted">Whole DB</div>
+              <div className="mt-1 select-all font-mono text-xs text-foreground">
+                {db.databaseSha256}
+              </div>
             </div>
+            <DatabaseFingerprintActions snapshot={db} />
           </div>
         </div>
 
