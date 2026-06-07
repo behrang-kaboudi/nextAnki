@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { buildDbFingerprintSnapshot } from "@/lib/dbCompare/dbFingerprint";
 import { getGitComparison } from "@/lib/dbCompare/gitCompare";
+import { VersionCompareReportButton } from "./VersionCompareReportButton";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -56,7 +57,10 @@ export default async function AdminDbComparePage() {
       </div>
 
       <section className="rounded-2xl border border-card bg-card p-4 shadow-elevated">
-        <h2 className="text-sm font-semibold text-foreground">Git version</h2>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-sm font-semibold text-foreground">Git version</h2>
+          <VersionCompareReportButton git={git} />
+        </div>
         {git.error ? (
           <div className="mt-3 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-700">
             {git.error}
