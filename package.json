@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "db:push": "prisma db push",
+    "db:fingerprint": "node scripts/export-db-fingerprint.mjs",
     "db:reset:safe": "node scripts/migrate-reset-safe.mjs",
     "db:restore": "node scripts/restore-backup.js",
     "import:words": "node scripts/import-words-to-mysql.mjs",
