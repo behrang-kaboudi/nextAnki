@@ -83,6 +83,7 @@ const sections: Section[] = [
     links: [
       { href: "/admin/themes", label: "Theme Settings" },
       { href: "/admin/data", label: "Data" },
+      { href: "/admin/db-compare", label: "Database Compare", note: "Git version + table hashes" },
       { href: "/admin/word/imageability", label: "Word Sentences" },
     ],
   },

@@ -5,6 +5,7 @@ export const dashboardMenu: Menu = {
   primary: [
     { type: "link", href: "/admin/themes", label: "Theme Settings", icon: "admin" },
     { type: "link", href: "/admin/data", label: "Data", icon: "admin" },
+    { type: "link", href: "/admin/db-compare", label: "Database Compare", icon: "admin" },
     {
       type: "group",
       label: "Word",
