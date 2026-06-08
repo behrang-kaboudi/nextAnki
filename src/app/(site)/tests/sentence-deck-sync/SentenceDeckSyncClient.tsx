@@ -59,22 +59,37 @@ export default function SentenceDeckSyncClient() {
 
   const isSyncing = Boolean(syncResult?.ok && syncResult.status.running);
   const parsedLimit = Math.max(1, Math.trunc(Number(addLimit || "10") || 10));
-  const targetCount = syncResult?.ok ? syncResult.status.targetAddCount : parsedLimit;
+  const targetCount = syncResult?.ok
+    ? syncResult.status.targetAddCount
+    : parsedLimit;
   const addedCount = syncResult?.ok ? syncResult.status.added : 0;
   const remainingCount = Math.max(0, targetCount - addedCount);
-  const countdownPercent = targetCount > 0 ? Math.max(0, Math.min(100, (remainingCount / targetCount) * 100)) : 0;
+  const countdownPercent =
+    targetCount > 0
+      ? Math.max(0, Math.min(100, (remainingCount / targetCount) * 100))
+      : 0;
   const countdownWidthClass =
-    countdownPercent <= 0 ? "w-0"
-      : countdownPercent <= 10 ? "w-[10%]"
-      : countdownPercent <= 20 ? "w-[20%]"
-      : countdownPercent <= 30 ? "w-[30%]"
-      : countdownPercent <= 40 ? "w-[40%]"
-      : countdownPercent <= 50 ? "w-1/2"
-      : countdownPercent <= 60 ? "w-[60%]"
-      : countdownPercent <= 70 ? "w-[70%]"
-      : countdownPercent <= 80 ? "w-[80%]"
-      : countdownPercent <= 90 ? "w-[90%]"
-      : "w-full";
+    countdownPercent <= 0
+      ? "w-0"
+      : countdownPercent <= 10
+        ? "w-[10%]"
+        : countdownPercent <= 20
+          ? "w-[20%]"
+          : countdownPercent <= 30
+            ? "w-[30%]"
+            : countdownPercent <= 40
+              ? "w-[40%]"
+              : countdownPercent <= 50
+                ? "w-1/2"
+                : countdownPercent <= 60
+                  ? "w-[60%]"
+                  : countdownPercent <= 70
+                    ? "w-[70%]"
+                    : countdownPercent <= 80
+                      ? "w-[80%]"
+                      : countdownPercent <= 90
+                        ? "w-[90%]"
+                        : "w-full";
 
   useEffect(() => {
     const el = logBoxRef.current;
@@ -187,8 +202,9 @@ export default function SentenceDeckSyncClient() {
         <div className="rounded-2xl border border-card bg-background p-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="text-sm text-muted">
-              This page currently only ensures the Anki deck <span className="font-mono">enSenteses</span>
-              {" "}and the note type <span className="font-mono">enSenteses</span>.
+              This page currently only ensures the Anki deck{" "}
+              <span className="font-mono">enSenteses</span> and the note type{" "}
+              <span className="font-mono">enSenteses</span>.
             </div>
             <button
               type="button"
@@ -212,12 +228,14 @@ export default function SentenceDeckSyncClient() {
         <div className="rounded-2xl border border-card bg-gradient-to-br from-emerald-50/90 via-white to-cyan-50/80 p-4 shadow-[0_12px_40px_-24px_rgba(6,95,70,0.55)] dark:from-emerald-950/30 dark:via-background dark:to-cyan-950/20">
           <div className="grid gap-4">
             <div className="text-sm text-muted">
-              Add notes to <span className="font-mono">enSenteses</span> from DB sentences where{" "}
-              <span className="font-mono">items</span> is non-empty,{" "}
-              <span className="font-mono">sentence_en</span> is not already in the deck, and all
-              referenced <span className="font-mono">anki_link_id</span> values have a{" "}
-              <span className="font-mono">FaToEn</span> card in review. If local audio exists for sentence fields,
-              corresponding sound fields are filled automatically.
+              Add notes to <span className="font-mono">enSenteses</span> from DB
+              sentences where <span className="font-mono">items</span> is
+              non-empty, <span className="font-mono">sentence_en</span> is not
+              already in the deck, and all referenced{" "}
+              <span className="font-mono">anki_link_id</span> values have a{" "}
+              <span className="font-mono">FaToEn</span> card in review. If local
+              audio exists for sentence fields, corresponding sound fields are
+              filled automatically.
             </div>
 
             <div className="rounded-xl border border-emerald-200/80 bg-white/70 p-3 dark:border-emerald-900/60 dark:bg-black/10">
@@ -267,7 +285,9 @@ export default function SentenceDeckSyncClient() {
               <div className="mt-4 grid gap-2">
                 <div className="flex items-center justify-between text-xs font-semibold text-emerald-900 dark:text-emerald-200">
                   <span>شمارش معکوس افزودن</span>
-                  <span>باقی‌مانده: {remainingCount} / هدف: {targetCount}</span>
+                  <span>
+                    باقی‌مانده: {remainingCount} / هدف: {targetCount}
+                  </span>
                 </div>
                 <div className="h-2 overflow-hidden rounded-full bg-emerald-100 dark:bg-emerald-900/40">
                   <div
@@ -285,18 +305,23 @@ export default function SentenceDeckSyncClient() {
               <div className="grid gap-2">
                 <div className="font-semibold">Operation completed.</div>
                 <div>
-                  Deck: <span className="font-mono">{result.deckName}</span> | Note type:{" "}
+                  Deck: <span className="font-mono">{result.deckName}</span> |
+                  Note type:{" "}
                   <span className="font-mono">{result.modelName}</span>
                 </div>
                 <div>
-                  Deck status: {result.deckCreated ? "created" : "already existed"}
+                  Deck status:{" "}
+                  {result.deckCreated ? "created" : "already existed"}
                 </div>
                 <div>
-                  Note type status: {result.modelCreated ? "created" : "already existed"}
+                  Note type status:{" "}
+                  {result.modelCreated ? "created" : "already existed"}
                 </div>
                 <div>
                   Added missing fields:{" "}
-                  {result.addedFields.length ? result.addedFields.join(", ") : "none"}
+                  {result.addedFields.length
+                    ? result.addedFields.join(", ")
+                    : "none"}
                 </div>
               </div>
             ) : (
@@ -312,19 +337,39 @@ export default function SentenceDeckSyncClient() {
             {syncResult.ok ? (
               <div className="grid gap-2">
                 <div className="font-semibold">
-                  {syncResult.status.running ? "Sentence sync is running..." : "Sentence sync finished."}
+                  {syncResult.status.running
+                    ? "Sentence sync is running..."
+                    : "Sentence sync finished."}
                 </div>
                 <div>Target add count: {syncResult.status.targetAddCount}</div>
-                <div>Processed: {syncResult.status.processed} / {syncResult.status.total}</div>
+                <div>
+                  Processed: {syncResult.status.processed} /{" "}
+                  {syncResult.status.total}
+                </div>
                 <div>Eligible: {syncResult.status.eligible}</div>
                 <div>Added: {syncResult.status.added}</div>
-                <div>Skipped empty items: {syncResult.status.skippedEmptyItems}</div>
-                <div>Skipped already in deck: {syncResult.status.skippedAlreadyInDeck}</div>
-                <div>Skipped missing FaToEn review: {syncResult.status.skippedMissingFaToEnReview}</div>
+                <div>
+                  Skipped empty items: {syncResult.status.skippedEmptyItems}
+                </div>
+                <div>
+                  Skipped already in deck:{" "}
+                  {syncResult.status.skippedAlreadyInDeck}
+                </div>
+                <div>
+                  Skipped missing FaToEn review:{" "}
+                  {syncResult.status.skippedMissingFaToEnReview}
+                </div>
                 <div>Failed: {syncResult.status.failed}</div>
-                <div>Stop requested: {syncResult.status.stopRequested ? "yes" : "no"}</div>
-                <div>Stopped early: {syncResult.status.stoppedEarly ? "yes" : "no"}</div>
-                {syncResult.status.error ? <div>Error: {syncResult.status.error}</div> : null}
+                <div>
+                  Stop requested:{" "}
+                  {syncResult.status.stopRequested ? "yes" : "no"}
+                </div>
+                <div>
+                  Stopped early: {syncResult.status.stoppedEarly ? "yes" : "no"}
+                </div>
+                {syncResult.status.error ? (
+                  <div>Error: {syncResult.status.error}</div>
+                ) : null}
               </div>
             ) : (
               <div className="text-red-600 dark:text-red-400">
@@ -344,7 +389,9 @@ export default function SentenceDeckSyncClient() {
             className="max-h-96 overflow-auto rounded-xl border border-card bg-black/5 p-3 font-mono text-xs dark:bg-white/5"
           >
             {logs.length ? (
-              <pre className="whitespace-pre-wrap break-words">{logs.join("\n")}</pre>
+              <pre className="whitespace-pre-wrap break-words">
+                {logs.join("\n")}
+              </pre>
             ) : (
               <div className="text-xs text-muted">No logs yet.</div>
             )}

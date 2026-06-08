@@ -7,8 +7,14 @@ import { createAnkiConnectClient } from "@/lib/AnkiConnect";
 import { WordAnkiConstants } from "@/lib/AnkiDeck";
 import { chunkArray } from "@/lib/AnkiDeck/workflowHelpers";
 import { quoteAnkiSearchValue } from "@/lib/AnkiDeck/queries";
-import { sanitizeWordAudioFilenamePart, WORD_AUDIO_FILENAME_SEPARATOR } from "@/lib/audio/wordFieldAudioNaming";
-import { getWordFieldAudioAbsoluteDir, getWordFieldAudioAbsolutePath } from "@/lib/audio/wordFieldAudioPaths.server";
+import {
+  sanitizeWordAudioFilenamePart,
+  WORD_AUDIO_FILENAME_SEPARATOR,
+} from "@/lib/audio/wordFieldAudioNaming";
+import {
+  getWordFieldAudioAbsoluteDir,
+  getWordFieldAudioAbsolutePath,
+} from "@/lib/audio/wordFieldAudioPaths.server";
 
 const SENTENCE_DECK_NAME = "enSenteses";
 const SENTENCE_MODEL_NAME = "enSenteses";
@@ -79,7 +85,9 @@ function escapeRegExp(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-function indexLatestAudioByField(field: "sentence_en" | "sentence_en_meaning_fa"): Map<string, ExistingFileInfo> {
+function indexLatestAudioByField(
+  field: "sentence_en" | "sentence_en_meaning_fa",
+): Map<string, ExistingFileInfo> {
   const dir = getWordFieldAudioAbsoluteDir();
   let entries: string[] = [];
   try {
@@ -89,7 +97,9 @@ function indexLatestAudioByField(field: "sentence_en" | "sentence_en_meaning_fa"
   }
 
   const sep = escapeRegExp(WORD_AUDIO_FILENAME_SEPARATOR);
-  const reNew = new RegExp(`^(?<id>.+?)${sep}${field}${sep}(?<ts>\\d{8,})\\.mp3$`);
+  const reNew = new RegExp(
+    `^(?<id>.+?)${sep}${field}${sep}(?<ts>\\d{8,})\\.mp3$`,
+  );
   const reLegacy = new RegExp(`^(?<id>.+)_${field}_(?<ts>\\d{8,})\\.mp3$`);
 
   const latestById = new Map<string, ExistingFileInfo>();
@@ -110,7 +120,11 @@ function indexLatestAudioByField(field: "sentence_en" | "sentence_en_meaning_fa"
 
     const prev = latestById.get(normalized);
     if (!prev || Math.trunc(ts) > prev.timestampMs) {
-      latestById.set(normalized, { filename, timestampMs: Math.trunc(ts), size });
+      latestById.set(normalized, {
+        filename,
+        timestampMs: Math.trunc(ts),
+        size,
+      });
     }
   }
 
@@ -122,11 +136,15 @@ function toSoundTag(info: ExistingFileInfo | undefined): string {
   return `[sound:${info.filename}]`;
 }
 
-async function loadExistingSentenceSet(anki: ReturnType<typeof createAnkiConnectClient>) {
+async function loadExistingSentenceSet(
+  anki: ReturnType<typeof createAnkiConnectClient>,
+) {
   const query = `deck:${quoteAnkiSearchValue(SENTENCE_DECK_NAME)} note:${quoteAnkiSearchValue(SENTENCE_MODEL_NAME)}`;
   const noteIdsRes = await anki.requestDetailed("findNotes", { query });
   if (!noteIdsRes.ok) {
-    throw new Error(`AnkiConnect findNotes failed while loading existing sentence notes: ${noteIdsRes.error}`);
+    throw new Error(
+      `AnkiConnect findNotes failed while loading existing sentence notes: ${noteIdsRes.error}`,
+    );
   }
 
   const noteIds = noteIdsRes.result ?? [];
@@ -136,7 +154,9 @@ async function loadExistingSentenceSet(anki: ReturnType<typeof createAnkiConnect
     if (!chunk.length) continue;
     const infoRes = await anki.requestDetailed("notesInfo", { notes: chunk });
     if (!infoRes.ok) {
-      throw new Error(`AnkiConnect notesInfo failed while loading existing sentence notes: ${infoRes.error}`);
+      throw new Error(
+        `AnkiConnect notesInfo failed while loading existing sentence notes: ${infoRes.error}`,
+      );
     }
 
     for (const note of infoRes.result ?? []) {
@@ -163,10 +183,12 @@ async function allItemsHaveFaToEnReviewCards(
 
     const cardIdsRes = await anki.requestDetailed("findCards", { query });
     if (!cardIdsRes.ok) {
-      throw new Error(`AnkiConnect findCards failed for anki_link_id=${ankiLinkId}: ${cardIdsRes.error}`);
+      throw new Error(
+        `AnkiConnect findCards failed for anki_link_id=${ankiLinkId}: ${cardIdsRes.error}`,
+      );
     }
 
-    if (!(cardIdsRes.result?.length)) {
+    if (!cardIdsRes.result?.length) {
       return { ok: false, missingAnkiLinkId: ankiLinkId };
     }
   }
@@ -250,16 +272,28 @@ async function runJob(state: State) {
     })) as SentenceCandidate[];
 
     state.total = rows.length;
-    log(`Loaded ${rows.length} sentence row(s) from DB. targetAddCount=${maxAddCount}`);
+    log(
+      `Loaded ${rows.length} sentence row(s) from DB. targetAddCount=${maxAddCount}`,
+    );
 
-    const reviewChecker = createAnkiConnectClient({ timeoutMs: 20_000, retryDelayMs: 750 });
-    const addClient = createAnkiConnectClient({ timeoutMs: 20_000, retryDelayMs: 750 });
+    const reviewChecker = createAnkiConnectClient({
+      timeoutMs: 20_000,
+      retryDelayMs: 750,
+    });
+    const addClient = createAnkiConnectClient({
+      timeoutMs: 20_000,
+      retryDelayMs: 750,
+    });
 
     const existingSentences = await loadExistingSentenceSet(reviewChecker);
-    log(`Loaded ${existingSentences.size} existing note(s) from deck ${SENTENCE_DECK_NAME}.`);
+    log(
+      `Loaded ${existingSentences.size} existing note(s) from deck ${SENTENCE_DECK_NAME}.`,
+    );
 
     const sentenceEnAudioById = indexLatestAudioByField("sentence_en");
-    const sentenceFaAudioById = indexLatestAudioByField("sentence_en_meaning_fa");
+    const sentenceFaAudioById = indexLatestAudioByField(
+      "sentence_en_meaning_fa",
+    );
     log(
       `Indexed local audio files: sentence_en=${sentenceEnAudioById.size}, sentence_en_meaning_fa=${sentenceFaAudioById.size}.`,
     );
@@ -285,23 +319,34 @@ async function runJob(state: State) {
         if (existingSentences.has(row.sentence_en)) {
           state.skippedAlreadyInDeck += 1;
           state.processed += 1;
-          log(`Skip sentence ${row.id}: sentence_en already exists in ${SENTENCE_DECK_NAME}.`);
+          log(
+            `Skip sentence ${row.id}: sentence_en already exists in ${SENTENCE_DECK_NAME}.`,
+          );
           continue;
         }
 
-        const reviewCheck = await allItemsHaveFaToEnReviewCards(items, reviewChecker);
+        const reviewCheck = await allItemsHaveFaToEnReviewCards(
+          items,
+          reviewChecker,
+        );
         if (!reviewCheck.ok) {
           state.skippedMissingFaToEnReview += 1;
           state.processed += 1;
-          log(`Skip sentence ${row.id}: FaToEn review card missing for anki_link_id=${reviewCheck.missingAnkiLinkId}.`);
+          log(
+            `Skip sentence ${row.id}: FaToEn review card missing for anki_link_id=${reviewCheck.missingAnkiLinkId}.`,
+          );
           continue;
         }
 
         state.eligible += 1;
 
         const sentenceKey = sanitizeWordAudioFilenamePart(String(row.id));
-        const sentenceEnSound = toSoundTag(sentenceEnAudioById.get(sentenceKey));
-        const sentenceEnMeaningFaSound = toSoundTag(sentenceFaAudioById.get(sentenceKey));
+        const sentenceEnSound = toSoundTag(
+          sentenceEnAudioById.get(sentenceKey),
+        );
+        const sentenceEnMeaningFaSound = toSoundTag(
+          sentenceFaAudioById.get(sentenceKey),
+        );
 
         const addRes = await addClient.requestDetailed("addNote", {
           note: {
@@ -377,7 +422,9 @@ export function getSentenceDeckSyncAllStatus(): SentenceDeckSyncAllStatus {
   return pub;
 }
 
-export function startSentenceDeckSyncAllIfNeeded(targetAddCount?: number): SentenceDeckSyncAllStatus {
+export function startSentenceDeckSyncAllIfNeeded(
+  targetAddCount?: number,
+): SentenceDeckSyncAllStatus {
   const state = getState();
   if (state.running) return getSentenceDeckSyncAllStatus();
   if (state._started && !state.done) return getSentenceDeckSyncAllStatus();
