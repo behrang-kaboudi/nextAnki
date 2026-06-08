@@ -397,7 +397,7 @@ export default function StructureBuilderPage() {
     }
 
     const modelName = AnkiNoteTypes.META_LEX_VR9;
-    const desiredFields = WordAnkiConstants.noteFields.META_LEX_VR9.slice().map(String);
+    const desiredFields = WordAnkiConstants.noteFields.slice().map(String);
     const desiredSet = new Set<string>(desiredFields);
 
     const modelNamesRes = await ankiRequestDetailed("modelNames");
@@ -408,7 +408,7 @@ export default function StructureBuilderPage() {
 
     if (!modelNamesRes.result.includes(modelName)) {
       appendLog(`Creating model: ${modelName} ...`);
-      const templates = WordAnkiConstants.noteTemplates.META_LEX_VR9;
+      const templates = WordAnkiConstants.noteTemplates;
       const cardTemplates = [
         { Name: "EnToFa", Front: templates.EnToFa.Front, Back: templates.EnToFa.Back },
         { Name: "FaToEn", Front: templates.FaToEn.Front, Back: templates.FaToEn.Back },
@@ -479,7 +479,7 @@ export default function StructureBuilderPage() {
     appendLog(`Step 4: Ensure note type templates (${AnkiNoteTypes.META_LEX_VR9})...`);
 
     const modelName = AnkiNoteTypes.META_LEX_VR9;
-    const desired = WordAnkiConstants.noteTemplates.META_LEX_VR9;
+    const desired = WordAnkiConstants.noteTemplates;
     const desiredNames = Object.keys(desired) as Array<keyof typeof desired>;
 
     const templatesRes = await ankiRequestDetailed("modelTemplates", { modelName });
@@ -595,7 +595,7 @@ export default function StructureBuilderPage() {
             <p>Note Type با نام {AnkiNoteTypes.META_LEX_VR9} را می‌سازد/بررسی می‌کند.</p>
             <p>
               سپس فیلدها را دقیقاً مطابق{" "}
-              <span className="font-mono">WordAnkiConstants.noteFields.META_LEX_VR9</span> سینک می‌کند: فیلد اضافه را
+              <span className="font-mono">WordAnkiConstants.noteFields</span> سینک می‌کند: فیلد اضافه را
               حذف می‌کند، فیلدهای کم را اضافه می‌کند و ترتیب را هم دقیقاً همان ترتیب ثابت‌ها قرار می‌دهد.
             </p>
             <p className="text-xs opacity-80">

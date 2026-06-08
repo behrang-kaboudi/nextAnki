@@ -1,40 +1,37 @@
 export const WordAnkiConstants = {
-  noteFields: {
-    META_LEX_VR9: [
-      "anki_link_id",
-      "base_form",
-      "phonetic_us",
-      "pos",
-      "meaning_fa",
-      "other_meanings_fa",
-      "concept_explained_fa",
-      "sentence_en",
-      "sentence_en_meaning_fa",
-      "best_translate",
-      "mixed_sentence",
-      "first_letter_fa_hint",
-      "first_letter_en_hint",
-      "selfGuide",
-      "hint_to_select_letters",
-      "hint_sentence",
-      "phonetic_us_normalized",
-      "learning_depth",
-      "imageability",
-      "json_hint",
-      "updatedAt",
-    ],
-  },
+  noteFields: [
+    "anki_link_id",
+    "base_form",
+    "phonetic_us",
+    "pos",
+    "meaning_fa",
+    "other_meanings_fa",
+    "concept_explained_fa",
+    "sentence_en",
+    "sentence_en_meaning_fa",
+    "best_translate",
+    "mixed_sentence",
+    "first_letter_fa_hint",
+    "first_letter_en_hint",
+    "selfGuide",
+    "hint_to_select_letters",
+    "hint_sentence",
+    "phonetic_us_normalized",
+    "learning_depth",
+    "imageability",
+    "json_hint",
+    "updatedAt",
+  ],
   noteTemplates: {
-    META_LEX_VR9: {
-      EnToFa: {
-        Front: `
+    EnToFa: {
+      Front: `
 <div style='display:none'>[sound:rec1773369104.mp3]</div>
 {{base_form}}{{phonetic_us}}
 <div style='display:none'>[sound:rec1768097855.mp3]</div>
 <br>
 {{sentence_en}}
 <div style='display:none'>[sound:6s_Stop.mp3]</div>`,
-        Back: `
+      Back: `
 <div style='display:none'>[sound:rec1773369104.mp3]</div>
 <div style='font-family: "Arial"; font-size: 20px;'>{{phonetic_us}}</div>
 <hr id='answer'>
@@ -62,9 +59,9 @@ export const WordAnkiConstants = {
 <div style='display:none'>[sound:rec1765049893.mp3]</div>
 <div style='font-family: "Arial"; font-size: 20px;'>{{first_letter_en_hint}}</div>
 </div>`,
-      },
-      FaToEn: {
-        Front: `
+    },
+    FaToEn: {
+      Front: `
 <div style='display:none'>[sound:rec1773369104.mp3]</div>
 
 <div style=";text-align:right">
@@ -85,7 +82,7 @@ export const WordAnkiConstants = {
 </div>
 
 `,
-        Back: `
+      Back: `
 <div style='display:none'>[sound:rec1773369104.mp3]</div>
 {{base_form}}{{phonetic_us}}
 
@@ -96,9 +93,9 @@ export const WordAnkiConstants = {
 <div style='display:none'>[sound:rec1765049893.mp3]</div>
 <div style='font-family: "Arial"; font-size: 20px;'>{{first_letter_en_hint}}</div>
 </div>`,
-      },
-      Emla: {
-        Front: `<div style=";text-align:right">
+    },
+    Emla: {
+      Front: `<div style=";text-align:right">
 <div style='display:none'>[sound:rec1765049893.mp3]</div>
 
 <div style='font-family: "Arial"; font-size: 20px;'>{{meaning_fa}}</div>
@@ -114,7 +111,7 @@ export const WordAnkiConstants = {
 <div style='font-family: "Arial"; font-size: 20px;'>{{first_letter_fa_hint}}</div>
 <div style='font-family: "Arial"; font-size: 20px;'>{{first_letter_en_hint}}</div>
 </div>`,
-        Back: `{{base_form}}{{phonetic_us}}
+      Back: `{{base_form}}{{phonetic_us}}
 <br>
 {{sentence_en}}
 <hr>
@@ -124,9 +121,9 @@ export const WordAnkiConstants = {
 <div style='display:none'>[sound:rec1765049893.mp3]</div>
 <div style='font-family: "Arial"; font-size: 20px;'>{{first_letter_en_hint}}</div>
 </div>`,
-      },
-      Rahnama: {
-        Front: `<div style='display:none'>[sound:rec1765049893.mp3]</div>{{base_form}}{{phonetic_us}}
+    },
+    Rahnama: {
+      Front: `<div style='display:none'>[sound:rec1765049893.mp3]</div>{{base_form}}{{phonetic_us}}
 
 <div style='display:none'>
 [sound:rec1771027001.mp3]
@@ -134,22 +131,21 @@ export const WordAnkiConstants = {
 [sound:6s_Stop.mp3]</div>
 
 `,
-        Back: `{{FrontSide}}
+      Back: `{{FrontSide}}
 
 
 {{#selfGuide}}<div style='font-family: "Arial"; font-size: 20px;'>{{selfGuide}}</div>{{/selfGuide}}{{^selfGuide}}<div style='font-family: "Arial"; font-size: 20px;'>{{first_letter_en_hint}}</div>{{/selfGuide}}
 
 `,
-      },
-      Rahnama2: {
-        Front: `{{#selfGuide}}<div style='font-family: "Arial"; font-size: 20px;'>{{selfGuide}}</div>{{/selfGuide}}{{^selfGuide}}<div style='font-family: "Arial"; font-size: 20px;'>{{first_letter_en_hint}}</div>{{/selfGuide}}
+    },
+    Rahnama2: {
+      Front: `{{#selfGuide}}<div style='font-family: "Arial"; font-size: 20px;'>{{selfGuide}}</div>{{/selfGuide}}{{^selfGuide}}<div style='font-family: "Arial"; font-size: 20px;'>{{first_letter_en_hint}}</div>{{/selfGuide}}
 
 `,
-        Back: `{{FrontSide}}
+      Back: `{{FrontSide}}
 <div style=";text-align:right">
 	{{meaning_fa}}
 </div>`,
-      },
     },
   },
   cardTypes: {

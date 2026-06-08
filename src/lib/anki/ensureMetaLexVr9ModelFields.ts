@@ -14,7 +14,7 @@ export async function ensureMetaLexVr9ModelFields(
   }
 
   const modelName = AnkiNoteTypes.META_LEX_VR9;
-  const desiredFields = WordAnkiConstants.noteFields.META_LEX_VR9.slice().map(String);
+  const desiredFields = WordAnkiConstants.noteFields.slice().map(String);
 
   const modelNamesRes = await anki.requestDetailed("modelNames");
   if (!modelNamesRes.ok) throw new Error(modelNamesRes.error);
@@ -22,7 +22,7 @@ export async function ensureMetaLexVr9ModelFields(
   if (!modelNames) throw new Error("AnkiConnect returned null for modelNames.");
 
   if (!modelNames.includes(modelName)) {
-    const templates = WordAnkiConstants.noteTemplates.META_LEX_VR9;
+    const templates = WordAnkiConstants.noteTemplates;
     const cardTemplates = [
       { Name: "EnToFa", Front: templates.EnToFa.Front, Back: templates.EnToFa.Back },
       { Name: "FaToEn", Front: templates.FaToEn.Front, Back: templates.FaToEn.Back },
@@ -52,7 +52,7 @@ export async function ensureMetaLexVr9ModelFields(
   }
 
   // Keep card templates in sync as well (especially important for existing users/models).
-  const desiredTemplates = WordAnkiConstants.noteTemplates.META_LEX_VR9;
+  const desiredTemplates = WordAnkiConstants.noteTemplates;
   const desiredByName: Record<string, { Front: string; Back: string }> = {
     Rahnama: desiredTemplates.Rahnama,
     Rahnama2: desiredTemplates.Rahnama2,

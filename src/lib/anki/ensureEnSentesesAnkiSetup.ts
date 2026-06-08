@@ -5,10 +5,10 @@ import { AnkiNoteTypes, SentenceAnkiConstants } from "@/lib/AnkiDeck";
 
 const DECK_NAME = SentenceAnkiConstants.decks.EnSentences;
 const MODEL_NAME = AnkiNoteTypes.EN_SENTENCES;
-const FIELD_NAMES = SentenceAnkiConstants.noteFields.EN_SENTENCES;
+const FIELD_NAMES = SentenceAnkiConstants.noteFields;
 const CARD_TEMPLATE = {
   Name: SentenceAnkiConstants.cardTypes.Sentence,
-  ...SentenceAnkiConstants.noteTemplates.EN_SENTENCES.Sentence,
+  ...SentenceAnkiConstants.noteTemplates.Sentence,
 };
 
 export async function ensureEnSentesesAnkiSetup() {

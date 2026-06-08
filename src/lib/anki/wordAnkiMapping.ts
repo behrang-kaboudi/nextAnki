@@ -297,7 +297,7 @@ export const WORD_ANKI_FIELD_GENERATORS = {
 export function generateWordAnkiFieldsForMetaLexVr9(
   word: Word,
 ): Promise<Record<string, string>> {
-  const fields = WordAnkiConstants.noteFields.META_LEX_VR9;
+  const fields = WordAnkiConstants.noteFields;
   return Promise.all(
     fields.map(
       async (f) => [f, await WORD_ANKI_FIELD_GENERATORS[f](word)] as const,

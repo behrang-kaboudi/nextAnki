@@ -192,7 +192,7 @@ async function runJob(state: State) {
   const noteIds = idsRes.result ?? [];
 
   const noteByAnkiLinkId = new Map<string, ExistingAnkiNoteInfo>();
-  const wantedFields = WordAnkiConstants.noteFields.META_LEX_VR9;
+  const wantedFields = WordAnkiConstants.noteFields;
   const managedFields = wantedFields.filter(
     (f) => f !== "selfGuide",
   );
