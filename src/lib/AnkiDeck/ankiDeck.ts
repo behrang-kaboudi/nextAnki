@@ -1,5 +1,5 @@
 import { ankiRequest } from "@/lib/AnkiConnect";
-import { WordAnkiConstants, type WordDeckName } from "./constants";
+import { WordAnkiConstants } from "./constants";
 import {
   buildCardsDueAfterDaysQuery,
   buildNotesDueAfterDaysQuery,
@@ -16,13 +16,13 @@ import {
 } from "./workflowHelpers";
 
 export type StudiedDueCountResult = {
-  deck: WordDeckName;
+  deck: string;
   dueAfterDays: number;
   noteIds: number[];
 };
 
 export async function getStudiedNotesDueInDays(
-  deck: WordDeckName,
+  deck: string,
   dueAfterDays = 30
 ): Promise<StudiedDueCountResult | null> {
   const query = buildNotesDueAfterDaysQuery(deck, dueAfterDays);
@@ -40,8 +40,8 @@ export async function getEnToFaStudiedNotesDueAfterDays(dueAfterDays = 30) {
 }
 
 export type EmlaAgainWorkflowResult = {
-  sourceDeck: WordDeckName;
-  targetDeck: WordDeckName;
+  sourceDeck: string;
+  targetDeck: string;
   dueAfterDays: number;
   sourceNoteIds: number[];
   emlaCardIdsMatched: number[];
@@ -146,8 +146,8 @@ export async function runEmlaAgainForNotesDueAfterDaysFromEnToFa(
 }
 
 export type FaToEnAgainFromEnToFaWorkflowResult = {
-  sourceDeck: WordDeckName;
-  targetDeck: WordDeckName;
+  sourceDeck: string;
+  targetDeck: string;
   dueAfterDays: number;
   sourceCardIds: number[];
   sourceNoteIds: number[];

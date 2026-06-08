@@ -1,7 +1,7 @@
 import "server-only";
 
 import { createAnkiConnectClient } from "@/lib/AnkiConnect";
-import { AnkiNoteTypes, WordAnkiConstants, type WordNoteFieldName } from "@/lib/AnkiDeck";
+import { AnkiNoteTypes, WordAnkiConstants } from "@/lib/AnkiDeck";
 import { ensureMetaLexVr9ModelFields } from "@/lib/anki/ensureMetaLexVr9ModelFields";
 import { generateWordAnkiFieldsForMetaLexVr9, getAnkiLinkIdFromNoteFields } from "@/lib/anki/wordAnkiMapping";
 import { prisma } from "@/lib/prisma";
@@ -117,7 +117,7 @@ export function getFullSyncAllStatus(): FullSyncAllStatus {
 
 async function updateNoteFields(
   noteId: number,
-  fields: Partial<Record<WordNoteFieldName, string>>,
+  fields: Record<string, string>,
   anki: ReturnType<typeof createAnkiConnectClient>,
 ) {
   const res = await anki.requestDetailed("updateNoteFields", { note: { id: noteId, fields } });
@@ -126,7 +126,7 @@ async function updateNoteFields(
 }
 
 async function addWordNote(
-  fields: Record<WordNoteFieldName, string>,
+  fields: Record<string, string>,
   anki: ReturnType<typeof createAnkiConnectClient>,
 ) {
   const deckName = WordAnkiConstants.decks.tempRoot;
@@ -150,7 +150,7 @@ async function addWordNote(
 
 type ExistingAnkiNoteInfo = {
   noteId: number;
-  fieldsByName: Partial<Record<WordNoteFieldName, string>>;
+  fieldsByName: Partial<Record<string, string>>;
 };
 
 async function runJob(state: State) {
@@ -195,7 +195,7 @@ async function runJob(state: State) {
   const wantedFields = WordAnkiConstants.noteFields.META_LEX_VR9;
   const managedFields = wantedFields.filter(
     (f) => f !== "selfGuide",
-  ) as WordNoteFieldName[];
+  );
 
   for (const batch of chunk(noteIds, 250)) {
     const infoRes = await ankiFinder.requestDetailed("notesInfo", { notes: batch });
@@ -205,7 +205,7 @@ async function runJob(state: State) {
       if (!ankiLinkId) continue;
       if (noteByAnkiLinkId.has(ankiLinkId)) continue;
 
-      const fieldsByName: Partial<Record<WordNoteFieldName, string>> = {};
+      const fieldsByName: Partial<Record<string, string>> = {};
       for (const f of managedFields) {
         fieldsByName[f] = normalizeFieldValueForCompare(String(n.fields?.[f]?.value ?? ""));
       }
@@ -280,7 +280,7 @@ async function runJob(state: State) {
       const client = clients[Math.abs(existing.noteId) % clients.length]!;
       const managedUpdateFields = Object.fromEntries(
         managedFields.map((f) => [f, fields[f]] as const),
-      ) as Partial<Record<WordNoteFieldName, string>>;
+      ) as Record<string, string>;
       const updated = await updateNoteFields(existing.noteId, managedUpdateFields, client);
       if (!updated.ok) state.failed += 1;
       else state.updated += 1;

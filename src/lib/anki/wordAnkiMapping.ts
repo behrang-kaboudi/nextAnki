@@ -6,7 +6,7 @@ import path from "node:path";
 import type { Prisma, Word } from "@prisma/client";
 
 import type { AnkiNotesInfo } from "@/lib/AnkiConnect";
-import { WordAnkiConstants, type WordNoteFieldName } from "@/lib/AnkiDeck";
+import { WordAnkiConstants } from "@/lib/AnkiDeck";
 import {
   parsePictureWordAudioFilename,
   pictureWordAudioKey,
@@ -292,11 +292,11 @@ export const WORD_ANKI_FIELD_GENERATORS = {
   imageability: (w) => (w.imageability == null ? "" : String(w.imageability)),
   json_hint: (w) => w.json_hint ?? "",
   updatedAt: (w) => w.updatedAt.toISOString(),
-} as const satisfies Record<WordNoteFieldName, WordAnkiFieldGenerator>;
+} as const satisfies Record<string, WordAnkiFieldGenerator>;
 
 export function generateWordAnkiFieldsForMetaLexVr9(
   word: Word,
-): Promise<Record<WordNoteFieldName, string>> {
+): Promise<Record<string, string>> {
   const fields = WordAnkiConstants.noteFields.META_LEX_VR9;
   return Promise.all(
     fields.map(
@@ -304,6 +304,6 @@ export function generateWordAnkiFieldsForMetaLexVr9(
     ),
   ).then(
     (entries) =>
-      Object.fromEntries(entries) as Record<WordNoteFieldName, string>,
+      Object.fromEntries(entries) as Record<string, string>,
   );
 }
