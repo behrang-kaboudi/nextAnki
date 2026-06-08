@@ -240,7 +240,8 @@ export default function WordExtractionPage() {
     setSentenceExtractModalError(null);
     setSentenceExtractModalPromptCopied(false);
     try {
-      const path = "src/prompts/word-extraction/exFromSentencess/rulseV1.md";
+      const path =
+        "src/prompts/word-extraction/exFromSentencesForTempWords/rulseV1.md";
       const res = await fetch(
         `/api/ai/prompt-file?path=${encodeURIComponent(path)}`,
         { method: "GET" },
@@ -1581,7 +1582,7 @@ export default function WordExtractionPage() {
                   Sentence Extraction Prompt
                 </div>
                 <div className="mt-1 text-xs opacity-70">
-                  src/prompts/word-extraction/exFromSentencess/rulseV1.md
+                  src/prompts/word-extraction/exFromSentencesForTempWords/rulseV1.md
                 </div>
               </div>
               <button
