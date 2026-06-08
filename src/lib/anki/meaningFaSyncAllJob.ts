@@ -3,7 +3,7 @@ import "server-only";
 import fs from "node:fs";
 
 import { createAnkiConnectClient } from "@/lib/AnkiConnect";
-import { WordAnkiConstants } from "@/lib/AnkiDeck";
+import { AnkiNoteTypes } from "@/lib/AnkiDeck";
 import { sanitizeWordAudioFilenamePart, WORD_AUDIO_FILENAME_SEPARATOR } from "@/lib/audio/wordFieldAudioNaming";
 import { getWordFieldAudioAbsoluteDir, getWordFieldAudioAbsolutePath } from "@/lib/audio/wordFieldAudioPaths.server";
 import { getAnkiLinkIdFromNoteFields } from "@/lib/anki/wordAnkiMapping";
@@ -181,7 +181,7 @@ async function runJob(state: State) {
   state.mediaDeleted = 0;
   state.currentNoteId = null;
 
-  const modelName = WordAnkiConstants.noteTypes.META_LEX_VR9;
+  const modelName = AnkiNoteTypes.META_LEX_VR9;
   const query = `note:"${modelName.replaceAll('"', '\\"')}"`;
 
   const ankiFinder = createAnkiConnectClient({ timeoutMs: 30000, retryDelayMs: 1000 });

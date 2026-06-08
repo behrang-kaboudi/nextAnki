@@ -5,9 +5,9 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireApiAuth } from "@/lib/auth/apiAuth";
 import { createAnkiConnectClient } from "@/lib/AnkiConnect";
-import { WordAnkiConstants } from "@/lib/AnkiDeck/constants";
+import { AnkiNoteTypes } from "@/lib/AnkiDeck/constants";
 
-const DEFAULT_QUERY = `note:"${WordAnkiConstants.noteTypes.META_LEX_VR9}"`;
+const DEFAULT_QUERY = `note:"${AnkiNoteTypes.META_LEX_VR9}"`;
 
 function chunk<T>(arr: T[], size: number) {
   const out: T[][] = [];

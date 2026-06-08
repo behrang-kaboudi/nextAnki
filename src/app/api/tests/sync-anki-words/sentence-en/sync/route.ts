@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import fs from "node:fs";
 
 import { createAnkiConnectClient } from "@/lib/AnkiConnect";
-import { WordAnkiConstants } from "@/lib/AnkiDeck";
+import { AnkiNoteTypes } from "@/lib/AnkiDeck";
 import { WORD_ANKI_FIELD_GENERATORS, getAnkiLinkIdFromNoteFields } from "@/lib/anki/wordAnkiMapping";
 import { prisma } from "@/lib/prisma";
 import { getWordFieldAudioFileInfo } from "@/lib/words/wordFieldVoice";
@@ -37,7 +37,7 @@ async function deleteMediaIfExists(filename: string, anki: ReturnType<typeof cre
 export async function POST() {
   const anki = createAnkiConnectClient({ timeoutMs: 15_000, retryDelayMs: 750 });
 
-  const modelName = WordAnkiConstants.noteTypes.META_LEX_VR9;
+  const modelName = AnkiNoteTypes.META_LEX_VR9;
   const query = `note:"${modelName}"`;
 
   const found = await anki.requestDetailed("findNotes", { query });

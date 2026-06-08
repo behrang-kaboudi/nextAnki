@@ -1,7 +1,7 @@
 import "server-only";
 
 import { createAnkiConnectClient } from "@/lib/AnkiConnect";
-import { WordAnkiConstants } from "@/lib/AnkiDeck";
+import { AnkiNoteTypes, WordAnkiConstants } from "@/lib/AnkiDeck";
 
 export async function ensureMetaLexVr9ModelFields(
   anki: ReturnType<typeof createAnkiConnectClient>,
@@ -13,7 +13,7 @@ export async function ensureMetaLexVr9ModelFields(
     throw new Error("Permission denied in AnkiConnect settings.");
   }
 
-  const modelName = WordAnkiConstants.noteTypes.META_LEX_VR9;
+  const modelName = AnkiNoteTypes.META_LEX_VR9;
   const desiredFields = WordAnkiConstants.noteFields.META_LEX_VR9.slice().map(String);
 
   const modelNamesRes = await anki.requestDetailed("modelNames");

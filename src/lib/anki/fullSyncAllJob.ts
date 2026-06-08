@@ -1,7 +1,7 @@
 import "server-only";
 
 import { createAnkiConnectClient } from "@/lib/AnkiConnect";
-import { WordAnkiConstants, type WordNoteFieldName } from "@/lib/AnkiDeck";
+import { AnkiNoteTypes, WordAnkiConstants, type WordNoteFieldName } from "@/lib/AnkiDeck";
 import { ensureMetaLexVr9ModelFields } from "@/lib/anki/ensureMetaLexVr9ModelFields";
 import { generateWordAnkiFieldsForMetaLexVr9, getAnkiLinkIdFromNoteFields } from "@/lib/anki/wordAnkiMapping";
 import { prisma } from "@/lib/prisma";
@@ -130,7 +130,7 @@ async function addWordNote(
   anki: ReturnType<typeof createAnkiConnectClient>,
 ) {
   const deckName = WordAnkiConstants.decks.tempRoot;
-  const modelName = WordAnkiConstants.noteTypes.META_LEX_VR9;
+  const modelName = AnkiNoteTypes.META_LEX_VR9;
 
   const res = await anki.requestDetailed("addNote", {
     note: {
@@ -176,7 +176,7 @@ async function runJob(state: State) {
 
   state.total = await prisma.word.count();
 
-  const modelName = WordAnkiConstants.noteTypes.META_LEX_VR9;
+  const modelName = AnkiNoteTypes.META_LEX_VR9;
   const query = `note:"${modelName.replaceAll('"', '\\"')}"`;
 
   const ankiFinder = createAnkiConnectClient({ timeoutMs: 30000, retryDelayMs: 1000 });

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { PageHeader } from "@/components/page-header";
+import { AnkiNoteTypes, SentenceAnkiConstants } from "@/lib/AnkiDeck";
 
 type EnsureResponse =
   | {
@@ -203,8 +204,8 @@ export default function SentenceDeckSyncClient() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="text-sm text-muted">
               This page currently only ensures the Anki deck{" "}
-              <span className="font-mono">enSenteses</span> and the note type{" "}
-              <span className="font-mono">enSenteses</span>.
+              <span className="font-mono">{SentenceAnkiConstants.decks.EnSentences}</span> and the note type{" "}
+              <span className="font-mono">{AnkiNoteTypes.EN_SENTENCES}</span>.
             </div>
             <button
               type="button"
@@ -228,7 +229,7 @@ export default function SentenceDeckSyncClient() {
         <div className="rounded-2xl border border-card bg-gradient-to-br from-emerald-50/90 via-white to-cyan-50/80 p-4 shadow-[0_12px_40px_-24px_rgba(6,95,70,0.55)] dark:from-emerald-950/30 dark:via-background dark:to-cyan-950/20">
           <div className="grid gap-4">
             <div className="text-sm text-muted">
-              Add notes to <span className="font-mono">enSenteses</span> from DB
+              Add notes to <span className="font-mono">{SentenceAnkiConstants.decks.EnSentences}</span> from DB
               sentences where <span className="font-mono">items</span> is
               non-empty, <span className="font-mono">sentence_en</span> is not
               already in the deck, and all referenced{" "}

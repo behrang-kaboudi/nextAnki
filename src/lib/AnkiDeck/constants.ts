@@ -4,10 +4,13 @@ export const requiredFields = [
   "pos",
   "meaning_fa",
 ] as const;
+
+export const AnkiNoteTypes = {
+  META_LEX_VR9: "Meta-LEX-vR9",
+  EN_SENTENCES: "enSenteses",
+} as const;
+
 export const WordAnkiConstants = {
-  noteTypes: {
-    META_LEX_VR9: "Meta-LEX-vR9",
-  },
   noteFields: {
     META_LEX_VR9: [
       "anki_link_id",
@@ -180,9 +183,6 @@ export const WordAnkiConstants = {
 } as const;
 
 export const SentenceAnkiConstants = {
-  noteTypes: {
-    EN_SENTENCES: "enSenteses",
-  },
   noteFields: {
     EN_SENTENCES: [
       "sentence_en",
@@ -258,8 +258,7 @@ export type WordDeckConfigName = keyof typeof WordDeckConfigs;
 
 export type WordDeckConfig = (typeof WordDeckConfigs)[WordDeckConfigName];
 
-export type WordNoteType =
-  (typeof WordAnkiConstants.noteTypes)[keyof typeof WordAnkiConstants.noteTypes];
+export type WordNoteType = (typeof AnkiNoteTypes)["META_LEX_VR9"];
 
 export type WordNoteFieldName =
   (typeof WordAnkiConstants.noteFields)[keyof typeof WordAnkiConstants.noteFields][number];
@@ -273,8 +272,7 @@ export type WordCardType =
 export type WordDeckName =
   (typeof WordAnkiConstants.decks)[keyof typeof WordAnkiConstants.decks];
 
-export type SentenceNoteType =
-  (typeof SentenceAnkiConstants.noteTypes)[keyof typeof SentenceAnkiConstants.noteTypes];
+export type SentenceNoteType = (typeof AnkiNoteTypes)["EN_SENTENCES"];
 
 export type SentenceNoteFieldName =
   (typeof SentenceAnkiConstants.noteFields)[keyof typeof SentenceAnkiConstants.noteFields][number];

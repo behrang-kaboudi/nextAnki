@@ -2,12 +2,12 @@ import "server-only";
 
 import { prisma } from "@/lib/prisma";
 import { createAnkiConnectClient } from "@/lib/AnkiConnect";
-import { SentenceAnkiConstants, WordAnkiConstants } from "@/lib/AnkiDeck";
+import { AnkiNoteTypes, SentenceAnkiConstants, WordAnkiConstants } from "@/lib/AnkiDeck";
 import { chunkArray } from "@/lib/AnkiDeck/workflowHelpers";
 import { quoteAnkiSearchValue } from "@/lib/AnkiDeck/queries";
 
 const SENTENCE_DECK_NAME = SentenceAnkiConstants.decks.EnSentences;
-const SENTENCE_MODEL_NAME = SentenceAnkiConstants.noteTypes.EN_SENTENCES;
+const SENTENCE_MODEL_NAME = AnkiNoteTypes.EN_SENTENCES;
 
 type SentenceCandidate = {
   id: number;
@@ -72,7 +72,7 @@ async function allItemsHaveFaToEnReviewCards(ankiLinkIds: string[]) {
   for (const ankiLinkId of ankiLinkIds) {
     const query = [
       `deck:${quoteAnkiSearchValue(WordAnkiConstants.decks.FaToEn)}`,
-      `note:${quoteAnkiSearchValue(WordAnkiConstants.noteTypes.META_LEX_VR9)}`,
+      `note:${quoteAnkiSearchValue(AnkiNoteTypes.META_LEX_VR9)}`,
       `card:${quoteAnkiSearchValue(WordAnkiConstants.cardTypes.FaToEn)}`,
       `anki_link_id:${quoteAnkiSearchValue(ankiLinkId)}`,
       "is:review",

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { createAnkiConnectClient } from "@/lib/AnkiConnect";
-import { WordAnkiConstants } from "@/lib/AnkiDeck";
+import { AnkiNoteTypes } from "@/lib/AnkiDeck";
 import { getAnkiLinkIdFromNoteFields } from "@/lib/anki/wordAnkiMapping";
 
 export const runtime = "nodejs";
@@ -15,7 +15,7 @@ function chunk<T>(arr: T[], size: number): T[][] {
 export async function POST() {
   const anki = createAnkiConnectClient({ timeoutMs: 30_000, retryDelayMs: 1000 });
 
-  const modelName = WordAnkiConstants.noteTypes.META_LEX_VR9;
+  const modelName = AnkiNoteTypes.META_LEX_VR9;
   const query = `note:"${modelName.replaceAll('"', '\\"')}"`;
 
   const found = await anki.requestDetailed("findNotes", { query });
@@ -80,4 +80,3 @@ export async function POST() {
     { status: 200 },
   );
 }
-

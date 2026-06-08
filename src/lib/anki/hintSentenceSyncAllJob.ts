@@ -4,7 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 import { createAnkiConnectClient } from "@/lib/AnkiConnect";
-import { WordAnkiConstants } from "@/lib/AnkiDeck/constants";
+import { AnkiNoteTypes } from "@/lib/AnkiDeck/constants";
 import { prisma } from "@/lib/prisma";
 import { getAnkiLinkIdFromNoteFields } from "@/lib/anki/ankiLink";
 import { buildLatestHintSentenceAudioIndex } from "@/lib/words/hintSentenceVoice";
@@ -156,7 +156,7 @@ async function runJob(state: State) {
   state.currentNoteId = null;
 
   const anki = createAnkiConnectClient({ timeoutMs: 30000, retryDelayMs: 1000 });
-  const modelName = WordAnkiConstants.noteTypes.META_LEX_VR9;
+  const modelName = AnkiNoteTypes.META_LEX_VR9;
   const query = `note:"${modelName.replaceAll('"', '\\"')}"`;
 
   const idsRes = await anki.requestDetailed("findNotes", { query });

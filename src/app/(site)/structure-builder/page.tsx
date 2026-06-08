@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import { PageHeader } from "@/components/page-header";
 import { ankiRequestDetailed, type AnkiDeckConfig } from "@/lib/AnkiConnect";
-import { WordAnkiConstants, WordDeckConfigs } from "@/lib/AnkiDeck/constants";
+import { AnkiNoteTypes, WordAnkiConstants, WordDeckConfigs } from "@/lib/AnkiDeck/constants";
 
 function asNumber(v: unknown): number | null {
   return typeof v === "number" && Number.isFinite(v) ? v : null;
@@ -380,7 +380,7 @@ export default function StructureBuilderPage() {
   }
 
   async function step3EnsureMetaLexVr9NoteType() {
-    appendLog("Step 3: Ensure note type (Meta-LEX-vR9) + exact fields...");
+    appendLog(`Step 3: Ensure note type (${AnkiNoteTypes.META_LEX_VR9}) + exact fields...`);
 
     const permRes = await ankiRequestDetailed("requestPermission");
     if (!permRes.ok) {
@@ -396,7 +396,7 @@ export default function StructureBuilderPage() {
       return { ok: false as const };
     }
 
-    const modelName = WordAnkiConstants.noteTypes.META_LEX_VR9;
+    const modelName = AnkiNoteTypes.META_LEX_VR9;
     const desiredFields = WordAnkiConstants.noteFields.META_LEX_VR9.slice().map(String);
     const desiredSet = new Set<string>(desiredFields);
 
@@ -476,9 +476,9 @@ export default function StructureBuilderPage() {
   }
 
   async function step4EnsureMetaLexVr9Templates() {
-    appendLog("Step 4: Ensure note type templates (Meta-LEX-vR9)...");
+    appendLog(`Step 4: Ensure note type templates (${AnkiNoteTypes.META_LEX_VR9})...`);
 
-    const modelName = WordAnkiConstants.noteTypes.META_LEX_VR9;
+    const modelName = AnkiNoteTypes.META_LEX_VR9;
     const desired = WordAnkiConstants.noteTemplates.META_LEX_VR9;
     const desiredNames = Object.keys(desired) as Array<keyof typeof desired>;
 
@@ -592,7 +592,7 @@ export default function StructureBuilderPage() {
         title: "Step 3: Ensure Note Type",
         body: (
           <div className="space-y-2 text-sm leading-6">
-            <p>Note Type با نام {WordAnkiConstants.noteTypes.META_LEX_VR9} را می‌سازد/بررسی می‌کند.</p>
+            <p>Note Type با نام {AnkiNoteTypes.META_LEX_VR9} را می‌سازد/بررسی می‌کند.</p>
             <p>
               سپس فیلدها را دقیقاً مطابق{" "}
               <span className="font-mono">WordAnkiConstants.noteFields.META_LEX_VR9</span> سینک می‌کند: فیلد اضافه را

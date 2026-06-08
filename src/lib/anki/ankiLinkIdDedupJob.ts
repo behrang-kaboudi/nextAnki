@@ -1,7 +1,7 @@
 import "server-only";
 
 import { createAnkiConnectClient } from "@/lib/AnkiConnect";
-import { WordAnkiConstants } from "@/lib/AnkiDeck";
+import { AnkiNoteTypes } from "@/lib/AnkiDeck";
 import { getAnkiLinkIdFromNoteFields } from "@/lib/anki/wordAnkiMapping";
 
 export type AnkiLinkIdDedupStatus = {
@@ -94,7 +94,7 @@ async function runJob(state: State) {
   state.currentNoteId = null;
 
   const anki = createAnkiConnectClient({ timeoutMs: 30_000, retryDelayMs: 1000 });
-  const modelName = WordAnkiConstants.noteTypes.META_LEX_VR9;
+  const modelName = AnkiNoteTypes.META_LEX_VR9;
   const query = `note:"${modelName.replaceAll('"', '\\"')}"`;
 
   const found = await anki.requestDetailed("findNotes", { query });
@@ -181,4 +181,3 @@ export function requestStopAnkiLinkIdDedup(): AnkiLinkIdDedupStatus {
   state.stopRequested = true;
   return getAnkiLinkIdDedupStatus();
 }
-

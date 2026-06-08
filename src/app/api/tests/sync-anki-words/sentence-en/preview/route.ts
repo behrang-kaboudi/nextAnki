@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { createAnkiConnectClient } from "@/lib/AnkiConnect";
-import { WordAnkiConstants } from "@/lib/AnkiDeck";
+import { AnkiNoteTypes } from "@/lib/AnkiDeck";
 import { WORD_ANKI_FIELD_GENERATORS, getAnkiLinkIdFromNoteFields } from "@/lib/anki/wordAnkiMapping";
 import { prisma } from "@/lib/prisma";
 
@@ -16,7 +16,7 @@ function extractFirstSoundFilename(value: string): string | null {
 export async function POST() {
   const anki = createAnkiConnectClient({ timeoutMs: 15_000, retryDelayMs: 750 });
 
-  const modelName = WordAnkiConstants.noteTypes.META_LEX_VR9;
+  const modelName = AnkiNoteTypes.META_LEX_VR9;
   const query = `note:"${modelName}"`;
 
   const found = await anki.requestDetailed("findNotes", { query });

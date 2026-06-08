@@ -9,6 +9,7 @@ import {
   type AnkiNotesInfo,
 } from "@/lib/AnkiConnect";
 import {
+  AnkiNoteTypes,
   findCardIdsInDeck,
   getLastRevlogByCardIds,
   WordAnkiConstants,
@@ -1146,7 +1147,7 @@ export default function AnkiNotePage() {
     setUpdateErrors({});
 
     try {
-      const modelName = WordAnkiConstants.noteTypes.META_LEX_VR9;
+      const modelName = AnkiNoteTypes.META_LEX_VR9;
       const limit = Math.max(
         1,
         Math.min(500, Math.trunc(Number(browseLimit) || 50)),
@@ -1321,7 +1322,7 @@ export default function AnkiNotePage() {
     setModelBusy(true);
     try {
       const fieldsRes = await ankiRequestDetailed("modelFieldNames", {
-        modelName: WordAnkiConstants.noteTypes.META_LEX_VR9,
+        modelName: AnkiNoteTypes.META_LEX_VR9,
       });
       if (!fieldsRes.ok) {
         setModelError(fieldsRes.error);
@@ -1342,7 +1343,7 @@ export default function AnkiNotePage() {
     setModelBusy(true);
     try {
       const fieldsRes = await ankiRequestDetailed("modelFieldNames", {
-        modelName: WordAnkiConstants.noteTypes.META_LEX_VR9,
+        modelName: AnkiNoteTypes.META_LEX_VR9,
       });
       if (!fieldsRes.ok) {
         setModelError(fieldsRes.error);
@@ -1360,7 +1361,7 @@ export default function AnkiNotePage() {
       }
 
       const addRes = await ankiRequestDetailed("modelFieldAdd", {
-        modelName: WordAnkiConstants.noteTypes.META_LEX_VR9,
+        modelName: AnkiNoteTypes.META_LEX_VR9,
         fieldName: "hint_sentence",
       });
       if (!addRes.ok) {
@@ -1651,7 +1652,7 @@ export default function AnkiNotePage() {
         });
         if (!noteInfoRes.ok) throw new Error(noteInfoRes.error);
         const noteInfo = noteInfoRes.result?.[0];
-        if (noteInfo?.modelName !== WordAnkiConstants.noteTypes.META_LEX_VR9) {
+        if (noteInfo?.modelName !== AnkiNoteTypes.META_LEX_VR9) {
           continue;
         }
 
@@ -1799,7 +1800,7 @@ export default function AnkiNotePage() {
           }}
           className="rounded-xl border border-card bg-card px-4 py-2 text-sm text-foreground shadow-elevated transition hover:bg-accent"
         >
-          افزودن نوت‌های Meta-LEX-vR9 به صف مطالعه
+          افزودن نوت‌های {AnkiNoteTypes.META_LEX_VR9} به صف مطالعه
         </button>
         <div className="flex flex-wrap items-center gap-2">
           <input
@@ -2227,7 +2228,7 @@ export default function AnkiNotePage() {
           <div className="mt-1 text-xs text-muted">
             Fetches notes of model{" "}
             <span className="font-mono">
-              {WordAnkiConstants.noteTypes.META_LEX_VR9}
+              {AnkiNoteTypes.META_LEX_VR9}
             </span>{" "}
             via AnkiConnect search.
           </div>
@@ -2318,7 +2319,7 @@ export default function AnkiNotePage() {
               <div className="text-sm">
                 Model:{" "}
                 <span className="font-mono">
-                  {WordAnkiConstants.noteTypes.META_LEX_VR9}
+                  {AnkiNoteTypes.META_LEX_VR9}
                 </span>
               </div>
 
@@ -2448,7 +2449,7 @@ export default function AnkiNotePage() {
             <div className="flex items-start justify-between gap-3">
               <div className="text-right">
                 <div className="text-base font-semibold text-foreground">
-                  نوت‌های Meta-LEX-vR9 خارج از دک‌های مطالعه
+                  نوت‌های {AnkiNoteTypes.META_LEX_VR9} خارج از دک‌های مطالعه
                 </div>
                 <div className="mt-1 text-xs text-muted">
                   فقط نوت‌هایی نمایش داده می‌شوند که هیچ کارتی از آن‌ها داخل

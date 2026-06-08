@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 
 import { PageHeader } from "@/components/page-header";
+import { AnkiNoteTypes, WordAnkiConstants } from "@/lib/AnkiDeck";
 
 type MissingNote = {
   noteId: number;
@@ -125,7 +126,7 @@ export default function WordCleanupPage() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               className="h-10 w-full rounded-xl border border-card bg-background px-3 text-sm text-foreground outline-none focus:ring-2 focus:ring-neutral-400"
-              placeholder='Default: note:"Meta-LEX-vR9" deck:"WordsForNewStudy"'
+              placeholder={`Default: note:"${AnkiNoteTypes.META_LEX_VR9}" deck:"${WordAnkiConstants.decks.root}"`}
             />
           </div>
           <div className="grid gap-2">

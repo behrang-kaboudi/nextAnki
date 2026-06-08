@@ -1,2 +1,3 @@
-import { WordAnkiConstants } from "./constants";
-const p = WordAnkiConstants.noteTypes.META_LEX_VR9;
+import { AnkiNoteTypes } from "./constants";
+
+export const p = AnkiNoteTypes.META_LEX_VR9;

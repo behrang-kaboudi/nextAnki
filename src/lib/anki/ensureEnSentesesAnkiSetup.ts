@@ -1,10 +1,10 @@
 import "server-only";
 
 import { createAnkiConnectClient } from "@/lib/AnkiConnect";
-import { SentenceAnkiConstants } from "@/lib/AnkiDeck";
+import { AnkiNoteTypes, SentenceAnkiConstants } from "@/lib/AnkiDeck";
 
 const DECK_NAME = SentenceAnkiConstants.decks.EnSentences;
-const MODEL_NAME = SentenceAnkiConstants.noteTypes.EN_SENTENCES;
+const MODEL_NAME = AnkiNoteTypes.EN_SENTENCES;
 const FIELD_NAMES = SentenceAnkiConstants.noteFields.EN_SENTENCES;
 const CARD_TEMPLATE = {
   Name: SentenceAnkiConstants.cardTypes.Sentence,
