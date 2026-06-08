@@ -51,9 +51,15 @@ export async function GET(req: Request) {
         base_form: string;
         meaning_fa: string;
         sentence_en: string;
+        sentence_en_meaning_fa: string;
       }>
     >(Prisma.sql`
-      SELECT w.id, w.base_form, w.meaning_fa, COALESCE(s.sentence_en, '') AS sentence_en
+      SELECT
+        w.id,
+        w.base_form,
+        w.meaning_fa,
+        COALESCE(s.sentence_en, '') AS sentence_en,
+        COALESCE(s.sentence_en_meaning_fa, '') AS sentence_en_meaning_fa
       FROM word w
       LEFT JOIN SentenceWordLink sw ON sw.wordId = w.id AND sw.isPrimary = true
       LEFT JOIN Sentence s ON s.id = sw.sentenceId

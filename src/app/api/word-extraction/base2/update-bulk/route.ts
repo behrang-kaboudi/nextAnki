@@ -4,10 +4,6 @@ import { NextResponse } from "next/server";
 
 import { normalizeIpaForDb } from "@/lib/ipa/normalize";
 import { prisma } from "@/lib/prisma";
-import {
-  findPrimarySentenceByAnkiLinkId,
-  upsertPrimarySentenceByAnkiLinkId,
-} from "@/lib/sentences/sentenceRepo";
 
 export const runtime = "nodejs";
 
@@ -16,7 +12,6 @@ type PayloadItem = {
   phonetic_us?: string;
   imageability?: number;
   learning_depth?: number;
-  sentence_en_meaning_fa?: string;
   pos?: string;
   other_meanings_fa?: string | null;
   concept_explained_fa?: string;
@@ -27,7 +22,6 @@ const optionalKeys = [
   "phonetic_us",
   "imageability",
   "learning_depth",
-  "sentence_en_meaning_fa",
   "pos",
   "other_meanings_fa",
   "concept_explained_fa",
@@ -105,14 +99,6 @@ function validateItem(value: unknown): { ok: true; item: PayloadItem } | { ok: f
     : undefined;
   if (hasLearningDepth && learning_depth === null) issues.push("learning_depth must be -100 or a number between 0 and 1");
 
-  const hasSentenceMeaning = "sentence_en_meaning_fa" in value;
-  const sentence_en_meaning_fa = hasSentenceMeaning
-    ? asNonEmptyString((value as Record<string, unknown>).sentence_en_meaning_fa)
-    : undefined;
-  if (hasSentenceMeaning && !sentence_en_meaning_fa) {
-    issues.push("sentence_en_meaning_fa must be a non-empty string");
-  }
-
   const hasPos = "pos" in value;
   const pos = hasPos ? asNonEmptyString((value as Record<string, unknown>).pos) : undefined;
   if (hasPos && !pos) issues.push("pos must be a non-empty string");
@@ -143,7 +129,6 @@ function validateItem(value: unknown): { ok: true; item: PayloadItem } | { ok: f
       ...(phonetic_us == null ? {} : { phonetic_us }),
       ...(imageability == null ? {} : { imageability }),
       ...(learning_depth == null ? {} : { learning_depth }),
-      ...(sentence_en_meaning_fa == null ? {} : { sentence_en_meaning_fa }),
       ...(pos == null ? {} : { pos }),
       ...(other_meanings_fa === undefined ? {} : { other_meanings_fa }),
       ...(concept_explained_fa == null ? {} : { concept_explained_fa }),
@@ -181,7 +166,7 @@ export async function POST(req: Request) {
         {
           ok: false,
           error:
-            "Invalid input items (must be { id } plus one or more of: phonetic_us, imageability, learning_depth, sentence_en_meaning_fa, pos, other_meanings_fa, concept_explained_fa)",
+            "Invalid input items (must be { id } plus one or more of: phonetic_us, imageability, learning_depth, pos, other_meanings_fa, concept_explained_fa)",
           errors,
         },
         { status: 400 }
@@ -196,7 +181,6 @@ export async function POST(req: Request) {
           phonetic_us_normalized?: string;
           imageability?: number;
           learning_depth?: number;
-          sentence_en_meaning_fa?: string;
           pos?: string;
           other_meanings_fa?: string | null;
           concept_explained_fa?: string;
@@ -225,16 +209,8 @@ export async function POST(req: Request) {
           data: {
             ...patch,
           },
-          select: { id: true, anki_link_id: true },
+          select: { id: true },
         });
-        if (item.sentence_en_meaning_fa !== undefined) {
-          const existingSentence = await findPrimarySentenceByAnkiLinkId(row.anki_link_id);
-          await upsertPrimarySentenceByAnkiLinkId({
-            ankiLinkId: row.anki_link_id,
-            sentence_en: existingSentence?.sentence_en ?? "",
-            sentence_en_meaning_fa: item.sentence_en_meaning_fa,
-          });
-        }
         updated += 1;
         results.push({
           ok: true,
@@ -242,7 +218,6 @@ export async function POST(req: Request) {
           ...(phonetic_us_normalized === undefined ? {} : { phonetic_us_normalized }),
           ...(item.imageability === undefined ? {} : { imageability: item.imageability }),
           ...(item.learning_depth === undefined ? {} : { learning_depth: item.learning_depth }),
-          ...(item.sentence_en_meaning_fa === undefined ? {} : { sentence_en_meaning_fa: item.sentence_en_meaning_fa }),
           ...(item.pos === undefined ? {} : { pos: item.pos }),
           ...(item.other_meanings_fa === undefined ? {} : { other_meanings_fa: item.other_meanings_fa }),
           ...(item.concept_explained_fa === undefined ? {} : { concept_explained_fa: item.concept_explained_fa }),

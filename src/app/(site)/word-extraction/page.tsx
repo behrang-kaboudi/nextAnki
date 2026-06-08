@@ -17,7 +17,7 @@ export default function WordExtractionPage() {
       "Perform the full internal pipeline:",
       "1) normalization of noisy input",
       "2) base_form extraction",
-      "3) extraction of meanings_fa and sentence_en",
+      "3) extraction of meanings_fa, sentence_en, and sentence_en_meaning_fa",
       "4) verification and correction",
       "5) generating final structured sense objects",
       "",
@@ -211,6 +211,7 @@ export default function WordExtractionPage() {
         "src/prompts/word-extraction/base_form/rulseV1.md",
         "src/prompts/word-extraction/meaning_fa/rulseV1.md",
         "src/prompts/word-extraction/sentence_en/rulseV1.md",
+        "src/prompts/word-extraction/sentence_meaning_fa/rulseV1.md",
       ];
       const results = await Promise.all(
         paths.map(async (path) => {
@@ -428,9 +429,8 @@ export default function WordExtractionPage() {
 
   const helperSpecs = WORD_EXTRACTION_PROMPTS_PHASE3;
   const helperDefaultActiveId =
-    helperSpecs.find((s) => s.id === "sentence_en_meaning_fa")?.id ??
     helperSpecs.find((s) => s.fieldKey)?.id ??
-    "sentence_en_meaning_fa";
+    "phonetic_us";
 
   const [isBase2ModalOpen, setIsBase2ModalOpen] = useState(false);
   const [isBase2ModalLoading, setIsBase2ModalLoading] = useState(false);
@@ -748,7 +748,7 @@ export default function WordExtractionPage() {
       const parsed = JSON.parse(promptText) as unknown;
       if (!Array.isArray(parsed)) {
         throw new Error(
-          "Input must be a JSON array: [{ id, phonetic_us?, imageability?, learning_depth?, sentence_en_meaning_fa?, pos?, other_meanings_fa? }]",
+          "Input must be a JSON array: [{ id, phonetic_us?, imageability?, learning_depth?, pos?, other_meanings_fa?, concept_explained_fa? }]",
         );
       }
 
@@ -787,7 +787,7 @@ export default function WordExtractionPage() {
       const parsed = JSON.parse(promptText) as unknown;
       if (!Array.isArray(parsed)) {
         throw new Error(
-          "Input must be a JSON array: [{ id, phonetic_us?, imageability?, learning_depth?, sentence_en_meaning_fa?, pos?, other_meanings_fa? }]",
+          "Input must be a JSON array: [{ id, phonetic_us?, imageability?, learning_depth?, pos?, other_meanings_fa?, concept_explained_fa? }]",
         );
       }
 
@@ -1110,11 +1110,16 @@ export default function WordExtractionPage() {
       const parsed = JSON.parse(promptText) as unknown;
       if (!Array.isArray(parsed)) {
         throw new Error(
-          "Input must be a JSON array of { base_form, meaning_fa, sentence_en }",
+          "Input must be a JSON array of { base_form, meaning_fa, sentence_en, sentence_en_meaning_fa }",
         );
       }
 
-      const allowedKeys = ["base_form", "meaning_fa", "sentence_en"] as const;
+      const allowedKeys = [
+        "base_form",
+        "meaning_fa",
+        "sentence_en",
+        "sentence_en_meaning_fa",
+      ] as const;
       const allowedKeySet = new Set<string>(allowedKeys);
       const issues: string[] = [];
       for (let i = 0; i < parsed.length; i++) {
@@ -1432,8 +1437,7 @@ export default function WordExtractionPage() {
           <div className="grid gap-3 rounded-xl border border-card bg-background/70 p-3">
             <div className="text-xs font-semibold tracking-wide text-muted">
               PHASE 3 — PHONETIC_US + IMAGEABILITY + LEARNING_DEPTH +
-              SENTENCE_EN_MEANING_FA + POS + OTHER_MEANINGS_FA +
-              CONCEPT_EXPLAINED_FA
+              POS + OTHER_MEANINGS_FA + CONCEPT_EXPLAINED_FA
             </div>
             <div className="grid gap-3">
               <div className="flex items-stretch gap-2">
@@ -1444,8 +1448,7 @@ export default function WordExtractionPage() {
                   disabled={isBase2ModalLoading}
                 >
                   3.1 PROMPT FOR: PHONETIC_US + IMAGEABILITY + LEARNING_DEPTH +
-                  SENTENCE_EN_MEANING_FA + POS + OTHER_MEANINGS_FA +
-                  CONCEPT_EXPLAINED_FA
+                  POS + OTHER_MEANINGS_FA + CONCEPT_EXPLAINED_FA
                 </button>
                 <input
                   type="number"
@@ -2008,7 +2011,7 @@ export default function WordExtractionPage() {
                     : "—"}{" "}
                   — واکشی‌شده: {base2ModalTailCount} (limit{" "}
                   {base2ModalTailLimitApplied})
-                  (id/base_form/meaning_fa/sentence_en)
+                  (id/base_form/meaning_fa/sentence_en/sentence_en_meaning_fa)
                 </div>
               </div>
               <button

@@ -35,12 +35,6 @@ export const WORD_EXTRACTION_PROMPTS_PHASE3: WordExtractionPromptSpec[] = [
     path: "src/prompts/word-extraction/learning_depth/rulseV1.md",
   },
   {
-    id: "sentence_en_meaning_fa",
-    label: "SENTENCE_EN_MEANING_FA",
-    fieldKey: "sentence_en_meaning_fa",
-    path: "src/prompts/word-extraction/sentence_meaning_fa/rulseV1.md",
-  },
-  {
     id: "pos",
     label: "POS",
     fieldKey: "pos",
@@ -59,4 +53,3 @@ export const WORD_EXTRACTION_PROMPTS_PHASE3: WordExtractionPromptSpec[] = [
     path: "src/prompts/word-extraction/concept_explained_fa/rulseV1.md",
   },
 ];
-

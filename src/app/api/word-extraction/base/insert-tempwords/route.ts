@@ -4,12 +4,18 @@ import { NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
 
 import { prisma } from "@/lib/prisma";
+import { upsertPrimarySentenceByAnkiLinkId } from "@/lib/sentences/sentenceRepo";
 
 export const runtime = "nodejs";
 
-type PayloadItem = { base_form: string; meaning_fa: string; sentence_en: string };
+type PayloadItem = {
+  base_form: string;
+  meaning_fa: string;
+  sentence_en: string;
+  sentence_en_meaning_fa: string;
+};
 
-const allowedKeys = ["base_form", "meaning_fa", "sentence_en"] as const;
+const allowedKeys = ["base_form", "meaning_fa", "sentence_en", "sentence_en_meaning_fa"] as const;
 const allowedKeySet = new Set<string>(allowedKeys);
 
 function normalizeMeaningFaForCompare(value: string): string {
@@ -65,16 +71,20 @@ function validateItem(value: unknown): { ok: true; item: PayloadItem } | { ok: f
   const base_form = asNonEmptyString(value.base_form);
   const meaning_fa_raw = asNonEmptyString(value.meaning_fa);
   const sentence_en = asNonEmptyString(value.sentence_en);
+  const sentence_en_meaning_fa = asNonEmptyString(value.sentence_en_meaning_fa);
   if (!base_form) issues.push("base_form must be a non-empty string");
   if (!meaning_fa_raw) issues.push("meaning_fa must be a non-empty string");
   if (!sentence_en) issues.push("sentence_en must be a non-empty string");
+  if (!sentence_en_meaning_fa) issues.push("sentence_en_meaning_fa must be a non-empty string");
 
   if (issues.length) return { ok: false, issues };
-  if (!base_form || !meaning_fa_raw || !sentence_en) return { ok: false, issues: ["Invalid input"] };
+  if (!base_form || !meaning_fa_raw || !sentence_en || !sentence_en_meaning_fa) {
+    return { ok: false, issues: ["Invalid input"] };
+  }
 
   const meaning_fa = normalizeMeaningFaForStore(meaning_fa_raw);
   if (!meaning_fa) return { ok: false, issues: ["meaning_fa is empty after normalization"] };
-  return { ok: true, item: { base_form, meaning_fa, sentence_en } };
+  return { ok: true, item: { base_form, meaning_fa, sentence_en, sentence_en_meaning_fa } };
 }
 
 export async function POST(req: Request) {
@@ -101,7 +111,8 @@ export async function POST(req: Request) {
       return NextResponse.json(
         {
           ok: false,
-          error: "Invalid input items (must be exactly { base_form, meaning_fa, sentence_en })",
+          error:
+            "Invalid input items (must be exactly { base_form, meaning_fa, sentence_en, sentence_en_meaning_fa })",
           errors,
         },
         { status: 400 }
@@ -110,7 +121,7 @@ export async function POST(req: Request) {
 
     if (items.length === 0) {
       return NextResponse.json(
-        { ok: false, error: "No valid items (need {base_form, meaning_fa, sentence_en})" },
+        { ok: false, error: "No valid items (need {base_form, meaning_fa, sentence_en, sentence_en_meaning_fa})" },
         { status: 400 }
       );
     }
@@ -118,8 +129,22 @@ export async function POST(req: Request) {
     let inserted = 0;
     let skippedExisting = 0;
     const results: Array<
-      | { ok: true; action: "inserted"; id: number; base_form: string; meaning_fa: string }
-      | { ok: true; action: "skipped_exists"; id: number; base_form: string; meaning_fa: string }
+      | {
+          ok: true;
+          action: "inserted";
+          id: number;
+          base_form: string;
+          meaning_fa: string;
+          sentence_en_meaning_fa: string;
+        }
+      | {
+          ok: true;
+          action: "skipped_exists";
+          id: number;
+          base_form: string;
+          meaning_fa: string;
+          sentence_en_meaning_fa: string;
+        }
       | { ok: false; action: "error"; base_form: string; meaning_fa: string; error: string }
     > = [];
 
@@ -127,7 +152,7 @@ export async function POST(req: Request) {
       try {
         const candidates = await prisma.word.findMany({
           where: { base_form: item.base_form },
-          select: { id: true, meaning_fa: true },
+          select: { id: true, anki_link_id: true, meaning_fa: true },
         });
 
         const targetMeaning = normalizeMeaningFaForCompare(item.meaning_fa);
@@ -136,6 +161,11 @@ export async function POST(req: Request) {
         );
 
         if (existing) {
+          await upsertPrimarySentenceByAnkiLinkId({
+            ankiLinkId: existing.anki_link_id,
+            sentence_en: item.sentence_en,
+            sentence_en_meaning_fa: item.sentence_en_meaning_fa,
+          });
           skippedExisting += 1;
           results.push({
             ok: true,
@@ -143,6 +173,7 @@ export async function POST(req: Request) {
             id: existing.id,
             base_form: item.base_form,
             meaning_fa: item.meaning_fa,
+            sentence_en_meaning_fa: item.sentence_en_meaning_fa,
           });
           continue;
         }
@@ -168,9 +199,14 @@ export async function POST(req: Request) {
             select: { id: true },
           });
 
-          const sentence = await tx.sentence.create({
-            data: {
+          const sentence = await tx.sentence.upsert({
+            where: { sentence_en: item.sentence_en },
+            update: {
+              sentence_en_meaning_fa: item.sentence_en_meaning_fa,
+            },
+            create: {
               sentence_en: item.sentence_en,
+              sentence_en_meaning_fa: item.sentence_en_meaning_fa,
             },
             select: { id: true },
           });
@@ -193,6 +229,7 @@ export async function POST(req: Request) {
           id: created.id,
           base_form: item.base_form,
           meaning_fa: item.meaning_fa,
+          sentence_en_meaning_fa: item.sentence_en_meaning_fa,
         });
       } catch (e) {
         results.push({
