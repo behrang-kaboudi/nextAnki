@@ -1,30 +1,14 @@
 import "server-only";
 
 import { createAnkiConnectClient } from "@/lib/AnkiConnect";
+import { SentenceAnkiConstants } from "@/lib/AnkiDeck";
 
-const DECK_NAME = "enSenteses";
-const MODEL_NAME = "enSenteses";
-const FIELD_NAMES = [
-  "sentence_en",
-  "sentence_en_sound",
-  "sentence_en_meaning_fa",
-  "sentence_en_meaning_fa_sound",
-  "updatedAt",
-] as const;
-
+const DECK_NAME = SentenceAnkiConstants.decks.EnSentences;
+const MODEL_NAME = SentenceAnkiConstants.noteTypes.EN_SENTENCES;
+const FIELD_NAMES = SentenceAnkiConstants.noteFields.EN_SENTENCES;
 const CARD_TEMPLATE = {
-  Name: "Sentence",
-  Front: `
-<div>{{sentence_en}}</div>
-<div>{{sentence_en_sound}}</div>
-`.trim(),
-  Back: `
-{{FrontSide}}
-<hr id=answer>
-<div>{{sentence_en_meaning_fa}}</div>
-<div>{{sentence_en_meaning_fa_sound}}</div>
-<div>{{updatedAt}}</div>
-`.trim(),
+  Name: SentenceAnkiConstants.cardTypes.Sentence,
+  ...SentenceAnkiConstants.noteTemplates.EN_SENTENCES.Sentence,
 };
 
 export async function ensureEnSentesesAnkiSetup() {

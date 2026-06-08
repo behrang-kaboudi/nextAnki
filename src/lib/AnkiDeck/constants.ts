@@ -173,6 +173,44 @@ export const WordAnkiConstants = {
   },
 } as const;
 
+export const SentenceAnkiConstants = {
+  noteTypes: {
+    EN_SENTENCES: "enSenteses",
+  },
+  noteFields: {
+    EN_SENTENCES: [
+      "sentence_en",
+      "sentence_en_sound",
+      "sentence_en_meaning_fa",
+      "sentence_en_meaning_fa_sound",
+      "updatedAt",
+    ],
+  },
+  noteTemplates: {
+    EN_SENTENCES: {
+      Sentence: {
+        Front: `
+<div>{{sentence_en}}</div>
+<div>{{sentence_en_sound}}</div>
+`.trim(),
+        Back: `
+{{FrontSide}}
+<hr id=answer>
+<div>{{sentence_en_meaning_fa}}</div>
+<div>{{sentence_en_meaning_fa_sound}}</div>
+<div>{{updatedAt}}</div>
+`.trim(),
+      },
+    },
+  },
+  cardTypes: {
+    Sentence: "Sentence",
+  },
+  decks: {
+    EnSentences: "enSenteses",
+  },
+} as const;
+
 export const WordDeckConfigs = {
   WordsForNewStudyEnToFa: {
     newCardsPerDay: 2000,
@@ -228,6 +266,21 @@ export type WordCardType =
 
 export type WordDeckName =
   (typeof WordAnkiConstants.decks)[keyof typeof WordAnkiConstants.decks];
+
+export type SentenceNoteType =
+  (typeof SentenceAnkiConstants.noteTypes)[keyof typeof SentenceAnkiConstants.noteTypes];
+
+export type SentenceNoteFieldName =
+  (typeof SentenceAnkiConstants.noteFields)[keyof typeof SentenceAnkiConstants.noteFields][number];
+
+export type SentenceTemplateName =
+  keyof (typeof SentenceAnkiConstants.noteTemplates)["EN_SENTENCES"];
+
+export type SentenceCardType =
+  (typeof SentenceAnkiConstants.cardTypes)[keyof typeof SentenceAnkiConstants.cardTypes];
+
+export type SentenceDeckName =
+  (typeof SentenceAnkiConstants.decks)[keyof typeof SentenceAnkiConstants.decks];
 
 export const WordDeckByCardType = {
   EnToFa: WordAnkiConstants.decks.EnToFa,

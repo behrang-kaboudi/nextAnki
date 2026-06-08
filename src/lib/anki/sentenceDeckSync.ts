@@ -2,12 +2,12 @@ import "server-only";
 
 import { prisma } from "@/lib/prisma";
 import { createAnkiConnectClient } from "@/lib/AnkiConnect";
-import { WordAnkiConstants } from "@/lib/AnkiDeck";
+import { SentenceAnkiConstants, WordAnkiConstants } from "@/lib/AnkiDeck";
 import { chunkArray } from "@/lib/AnkiDeck/workflowHelpers";
 import { quoteAnkiSearchValue } from "@/lib/AnkiDeck/queries";
 
-const SENTENCE_DECK_NAME = "enSenteses";
-const SENTENCE_MODEL_NAME = "enSenteses";
+const SENTENCE_DECK_NAME = SentenceAnkiConstants.decks.EnSentences;
+const SENTENCE_MODEL_NAME = SentenceAnkiConstants.noteTypes.EN_SENTENCES;
 
 type SentenceCandidate = {
   id: number;
