@@ -1,5 +1,5 @@
 {
-  "createdAt": "2026-06-07T21:59:32.703Z",
+  "createdAt": "2026-06-08T04:42:20.065Z",
   "data": {
     "theme": [
       {
@@ -49748,7 +49748,7 @@
         "common_error": null,
         "imageability": 98,
         "createdAt": "2026-02-03T13:27:45.385Z",
-        "updatedAt": "2026-02-16T14:48:43.919Z"
+        "updatedAt": "2026-06-08T02:51:01.343Z"
       },
       {
         "id": 2507,
@@ -50318,7 +50318,7 @@
         "common_error": null,
         "imageability": 95,
         "createdAt": "2026-02-03T13:27:45.422Z",
-        "updatedAt": "2026-03-31T23:55:48.846Z"
+        "updatedAt": "2026-06-08T02:51:01.734Z"
       },
       {
         "id": 2526,
@@ -130268,7 +130268,7 @@
         "common_error": null,
         "imageability": 85,
         "createdAt": "2026-04-22T00:34:41.127Z",
-        "updatedAt": "2026-05-05T07:53:46.410Z"
+        "updatedAt": "2026-06-08T02:51:03.593Z"
       },
       {
         "id": 5248,
@@ -147189,6 +147189,66 @@
         "imageability": 58,
         "createdAt": "2026-05-03T04:27:27.098Z",
         "updatedAt": "2026-05-04T05:26:13.004Z"
+      },
+      {
+        "id": 5816,
+        "anki_link_id": "5816_1780886838812",
+        "base_form": "superset",
+        "phonetic_us": "ˈsupərˌsɛt",
+        "phonetic_us_normalized": "sʊperset",
+        "meaning_fa": "نسخه گسترده تر",
+        "meaning_fa_IPA": "nosxeye gostærdetær",
+        "meaning_fa_IPA_normalized": "nosxeje ɡostærdetær",
+        "pos": "noun",
+        "concept_explained": null,
+        "concept_explained_fa": "در نرم افزار به سیستمی گفته می شود که همه قابلیت های سیستم پایه را دارد و امکانات بیشتری نیز اضافه می کند.",
+        "word_hint_story": null,
+        "explanation_for_sentence_meaning": null,
+        "learning_depth": 0.67,
+        "mixed_sentence": null,
+        "other_meanings_fa": "نسخه کامل تر*نسخه توسعه یافته تر",
+        "category": null,
+        "typeOfWordInDb": "temp",
+        "hint_sentence": null,
+        "first_letter_en_hint": null,
+        "first_letter_fa_hint": null,
+        "hint_to_select": null,
+        "json_hint": "{\"person\":{\"fa\":\"سوپ\",\"en\":\"soup\",\"anki_link_id\":\"2895_1770145426690\",\"target_ipa\":\"sʊp\",\"target_lang\":\"fa\",\"usage\":\"noun\",\"source\":\"word\"},\"job\":{\"fa\":\"دستشویی\",\"en\":\"restroom\",\"anki_link_id\":\"3029_1770145687873\",\"target_ipa\":\"restrʊm\",\"usage\":\"noun\",\"source\":\"word\",\"target_lang\":\"en\",\"imageability\":95},\"persianImage\":{\"fa\":\"نسخه\",\"en\":\"prescription\",\"anki_link_id\":\"69407a9ea97a8681bac58f90\",\"target_ipa\":\"nosxe\",\"target_lang\":\"fa\",\"usage\":\"noun\",\"source\":\"word\"},\"generatedAtMs\":1780887042318}",
+        "word_note": null,
+        "common_error": null,
+        "imageability": 46,
+        "createdAt": "2026-06-08T02:47:18.798Z",
+        "updatedAt": "2026-06-08T02:51:04.438Z"
+      },
+      {
+        "id": 5817,
+        "anki_link_id": "5817_1780886838832",
+        "base_form": "superset",
+        "phonetic_us": "ˈsupərˌsɛt",
+        "phonetic_us_normalized": "sʊperset",
+        "meaning_fa": "مجموعه بزرگ تر",
+        "meaning_fa_IPA": "mædʒmuːʔe bozorgtær",
+        "meaning_fa_IPA_normalized": "mæʤmʊe bozorɡtær",
+        "pos": "noun",
+        "concept_explained": null,
+        "concept_explained_fa": "مجموعه ای که همه اعضای یک یا چند مجموعه دیگر را در خود دارد و از آن ها شامل تر است.",
+        "word_hint_story": null,
+        "explanation_for_sentence_meaning": null,
+        "learning_depth": 0.63,
+        "mixed_sentence": null,
+        "other_meanings_fa": "مجموعه فراگیرتر",
+        "category": null,
+        "typeOfWordInDb": "temp",
+        "hint_sentence": null,
+        "first_letter_en_hint": null,
+        "first_letter_fa_hint": null,
+        "hint_to_select": null,
+        "json_hint": "{\"person\":{\"fa\":\"سوپ\",\"en\":\"soup\",\"anki_link_id\":\"2895_1770145426690\",\"target_ipa\":\"sʊp\",\"target_lang\":\"fa\",\"usage\":\"noun\",\"source\":\"word\"},\"job\":{\"fa\":\"دستشویی\",\"en\":\"restroom\",\"anki_link_id\":\"3029_1770145687873\",\"target_ipa\":\"restrʊm\",\"usage\":\"noun\",\"source\":\"word\",\"target_lang\":\"en\",\"imageability\":95},\"persianImage\":{\"fa\":\"مجموع\",\"en\":\"total\",\"anki_link_id\":\"4903_1775771408730\",\"target_ipa\":\"mæʤmʊ\",\"target_lang\":\"fa\",\"usage\":\"noun\",\"source\":\"word\"},\"generatedAtMs\":1780887042390}",
+        "word_note": null,
+        "common_error": null,
+        "imageability": 52,
+        "createdAt": "2026-06-08T02:47:18.830Z",
+        "updatedAt": "2026-06-08T02:51:04.913Z"
       }
     ],
     "sentence": [
@@ -193470,6 +193530,24 @@
         "items": null,
         "createdAt": "2026-05-03T04:27:27.104Z",
         "updatedAt": "2026-05-04T00:48:37.422Z"
+      },
+      {
+        "id": 4307,
+        "sentence_en": "TypeScript is a superset of JavaScript.",
+        "sentence_en_meaning_fa": "تایپ اسکریپت یک نسخه گسترده تر از جاوااسکریپت است.",
+        "mentionedWordsJson": null,
+        "items": null,
+        "createdAt": "2026-06-08T02:47:18.820Z",
+        "updatedAt": "2026-06-08T02:49:09.352Z"
+      },
+      {
+        "id": 4308,
+        "sentence_en": "This set is a superset of all the required elements.",
+        "sentence_en_meaning_fa": "این مجموعه یک مجموعه بزرگ تر از همه عناصر موردنیاز است.",
+        "mentionedWordsJson": null,
+        "items": null,
+        "createdAt": "2026-06-08T02:47:18.836Z",
+        "updatedAt": "2026-06-08T02:49:09.343Z"
       }
     ],
     "sentenceWordLink": [
@@ -227800,6 +227878,20 @@
         "isPrimary": true,
         "createdAt": "2026-05-03T04:27:27.106Z",
         "updatedAt": "2026-05-03T04:27:27.106Z"
+      },
+      {
+        "sentenceId": 4307,
+        "wordId": 5816,
+        "isPrimary": true,
+        "createdAt": "2026-06-08T02:47:18.821Z",
+        "updatedAt": "2026-06-08T02:47:18.821Z"
+      },
+      {
+        "sentenceId": 4308,
+        "wordId": 5817,
+        "isPrimary": true,
+        "createdAt": "2026-06-08T02:47:18.837Z",
+        "updatedAt": "2026-06-08T02:47:18.837Z"
       }
     ],
     "ipaKeyword": [

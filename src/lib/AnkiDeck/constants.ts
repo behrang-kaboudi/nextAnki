@@ -1,3 +1,9 @@
+export const requiredFields = [
+  "word_en",
+  "phonetic",
+  "pos",
+  "meaning_fa",
+] as const;
 export const WordAnkiConstants = {
   noteTypes: {
     META_LEX_VR9: "Meta-LEX-vR9",
