@@ -210,56 +210,39 @@ async function getSentenceFields(ankiLinkId: string) {
   };
 }
 
-function withLatestAudioTag(
-  text: string,
-  audioKey: string,
-  field: WordAudioFieldKey,
-): string {
+function latestAudioTag(audioKey: string, field: WordAudioFieldKey): string {
   const latest = getLatestWordFieldAudioFile({ audioKey, ankiLinkId: audioKey, field });
-  if (!latest || latest.size <= 0) return text;
-
-  const tag = `[sound:${latest.filename}]`;
-  if (text.includes(tag)) return text;
-
-  const base = text.trim();
-  return base ? `${base} ${tag}` : tag;
+  if (!latest || latest.size <= 0) return "";
+  return `[sound:${latest.filename}]`;
 }
 
 export const WORD_ANKI_FIELD_GENERATORS = {
   anki_link_id: (w) => w.anki_link_id,
-  base_form: (w) =>
-    withLatestAudioTag(w.base_form, w.anki_link_id, "base_form"),
+  base_form: (w) => w.base_form,
+  base_form_audio: (w) => latestAudioTag(w.anki_link_id, "base_form"),
   phonetic_us: (w) => w.phonetic_us ?? "",
   pos: (w) => w.pos ?? "",
-  meaning_fa: (w) =>
-    withLatestAudioTag(w.meaning_fa, w.anki_link_id, "meaning_fa"),
-  other_meanings_fa: (w) =>
-    withLatestAudioTag(
-      w.other_meanings_fa ?? "",
-      w.anki_link_id,
-      "other_meanings_fa",
-    ),
-  concept_explained_fa: (w) =>
-    withLatestAudioTag(
-      w.concept_explained_fa ?? "",
-      w.anki_link_id,
-      "concept_explained_fa",
-    ),
+  meaning_fa: (w) => w.meaning_fa,
+  meaning_fa_audio: (w) => latestAudioTag(w.anki_link_id, "meaning_fa"),
+  other_meanings_fa: (w) => w.other_meanings_fa ?? "",
+  other_meanings_fa_audio: (w) => latestAudioTag(w.anki_link_id, "other_meanings_fa"),
+  concept_explained_fa: (w) => w.concept_explained_fa ?? "",
+  concept_explained_fa_audio: (w) => latestAudioTag(w.anki_link_id, "concept_explained_fa"),
   sentence_en: async (w) => {
     const sentence = await getSentenceFields(w.anki_link_id);
-    return sentence.id != null
-      ? withLatestAudioTag(sentence.sentence_en, String(sentence.id), "sentence_en")
-      : sentence.sentence_en;
+    return sentence.sentence_en;
+  },
+  sentence_en_audio: async (w) => {
+    const sentence = await getSentenceFields(w.anki_link_id);
+    return sentence.id != null ? latestAudioTag(String(sentence.id), "sentence_en") : "";
   },
   sentence_en_meaning_fa: async (w) => {
     const sentence = await getSentenceFields(w.anki_link_id);
-    return sentence.id != null
-      ? withLatestAudioTag(
-          sentence.sentence_en_meaning_fa,
-          String(sentence.id),
-          "sentence_en_meaning_fa",
-        )
-      : sentence.sentence_en_meaning_fa;
+    return sentence.sentence_en_meaning_fa;
+  },
+  sentence_en_meaning_fa_audio: async (w) => {
+    const sentence = await getSentenceFields(w.anki_link_id);
+    return sentence.id != null ? latestAudioTag(String(sentence.id), "sentence_en_meaning_fa") : "";
   },
 
   // TODO: define the source-of-truth for this field (not currently present in DB schema).

@@ -2,13 +2,19 @@ export const WordAnkiConstants = {
   noteFields: [
     "anki_link_id",
     "base_form",
+    "base_form_audio",
     "phonetic_us",
     "pos",
     "meaning_fa",
+    "meaning_fa_audio",
     "other_meanings_fa",
+    "other_meanings_fa_audio",
     "concept_explained_fa",
+    "concept_explained_fa_audio",
     "sentence_en",
+    "sentence_en_audio",
     "sentence_en_meaning_fa",
+    "sentence_en_meaning_fa_audio",
     "best_translate",
     "mixed_sentence",
     "first_letter_fa_hint",
@@ -26,10 +32,10 @@ export const WordAnkiConstants = {
     EnToFa: {
       Front: `
 <div style='display:none'>[sound:rec1773369104.mp3]</div>
-{{base_form}}{{phonetic_us}}
+{{base_form}} {{base_form_audio}}{{phonetic_us}}
 <div style='display:none'>[sound:rec1768097855.mp3]</div>
 <br>
-{{sentence_en}}
+{{sentence_en}} {{sentence_en_audio}}
 <div style='display:none'>[sound:6s_Stop.mp3]</div>`,
       Back: `
 <div style='display:none'>[sound:rec1773369104.mp3]</div>
@@ -38,12 +44,12 @@ export const WordAnkiConstants = {
 <div style='display:none'>[sound:rec1765049893.mp3]</div>
 
 <div style=";text-align:right">
-{{meaning_fa}}
-<div style='font-family: "Arial"; font-size: 20px;'>{{other_meanings_fa}}</div>
+{{meaning_fa}} {{meaning_fa_audio}}
+<div style='font-family: "Arial"; font-size: 20px;'>{{other_meanings_fa}} {{other_meanings_fa_audio}}</div>
 
-<div style='font-family: "Arial"; font-size: 20px;'>{{concept_explained_fa}}</div>
+<div style='font-family: "Arial"; font-size: 20px;'>{{concept_explained_fa}} {{concept_explained_fa_audio}}</div>
 </div>
-<div style='display:none'>[sound:rec1765049893.mp3]</div>{{sentence_en_meaning_fa}}<div style='font-family: "Arial"; font-size: 20px;direction:rtl'></div>
+<div style='display:none'>[sound:rec1765049893.mp3]</div>{{sentence_en_meaning_fa}} {{sentence_en_meaning_fa_audio}}<div style='font-family: "Arial"; font-size: 20px;direction:rtl'></div>
 <div style='font-family: "Arial"; font-size: 20px;'>{{best_translate}}</div>
 <hr>
 <div style='display:none'>[sound:rec1765049893.mp3]</div>
@@ -67,10 +73,10 @@ export const WordAnkiConstants = {
 <div style=";text-align:right">
 
 
-<div style='font-family: "Arial"; font-size: 20px;'>{{meaning_fa}}</div>
-<div style='font-family: "Arial"; font-size: 20px;'>{{other_meanings_fa}}</div>
+<div style='font-family: "Arial"; font-size: 20px;'>{{meaning_fa}} {{meaning_fa_audio}}</div>
+<div style='font-family: "Arial"; font-size: 20px;'>{{other_meanings_fa}} {{other_meanings_fa_audio}}</div>
 
-<div style='font-family: "Arial"; font-size: 20px;'>{{concept_explained_fa}}</div>
+<div style='font-family: "Arial"; font-size: 20px;'>{{concept_explained_fa}} {{concept_explained_fa_audio}}</div>
 </div>
 
 <div style='font-family: "Arial"; font-size: 20px;'>{{mixed_sentence}}</div>
@@ -84,7 +90,7 @@ export const WordAnkiConstants = {
 `,
       Back: `
 <div style='display:none'>[sound:rec1773369104.mp3]</div>
-{{base_form}}{{phonetic_us}}
+{{base_form}} {{base_form_audio}}{{phonetic_us}}
 
 <hr>
 <div style=";text-align:right">
@@ -98,22 +104,22 @@ export const WordAnkiConstants = {
       Front: `<div style=";text-align:right">
 <div style='display:none'>[sound:rec1765049893.mp3]</div>
 
-<div style='font-family: "Arial"; font-size: 20px;'>{{meaning_fa}}</div>
+<div style='font-family: "Arial"; font-size: 20px;'>{{meaning_fa}} {{meaning_fa_audio}}</div>
 
 <div style='display:none'>[sound:rec1765487198.mp3]</div>
 
-<div style='font-family: "Arial"; font-size: 20px;'>{{concept_explained_fa}}</div>
+<div style='font-family: "Arial"; font-size: 20px;'>{{concept_explained_fa}} {{concept_explained_fa_audio}}</div>
 </div>
 <hr>
-{{base_form}}{{phonetic_us}}
+{{base_form}} {{base_form_audio}}{{phonetic_us}}
 
 <div style=";text-align:right">
 <div style='font-family: "Arial"; font-size: 20px;'>{{first_letter_fa_hint}}</div>
 <div style='font-family: "Arial"; font-size: 20px;'>{{first_letter_en_hint}}</div>
 </div>`,
-      Back: `{{base_form}}{{phonetic_us}}
+      Back: `{{base_form}} {{base_form_audio}}{{phonetic_us}}
 <br>
-{{sentence_en}}
+{{sentence_en}} {{sentence_en_audio}}
 <hr>
 <div style=";text-align:right">
 <div style='display:none'>[sound:rec1765049893.mp3]</div>
@@ -123,7 +129,7 @@ export const WordAnkiConstants = {
 </div>`,
     },
     Rahnama: {
-      Front: `<div style='display:none'>[sound:rec1765049893.mp3]</div>{{base_form}}{{phonetic_us}}
+      Front: `<div style='display:none'>[sound:rec1765049893.mp3]</div>{{base_form}} {{base_form_audio}}{{phonetic_us}}
 
 <div style='display:none'>
 [sound:rec1771027001.mp3]
@@ -144,7 +150,7 @@ export const WordAnkiConstants = {
 `,
       Back: `{{FrontSide}}
 <div style=";text-align:right">
-	{{meaning_fa}}
+	{{meaning_fa}} {{meaning_fa_audio}}
 </div>`,
     },
   },

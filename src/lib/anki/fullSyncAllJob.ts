@@ -194,7 +194,7 @@ async function runJob(state: State) {
   const noteByAnkiLinkId = new Map<string, ExistingAnkiNoteInfo>();
   const wantedFields = WordAnkiConstants.noteFields;
   const managedFields = wantedFields.filter(
-    (f) => f !== "selfGuide",
+    (f) => f !== "selfGuide" && f !== "anki_link_id",
   );
 
   for (const batch of chunk(noteIds, 250)) {
