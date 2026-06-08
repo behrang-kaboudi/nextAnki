@@ -1,0 +1,67 @@
+import { ankiRequestDetailed } from "@/lib/AnkiConnect";
+import { WordAnkiConstants } from "@/lib/AnkiDeck/constants";
+
+import { loadDeckNames } from "./deckNames";
+import type { LogFn, StepResult } from "./types";
+
+export const requiredStructureDecks = [
+  WordAnkiConstants.decks.tempRoot,
+  WordAnkiConstants.decks.root,
+  WordAnkiConstants.decks.EnToFa,
+  WordAnkiConstants.decks.FaToEn,
+  WordAnkiConstants.decks.Emla,
+  WordAnkiConstants.decks.Rahnama,
+  WordAnkiConstants.decks.Rahnama2,
+];
+
+async function createMissingDecks(missingDecks: string[], appendLog: LogFn): Promise<StepResult> {
+  for (const deck of missingDecks) {
+    appendLog(`Creating deck: ${deck} ...`);
+    const res = await ankiRequestDetailed("createDeck", { deck });
+    if (!res.ok) {
+      appendLog(`✗ createDeck failed: ${res.error}`);
+      return { ok: false };
+    }
+    appendLog(`✓ Created (id=${res.result})`);
+  }
+
+  return { ok: true };
+}
+
+async function confirmDecksExist(deckNames: string[], appendLog: LogFn): Promise<StepResult> {
+  const after = await loadDeckNames();
+  if (!after.ok) {
+    appendLog(`✗ ${after.error}`);
+    return { ok: false };
+  }
+
+  for (const deck of deckNames) {
+    appendLog(`${after.deckSet.has(deck) ? "✓ Confirmed" : "✗ Still missing"}: ${deck}`);
+  }
+
+  return { ok: true };
+}
+
+export async function ensureRequiredDecks(appendLog: LogFn): Promise<StepResult> {
+  appendLog("Step 1: Ensure decks (roots + subdecks)...");
+
+  const before = await loadDeckNames();
+  if (!before.ok) {
+    appendLog(`✗ ${before.error}`);
+    return { ok: false };
+  }
+
+  const missing = requiredStructureDecks.filter((d) => !before.deckSet.has(d));
+  for (const deck of requiredStructureDecks) {
+    appendLog(`${before.deckSet.has(deck) ? "✓" : "✗"} ${deck}`);
+  }
+
+  const createResult = await createMissingDecks(missing, appendLog);
+  if (!createResult.ok) return createResult;
+
+  const confirmResult = await confirmDecksExist(requiredStructureDecks, appendLog);
+  if (!confirmResult.ok) return confirmResult;
+
+  appendLog("Step 1: Done.");
+  return { ok: true };
+}
