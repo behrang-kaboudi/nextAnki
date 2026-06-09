@@ -64,6 +64,20 @@ export default function WordExtractionPage() {
     sentenceExtractModalPromptCopied,
     setSentenceExtractModalPromptCopied,
   ] = useState(false);
+  const [sentenceExtractModalCopied, setSentenceExtractModalCopied] =
+    useState(false);
+  const [sentenceExtractModalDataCopied, setSentenceExtractModalDataCopied] =
+    useState(false);
+  const [sentenceExtractModalTailJson, setSentenceExtractModalTailJson] =
+    useState("");
+  const [sentenceExtractTailLimit, setSentenceExtractTailLimit] =
+    useState("20");
+  const [sentenceExtractModalTailCount, setSentenceExtractModalTailCount] =
+    useState(0);
+  const [
+    sentenceExtractModalTailLimitApplied,
+    setSentenceExtractModalTailLimitApplied,
+  ] = useState(20);
   const [isSentenceInsertBusy, setIsSentenceInsertBusy] = useState(false);
   const [isPhoneticModalOpen, setIsPhoneticModalOpen] = useState(false);
   const [isPhoneticModalLoading, setIsPhoneticModalLoading] = useState(false);
@@ -240,6 +254,10 @@ export default function WordExtractionPage() {
     setIsSentenceExtractModalLoading(true);
     setSentenceExtractModalError(null);
     setSentenceExtractModalPromptCopied(false);
+    setSentenceExtractModalCopied(false);
+    setSentenceExtractModalDataCopied(false);
+    setSentenceExtractModalTailJson("");
+    setSentenceExtractModalTailCount(0);
     try {
       const path =
         "src/prompts/word-extraction/exFromSentencesForTempWords/rulseV1.md";
@@ -253,6 +271,35 @@ export default function WordExtractionPage() {
       }
       const data = (await res.json()) as { path: string; text: string };
       setSentenceExtractModalItems([{ path: data.path, text: data.text }]);
+
+      const limitParsed = Number.parseInt(sentenceExtractTailLimit, 10);
+      const limit =
+        Number.isFinite(limitParsed) && limitParsed > 0
+          ? Math.min(Math.floor(limitParsed), 500)
+          : 20;
+      setSentenceExtractModalTailLimitApplied(limit);
+
+      const missingRes = await fetch(
+        `/api/word-extraction/ex-from-sentences/missing-anki-notes?limit=${encodeURIComponent(
+          String(limit),
+        )}`,
+        { method: "GET" },
+      );
+      const missingJson = (await missingRes.json().catch(() => null)) as {
+        ok?: boolean;
+        error?: string;
+        items?: unknown;
+      } | null;
+      if (!missingRes.ok || !missingJson?.ok) {
+        throw new Error(
+          missingJson?.error ??
+            `Failed to load missing sentence note rows (${missingRes.status})`,
+        );
+      }
+
+      const items = Array.isArray(missingJson.items) ? missingJson.items : [];
+      setSentenceExtractModalTailCount(items.length);
+      setSentenceExtractModalTailJson(JSON.stringify(items, null, 2));
     } catch (error) {
       setSentenceExtractModalError(
         error instanceof Error ? error.message : String(error),
@@ -260,7 +307,7 @@ export default function WordExtractionPage() {
     } finally {
       setIsSentenceExtractModalLoading(false);
     }
-  }, []);
+  }, [sentenceExtractTailLimit]);
 
   const openPhoneticPromptModal = useCallback(async () => {
     setIsPhoneticModalOpen(true);
@@ -1373,14 +1420,29 @@ export default function WordExtractionPage() {
               فاز ۱ استخراج از جملات
             </div>
             <div className="grid gap-3">
-              <button
-                type="button"
-                className={`${buttonBase} bg-gradient-to-r from-violet-700 to-indigo-600 text-white`}
-                onClick={openSentenceExtractPromptModal}
-                disabled={isSentenceExtractModalLoading}
-              >
-                1.S.1 PROMPT FOR: EXTRACT FROM SENTENCES
-              </button>
+              <div className="flex items-stretch gap-2">
+                <button
+                  type="button"
+                  className={`${buttonBase} flex-1 bg-gradient-to-r from-violet-700 to-indigo-600 text-white`}
+                  onClick={openSentenceExtractPromptModal}
+                  disabled={isSentenceExtractModalLoading}
+                >
+                  1.S.1 PROMPT FOR: EXTRACT FROM SENTENCES
+                </button>
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  min={1}
+                  max={500}
+                  value={sentenceExtractTailLimit}
+                  onChange={(event) =>
+                    setSentenceExtractTailLimit(event.target.value)
+                  }
+                  className="h-11 w-20 rounded-xl border border-card bg-background px-3 text-xs font-semibold text-foreground shadow-elevated outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[color-mix(in_oklab,var(--primary),transparent_70%)]"
+                  aria-label="Count (missing sentence note rows)"
+                  title="تعداد جمله‌های DB که در نوت‌های جمله Anki وجود ندارند"
+                />
+              </div>
               <button
                 type="button"
                 className={`${buttonBase} bg-gradient-to-r from-violet-700 to-indigo-600 text-white`}
@@ -1585,7 +1647,8 @@ export default function WordExtractionPage() {
                   Sentence Extraction Prompt
                 </div>
                 <div className="mt-1 text-xs opacity-70">
-                  src/prompts/word-extraction/exFromSentencesForTempWords/rulseV1.md
+                  Prompt file + {sentenceExtractModalTailCount} missing sentence
+                  rows (limit {sentenceExtractModalTailLimitApplied})
                 </div>
               </div>
               <button
@@ -1622,6 +1685,8 @@ export default function WordExtractionPage() {
                           .writeText(combined)
                           .then(() => {
                             setSentenceExtractModalPromptCopied(true);
+                            setSentenceExtractModalCopied(false);
+                            setSentenceExtractModalDataCopied(false);
                             window.setTimeout(
                               () => setSentenceExtractModalPromptCopied(false),
                               1200,
@@ -1638,13 +1703,73 @@ export default function WordExtractionPage() {
                         ? "Copied"
                         : "Copy prompt"}
                     </button>
+                    <button
+                      type="button"
+                      disabled={!sentenceExtractModalTailJson}
+                      onClick={() => {
+                        if (!sentenceExtractModalTailJson) return;
+                        void navigator.clipboard
+                          .writeText(sentenceExtractModalTailJson)
+                          .then(() => {
+                            setSentenceExtractModalDataCopied(true);
+                            setSentenceExtractModalCopied(false);
+                            setSentenceExtractModalPromptCopied(false);
+                            window.setTimeout(
+                              () => setSentenceExtractModalDataCopied(false),
+                              1200,
+                            );
+                          });
+                      }}
+                      className={`rounded border px-3 py-2 text-sm transition hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5 ${
+                        sentenceExtractModalDataCopied
+                          ? "border-emerald-500/40 bg-emerald-500/10"
+                          : ""
+                      }`}
+                      title="Copies JSON array only"
+                    >
+                      {sentenceExtractModalDataCopied
+                        ? "Copied"
+                        : "Copy data"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const combined = sentenceExtractModalItems
+                          .map((item) => item.text.trim())
+                          .join("\n\n");
+                        const tail = sentenceExtractModalTailJson
+                          ? `\n\n${sentenceExtractModalTailJson}`
+                          : "";
+                        void navigator.clipboard
+                          .writeText(`${combined}${tail}`)
+                          .then(() => {
+                            setSentenceExtractModalCopied(true);
+                            setSentenceExtractModalPromptCopied(false);
+                            setSentenceExtractModalDataCopied(false);
+                            window.setTimeout(
+                              () => setSentenceExtractModalCopied(false),
+                              1200,
+                            );
+                          });
+                      }}
+                      className={`rounded border px-3 py-2 text-sm transition hover:bg-black/5 dark:hover:bg-white/5 ${
+                        sentenceExtractModalCopied
+                          ? "border-emerald-500/40 bg-emerald-500/10"
+                          : ""
+                      }`}
+                      title="Copies prompt + JSON array"
+                    >
+                      {sentenceExtractModalCopied ? "Copied" : "Copy all"}
+                    </button>
                   </div>
                 </div>
                 <textarea
                   readOnly
-                  value={sentenceExtractModalItems
+                  value={`${sentenceExtractModalItems
                     .map((item) => item.text.trim())
-                    .join("\n\n")}
+                    .join(
+                      "\n\n",
+                    )}${sentenceExtractModalTailJson ? `\n\n${sentenceExtractModalTailJson}` : ""}`}
                   className="min-h-0 flex-1 resize-none rounded border bg-transparent p-3 font-mono text-xs"
                 />
               </div>
