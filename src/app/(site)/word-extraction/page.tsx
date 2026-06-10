@@ -52,6 +52,9 @@ export default function WordExtractionPage() {
   const [baseModalCopied, setBaseModalCopied] = useState(false);
   const [isSentenceExtractModalOpen, setIsSentenceExtractModalOpen] =
     useState(false);
+  const [sentenceExtractModalKind, setSentenceExtractModalKind] = useState<
+    "plain" | "missing"
+  >("missing");
   const [isSentenceExtractModalLoading, setIsSentenceExtractModalLoading] =
     useState(false);
   const [sentenceExtractModalError, setSentenceExtractModalError] = useState<
@@ -249,7 +252,40 @@ export default function WordExtractionPage() {
     }
   }, []);
 
+  const openPlainSentencePromptModal = useCallback(async () => {
+    setSentenceExtractModalKind("plain");
+    setIsSentenceExtractModalOpen(true);
+    setIsSentenceExtractModalLoading(true);
+    setSentenceExtractModalError(null);
+    setSentenceExtractModalPromptCopied(false);
+    setSentenceExtractModalCopied(false);
+    setSentenceExtractModalDataCopied(false);
+    setSentenceExtractModalTailJson("");
+    setSentenceExtractModalTailCount(0);
+    setSentenceExtractModalTailLimitApplied(0);
+    try {
+      const path = "src/prompts/word-extraction/exFromSentencess/rulseV1.md";
+      const res = await fetch(
+        `/api/ai/prompt-file?path=${encodeURIComponent(path)}`,
+        { method: "GET" },
+      );
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        throw new Error(text || `Request failed: ${res.status}`);
+      }
+      const data = (await res.json()) as { path: string; text: string };
+      setSentenceExtractModalItems([{ path: data.path, text: data.text }]);
+    } catch (error) {
+      setSentenceExtractModalError(
+        error instanceof Error ? error.message : String(error),
+      );
+    } finally {
+      setIsSentenceExtractModalLoading(false);
+    }
+  }, []);
+
   const openSentenceExtractPromptModal = useCallback(async () => {
+    setSentenceExtractModalKind("missing");
     setIsSentenceExtractModalOpen(true);
     setIsSentenceExtractModalLoading(true);
     setSentenceExtractModalError(null);
@@ -1369,7 +1405,7 @@ export default function WordExtractionPage() {
             <button
               type="button"
               className={`${buttonBase} bg-gradient-to-r from-violet-700 to-indigo-600 text-white`}
-              onClick={openSentenceExtractPromptModal}
+              onClick={openPlainSentencePromptModal}
               disabled={isSentenceExtractModalLoading}
             >
               {isSentenceExtractModalLoading
@@ -1644,11 +1680,14 @@ export default function WordExtractionPage() {
             <div className="flex items-start justify-between gap-3">
               <div>
                 <div className="text-base font-semibold">
-                  Sentence Extraction Prompt
+                  {sentenceExtractModalKind === "missing"
+                    ? "Sentence Extraction Prompt"
+                    : "Prompt From Sentences"}
                 </div>
                 <div className="mt-1 text-xs opacity-70">
-                  Prompt file + {sentenceExtractModalTailCount} missing sentence
-                  rows (limit {sentenceExtractModalTailLimitApplied})
+                  {sentenceExtractModalKind === "missing"
+                    ? `Prompt file + ${sentenceExtractModalTailCount} missing sentence rows (limit ${sentenceExtractModalTailLimitApplied})`
+                    : "Prompt file only"}
                 </div>
               </div>
               <button
@@ -1703,34 +1742,36 @@ export default function WordExtractionPage() {
                         ? "Copied"
                         : "Copy prompt"}
                     </button>
-                    <button
-                      type="button"
-                      disabled={!sentenceExtractModalTailJson}
-                      onClick={() => {
-                        if (!sentenceExtractModalTailJson) return;
-                        void navigator.clipboard
-                          .writeText(sentenceExtractModalTailJson)
-                          .then(() => {
-                            setSentenceExtractModalDataCopied(true);
-                            setSentenceExtractModalCopied(false);
-                            setSentenceExtractModalPromptCopied(false);
-                            window.setTimeout(
-                              () => setSentenceExtractModalDataCopied(false),
-                              1200,
-                            );
-                          });
-                      }}
-                      className={`rounded border px-3 py-2 text-sm transition hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5 ${
-                        sentenceExtractModalDataCopied
-                          ? "border-emerald-500/40 bg-emerald-500/10"
-                          : ""
-                      }`}
-                      title="Copies JSON array only"
-                    >
-                      {sentenceExtractModalDataCopied
-                        ? "Copied"
-                        : "Copy data"}
-                    </button>
+                    {sentenceExtractModalKind === "missing" ? (
+                      <button
+                        type="button"
+                        disabled={!sentenceExtractModalTailJson}
+                        onClick={() => {
+                          if (!sentenceExtractModalTailJson) return;
+                          void navigator.clipboard
+                            .writeText(sentenceExtractModalTailJson)
+                            .then(() => {
+                              setSentenceExtractModalDataCopied(true);
+                              setSentenceExtractModalCopied(false);
+                              setSentenceExtractModalPromptCopied(false);
+                              window.setTimeout(
+                                () => setSentenceExtractModalDataCopied(false),
+                                1200,
+                              );
+                            });
+                        }}
+                        className={`rounded border px-3 py-2 text-sm transition hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5 ${
+                          sentenceExtractModalDataCopied
+                            ? "border-emerald-500/40 bg-emerald-500/10"
+                            : ""
+                        }`}
+                        title="Copies JSON array only"
+                      >
+                        {sentenceExtractModalDataCopied
+                          ? "Copied"
+                          : "Copy data"}
+                      </button>
+                    ) : null}
                     <button
                       type="button"
                       onClick={() => {
@@ -1757,7 +1798,11 @@ export default function WordExtractionPage() {
                           ? "border-emerald-500/40 bg-emerald-500/10"
                           : ""
                       }`}
-                      title="Copies prompt + JSON array"
+                      title={
+                        sentenceExtractModalKind === "missing"
+                          ? "Copies prompt + JSON array"
+                          : "Copies prompt file"
+                      }
                     >
                       {sentenceExtractModalCopied ? "Copied" : "Copy all"}
                     </button>
