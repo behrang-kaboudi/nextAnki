@@ -2,7 +2,7 @@ import "server-only";
 
 import { prisma } from "@/lib/prisma";
 import { createAnkiConnectClient } from "@/lib/AnkiConnect";
-import { AnkiNoteTypes, SentenceAnkiConstants, WordAnkiConstants } from "@/lib/AnkiDeck";
+import { AnkiNoteTypes, SentenceAnkiConstants } from "@/lib/AnkiDeck";
 import { chunkArray } from "@/lib/AnkiDeck/workflowHelpers";
 import { quoteAnkiSearchValue } from "@/lib/AnkiDeck/queries";
 
@@ -13,7 +13,6 @@ type SentenceCandidate = {
   id: number;
   sentence_en: string;
   sentence_en_meaning_fa: string | null;
-  items: unknown;
   updatedAt: Date;
 };
 
@@ -21,22 +20,6 @@ function asNonEmptyString(value: unknown): string | null {
   if (typeof value !== "string") return null;
   const trimmed = value.trim();
   return trimmed ? trimmed : null;
-}
-
-function parseSentenceItems(value: unknown): string[] {
-  if (!Array.isArray(value)) return [];
-
-  const out: string[] = [];
-  const seen = new Set<string>();
-
-  for (const item of value) {
-    const next = asNonEmptyString(item);
-    if (!next || seen.has(next)) continue;
-    seen.add(next);
-    out.push(next);
-  }
-
-  return out;
 }
 
 async function loadExistingSentenceSet() {
@@ -66,39 +49,12 @@ async function loadExistingSentenceSet() {
   return existing;
 }
 
-async function allItemsHaveFaToEnReviewCards(ankiLinkIds: string[]) {
-  const anki = createAnkiConnectClient({ timeoutMs: 20_000, retryDelayMs: 750 });
-
-  for (const ankiLinkId of ankiLinkIds) {
-    const query = [
-      `deck:${quoteAnkiSearchValue(WordAnkiConstants.decks.FaToEn)}`,
-      `note:${quoteAnkiSearchValue(AnkiNoteTypes.META_LEX_VR9)}`,
-      `card:${quoteAnkiSearchValue(WordAnkiConstants.cardTypes.FaToEn)}`,
-      `anki_link_id:${quoteAnkiSearchValue(ankiLinkId)}`,
-      "is:review",
-    ].join(" ");
-
-    const cardIdsRes = await anki.requestDetailed("findCards", { query });
-    if (!cardIdsRes.ok) {
-      throw new Error(`AnkiConnect findCards failed for anki_link_id=${ankiLinkId}: ${cardIdsRes.error}`);
-    }
-
-    if (!(cardIdsRes.result?.length)) {
-      return { ok: false as const, missingAnkiLinkId: ankiLinkId };
-    }
-  }
-
-  return { ok: true as const };
-}
-
 export type SentenceDeckSyncResult = {
   ok: true;
   scanned: number;
   eligible: number;
   added: number;
-  skippedEmptyItems: number;
   skippedAlreadyInDeck: number;
-  skippedMissingFaToEnReview: number;
   logs: string[];
   addedItems: Array<{ sentenceId: number; sentence_en: string; noteId: number }>;
 } | {
@@ -124,7 +80,6 @@ export async function syncSentencesToSentenceDeck(): Promise<SentenceDeckSyncRes
         id: true,
         sentence_en: true,
         sentence_en_meaning_fa: true,
-        items: true,
         updatedAt: true,
       },
       orderBy: { id: "asc" },
@@ -139,31 +94,13 @@ export async function syncSentencesToSentenceDeck(): Promise<SentenceDeckSyncRes
 
     let eligible = 0;
     let added = 0;
-    let skippedEmptyItems = 0;
     let skippedAlreadyInDeck = 0;
-    let skippedMissingFaToEnReview = 0;
     const addedItems: Array<{ sentenceId: number; sentence_en: string; noteId: number }> = [];
 
     for (const row of rows) {
-      const items = parseSentenceItems(row.items);
-      if (!items.length) {
-        skippedEmptyItems += 1;
-        log(`Skip sentence ${row.id}: items is empty.`);
-        continue;
-      }
-
       if (existingSentences.has(row.sentence_en)) {
         skippedAlreadyInDeck += 1;
         log(`Skip sentence ${row.id}: sentence_en already exists in ${SENTENCE_DECK_NAME}.`);
-        continue;
-      }
-
-      const reviewCheck = await allItemsHaveFaToEnReviewCards(items);
-      if (!reviewCheck.ok) {
-        skippedMissingFaToEnReview += 1;
-        log(
-          `Skip sentence ${row.id}: FaToEn review card missing for anki_link_id=${reviewCheck.missingAnkiLinkId}.`,
-        );
         continue;
       }
 
@@ -208,7 +145,7 @@ export async function syncSentencesToSentenceDeck(): Promise<SentenceDeckSyncRes
     }
 
     log(
-      `Done. scanned=${rows.length}, eligible=${eligible}, added=${added}, skippedEmptyItems=${skippedEmptyItems}, skippedAlreadyInDeck=${skippedAlreadyInDeck}, skippedMissingFaToEnReview=${skippedMissingFaToEnReview}`,
+      `Done. scanned=${rows.length}, eligible=${eligible}, added=${added}, skippedAlreadyInDeck=${skippedAlreadyInDeck}`,
     );
 
     return {
@@ -216,9 +153,7 @@ export async function syncSentencesToSentenceDeck(): Promise<SentenceDeckSyncRes
       scanned: rows.length,
       eligible,
       added,
-      skippedEmptyItems,
       skippedAlreadyInDeck,
-      skippedMissingFaToEnReview,
       logs,
       addedItems,
     };

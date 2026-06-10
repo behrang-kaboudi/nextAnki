@@ -52,6 +52,70 @@ function phoneticLength(value: unknown): number {
   return cleaned ? cleaned.length : Number.POSITIVE_INFINITY;
 }
 
+function asTrimmedString(value: unknown) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+type BaseFormLookupInputItem = {
+  base_form?: string;
+  meaning_fa?: string;
+  anki_link_id?: string;
+};
+
+type NormalizedBaseFormLookupInput = {
+  items: BaseFormLookupInputItem[];
+  sourceLabel: string;
+};
+
+function toBaseFormLookupItem(value: unknown): BaseFormLookupInputItem | null {
+  if (!isRecord(value)) return null;
+
+  const baseForm = asTrimmedString(value.base_form);
+  const meaningFa = asTrimmedString(value.meaning_fa);
+  const ankiLinkId = asTrimmedString(value.anki_link_id);
+
+  if (!baseForm && !ankiLinkId) return null;
+
+  return {
+    ...(baseForm ? { base_form: baseForm } : {}),
+    ...(meaningFa ? { meaning_fa: meaningFa } : {}),
+    ...(ankiLinkId ? { anki_link_id: ankiLinkId } : {}),
+  };
+}
+
+function normalizeBaseFormLookupInput(value: unknown): NormalizedBaseFormLookupInput {
+  if (!Array.isArray(value)) {
+    throw new Error("JSON must be an array.");
+  }
+
+  const sentenceExtractionItems = value.flatMap((sentenceItem) => {
+    if (!isRecord(sentenceItem) || !Array.isArray(sentenceItem.items)) return [];
+    return sentenceItem.items
+      .map(toBaseFormLookupItem)
+      .filter((item): item is BaseFormLookupInputItem => item !== null);
+  });
+
+  if (sentenceExtractionItems.length > 0) {
+    return {
+      items: sentenceExtractionItems,
+      sourceLabel: `word-extraction: ${sentenceExtractionItems.length} item`,
+    };
+  }
+
+  const directItems = value
+    .map(toBaseFormLookupItem)
+    .filter((item): item is BaseFormLookupInputItem => item !== null);
+
+  return {
+    items: directItems,
+    sourceLabel: `direct array: ${directItems.length} item`,
+  };
+}
+
 type StudyCandidateRow = {
   anki_link_id: string;
   base_form: string;
@@ -158,6 +222,9 @@ export default function AnkiNotePage() {
   );
   const [baseFormLookupLog, setBaseFormLookupLog] = useState("[]");
   const [baseFormLookupNoteIds, setBaseFormLookupNoteIds] = useState<string[]>([]);
+  const [baseFormLookupInputStatus, setBaseFormLookupInputStatus] = useState<string | null>(
+    null,
+  );
   const [baseFormQueueLoading, setBaseFormQueueLoading] = useState(false);
   const [baseFormQueueStatus, setBaseFormQueueStatus] = useState<string | null>(null);
   const [studyCandidatesModalOpen, setStudyCandidatesModalOpen] = useState(false);
@@ -1386,14 +1453,12 @@ export default function AnkiNotePage() {
     setBaseFormLookupError(null);
     try {
       const parsed = JSON.parse(baseFormLookupJson) as unknown;
-      if (!Array.isArray(parsed)) {
-        throw new Error("JSON must be an array.");
-      }
+      const normalized = normalizeBaseFormLookupInput(parsed);
 
       const res = await fetch("/api/anki-note/base-form-note-ids", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify(parsed),
+        body: JSON.stringify(normalized.items),
       });
       const data = (await res.json().catch(() => null)) as
         | { ok?: boolean; error?: string; noteIds?: string[] }
@@ -1405,10 +1470,14 @@ export default function AnkiNotePage() {
       const noteIds = data.noteIds ?? [];
       setBaseFormLookupNoteIds(noteIds);
       setBaseFormLookupLog(JSON.stringify(noteIds, null, 2));
+      setBaseFormLookupInputStatus(
+        `${normalized.sourceLabel} -> ${noteIds.length} anki_link_id`,
+      );
     } catch (e) {
       setBaseFormLookupError(e instanceof Error ? e.message : String(e));
       setBaseFormLookupNoteIds([]);
       setBaseFormLookupLog("[]");
+      setBaseFormLookupInputStatus(null);
     } finally {
       setBaseFormLookupLoading(false);
     }
@@ -1425,6 +1494,7 @@ export default function AnkiNotePage() {
       setBaseFormLookupJson(text);
       setBaseFormLookupNoteIds([]);
       setBaseFormLookupLog("[]");
+      setBaseFormLookupInputStatus(null);
       setBaseFormQueueStatus(null);
     } catch (e) {
       setBaseFormLookupError(e instanceof Error ? e.message : String(e));
@@ -2367,8 +2437,9 @@ export default function AnkiNotePage() {
                   قرار دادن در صف مطالعه
                 </div>
                 <div className="mt-1 text-xs text-muted">
-                  برای هر <code>base_form</code> در جدول <code>Word</code> جستجو می‌شود و فقط
-                  آرایه <code>anki_link_id</code>ها در لاگ نمایش داده می‌شود.
+                  آرایه مستقیم کلمات یا خروجی <code>word-extraction</code> را paste کن.
+                  اگر ورودی شامل <code>items</code> باشد، همه آیتم‌ها flatten می‌شوند و بعد
+                  با <code>base_form</code> در جدول <code>Word</code> جستجو می‌شوند.
                 </div>
               </div>
               <button
@@ -2388,7 +2459,14 @@ export default function AnkiNotePage() {
 
             <div className="mt-4 grid min-h-0 flex-1 gap-4 lg:grid-cols-2">
               <div className="flex min-h-0 flex-col gap-2">
-                <div className="text-xs font-semibold text-muted">آرایه ورودی</div>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="text-xs font-semibold text-muted">
+                    ورودی JSON: آرایه کلمات یا خروجی extract from sentences
+                  </div>
+                  {baseFormLookupInputStatus ? (
+                    <div className="text-xs text-muted">{baseFormLookupInputStatus}</div>
+                  ) : null}
+                </div>
                 <textarea
                   dir="ltr"
                   value={baseFormLookupJson}

@@ -4,7 +4,7 @@ import fs from "node:fs";
 
 import { prisma } from "@/lib/prisma";
 import { createAnkiConnectClient } from "@/lib/AnkiConnect";
-import { AnkiNoteTypes, SentenceAnkiConstants, WordAnkiConstants } from "@/lib/AnkiDeck";
+import { AnkiNoteTypes, SentenceAnkiConstants } from "@/lib/AnkiDeck";
 import { chunkArray } from "@/lib/AnkiDeck/workflowHelpers";
 import { quoteAnkiSearchValue } from "@/lib/AnkiDeck/queries";
 import {
@@ -23,7 +23,6 @@ type SentenceCandidate = {
   id: number;
   sentence_en: string;
   sentence_en_meaning_fa: string | null;
-  items: unknown;
   updatedAt: Date;
 };
 
@@ -45,13 +44,35 @@ export type SentenceDeckSyncAllStatus = {
   targetAddCount: number;
   eligible: number;
   added: number;
-  skippedEmptyItems: number;
   skippedAlreadyInDeck: number;
-  skippedMissingFaToEnReview: number;
   failed: number;
   currentSentenceId: number | null;
   logs: string[];
 };
+
+export type SelectedSentenceDeckSyncResult =
+  | {
+      ok: true;
+      requested: number;
+      matched: number;
+      notFound: number;
+      eligible: number;
+      added: number;
+      skippedAlreadyInDeck: number;
+      failed: number;
+      logs: string[];
+      addedItems: Array<{
+        sentenceId: number;
+        sentence_en: string;
+        noteId: number;
+      }>;
+      notFoundItems: string[];
+    }
+  | {
+      ok: false;
+      error: string;
+      logs: string[];
+    };
 
 type State = SentenceDeckSyncAllStatus & { _started: boolean };
 
@@ -63,22 +84,6 @@ function asNonEmptyString(value: unknown): string | null {
   if (typeof value !== "string") return null;
   const trimmed = value.trim();
   return trimmed ? trimmed : null;
-}
-
-function parseSentenceItems(value: unknown): string[] {
-  if (!Array.isArray(value)) return [];
-
-  const out: string[] = [];
-  const seen = new Set<string>();
-
-  for (const item of value) {
-    const next = asNonEmptyString(item);
-    if (!next || seen.has(next)) continue;
-    seen.add(next);
-    out.push(next);
-  }
-
-  return out;
 }
 
 function escapeRegExp(value: string) {
@@ -168,34 +173,6 @@ async function loadExistingSentenceSet(
   return existing;
 }
 
-async function allItemsHaveFaToEnReviewCards(
-  ankiLinkIds: string[],
-  anki: ReturnType<typeof createAnkiConnectClient>,
-): Promise<{ ok: true } | { ok: false; missingAnkiLinkId: string }> {
-  for (const ankiLinkId of ankiLinkIds) {
-    const query = [
-      `deck:${quoteAnkiSearchValue(WordAnkiConstants.decks.FaToEn)}`,
-      `note:${quoteAnkiSearchValue(AnkiNoteTypes.META_LEX_VR9)}`,
-      `card:${quoteAnkiSearchValue(WordAnkiConstants.cardTypes.FaToEn)}`,
-      `anki_link_id:${quoteAnkiSearchValue(ankiLinkId)}`,
-      "is:review",
-    ].join(" ");
-
-    const cardIdsRes = await anki.requestDetailed("findCards", { query });
-    if (!cardIdsRes.ok) {
-      throw new Error(
-        `AnkiConnect findCards failed for anki_link_id=${ankiLinkId}: ${cardIdsRes.error}`,
-      );
-    }
-
-    if (!cardIdsRes.result?.length) {
-      return { ok: false, missingAnkiLinkId: ankiLinkId };
-    }
-  }
-
-  return { ok: true };
-}
-
 function getState(): State {
   const g = globalThis as unknown as { __sentenceDeckSyncAll?: State };
   if (!g.__sentenceDeckSyncAll) {
@@ -213,9 +190,7 @@ function getState(): State {
       targetAddCount: 10,
       eligible: 0,
       added: 0,
-      skippedEmptyItems: 0,
       skippedAlreadyInDeck: 0,
-      skippedMissingFaToEnReview: 0,
       failed: 0,
       currentSentenceId: null,
       logs: [],
@@ -244,9 +219,7 @@ async function runJob(state: State) {
   state.processed = 0;
   state.eligible = 0;
   state.added = 0;
-  state.skippedEmptyItems = 0;
   state.skippedAlreadyInDeck = 0;
-  state.skippedMissingFaToEnReview = 0;
   state.failed = 0;
   state.currentSentenceId = null;
   state.logs = [];
@@ -265,7 +238,6 @@ async function runJob(state: State) {
         id: true,
         sentence_en: true,
         sentence_en_meaning_fa: true,
-        items: true,
         updatedAt: true,
       },
       orderBy: { id: "asc" },
@@ -276,16 +248,12 @@ async function runJob(state: State) {
       `Loaded ${rows.length} sentence row(s) from DB. targetAddCount=${maxAddCount}`,
     );
 
-    const reviewChecker = createAnkiConnectClient({
-      timeoutMs: 20_000,
-      retryDelayMs: 750,
-    });
     const addClient = createAnkiConnectClient({
       timeoutMs: 20_000,
       retryDelayMs: 750,
     });
 
-    const existingSentences = await loadExistingSentenceSet(reviewChecker);
+    const existingSentences = await loadExistingSentenceSet(addClient);
     log(
       `Loaded ${existingSentences.size} existing note(s) from deck ${SENTENCE_DECK_NAME}.`,
     );
@@ -308,32 +276,11 @@ async function runJob(state: State) {
       state.currentSentenceId = row.id;
 
       try {
-        const items = parseSentenceItems(row.items);
-        if (!items.length) {
-          state.skippedEmptyItems += 1;
-          state.processed += 1;
-          log(`Skip sentence ${row.id}: items is empty.`);
-          continue;
-        }
-
         if (existingSentences.has(row.sentence_en)) {
           state.skippedAlreadyInDeck += 1;
           state.processed += 1;
           log(
             `Skip sentence ${row.id}: sentence_en already exists in ${SENTENCE_DECK_NAME}.`,
-          );
-          continue;
-        }
-
-        const reviewCheck = await allItemsHaveFaToEnReviewCards(
-          items,
-          reviewChecker,
-        );
-        if (!reviewCheck.ok) {
-          state.skippedMissingFaToEnReview += 1;
-          state.processed += 1;
-          log(
-            `Skip sentence ${row.id}: FaToEn review card missing for anki_link_id=${reviewCheck.missingAnkiLinkId}.`,
           );
           continue;
         }
@@ -401,7 +348,7 @@ async function runJob(state: State) {
     }
 
     log(
-      `Done. scanned=${state.total}, processed=${state.processed}, eligible=${state.eligible}, added=${state.added}, skippedEmptyItems=${state.skippedEmptyItems}, skippedAlreadyInDeck=${state.skippedAlreadyInDeck}, skippedMissingFaToEnReview=${state.skippedMissingFaToEnReview}, failed=${state.failed}`,
+      `Done. scanned=${state.total}, processed=${state.processed}, eligible=${state.eligible}, added=${state.added}, skippedAlreadyInDeck=${state.skippedAlreadyInDeck}, failed=${state.failed}`,
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
@@ -452,4 +399,176 @@ export function requestStopSentenceDeckSyncAll(): SentenceDeckSyncAllStatus {
   state.stopRequested = true;
   pushLog(state, "Stop requested by user.");
   return getSentenceDeckSyncAllStatus();
+}
+
+export async function syncSelectedSentencesToSentenceDeck(
+  requestedSentenceEns: string[],
+): Promise<SelectedSentenceDeckSyncResult> {
+  const logs: string[] = [];
+  const log = (line: string) => logs.push(line);
+
+  try {
+    const normalized = requestedSentenceEns
+      .map(asNonEmptyString)
+      .filter((value): value is string => Boolean(value));
+    const unique = Array.from(new Set(normalized));
+
+    log(
+      `Received ${requestedSentenceEns.length} requested row(s), ${unique.length} unique non-empty sentence_en value(s).`,
+    );
+
+    if (!unique.length) {
+      return {
+        ok: false,
+        error: "No valid sentence_en values were provided.",
+        logs,
+      };
+    }
+
+    const rows = (await prisma.sentence.findMany({
+      where: {
+        sentence_en: { in: unique },
+      },
+      select: {
+        id: true,
+        sentence_en: true,
+        sentence_en_meaning_fa: true,
+        updatedAt: true,
+      },
+    })) as SentenceCandidate[];
+
+    const rowBySentence = new Map(rows.map((row) => [row.sentence_en, row]));
+    const orderedRows = unique
+      .map((sentenceEn) => rowBySentence.get(sentenceEn))
+      .filter((row): row is SentenceCandidate => Boolean(row));
+    const notFoundItems = unique.filter(
+      (sentenceEn) => !rowBySentence.has(sentenceEn),
+    );
+
+    log(
+      `Matched ${orderedRows.length} sentence row(s) in DB. notFound=${notFoundItems.length}.`,
+    );
+    for (const sentenceEn of notFoundItems) {
+      log(`Not found in DB: ${sentenceEn}`);
+    }
+
+    const addClient = createAnkiConnectClient({
+      timeoutMs: 20_000,
+      retryDelayMs: 750,
+    });
+
+    const existingSentences = await loadExistingSentenceSet(addClient);
+    log(
+      `Loaded ${existingSentences.size} existing note(s) from deck ${SENTENCE_DECK_NAME}.`,
+    );
+
+    const sentenceEnAudioById = indexLatestAudioByField("sentence_en");
+    const sentenceFaAudioById = indexLatestAudioByField(
+      "sentence_en_meaning_fa",
+    );
+    log(
+      `Indexed local audio files: sentence_en=${sentenceEnAudioById.size}, sentence_en_meaning_fa=${sentenceFaAudioById.size}.`,
+    );
+
+    let eligible = 0;
+    let added = 0;
+    let skippedAlreadyInDeck = 0;
+    let failed = 0;
+    const addedItems: Array<{
+      sentenceId: number;
+      sentence_en: string;
+      noteId: number;
+    }> = [];
+
+    for (const row of orderedRows) {
+      try {
+        if (existingSentences.has(row.sentence_en)) {
+          skippedAlreadyInDeck += 1;
+          log(
+            `Skip sentence ${row.id}: sentence_en already exists in ${SENTENCE_DECK_NAME}.`,
+          );
+          continue;
+        }
+
+        eligible += 1;
+
+        const sentenceKey = sanitizeWordAudioFilenamePart(String(row.id));
+        const sentenceEnSound = toSoundTag(
+          sentenceEnAudioById.get(sentenceKey),
+        );
+        const sentenceEnMeaningFaSound = toSoundTag(
+          sentenceFaAudioById.get(sentenceKey),
+        );
+
+        const addRes = await addClient.requestDetailed("addNote", {
+          note: {
+            deckName: SENTENCE_DECK_NAME,
+            modelName: SENTENCE_MODEL_NAME,
+            fields: {
+              sentence_en: row.sentence_en,
+              sentence_en_sound: sentenceEnSound,
+              sentence_en_meaning_fa: row.sentence_en_meaning_fa ?? "",
+              sentence_en_meaning_fa_sound: sentenceEnMeaningFaSound,
+              updatedAt: row.updatedAt.toISOString(),
+            },
+            options: {
+              allowDuplicate: false,
+              duplicateScope: "deck",
+              duplicateScopeOptions: {
+                deckName: SENTENCE_DECK_NAME,
+                checkChildren: false,
+                checkAllModels: false,
+              },
+            },
+          },
+        });
+
+        if (!addRes.ok) {
+          throw new Error(`AnkiConnect addNote failed: ${addRes.error}`);
+        }
+
+        const noteId = addRes.result;
+        if (noteId == null) {
+          throw new Error("AnkiConnect addNote returned null.");
+        }
+
+        existingSentences.add(row.sentence_en);
+        added += 1;
+        addedItems.push({
+          sentenceId: row.id,
+          sentence_en: row.sentence_en,
+          noteId,
+        });
+        log(
+          `Added sentence ${row.id} as note ${noteId}. sound_en=${sentenceEnSound ? "yes" : "no"}, sound_fa=${sentenceEnMeaningFaSound ? "yes" : "no"}.`,
+        );
+      } catch (error) {
+        failed += 1;
+        const message = error instanceof Error ? error.message : String(error);
+        log(`Failed sentence ${row.id}: ${message}`);
+      }
+    }
+
+    log(
+      `Done. requested=${unique.length}, matched=${orderedRows.length}, notFound=${notFoundItems.length}, eligible=${eligible}, added=${added}, skippedAlreadyInDeck=${skippedAlreadyInDeck}, failed=${failed}`,
+    );
+
+    return {
+      ok: true,
+      requested: unique.length,
+      matched: orderedRows.length,
+      notFound: notFoundItems.length,
+      eligible,
+      added,
+      skippedAlreadyInDeck,
+      failed,
+      logs,
+      addedItems,
+      notFoundItems,
+    };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    logs.push(`Error: ${message}`);
+    return { ok: false, error: message, logs };
+  }
 }

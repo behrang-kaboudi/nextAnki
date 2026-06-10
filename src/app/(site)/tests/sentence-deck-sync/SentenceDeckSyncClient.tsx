@@ -37,9 +37,7 @@ type SyncResponse =
         targetAddCount: number;
         eligible: number;
         added: number;
-        skippedEmptyItems: number;
         skippedAlreadyInDeck: number;
-        skippedMissingFaToEnReview: number;
         failed: number;
         currentSentenceId: number | null;
         logs: string[];
@@ -50,11 +48,50 @@ type SyncResponse =
       error: string;
     };
 
+type SelectedSyncResponse =
+  | {
+      ok: true;
+      requested: number;
+      matched: number;
+      notFound: number;
+      eligible: number;
+      added: number;
+      skippedAlreadyInDeck: number;
+      failed: number;
+      logs: string[];
+      addedItems: Array<{
+        sentenceId: number;
+        sentence_en: string;
+        noteId: number;
+      }>;
+      notFoundItems: string[];
+    }
+  | {
+      ok: false;
+      error: string;
+      logs?: string[];
+    };
+
+const SELECTED_SYNC_EXAMPLE = `[
+  {
+    "sentence_en": "The man waited quietly at the bus stop."
+  },
+  {
+    "sentence_en": "People gathered outside the building after work."
+  }
+]`;
+
 export default function SentenceDeckSyncClient() {
   const [isRunning, setIsRunning] = useState(false);
   const [addLimit, setAddLimit] = useState<string>("10");
   const [result, setResult] = useState<EnsureResponse | null>(null);
   const [syncResult, setSyncResult] = useState<SyncResponse | null>(null);
+  const [selectedModalOpen, setSelectedModalOpen] = useState(false);
+  const [selectedInput, setSelectedInput] = useState(SELECTED_SYNC_EXAMPLE);
+  const [selectedSyncing, setSelectedSyncing] = useState(false);
+  const [selectedResult, setSelectedResult] =
+    useState<SelectedSyncResponse | null>(null);
+  const [selectedError, setSelectedError] = useState<string | null>(null);
   const [logs, setLogs] = useState<string[]>([]);
   const logBoxRef = useRef<HTMLDivElement | null>(null);
 
@@ -180,17 +217,67 @@ export default function SentenceDeckSyncClient() {
     }
   }
 
+  async function handleSelectedSync() {
+    if (selectedSyncing) return;
+
+    setSelectedSyncing(true);
+    setSelectedError(null);
+    setSelectedResult(null);
+
+    try {
+      const parsed = JSON.parse(selectedInput) as unknown;
+      if (!Array.isArray(parsed)) {
+        throw new Error("JSON باید یک آرایه باشد.");
+      }
+
+      for (const item of parsed) {
+        if (
+          !item ||
+          typeof item !== "object" ||
+          Array.isArray(item) ||
+          typeof (item as { sentence_en?: unknown }).sentence_en !== "string"
+        ) {
+          throw new Error(
+            'هر آیتم باید دقیقاً فیلد string به نام "sentence_en" داشته باشد.',
+          );
+        }
+      }
+
+      const res = await fetch("/api/tests/sentence-deck-sync/sync-selected", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ rows: parsed }),
+      });
+      const data = (await res.json()) as SelectedSyncResponse;
+      setSelectedResult(data);
+      if (data.ok) {
+        setLogs(data.logs ?? []);
+      } else {
+        setSelectedError(data.error);
+        setLogs(data.logs?.length ? data.logs : [`Error: ${data.error}`]);
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      setSelectedError(message);
+      setLogs([`Error: ${message}`]);
+    } finally {
+      setSelectedSyncing(false);
+    }
+  }
+
   useEffect(() => {
     void fetchSyncStatus();
   }, []);
 
   useEffect(() => {
-    if (!(syncResult?.ok && syncResult.status.running)) return;
+    if (!isSyncing) return;
     const id = setInterval(() => {
       void fetchSyncStatus();
     }, 1000);
     return () => clearInterval(id);
-  }, [syncResult?.ok, syncResult?.ok ? syncResult.status.running : false]);
+  }, [isSyncing]);
 
   return (
     <main className="mx-auto w-full max-w-4xl p-4">
@@ -230,13 +317,10 @@ export default function SentenceDeckSyncClient() {
           <div className="grid gap-4">
             <div className="text-sm text-muted">
               Add notes to <span className="font-mono">{SentenceAnkiConstants.decks.EnSentences}</span> from DB
-              sentences where <span className="font-mono">items</span> is
-              non-empty, <span className="font-mono">sentence_en</span> is not
-              already in the deck, and all referenced{" "}
-              <span className="font-mono">anki_link_id</span> values have a{" "}
-              <span className="font-mono">FaToEn</span> card in review. If local
-              audio exists for sentence fields, corresponding sound fields are
-              filled automatically.
+              sentences when <span className="font-mono">sentence_en</span> is
+              not already in the sentence note type. If local audio exists for
+              sentence fields, corresponding sound fields are filled
+              automatically.
             </div>
 
             <div className="rounded-xl border border-emerald-200/80 bg-white/70 p-3 dark:border-emerald-900/60 dark:bg-black/10">
@@ -269,6 +353,17 @@ export default function SentenceDeckSyncClient() {
                   className="rounded-xl border border-rose-600 bg-rose-600 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-rose-900/20 transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   استاپ افزودن
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedModalOpen(true);
+                    setSelectedError(null);
+                  }}
+                  disabled={isSyncing}
+                  className="rounded-xl border border-sky-600 bg-sky-600 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-sky-900/20 transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  افزودن از JSON
                 </button>
                 <button
                   type="button"
@@ -350,15 +445,8 @@ export default function SentenceDeckSyncClient() {
                 <div>Eligible: {syncResult.status.eligible}</div>
                 <div>Added: {syncResult.status.added}</div>
                 <div>
-                  Skipped empty items: {syncResult.status.skippedEmptyItems}
-                </div>
-                <div>
                   Skipped already in deck:{" "}
                   {syncResult.status.skippedAlreadyInDeck}
-                </div>
-                <div>
-                  Skipped missing FaToEn review:{" "}
-                  {syncResult.status.skippedMissingFaToEnReview}
                 </div>
                 <div>Failed: {syncResult.status.failed}</div>
                 <div>
@@ -398,6 +486,125 @@ export default function SentenceDeckSyncClient() {
             )}
           </div>
         </div>
+
+        {selectedModalOpen ? (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+            role="dialog"
+            aria-modal="true"
+          >
+            <div
+              dir="rtl"
+              lang="fa"
+              className="flex h-[86vh] w-full max-w-3xl flex-col rounded border bg-background p-4 text-right shadow-lg"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <div className="text-base font-semibold">
+                    افزودن جمله‌های انتخابی به Anki
+                  </div>
+                  <div className="mt-1 text-xs opacity-80">
+                    ورودی باید آرایه‌ای از آبجکت‌های{" "}
+                    <span className="font-mono">sentence_en</span> باشد.
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedModalOpen(false)}
+                  className="rounded border px-2 py-1 text-sm hover:bg-black/5 dark:hover:bg-white/5"
+                >
+                  Close
+                </button>
+              </div>
+
+              <div className="mt-4 grid min-h-0 flex-1 gap-4 overflow-auto">
+                <section className="rounded border p-3 text-sm leading-6">
+                  <div className="text-xs font-semibold">راهنما</div>
+                  <ul className="mt-2 list-disc space-y-1 ps-5">
+                    <li>
+                      سیستم جمله‌ها را با مقدار دقیق{" "}
+                      <span className="font-mono">sentence_en</span> در جدول{" "}
+                      <span className="font-mono">Sentence</span> پیدا می‌کند.
+                    </li>
+                    <li>
+                      فقط جمله‌هایی اضافه می‌شوند که مقدار{" "}
+                      <span className="font-mono">sentence_en</span> آن‌ها
+                      قبلاً در deck و note type جمله‌ها وجود نداشته باشد.
+                    </li>
+                    <li>
+                      اگر برای فیلدهای جمله فایل صوتی محلی موجود باشد، فیلدهای
+                      sound هم مثل sync اصلی پر می‌شوند.
+                    </li>
+                  </ul>
+                </section>
+
+                <label className="grid min-h-[260px] gap-2 text-xs font-semibold">
+                  JSON
+                  <textarea
+                    dir="ltr"
+                    value={selectedInput}
+                    onChange={(event) => setSelectedInput(event.target.value)}
+                    className="min-h-0 resize-none rounded border bg-transparent p-3 text-left font-mono text-xs font-normal outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-900"
+                    spellCheck={false}
+                  />
+                </label>
+
+                {selectedError ? (
+                  <div className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300">
+                    {selectedError}
+                  </div>
+                ) : null}
+
+                {selectedResult?.ok ? (
+                  <div className="grid gap-2 rounded border p-3 text-sm">
+                    <div className="font-semibold">نتیجه</div>
+                    <div>Requested: {selectedResult.requested}</div>
+                    <div>Matched: {selectedResult.matched}</div>
+                    <div>Not found: {selectedResult.notFound}</div>
+                    <div>Eligible: {selectedResult.eligible}</div>
+                    <div>Added: {selectedResult.added}</div>
+                    <div>
+                      Skipped already in deck:{" "}
+                      {selectedResult.skippedAlreadyInDeck}
+                    </div>
+                    <div>Failed: {selectedResult.failed}</div>
+                  </div>
+                ) : null}
+              </div>
+
+              <div className="mt-4 flex flex-wrap justify-end gap-2 border-t pt-4">
+                <button
+                  type="button"
+                  onClick={() => setSelectedInput(SELECTED_SYNC_EXAMPLE)}
+                  disabled={selectedSyncing}
+                  className="rounded border px-3 py-2 text-sm hover:bg-black/5 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-white/5"
+                >
+                  نمونه
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedInput("");
+                    setSelectedResult(null);
+                    setSelectedError(null);
+                  }}
+                  disabled={selectedSyncing}
+                  className="rounded border px-3 py-2 text-sm hover:bg-black/5 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-white/5"
+                >
+                  پاک کردن
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void handleSelectedSync()}
+                  disabled={selectedSyncing || isSyncing}
+                  className="rounded border border-sky-600 bg-sky-600 px-4 py-2 text-sm font-semibold text-white hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {selectedSyncing ? "در حال افزودن..." : "پیدا کن و اضافه کن"}
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : null}
       </div>
     </main>
   );
