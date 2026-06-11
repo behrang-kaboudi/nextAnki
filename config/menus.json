@@ -84,19 +84,6 @@
         "label": "Database Compare",
         "href": "/admin/db-compare",
         "icon": "database"
-      },
-      {
-        "type": "group",
-        "label": "Word",
-        "items": [
-          {
-            "type": "link",
-            "label": "Sentences",
-            "href": "/admin/word/imageability",
-            "icon": "file"
-          }
-        ],
-        "icon": "anki"
       }
     ]
   }
