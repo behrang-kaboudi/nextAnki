@@ -1,4 +1,3 @@
 export * from "./types";
-export { siteMenu } from "./site";
-export { dashboardMenu } from "./dashboard";
-
+export { getSiteMenu, siteMenu } from "./site";
+export { dashboardMenu, getDashboardMenu } from "./dashboard";

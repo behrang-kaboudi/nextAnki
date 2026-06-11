@@ -1,0 +1,89 @@
+import "server-only";
+
+import { prisma } from "@/lib/prisma";
+
+export type WordEditorInitial = {
+  id: number;
+  anki_link_id: string;
+  sentenceRecordId: number | null;
+
+  base_form: string;
+  phonetic_us: string | null;
+  phonetic_us_normalized: string | null;
+  meaning_fa: string;
+  meaning_fa_IPA: string;
+  meaning_fa_IPA_normalized: string;
+  pos: string | null;
+  concept_explained: string | null;
+  concept_explained_fa: string | null;
+  word_hint_story: string | null;
+  sentence_en: string;
+  sentence_en_meaning_fa: string | null;
+  explanation_for_sentence_meaning: string | null;
+  learning_depth: number | null;
+  mixed_sentence: string | null;
+  other_meanings_fa: string | null;
+  category: string | null;
+  typeOfWordInDb: string;
+  hint_sentence: string | null;
+  first_letter_en_hint: string | null;
+  first_letter_fa_hint: string | null;
+  hint_to_select: string | null;
+  json_hint: string | null;
+  word_note: string | null;
+  common_error: string | null;
+  imageability: number | null;
+
+  createdAt: string;
+  updatedAt: string;
+};
+
+export async function getWordEditorInitial(id: number): Promise<WordEditorInitial | null> {
+  const word = await prisma.word.findUnique({
+    where: { id },
+    include: {
+      sentenceLinks: {
+        where: { isPrimary: true },
+        take: 1,
+        include: { sentence: true },
+      },
+    },
+  });
+  if (!word) return null;
+
+  const primarySentence = word.sentenceLinks[0]?.sentence ?? null;
+
+  return {
+    id: word.id,
+    anki_link_id: word.anki_link_id,
+    base_form: word.base_form,
+    phonetic_us: word.phonetic_us,
+    phonetic_us_normalized: word.phonetic_us_normalized,
+    meaning_fa: word.meaning_fa,
+    meaning_fa_IPA: word.meaning_fa_IPA,
+    meaning_fa_IPA_normalized: word.meaning_fa_IPA_normalized,
+    pos: word.pos,
+    concept_explained: word.concept_explained,
+    concept_explained_fa: word.concept_explained_fa,
+    word_hint_story: word.word_hint_story,
+    sentenceRecordId: primarySentence?.id ?? null,
+    sentence_en: primarySentence?.sentence_en ?? "",
+    sentence_en_meaning_fa: primarySentence?.sentence_en_meaning_fa ?? null,
+    explanation_for_sentence_meaning: word.explanation_for_sentence_meaning,
+    learning_depth: word.learning_depth,
+    mixed_sentence: word.mixed_sentence,
+    other_meanings_fa: word.other_meanings_fa,
+    category: word.category,
+    typeOfWordInDb: word.typeOfWordInDb,
+    hint_sentence: word.hint_sentence,
+    first_letter_en_hint: word.first_letter_en_hint,
+    first_letter_fa_hint: word.first_letter_fa_hint,
+    hint_to_select: word.hint_to_select,
+    json_hint: word.json_hint,
+    word_note: word.word_note,
+    common_error: word.common_error,
+    imageability: word.imageability,
+    createdAt: word.createdAt.toISOString(),
+    updatedAt: word.updatedAt.toISOString(),
+  };
+}

@@ -1,4 +1,4 @@
-import type { MenuIcon as MenuIconName } from "@/menus";
+import type { MenuIcon as MenuIconName } from "@/menus/types";
 
 function Icon({
   children,
@@ -108,8 +108,83 @@ export function MenuIcon({
           <circle cx="12" cy="9" r="4" />
         </Icon>
       );
+    case "book":
+      return (
+        <Icon className={className}>
+          <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5v-16Z" />
+          <path d="M4 5.5A2.5 2.5 0 0 1 6.5 8H20" />
+        </Icon>
+      );
+    case "database":
+      return (
+        <Icon className={className}>
+          <ellipse cx="12" cy="5" rx="7" ry="3" />
+          <path d="M5 5v6c0 1.7 3.1 3 7 3s7-1.3 7-3V5" />
+          <path d="M5 11v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6" />
+        </Icon>
+      );
+    case "settings":
+      return (
+        <Icon className={className}>
+          <circle cx="12" cy="12" r="3" />
+          <path d="M19.4 15a1.8 1.8 0 0 0 .36 2l.06.06-2.12 2.12-.06-.06a1.8 1.8 0 0 0-2-.36 1.8 1.8 0 0 0-1.1 1.66V20.5h-3v-.08A1.8 1.8 0 0 0 10.4 18.8a1.8 1.8 0 0 0-2 .36l-.06.06-2.12-2.12.06-.06a1.8 1.8 0 0 0 .36-2A1.8 1.8 0 0 0 5 13.9H4.5v-3H5A1.8 1.8 0 0 0 6.64 9.8a1.8 1.8 0 0 0-.36-2l-.06-.06 2.12-2.12.06.06a1.8 1.8 0 0 0 2 .36A1.8 1.8 0 0 0 11.5 4.5V4h3v.5a1.8 1.8 0 0 0 1.1 1.64 1.8 1.8 0 0 0 2-.36l.06-.06 2.12 2.12-.06.06a1.8 1.8 0 0 0-.36 2A1.8 1.8 0 0 0 21 11v3h-.5A1.8 1.8 0 0 0 19.4 15Z" />
+        </Icon>
+      );
+    case "brain":
+      return (
+        <Icon className={className}>
+          <path d="M9 4a3 3 0 0 0-3 3 3 3 0 0 0-2 5 3.5 3.5 0 0 0 3.5 5H9V4Z" />
+          <path d="M15 4a3 3 0 0 1 3 3 3 3 0 0 1 2 5 3.5 3.5 0 0 1-3.5 5H15V4Z" />
+          <path d="M9 8H7M15 8h2M9 13H6M15 13h3" />
+        </Icon>
+      );
+    case "file":
+      return (
+        <Icon className={className}>
+          <path d="M6 3h8l4 4v14H6z" />
+          <path d="M14 3v5h4" />
+          <path d="M9 13h6M9 17h6" />
+        </Icon>
+      );
+    case "code":
+      return (
+        <Icon className={className}>
+          <path d="m8 9-4 3 4 3" />
+          <path d="m16 9 4 3-4 3" />
+          <path d="m14 5-4 14" />
+        </Icon>
+      );
+    case "search":
+      return (
+        <Icon className={className}>
+          <circle cx="11" cy="11" r="7" />
+          <path d="m16 16 4 4" />
+        </Icon>
+      );
+    case "audio":
+      return (
+        <Icon className={className}>
+          <path d="M4 10v4h4l5 4V6l-5 4H4Z" />
+          <path d="M16 9a4 4 0 0 1 0 6" />
+          <path d="M18.5 6.5a7.5 7.5 0 0 1 0 11" />
+        </Icon>
+      );
+    case "image":
+      return (
+        <Icon className={className}>
+          <rect x="4" y="5" width="16" height="14" rx="2" />
+          <circle cx="9" cy="10" r="1.5" />
+          <path d="m5 17 4.5-4.5L13 16l2-2 4 4" />
+        </Icon>
+      );
+    case "link":
+      return (
+        <Icon className={className}>
+          <path d="M10 13a5 5 0 0 0 7.1 0l2-2a5 5 0 0 0-7.1-7.1l-1.1 1.1" />
+          <path d="M14 11a5 5 0 0 0-7.1 0l-2 2A5 5 0 0 0 12 20.1l1.1-1.1" />
+        </Icon>
+      );
     default:
       return null;
   }
 }
-

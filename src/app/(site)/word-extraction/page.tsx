@@ -8,6 +8,8 @@ import { WORD_EXTRACTION_PROMPTS_PHASE3 } from "@/lib/word-extraction/promptSpec
 const buttonBase =
   "inline-flex h-11 cursor-pointer items-center justify-center rounded-xl px-4 text-xs font-semibold tracking-wide shadow-elevated transition-all duration-150 ease-out hover:-translate-y-0.5 hover:shadow-[0_12px_30px_rgba(0,0,0,0.18)] hover:brightness-105 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:shadow-elevated";
 
+type PromptModalItem = { path: string; text: string };
+
 export default function WordExtractionPage() {
   const [promptText, setPromptText] = useState(
     [
@@ -47,7 +49,7 @@ export default function WordExtractionPage() {
   const [isBaseModalLoading, setIsBaseModalLoading] = useState(false);
   const [baseModalError, setBaseModalError] = useState<string | null>(null);
   const [baseModalItems, setBaseModalItems] = useState<
-    { path: string; text: string }[]
+    PromptModalItem[]
   >([]);
   const [baseModalCopied, setBaseModalCopied] = useState(false);
   const [isSentenceExtractModalOpen, setIsSentenceExtractModalOpen] =
@@ -61,7 +63,7 @@ export default function WordExtractionPage() {
     string | null
   >(null);
   const [sentenceExtractModalItems, setSentenceExtractModalItems] = useState<
-    { path: string; text: string }[]
+    PromptModalItem[]
   >([]);
   const [
     sentenceExtractModalPromptCopied,
@@ -88,7 +90,7 @@ export default function WordExtractionPage() {
     null,
   );
   const [phoneticModalItems, setPhoneticModalItems] = useState<
-    { path: string; text: string }[]
+    PromptModalItem[]
   >([]);
   const [phoneticModalTailJson, setPhoneticModalTailJson] =
     useState<string>("");
@@ -264,17 +266,26 @@ export default function WordExtractionPage() {
     setSentenceExtractModalTailCount(0);
     setSentenceExtractModalTailLimitApplied(0);
     try {
-      const path = "src/prompts/word-extraction/exFromSentencess/rulseV1.md";
-      const res = await fetch(
-        `/api/ai/prompt-file?path=${encodeURIComponent(path)}`,
-        { method: "GET" },
+      const paths = [
+        "src/prompts/word-extraction/exFromSentencess/rulseV1.md",
+        "src/prompts/word-extraction/sentence_en/rulseV1.md",
+        "src/prompts/word-extraction/sentence_meaning_fa/rulseV1.md",
+      ];
+      const results = await Promise.all(
+        paths.map(async (path) => {
+          const res = await fetch(
+            `/api/ai/prompt-file?path=${encodeURIComponent(path)}`,
+            { method: "GET" },
+          );
+          if (!res.ok) {
+            const text = await res.text().catch(() => "");
+            throw new Error(text || `Request failed: ${res.status}`);
+          }
+          const data = (await res.json()) as { path: string; text: string };
+          return { path: data.path, text: data.text };
+        }),
       );
-      if (!res.ok) {
-        const text = await res.text().catch(() => "");
-        throw new Error(text || `Request failed: ${res.status}`);
-      }
-      const data = (await res.json()) as { path: string; text: string };
-      setSentenceExtractModalItems([{ path: data.path, text: data.text }]);
+      setSentenceExtractModalItems(results);
     } catch (error) {
       setSentenceExtractModalError(
         error instanceof Error ? error.message : String(error),
@@ -519,7 +530,7 @@ export default function WordExtractionPage() {
   const [isBase2ModalLoading, setIsBase2ModalLoading] = useState(false);
   const [base2ModalError, setBase2ModalError] = useState<string | null>(null);
   const [base2ModalItems, setBase2ModalItems] = useState<
-    { path: string; text: string }[]
+    PromptModalItem[]
   >([]);
   const [base2ModalTailJson, setBase2ModalTailJson] = useState<string>("");
   const [base2ModalCopied, setBase2ModalCopied] = useState(false);
@@ -542,11 +553,16 @@ export default function WordExtractionPage() {
     string | null
   >(null);
   const [phase4PromptModalItems, setPhase4PromptModalItems] = useState<
-    { path: string; text: string }[]
+    PromptModalItem[]
   >([]);
   const [phase4PromptModalTailJson, setPhase4PromptModalTailJson] =
     useState<string>("");
   const [phase4PromptModalCopied, setPhase4PromptModalCopied] = useState(false);
+  const [promptPathModal, setPromptPathModal] = useState<{
+    title: string;
+    paths: string[];
+  } | null>(null);
+  const [promptPathModalCopied, setPromptPathModalCopied] = useState(false);
   const [phase4Checked, setPhase4Checked] = useState<Record<string, boolean>>(
     () =>
       Object.fromEntries(
@@ -569,6 +585,17 @@ export default function WordExtractionPage() {
     null,
   );
   const [helpModalSaveOk, setHelpModalSaveOk] = useState(false);
+
+  const openPromptPathModal = useCallback(
+    (title: string, items: PromptModalItem[]) => {
+      setPromptPathModal({
+        title,
+        paths: items.map((item) => item.path),
+      });
+      setPromptPathModalCopied(false);
+    },
+    [],
+  );
 
   const openBase2PromptModal = useCallback(async () => {
     setIsBase2ModalOpen(true);
@@ -1608,7 +1635,7 @@ export default function WordExtractionPage() {
               <div>
                 <div className="text-base font-semibold">Base Prompt Files</div>
                 <div className="mt-1 text-xs opacity-70">
-                  3 files loaded in order
+                  {baseModalItems.length} file(s) loaded in order
                 </div>
               </div>
               <button
@@ -1634,28 +1661,41 @@ export default function WordExtractionPage() {
                   <div className="text-xs opacity-70">
                     {baseModalItems.length} file(s)
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const combined = baseModalItems
-                        .map((item) => item.text.trim())
-                        .join("\n\n");
-                      void navigator.clipboard.writeText(combined).then(() => {
-                        setBaseModalCopied(true);
-                        window.setTimeout(
-                          () => setBaseModalCopied(false),
-                          1200,
-                        );
-                      });
-                    }}
-                    className={`rounded border px-3 py-2 text-sm transition hover:bg-black/5 dark:hover:bg-white/5 ${
-                      baseModalCopied
-                        ? "border-emerald-500/40 bg-emerald-500/10"
-                        : ""
-                    }`}
-                  >
-                    {baseModalCopied ? "Copied" : "Copy all"}
-                  </button>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        openPromptPathModal("Base Prompt Files", baseModalItems)
+                      }
+                      className="rounded border px-3 py-2 text-sm transition hover:bg-black/5 dark:hover:bg-white/5"
+                    >
+                      File paths
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const combined = baseModalItems
+                          .map((item) => item.text.trim())
+                          .join("\n\n");
+                        void navigator.clipboard
+                          .writeText(combined)
+                          .then(() => {
+                            setBaseModalCopied(true);
+                            window.setTimeout(
+                              () => setBaseModalCopied(false),
+                              1200,
+                            );
+                          });
+                      }}
+                      className={`rounded border px-3 py-2 text-sm transition hover:bg-black/5 dark:hover:bg-white/5 ${
+                        baseModalCopied
+                          ? "border-emerald-500/40 bg-emerald-500/10"
+                          : ""
+                      }`}
+                    >
+                      {baseModalCopied ? "Copied" : "Copy all"}
+                    </button>
+                  </div>
                 </div>
                 <textarea
                   readOnly
@@ -1713,7 +1753,21 @@ export default function WordExtractionPage() {
                   <div className="text-xs opacity-70">
                     {sentenceExtractModalItems.length} file(s)
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        openPromptPathModal(
+                          sentenceExtractModalKind === "missing"
+                            ? "Sentence Extraction Prompt"
+                            : "Prompt From Sentences",
+                          sentenceExtractModalItems,
+                        )
+                      }
+                      className="rounded border px-3 py-2 text-sm transition hover:bg-black/5 dark:hover:bg-white/5"
+                    >
+                      File paths
+                    </button>
                     <button
                       type="button"
                       onClick={() => {
@@ -1863,7 +1917,19 @@ export default function WordExtractionPage() {
                   <div className="text-xs opacity-70">
                     {phoneticModalItems.length} file(s)
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        openPromptPathModal(
+                          "meaning_fa_IPA Prompt",
+                          phoneticModalItems,
+                        )
+                      }
+                      className="rounded border px-3 py-2 text-sm transition hover:bg-black/5 dark:hover:bg-white/5"
+                    >
+                      File paths
+                    </button>
                     <button
                       type="button"
                       onClick={() => {
@@ -2207,7 +2273,16 @@ export default function WordExtractionPage() {
                   <div className="text-xs opacity-70">
                     {base2ModalItems.length} file(s)
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        openPromptPathModal("Phase 3 Prompt", base2ModalItems)
+                      }
+                      className="rounded border px-3 py-2 text-sm transition hover:bg-black/5 dark:hover:bg-white/5"
+                    >
+                      File paths
+                    </button>
                     <button
                       type="button"
                       onClick={() => {
@@ -2436,27 +2511,41 @@ export default function WordExtractionPage() {
                         ? "Loading missing rows…"
                         : "Prompt + missing rows"}
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        void navigator.clipboard
-                          .writeText(buildHelperPromptText())
-                          .then(() => {
-                            setPhase4PromptModalCopied(true);
-                            window.setTimeout(
-                              () => setPhase4PromptModalCopied(false),
-                              1200,
-                            );
-                          });
-                      }}
-                      className={`rounded border px-3 py-2 text-sm transition hover:bg-black/5 dark:hover:bg-white/5 ${
-                        phase4PromptModalCopied
-                          ? "border-emerald-500/40 bg-emerald-500/10"
-                          : ""
-                      }`}
-                    >
-                      {phase4PromptModalCopied ? "Copied" : "Copy all"}
-                    </button>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          openPromptPathModal(
+                            "Helper Prompt Files",
+                            phase4PromptModalItems,
+                          )
+                        }
+                        className="rounded border px-3 py-2 text-sm transition hover:bg-black/5 dark:hover:bg-white/5"
+                      >
+                        File paths
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          void navigator.clipboard
+                            .writeText(buildHelperPromptText())
+                            .then(() => {
+                              setPhase4PromptModalCopied(true);
+                              window.setTimeout(
+                                () => setPhase4PromptModalCopied(false),
+                                1200,
+                              );
+                            });
+                        }}
+                        className={`rounded border px-3 py-2 text-sm transition hover:bg-black/5 dark:hover:bg-white/5 ${
+                          phase4PromptModalCopied
+                            ? "border-emerald-500/40 bg-emerald-500/10"
+                            : ""
+                        }`}
+                      >
+                        {phase4PromptModalCopied ? "Copied" : "Copy all"}
+                      </button>
+                    </div>
                   </div>
                   <textarea
                     readOnly
@@ -2466,6 +2555,78 @@ export default function WordExtractionPage() {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      ) : null}
+
+      {promptPathModal ? (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div className="flex w-full max-w-3xl flex-col gap-4 rounded-2xl border border-card bg-background p-6 shadow-elevated">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <div className="text-base font-semibold">
+                  {promptPathModal.title} — file paths
+                </div>
+                <div className="mt-1 text-xs opacity-70">
+                  {promptPathModal.paths.length} prompt file(s)
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPromptPathModal(null)}
+                className="rounded border px-2 py-1 text-sm hover:bg-black/5 dark:hover:bg-white/5"
+              >
+                Close
+              </button>
+            </div>
+
+            <div className="max-h-[55vh] overflow-auto rounded border bg-background/50">
+              {promptPathModal.paths.length ? (
+                <ol className="grid gap-0">
+                  {promptPathModal.paths.map((path, index) => (
+                    <li
+                      key={`${path}-${index}`}
+                      className="border-b px-3 py-2 font-mono text-xs last:border-b-0"
+                    >
+                      {path}
+                    </li>
+                  ))}
+                </ol>
+              ) : (
+                <div className="px-3 py-6 text-center text-sm opacity-70">
+                  No prompt file paths loaded.
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                disabled={promptPathModal.paths.length === 0}
+                onClick={() => {
+                  void navigator.clipboard
+                    .writeText(promptPathModal.paths.join("\n"))
+                    .then(() => {
+                      setPromptPathModalCopied(true);
+                      window.setTimeout(
+                        () => setPromptPathModalCopied(false),
+                        1200,
+                      );
+                    });
+                }}
+                className={`rounded border px-3 py-2 text-sm transition hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5 ${
+                  promptPathModalCopied
+                    ? "border-emerald-500/40 bg-emerald-500/10"
+                    : ""
+                }`}
+              >
+                {promptPathModalCopied ? "Copied" : "Copy paths"}
+              </button>
+            </div>
           </div>
         </div>
       ) : null}

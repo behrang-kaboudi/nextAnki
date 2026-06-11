@@ -1,4 +1,5 @@
 import type { Menu } from "./types";
+import { readEditableMenus } from "@/lib/menus/menuRepository";
 
 export const siteMenu: Menu = {
   id: "marketing",
@@ -33,3 +34,7 @@ export const siteMenu: Menu = {
     },
   ],
 };
+
+export async function getSiteMenu(): Promise<Menu> {
+  return (await readEditableMenus()).site;
+}

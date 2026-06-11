@@ -1,7 +1,7 @@
 import { NavbarClient } from "./Navbar.client";
 import type { NavbarItem } from "./NavbarView";
 import type { ThemeLayout } from "@/lib/theme/defaultThemes";
-import type { MenuItem } from "@/menus";
+import type { MenuItem } from "@/menus/types";
 
 function toNavbarItems(items: MenuItem[]): NavbarItem[] {
   return items.map((item) => {

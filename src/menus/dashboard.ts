@@ -1,4 +1,5 @@
 import type { Menu } from "./types";
+import { readEditableMenus } from "@/lib/menus/menuRepository";
 
 export const dashboardMenu: Menu = {
   id: "dashboard",
@@ -21,3 +22,7 @@ export const dashboardMenu: Menu = {
     },
   ],
 };
+
+export async function getDashboardMenu(): Promise<Menu> {
+  return (await readEditableMenus()).dashboard;
+}

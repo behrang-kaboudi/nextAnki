@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { PageHeader } from "@/components/page-header";
-import { prisma } from "@/lib/prisma";
+import { getWordEditorInitial } from "@/lib/words/editorPayload";
 
 import WordEditorClient from "./word-editor.client";
 
@@ -17,18 +17,8 @@ export default async function WordEditorPage({
   const id = Number(idRaw);
   if (!Number.isFinite(id) || id <= 0) notFound();
 
-  const word = await prisma.word.findUnique({
-    where: { id },
-    include: {
-      sentenceLinks: {
-        where: { isPrimary: true },
-        take: 1,
-        include: { sentence: true },
-      },
-    },
-  });
+  const word = await getWordEditorInitial(id);
   if (!word) notFound();
-  const primarySentence = word.sentenceLinks[0]?.sentence ?? null;
 
   return (
     <main className="mx-auto w-full max-w-6xl p-4">
@@ -47,39 +37,7 @@ export default async function WordEditorPage({
 
       <div className="mt-4">
         <WordEditorClient
-          initial={{
-            id: word.id,
-            anki_link_id: word.anki_link_id,
-            base_form: word.base_form,
-            phonetic_us: word.phonetic_us,
-            phonetic_us_normalized: word.phonetic_us_normalized,
-            meaning_fa: word.meaning_fa,
-            meaning_fa_IPA: word.meaning_fa_IPA,
-            meaning_fa_IPA_normalized: word.meaning_fa_IPA_normalized,
-            pos: word.pos,
-            concept_explained: word.concept_explained,
-            concept_explained_fa: word.concept_explained_fa,
-            word_hint_story: word.word_hint_story,
-            sentenceRecordId: primarySentence?.id ?? null,
-            sentence_en: primarySentence?.sentence_en ?? "",
-            sentence_en_meaning_fa: primarySentence?.sentence_en_meaning_fa ?? null,
-            explanation_for_sentence_meaning: word.explanation_for_sentence_meaning,
-            learning_depth: word.learning_depth,
-            mixed_sentence: word.mixed_sentence,
-            other_meanings_fa: word.other_meanings_fa,
-            category: word.category,
-            typeOfWordInDb: word.typeOfWordInDb,
-            hint_sentence: word.hint_sentence,
-            first_letter_en_hint: word.first_letter_en_hint,
-            first_letter_fa_hint: word.first_letter_fa_hint,
-            hint_to_select: word.hint_to_select,
-            json_hint: word.json_hint,
-            word_note: word.word_note,
-            common_error: word.common_error,
-            imageability: word.imageability,
-            createdAt: word.createdAt.toISOString(),
-            updatedAt: word.updatedAt.toISOString(),
-          }}
+          initial={word}
         />
       </div>
     </main>

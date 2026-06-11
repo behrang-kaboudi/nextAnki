@@ -1,0 +1,84 @@
+{
+  "site": {
+    "id": "marketing",
+    "primary": [
+      {
+        "type": "link",
+        "label": "Home",
+        "href": "/tests",
+        "icon": "home",
+        "description": "Main app entry (features overview)"
+      },
+      {
+        "type": "link",
+        "label": "How to do?",
+        "href": "/how-to-do",
+        "icon": "book",
+        "description": "How-to guides and walkthroughs"
+      },
+      {
+        "type": "link",
+        "label": "Tests",
+        "href": "/tests",
+        "icon": "tools",
+        "description": "Hub for internal dev/test pages"
+      },
+      {
+        "type": "link",
+        "label": "About",
+        "href": "/about",
+        "icon": "about",
+        "description": "Project info and notes"
+      },
+      {
+        "type": "group",
+        "label": "Edits",
+        "items": [
+          {
+            "type": "link",
+            "label": "Voice",
+            "href": "/words/editor",
+            "icon": "database"
+          }
+        ],
+        "icon": "database"
+      }
+    ]
+  },
+  "dashboard": {
+    "id": "dashboard",
+    "primary": [
+      {
+        "type": "link",
+        "label": "Theme Settings",
+        "href": "/admin/themes",
+        "icon": "settings"
+      },
+      {
+        "type": "link",
+        "label": "Data",
+        "href": "/admin/data",
+        "icon": "database"
+      },
+      {
+        "type": "link",
+        "label": "Database Compare",
+        "href": "/admin/db-compare",
+        "icon": "database"
+      },
+      {
+        "type": "group",
+        "label": "Word",
+        "items": [
+          {
+            "type": "link",
+            "label": "Sentences",
+            "href": "/admin/word/imageability",
+            "icon": "file"
+          }
+        ],
+        "icon": "anki"
+      }
+    ]
+  }
+}

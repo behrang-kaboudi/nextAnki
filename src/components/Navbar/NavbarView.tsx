@@ -39,12 +39,64 @@ function ChevronDownIcon({ className }: { className?: string }) {
   );
 }
 
+function isExternalHref(href: string) {
+  return /^https?:\/\//i.test(href);
+}
+
+function NavItemLink({
+  item,
+  className,
+  iconClassName,
+  onClick,
+}: {
+  item: NavbarItem;
+  className: string;
+  iconClassName: string;
+  onClick: (event: React.MouseEvent<HTMLElement>) => void;
+}) {
+  const href = item.href ?? "#";
+  const content = (
+    <span className="flex items-center gap-2">
+      {item.icon ? <MenuIcon name={item.icon} className={iconClassName} /> : null}
+      <span>{item.label}</span>
+    </span>
+  );
+
+  if (isExternalHref(href)) {
+    return (
+      <a
+        href={href}
+        title={item.description ?? item.label}
+        onClick={onClick}
+        className={className}
+        target="_blank"
+        rel="noreferrer"
+      >
+        {content}
+      </a>
+    );
+  }
+
+  return (
+    <Link
+      href={href}
+      title={item.description ?? item.label}
+      onClick={onClick}
+      className={className}
+    >
+      {content}
+    </Link>
+  );
+}
+
 function SidebarNavItems({
   items,
   onNavigate,
+  parentKey = "sidebar",
 }: {
   items: NavbarItem[];
   onNavigate?: () => void;
+  parentKey?: string;
 }) {
   const closeSiblingDetails = (event: React.MouseEvent<HTMLElement>) => {
     const nav = (event.currentTarget as HTMLElement).closest("nav");
@@ -67,10 +119,12 @@ function SidebarNavItems({
 
   return (
     <>
-      {items.map((item) => {
+      {items.map((item, index) => {
+        const itemKey = `${parentKey}-${index}-${item.href ?? item.label}`;
+
         if (item.children?.length) {
           return (
-            <details key={item.label} className={navbarStyles.navGroup}>
+            <details key={itemKey} className={navbarStyles.navGroup}>
               <summary className={navbarStyles.navGroupSummary} onClick={closeSiblingDetails}>
                 <span className="flex items-center gap-2">
                   {item.icon ? <MenuIcon name={item.icon} className="size-5 opacity-80" /> : null}
@@ -79,46 +133,23 @@ function SidebarNavItems({
                 <ChevronDownIcon className={navbarStyles.navGroupChevron} />
               </summary>
               <div className={navbarStyles.subnav}>
-                {item.children.map((child) => (
-                  <Link
-                    key={child.href ?? child.label}
-                    href={child.href ?? "#"}
-                    title={child.description ?? child.label}
-                    onClick={(event) => {
-                      closeAllDetailsInNav(event);
-                      onNavigate?.();
-                    }}
-                    className={navbarStyles.subnavLink}
-                  >
-                    <span className="flex items-center gap-2">
-                      {child.icon ? (
-                        <MenuIcon name={child.icon} className="size-4 opacity-70" />
-                      ) : null}
-                      <span>{child.label}</span>
-                    </span>
-                  </Link>
-                ))}
+                <SidebarNavItems items={item.children} onNavigate={onNavigate} parentKey={itemKey} />
               </div>
             </details>
           );
         }
 
         return (
-          <Link
-            key={item.href ?? item.label}
-            href={item.href ?? "#"}
-            title={item.description ?? item.label}
+          <NavItemLink
+            key={itemKey}
+            item={item}
             onClick={(event) => {
               closeAllDetailsInNav(event);
               onNavigate?.();
             }}
             className={navbarStyles.navLink}
-          >
-            <span className="flex items-center gap-2">
-              {item.icon ? <MenuIcon name={item.icon} className="size-5 opacity-80" /> : null}
-              <span>{item.label}</span>
-            </span>
-          </Link>
+            iconClassName="size-5 opacity-80"
+          />
         );
       })}
     </>
@@ -128,9 +159,11 @@ function SidebarNavItems({
 function TopbarNavItems({
   items,
   onNavigate,
+  parentKey = "topbar",
 }: {
   items: NavbarItem[];
   onNavigate?: () => void;
+  parentKey?: string;
 }) {
   const closeSiblingDetails = (event: React.MouseEvent<HTMLElement>) => {
     const nav = (event.currentTarget as HTMLElement).closest("nav");
@@ -153,10 +186,12 @@ function TopbarNavItems({
 
   return (
     <>
-      {items.map((item) => {
+      {items.map((item, index) => {
+        const itemKey = `${parentKey}-${index}-${item.href ?? item.label}`;
+
         if (item.children?.length) {
           return (
-            <details key={item.label} className={navbarStyles.topbarGroup}>
+            <details key={itemKey} className={navbarStyles.topbarGroup}>
               <summary className={navbarStyles.topbarGroupSummary} onClick={closeSiblingDetails}>
                 <span className="flex items-center gap-2">
                   {item.icon ? <MenuIcon name={item.icon} className="size-5 opacity-80" /> : null}
@@ -165,46 +200,23 @@ function TopbarNavItems({
                 <ChevronDownIcon className={navbarStyles.navGroupChevron} />
               </summary>
               <div className={navbarStyles.topbarDropdown}>
-                {item.children.map((child) => (
-                  <Link
-                    key={child.href ?? child.label}
-                    href={child.href ?? "#"}
-                    title={child.description ?? child.label}
-                    onClick={(event) => {
-                      closeAllDetailsInNav(event);
-                      onNavigate?.();
-                    }}
-                    className={navbarStyles.topbarDropdownLink}
-                  >
-                    <span className="flex items-center gap-2">
-                      {child.icon ? (
-                        <MenuIcon name={child.icon} className="size-4 opacity-70" />
-                      ) : null}
-                      <span>{child.label}</span>
-                    </span>
-                  </Link>
-                ))}
+                <TopbarNavItems items={item.children} onNavigate={onNavigate} parentKey={itemKey} />
               </div>
             </details>
           );
         }
 
         return (
-          <Link
-            key={item.href ?? item.label}
-            href={item.href ?? "#"}
-            title={item.description ?? item.label}
+          <NavItemLink
+            key={itemKey}
+            item={item}
             onClick={(event) => {
               closeAllDetailsInNav(event);
               onNavigate?.();
             }}
             className={navbarStyles.topbarLink}
-          >
-            <span className="flex items-center gap-2">
-              {item.icon ? <MenuIcon name={item.icon} className="size-5 opacity-80" /> : null}
-              <span>{item.label}</span>
-            </span>
-          </Link>
+            iconClassName="size-5 opacity-80"
+          />
         );
       })}
     </>

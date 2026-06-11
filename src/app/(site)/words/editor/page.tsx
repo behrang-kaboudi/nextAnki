@@ -4,6 +4,7 @@ import { PageHeader } from "@/components/page-header";
 import { prisma } from "@/lib/prisma";
 
 import DeleteWordButton from "./DeleteWordButton.client";
+import OpenWordEditorModal from "./OpenWordEditorModal.client";
 
 export const metadata = {
   title: "Words — Editor",
@@ -151,12 +152,7 @@ export default async function WordsEditorIndexPage({
                   <td className="whitespace-nowrap px-3 py-2 font-mono">{r.updatedAt.toISOString()}</td>
                   <td className="whitespace-nowrap px-3 py-2">
                     <div className="flex items-center gap-2">
-                    <Link
-                      href={`/words/editor/${r.id}`}
-                      className="rounded border px-2 py-1 text-[11px] hover:bg-black/5 dark:hover:bg-white/5"
-                    >
-                      Open
-                    </Link>
+                      <OpenWordEditorModal id={r.id} label={r.base_form} />
                       <DeleteWordButton id={r.id} label={r.base_form} />
                     </div>
                   </td>

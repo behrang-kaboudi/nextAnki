@@ -35,7 +35,7 @@ const IPA_SPECIAL_CHARACTERS = [
   "ɡ",
 ] as const;
 
-type WordEditorState = {
+export type WordEditorState = {
   id: number;
   anki_link_id: string;
   sentenceRecordId: number | null;
@@ -126,7 +126,17 @@ function asNullableNumber(raw: string) {
   return Number.isFinite(n) ? n : null;
 }
 
-export default function WordEditorClient({ initial }: { initial: WordEditorState }) {
+export default function WordEditorClient({
+  initial,
+  floatingActions = true,
+  onDirtyChange,
+  onSaved,
+}: {
+  initial: WordEditorState;
+  floatingActions?: boolean;
+  onDirtyChange?: (dirty: boolean) => void;
+  onSaved?: (id: number) => void;
+}) {
   type SaveOptions = { force?: boolean; audioUpdatedField?: (typeof WORD_AUDIO_FIELDS)[number] };
 
   const [baseline, setBaseline] = useState<WordEditorState>(initial);
@@ -143,6 +153,10 @@ export default function WordEditorClient({ initial }: { initial: WordEditorState
   const lastUrlRef = useRef<string>("");
 
   const dirty = useMemo(() => JSON.stringify(word) !== JSON.stringify(baseline), [word, baseline]);
+
+  useEffect(() => {
+    onDirtyChange?.(dirty);
+  }, [dirty, onDirtyChange]);
 
   function normalizeAudioText(value: string | null | undefined) {
     return String(value ?? "").trim();
@@ -343,6 +357,7 @@ export default function WordEditorClient({ initial }: { initial: WordEditorState
       }
 
       setSavedAt(new Date().toISOString());
+      onSaved?.(word.id);
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -521,28 +536,30 @@ export default function WordEditorClient({ initial }: { initial: WordEditorState
         {savedAt ? <div className="mt-3 text-xs opacity-70">Saved at {savedAt}</div> : null}
       </div>
 
-      <div className="fixed bottom-4 right-4 z-40 flex items-center gap-2 rounded-2xl border border-card bg-background/95 p-2 shadow-elevated backdrop-blur">
-        <div className="hidden max-w-[34rem] text-xs opacity-70 sm:block">
-          <div className="truncate">{statusText}</div>
-          {statusMetaText ? <div className="truncate text-[11px] opacity-70">{statusMetaText}</div> : null}
+      {floatingActions ? (
+        <div className="fixed bottom-4 right-4 z-40 flex items-center gap-2 rounded-2xl border border-card bg-background/95 p-2 shadow-elevated backdrop-blur">
+          <div className="hidden max-w-[34rem] text-xs opacity-70 sm:block">
+            <div className="truncate">{statusText}</div>
+            {statusMetaText ? <div className="truncate text-[11px] opacity-70">{statusMetaText}</div> : null}
+          </div>
+          <button
+            type="button"
+            onClick={() => setWord(baseline)}
+            disabled={saving || !dirty}
+            className="rounded-xl border px-3 py-2 text-sm hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5"
+          >
+            Reset
+          </button>
+          <button
+            type="button"
+            onClick={() => void save()}
+            disabled={saving || !dirty || !requiredOk}
+            className="rounded-xl bg-foreground px-4 py-2 text-sm font-semibold text-background disabled:opacity-50"
+          >
+            {saving ? "Saving…" : "Save"}
+          </button>
         </div>
-        <button
-          type="button"
-          onClick={() => setWord(baseline)}
-          disabled={saving || !dirty}
-          className="rounded-xl border px-3 py-2 text-sm hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5"
-        >
-          Reset
-        </button>
-        <button
-          type="button"
-          onClick={() => void save()}
-          disabled={saving || !dirty || !requiredOk}
-          className="rounded-xl bg-foreground px-4 py-2 text-sm font-semibold text-background disabled:opacity-50"
-        >
-          {saving ? "Saving…" : "Save"}
-        </button>
-      </div>
+      ) : null}
 
       <div className="grid gap-4 rounded-2xl border border-card bg-background p-4">
         <div className="text-sm font-semibold">Main fields</div>

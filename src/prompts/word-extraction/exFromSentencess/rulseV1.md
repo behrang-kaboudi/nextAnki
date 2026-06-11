@@ -9,7 +9,12 @@ OUTPUT FORMAT (STRICT):
 Return a JSON array. Each element must follow this exact structure:
 
 [
-{ "base_form": "<word_or_phrase>", "meaning_fa": "<persian_meaning>" }
+{
+"base_form": "<word>",
+"meaning_fa": "<meaning1>", // only 1 meaning
+"sentence_en": "<sentence_for_this_specific_sense>", // mandatory field
+"sentence_en_meaning_fa": "<persian_translation_of_sentence_en>", // mandatory field
+}
 ]
 
 ══════════════════════════════════════
