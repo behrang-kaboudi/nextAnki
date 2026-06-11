@@ -110,7 +110,7 @@ function MenuItemCard({
   onDropOn: (path: Path) => void;
 }) {
   const canHaveChildren = depth < 3;
-  const addSubmenuDisabled = item.type !== "group" || !canHaveChildren || item.items.some((child) => child.type === "link");
+  const addSubmenuDisabled = item.type !== "group" || !canHaveChildren;
 
   return (
     <div
@@ -482,7 +482,7 @@ export function MenuManagerClient({
 
   async function loadMenus() {
     setStatus("Loading menu config...");
-    const res = await fetch("/api/tests/menu-manager", { cache: "no-store" });
+    const res = await fetch("/api/admin/menu-manager", { cache: "no-store" });
     const data = (await res.json()) as ApiResponse;
     if (!data.ok || !data.menus) {
       setStatus(data.error ?? "Failed to load menus.");
@@ -497,7 +497,7 @@ export function MenuManagerClient({
   async function saveMenus() {
     setSaving(true);
     setStatus("Saving...");
-    const res = await fetch("/api/tests/menu-manager", {
+    const res = await fetch("/api/admin/menu-manager", {
       method: "PUT",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ menus }),

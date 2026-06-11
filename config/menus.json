@@ -17,11 +17,30 @@
         "description": "How-to guides and walkthroughs"
       },
       {
-        "type": "link",
-        "label": "Tests",
-        "href": "/tests",
-        "icon": "tools",
-        "description": "Hub for internal dev/test pages"
+        "type": "group",
+        "label": "Admin",
+        "items": [
+          {
+            "type": "link",
+            "label": "Menu Manager",
+            "href": "/admin/menu-manager",
+            "icon": "tools"
+          },
+          {
+            "type": "link",
+            "label": "New link",
+            "href": "/",
+            "icon": "link"
+          },
+          {
+            "type": "link",
+            "label": "Database Compare",
+            "href": "/admin/db-compare",
+            "icon": "link",
+            "description": "مقایسه دیتا بیس در دو سیستم متفاووت"
+          }
+        ],
+        "icon": "account"
       },
       {
         "type": "link",
