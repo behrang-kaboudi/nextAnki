@@ -14,7 +14,7 @@ if (process.env.NODE_ENV !== "production") {
       ?.find((m: { name?: string; fields?: Array<{ name?: string }> }) => m?.name === "Word")
       ?.fields?.some((f: { name?: string }) => f?.name === "imageability"));
 
-  if (!("theme" in prisma) || !("ipaKeyword" in prisma) || !hasImageability) {
+  if (!("ipaKeyword" in prisma) || !hasImageability) {
     prisma = new PrismaClient();
   }
   globalForPrisma.prisma = prisma;

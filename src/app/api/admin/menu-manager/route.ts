@@ -1,6 +1,7 @@
 import "server-only";
 
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 
 import {
   readEditableMenus,
@@ -28,6 +29,8 @@ export async function PUT(req: Request) {
     const body = (await req.json().catch(() => null)) as unknown;
     const menus = validateEditableMenus((body as { menus?: unknown } | null)?.menus);
     const saved = await writeEditableMenus(menus);
+    revalidatePath("/", "layout");
+    revalidatePath("/admin", "layout");
     return NextResponse.json({ ok: true, menus: saved, iconNames: menuIconNames });
   } catch (error) {
     return NextResponse.json(

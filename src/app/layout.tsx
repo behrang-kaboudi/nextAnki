@@ -2,9 +2,6 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import "@/lib/backup/scheduler";
-import { getActiveTheme } from "@/lib/theme/themeRepository";
-import { buildThemeStyleTagContent } from "@/lib/theme/themeCss";
-import { defaultThemes } from "@/lib/theme/defaultThemes";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,22 +26,12 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const activeTheme = (await getActiveTheme()) ?? {
-    slug: defaultThemes[0].slug,
-    variables: defaultThemes[0].variables,
-  };
-
   return (
-    <html lang="en" dir="ltr" data-theme={activeTheme.slug} suppressHydrationWarning>
+    <html lang="en" dir="ltr" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}
         suppressHydrationWarning
       >
-        <style
-          dangerouslySetInnerHTML={{
-            __html: buildThemeStyleTagContent(activeTheme.slug, activeTheme.variables),
-          }}
-        />
         <div className="min-h-dvh bg-background text-foreground">{children}</div>
       </body>
     </html>

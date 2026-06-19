@@ -1,6 +1,5 @@
 import { NavbarClient } from "./Navbar.client";
 import type { NavbarItem } from "./NavbarView";
-import type { ThemeLayout } from "@/lib/theme/defaultThemes";
 import type { MenuItem } from "@/menus/types";
 
 function toNavbarItems(items: MenuItem[]): NavbarItem[] {
@@ -23,11 +22,9 @@ function toNavbarItems(items: MenuItem[]): NavbarItem[] {
 }
 
 export function Navbar({
-  layout,
   items,
 }: {
-  layout: ThemeLayout;
   items: MenuItem[];
 }) {
-  return <NavbarClient navItems={toNavbarItems(items)} layout={layout} />;
+  return <NavbarClient navItems={toNavbarItems(items)} />;
 }

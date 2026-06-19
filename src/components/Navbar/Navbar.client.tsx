@@ -4,18 +4,15 @@ import { useCallback, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 
 import { NavbarView, type NavbarItem } from "./NavbarView";
-import type { ThemeLayout } from "@/lib/theme/defaultThemes";
 
 type NavbarClientProps = {
   navItems: NavbarItem[];
-  layout: ThemeLayout;
 };
 
-export function NavbarClient({ navItems, layout }: NavbarClientProps) {
+export function NavbarClient({ navItems }: NavbarClientProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
 
-  const openMobileMenu = useCallback(() => setIsMobileMenuOpen(true), []);
   const closeMobileMenu = useCallback(() => setIsMobileMenuOpen(false), []);
   const toggleMobileMenu = useCallback(
     () => setIsMobileMenuOpen((open) => !open),
@@ -45,9 +42,7 @@ export function NavbarClient({ navItems, layout }: NavbarClientProps) {
   return (
     <NavbarView
       navItems={navItems}
-      layout={layout}
       isMobileMenuOpen={isMobileMenuOpen}
-      onMobileMenuOpen={openMobileMenu}
       onMobileMenuClose={closeMobileMenu}
       onMobileMenuToggle={toggleMobileMenu}
     />

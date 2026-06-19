@@ -5,12 +5,12 @@ type PageHeaderProps = {
 
 export function PageHeader({ title, subtitle }: PageHeaderProps) {
   return (
-    <div className="grid gap-2">
-      <h1 className="text-balance text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+    <div className="mx-auto grid max-w-5xl gap-2 text-center">
+      <h1 className="text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-5xl">
         {title}
       </h1>
       {subtitle ? (
-        <p className="max-w-2xl text-sm leading-7 text-muted sm:text-base">
+        <p className="mx-auto max-w-3xl text-base leading-7 text-muted sm:text-xl">
           {subtitle}
         </p>
       ) : null}

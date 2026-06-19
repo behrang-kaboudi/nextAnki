@@ -20,7 +20,6 @@ async function main() {
     const snapshot = {
       createdAt: new Date().toISOString(),
       data: {
-        theme: await prisma.theme.findMany(),
         word: await prisma.word.findMany(),
         sentence: await prisma.sentence.findMany(),
         sentenceWordLink: await prisma.sentenceWordLink.findMany(),

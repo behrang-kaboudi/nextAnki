@@ -62,8 +62,6 @@ async function countOrNull(getter: () => Promise<number>) {
 
 export async function getDbFingerprint(prisma: PrismaClient) {
   const [
-    themeCount,
-    themeMax,
     wordCount,
     wordMax,
     sentenceCount,
@@ -88,8 +86,6 @@ export async function getDbFingerprint(prisma: PrismaClient) {
     userRoleCount,
     rolePermissionCount,
   ] = await Promise.all([
-    countOrNull(() => prisma.theme.count()),
-    maxDateOrNull(async () => (await prisma.theme.aggregate({ _max: { updatedAt: true } }))._max.updatedAt ?? null),
     countOrNull(() => prisma.word.count()),
     maxDateOrNull(async () => (await prisma.word.aggregate({ _max: { updatedAt: true } }))._max.updatedAt ?? null),
     countOrNull(() => prisma.sentence.count()),
@@ -126,7 +122,6 @@ export async function getDbFingerprint(prisma: PrismaClient) {
   ]);
 
   const fingerprint = {
-    theme: { count: themeCount, max: themeMax?.toISOString() ?? null },
     word: { count: wordCount, max: wordMax?.toISOString() ?? null },
     sentence: { count: sentenceCount, max: sentenceMax?.toISOString() ?? null },
     sentenceWordLink: { count: sentenceWordLinkCount, max: sentenceWordLinkMax?.toISOString() ?? null },
@@ -207,7 +202,6 @@ async function writeJsonBackup(prisma: PrismaClient, outputFile: string) {
   const snapshot = {
     createdAt: new Date().toISOString(),
     data: {
-      theme: await prisma.theme.findMany(),
       word: await prisma.word.findMany(),
       sentence: await prisma.sentence.findMany(),
       sentenceWordLink: await prisma.sentenceWordLink.findMany(),

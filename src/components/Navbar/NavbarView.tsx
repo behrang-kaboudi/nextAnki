@@ -1,7 +1,6 @@
 import Link from "next/link";
 
 import { navbarStyles } from "./styles";
-import type { ThemeLayout } from "@/lib/theme/defaultThemes";
 import { MenuIcon } from "@/components/icons";
 import { NavAuthWidget } from "@/components/auth/NavAuthWidget";
 
@@ -15,9 +14,7 @@ export type NavbarItem = {
 
 type NavbarViewProps = {
   navItems: NavbarItem[];
-  layout: ThemeLayout;
   isMobileMenuOpen: boolean;
-  onMobileMenuOpen: () => void;
   onMobileMenuClose: () => void;
   onMobileMenuToggle: () => void;
 };
@@ -158,11 +155,9 @@ function SidebarNavItems({
 
 function TopbarNavItems({
   items,
-  onNavigate,
   parentKey = "topbar",
 }: {
   items: NavbarItem[];
-  onNavigate?: () => void;
   parentKey?: string;
 }) {
   const closeSiblingDetails = (event: React.MouseEvent<HTMLElement>) => {
@@ -193,14 +188,11 @@ function TopbarNavItems({
           return (
             <details key={itemKey} className={navbarStyles.topbarGroup}>
               <summary className={navbarStyles.topbarGroupSummary} onClick={closeSiblingDetails}>
-                <span className="flex items-center gap-2">
-                  {item.icon ? <MenuIcon name={item.icon} className="size-5 opacity-80" /> : null}
-                  <span>{item.label}</span>
-                </span>
-                <ChevronDownIcon className={navbarStyles.navGroupChevron} />
+                <span>{item.label}</span>
+                <ChevronDownIcon className={navbarStyles.topbarChevron} />
               </summary>
               <div className={navbarStyles.topbarDropdown}>
-                <TopbarNavItems items={item.children} onNavigate={onNavigate} parentKey={itemKey} />
+                <DropdownNavItems items={item.children} parentKey={itemKey} />
               </div>
             </details>
           );
@@ -210,12 +202,61 @@ function TopbarNavItems({
           <NavItemLink
             key={itemKey}
             item={item}
-            onClick={(event) => {
-              closeAllDetailsInNav(event);
-              onNavigate?.();
-            }}
+            onClick={closeAllDetailsInNav}
             className={navbarStyles.topbarLink}
-            iconClassName="size-5 opacity-80"
+            iconClassName="hidden"
+          />
+        );
+      })}
+    </>
+  );
+}
+
+function DropdownNavItems({
+  items,
+  parentKey = "dropdown",
+}: {
+  items: NavbarItem[];
+  parentKey?: string;
+}) {
+  const closeAllDetailsInNav = (event: React.MouseEvent<HTMLElement>) => {
+    const nav = (event.currentTarget as HTMLElement).closest("nav");
+    if (!nav) return;
+
+    nav.querySelectorAll("details[open]").forEach((details) => {
+      (details as HTMLDetailsElement).open = false;
+    });
+  };
+
+  return (
+    <>
+      {items.map((item, index) => {
+        const itemKey = `${parentKey}-${index}-${item.href ?? item.label}`;
+
+        if (item.children?.length) {
+          return (
+            <details key={itemKey} className={navbarStyles.dropdownGroup}>
+              <summary className={navbarStyles.dropdownGroupSummary}>
+                <span className="flex items-center gap-2">
+                  {item.icon ? <MenuIcon name={item.icon} className="size-4 opacity-70" /> : null}
+                  <span>{item.label}</span>
+                </span>
+                <ChevronDownIcon className={navbarStyles.navGroupChevron} />
+              </summary>
+              <div className={navbarStyles.dropdownSubnav}>
+                <DropdownNavItems items={item.children} parentKey={itemKey} />
+              </div>
+            </details>
+          );
+        }
+
+        return (
+          <NavItemLink
+            key={itemKey}
+            item={item}
+            onClick={closeAllDetailsInNav}
+            className={navbarStyles.dropdownLink}
+            iconClassName="size-4 opacity-70"
           />
         );
       })}
@@ -225,21 +266,28 @@ function TopbarNavItems({
 
 export function NavbarView({
   navItems,
-  layout,
   isMobileMenuOpen,
   onMobileMenuClose,
   onMobileMenuToggle,
 }: NavbarViewProps) {
-  if (layout === "sidebar") {
-    return (
-      <>
-        <header className={navbarStyles.mobileHeader}>
-          <Link href="/" className={navbarStyles.mobileBrand}>
+  return (
+    <>
+      <header className={navbarStyles.header}>
+        <div className={navbarStyles.headerInner}>
+          <Link href="/" className={navbarStyles.brandLink}>
             <span className={navbarStyles.brandMark} aria-hidden>
               A
             </span>
             <span className={navbarStyles.brandText}>Anki Bridge</span>
           </Link>
+
+          <nav className={navbarStyles.topbarNav}>
+            <TopbarNavItems items={navItems} />
+          </nav>
+
+          <div className={navbarStyles.topbarActions}>
+            <NavAuthWidget variant="primary" />
+          </div>
 
           <button
             type="button"
@@ -252,146 +300,24 @@ export function NavbarView({
               {isMobileMenuOpen ? "×" : "☰"}
             </span>
           </button>
-        </header>
+        </div>
+      </header>
 
-        <aside className={navbarStyles.sidebar}>
-          <div className={navbarStyles.sidebarInner}>
-            <Link href="/" className={navbarStyles.brandLink}>
-              <span className={navbarStyles.brandMark} aria-hidden>
-                A
-              </span>
-              <div className="grid leading-tight">
-                <span className={navbarStyles.brandText}>Anki Bridge</span>
-                <span className={navbarStyles.brandSubtext}>Study companion</span>
-              </div>
-            </Link>
-
-            <nav className={navbarStyles.nav}>
-              <SidebarNavItems items={navItems} />
-            </nav>
-
-            <div className={navbarStyles.sidebarFooter}>
-              <NavAuthWidget variant="primary" />
-              <div className={navbarStyles.sidebarHint}>
-                Runs locally against AnkiConnect
-              </div>
-            </div>
-          </div>
-        </aside>
-
-        {isMobileMenuOpen ? (
+      {isMobileMenuOpen ? (
+        <div
+          className={navbarStyles.mobileMenuOverlay}
+          onClick={onMobileMenuClose}
+        >
           <div
-            className={navbarStyles.mobileMenuOverlay}
-            onClick={onMobileMenuClose}
+            className={navbarStyles.mobileMenuPanel}
+            onClick={(event) => event.stopPropagation()}
           >
-            <div
-              className={navbarStyles.mobileMenuPanel}
-              onClick={(event) => event.stopPropagation()}
-            >
-              <nav className={navbarStyles.mobileMenuNav}>
-                <SidebarNavItems items={navItems} onNavigate={onMobileMenuClose} />
-                <NavAuthWidget variant="mobile" onNavigate={onMobileMenuClose} />
-              </nav>
-            </div>
-          </div>
-        ) : null}
-      </>
-    );
-  }
-
-  if (layout === "focus") {
-    return (
-      <>
-        <header className={navbarStyles.topbarHeader}>
-          <div className={navbarStyles.topbarContainer}>
-            <Link href="/" className={navbarStyles.topbarBrand}>
+            <Link href="/" className={navbarStyles.mobileBrand} onClick={onMobileMenuClose}>
               <span className={navbarStyles.brandMark} aria-hidden>
                 A
               </span>
               <span className={navbarStyles.brandText}>Anki Bridge</span>
             </Link>
-
-            <nav className={navbarStyles.topbarNav}>
-              <TopbarNavItems items={navItems} />
-            </nav>
-
-            <button
-              type="button"
-              aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
-              aria-expanded={isMobileMenuOpen}
-              onClick={onMobileMenuToggle}
-              className={navbarStyles.topbarMobileButton}
-            >
-              <span aria-hidden className={navbarStyles.mobileMenuIcon}>
-                {isMobileMenuOpen ? "×" : "☰"}
-              </span>
-            </button>
-
-            <div className={navbarStyles.topbarActions}>
-              <NavAuthWidget variant="primary" />
-            </div>
-          </div>
-        </header>
-
-        {isMobileMenuOpen ? (
-          <div
-            className={navbarStyles.mobileMenuOverlay}
-            onClick={onMobileMenuClose}
-          >
-            <div
-              className={navbarStyles.mobileMenuPanel}
-              onClick={(event) => event.stopPropagation()}
-            >
-              <nav className={navbarStyles.mobileMenuNav}>
-                <SidebarNavItems items={navItems} onNavigate={onMobileMenuClose} />
-                <NavAuthWidget variant="mobile" onNavigate={onMobileMenuClose} />
-              </nav>
-            </div>
-          </div>
-        ) : null}
-      </>
-    );
-  }
-
-  return (
-    <>
-      <header className={navbarStyles.topbarHeader}>
-        <div className={navbarStyles.topbarContainer}>
-          <Link href="/" className={navbarStyles.topbarBrand}>
-            <span className={navbarStyles.brandMark} aria-hidden>
-              A
-            </span>
-            <span className={navbarStyles.brandText}>Anki Bridge</span>
-          </Link>
-
-          <nav className={navbarStyles.topbarNav}>
-            <TopbarNavItems items={navItems} />
-          </nav>
-
-          <button
-            type="button"
-            aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
-            aria-expanded={isMobileMenuOpen}
-            onClick={onMobileMenuToggle}
-            className={navbarStyles.topbarMobileButton}
-          >
-            <span aria-hidden className={navbarStyles.mobileMenuIcon}>
-              {isMobileMenuOpen ? "×" : "☰"}
-            </span>
-          </button>
-
-          <div className={navbarStyles.topbarActions}>
-            <NavAuthWidget variant="primary" />
-          </div>
-        </div>
-      </header>
-
-      {isMobileMenuOpen ? (
-        <div className={navbarStyles.mobileMenuOverlay} onClick={onMobileMenuClose}>
-          <div
-            className={navbarStyles.mobileMenuPanel}
-            onClick={(event) => event.stopPropagation()}
-          >
             <nav className={navbarStyles.mobileMenuNav}>
               <SidebarNavItems items={navItems} onNavigate={onMobileMenuClose} />
               <NavAuthWidget variant="mobile" onNavigate={onMobileMenuClose} />

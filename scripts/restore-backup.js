@@ -107,7 +107,6 @@ async function main() {
     prisma.verificationToken.deleteMany(),
     prisma.sentence.deleteMany(),
     prisma.word.deleteMany(),
-    prisma.theme.deleteMany(),
     prisma.ipaKeyword.deleteMany(),
     prisma.pictureWord.deleteMany(),
     prisma.role.deleteMany(),
@@ -116,10 +115,6 @@ async function main() {
   ]);
 
   console.log("Restoring from backup…");
-  await createMany("Theme", withDates(data.theme ?? []), (rows) =>
-    prisma.theme.createMany({ data: rows, skipDuplicates: true })
-  );
-
   await createMany("IpaKeyword", withDates(data.ipaKeyword ?? []), (rows) =>
     prisma.ipaKeyword.createMany({ data: rows, skipDuplicates: true })
   );

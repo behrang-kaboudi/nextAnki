@@ -69,12 +69,6 @@
     "primary": [
       {
         "type": "link",
-        "label": "Theme Settings",
-        "href": "/admin/themes",
-        "icon": "settings"
-      },
-      {
-        "type": "link",
         "label": "Data",
         "href": "/admin/data",
         "icon": "database"

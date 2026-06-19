@@ -2,6 +2,7 @@ import "server-only";
 
 import { promises as fs } from "node:fs";
 import path from "node:path";
+import { unstable_noStore as noStore } from "next/cache";
 
 import {
   menuIconNames,
@@ -110,6 +111,7 @@ export function validateEditableMenus(value: unknown): EditableMenus {
 }
 
 export async function readEditableMenus(): Promise<EditableMenus> {
+  noStore();
   const raw = await fs.readFile(MENU_CONFIG_PATH, "utf8");
   return validateEditableMenus(JSON.parse(raw) as unknown);
 }

@@ -82,7 +82,6 @@ const sections: Section[] = [
     title: "Admin",
     links: [
       { href: "/admin/menu-manager", label: "Menu Manager", note: "Edit site/admin JSON menus" },
-      { href: "/admin/themes", label: "Theme Settings" },
       { href: "/admin/data", label: "Data" },
       { href: "/admin/db-compare", label: "Database Compare", note: "Git version + table hashes" },
     ],
