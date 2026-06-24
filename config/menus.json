@@ -28,26 +28,19 @@
           },
           {
             "type": "link",
-            "label": "New link",
-            "href": "/",
-            "icon": "link"
-          },
-          {
-            "type": "link",
             "label": "Database Compare",
             "href": "/admin/db-compare",
             "icon": "link",
             "description": "مقایسه دیتا بیس در دو سیستم متفاووت"
+          },
+          {
+            "type": "link",
+            "label": "Clear Word fields",
+            "href": "/tests/word/clear-fields",
+            "icon": "link"
           }
         ],
         "icon": "account"
-      },
-      {
-        "type": "link",
-        "label": "About",
-        "href": "/about",
-        "icon": "about",
-        "description": "Project info and notes"
       },
       {
         "type": "group",
@@ -55,12 +48,69 @@
         "items": [
           {
             "type": "link",
-            "label": "Voice",
+            "label": "Voice-Word",
             "href": "/words/editor",
             "icon": "database"
+          },
+          {
+            "type": "link",
+            "label": "New link",
+            "href": "/",
+            "icon": "link"
           }
         ],
         "icon": "database"
+      },
+      {
+        "type": "group",
+        "label": "Words",
+        "items": [
+          {
+            "type": "link",
+            "label": "Word Extraction",
+            "href": "/word-extraction",
+            "icon": "link"
+          },
+          {
+            "type": "link",
+            "label": "Json Hint Extraction",
+            "href": "/word-hints/json",
+            "icon": "app"
+          },
+          {
+            "type": "link",
+            "label": "Audio Genarate",
+            "href": "/word-hints/audio",
+            "icon": "app"
+          }
+        ],
+        "icon": "app"
+      },
+      {
+        "type": "group",
+        "label": "Anki Sync",
+        "items": [
+          {
+            "type": "link",
+            "label": "Anki/Words",
+            "href": "/tests/sync-anki-words",
+            "icon": "link"
+          },
+          {
+            "type": "link",
+            "label": "Delete Missing",
+            "href": "/words/word-cleanup",
+            "icon": "link"
+          }
+        ],
+        "icon": "app"
+      },
+      {
+        "type": "link",
+        "label": "About",
+        "href": "/about",
+        "icon": "about",
+        "description": "Project info and notes"
       }
     ]
   },

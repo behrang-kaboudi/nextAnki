@@ -26,13 +26,11 @@ const sections: Section[] = [
     title: "Word",
     defaultOpen: true,
     links: [
-      { href: "/words/editor", label: "Word Editor", note: "Search + edit Word fields (incl. audio controls)" },
-      { href: "/word-hints/json", label: "Word Hints — json_hint", note: "Preview & compare" },
-      { href: "/word-hints/audio", label: "Word Hints — Audio", note: "Generate & manage" },
-      { href: "/tests/word/clear-fields", label: "Clear Word fields", note: "Bulk clear selected nullable fields (DB)" },
-      { href: "/words/sentence-fields", label: "Sentence Fields", note: "TEMP: sentence_en + sentence_en_meaning_fa" },
-      { href: "/word-extraction", label: "Word Extraction" },
-      { href: "/words/word-cleanup", label: "Missing in DB" },
+      {
+        href: "/words/sentence-fields",
+        label: "Sentence Fields",
+        note: "TEMP: sentence_en + sentence_en_meaning_fa",
+      },
     ],
   },
   {
@@ -53,7 +51,11 @@ const sections: Section[] = [
       },
       { href: "/structure-builder", label: "Structure Builder" },
       { href: "/anki-connect-playground", label: "AnkiConnect Playground" },
-      { href: "/tests/anki-revlog", label: "Anki Revlog (AnkiDroid)", note: "View getReviewsOfCards output" },
+      {
+        href: "/tests/anki-revlog",
+        label: "Anki Revlog (AnkiDroid)",
+        note: "View getReviewsOfCards output",
+      },
     ],
   },
   {
@@ -81,9 +83,17 @@ const sections: Section[] = [
   {
     title: "Admin",
     links: [
-      { href: "/admin/menu-manager", label: "Menu Manager", note: "Edit site/admin JSON menus" },
+      {
+        href: "/admin/menu-manager",
+        label: "Menu Manager",
+        note: "Edit site/admin JSON menus",
+      },
       { href: "/admin/data", label: "Data" },
-      { href: "/admin/db-compare", label: "Database Compare", note: "Git version + table hashes" },
+      {
+        href: "/admin/db-compare",
+        label: "Database Compare",
+        note: "Git version + table hashes",
+      },
     ],
   },
   {
@@ -108,7 +118,9 @@ function normalize(value: string) {
 
 function matchesQuery(item: LinkItem, sectionTitle: string, q: string) {
   if (!q) return true;
-  const hay = normalize(`${sectionTitle} ${item.label} ${item.href} ${item.note ?? ""}`);
+  const hay = normalize(
+    `${sectionTitle} ${item.label} ${item.href} ${item.note ?? ""}`,
+  );
   return hay.includes(q);
 }
 
@@ -137,11 +149,11 @@ export function TestsClient() {
 
   const totalLinks = useMemo(
     () => sections.reduce((sum, s) => sum + s.links.length, 0),
-    []
+    [],
   );
   const totalVisible = useMemo(
     () => filteredSections.reduce((sum, s) => sum + s.links.length, 0),
-    [filteredSections]
+    [filteredSections],
   );
 
   return (
