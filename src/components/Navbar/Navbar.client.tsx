@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 
-import { NavbarView, type NavbarItem } from "./NavbarView";
+import { NavbarView } from "./NavbarView";
+import type { NavbarItem } from "./types";
 
 type NavbarClientProps = {
   navItems: NavbarItem[];

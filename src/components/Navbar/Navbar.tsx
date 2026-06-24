@@ -1,5 +1,5 @@
 import { NavbarClient } from "./Navbar.client";
-import type { NavbarItem } from "./NavbarView";
+import type { NavbarItem } from "./types";
 import type { MenuItem } from "@/menus/types";
 
 function toNavbarItems(items: MenuItem[]): NavbarItem[] {

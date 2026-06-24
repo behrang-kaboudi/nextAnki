@@ -18,7 +18,7 @@ export const navbarStyles = {
     "flex h-12 cursor-pointer list-none items-center gap-1 whitespace-nowrap px-3 text-xs font-medium text-muted transition hover:text-foreground [&::-webkit-details-marker]:hidden",
   topbarChevron: "size-3 opacity-60 transition group-open:rotate-180",
   topbarDropdown:
-    "absolute left-1/2 top-full z-50 grid min-w-56 -translate-x-1/2 gap-1 border border-card bg-card/95 p-3 shadow-elevated backdrop-blur-xl",
+    "absolute left-0 top-full z-50 grid min-w-56 gap-1 border border-card bg-card p-3 shadow-elevated",
   dropdownLink:
     "flex min-h-10 items-center rounded-md px-3 py-2 text-sm font-medium text-muted transition hover:bg-background hover:text-foreground",
   dropdownGroup: "group/dropdown grid gap-1 rounded-md",
