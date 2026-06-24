@@ -38,6 +38,12 @@
             "label": "Clear Word fields",
             "href": "/tests/word/clear-fields",
             "icon": "link"
+          },
+          {
+            "type": "link",
+            "label": "Database Manager",
+            "href": "/admin/data",
+            "icon": "link"
           }
         ],
         "icon": "account"
@@ -98,8 +104,27 @@
           },
           {
             "type": "link",
-            "label": "Delete Missing",
+            "label": "Delete Missing Words",
             "href": "/words/word-cleanup",
+            "icon": "link"
+          },
+          {
+            "type": "link",
+            "label": "Sentence Cards",
+            "href": "/tests/sentence-deck-sync",
+            "icon": "link"
+          }
+        ],
+        "icon": "app"
+      },
+      {
+        "type": "group",
+        "label": "Anki Management",
+        "items": [
+          {
+            "type": "link",
+            "label": "Card Management",
+            "href": "/anki-note",
             "icon": "link"
           }
         ],

@@ -43,12 +43,6 @@ const sections: Section[] = [
   {
     title: "Anki",
     links: [
-      { href: "/anki-note", label: "Card Management" },
-      {
-        href: "/tests/sentence-deck-sync",
-        label: "Sentence Cards Management",
-        note: "Placeholder: manage sentence cards + sync with sentence deck",
-      },
       { href: "/structure-builder", label: "Structure Builder" },
       { href: "/anki-connect-playground", label: "AnkiConnect Playground" },
       {
@@ -61,13 +55,7 @@ const sections: Section[] = [
   {
     title: "sync anki/words",
     defaultOpen: true,
-    links: [
-      {
-        href: "/tests/sync-anki-words",
-        label: "Sync Anki fields (Words)",
-        note: "Placeholder (TBD): update Anki note fields from DB",
-      },
-    ],
+    links: [],
   },
   {
     title: "test functions",
@@ -82,19 +70,7 @@ const sections: Section[] = [
   },
   {
     title: "Admin",
-    links: [
-      {
-        href: "/admin/menu-manager",
-        label: "Menu Manager",
-        note: "Edit site/admin JSON menus",
-      },
-      { href: "/admin/data", label: "Data" },
-      {
-        href: "/admin/db-compare",
-        label: "Database Compare",
-        note: "Git version + table hashes",
-      },
-    ],
+    links: [],
   },
   {
     title: "App",
