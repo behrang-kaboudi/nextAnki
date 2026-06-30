@@ -1,6 +1,7 @@
 ══════════════════════════════════════
 RULES FOR meaning_fa
 First, identify all the meanings provided in the input.
+اگر معنی کلمه ای مشخص نشده بود مهمترین معنی برای اون کلمه رو بگو و در این صورت بیشتر از یک معنی برای کلمه نگو. یعنی معانی دیگر رو استخراج نکن.
 for each meaning, create a separate object in the output array.
 The meaning_fa must have one meaning only.
 Meanings must be the meaning of the base_form. Do not use meanings of other forms like plurals, past tense, etc.So Meanings must match the base_form.

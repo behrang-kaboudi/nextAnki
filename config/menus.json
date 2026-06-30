@@ -79,14 +79,14 @@
           },
           {
             "type": "link",
-            "label": "Json Hint Extraction",
-            "href": "/word-hints/json",
+            "label": "Audio Genarate",
+            "href": "/word-hints/audio",
             "icon": "app"
           },
           {
             "type": "link",
-            "label": "Audio Genarate",
-            "href": "/word-hints/audio",
+            "label": "Json Hint Extraction",
+            "href": "/word-hints/json",
             "icon": "app"
           }
         ],
