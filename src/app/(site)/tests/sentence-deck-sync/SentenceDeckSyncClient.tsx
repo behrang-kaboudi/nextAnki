@@ -37,6 +37,8 @@ type SyncResponse =
         targetAddCount: number;
         eligible: number;
         added: number;
+        updated: number;
+        skippedSame: number;
         skippedAlreadyInDeck: number;
         failed: number;
         currentSentenceId: number | null;
@@ -56,6 +58,8 @@ type SelectedSyncResponse =
       notFound: number;
       eligible: number;
       added: number;
+      updated: number;
+      skippedSame: number;
       skippedAlreadyInDeck: number;
       failed: number;
       logs: string[];
@@ -317,10 +321,9 @@ export default function SentenceDeckSyncClient() {
           <div className="grid gap-4">
             <div className="text-sm text-muted">
               Add notes to <span className="font-mono">{SentenceAnkiConstants.decks.EnSentences}</span> from DB
-              sentences when <span className="font-mono">sentence_en</span> is
-              not already in the sentence note type. If local audio exists for
-              sentence fields, corresponding sound fields are filled
-              automatically.
+              sentences. Existing sentence notes are updated when DB fields,
+              local audio sound tags, or <span className="font-mono">updatedAt</span>{" "}
+              changed.
             </div>
 
             <div className="rounded-xl border border-emerald-200/80 bg-white/70 p-3 dark:border-emerald-900/60 dark:bg-black/10">
@@ -444,6 +447,8 @@ export default function SentenceDeckSyncClient() {
                 </div>
                 <div>Eligible: {syncResult.status.eligible}</div>
                 <div>Added: {syncResult.status.added}</div>
+                <div>Updated: {syncResult.status.updated}</div>
+                <div>Skipped same: {syncResult.status.skippedSame}</div>
                 <div>
                   Skipped already in deck:{" "}
                   {syncResult.status.skippedAlreadyInDeck}
@@ -527,9 +532,10 @@ export default function SentenceDeckSyncClient() {
                       <span className="font-mono">Sentence</span> پیدا می‌کند.
                     </li>
                     <li>
-                      فقط جمله‌هایی اضافه می‌شوند که مقدار{" "}
+                      جمله‌هایی که مقدار{" "}
                       <span className="font-mono">sentence_en</span> آن‌ها
-                      قبلاً در deck و note type جمله‌ها وجود نداشته باشد.
+                      قبلاً در deck و note type جمله‌ها وجود داشته باشد، در
+                      صورت تغییر فیلدها یا صوت آپدیت می‌شوند.
                     </li>
                     <li>
                       اگر برای فیلدهای جمله فایل صوتی محلی موجود باشد، فیلدهای
@@ -563,6 +569,8 @@ export default function SentenceDeckSyncClient() {
                     <div>Not found: {selectedResult.notFound}</div>
                     <div>Eligible: {selectedResult.eligible}</div>
                     <div>Added: {selectedResult.added}</div>
+                    <div>Updated: {selectedResult.updated}</div>
+                    <div>Skipped same: {selectedResult.skippedSame}</div>
                     <div>
                       Skipped already in deck:{" "}
                       {selectedResult.skippedAlreadyInDeck}

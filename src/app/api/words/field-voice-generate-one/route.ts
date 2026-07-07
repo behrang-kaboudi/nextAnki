@@ -13,6 +13,8 @@ import {
 } from "@/lib/audio/wordFieldAudioNaming";
 import { generateSpeechFromMixedText } from "@/lib/tts/cloudTts";
 import { getWordFieldAudioAbsolutePath } from "@/lib/audio/wordFieldAudioPaths.server";
+import { touchSentenceById } from "@/lib/sentences/sentenceRepo";
+import { touchWordByAnkiLinkId, touchWordsLinkedToSentenceId } from "@/lib/words/wordRepo";
 
 export const runtime = "nodejs";
 
@@ -20,6 +22,25 @@ function asNonEmptyString(value: unknown): string | null {
   if (typeof value !== "string") return null;
   const trimmed = value.trim();
   return trimmed.length ? trimmed : null;
+}
+
+function asPositiveIntString(value: string): number | null {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return null;
+  const i = Math.floor(n);
+  return i > 0 && String(i) === value ? i : null;
+}
+
+async function touchWordsForAudioChange(audioKey: string, field: WordAudioFieldKey) {
+  if (field === "sentence_en" || field === "sentence_en_meaning_fa") {
+    const sentenceId = asPositiveIntString(audioKey);
+    if (sentenceId) {
+      await touchSentenceById(sentenceId);
+      await touchWordsLinkedToSentenceId(sentenceId);
+    }
+    return;
+  }
+  await touchWordByAnkiLinkId(audioKey);
 }
 
 export async function POST(req: Request) {
@@ -56,6 +77,7 @@ export async function POST(req: Request) {
     } catch {
       size = 0;
     }
+    await touchWordsForAudioChange(audioKey, field);
     return NextResponse.json({
       ok: true,
       filename,

@@ -263,3 +263,10 @@ export function getSentenceAudioKey(sentenceId: number | string | null | undefin
   const value = String(sentenceId).trim();
   return value.length ? value : null;
 }
+
+export async function touchSentenceById(sentenceId: number) {
+  return prisma.sentence.update({
+    where: { id: sentenceId },
+    data: { updatedAt: new Date() },
+  });
+}

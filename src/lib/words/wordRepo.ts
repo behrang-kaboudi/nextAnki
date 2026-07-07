@@ -29,6 +29,18 @@ export async function touchWordByAnkiLinkId(ankiLinkId: string) {
   });
 }
 
+export async function touchWordsLinkedToSentenceId(sentenceId: number) {
+  return prisma.word.updateMany({
+    where: {
+      sentenceLinks: {
+        some: { sentenceId },
+      },
+    },
+    // Audio and Sentence edits are real sync-relevant changes even when no Word column changes.
+    data: { updatedAt: new Date() },
+  });
+}
+
 export async function deleteWord(args: Prisma.WordDeleteArgs) {
   return prisma.word.delete(args);
 }

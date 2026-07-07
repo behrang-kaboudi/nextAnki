@@ -6,7 +6,9 @@ function asTrimmedNonEmptyString(value: unknown): string | null {
   return trimmed.length ? trimmed : null;
 }
 
-export function normalizeJsonHintForCompare(jsonHint: string | null): string | null {
+export function normalizeJsonHintForCompare(
+  jsonHint: string | null,
+): string | null {
   const raw = asTrimmedNonEmptyString(jsonHint);
   if (!raw) return null;
 
@@ -22,14 +24,18 @@ export function normalizeJsonHintForCompare(jsonHint: string | null): string | n
   }
 }
 
-export function getJsonHintGeneratedAtMs(jsonHint: string | null): number | null {
+export function getJsonHintGeneratedAtMs(
+  jsonHint: string | null,
+): number | null {
   const raw = asTrimmedNonEmptyString(jsonHint);
   if (!raw) return null;
 
   try {
     const obj = JSON.parse(raw) as unknown;
     if (!obj || typeof obj !== "object") return null;
-    const value = (obj as Record<string, unknown>)[JSON_HINT_GENERATED_AT_FIELD];
+    const value = (obj as Record<string, unknown>)[
+      JSON_HINT_GENERATED_AT_FIELD
+    ];
     if (typeof value !== "number" || !Number.isFinite(value)) return null;
     return Math.trunc(value);
   } catch {
@@ -39,7 +45,7 @@ export function getJsonHintGeneratedAtMs(jsonHint: string | null): number | null
 
 export function stringifyJsonHintWithTimestamp(
   jsonHintObject: unknown,
-  nowMs: number = Date.now()
+  nowMs: number = Date.now(),
 ): string | null {
   if (!jsonHintObject || typeof jsonHintObject !== "object") return null;
   const record = jsonHintObject as Record<string, unknown>;

@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { Prisma, type PictureWord, type Word } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { pickPictureSymbolsForWord } from "@/lib/ipa/setPictures/setForAny";
+import { JSON_HINT_GENERATED_AT_FIELD } from "@/lib/words/jsonHint";
 
 export const runtime = "nodejs";
 
@@ -63,6 +64,46 @@ function isPlaceholderJob(match: {
   return Boolean(fa === "💼" && en === "job");
 }
 
+function parseStoredMatch(jsonHint: string | null | undefined): unknown {
+  const raw = (jsonHint ?? "").trim();
+  if (!raw) return null;
+
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    if (!parsed || typeof parsed !== "object") return null;
+    const record = { ...(parsed as Record<string, unknown>) };
+    delete record[JSON_HINT_GENERATED_AT_FIELD];
+    return record;
+  } catch {
+    return null;
+  }
+}
+
+function normalizeMatchForCompare(value: unknown): unknown {
+  if (value === undefined) return undefined;
+  if (value === null) return null;
+  if (Array.isArray(value)) return value.map(normalizeMatchForCompare);
+  if (typeof value !== "object") return value;
+
+  const normalized: Record<string, unknown> = {};
+  const record = value as Record<string, unknown>;
+  for (const key of Object.keys(record).sort()) {
+    if (key === JSON_HINT_GENERATED_AT_FIELD) continue;
+    const nextValue = normalizeMatchForCompare(record[key]);
+    if (nextValue === undefined) continue;
+    normalized[key] = nextValue;
+  }
+  return normalized;
+}
+
+function matchCompareText(value: unknown): string {
+  return JSON.stringify(normalizeMatchForCompare(value) ?? null);
+}
+
+function matchesDiffer(oldMatch: unknown, newMatch: unknown): boolean {
+  return matchCompareText(oldMatch) !== matchCompareText(newMatch);
+}
+
 async function mapWithConcurrency<T, R>(
   items: T[],
   concurrency: number,
@@ -115,6 +156,9 @@ export async function GET(req: Request) {
     const onlySpaced = parseBoolean(url.searchParams.get("onlySpaced"));
     const onlyEmptyMatch = parseBoolean(url.searchParams.get("onlyEmptyMatch"));
     const onlyNoJob = parseBoolean(url.searchParams.get("onlyNoJob"));
+    const onlyDifferentMatch = parseBoolean(
+      url.searchParams.get("onlyDifferentMatch")
+    );
     if (onlyEmptyMatch && onlyNoJob) {
       return NextResponse.json(
         { error: "onlyEmptyMatch and onlyNoJob cannot both be enabled" },
@@ -181,9 +225,10 @@ export async function GET(req: Request) {
               phonetic_us_normalized: string | null;
               meaning_fa: string;
               meaning_fa_IPA_normalized: string;
+              json_hint: string | null;
             }>
           >`
-            SELECT id, base_form, phonetic_us_normalized, meaning_fa, meaning_fa_IPA_normalized
+            SELECT id, base_form, phonetic_us_normalized, meaning_fa, meaning_fa_IPA_normalized, json_hint
             FROM Word
             WHERE phonetic_us_normalized IS NOT NULL
               AND phonetic_us_normalized <> ''
@@ -216,9 +261,10 @@ export async function GET(req: Request) {
               phonetic_us_normalized: string | null;
               meaning_fa: string;
               meaning_fa_IPA_normalized: string;
+              json_hint: string | null;
             }>
           >`
-            SELECT id, base_form, phonetic_us_normalized, meaning_fa, meaning_fa_IPA_normalized
+            SELECT id, base_form, phonetic_us_normalized, meaning_fa, meaning_fa_IPA_normalized, json_hint
             FROM Word
             WHERE phonetic_us_normalized IS NOT NULL
               AND phonetic_us_normalized <> ''
@@ -252,6 +298,7 @@ export async function GET(req: Request) {
               phonetic_us_normalized: true,
               meaning_fa: true,
               meaning_fa_IPA_normalized: true,
+              json_hint: true,
             },
           }),
         ]);
@@ -264,9 +311,10 @@ export async function GET(req: Request) {
       const responseStream = new ReadableStream<Uint8Array>({
         start: async (controller) => {
           try {
-            // If we need a computed filter (empty-match / placeholder-job), we must compute
+            // If we need a computed filter, we must compute
             // matches first on a larger set, then filter + paginate in-memory.
-            const needsComputedFilter = onlyEmptyMatch || onlyNoJob;
+            const needsComputedFilter =
+              onlyEmptyMatch || onlyNoJob || onlyDifferentMatch;
 
             const baseRows = (() => {
               if (!needsComputedFilter) return Promise.resolve(rows);
@@ -280,9 +328,10 @@ export async function GET(req: Request) {
                     phonetic_us_normalized: string | null;
                     meaning_fa: string;
                     meaning_fa_IPA_normalized: string;
+                    json_hint: string | null;
                   }>
                 >`
-                  SELECT id, base_form, phonetic_us_normalized, meaning_fa, meaning_fa_IPA_normalized
+                  SELECT id, base_form, phonetic_us_normalized, meaning_fa, meaning_fa_IPA_normalized, json_hint
                   FROM Word
                   WHERE phonetic_us_normalized IS NOT NULL
                     AND phonetic_us_normalized <> ''
@@ -300,9 +349,10 @@ export async function GET(req: Request) {
                     phonetic_us_normalized: string | null;
                     meaning_fa: string;
                     meaning_fa_IPA_normalized: string;
+                    json_hint: string | null;
                   }>
                 >`
-                  SELECT id, base_form, phonetic_us_normalized, meaning_fa, meaning_fa_IPA_normalized
+                  SELECT id, base_form, phonetic_us_normalized, meaning_fa, meaning_fa_IPA_normalized, json_hint
                   FROM Word
                   WHERE phonetic_us_normalized IS NOT NULL
                     AND phonetic_us_normalized <> ''
@@ -323,6 +373,7 @@ export async function GET(req: Request) {
                   phonetic_us_normalized: true,
                   meaning_fa: true,
                   meaning_fa_IPA_normalized: true,
+                  json_hint: true,
                 },
               });
             })();
@@ -339,7 +390,13 @@ export async function GET(req: Request) {
             controller.enqueue(ndjsonLine({ type: "start", total: totalToProcess }));
 
             const rowById = new Map(rowsToCompute.map((r) => [r.id, r] as const));
-            const computed: Array<(typeof rowsToCompute)[number] & { match: unknown }> = [];
+            const computed: Array<
+              (typeof rowsToCompute)[number] & {
+                match: unknown;
+                newMatch: unknown;
+                oldMatch: unknown;
+              }
+            > = [];
 
             await mapWithConcurrency(idsToProcess, 20, async (id) => {
               const word = wordsById.get(id);
@@ -347,27 +404,53 @@ export async function GET(req: Request) {
               const match = word ? await pickPictureSymbolsForWord(word) : null;
               done += 1;
               controller.enqueue(ndjsonLine({ type: "progress", done, total: totalToProcess }));
-              if (baseRow) computed.push({ ...baseRow, match });
+              if (baseRow) {
+                computed.push({
+                  ...baseRow,
+                  match,
+                  newMatch: match,
+                  oldMatch: parseStoredMatch(baseRow.json_hint),
+                });
+              }
               return null;
             });
 
             for (const row of rowsToCompute) {
               if (row.phonetic_us_normalized) continue;
-              computed.push({ ...row, match: null });
+              computed.push({
+                ...row,
+                match: null,
+                newMatch: null,
+                oldMatch: parseStoredMatch(row.json_hint),
+              });
             }
 
             // Keep stable ordering.
             const resultsById = new Map(computed.map((r) => [r.id, r] as const));
-            const orderedAll = rowsToCompute.map((r) => resultsById.get(r.id) ?? { ...r, match: null });
+            const orderedAll = rowsToCompute.map(
+              (r) =>
+                resultsById.get(r.id) ?? {
+                  ...r,
+                  match: null,
+                  newMatch: null,
+                  oldMatch: parseStoredMatch(r.json_hint),
+                }
+            );
 
-            const finalRows = needsComputedFilter
-              ? onlyEmptyMatch
-                ? orderedAll.filter((r) => !hasAnyMatchSymbols(r.match as null))
-                : orderedAll.filter(
-                    (r) =>
-                      hasAnyMatchSymbols(r.match as null) && isPlaceholderJob(r.match as null)
-                  )
-              : orderedAll;
+            let finalRows = orderedAll;
+            if (onlyEmptyMatch) {
+              finalRows = finalRows.filter((r) => !hasAnyMatchSymbols(r.match as null));
+            } else if (onlyNoJob) {
+              finalRows = finalRows.filter(
+                (r) =>
+                  hasAnyMatchSymbols(r.match as null) && isPlaceholderJob(r.match as null)
+              );
+            }
+            if (onlyDifferentMatch) {
+              finalRows = finalRows.filter((r) =>
+                matchesDiffer(r.oldMatch, r.newMatch)
+              );
+            }
 
             const totalForResponse = needsComputedFilter ? finalRows.length : total;
             const sliced = needsComputedFilter ? finalRows.slice(skip, skip + pageSize) : finalRows;
@@ -403,7 +486,7 @@ export async function GET(req: Request) {
     }
 
     const { rowsWithMatch, totalForResponse } = await (async () => {
-      if (!onlyEmptyMatch && !onlyNoJob) {
+      if (!onlyEmptyMatch && !onlyNoJob && !onlyDifferentMatch) {
         const wordsById = await loadWordsById(rows.map((r) => r.id));
         const rowsWithMatch = await mapWithConcurrency(rows, 20, async (row) => {
           const word = wordsById.get(row.id);
@@ -415,12 +498,14 @@ export async function GET(req: Request) {
           return {
             ...row,
             match,
+            newMatch: match,
+            oldMatch: parseStoredMatch(row.json_hint),
           };
         });
         return { rowsWithMatch, totalForResponse: total };
       }
 
-      // Filtering by empty-match / no-job requires computing match first, so we do an
+      // Filtering by computed match fields requires computing match first, so we do an
       // in-memory filtered pagination with a guard.
       const MAX_FILTER_ROWS = 5000;
 
@@ -432,9 +517,10 @@ export async function GET(req: Request) {
               phonetic_us_normalized: string | null;
               meaning_fa: string;
               meaning_fa_IPA_normalized: string;
+              json_hint: string | null;
             }>
           >`
-            SELECT id, base_form, phonetic_us_normalized, meaning_fa, meaning_fa_IPA_normalized
+            SELECT id, base_form, phonetic_us_normalized, meaning_fa, meaning_fa_IPA_normalized, json_hint
             FROM Word
             WHERE phonetic_us_normalized IS NOT NULL
               AND phonetic_us_normalized <> ''
@@ -451,9 +537,10 @@ export async function GET(req: Request) {
                 phonetic_us_normalized: string | null;
                 meaning_fa: string;
                 meaning_fa_IPA_normalized: string;
+                json_hint: string | null;
               }>
             >`
-              SELECT id, base_form, phonetic_us_normalized, meaning_fa, meaning_fa_IPA_normalized
+              SELECT id, base_form, phonetic_us_normalized, meaning_fa, meaning_fa_IPA_normalized, json_hint
               FROM Word
               WHERE phonetic_us_normalized IS NOT NULL
                 AND phonetic_us_normalized <> ''
@@ -474,6 +561,7 @@ export async function GET(req: Request) {
                 phonetic_us_normalized: true,
                 meaning_fa: true,
                 meaning_fa_IPA_normalized: true,
+                json_hint: true,
               },
             });
 
@@ -488,15 +576,26 @@ export async function GET(req: Request) {
             row.phonetic_us_normalized && word
               ? await pickPictureSymbolsForWord(word)
               : null;
-          return { ...row, match };
+          return {
+            ...row,
+            match,
+            newMatch: match,
+            oldMatch: parseStoredMatch(row.json_hint),
+          };
         }
       );
 
-      const filtered = onlyEmptyMatch
-        ? allWithMatchFilled.filter((r) => !hasAnyMatchSymbols(r.match))
-        : allWithMatchFilled.filter(
-            (r) => hasAnyMatchSymbols(r.match) && isPlaceholderJob(r.match)
-          );
+      let filtered = allWithMatchFilled;
+      if (onlyEmptyMatch) {
+        filtered = filtered.filter((r) => !hasAnyMatchSymbols(r.match));
+      } else if (onlyNoJob) {
+        filtered = filtered.filter(
+          (r) => hasAnyMatchSymbols(r.match) && isPlaceholderJob(r.match)
+        );
+      }
+      if (onlyDifferentMatch) {
+        filtered = filtered.filter((r) => matchesDiffer(r.oldMatch, r.newMatch));
+      }
 
       // override totals for empty-match view (best-effort; capped by MAX_EMPTY_MATCH_FILTER_ROWS)
       const filteredTotal = filtered.length;

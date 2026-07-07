@@ -17,6 +17,21 @@ type WordRow = {
   meaning_fa: string;
   meaning_fa_IPA_normalized: string;
   match?: MatchSymbols | null;
+  newMatch?: MatchSymbols | null;
+  oldMatch?: MatchSymbols | null;
+};
+
+type AppliedFilters = {
+  loadAll: boolean;
+  only2CharPhonetic: boolean;
+  only3CharPhonetic: boolean;
+  only4CharPhonetic: boolean;
+  only5CharPhonetic: boolean;
+  onlyOver6CharPhonetic: boolean;
+  onlySpaced: boolean;
+  onlyEmptyMatch: boolean;
+  onlyNoJob: boolean;
+  onlyDifferentMatch: boolean;
 };
 
 function matchHasAnyValue(match: MatchSymbols | null | undefined): boolean {
@@ -93,6 +108,10 @@ export function WordListClient() {
   const [onlySpaced, setOnlySpaced] = useState(false);
   const [onlyEmptyMatch, setOnlyEmptyMatch] = useState(false);
   const [onlyNoJob, setOnlyNoJob] = useState(false);
+  const [onlyDifferentMatch, setOnlyDifferentMatch] = useState(true);
+  const [appliedFilters, setAppliedFilters] = useState<AppliedFilters | null>(
+    null,
+  );
   const [progress, setProgress] = useState<null | {
     done: number;
     total: number;
@@ -123,16 +142,20 @@ export function WordListClient() {
   const rowsForRender = useMemo(() => {
     const rows = data?.rows ?? [];
     const decorated = rows.map((row) => {
-      const matchText = matchAsText(row.match);
+      const newMatch = row.newMatch ?? row.match;
+      const oldMatch = row.oldMatch;
+      const newMatchText = matchAsText(newMatch);
+      const oldMatchText = matchAsText(oldMatch);
       const matchHasSomething =
-        matchHasAnyValue(row.match) || matchHasPersianImageNull(row.match);
-      const needsPersonHighlight = matchHasSomething && isMatchMissingPerson(row.match);
-      const needsNoFaHighlight = matchHasSomething && matchHasNoFa(row.match);
+        matchHasAnyValue(newMatch) || matchHasPersianImageNull(newMatch);
+      const needsPersonHighlight = matchHasSomething && isMatchMissingPerson(newMatch);
+      const needsNoFaHighlight = matchHasSomething && matchHasNoFa(newMatch);
       const needsPersianImageNullHighlight =
-        matchHasSomething && matchHasPersianImageNull(row.match);
+        matchHasSomething && matchHasPersianImageNull(newMatch);
       return {
         row,
-        matchText,
+        newMatchText,
+        oldMatchText,
         needsPersonHighlight,
         needsNoFaHighlight,
         needsPersianImageNullHighlight,
@@ -154,39 +177,55 @@ export function WordListClient() {
   }, [data?.rows]);
 
   const clampedPage = Math.min(Math.max(page, 1), totalPages);
-  const shouldLoad =
-    loadAll ||
-    only2CharPhonetic ||
-    only3CharPhonetic ||
-    only4CharPhonetic ||
-    only5CharPhonetic ||
-    onlyOver6CharPhonetic ||
-    onlySpaced ||
-    onlyEmptyMatch ||
-    onlyNoJob;
+  const applyFilters = useCallback(() => {
+    setPage(1);
+    setAppliedFilters({
+      loadAll,
+      only2CharPhonetic,
+      only3CharPhonetic,
+      only4CharPhonetic,
+      only5CharPhonetic,
+      onlyOver6CharPhonetic,
+      onlySpaced,
+      onlyEmptyMatch,
+      onlyNoJob,
+      onlyDifferentMatch,
+    });
+  }, [
+    loadAll,
+    only2CharPhonetic,
+    only3CharPhonetic,
+    only4CharPhonetic,
+    only5CharPhonetic,
+    onlyOver6CharPhonetic,
+    onlySpaced,
+    onlyEmptyMatch,
+    onlyNoJob,
+    onlyDifferentMatch,
+  ]);
 
   const load = useCallback(async () => {
     try {
-      if (!shouldLoad) return;
+      if (!appliedFilters) return;
       setLoading(true);
       setError(null);
       setProgress(null);
       const res = await fetch(
         `/api/ipa/phrase-building/words?page=${clampedPage}&pageSize=${pageSize}&includeMatch=1&includeMatchStats=1&sortBy=${sortBy}&sortDir=${sortDir}&stream=1${
-          loadAll
+          appliedFilters.loadAll
             ? ""
-            : only2CharPhonetic
+            : appliedFilters.only2CharPhonetic
               ? "&phoneticLen=2"
-              : only3CharPhonetic
+              : appliedFilters.only3CharPhonetic
                 ? "&phoneticLen=3"
-                : only4CharPhonetic
+                : appliedFilters.only4CharPhonetic
                   ? "&phoneticLen=4&includeSpacedFiveForFour=1"
-                  : only5CharPhonetic
+                  : appliedFilters.only5CharPhonetic
                     ? "&phoneticLen=5&includeSpacedSixForFive=1"
-                    : onlyOver6CharPhonetic
+                    : appliedFilters.onlyOver6CharPhonetic
                       ? "&phoneticLenGt=6"
                       : ""
-        }${!loadAll && onlySpaced ? "&onlySpaced=1" : ""}${!loadAll && onlyEmptyMatch ? "&onlyEmptyMatch=1" : ""}${!loadAll && onlyNoJob ? "&onlyNoJob=1" : ""}`,
+        }${!appliedFilters.loadAll && appliedFilters.onlySpaced ? "&onlySpaced=1" : ""}${!appliedFilters.loadAll && appliedFilters.onlyEmptyMatch ? "&onlyEmptyMatch=1" : ""}${!appliedFilters.loadAll && appliedFilters.onlyNoJob ? "&onlyNoJob=1" : ""}${appliedFilters.onlyDifferentMatch ? "&onlyDifferentMatch=1" : ""}`,
         { cache: "no-store" },
       );
       if (!res.ok) {
@@ -238,26 +277,17 @@ export function WordListClient() {
       setLoading(false);
     }
   }, [
+    appliedFilters,
     clampedPage,
-    loadAll,
-    only2CharPhonetic,
-    only3CharPhonetic,
-    only4CharPhonetic,
-    only5CharPhonetic,
-    onlyOver6CharPhonetic,
-    onlySpaced,
-    onlyEmptyMatch,
-    onlyNoJob,
     pageSize,
     sortBy,
     sortDir,
-    shouldLoad,
   ]);
 
   useEffect(() => {
-    if (!shouldLoad) return;
+    if (!appliedFilters) return;
     void load();
-  }, [load, shouldLoad]);
+  }, [appliedFilters, load]);
 
   useEffect(() => {
     if (page !== clampedPage) setPage(clampedPage);
@@ -287,6 +317,25 @@ export function WordListClient() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          <label className="inline-flex basis-full items-center gap-2 rounded-md border border-border/60 bg-background px-3 py-2 text-sm text-foreground">
+            <input
+              type="checkbox"
+              checked={onlyDifferentMatch}
+              onChange={(e) => {
+                setPage(1);
+                setOnlyDifferentMatch(e.target.checked);
+              }}
+            />
+            <span>Only changed Old/New Match</span>
+          </label>
+          <button
+            type="button"
+            onClick={applyFilters}
+            disabled={loading}
+            className="rounded-md border border-border/60 bg-primary px-3 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60"
+          >
+            Run
+          </button>
           <label className="inline-flex items-center gap-2 rounded-md border border-border/60 bg-background px-3 py-2 text-sm text-foreground">
             <input
               type="checkbox"
@@ -304,8 +353,6 @@ export function WordListClient() {
                   setOnlySpaced(false);
                   setOnlyEmptyMatch(false);
                   setOnlyNoJob(false);
-                } else {
-                  setData(null);
                 }
               }}
             />
@@ -576,7 +623,8 @@ export function WordListClient() {
                   ) : null}
                 </button>
               </th>
-              <th className="border-b border-border/60 px-3 py-2">match</th>
+              <th className="border-b border-border/60 px-3 py-2">Old Match</th>
+              <th className="border-b border-border/60 px-3 py-2">New Match</th>
               <th className="border-b border-border/60 px-3 py-2">
                 meaning_fa_IPA_normalized
               </th>
@@ -587,7 +635,8 @@ export function WordListClient() {
               rowsForRender.map(
                 ({
                   row,
-                  matchText,
+                  newMatchText,
+                  oldMatchText,
                   needsPersonHighlight,
                   needsNoFaHighlight,
                   needsPersianImageNullHighlight,
@@ -611,7 +660,12 @@ export function WordListClient() {
                     </td>
                     <td className="border-b border-border/30 px-3 py-2 font-mono text-xs text-foreground">
                       <pre className="whitespace-pre-wrap break-words leading-5">
-                        {matchText}
+                        {oldMatchText}
+                      </pre>
+                    </td>
+                    <td className="border-b border-border/30 px-3 py-2 font-mono text-xs text-foreground">
+                      <pre className="whitespace-pre-wrap break-words leading-5">
+                        {newMatchText}
                       </pre>
                     </td>
                     <td className="border-b border-border/30 px-3 py-2 font-mono text-foreground">
@@ -623,7 +677,7 @@ export function WordListClient() {
             ) : (
               <tr>
                 <td
-                  colSpan={5}
+                  colSpan={6}
                   className="px-3 py-6 text-center text-sm text-muted"
                 >
                   {loading ? "Loading..." : "No results."}

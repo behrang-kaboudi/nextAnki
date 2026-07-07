@@ -66,11 +66,9 @@ export async function setFor4(word: Word): Promise<WordPictures> {
       // }
       const adjCandidate = pickBestFaEn(adjMatches, phoneticNormalized);
       symbols.adj = adjCandidate;
-
     }
   }
   if (matches.length === 0) {
-
     const persons = await findCandidatesByPart(
       phoneticNormalized[0] + phoneticNormalized[1],
       word,

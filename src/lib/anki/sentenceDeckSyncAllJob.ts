@@ -28,6 +28,17 @@ type SentenceCandidate = {
 
 type ExistingFileInfo = { filename: string; timestampMs: number; size: number };
 
+type ExistingSentenceNote = {
+  noteId: number;
+  fields: {
+    sentence_en: string;
+    sentence_en_sound: string;
+    sentence_en_meaning_fa: string;
+    sentence_en_meaning_fa_sound: string;
+    updatedAt: string;
+  };
+};
+
 export type SentenceDeckSyncAllStatus = {
   jobId: string;
   running: boolean;
@@ -44,6 +55,8 @@ export type SentenceDeckSyncAllStatus = {
   targetAddCount: number;
   eligible: number;
   added: number;
+  updated: number;
+  skippedSame: number;
   skippedAlreadyInDeck: number;
   failed: number;
   currentSentenceId: number | null;
@@ -58,6 +71,8 @@ export type SelectedSentenceDeckSyncResult =
       notFound: number;
       eligible: number;
       added: number;
+      updated: number;
+      skippedSame: number;
       skippedAlreadyInDeck: number;
       failed: number;
       logs: string[];
@@ -141,7 +156,35 @@ function toSoundTag(info: ExistingFileInfo | undefined): string {
   return `[sound:${info.filename}]`;
 }
 
-async function loadExistingSentenceSet(
+function normalizeCompare(value: unknown) {
+  return String(value ?? "").trim();
+}
+
+function buildSentenceNoteFields(
+  row: SentenceCandidate,
+  sentenceEnAudioById: Map<string, ExistingFileInfo>,
+  sentenceFaAudioById: Map<string, ExistingFileInfo>,
+) {
+  const sentenceKey = sanitizeWordAudioFilenamePart(String(row.id));
+  return {
+    sentence_en: row.sentence_en,
+    sentence_en_sound: toSoundTag(sentenceEnAudioById.get(sentenceKey)),
+    sentence_en_meaning_fa: row.sentence_en_meaning_fa ?? "",
+    sentence_en_meaning_fa_sound: toSoundTag(sentenceFaAudioById.get(sentenceKey)),
+    updatedAt: row.updatedAt.toISOString(),
+  };
+}
+
+function fieldsAreSame(
+  existing: ExistingSentenceNote["fields"],
+  next: ExistingSentenceNote["fields"],
+) {
+  return (Object.keys(next) as Array<keyof ExistingSentenceNote["fields"]>).every(
+    (key) => normalizeCompare(existing[key]) === normalizeCompare(next[key]),
+  );
+}
+
+async function loadExistingSentenceNotes(
   anki: ReturnType<typeof createAnkiConnectClient>,
 ) {
   const query = `deck:${quoteAnkiSearchValue(SENTENCE_DECK_NAME)} note:${quoteAnkiSearchValue(SENTENCE_MODEL_NAME)}`;
@@ -153,7 +196,7 @@ async function loadExistingSentenceSet(
   }
 
   const noteIds = noteIdsRes.result ?? [];
-  const existing = new Set<string>();
+  const existing = new Map<string, ExistingSentenceNote>();
 
   for (const chunk of chunkArray(noteIds, 200)) {
     if (!chunk.length) continue;
@@ -166,7 +209,17 @@ async function loadExistingSentenceSet(
 
     for (const note of infoRes.result ?? []) {
       const sentenceEn = asNonEmptyString(note.fields?.sentence_en?.value);
-      if (sentenceEn) existing.add(sentenceEn);
+      if (!sentenceEn) continue;
+      existing.set(sentenceEn, {
+        noteId: note.noteId,
+        fields: {
+          sentence_en: String(note.fields?.sentence_en?.value ?? ""),
+          sentence_en_sound: String(note.fields?.sentence_en_sound?.value ?? ""),
+          sentence_en_meaning_fa: String(note.fields?.sentence_en_meaning_fa?.value ?? ""),
+          sentence_en_meaning_fa_sound: String(note.fields?.sentence_en_meaning_fa_sound?.value ?? ""),
+          updatedAt: String(note.fields?.updatedAt?.value ?? ""),
+        },
+      });
     }
   }
 
@@ -190,6 +243,8 @@ function getState(): State {
       targetAddCount: 10,
       eligible: 0,
       added: 0,
+      updated: 0,
+      skippedSame: 0,
       skippedAlreadyInDeck: 0,
       failed: 0,
       currentSentenceId: null,
@@ -219,6 +274,8 @@ async function runJob(state: State) {
   state.processed = 0;
   state.eligible = 0;
   state.added = 0;
+  state.updated = 0;
+  state.skippedSame = 0;
   state.skippedAlreadyInDeck = 0;
   state.failed = 0;
   state.currentSentenceId = null;
@@ -253,7 +310,7 @@ async function runJob(state: State) {
       retryDelayMs: 750,
     });
 
-    const existingSentences = await loadExistingSentenceSet(addClient);
+    const existingSentences = await loadExistingSentenceNotes(addClient);
     log(
       `Loaded ${existingSentences.size} existing note(s) from deck ${SENTENCE_DECK_NAME}.`,
     );
@@ -276,36 +333,43 @@ async function runJob(state: State) {
       state.currentSentenceId = row.id;
 
       try {
-        if (existingSentences.has(row.sentence_en)) {
+        const nextFields = buildSentenceNoteFields(row, sentenceEnAudioById, sentenceFaAudioById);
+        const existing = existingSentences.get(row.sentence_en);
+
+        if (existing) {
+          if (fieldsAreSame(existing.fields, nextFields)) {
+            state.skippedSame += 1;
+            state.skippedAlreadyInDeck += 1;
+            state.processed += 1;
+            log(`Skip sentence ${row.id}: existing note ${existing.noteId} is already up to date.`);
+            continue;
+          }
+
+          const updateRes = await addClient.requestDetailed("updateNoteFields", {
+            note: {
+              id: existing.noteId,
+              fields: nextFields,
+            },
+          });
+          if (!updateRes.ok) {
+            throw new Error(`AnkiConnect updateNoteFields failed: ${updateRes.error}`);
+          }
+
+          existingSentences.set(row.sentence_en, { noteId: existing.noteId, fields: nextFields });
+          state.updated += 1;
           state.skippedAlreadyInDeck += 1;
           state.processed += 1;
-          log(
-            `Skip sentence ${row.id}: sentence_en already exists in ${SENTENCE_DECK_NAME}.`,
-          );
+          log(`Updated sentence ${row.id} on existing note ${existing.noteId}.`);
           continue;
         }
 
         state.eligible += 1;
 
-        const sentenceKey = sanitizeWordAudioFilenamePart(String(row.id));
-        const sentenceEnSound = toSoundTag(
-          sentenceEnAudioById.get(sentenceKey),
-        );
-        const sentenceEnMeaningFaSound = toSoundTag(
-          sentenceFaAudioById.get(sentenceKey),
-        );
-
         const addRes = await addClient.requestDetailed("addNote", {
           note: {
             deckName: SENTENCE_DECK_NAME,
             modelName: SENTENCE_MODEL_NAME,
-            fields: {
-              sentence_en: row.sentence_en,
-              sentence_en_sound: sentenceEnSound,
-              sentence_en_meaning_fa: row.sentence_en_meaning_fa ?? "",
-              sentence_en_meaning_fa_sound: sentenceEnMeaningFaSound,
-              updatedAt: row.updatedAt.toISOString(),
-            },
+            fields: nextFields,
             options: {
               allowDuplicate: false,
               duplicateScope: "deck",
@@ -327,11 +391,11 @@ async function runJob(state: State) {
           throw new Error("AnkiConnect addNote returned null.");
         }
 
-        existingSentences.add(row.sentence_en);
+        existingSentences.set(row.sentence_en, { noteId, fields: nextFields });
         state.added += 1;
         state.processed += 1;
         log(
-          `Added sentence ${row.id} as note ${noteId}. sound_en=${sentenceEnSound ? "yes" : "no"}, sound_fa=${sentenceEnMeaningFaSound ? "yes" : "no"}.`,
+          `Added sentence ${row.id} as note ${noteId}. sound_en=${nextFields.sentence_en_sound ? "yes" : "no"}, sound_fa=${nextFields.sentence_en_meaning_fa_sound ? "yes" : "no"}.`,
         );
 
         if (state.added >= maxAddCount) {
@@ -348,7 +412,7 @@ async function runJob(state: State) {
     }
 
     log(
-      `Done. scanned=${state.total}, processed=${state.processed}, eligible=${state.eligible}, added=${state.added}, skippedAlreadyInDeck=${state.skippedAlreadyInDeck}, failed=${state.failed}`,
+      `Done. scanned=${state.total}, processed=${state.processed}, eligible=${state.eligible}, added=${state.added}, updated=${state.updated}, skippedSame=${state.skippedSame}, skippedAlreadyInDeck=${state.skippedAlreadyInDeck}, failed=${state.failed}`,
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
@@ -457,7 +521,7 @@ export async function syncSelectedSentencesToSentenceDeck(
       retryDelayMs: 750,
     });
 
-    const existingSentences = await loadExistingSentenceSet(addClient);
+    const existingSentences = await loadExistingSentenceNotes(addClient);
     log(
       `Loaded ${existingSentences.size} existing note(s) from deck ${SENTENCE_DECK_NAME}.`,
     );
@@ -472,6 +536,8 @@ export async function syncSelectedSentencesToSentenceDeck(
 
     let eligible = 0;
     let added = 0;
+    let updated = 0;
+    let skippedSame = 0;
     let skippedAlreadyInDeck = 0;
     let failed = 0;
     const addedItems: Array<{
@@ -482,35 +548,40 @@ export async function syncSelectedSentencesToSentenceDeck(
 
     for (const row of orderedRows) {
       try {
-        if (existingSentences.has(row.sentence_en)) {
+        const nextFields = buildSentenceNoteFields(row, sentenceEnAudioById, sentenceFaAudioById);
+        const existing = existingSentences.get(row.sentence_en);
+
+        if (existing) {
           skippedAlreadyInDeck += 1;
-          log(
-            `Skip sentence ${row.id}: sentence_en already exists in ${SENTENCE_DECK_NAME}.`,
-          );
+          if (fieldsAreSame(existing.fields, nextFields)) {
+            skippedSame += 1;
+            log(`Skip sentence ${row.id}: existing note ${existing.noteId} is already up to date.`);
+            continue;
+          }
+
+          const updateRes = await addClient.requestDetailed("updateNoteFields", {
+            note: {
+              id: existing.noteId,
+              fields: nextFields,
+            },
+          });
+          if (!updateRes.ok) {
+            throw new Error(`AnkiConnect updateNoteFields failed: ${updateRes.error}`);
+          }
+
+          existingSentences.set(row.sentence_en, { noteId: existing.noteId, fields: nextFields });
+          updated += 1;
+          log(`Updated sentence ${row.id} on existing note ${existing.noteId}.`);
           continue;
         }
 
         eligible += 1;
 
-        const sentenceKey = sanitizeWordAudioFilenamePart(String(row.id));
-        const sentenceEnSound = toSoundTag(
-          sentenceEnAudioById.get(sentenceKey),
-        );
-        const sentenceEnMeaningFaSound = toSoundTag(
-          sentenceFaAudioById.get(sentenceKey),
-        );
-
         const addRes = await addClient.requestDetailed("addNote", {
           note: {
             deckName: SENTENCE_DECK_NAME,
             modelName: SENTENCE_MODEL_NAME,
-            fields: {
-              sentence_en: row.sentence_en,
-              sentence_en_sound: sentenceEnSound,
-              sentence_en_meaning_fa: row.sentence_en_meaning_fa ?? "",
-              sentence_en_meaning_fa_sound: sentenceEnMeaningFaSound,
-              updatedAt: row.updatedAt.toISOString(),
-            },
+            fields: nextFields,
             options: {
               allowDuplicate: false,
               duplicateScope: "deck",
@@ -532,7 +603,7 @@ export async function syncSelectedSentencesToSentenceDeck(
           throw new Error("AnkiConnect addNote returned null.");
         }
 
-        existingSentences.add(row.sentence_en);
+        existingSentences.set(row.sentence_en, { noteId, fields: nextFields });
         added += 1;
         addedItems.push({
           sentenceId: row.id,
@@ -540,7 +611,7 @@ export async function syncSelectedSentencesToSentenceDeck(
           noteId,
         });
         log(
-          `Added sentence ${row.id} as note ${noteId}. sound_en=${sentenceEnSound ? "yes" : "no"}, sound_fa=${sentenceEnMeaningFaSound ? "yes" : "no"}.`,
+          `Added sentence ${row.id} as note ${noteId}. sound_en=${nextFields.sentence_en_sound ? "yes" : "no"}, sound_fa=${nextFields.sentence_en_meaning_fa_sound ? "yes" : "no"}.`,
         );
       } catch (error) {
         failed += 1;
@@ -550,7 +621,7 @@ export async function syncSelectedSentencesToSentenceDeck(
     }
 
     log(
-      `Done. requested=${unique.length}, matched=${orderedRows.length}, notFound=${notFoundItems.length}, eligible=${eligible}, added=${added}, skippedAlreadyInDeck=${skippedAlreadyInDeck}, failed=${failed}`,
+      `Done. requested=${unique.length}, matched=${orderedRows.length}, notFound=${notFoundItems.length}, eligible=${eligible}, added=${added}, updated=${updated}, skippedSame=${skippedSame}, skippedAlreadyInDeck=${skippedAlreadyInDeck}, failed=${failed}`,
     );
 
     return {
@@ -560,6 +631,8 @@ export async function syncSelectedSentencesToSentenceDeck(
       notFound: notFoundItems.length,
       eligible,
       added,
+      updated,
+      skippedSame,
       skippedAlreadyInDeck,
       failed,
       logs,

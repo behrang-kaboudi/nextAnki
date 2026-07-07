@@ -19,13 +19,17 @@ const sections: Section[] = [
         label: "Picture Words Audio",
         note: "Record/upload/list audio",
       },
-      { href: "/ipa/phrase-building", label: "Phrase Building" },
     ],
   },
   {
     title: "Word",
     defaultOpen: true,
     links: [
+      {
+        href: "/sentences/editor",
+        label: "Sentence Editor",
+        note: "Edit sentence text, meaning, and audio",
+      },
       {
         href: "/words/sentence-fields",
         label: "Sentence Fields",

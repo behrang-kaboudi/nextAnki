@@ -60,6 +60,12 @@
           },
           {
             "type": "link",
+            "label": "Sentence Editor",
+            "href": "/sentences/editor",
+            "icon": "database"
+          },
+          {
+            "type": "link",
             "label": "New link",
             "href": "/",
             "icon": "link"
@@ -136,6 +142,19 @@
         "href": "/about",
         "icon": "about",
         "description": "Project info and notes"
+      },
+      {
+        "type": "group",
+        "label": "Tests",
+        "items": [
+          {
+            "type": "link",
+            "label": "JsonHints",
+            "href": "/ipa/phrase-building",
+            "icon": "link"
+          }
+        ],
+        "icon": "tools"
       }
     ]
   },

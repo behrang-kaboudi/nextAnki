@@ -88,8 +88,8 @@ function addReplaceMentsForFirstLetter(
     replaceFirstChar("ʒ", "ʤ"),
     replaceFirstChar("ʤ", "ʧ"),
     // source.replace("ʧ", "ʤ"),
-    replaceFirstChar("o", "ʊ"),
-    replaceFirstChar("ʊ", "o"),
+    // replaceFirstChar("o", "ʊ"),
+    // replaceFirstChar("ʊ", "o"),
   ];
 
   for (const next of nextValues) {
@@ -114,18 +114,19 @@ export function addReplaceMentsForEach(
 
   const existing = new Set(patterns);
   const nextValues = [
+    replaceFromSecondChar("ʤ", "ʒ"),
+    replaceFromSecondChar("ʒ", "ʤ"),
+    replaceFromSecondChar("ʤ", "ʧ"),
     replaceFromSecondChar("j", "ɪ"),
     replaceFromSecondChar("ɪ", "j"),
     replaceFromSecondChar("ɪ", "e"),
     // source.replace("e", "ɪ"),
-    replaceFromSecondChar("ʤ", "ʒ"),
-    replaceFromSecondChar("ʒ", "ʤ"),
-    replaceFromSecondChar("ʤ", "ʧ"),
+
     // source.replace("ʧ", "ʤ"),
-    replaceFromSecondChar("o", "ʊ"),
-    replaceFromSecondChar("ʊ", "o"),
-    replaceFromSecondChar("æ", "ʌ"),
-    replaceFromSecondChar("ʌ", "æ"),
+    // replaceFromSecondChar("o", "ʊ"),
+    // replaceFromSecondChar("ʊ", "o"),
+    // replaceFromSecondChar("æ", "ʌ"),
+    // replaceFromSecondChar("ʌ", "æ"),
   ];
 
   for (const next of nextValues) {

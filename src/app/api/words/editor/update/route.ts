@@ -8,7 +8,7 @@ import { normalizeIpaForDb } from "@/lib/ipa/normalize";
 import { pickPictureSymbolsForWord } from "@/lib/ipa/setPictures/setForAny";
 import { upsertPrimarySentenceByAnkiLinkId } from "@/lib/sentences/sentenceRepo";
 import { stringifyJsonHintWithTimestamp } from "@/lib/words/jsonHint";
-import { updateWord } from "@/lib/words/wordRepo";
+import { touchWordsLinkedToSentenceId, updateWord } from "@/lib/words/wordRepo";
 
 export const runtime = "nodejs";
 
@@ -154,6 +154,7 @@ export async function POST(req: Request) {
       sentence_en,
       sentence_en_meaning_fa: normalizeNullableString(d.sentence_en_meaning_fa) ?? null,
     });
+    await touchWordsLinkedToSentenceId(sentence.id);
 
     return NextResponse.json({
       ok: true as const,

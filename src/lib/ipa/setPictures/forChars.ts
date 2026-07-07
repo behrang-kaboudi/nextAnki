@@ -147,8 +147,9 @@ export function get2CharPatterns(phoneticNormalized: string): string[] {
 
   const patterns = [
     `${phoneticNormalized}`,
-    `${a}_${b}`,
+
     `_${a}${b}`,
+    `${a}_${b}`,
     // `_${a}_${b}`,
   ];
   for (const base of [...patterns]) addReplaceMentsForEach(patterns, base);

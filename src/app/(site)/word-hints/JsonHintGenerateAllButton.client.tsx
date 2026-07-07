@@ -60,16 +60,25 @@ export default function JsonHintGenerateAllButton({ q }: { q: string }) {
         const params = new URLSearchParams();
         if (q.trim()) params.set("q", q.trim());
         params.set("cursorId", String(cursor));
-        params.set("scanBatch", String(Math.max(10, Math.min(500, Math.trunc(scanBatch || 0) || 50))));
+        params.set(
+          "scanBatch",
+          String(Math.max(10, Math.min(500, Math.trunc(scanBatch || 0) || 50))),
+        );
         if (totalLocal == null) params.set("includeTotal", "1");
         if (onlyEmptyJsonHint) params.set("onlyEmptyJsonHint", "1");
 
-        const res = await fetch(`/api/words/json-hint-generate-all?${params.toString()}`, {
-          method: "POST",
-        });
+        const res = await fetch(
+          `/api/words/json-hint-generate-all?${params.toString()}`,
+          {
+            method: "POST",
+          },
+        );
         const data = (await res.json().catch(() => null)) as ApiResponse | null;
         if (!res.ok || !data?.ok) {
-          throw new Error((data as { error?: string } | null)?.error || `Request failed (${res.status})`);
+          throw new Error(
+            (data as { error?: string } | null)?.error ||
+              `Request failed (${res.status})`,
+          );
         }
 
         totalLocal = data.total ?? totalLocal;
@@ -101,16 +110,27 @@ export default function JsonHintGenerateAllButton({ q }: { q: string }) {
   }
 
   const totalDisplay = total ?? null;
-  const processedDisplay = totalDisplay != null ? Math.min(processed, totalDisplay) : processed;
+  const processedDisplay =
+    totalDisplay != null ? Math.min(processed, totalDisplay) : processed;
   const percent =
-    totalDisplay && totalDisplay > 0 ? Math.round((processedDisplay / totalDisplay) * 100) : null;
+    totalDisplay && totalDisplay > 0
+      ? Math.round((processedDisplay / totalDisplay) * 100)
+      : null;
   const progressText = [
-    totalDisplay != null ? `Processed: ${processedDisplay}/${totalDisplay}` : `Processed: ${processedDisplay}`,
+    totalDisplay != null
+      ? `Processed: ${processedDisplay}/${totalDisplay}`
+      : `Processed: ${processedDisplay}`,
     percent != null ? `${percent}%` : null,
     `Updated: ${updated}`,
-    batchLastId != null ? `Current/LastId: ${batchLastId}` : `CursorId: ${cursorId}`,
-    batchFirstId != null && batchLastId != null ? `Batch: ${batchFirstId}→${batchLastId}` : null,
-    lastTookMs != null ? `Last: ${Math.max(0, Math.round(lastTookMs))}ms` : null,
+    batchLastId != null
+      ? `Current/LastId: ${batchLastId}`
+      : `CursorId: ${cursorId}`,
+    batchFirstId != null && batchLastId != null
+      ? `Batch: ${batchFirstId}→${batchLastId}`
+      : null,
+    lastTookMs != null
+      ? `Last: ${Math.max(0, Math.round(lastTookMs))}ms`
+      : null,
     stopping ? "Stopping…" : null,
   ]
     .filter(Boolean)
@@ -169,11 +189,17 @@ export default function JsonHintGenerateAllButton({ q }: { q: string }) {
       </div>
 
       <div className="basis-full text-xs opacity-80">
-        {[progressText, q.trim() ? `Filter: ${q.trim()}` : null, onlyEmptyJsonHint ? "Mode: only null/empty json_hint" : null]
+        {[
+          progressText,
+          q.trim() ? `Filter: ${q.trim()}` : null,
+          onlyEmptyJsonHint ? "Mode: only null/empty json_hint" : null,
+        ]
           .filter(Boolean)
           .join(" • ")}
       </div>
-      {error ? <div className="basis-full text-xs text-red-600">{error}</div> : null}
+      {error ? (
+        <div className="basis-full text-xs text-red-600">{error}</div>
+      ) : null}
     </>
   );
 }

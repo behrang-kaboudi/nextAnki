@@ -5,12 +5,20 @@ import { NextResponse } from "next/server";
 import type { Word } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { pickPictureSymbolsForWord } from "@/lib/ipa/setPictures/setForAny";
-import { normalizeJsonHintForCompare, stringifyJsonHintWithTimestamp } from "@/lib/words/jsonHint";
+import {
+  normalizeJsonHintForCompare,
+  stringifyJsonHintWithTimestamp,
+} from "@/lib/words/jsonHint";
 import { updateWord } from "@/lib/words/wordRepo";
 
 export const runtime = "nodejs";
 
-const clampInt = (value: string | null, def: number, min: number, max: number) => {
+const clampInt = (
+  value: string | null,
+  def: number,
+  min: number,
+  max: number,
+) => {
   const n = value ? Number.parseInt(value, 10) : Number.NaN;
   if (!Number.isFinite(n)) return def;
   return Math.max(min, Math.min(max, n));
@@ -25,14 +33,17 @@ async function mapWithConcurrency<T, R>(
   const results: R[] = new Array(items.length);
   let nextIndex = 0;
 
-  const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
-    while (true) {
-      const current = nextIndex;
-      nextIndex += 1;
-      if (current >= items.length) return;
-      results[current] = await fn(items[current]!, current);
-    }
-  });
+  const workers = Array.from(
+    { length: Math.min(limit, items.length) },
+    async () => {
+      while (true) {
+        const current = nextIndex;
+        nextIndex += 1;
+        if (current >= items.length) return;
+        results[current] = await fn(items[current]!, current);
+      }
+    },
+  );
 
   await Promise.all(workers);
   return results;
@@ -42,14 +53,23 @@ export async function POST(req: Request) {
   try {
     const url = new URL(req.url);
     const q = String(url.searchParams.get("q") ?? "").trim();
-    const cursorId = clampInt(url.searchParams.get("cursorId"), 0, 0, Number.MAX_SAFE_INTEGER);
+    const cursorId = clampInt(
+      url.searchParams.get("cursorId"),
+      0,
+      0,
+      Number.MAX_SAFE_INTEGER,
+    );
     const scanBatch = clampInt(url.searchParams.get("scanBatch"), 50, 10, 500);
     const includeTotal = (() => {
-      const raw = (url.searchParams.get("includeTotal") ?? "").trim().toLowerCase();
+      const raw = (url.searchParams.get("includeTotal") ?? "")
+        .trim()
+        .toLowerCase();
       return raw === "1" || raw === "true" || raw === "yes";
     })();
     const onlyEmptyJsonHint = (() => {
-      const raw = (url.searchParams.get("onlyEmptyJsonHint") ?? "").trim().toLowerCase();
+      const raw = (url.searchParams.get("onlyEmptyJsonHint") ?? "")
+        .trim()
+        .toLowerCase();
       return raw === "1" || raw === "true" || raw === "yes";
     })();
 
@@ -71,9 +91,13 @@ export async function POST(req: Request) {
 
     const whereFilter = whereParts.length > 0 ? { AND: whereParts } : undefined;
 
-    const total = includeTotal ? await prisma.word.count({ where: whereFilter }) : null;
+    const total = includeTotal
+      ? await prisma.word.count({ where: whereFilter })
+      : null;
     const rows = await prisma.word.findMany({
-      where: { AND: [{ id: { gt: cursorId } }, ...(whereFilter ? [whereFilter] : [])] },
+      where: {
+        AND: [{ id: { gt: cursorId } }, ...(whereFilter ? [whereFilter] : [])],
+      },
       orderBy: { id: "asc" },
       take: scanBatch,
       select: {
@@ -120,13 +144,15 @@ export async function POST(req: Request) {
             : null;
 
         const nextComparable = match ? JSON.stringify(match) : null;
-        const prevComparable = normalizeJsonHintForCompare(row.json_hint ?? null);
+        const prevComparable = normalizeJsonHintForCompare(
+          row.json_hint ?? null,
+        );
         const changed = prevComparable !== nextComparable;
         if (!changed) return null;
 
         const nextJson = match ? stringifyJsonHintWithTimestamp(match) : null;
         return { id: row.id, json_hint: nextJson };
-      }
+      },
     );
 
     const updates = computed.filter(
@@ -161,7 +187,7 @@ export async function POST(req: Request) {
   } catch (e) {
     return NextResponse.json(
       { ok: false, error: e instanceof Error ? e.message : String(e) },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -16,14 +16,15 @@ export async function pickPictureSymbolsForWord(
   const normalized = (word.phonetic_us_normalized ?? "").trim();
   let persianImage: IpaCandidate | null;
   if ((word.imageability ?? 0) < imageabilityBaseThreshold) {
-    persianImage = await setForPersian(word);
-    if (!persianImage)
-      console.log(
-        `[setForAny.ts:21]`,
-        "NoooooooooooooooooooooooooooooooooooooooooopersianImagepersianImagepersianImagepersianImagepersianImage",
-        word.meaning_fa_IPA_normalized,
-        word.base_form,
-      );
+    //Todo: add a better way to find the persian image for the word, maybe by using the meaning_fa_IPA_normalized field or by using the base_form field
+    // persianImage = await setForPersian(word);
+    // if (!persianImage)
+    //   console.log(
+    //     `[setForAny.ts:21]`,
+    //     "NoooooooooooooooooooooooooooooooooooooooooopersianImagepersianImagepersianImagepersianImagepersianImage",
+    //     word.meaning_fa_IPA_normalized,
+    //     word.base_form,
+    //   );
   }
   // console.log(`[setForAny.ts:30]`, normalized.length, word);
   // if (word.base_form === "chameleon") {
