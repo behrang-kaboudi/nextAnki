@@ -132,6 +132,12 @@
             "label": "Card Management",
             "href": "/anki-note",
             "icon": "link"
+          },
+          {
+            "type": "link",
+            "label": "AnkiSuspendManagement",
+            "href": "/anki-suspend-management",
+            "icon": "link"
           }
         ],
         "icon": "app"

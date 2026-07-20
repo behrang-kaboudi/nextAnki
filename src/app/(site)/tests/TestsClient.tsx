@@ -50,6 +50,10 @@ const sections: Section[] = [
       { href: "/structure-builder", label: "Structure Builder" },
       { href: "/anki-connect-playground", label: "AnkiConnect Playground" },
       {
+        href: "/anki-suspend-management",
+        label: "AnkiSuspendManagement",
+      },
+      {
         href: "/tests/anki-revlog",
         label: "Anki Revlog (AnkiDroid)",
         note: "View getReviewsOfCards output",
