@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 
 import { PageHeader } from "@/components/page-header";
-import { AnkiNoteTypes, WordAnkiConstants } from "@/lib/AnkiDeck";
+import { AnkiNoteTypes, WordAnkiConstants } from "@/lib/anki";
 
 type MissingNote = {
   noteId: number;

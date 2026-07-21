@@ -1,7 +1,7 @@
 import "server-only";
 
 import { prisma } from "@/lib/prisma";
-import { createAnkiConnectClient, type AnkiNotesInfo } from "@/lib/AnkiConnect";
+import { createAnkiConnectClient, type AnkiNotesInfo } from "@/lib/anki";
 import { getAnkiLinkIdFromNoteFields as extractAnkiLinkIdFromNoteFields } from "@/lib/anki/wordAnkiMapping";
 
 export function getAnkiLinkIdFromNoteFields(note: AnkiNotesInfo[number]): string | null {

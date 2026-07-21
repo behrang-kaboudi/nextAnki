@@ -222,6 +222,13 @@ async function countCandidates(field: WordAudioFieldKey): Promise<number> {
       },
     });
   }
+  if (field === "other_meanings_en") {
+    return prisma.word.count({
+      where: {
+        AND: [{ other_meanings_en: { not: null } }, { other_meanings_en: { not: "" } }],
+      },
+    });
+  }
   if (field === "concept_explained_fa") {
     return prisma.word.count({
       where: {
@@ -287,6 +294,18 @@ async function fetchBatch(
       select: { id: true, anki_link_id: true, other_meanings_fa: true },
     });
     return rows.map((r) => ({ id: r.id, anki_link_id: r.anki_link_id, audioKey: r.anki_link_id, value: r.other_meanings_fa ?? null }));
+  }
+  if (field === "other_meanings_en") {
+    const rows = await prisma.word.findMany({
+      ...base,
+      select: { id: true, anki_link_id: true, other_meanings_en: true },
+    });
+    return rows.map((r) => ({
+      id: r.id,
+      anki_link_id: r.anki_link_id,
+      audioKey: r.anki_link_id,
+      value: r.other_meanings_en ?? null,
+    }));
   }
   if (field === "concept_explained_fa") {
     const rows = await prisma.word.findMany({

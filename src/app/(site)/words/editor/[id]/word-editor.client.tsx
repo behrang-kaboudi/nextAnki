@@ -10,6 +10,7 @@ const WORD_AUDIO_FIELDS = [
   "base_form",
   "meaning_fa",
   "other_meanings_fa",
+  "other_meanings_en",
   "concept_explained_fa",
   "sentence_en",
   "sentence_en_meaning_fa",
@@ -56,6 +57,7 @@ export type WordEditorState = {
   learning_depth: number | null;
   mixed_sentence: string | null;
   other_meanings_fa: string | null;
+  other_meanings_en: string | null;
   category: string | null;
   typeOfWordInDb: string;
   hint_sentence: string | null;
@@ -80,6 +82,7 @@ type EditableFieldKey =
   | "sentence_en"
   | "sentence_en_meaning_fa"
   | "other_meanings_fa"
+  | "other_meanings_en"
   | "concept_explained_fa"
   | "phonetic_us_normalized"
   | "meaning_fa_IPA_normalized"
@@ -262,6 +265,7 @@ export default function WordEditorClient({
             learning_depth: word.learning_depth,
             mixed_sentence: word.mixed_sentence,
             other_meanings_fa: word.other_meanings_fa,
+            other_meanings_en: word.other_meanings_en,
             category: word.category,
             typeOfWordInDb: word.typeOfWordInDb,
             hint_sentence: word.hint_sentence,
@@ -686,6 +690,33 @@ export default function WordEditorClient({
                 audioKey={word.anki_link_id}
                 text={word.other_meanings_fa}
               />
+            </div>
+          </InputRow>
+
+          <InputRow label="other_meanings_en">
+            <div className="grid gap-1">
+              <div className="text-xs text-muted">
+                Separate different English meanings with the <span className="font-mono">-</span> character.
+              </div>
+              <div className="flex items-center gap-2">
+                <textarea
+                  value={word.other_meanings_en ?? ""}
+                  onChange={(e) =>
+                    setWord((p) => ({
+                      ...p,
+                      other_meanings_en: asNullableString(e.target.value, { trim: false }),
+                    }))
+                  }
+                  onFocus={registerFieldFocus("other_meanings_en")}
+                  className="min-h-[84px] w-full rounded border px-3 py-2 text-sm"
+                  placeholder="meaning one-meaning two (nullable)"
+                />
+                <WordFieldVoiceCell
+                  field="other_meanings_en"
+                  audioKey={word.anki_link_id}
+                  text={word.other_meanings_en}
+                />
+              </div>
             </div>
           </InputRow>
 

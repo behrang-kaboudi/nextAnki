@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 import { PageHeader } from "@/components/page-header";
-import { WordAnkiConstants } from "@/lib/AnkiDeck";
+import { ankiOperations, WordAnkiConstants } from "@/lib/anki";
 
 const DECKS = [
   { label: "FaToEn", value: WordAnkiConstants.decks.FaToEn },
@@ -11,11 +11,6 @@ const DECKS = [
 ] as const;
 
 type DeckName = (typeof DECKS)[number]["value"];
-
-type AnkiConnectResponse = {
-  result: unknown;
-  error: string | null;
-};
 
 type SuspendedCardsResult = {
   deckLabel: string;
@@ -41,20 +36,12 @@ export default function AnkiSuspendManagementClient() {
     setResult(null);
 
     try {
-      const response = await fetch("/api/anki-connect", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          action: "findCards",
-          params: {
-            query: `deck:"${escapeAnkiQueryValue(selectedDeck)}" is:suspended`,
-          },
-        }),
+      const data = await ankiOperations.findCards({
+        query: `deck:"${escapeAnkiQueryValue(selectedDeck)}" is:suspended`,
       });
-      const data = (await response.json()) as AnkiConnectResponse;
 
-      if (!response.ok || data.error) {
-        throw new Error(data.error ?? "دریافت اطلاعات از Anki ناموفق بود.");
+      if (!data.ok) {
+        throw new Error(data.error);
       }
       if (!Array.isArray(data.result)) {
         throw new Error("پاسخ AnkiConnect ساختار مورد انتظار را ندارد.");

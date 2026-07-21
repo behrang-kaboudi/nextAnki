@@ -1,10 +1,10 @@
 import "server-only";
 
 import { prisma } from "@/lib/prisma";
-import { createAnkiConnectClient } from "@/lib/AnkiConnect";
-import { AnkiNoteTypes, SentenceAnkiConstants } from "@/lib/AnkiDeck";
-import { chunkArray } from "@/lib/AnkiDeck/workflowHelpers";
-import { quoteAnkiSearchValue } from "@/lib/AnkiDeck/queries";
+import { createAnkiConnectClient } from "@/lib/anki";
+import { AnkiNoteTypes, SentenceAnkiConstants } from "@/lib/anki";
+import { chunkArray } from "@/lib/anki";
+import { quoteAnkiSearchValue } from "@/lib/anki";
 
 const SENTENCE_DECK_NAME = SentenceAnkiConstants.decks.EnSentences;
 const SENTENCE_MODEL_NAME = AnkiNoteTypes.EN_SENTENCES;

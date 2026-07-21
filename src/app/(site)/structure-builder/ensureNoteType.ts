@@ -1,10 +1,10 @@
-import { ankiRequestDetailed } from "@/lib/AnkiConnect";
-import { AnkiNoteTypes, WordAnkiConstants } from "@/lib/AnkiDeck/constants";
+import { ankiOperations } from "@/lib/anki";
+import { AnkiNoteTypes, WordAnkiConstants } from "@/lib/anki";
 
 import type { LogFn, StepResult } from "./types";
 
 async function ensureAnkiPermission(appendLog: LogFn): Promise<StepResult> {
-  const permRes = await ankiRequestDetailed("requestPermission");
+  const permRes = await ankiOperations.requestPermission();
   if (!permRes.ok) {
     appendLog(`✗ requestPermission failed: ${permRes.error}`);
     return { ok: false };
@@ -25,7 +25,7 @@ async function ensureModelExists(
   desiredFields: string[],
   appendLog: LogFn,
 ): Promise<StepResult> {
-  const modelNamesRes = await ankiRequestDetailed("modelNames");
+  const modelNamesRes = await ankiOperations.modelNames();
   if (!modelNamesRes.ok || !modelNamesRes.result) {
     appendLog(
       `✗ modelNames failed: ${modelNamesRes.ok ? "null result" : modelNamesRes.error}`,
@@ -63,7 +63,7 @@ async function ensureModelExists(
       Back: templates.Rahnama2.Back,
     },
   ];
-  const createRes = await ankiRequestDetailed("createModel", {
+  const createRes = await ankiOperations.createModel({
     modelName,
     inOrderFields: desiredFields,
     cardTemplates,
@@ -78,7 +78,7 @@ async function ensureModelExists(
 }
 
 async function loadCurrentFields(modelName: string, appendLog: LogFn) {
-  const fieldNamesRes = await ankiRequestDetailed("modelFieldNames", {
+  const fieldNamesRes = await ankiOperations.modelFieldNames({
     modelName,
   });
   if (!fieldNamesRes.ok || !fieldNamesRes.result) {
@@ -97,7 +97,7 @@ async function removeExtraFields(
 ): Promise<StepResult> {
   for (const fieldName of extraFields) {
     appendLog(`Removing field: ${fieldName} ...`);
-    const res = await ankiRequestDetailed("modelFieldRemove", {
+    const res = await ankiOperations.modelFieldRemove({
       modelName,
       fieldName,
     });
@@ -116,7 +116,7 @@ async function addMissingFields(
 ): Promise<StepResult> {
   for (const fieldName of missingFields) {
     appendLog(`Adding field: ${fieldName} ...`);
-    const res = await ankiRequestDetailed("modelFieldAdd", {
+    const res = await ankiOperations.modelFieldAdd({
       modelName,
       fieldName,
     });
@@ -135,7 +135,7 @@ async function repositionFields(
 ): Promise<StepResult> {
   for (let i = 0; i < desiredFields.length; i += 1) {
     const fieldName = desiredFields[i];
-    const res = await ankiRequestDetailed("modelFieldReposition", {
+    const res = await ankiOperations.modelFieldReposition({
       modelName,
       fieldName,
       index: i,

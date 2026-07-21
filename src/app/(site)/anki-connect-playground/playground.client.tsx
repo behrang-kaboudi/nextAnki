@@ -3,11 +3,7 @@
 import { useMemo, useState } from "react";
 
 import { PageHeader } from "@/components/page-header";
-
-type AnkiConnectProxyResponse = {
-  result: unknown;
-  error: string | null;
-};
+import { requestAnkiConnectRaw } from "@/lib/anki";
 
 function safeJsonParse(value: string): { ok: true; value: unknown } | { ok: false; error: string } {
   try {
@@ -51,13 +47,7 @@ export default function AnkiConnectPlaygroundClient() {
       setRequestText(prettyJson(payload));
       setResponseText(null);
 
-      const res = await fetch("/api/anki-connect", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      const data = (await res.json()) as AnkiConnectProxyResponse;
+      const data = await requestAnkiConnectRaw(payload);
       setResponseText(prettyJson(data));
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
@@ -149,4 +139,3 @@ export default function AnkiConnectPlaygroundClient() {
     </main>
   );
 }
-

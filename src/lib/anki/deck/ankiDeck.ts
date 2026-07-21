@@ -1,4 +1,4 @@
-import { ankiRequest } from "@/lib/AnkiConnect";
+import { ankiRequest } from "../client";
 import { WordAnkiConstants } from "./constants";
 import {
   buildCardsDueAfterDaysQuery,

@@ -57,6 +57,7 @@ model Word {
   learning_depth                   Float?
   mixed_sentence                   String?
   other_meanings_fa                String?
+  other_meanings_en                String?
   category                         String?
   typeOfWordInDb                   String   @default("temp")
   hint_sentence                    String?

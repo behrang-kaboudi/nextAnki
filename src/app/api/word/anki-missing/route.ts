@@ -4,8 +4,8 @@ import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
 import { requireApiAuth } from "@/lib/auth/apiAuth";
-import { createAnkiConnectClient } from "@/lib/AnkiConnect";
-import { AnkiNoteTypes } from "@/lib/AnkiDeck/constants";
+import { createAnkiOperations } from "@/lib/anki";
+import { AnkiNoteTypes } from "@/lib/anki";
 
 const DEFAULT_QUERY = `note:"${AnkiNoteTypes.META_LEX_VR9}"`;
 
@@ -55,10 +55,13 @@ export async function POST(req: Request) {
     const limitRaw = Number((body as { limit?: unknown })?.limit ?? 5000);
     const limit = Number.isFinite(limitRaw) ? Math.max(1, Math.min(50_000, Math.trunc(limitRaw))) : 5000;
 
-    const client = createAnkiConnectClient({ timeoutMs: 15_000 });
-    const noteIds = await client.request("findNotes", { query });
+    const client = createAnkiOperations({ timeoutMs: 15_000 });
+    const noteIdsRes = await client.findNotes({ query });
+    if (!noteIdsRes.ok) {
+      return NextResponse.json({ ok: false, error: noteIdsRes.error }, { status: 502 });
+    }
 
-    const allNoteIds = Array.isArray(noteIds) ? noteIds.slice(0, limit) : [];
+    const allNoteIds = Array.isArray(noteIdsRes.result) ? noteIdsRes.result.slice(0, limit) : [];
     if (!allNoteIds.length) {
       return NextResponse.json({ query, totalNotes: 0, checkedNotes: 0, missing: [] });
     }
@@ -70,9 +73,11 @@ export async function POST(req: Request) {
     }> = [];
 
     for (const group of chunk(allNoteIds, 200)) {
-      const res = await client.request("notesInfo", { notes: group });
-      if (!res) return NextResponse.json({ error: "Failed to read notesInfo from AnkiConnect." }, { status: 502 });
-      infos.push(...(res as typeof infos));
+      const res = await client.notesInfo({ notes: group });
+      if (!res.ok || !res.result) {
+        return NextResponse.json({ ok: false, error: res.ok ? "Failed to read notesInfo from AnkiConnect." : res.error }, { status: 502 });
+      }
+      infos.push(...res.result);
     }
 
     const records = infos
@@ -106,7 +111,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       query,
-      totalNotes: Array.isArray(noteIds) ? noteIds.length : 0,
+      totalNotes: Array.isArray(noteIdsRes.result) ? noteIdsRes.result.length : 0,
       checkedNotes: allNoteIds.length,
       missing,
     });

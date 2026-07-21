@@ -1,4 +1,4 @@
-import { AnkiNoteTypes } from "@/lib/AnkiDeck/constants";
+import { AnkiNoteTypes } from "@/lib/anki";
 
 import type { HelpKey } from "./types";
 

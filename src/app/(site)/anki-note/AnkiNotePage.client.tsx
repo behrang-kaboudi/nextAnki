@@ -3,17 +3,16 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 
 import {
-  ankiRequest,
-  ankiRequestDetailed,
-  createAnkiConnectClient,
+  ankiOperations,
+  createAnkiOperations,
   type AnkiNotesInfo,
-} from "@/lib/AnkiConnect";
+} from "@/lib/anki";
 import {
   AnkiNoteTypes,
   findCardIdsInDeck,
   getLastRevlogByCardIds,
   WordAnkiConstants,
-} from "@/lib/AnkiDeck";
+} from "@/lib/anki";
 import { imageabilityBaseThreshold } from "@/lib/ipa/setPictures/types";
 import { PageHeader } from "@/components/page-header";
 
@@ -251,7 +250,7 @@ export default function AnkiNotePage() {
     [],
   );
   const ankiSyncClient = useMemo(
-    () => createAnkiConnectClient({ timeoutMs: 120_000, retryDelayMs: 1000 }),
+    () => createAnkiOperations({ timeoutMs: 120_000, retryDelayMs: 1000 }),
     [],
   );
 
@@ -323,7 +322,7 @@ export default function AnkiNotePage() {
     if (!cardIds.length) return { ok: true as const };
 
     for (const chunk of chunkArray(cardIds, 200)) {
-      const dueRes = await ankiRequestDetailed("setDueDate", {
+      const dueRes = await ankiOperations.setDueDate({
         cards: chunk,
         days: "0",
       });
@@ -331,7 +330,7 @@ export default function AnkiNotePage() {
     }
 
     for (const chunk of chunkArray(cardIds, 200)) {
-      const forgetRes = await ankiRequestDetailed("forgetCards", {
+      const forgetRes = await ankiOperations.forgetCards({
         cards: chunk,
       });
       if (!forgetRes.ok) return { ok: false as const, error: forgetRes.error };
@@ -344,7 +343,7 @@ export default function AnkiNotePage() {
     if (!cardIds.length) return { ok: true as const };
 
     for (const chunk of chunkArray(cardIds, 200)) {
-      const res = await ankiRequestDetailed("answerCards", {
+      const res = await ankiOperations.answerCards({
         answers: chunk.map((cardId) => ({ cardId, ease: 3 as const })),
       });
       if (!res.ok) return { ok: false as const, error: res.error };
@@ -364,7 +363,7 @@ export default function AnkiNotePage() {
       throw new Error(msg);
     }
 
-    const res = await ankiSyncClient.requestDetailed("sync");
+    const res = await ankiSyncClient.sync();
     if (!res.ok) {
       const msg = `سینک با AnkiWeb ناموفق بود (${label}): ${res.error}`;
       window.alert(msg);
@@ -481,7 +480,7 @@ export default function AnkiNotePage() {
   async function getNoteIdsForCardIds(cardIds: number[]) {
     const noteIds = new Set<number>();
     for (const chunk of chunkArray(cardIds, 200)) {
-      const infoRes = await ankiRequestDetailed("cardsInfo", { cards: chunk });
+      const infoRes = await ankiOperations.cardsInfo({ cards: chunk });
       if (!infoRes.ok) return { ok: false as const, error: infoRes.error };
       for (const card of infoRes.result ?? []) noteIds.add(card.note);
     }
@@ -491,7 +490,7 @@ export default function AnkiNotePage() {
   async function getNotesInfoByIds(noteIds: number[]) {
     const out: AnkiNotesInfo = [];
     for (const chunk of chunkArray(noteIds, 200)) {
-      const infoRes = await ankiRequestDetailed("notesInfo", { notes: chunk });
+      const infoRes = await ankiOperations.notesInfo({ notes: chunk });
       if (!infoRes.ok) return { ok: false as const, error: infoRes.error };
       if (infoRes.result) out.push(...infoRes.result);
     }
@@ -511,7 +510,7 @@ export default function AnkiNotePage() {
       } | null
     >();
     for (const chunk of chunkArray(cardIds, 100)) {
-      const reviewsRes = await ankiRequestDetailed("getReviewsOfCards", {
+      const reviewsRes = await ankiOperations.getReviewsOfCards({
         cards: chunk,
       });
       if (!reviewsRes.ok)
@@ -560,7 +559,7 @@ export default function AnkiNotePage() {
       const rahnamaDeck = WordAnkiConstants.decks.Rahnama;
 
       setPhase0StatusText("Finding EnToFa/FaToEn cards…");
-      const candidatesRes = await ankiRequestDetailed("findCards", {
+      const candidatesRes = await ankiOperations.findCards({
         query: `deck:"${escapeAnkiQueryValue(enToFaDeck)}" OR deck:"${escapeAnkiQueryValue(faToEnDeck)}"`,
       });
       if (!candidatesRes.ok) {
@@ -594,7 +593,7 @@ export default function AnkiNotePage() {
       );
 
       setPhase0StatusText(`Moving ${againCardIds.length} cards to ${tempDeck}…`);
-      const moveMainsRes = await ankiRequestDetailed("changeDeck", { cards: againCardIds, deck: tempDeck });
+      const moveMainsRes = await ankiOperations.changeDeck({ cards: againCardIds, deck: tempDeck });
       if (!moveMainsRes.ok) {
         setPhase0Error(moveMainsRes.error);
         return;
@@ -615,7 +614,7 @@ export default function AnkiNotePage() {
       setPhase0StatusText(`Finding Rahnama cards in ${tempDeck} for ${noteIds.length} notes…`);
       const rahnamaTempCardIds = new Set<number>();
       for (const noteId of noteIds) {
-        const res = await ankiRequestDetailed("findCards", {
+        const res = await ankiOperations.findCards({
           query: `nid:${noteId} deck:"${escapeAnkiQueryValue(tempDeck)}" card:"Rahnama"`,
         });
         if (!res.ok) {
@@ -634,7 +633,7 @@ export default function AnkiNotePage() {
       appendPhaseLogIds(`فاز ۰: کارت‌های Rahnama که در ${tempDeck} بودند (cardIds)`, rahnamaIds);
 
       setPhase0StatusText(`Moving ${rahnamaIds.length} Rahnama cards to ${rahnamaDeck}…`);
-      const moveRahnamaRes = await ankiRequestDetailed("changeDeck", { cards: rahnamaIds, deck: rahnamaDeck });
+      const moveRahnamaRes = await ankiOperations.changeDeck({ cards: rahnamaIds, deck: rahnamaDeck });
       if (!moveRahnamaRes.ok) {
         setPhase0Error(moveRahnamaRes.error);
         return;
@@ -715,7 +714,7 @@ export default function AnkiNotePage() {
       setPhase1StatusText(
         `Moving ${intervalFiltered.length} cards to ${tempDeck}…`,
       );
-      const moveToTempRes = await ankiRequestDetailed("changeDeck", { cards: intervalFiltered, deck: tempDeck });
+      const moveToTempRes = await ankiOperations.changeDeck({ cards: intervalFiltered, deck: tempDeck });
       if (!moveToTempRes.ok) return void setPhase1Error(moveToTempRes.error);
 
       setPhase1StatusText(
@@ -737,7 +736,7 @@ export default function AnkiNotePage() {
       );
       const rahnama2Ids = new Set<number>();
       for (const noteId of uniqueNoteIds) {
-        const res = await ankiRequestDetailed("findCards", {
+        const res = await ankiOperations.findCards({
           query: `nid:${noteId} card:"Rahnama2"`,
         });
         if (!res.ok) {
@@ -756,7 +755,7 @@ export default function AnkiNotePage() {
       appendPhaseLogIds("فاز ۱: کارت‌های Rahnama2 انتخاب‌شده (cardIds)", targetCardIds);
 
       setPhase1StatusText(`Moving ${targetCardIds.length} Rahnama2 cards to ${targetDeck}…`);
-      const moveRes = await ankiRequestDetailed("changeDeck", { cards: targetCardIds, deck: targetDeck });
+      const moveRes = await ankiOperations.changeDeck({ cards: targetCardIds, deck: targetDeck });
       if (!moveRes.ok) {
         setPhase1Error(moveRes.error);
         return;
@@ -827,7 +826,7 @@ export default function AnkiNotePage() {
       appendPhaseLogIds(`فاز ۲: کارت‌های Rahnama2 با interval>1 (از revlog) (cardIds)`, intervalFiltered);
 
       setPhase2StatusText(`Moving ${intervalFiltered.length} cards to ${tempDeck}…`);
-      const moveGuideRes = await ankiRequestDetailed("changeDeck", { cards: intervalFiltered, deck: tempDeck });
+      const moveGuideRes = await ankiOperations.changeDeck({ cards: intervalFiltered, deck: tempDeck });
       if (!moveGuideRes.ok) {
         setPhase2Error(moveGuideRes.error);
         return;
@@ -849,7 +848,7 @@ export default function AnkiNotePage() {
       const enToFaTemp = new Set<number>();
       const faToEnTemp = new Set<number>();
       for (const noteId of noteIds) {
-        const enRes = await ankiRequestDetailed("findCards", {
+        const enRes = await ankiOperations.findCards({
           query: `nid:${noteId} deck:"${escapeAnkiQueryValue(tempDeck)}" card:"EnToFa"`,
         });
         if (!enRes.ok) {
@@ -858,7 +857,7 @@ export default function AnkiNotePage() {
         }
         for (const id of enRes.result ?? []) enToFaTemp.add(id);
 
-        const faRes = await ankiRequestDetailed("findCards", {
+        const faRes = await ankiOperations.findCards({
           query: `nid:${noteId} deck:"${escapeAnkiQueryValue(tempDeck)}" card:"FaToEn"`,
         });
         if (!faRes.ok) {
@@ -877,7 +876,7 @@ export default function AnkiNotePage() {
 
       if (enToFaIds.length) {
         appendPhaseLogIds(`فاز ۲: کارت‌های EnToFa که در ${tempDeck} بودند (cardIds)`, enToFaIds);
-        const moveRes = await ankiRequestDetailed("changeDeck", { cards: enToFaIds, deck: enToFaDeck });
+        const moveRes = await ankiOperations.changeDeck({ cards: enToFaIds, deck: enToFaDeck });
         if (!moveRes.ok) {
           setPhase2Error(moveRes.error);
           return;
@@ -891,7 +890,7 @@ export default function AnkiNotePage() {
 
       if (faToEnIds.length) {
         appendPhaseLogIds(`فاز ۲: کارت‌های FaToEn که در ${tempDeck} بودند (cardIds)`, faToEnIds);
-        const moveRes = await ankiRequestDetailed("changeDeck", { cards: faToEnIds, deck: faToEnDeck });
+        const moveRes = await ankiOperations.changeDeck({ cards: faToEnIds, deck: faToEnDeck });
         if (!moveRes.ok) {
           setPhase2Error(moveRes.error);
           return;
@@ -944,7 +943,7 @@ export default function AnkiNotePage() {
       setPhase3StatusText(
         `Counting available cards in ${enToFaDeck} (is:new OR is:due)…`,
       );
-      const dueRes = await ankiRequestDetailed("findCards", {
+      const dueRes = await ankiOperations.findCards({
         query: `deck:"${escapeAnkiQueryValue(enToFaDeck)}" (is:new OR is:due)`,
       });
       if (!dueRes.ok) {
@@ -967,7 +966,7 @@ export default function AnkiNotePage() {
         `Need ${needed} more note(s). Finding EnToFa cards in ${tempRootDeck}…`,
       );
 
-      const tempCardRes = await ankiRequestDetailed("findCards", {
+      const tempCardRes = await ankiOperations.findCards({
         query: `deck:"${escapeAnkiQueryValue(tempRootDeck)}" card:"EnToFa"`,
       });
       if (!tempCardRes.ok) {
@@ -986,7 +985,7 @@ export default function AnkiNotePage() {
       );
       const tempEnToFaNoteIdsSet = new Set<number>();
       for (const chunk of chunkArray(tempCardIds, 200)) {
-        const cardsInfoRes = await ankiRequestDetailed("cardsInfo", {
+        const cardsInfoRes = await ankiOperations.cardsInfo({
           cards: chunk,
         });
         if (!cardsInfoRes.ok) {
@@ -1077,7 +1076,7 @@ export default function AnkiNotePage() {
       const candidateEmla = new Set<number>();
 
       for (const noteId of pickedNoteIds) {
-        const enRes = await ankiRequestDetailed("findCards", {
+        const enRes = await ankiOperations.findCards({
           query: `nid:${noteId} card:"EnToFa"`,
         });
         if (!enRes.ok) {
@@ -1086,7 +1085,7 @@ export default function AnkiNotePage() {
         }
         for (const id of enRes.result ?? []) candidateEnToFa.add(id);
 
-        const faRes = await ankiRequestDetailed("findCards", {
+        const faRes = await ankiOperations.findCards({
           query: `nid:${noteId} card:"FaToEn"`,
         });
         if (!faRes.ok) {
@@ -1095,7 +1094,7 @@ export default function AnkiNotePage() {
         }
         for (const id of faRes.result ?? []) candidateFaToEn.add(id);
 
-        const emRes = await ankiRequestDetailed("findCards", {
+        const emRes = await ankiOperations.findCards({
           query: `nid:${noteId} card:"Emla"`,
         });
         if (!emRes.ok) {
@@ -1127,7 +1126,7 @@ export default function AnkiNotePage() {
       setPhase3StatusText("Moving cards to target decks…");
       if (moveEnToFa.length) {
         for (const chunk of chunkArray(moveEnToFa, 200)) {
-          const res = await ankiRequestDetailed("changeDeck", {
+          const res = await ankiOperations.changeDeck({
             cards: chunk,
             deck: enToFaDeck,
           });
@@ -1139,7 +1138,7 @@ export default function AnkiNotePage() {
       }
       if (moveFaToEn.length) {
         for (const chunk of chunkArray(moveFaToEn, 200)) {
-          const res = await ankiRequestDetailed("changeDeck", {
+          const res = await ankiOperations.changeDeck({
             cards: chunk,
             deck: faToEnDeck,
           });
@@ -1151,7 +1150,7 @@ export default function AnkiNotePage() {
       }
       if (moveEmla.length) {
         for (const chunk of chunkArray(moveEmla, 200)) {
-          const res = await ankiRequestDetailed("changeDeck", {
+          const res = await ankiOperations.changeDeck({
             cards: chunk,
             deck: emlaDeck,
           });
@@ -1184,7 +1183,8 @@ export default function AnkiNotePage() {
 
       let noteIds: number[] | null = null;
       for (const query of queries) {
-        noteIds = await ankiRequest("findNotes", { query });
+        const noteIdsRes = await ankiOperations.findNotes({ query });
+        noteIds = noteIdsRes.ok ? noteIdsRes.result : null;
         if (noteIds && noteIds.length > 0) break;
       }
 
@@ -1193,13 +1193,13 @@ export default function AnkiNotePage() {
         return;
       }
 
-      const info = await ankiRequest("notesInfo", { notes: noteIds });
-      if (!info) {
+      const infoRes = await ankiOperations.notesInfo({ notes: noteIds });
+      if (!infoRes.ok || !infoRes.result) {
         setError("Failed to read note info from AnkiConnect.");
         return;
       }
 
-      setNotesInfo(info);
+      setNotesInfo(infoRes.result);
     } finally {
       setIsLoading(false);
     }
@@ -1224,7 +1224,7 @@ export default function AnkiNotePage() {
         .filter(Boolean)
         .join(" ");
 
-      const idsRes = await ankiRequestDetailed("findNotes", { query });
+      const idsRes = await ankiOperations.findNotes({ query });
       if (!idsRes.ok) {
         setError(idsRes.error);
         return;
@@ -1237,7 +1237,7 @@ export default function AnkiNotePage() {
       }
 
       const sliced = ids.length > limit ? ids.slice(-limit) : ids;
-      const infoRes = await ankiRequestDetailed("notesInfo", { notes: sliced });
+      const infoRes = await ankiOperations.notesInfo({ notes: sliced });
       if (!infoRes.ok) {
         setError(infoRes.error);
         return;
@@ -1388,7 +1388,7 @@ export default function AnkiNotePage() {
     setModelFields(null);
     setModelBusy(true);
     try {
-      const fieldsRes = await ankiRequestDetailed("modelFieldNames", {
+      const fieldsRes = await ankiOperations.modelFieldNames({
         modelName: AnkiNoteTypes.META_LEX_VR9,
       });
       if (!fieldsRes.ok) {
@@ -1409,7 +1409,7 @@ export default function AnkiNotePage() {
     setModelError(null);
     setModelBusy(true);
     try {
-      const fieldsRes = await ankiRequestDetailed("modelFieldNames", {
+      const fieldsRes = await ankiOperations.modelFieldNames({
         modelName: AnkiNoteTypes.META_LEX_VR9,
       });
       if (!fieldsRes.ok) {
@@ -1427,7 +1427,7 @@ export default function AnkiNotePage() {
         return;
       }
 
-      const addRes = await ankiRequestDetailed("modelFieldAdd", {
+      const addRes = await ankiOperations.modelFieldAdd({
         modelName: AnkiNoteTypes.META_LEX_VR9,
         fieldName: "hint_sentence",
       });
@@ -1546,7 +1546,7 @@ export default function AnkiNotePage() {
       let matchedNoteIds: number[] = [];
 
       for (const query of queries) {
-        const res = await ankiRequestDetailed("findNotes", { query });
+        const res = await ankiOperations.findNotes({ query });
         if (!res.ok) throw new Error(res.error);
         matchedNoteIds = res.result ?? [];
         if (matchedNoteIds.length > 0) break;
@@ -1570,19 +1570,19 @@ export default function AnkiNotePage() {
     const candidateEmla = new Set<number>();
 
     for (const noteId of ankiNoteIds) {
-      const enRes = await ankiRequestDetailed("findCards", {
+      const enRes = await ankiOperations.findCards({
         query: `nid:${noteId} card:"EnToFa"`,
       });
       if (!enRes.ok) throw new Error(enRes.error);
       for (const id of enRes.result ?? []) candidateEnToFa.add(id);
 
-      const faRes = await ankiRequestDetailed("findCards", {
+      const faRes = await ankiOperations.findCards({
         query: `nid:${noteId} card:"FaToEn"`,
       });
       if (!faRes.ok) throw new Error(faRes.error);
       for (const id of faRes.result ?? []) candidateFaToEn.add(id);
 
-      const emlaRes = await ankiRequestDetailed("findCards", {
+      const emlaRes = await ankiOperations.findCards({
         query: `nid:${noteId} card:"Emla"`,
       });
       if (!emlaRes.ok) throw new Error(emlaRes.error);
@@ -1606,7 +1606,7 @@ export default function AnkiNotePage() {
 
     if (moveEnToFa.length) {
       for (const chunk of chunkArray(moveEnToFa, 200)) {
-        const res = await ankiRequestDetailed("changeDeck", {
+        const res = await ankiOperations.changeDeck({
           cards: chunk,
           deck: WordAnkiConstants.decks.EnToFa,
         });
@@ -1616,7 +1616,7 @@ export default function AnkiNotePage() {
 
     if (moveFaToEn.length) {
       for (const chunk of chunkArray(moveFaToEn, 200)) {
-        const res = await ankiRequestDetailed("changeDeck", {
+        const res = await ankiOperations.changeDeck({
           cards: chunk,
           deck: WordAnkiConstants.decks.FaToEn,
         });
@@ -1626,7 +1626,7 @@ export default function AnkiNotePage() {
 
     if (moveEmla.length) {
       for (const chunk of chunkArray(moveEmla, 200)) {
-        const res = await ankiRequestDetailed("changeDeck", {
+        const res = await ankiOperations.changeDeck({
           cards: chunk,
           deck: WordAnkiConstants.decks.Emla,
         });
@@ -1709,7 +1709,7 @@ export default function AnkiNotePage() {
       let matchedNoteIds: number[] = [];
 
       for (const query of queries) {
-        const noteRes = await ankiRequestDetailed("findNotes", { query });
+        const noteRes = await ankiOperations.findNotes({ query });
         if (!noteRes.ok) throw new Error(noteRes.error);
         matchedNoteIds = noteRes.result ?? [];
         if (matchedNoteIds.length > 0) break;
@@ -1717,7 +1717,7 @@ export default function AnkiNotePage() {
       if (matchedNoteIds.length === 0) continue;
 
       for (const noteId of matchedNoteIds) {
-        const noteInfoRes = await ankiRequestDetailed("notesInfo", {
+        const noteInfoRes = await ankiOperations.notesInfo({
           notes: [noteId],
         });
         if (!noteInfoRes.ok) throw new Error(noteInfoRes.error);
@@ -1726,14 +1726,14 @@ export default function AnkiNotePage() {
           continue;
         }
 
-        const cardIdsRes = await ankiRequestDetailed("findCards", {
+        const cardIdsRes = await ankiOperations.findCards({
           query: `nid:${noteId}`,
         });
         if (!cardIdsRes.ok) throw new Error(cardIdsRes.error);
         const cardIds = cardIdsRes.result ?? [];
         if (cardIds.length === 0) continue;
 
-        const cardsInfoRes = await ankiRequestDetailed("cardsInfo", {
+        const cardsInfoRes = await ankiOperations.cardsInfo({
           cards: cardIds,
         });
         if (!cardsInfoRes.ok) throw new Error(cardsInfoRes.error);

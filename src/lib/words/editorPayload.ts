@@ -23,6 +23,7 @@ export type WordEditorInitial = {
   learning_depth: number | null;
   mixed_sentence: string | null;
   other_meanings_fa: string | null;
+  other_meanings_en: string | null;
   category: string | null;
   typeOfWordInDb: string;
   hint_sentence: string | null;
@@ -73,6 +74,7 @@ export async function getWordEditorInitial(id: number): Promise<WordEditorInitia
     learning_depth: word.learning_depth,
     mixed_sentence: word.mixed_sentence,
     other_meanings_fa: word.other_meanings_fa,
+    other_meanings_en: word.other_meanings_en,
     category: word.category,
     typeOfWordInDb: word.typeOfWordInDb,
     hint_sentence: word.hint_sentence,

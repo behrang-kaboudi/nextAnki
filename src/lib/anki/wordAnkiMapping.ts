@@ -5,8 +5,8 @@ import path from "node:path";
 
 import type { Prisma, Word } from "@prisma/client";
 
-import type { AnkiNotesInfo } from "@/lib/AnkiConnect";
-import { WordAnkiConstants } from "@/lib/AnkiDeck";
+import type { AnkiNotesInfo } from "@/lib/anki";
+import { WordAnkiConstants } from "@/lib/anki";
 import {
   parsePictureWordAudioFilename,
   pictureWordAudioKey,
@@ -226,6 +226,8 @@ export const WORD_ANKI_FIELD_GENERATORS = {
   meaning_fa_audio: (w) => latestAudioTag(w.anki_link_id, "meaning_fa"),
   other_meanings_fa: (w) => w.other_meanings_fa ?? "",
   other_meanings_fa_audio: (w) => latestAudioTag(w.anki_link_id, "other_meanings_fa"),
+  other_meanings_en: (w) => w.other_meanings_en ?? "",
+  other_meanings_en_audio: (w) => latestAudioTag(w.anki_link_id, "other_meanings_en"),
   concept_explained_fa: (w) => w.concept_explained_fa ?? "",
   concept_explained_fa_audio: (w) => latestAudioTag(w.anki_link_id, "concept_explained_fa"),
   sentence_en: async (w) => {

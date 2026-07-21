@@ -3,7 +3,7 @@ import "server-only";
 import { NextResponse } from "next/server";
 
 import { requireApiAuth } from "@/lib/auth/apiAuth";
-import { createAnkiConnectClient } from "@/lib/AnkiConnect";
+import { createAnkiOperations } from "@/lib/anki";
 
 function chunk<T>(arr: T[], size: number) {
   const out: T[][] = [];
@@ -39,9 +39,9 @@ export async function POST(req: Request) {
     const noteIds = parseNoteIds((body as { noteIds?: unknown })?.noteIds);
     if (!noteIds.length) return NextResponse.json({ deleted: 0 });
 
-    const client = createAnkiConnectClient({ timeoutMs: 30_000 });
+    const client = createAnkiOperations({ timeoutMs: 30_000 });
 
-    const permRes = await client.requestDetailed("requestPermission");
+    const permRes = await client.requestPermission();
     if (!permRes.ok) {
       return NextResponse.json(
         { error: `AnkiConnect requestPermission failed: ${permRes.error}` },
@@ -64,7 +64,7 @@ export async function POST(req: Request) {
 
     let deleted = 0;
     for (const group of chunk(noteIds, 200)) {
-      const res = await client.requestDetailed("deleteNotes", { notes: group });
+      const res = await client.deleteNotes({ notes: group });
       if (!res.ok) {
         return NextResponse.json(
           { error: `deleteNotes failed via AnkiConnect: ${res.error}` },

@@ -1,7 +1,7 @@
 import "server-only";
 
-import { createAnkiConnectClient } from "@/lib/AnkiConnect";
-import { AnkiNoteTypes, WordAnkiConstants } from "@/lib/AnkiDeck";
+import { createAnkiConnectClient } from "@/lib/anki";
+import { AnkiNoteTypes, WordAnkiConstants } from "@/lib/anki";
 
 export async function ensureMetaLexVr9ModelFields(
   anki: ReturnType<typeof createAnkiConnectClient>,

@@ -124,7 +124,10 @@ export type AnkiConnectActionMap = {
 
   getDeckConfig: { params: { deck: string }; result: AnkiDeckConfig };
   saveDeckConfig: { params: { config: AnkiDeckConfig }; result: boolean };
-  setDeckConfigId: { params: { decks: string[]; configId: number }; result: boolean };
+  setDeckConfigId: {
+    params: { decks: string[]; configId: number };
+    result: boolean;
+  };
   cloneDeckConfigId: {
     params: { name: string; cloneFrom?: number };
     result: number | false;
@@ -132,8 +135,14 @@ export type AnkiConnectActionMap = {
 
   modelNames: { params?: Record<string, never>; result: string[] };
   modelFieldNames: { params: { modelName: string }; result: string[] };
-  modelFieldAdd: { params: { modelName: string; fieldName: string }; result: null };
-  modelFieldRemove: { params: { modelName: string; fieldName: string }; result: null };
+  modelFieldAdd: {
+    params: { modelName: string; fieldName: string };
+    result: null;
+  };
+  modelFieldRemove: {
+    params: { modelName: string; fieldName: string };
+    result: null;
+  };
   modelFieldReposition: {
     params: { modelName: string; fieldName: string; index: number };
     result: null;
@@ -153,11 +162,19 @@ export type AnkiConnectActionMap = {
     result: Record<string, { Front: string; Back: string }>;
   };
   modelTemplateAdd: {
-    params: { modelName: string; template: { Name: string; Front: string; Back: string } };
+    params: {
+      modelName: string;
+      template: { Name: string; Front: string; Back: string };
+    };
     result: null;
   };
   updateModelTemplates: {
-    params: { model: { name: string; templates: Record<string, { Front?: string; Back?: string }> } };
+    params: {
+      model: {
+        name: string;
+        templates: Record<string, { Front?: string; Back?: string }>;
+      };
+    };
     result: null;
   };
 
@@ -225,13 +242,16 @@ export type AnkiConnectActionMap = {
 
 export type AnkiConnectAction = keyof AnkiConnectActionMap;
 
-type ActionParams<TAction extends AnkiConnectAction> =
+export type AnkiActionParams<TAction extends AnkiConnectAction> =
   AnkiConnectActionMap[TAction] extends { params: infer P }
     ? P
     : Record<string, never>;
 
-type ActionResult<TAction extends AnkiConnectAction> =
+export type AnkiActionResult<TAction extends AnkiConnectAction> =
   AnkiConnectActionMap[TAction] extends { result: infer R } ? R : never;
+
+type ActionParams<TAction extends AnkiConnectAction> = AnkiActionParams<TAction>;
+type ActionResult<TAction extends AnkiConnectAction> = AnkiActionResult<TAction>;
 
 export type AnkiConnectClientOptions = {
   baseUrl?: string;
@@ -251,7 +271,10 @@ export type AnkiConnectClient = {
     ...params: ActionParams<TAction> extends Record<string, never>
       ? []
       : [params: ActionParams<TAction>]
-  ): Promise<{ ok: true; result: ActionResult<TAction> | null } | { ok: false; error: string }>;
+  ): Promise<
+    | { ok: true; result: ActionResult<TAction> | null }
+    | { ok: false; error: string }
+  >;
 };
 
 const defaultBaseUrl =
@@ -269,7 +292,7 @@ function isRetryableTransportError(error: unknown) {
 }
 
 export function createAnkiConnectClient(
-  options: AnkiConnectClientOptions = {}
+  options: AnkiConnectClientOptions = {},
 ): AnkiConnectClient {
   const baseUrl = options.baseUrl ?? defaultBaseUrl;
   const timeoutMs = options.timeoutMs ?? 5000;
@@ -297,7 +320,7 @@ export function createAnkiConnectClient(
 
   async function ankiRequest<TAction extends AnkiConnectAction>(
     action: TAction,
-    params?: ActionParams<TAction>
+    params?: ActionParams<TAction>,
   ): Promise<ActionResult<TAction> | null> {
     const payload: AnkiConnectRequest<TAction, ActionParams<TAction>> = {
       action,
@@ -345,8 +368,11 @@ export function createAnkiConnectClient(
 
   async function ankiRequestDetailed<TAction extends AnkiConnectAction>(
     action: TAction,
-    params?: ActionParams<TAction>
-  ): Promise<{ ok: true; result: ActionResult<TAction> | null } | { ok: false; error: string }> {
+    params?: ActionParams<TAction>,
+  ): Promise<
+    | { ok: true; result: ActionResult<TAction> | null }
+    | { ok: false; error: string }
+  > {
     const payload: AnkiConnectRequest<TAction, ActionParams<TAction>> = {
       action,
       version: 6,
@@ -356,11 +382,9 @@ export function createAnkiConnectClient(
     return enqueueRequestDetailed(async () => {
       for (;;) {
         try {
-          const res = await axios.post<AnkiConnectResponse<ActionResult<TAction>>>(
-            baseUrl,
-            payload,
-            { timeout: timeoutMs },
-          );
+          const res = await axios.post<
+            AnkiConnectResponse<ActionResult<TAction>>
+          >(baseUrl, payload, { timeout: timeoutMs });
 
           if (res.data.error) {
             const message = res.data.error.toString();
@@ -378,9 +402,11 @@ export function createAnkiConnectClient(
           }
 
           const message = axios.isAxiosError(error)
-            ? (error.response?.data as { error?: unknown } | undefined)?.error?.toString() ??
+            ? ((
+                error.response?.data as { error?: unknown } | undefined
+              )?.error?.toString() ??
               error.message ??
-              "AxiosError"
+              "AxiosError")
             : error instanceof Error
               ? error.message
               : String(error ?? "");
@@ -389,7 +415,10 @@ export function createAnkiConnectClient(
             return { ok: true as const, result: null };
           }
 
-          return { ok: false as const, error: message || "Unknown AnkiConnect error" };
+          return {
+            ok: false as const,
+            error: message || "Unknown AnkiConnect error",
+          };
         }
       }
     });

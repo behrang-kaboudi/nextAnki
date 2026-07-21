@@ -1,7 +1,7 @@
 import "server-only";
 
-import { createAnkiConnectClient } from "@/lib/AnkiConnect";
-import { AnkiNoteTypes, SentenceAnkiConstants } from "@/lib/AnkiDeck";
+import { createAnkiConnectClient } from "@/lib/anki";
+import { AnkiNoteTypes, SentenceAnkiConstants } from "@/lib/anki";
 
 const DECK_NAME = SentenceAnkiConstants.decks.EnSentences;
 const MODEL_NAME = AnkiNoteTypes.EN_SENTENCES;

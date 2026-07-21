@@ -7,4 +7,3 @@ export function ok<T>(value: T): Result<T> {
 export function err<T = never>(error: string): Result<T> {
   return { ok: false, error };
 }
-

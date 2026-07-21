@@ -2,7 +2,7 @@ import "server-only";
 
 import fs from "node:fs";
 
-import { createAnkiConnectClient, type AnkiNotesInfo } from "@/lib/AnkiConnect";
+import { createAnkiConnectClient, type AnkiNotesInfo } from "@/lib/anki";
 import { getPublicAudioFileInfo, getLatestHintSentenceAudioFileForId } from "@/lib/words/hintSentenceVoice";
 import { getAnkiNoteAndDbWordByAnkiLinkId } from "@/lib/anki/ankiLink";
 

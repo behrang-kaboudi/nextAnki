@@ -9,6 +9,8 @@ export const WordAnkiConstants = {
     "meaning_fa_audio",
     "other_meanings_fa",
     "other_meanings_fa_audio",
+    "other_meanings_en",
+    "other_meanings_en_audio",
     "concept_explained_fa",
     "concept_explained_fa_audio",
     "sentence_en",
@@ -46,6 +48,7 @@ export const WordAnkiConstants = {
 <div style=";text-align:right">
 {{meaning_fa}} {{meaning_fa_audio}}
 <div style='font-family: "Arial"; font-size: 20px;'>{{other_meanings_fa}} {{other_meanings_fa_audio}}</div>
+<div style='font-family: "Arial"; font-size: 20px;'>{{other_meanings_en}} {{other_meanings_en_audio}}</div>
 
 <div style='font-family: "Arial"; font-size: 20px;'>{{concept_explained_fa}} {{concept_explained_fa_audio}}</div>
 </div>
@@ -75,6 +78,7 @@ export const WordAnkiConstants = {
 
 <div style='font-family: "Arial"; font-size: 20px;'>{{meaning_fa}} {{meaning_fa_audio}}</div>
 <div style='font-family: "Arial"; font-size: 20px;'>{{other_meanings_fa}} {{other_meanings_fa_audio}}</div>
+<div style='font-family: "Arial"; font-size: 20px;'>{{other_meanings_en}} {{other_meanings_en_audio}}</div>
 
 <div style='font-family: "Arial"; font-size: 20px;'>{{concept_explained_fa}} {{concept_explained_fa_audio}}</div>
 </div>

@@ -1,5 +1,5 @@
-import type { AnkiDeckConfig } from "@/lib/AnkiConnect";
-import { WordAnkiConstants } from "@/lib/AnkiDeck/constants";
+import type { AnkiDeckConfig } from "@/lib/anki";
+import { WordAnkiConstants } from "@/lib/anki";
 
 export function asNumber(v: unknown): number | null {
   return typeof v === "number" && Number.isFinite(v) ? v : null;

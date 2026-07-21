@@ -3,9 +3,9 @@
 import {
   runEmlaAgainForNotesDueAfterDaysFromEnToFa,
   runFaToEnAgainForNewCardsFromEnToFaCardsDueAfterDays,
-} from "@/lib/AnkiDeck/ankiDeck";
-import type { Result } from "@/lib/AnkiDeck/result";
-import { err, ok } from "@/lib/AnkiDeck/result";
+} from "@/lib/anki";
+import type { Result } from "@/lib/anki";
+import { err, ok } from "@/lib/anki";
 
 export type ScanSummary = {
   emla: NonNullable<Awaited<ReturnType<typeof runEmlaAgainForNotesDueAfterDaysFromEnToFa>>>;

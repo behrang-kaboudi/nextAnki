@@ -1,5 +1,5 @@
-import { ankiRequestDetailed } from "@/lib/AnkiConnect";
-import { WordAnkiConstants } from "@/lib/AnkiDeck/constants";
+import { ankiOperations } from "@/lib/anki";
+import { WordAnkiConstants } from "@/lib/anki";
 
 import { loadDeckNames } from "./deckNames";
 import type { LogFn, StepResult } from "./types";
@@ -17,7 +17,7 @@ export const requiredStructureDecks = [
 async function createMissingDecks(missingDecks: string[], appendLog: LogFn): Promise<StepResult> {
   for (const deck of missingDecks) {
     appendLog(`Creating deck: ${deck} ...`);
-    const res = await ankiRequestDetailed("createDeck", { deck });
+    const res = await ankiOperations.createDeck({ deck });
     if (!res.ok) {
       appendLog(`✗ createDeck failed: ${res.error}`);
       return { ok: false };

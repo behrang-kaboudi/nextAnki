@@ -3,7 +3,7 @@ import "server-only";
 import fs from "node:fs";
 import path from "node:path";
 
-import { createAnkiConnectClient } from "@/lib/AnkiConnect";
+import { createAnkiConnectClient } from "@/lib/anki";
 
 export type MediaSyncAllStatus = {
   jobId: string;

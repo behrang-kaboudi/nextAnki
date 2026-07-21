@@ -1,5 +1,5 @@
-import { ankiRequestDetailed } from "@/lib/AnkiConnect";
-import { AnkiNoteTypes, WordAnkiConstants } from "@/lib/AnkiDeck/constants";
+import { ankiOperations } from "@/lib/anki";
+import { AnkiNoteTypes, WordAnkiConstants } from "@/lib/anki";
 
 import type { LogFn, StepResult } from "./types";
 
@@ -12,7 +12,7 @@ async function addMissingTemplates(
   for (const name of missingNames) {
     appendLog(`Adding template: ${String(name)} ...`);
     const tpl = desired[name as keyof typeof desired];
-    const res = await ankiRequestDetailed("modelTemplateAdd", {
+    const res = await ankiOperations.modelTemplateAdd({
       modelName,
       template: { Name: String(name), Front: tpl.Front, Back: tpl.Back },
     });
@@ -49,7 +49,7 @@ async function updateChangedTemplates(
   if (!updateNames.length) return { ok: true };
 
   appendLog(`Updating templates: ${updateNames.join(", ")} ...`);
-  const updateRes = await ankiRequestDetailed("updateModelTemplates", {
+  const updateRes = await ankiOperations.updateModelTemplates({
     model: { name: modelName, templates: updates },
   });
   if (!updateRes.ok) {
@@ -66,7 +66,7 @@ export async function ensureMetaLexVr9Templates(appendLog: LogFn): Promise<StepR
   const desired = WordAnkiConstants.noteTemplates;
   const desiredNames = Object.keys(desired) as Array<keyof typeof desired>;
 
-  const templatesRes = await ankiRequestDetailed("modelTemplates", { modelName });
+  const templatesRes = await ankiOperations.modelTemplates({ modelName });
   if (!templatesRes.ok || !templatesRes.result) {
     appendLog(`✗ modelTemplates failed: ${templatesRes.ok ? "null result" : templatesRes.error}`);
     return { ok: false };

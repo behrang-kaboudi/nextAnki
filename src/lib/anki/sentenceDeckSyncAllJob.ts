@@ -3,10 +3,10 @@ import "server-only";
 import fs from "node:fs";
 
 import { prisma } from "@/lib/prisma";
-import { createAnkiConnectClient } from "@/lib/AnkiConnect";
-import { AnkiNoteTypes, SentenceAnkiConstants } from "@/lib/AnkiDeck";
-import { chunkArray } from "@/lib/AnkiDeck/workflowHelpers";
-import { quoteAnkiSearchValue } from "@/lib/AnkiDeck/queries";
+import { createAnkiConnectClient } from "@/lib/anki";
+import { AnkiNoteTypes, SentenceAnkiConstants } from "@/lib/anki";
+import { chunkArray } from "@/lib/anki";
+import { quoteAnkiSearchValue } from "@/lib/anki";
 import {
   sanitizeWordAudioFilenamePart,
   WORD_AUDIO_FILENAME_SEPARATOR,

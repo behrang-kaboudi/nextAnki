@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 
 import fs from "node:fs";
 
-import { createAnkiConnectClient } from "@/lib/AnkiConnect";
-import { AnkiNoteTypes } from "@/lib/AnkiDeck";
+import { createAnkiOperations } from "@/lib/anki";
+import { AnkiNoteTypes } from "@/lib/anki";
 import { WORD_ANKI_FIELD_GENERATORS, getAnkiLinkIdFromNoteFields } from "@/lib/anki/wordAnkiMapping";
 import { prisma } from "@/lib/prisma";
 import { getWordFieldAudioFileInfo } from "@/lib/words/wordFieldVoice";
@@ -16,31 +16,31 @@ function extractFirstSoundFilename(value: string): string | null {
   return fn ? fn : null;
 }
 
-async function uploadWordFieldAudioToAnki(filename: string, anki: ReturnType<typeof createAnkiConnectClient>) {
+async function uploadWordFieldAudioToAnki(filename: string, anki: ReturnType<typeof createAnkiOperations>) {
   const info = getWordFieldAudioFileInfo(filename);
   if (!info.exists) return { ok: false as const, error: `Local audio not found: ${filename}` };
   if (info.size <= 0) return { ok: false as const, error: `Local audio is zero-byte: ${filename}` };
 
   const bytes = fs.readFileSync(info.absPath);
   const data = bytes.toString("base64");
-  const res = await anki.requestDetailed("storeMediaFile", { filename, data, deleteExisting: true });
+  const res = await anki.storeMediaFile({ filename, data, deleteExisting: true });
   if (!res.ok) return { ok: false as const, error: res.error };
   return { ok: true as const };
 }
 
-async function deleteMediaIfExists(filename: string, anki: ReturnType<typeof createAnkiConnectClient>) {
-  const res = await anki.requestDetailed("deleteMediaFile", { filename });
+async function deleteMediaIfExists(filename: string, anki: ReturnType<typeof createAnkiOperations>) {
+  const res = await anki.deleteMediaFile({ filename });
   if (!res.ok) return { ok: false as const, error: res.error };
   return { ok: true as const };
 }
 
 export async function POST() {
-  const anki = createAnkiConnectClient({ timeoutMs: 15_000, retryDelayMs: 750 });
+  const anki = createAnkiOperations({ timeoutMs: 15_000, retryDelayMs: 750 });
 
   const modelName = AnkiNoteTypes.META_LEX_VR9;
   const query = `note:"${modelName}"`;
 
-  const found = await anki.requestDetailed("findNotes", { query });
+  const found = await anki.findNotes({ query });
   if (!found.ok) {
     return NextResponse.json({ ok: false as const, error: found.error }, { status: 502 });
   }
@@ -54,7 +54,7 @@ export async function POST() {
     );
   }
 
-  const info = await anki.requestDetailed("notesInfo", { notes: [noteId] });
+  const info = await anki.notesInfo({ notes: [noteId] });
   if (!info.ok) {
     return NextResponse.json({ ok: false as const, error: info.error }, { status: 502 });
   }
@@ -129,7 +129,7 @@ export async function POST() {
     media.push({ step: "storeMediaFile", ok: true, filename: newFilename });
   }
 
-  const upd = await anki.requestDetailed("updateNoteFields", {
+  const upd = await anki.updateNoteFields({
     note: { id: noteId, fields: { sentence_en: newValue } },
   });
   if (!upd.ok) {

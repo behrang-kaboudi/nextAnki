@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
-import { createAnkiConnectClient } from "@/lib/AnkiConnect";
-import { AnkiNoteTypes } from "@/lib/AnkiDeck";
+import { createAnkiOperations } from "@/lib/anki";
+import { AnkiNoteTypes } from "@/lib/anki";
 import { getAnkiLinkIdFromNoteFields } from "@/lib/anki/wordAnkiMapping";
 
 export const runtime = "nodejs";
@@ -13,12 +13,12 @@ function chunk<T>(arr: T[], size: number): T[][] {
 }
 
 export async function POST() {
-  const anki = createAnkiConnectClient({ timeoutMs: 30_000, retryDelayMs: 1000 });
+  const anki = createAnkiOperations({ timeoutMs: 30_000, retryDelayMs: 1000 });
 
   const modelName = AnkiNoteTypes.META_LEX_VR9;
   const query = `note:"${modelName.replaceAll('"', '\\"')}"`;
 
-  const found = await anki.requestDetailed("findNotes", { query });
+  const found = await anki.findNotes({ query });
   if (!found.ok) {
     return NextResponse.json({ ok: false as const, error: found.error }, { status: 502 });
   }
@@ -30,7 +30,7 @@ export async function POST() {
   let missingLinkId = 0;
 
   for (const batch of chunk(noteIds, 250)) {
-    const info = await anki.requestDetailed("notesInfo", { notes: batch });
+    const info = await anki.notesInfo({ notes: batch });
     if (!info.ok) {
       return NextResponse.json({ ok: false as const, error: info.error }, { status: 502 });
     }

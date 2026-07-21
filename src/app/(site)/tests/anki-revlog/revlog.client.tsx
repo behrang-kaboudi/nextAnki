@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 
 import { PageHeader } from "@/components/page-header";
-import { createAnkiConnectClient } from "@/lib/AnkiConnect/ankiConnect";
+import { createAnkiOperations } from "@/lib/anki";
 
 type RevlogRow = {
   cardId: number;
@@ -61,7 +61,7 @@ function formatReviewDate(id: number) {
 
 export default function AnkiRevlogClient() {
   const client = useMemo(
-    () => createAnkiConnectClient({ timeoutMs: 15_000, retryDelayMs: 750 }),
+    () => createAnkiOperations({ timeoutMs: 15_000, retryDelayMs: 750 }),
     [],
   );
 
@@ -82,7 +82,7 @@ export default function AnkiRevlogClient() {
   async function requestPermission() {
     setErrorText(null);
     setPermissionText(null);
-    const res = await client.requestDetailed("requestPermission");
+    const res = await client.requestPermission();
     if (!res.ok) {
       setErrorText(res.error);
       return;
@@ -111,7 +111,7 @@ export default function AnkiRevlogClient() {
           setErrorText("Provide either card IDs or a findCards query.");
           return;
         }
-        const found = await client.requestDetailed("findCards", { query: q });
+        const found = await client.findCards({ query: q });
         if (!found.ok) {
           setErrorText(found.error);
           return;
@@ -124,7 +124,7 @@ export default function AnkiRevlogClient() {
         return;
       }
 
-      const res = await client.requestDetailed("getReviewsOfCards", { cards: cardIds });
+      const res = await client.getReviewsOfCards({ cards: cardIds });
       if (!res.ok) {
         setErrorText(res.error);
         return;

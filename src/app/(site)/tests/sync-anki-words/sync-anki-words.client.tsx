@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { PageHeader } from "@/components/page-header";
-import { createAnkiConnectClient } from "@/lib/AnkiConnect";
+import { createAnkiOperations } from "@/lib/anki";
 
 type SyncAllStatus = {
   jobId: string;
@@ -78,7 +78,7 @@ function Code({ children }: { children: React.ReactNode }) {
 
 export default function SyncAnkiWordsClient() {
   const client = useMemo(
-    () => createAnkiConnectClient({ timeoutMs: 15_000, retryDelayMs: 750 }),
+    () => createAnkiOperations({ timeoutMs: 15_000, retryDelayMs: 750 }),
     [],
   );
 
@@ -577,7 +577,7 @@ export default function SyncAnkiWordsClient() {
   }
 
   async function requestPermission() {
-    const res = await client.requestDetailed("requestPermission");
+    const res = await client.requestPermission();
     if (!res.ok) {
       append({ level: "error", message: "requestPermission failed", data: res.error });
       return;

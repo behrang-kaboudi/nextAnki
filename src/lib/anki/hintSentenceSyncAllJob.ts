@@ -3,8 +3,8 @@ import "server-only";
 import fs from "node:fs";
 import path from "node:path";
 
-import { createAnkiConnectClient } from "@/lib/AnkiConnect";
-import { AnkiNoteTypes } from "@/lib/AnkiDeck/constants";
+import { createAnkiConnectClient } from "@/lib/anki";
+import { AnkiNoteTypes } from "@/lib/anki";
 import { prisma } from "@/lib/prisma";
 import { getAnkiLinkIdFromNoteFields } from "@/lib/anki/ankiLink";
 import { buildLatestHintSentenceAudioIndex } from "@/lib/words/hintSentenceVoice";

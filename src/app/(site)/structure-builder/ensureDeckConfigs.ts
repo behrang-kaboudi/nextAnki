@@ -1,5 +1,5 @@
-import { ankiRequestDetailed, type AnkiDeckConfig } from "@/lib/AnkiConnect";
-import { WordAnkiConstants, WordDeckConfigs } from "@/lib/AnkiDeck/constants";
+import { ankiOperations, type AnkiDeckConfig } from "@/lib/anki";
+import { WordAnkiConstants, WordDeckConfigs } from "@/lib/anki";
 
 import {
   arraysEqual,
@@ -115,14 +115,14 @@ function configNeedsUpdate(current: AnkiDeckConfig, desired: DesiredDeckConfig) 
 }
 
 async function saveConfig(config: AnkiDeckConfig) {
-  const res = await ankiRequestDetailed("saveDeckConfig", { config });
+  const res = await ankiOperations.saveDeckConfig({ config });
   if (!res.ok) return { ok: false as const, error: res.error };
   if (res.result !== true) return { ok: false as const, error: `saveDeckConfig returned ${String(res.result)}.` };
   return { ok: true as const };
 }
 
 async function applyConfigToDeck(deck: string, configId: number) {
-  const res = await ankiRequestDetailed("setDeckConfigId", { decks: [deck], configId });
+  const res = await ankiOperations.setDeckConfigId({ decks: [deck], configId });
   if (!res.ok) return { ok: false as const, error: res.error };
   if (res.result !== true) return { ok: false as const, error: `setDeckConfigId returned ${String(res.result)}.` };
   return { ok: true as const };
@@ -131,7 +131,7 @@ async function applyConfigToDeck(deck: string, configId: number) {
 async function loadConfigGroupsByName(deckNames: string[]) {
   const configByName = new Map<string, AnkiDeckConfig>();
   for (const deckName of deckNames) {
-    const cfgRes = await ankiRequestDetailed("getDeckConfig", { deck: deckName });
+    const cfgRes = await ankiOperations.getDeckConfig({ deck: deckName });
     if (!cfgRes.ok || !cfgRes.result) continue;
     if (!configByName.has(cfgRes.result.name)) configByName.set(cfgRes.result.name, cfgRes.result);
   }
@@ -145,7 +145,7 @@ async function createConfigGroup(
   appendLog: LogFn,
 ) {
   appendLog(`Creating config group: ${pair.configName} ...`);
-  const cloneRes = await ankiRequestDetailed("cloneDeckConfigId", { name: pair.configName, cloneFrom: current.id });
+  const cloneRes = await ankiOperations.cloneDeckConfigId({ name: pair.configName, cloneFrom: current.id });
   if (!cloneRes.ok) return { ok: false as const, error: `cloneDeckConfigId failed: ${cloneRes.error}` };
   const clonedId = cloneRes.result;
   if (!clonedId) return { ok: false as const, error: "cloneDeckConfigId returned an empty id." };
@@ -169,7 +169,7 @@ async function ensureConfigGroup(
   appendLog(`Deck: ${pair.deck}`);
   appendLog(`Config: ${pair.configName}`);
 
-  const currentRes = await ankiRequestDetailed("getDeckConfig", { deck: pair.deck });
+  const currentRes = await ankiOperations.getDeckConfig({ deck: pair.deck });
   if (!currentRes.ok) return { ok: false as const, error: `getDeckConfig failed: ${currentRes.error}` };
   const current = currentRes.result;
   if (!current) return { ok: false as const, error: "getDeckConfig returned null." };
@@ -198,7 +198,7 @@ async function ensureConfigGroup(
 }
 
 async function confirmDeckConfig(pair: DeckConfigPair, desired: DesiredDeckConfig, appendLog: LogFn): Promise<StepResult> {
-  const confirmRes = await ankiRequestDetailed("getDeckConfig", { deck: pair.deck });
+  const confirmRes = await ankiOperations.getDeckConfig({ deck: pair.deck });
   if (!confirmRes.ok || !confirmRes.result) {
     appendLog("✗ Failed to confirm deck config.");
     return { ok: false };

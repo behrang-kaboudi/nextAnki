@@ -1,4 +1,4 @@
-import { ankiRequest } from "@/lib/AnkiConnect";
+import { ankiRequest } from "../client";
 import type { Result } from "./result";
 import { err, ok } from "./result";
 import { quoteAnkiSearchValue } from "./queries";

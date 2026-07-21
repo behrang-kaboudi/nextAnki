@@ -129,6 +129,7 @@ export async function POST(req: Request) {
         learning_depth: normalizeNullableNumber(d.learning_depth),
         mixed_sentence: normalizeNullableString(d.mixed_sentence),
         other_meanings_fa: normalizeNullableString(d.other_meanings_fa),
+        other_meanings_en: normalizeNullableString(d.other_meanings_en),
         category: normalizeNullableString(d.category),
         typeOfWordInDb,
         hint_sentence: normalizeNullableString(d.hint_sentence),

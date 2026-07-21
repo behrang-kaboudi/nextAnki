@@ -1,9 +1,9 @@
 import "server-only";
 
-import { createAnkiConnectClient } from "@/lib/AnkiConnect";
-import { AnkiNoteTypes, SentenceAnkiConstants } from "@/lib/AnkiDeck";
-import { quoteAnkiSearchValue } from "@/lib/AnkiDeck/queries";
-import { chunkArray } from "@/lib/AnkiDeck/workflowHelpers";
+import { createAnkiOperations } from "@/lib/anki";
+import { AnkiNoteTypes, SentenceAnkiConstants } from "@/lib/anki";
+import { quoteAnkiSearchValue } from "@/lib/anki";
+import { chunkArray } from "@/lib/anki";
 import { prisma } from "@/lib/prisma";
 
 const SENTENCE_DECK_NAME = SentenceAnkiConstants.decks.EnSentences;
@@ -16,9 +16,9 @@ function asNonEmptyString(value: unknown): string | null {
 }
 
 async function loadExistingAnkiSentenceSet() {
-  const anki = createAnkiConnectClient({ timeoutMs: 20_000, retryDelayMs: 750 });
+  const anki = createAnkiOperations({ timeoutMs: 20_000, retryDelayMs: 750 });
   const query = `deck:${quoteAnkiSearchValue(SENTENCE_DECK_NAME)} note:${quoteAnkiSearchValue(SENTENCE_MODEL_NAME)}`;
-  const noteIdsRes = await anki.requestDetailed("findNotes", { query });
+  const noteIdsRes = await anki.findNotes({ query });
   if (!noteIdsRes.ok) {
     throw new Error(
       `AnkiConnect findNotes failed while loading existing sentence notes: ${noteIdsRes.error}`,
@@ -28,7 +28,7 @@ async function loadExistingAnkiSentenceSet() {
   const existing = new Set<string>();
   for (const chunk of chunkArray(noteIdsRes.result ?? [], 200)) {
     if (!chunk.length) continue;
-    const infoRes = await anki.requestDetailed("notesInfo", { notes: chunk });
+    const infoRes = await anki.notesInfo({ notes: chunk });
     if (!infoRes.ok) {
       throw new Error(
         `AnkiConnect notesInfo failed while loading existing sentence notes: ${infoRes.error}`,

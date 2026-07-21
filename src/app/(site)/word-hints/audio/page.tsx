@@ -55,6 +55,7 @@ export default async function WordHintsAudioPage({
         base_form: true,
         meaning_fa: true,
         other_meanings_fa: true,
+        other_meanings_en: true,
         concept_explained_fa: true,
         sentenceLinks: {
           where: { isPrimary: true },
@@ -103,6 +104,7 @@ export default async function WordHintsAudioPage({
             UI for generating audio for <span className="font-mono">base_form</span>,{" "}
             <span className="font-mono">meaning_fa</span>,{" "}
             <span className="font-mono">other_meanings_fa</span>,{" "}
+            <span className="font-mono">other_meanings_en</span>,{" "}
             <span className="font-mono">concept_explained_fa</span>,{" "}
             <span className="font-mono">sentence_en</span>,{" "}
             <span className="font-mono">sentence_en_meaning_fa</span>.
@@ -119,6 +121,9 @@ export default async function WordHintsAudioPage({
             />
             <BatchWordFieldVoiceGenerate
               field="other_meanings_fa"
+            />
+            <BatchWordFieldVoiceGenerate
+              field="other_meanings_en"
             />
             <BatchWordFieldVoiceGenerate
               field="concept_explained_fa"
@@ -188,6 +193,7 @@ export default async function WordHintsAudioPage({
                 <th className="whitespace-nowrap px-3 py-2 font-semibold">base_form</th>
                 <th className="whitespace-nowrap px-3 py-2 font-semibold">meaning_fa</th>
                 <th className="whitespace-nowrap px-3 py-2 font-semibold">other_meanings_fa</th>
+                <th className="whitespace-nowrap px-3 py-2 font-semibold">other_meanings_en</th>
                 <th className="whitespace-nowrap px-3 py-2 font-semibold">concept_explained_fa</th>
                 <th className="whitespace-nowrap px-3 py-2 font-semibold">sentence_en</th>
                 <th className="whitespace-nowrap px-3 py-2 font-semibold">sentence_en_meaning_fa</th>
@@ -235,6 +241,18 @@ export default async function WordHintsAudioPage({
                   </td>
                   <td className="max-w-[360px] px-3 py-2">
                     <div className="flex items-center justify-between gap-2">
+                      <span className="truncate" title={String(r.other_meanings_en ?? "")}>
+                        {r.other_meanings_en ?? "—"}
+                      </span>
+                      <WordFieldVoiceCell
+                        field="other_meanings_en"
+                        audioKey={r.anki_link_id}
+                        text={r.other_meanings_en}
+                      />
+                    </div>
+                  </td>
+                  <td className="max-w-[360px] px-3 py-2">
+                    <div className="flex items-center justify-between gap-2">
                       <span className="truncate" title={String(r.concept_explained_fa ?? "")}>
                         {r.concept_explained_fa ?? "—"}
                       </span>
@@ -276,7 +294,7 @@ export default async function WordHintsAudioPage({
               ))}
               {rows.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-3 py-6 text-center text-sm opacity-70">
+                  <td colSpan={8} className="px-3 py-6 text-center text-sm opacity-70">
                     No rows.
                   </td>
                 </tr>

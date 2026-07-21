@@ -1,7 +1,7 @@
 import "server-only";
 
-import { createAnkiConnectClient } from "@/lib/AnkiConnect";
-import { AnkiNoteTypes } from "@/lib/AnkiDeck";
+import { createAnkiConnectClient } from "@/lib/anki";
+import { AnkiNoteTypes } from "@/lib/anki";
 import { WORD_ANKI_FIELD_GENERATORS, getAnkiLinkIdFromNoteFields } from "@/lib/anki/wordAnkiMapping";
 import { prisma } from "@/lib/prisma";
 

@@ -6,7 +6,7 @@
  *   => 69404cca7aa46fd41264bdee
  *
  * Usage:
- *   node scripts/anki-strip-br-from-anki-link-id.mjs --apply
+ *   node src/lib/anki/scripts/anki-strip-br-from-anki-link-id.mjs --apply
  *
  * Notes:
  * - Uses AnkiConnect directly (default http://127.0.0.1:8765).

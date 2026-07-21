@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { PageHeader } from "@/components/page-header";
-import { AnkiNoteTypes, SentenceAnkiConstants } from "@/lib/AnkiDeck";
+import { AnkiNoteTypes, SentenceAnkiConstants } from "@/lib/anki";
 
 type EnsureResponse =
   | {

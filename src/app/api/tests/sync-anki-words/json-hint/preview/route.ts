@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
-import { createAnkiConnectClient } from "@/lib/AnkiConnect";
-import { AnkiNoteTypes } from "@/lib/AnkiDeck";
+import { createAnkiOperations } from "@/lib/anki";
+import { AnkiNoteTypes } from "@/lib/anki";
 import { WORD_ANKI_FIELD_GENERATORS, getAnkiLinkIdFromNoteFields } from "@/lib/anki/wordAnkiMapping";
 import { prisma } from "@/lib/prisma";
 
@@ -47,12 +47,12 @@ export async function POST(req: Request) {
     );
   }
 
-  const anki = createAnkiConnectClient({ timeoutMs: 15_000, retryDelayMs: 750 });
+  const anki = createAnkiOperations({ timeoutMs: 15_000, retryDelayMs: 750 });
 
   const modelName = AnkiNoteTypes.META_LEX_VR9;
   const query = `note:"${modelName}"`;
 
-  const found = await anki.requestDetailed("findNotes", { query });
+  const found = await anki.findNotes({ query });
   if (!found.ok) {
     return NextResponse.json({ ok: false as const, error: found.error }, { status: 502 });
   }
@@ -66,7 +66,7 @@ export async function POST(req: Request) {
     );
   }
 
-  const info = await anki.requestDetailed("notesInfo", { notes: [noteId] });
+  const info = await anki.notesInfo({ notes: [noteId] });
   if (!info.ok) {
     return NextResponse.json({ ok: false as const, error: info.error }, { status: 502 });
   }

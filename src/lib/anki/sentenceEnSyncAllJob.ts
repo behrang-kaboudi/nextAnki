@@ -2,8 +2,8 @@ import "server-only";
 
 import fs from "node:fs";
 
-import { createAnkiConnectClient } from "@/lib/AnkiConnect";
-import { AnkiNoteTypes } from "@/lib/AnkiDeck";
+import { createAnkiConnectClient } from "@/lib/anki";
+import { AnkiNoteTypes } from "@/lib/anki";
 import { sanitizeWordAudioFilenamePart, WORD_AUDIO_FILENAME_SEPARATOR } from "@/lib/audio/wordFieldAudioNaming";
 import { getWordFieldAudioAbsoluteDir, getWordFieldAudioAbsolutePath } from "@/lib/audio/wordFieldAudioPaths.server";
 import { getAnkiLinkIdFromNoteFields } from "@/lib/anki/wordAnkiMapping";
