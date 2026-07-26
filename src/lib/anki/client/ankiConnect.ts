@@ -168,6 +168,13 @@ export type AnkiConnectActionMap = {
     };
     result: null;
   };
+  modelTemplateRemove: {
+    params: {
+      modelName: string;
+      templateName: string;
+    };
+    result: null;
+  };
   updateModelTemplates: {
     params: {
       model: {

@@ -1,32 +1,14 @@
-import { ankiOperations } from "@/lib/anki";
+import { createAnkiOperations } from "@/lib/anki";
 import { AnkiNoteTypes, WordAnkiConstants } from "@/lib/anki";
+import type { AnkiStructureConfig } from "@/lib/anki/structureSettings";
 
 import type { LogFn, StepResult } from "./types";
 
-async function addMissingTemplates(
-  modelName: string,
-  missingNames: string[],
-  desired: typeof WordAnkiConstants.noteTemplates,
-  appendLog: LogFn,
-): Promise<StepResult> {
-  for (const name of missingNames) {
-    appendLog(`Adding template: ${String(name)} ...`);
-    const tpl = desired[name as keyof typeof desired];
-    const res = await ankiOperations.modelTemplateAdd({
-      modelName,
-      template: { Name: String(name), Front: tpl.Front, Back: tpl.Back },
-    });
-    if (!res.ok) {
-      appendLog(`✗ modelTemplateAdd failed: ${res.error}`);
-      return { ok: false };
-    }
-  }
-  return { ok: true };
-}
+const templateOperations = createAnkiOperations({ timeoutMs: 200_000 });
 
 function findTemplateUpdates(
   existing: Record<string, { Front: string; Back: string }>,
-  desired: typeof WordAnkiConstants.noteTemplates,
+  desired: Record<string, { Front: string; Back: string }>,
 ) {
   const updates: Record<string, { Front: string; Back: string }> = {};
   for (const name of Object.keys(desired) as Array<keyof typeof desired>) {
@@ -49,7 +31,7 @@ async function updateChangedTemplates(
   if (!updateNames.length) return { ok: true };
 
   appendLog(`Updating templates: ${updateNames.join(", ")} ...`);
-  const updateRes = await ankiOperations.updateModelTemplates({
+  const updateRes = await templateOperations.updateModelTemplates({
     model: { name: modelName, templates: updates },
   });
   if (!updateRes.ok) {
@@ -59,14 +41,24 @@ async function updateChangedTemplates(
   return { ok: true };
 }
 
-export async function ensureMetaLexVr9Templates(appendLog: LogFn): Promise<StepResult> {
-  appendLog(`Step 4: Ensure note type templates (${AnkiNoteTypes.META_LEX_VR9})...`);
+export async function ensureMetaLexVr9Templates(
+  appendLog: LogFn,
+  config?: AnkiStructureConfig,
+): Promise<StepResult> {
+  const modelName = config?.noteType.name ?? AnkiNoteTypes.META_LEX_VR9;
+  appendLog(`Step 5: Ensure Template content (${modelName})...`);
 
-  const modelName = AnkiNoteTypes.META_LEX_VR9;
-  const desired = WordAnkiConstants.noteTemplates;
+  const desired: Record<string, { Front: string; Back: string }> = config
+    ? Object.fromEntries(
+        config.noteType.cardTypes.map((template) => [
+          template.name,
+          { Front: template.front, Back: template.back },
+        ]),
+      )
+    : WordAnkiConstants.noteTemplates;
   const desiredNames = Object.keys(desired) as Array<keyof typeof desired>;
 
-  const templatesRes = await ankiOperations.modelTemplates({ modelName });
+  const templatesRes = await templateOperations.modelTemplates({ modelName });
   if (!templatesRes.ok || !templatesRes.result) {
     appendLog(`✗ modelTemplates failed: ${templatesRes.ok ? "null result" : templatesRes.error}`);
     return { ok: false };
@@ -76,15 +68,18 @@ export async function ensureMetaLexVr9Templates(appendLog: LogFn): Promise<StepR
   const existingNames = new Set(Object.keys(existing));
   const missing = desiredNames.map(String).filter((name) => !existingNames.has(name));
 
-  const addResult = await addMissingTemplates(modelName, missing, desired, appendLog);
-  if (!addResult.ok) return addResult;
+  if (missing.length > 0) {
+    appendLog(`✗ Missing Card Types: ${missing.join(", ")}`);
+    appendLog("Run Step 3: Ensure Card Types. This Step only updates existing Front/Back content.");
+    return { ok: false };
+  }
 
   const updates = findTemplateUpdates(existing, desired);
   const updateResult = await updateChangedTemplates(modelName, updates, appendLog);
   if (!updateResult.ok) return updateResult;
 
-  if (!missing.length && !Object.keys(updates).length) appendLog("✓ Templates already up-to-date.");
-  else appendLog("✓ Templates ensured.");
-  appendLog("Step 4: Done.");
+  if (!Object.keys(updates).length) appendLog("✓ Template content already up-to-date.");
+  else appendLog("✓ Template content updated.");
+  appendLog("Step 5: Done.");
   return { ok: true };
 }

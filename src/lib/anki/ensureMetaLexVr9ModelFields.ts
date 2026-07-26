@@ -23,13 +23,11 @@ export async function ensureMetaLexVr9ModelFields(
 
   if (!modelNames.includes(modelName)) {
     const templates = WordAnkiConstants.noteTemplates;
-    const cardTemplates = [
-      { Name: "EnToFa", Front: templates.EnToFa.Front, Back: templates.EnToFa.Back },
-      { Name: "FaToEn", Front: templates.FaToEn.Front, Back: templates.FaToEn.Back },
-      { Name: "Emla", Front: templates.Emla.Front, Back: templates.Emla.Back },
-      { Name: "Rahnama", Front: templates.Rahnama.Front, Back: templates.Rahnama.Back },
-      { Name: "Rahnama2", Front: templates.Rahnama2.Front, Back: templates.Rahnama2.Back },
-    ];
+    const cardTemplates = Object.entries(templates).map(([Name, template]) => ({
+      Name,
+      Front: template.Front,
+      Back: template.Back,
+    }));
 
     const createRes = await anki.requestDetailed("createModel", {
       modelName,
@@ -53,10 +51,6 @@ export async function ensureMetaLexVr9ModelFields(
 
   // Keep card templates in sync as well (especially important for existing users/models).
   const desiredTemplates = WordAnkiConstants.noteTemplates;
-  const desiredByName: Record<string, { Front: string; Back: string }> = {
-    Rahnama: desiredTemplates.Rahnama,
-    Rahnama2: desiredTemplates.Rahnama2,
-  };
 
   const currentTemplatesRes = await anki.requestDetailed("modelTemplates", { modelName });
   if (!currentTemplatesRes.ok) throw new Error(currentTemplatesRes.error);
@@ -64,7 +58,7 @@ export async function ensureMetaLexVr9ModelFields(
   if (!currentTemplates) throw new Error("AnkiConnect returned null for modelTemplates.");
 
   const updates: Record<string, { Front: string; Back: string }> = {};
-  for (const [name, desired] of Object.entries(desiredByName)) {
+  for (const [name, desired] of Object.entries(desiredTemplates)) {
     const current = currentTemplates[name] ?? null;
     if (!current) {
       const addRes = await anki.requestDetailed("modelTemplateAdd", {

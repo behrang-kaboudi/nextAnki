@@ -11,6 +11,7 @@ import {
   AnkiNoteTypes,
   findCardIdsInDeck,
   getLastRevlogByCardIds,
+  pressAgainOnce,
   WordAnkiConstants,
 } from "@/lib/anki";
 import { imageabilityBaseThreshold } from "@/lib/ipa/setPictures/types";
@@ -189,6 +190,12 @@ export default function AnkiNotePage() {
   const [phase3Running, setPhase3Running] = useState(false);
   const [phase3StatusText, setPhase3StatusText] = useState<string | null>(null);
   const [phase3Error, setPhase3Error] = useState<string | null>(null);
+  const [reviewPhaseRunning, setReviewPhaseRunning] = useState(false);
+  const [reviewPhaseStatusText, setReviewPhaseStatusText] = useState<string | null>(null);
+  const [reviewPhaseError, setReviewPhaseError] = useState<string | null>(null);
+  const [expandedReviewPhaseRunning, setExpandedReviewPhaseRunning] = useState(false);
+  const [expandedReviewPhaseStatusText, setExpandedReviewPhaseStatusText] = useState<string | null>(null);
+  const [expandedReviewPhaseError, setExpandedReviewPhaseError] = useState<string | null>(null);
   const [runAllRunning, setRunAllRunning] = useState(false);
   const [runAllStatusText, setRunAllStatusText] = useState<string | null>(null);
   const [runAllError, setRunAllError] = useState<string | null>(null);
@@ -485,6 +492,22 @@ export default function AnkiNotePage() {
       for (const card of infoRes.result ?? []) noteIds.add(card.note);
     }
     return { ok: true as const, noteIds: Array.from(noteIds) };
+  }
+
+  async function findCardIdsByNoteIdsAndTemplate(
+    noteIds: number[],
+    cardTemplate: string,
+  ) {
+    const cardIds = new Set<number>();
+    for (const chunk of chunkArray(Array.from(new Set(noteIds)), 200)) {
+      const nidQuery = chunk.map((noteId) => `nid:${noteId}`).join(" OR ");
+      const cardsRes = await ankiOperations.findCards({
+        query: `(${nidQuery}) card:"${escapeAnkiQueryValue(cardTemplate)}"`,
+      });
+      if (!cardsRes.ok) return { ok: false as const, error: cardsRes.error };
+      for (const cardId of cardsRes.result ?? []) cardIds.add(cardId);
+    }
+    return { ok: true as const, cardIds: Array.from(cardIds) };
   }
 
   async function getNotesInfoByIds(noteIds: number[]) {
@@ -1169,6 +1192,252 @@ export default function AnkiNotePage() {
     }
   }
 
+  async function runReviewCreationPhase() {
+    if (reviewPhaseRunning || expandedReviewPhaseRunning) return;
+
+    setReviewPhaseRunning(true);
+    setReviewPhaseError(null);
+    setReviewPhaseStatusText("Starting…");
+
+    try {
+      const sourceDecks = [
+        {
+          deck: WordAnkiConstants.decks.EnToFa,
+          sourceCard: WordAnkiConstants.cardTypes.EnToFa,
+          reviewCard: WordAnkiConstants.cardTypes.EnToFaRev,
+          reviewDeck: WordAnkiConstants.decks.EnToFaRev,
+        },
+        {
+          deck: WordAnkiConstants.decks.FaToEn,
+          sourceCard: WordAnkiConstants.cardTypes.FaToEn,
+          reviewCard: WordAnkiConstants.cardTypes.FaToEnRev,
+          reviewDeck: WordAnkiConstants.decks.FaToEnRev,
+        },
+      ] as const;
+      const cutoffMs = Date.now() - 24 * 60 * 60 * 1000;
+      const tempDeck = WordAnkiConstants.decks.tempRoot;
+      let sourceAgainCount = 0;
+      let answeredAgainCount = 0;
+      let movedCount = 0;
+
+      for (const config of sourceDecks) {
+        setReviewPhaseStatusText(`Finding cards in ${config.deck}…`);
+        const cardsRes = await ankiOperations.findCards({
+          query: `deck:"${escapeAnkiQueryValue(config.deck)}" card:"${config.sourceCard}"`,
+        });
+        if (!cardsRes.ok) throw new Error(cardsRes.error);
+
+        const sourceCardIds = cardsRes.result ?? [];
+        const recentAgainCardIds: number[] = [];
+        for (const chunk of chunkArray(sourceCardIds, 200)) {
+          const reviewsRes = await ankiOperations.getReviewsOfCards({ cards: chunk });
+          if (!reviewsRes.ok) throw new Error(reviewsRes.error);
+          const reviewsByCardId = reviewsRes.result ?? {};
+          for (const cardId of chunk) {
+            const hasRecentAgain = (reviewsByCardId[String(cardId)] ?? []).some(
+              (review) => review.ease === 1 && review.id >= cutoffMs,
+            );
+            if (hasRecentAgain) recentAgainCardIds.push(cardId);
+          }
+        }
+
+        sourceAgainCount += recentAgainCardIds.length;
+        if (!recentAgainCardIds.length) continue;
+        appendPhaseLogIds(
+          `فاز ایجاد مرور: ${config.sourceCard} با پاسخ Again در ۲۴ ساعت اخیر (cardIds)`,
+          recentAgainCardIds,
+        );
+
+        const noteIdsRes = await getNoteIdsForCardIds(recentAgainCardIds);
+        if (!noteIdsRes.ok) throw new Error(noteIdsRes.error);
+
+        const reviewRes = await findCardIdsByNoteIdsAndTemplate(
+          noteIdsRes.noteIds,
+          config.reviewCard,
+        );
+        if (!reviewRes.ok) throw new Error(reviewRes.error);
+
+        const movableReviewCardIds: number[] = [];
+        for (const chunk of chunkArray(reviewRes.cardIds, 200)) {
+          const infoRes = await ankiOperations.cardsInfo({ cards: chunk });
+          if (!infoRes.ok) throw new Error(infoRes.error);
+          for (const card of infoRes.result ?? []) {
+            const isInTemp =
+              card.deckName === tempDeck || card.deckName.startsWith(`${tempDeck}::`);
+            const isInDefault =
+              card.deckName === "Default" || card.deckName.startsWith("Default::");
+            if (isInTemp || isInDefault) movableReviewCardIds.push(card.cardId);
+          }
+        }
+
+        const cardsToMove = movableReviewCardIds;
+        for (const chunk of chunkArray(cardsToMove, 200)) {
+          const moveRes = await ankiOperations.changeDeck({
+            cards: chunk,
+            deck: config.reviewDeck,
+          });
+          if (!moveRes.ok) throw new Error(moveRes.error);
+        }
+        movedCount += cardsToMove.length;
+
+        const cardsToAnswerAgain = reviewRes.cardIds;
+        const againRes = await pressAgainOnce(cardsToAnswerAgain);
+        if (!againRes.ok) throw new Error(againRes.error);
+        if (againRes.value.failedCardIds.length) {
+          throw new Error(
+            `Failed to answer Again for cardIds: ${againRes.value.failedCardIds.join(", ")}`,
+          );
+        }
+        answeredAgainCount += againRes.value.okCardIds.length;
+        appendPhaseLogIds(
+          `فاز ایجاد مرور: ${config.reviewCard} با پاسخ Again (cardIds)`,
+          againRes.value.okCardIds,
+        );
+      }
+
+      setReviewPhaseStatusText(
+        `Done. Sources with Again in last 24h=${sourceAgainCount}. Review cards answered Again=${answeredAgainCount}. Moved from temp/default=${movedCount}.`,
+      );
+    } catch (error) {
+      setReviewPhaseError(error instanceof Error ? error.message : String(error));
+    } finally {
+      setReviewPhaseRunning(false);
+    }
+  }
+
+  async function runExpandedReviewCreationPhase() {
+    if (expandedReviewPhaseRunning || reviewPhaseRunning) return;
+
+    setExpandedReviewPhaseRunning(true);
+    setExpandedReviewPhaseError(null);
+    setExpandedReviewPhaseStatusText("Starting…");
+
+    try {
+      const sourceDecks = [
+        {
+          deck: WordAnkiConstants.decks.EnToFa,
+          sourceCard: WordAnkiConstants.cardTypes.EnToFa,
+          reviewCard: WordAnkiConstants.cardTypes.EnToFaRev,
+          reviewDeck: WordAnkiConstants.decks.EnToFaRev,
+        },
+        {
+          deck: WordAnkiConstants.decks.FaToEn,
+          sourceCard: WordAnkiConstants.cardTypes.FaToEn,
+          reviewCard: WordAnkiConstants.cardTypes.FaToEnRev,
+          reviewDeck: WordAnkiConstants.decks.FaToEnRev,
+        },
+      ] as const;
+      const cutoffMs = Date.now() - 24 * 60 * 60 * 1000;
+      let eligibleSourceCount = 0;
+      let sourceAgainCount = 0;
+      let movedCount = 0;
+      let answeredAgainCount = 0;
+
+      for (const config of sourceDecks) {
+        setExpandedReviewPhaseStatusText(
+          `Finding Learn/Review cards in ${config.deck}…`,
+        );
+        const cardsRes = await ankiOperations.findCards({
+          query: `deck:"${escapeAnkiQueryValue(config.deck)}" card:"${config.sourceCard}"`,
+        });
+        if (!cardsRes.ok) throw new Error(cardsRes.error);
+
+        const eligibleCards: Array<{ cardId: number; noteId: number }> = [];
+        for (const chunk of chunkArray(cardsRes.result ?? [], 200)) {
+          const infoRes = await ankiOperations.cardsInfo({ cards: chunk });
+          if (!infoRes.ok) throw new Error(infoRes.error);
+          for (const card of infoRes.result ?? []) {
+            if (card.type === 1 || card.type === 2 || card.type === 3) {
+              eligibleCards.push({ cardId: card.cardId, noteId: card.note });
+            }
+          }
+        }
+
+        eligibleSourceCount += eligibleCards.length;
+        if (!eligibleCards.length) continue;
+        appendPhaseLogIds(
+          `فاز ایجاد مرور گسترده: ${config.sourceCard} در Learn/Review (cardIds)`,
+          eligibleCards.map((card) => card.cardId),
+        );
+
+        const recentAgainSourceIds = new Set<number>();
+        for (const chunk of chunkArray(
+          eligibleCards.map((card) => card.cardId),
+          200,
+        )) {
+          const reviewsRes = await ankiOperations.getReviewsOfCards({ cards: chunk });
+          if (!reviewsRes.ok) throw new Error(reviewsRes.error);
+          const reviewsByCardId = reviewsRes.result ?? {};
+          for (const cardId of chunk) {
+            const hasRecentAgain = (reviewsByCardId[String(cardId)] ?? []).some(
+              (review) => review.ease === 1 && review.id >= cutoffMs,
+            );
+            if (hasRecentAgain) recentAgainSourceIds.add(cardId);
+          }
+        }
+        sourceAgainCount += recentAgainSourceIds.size;
+
+        const againNoteIds = new Set(
+          eligibleCards
+            .filter((card) => recentAgainSourceIds.has(card.cardId))
+            .map((card) => card.noteId),
+        );
+        const reviewRes = await findCardIdsByNoteIdsAndTemplate(
+          eligibleCards.map((card) => card.noteId),
+          config.reviewCard,
+        );
+        if (!reviewRes.ok) throw new Error(reviewRes.error);
+
+        const reviewCardsToAnswerAgain: number[] = [];
+        for (const chunk of chunkArray(reviewRes.cardIds, 200)) {
+          const infoRes = await ankiOperations.cardsInfo({ cards: chunk });
+          if (!infoRes.ok) throw new Error(infoRes.error);
+          for (const card of infoRes.result ?? []) {
+            if (againNoteIds.has(card.note)) reviewCardsToAnswerAgain.push(card.cardId);
+          }
+        }
+
+        const cardsToMove = reviewRes.cardIds;
+        for (const chunk of chunkArray(cardsToMove, 200)) {
+          const moveRes = await ankiOperations.changeDeck({
+            cards: chunk,
+            deck: config.reviewDeck,
+          });
+          if (!moveRes.ok) throw new Error(moveRes.error);
+        }
+        movedCount += cardsToMove.length;
+        appendPhaseLogIds(
+          `فاز ایجاد مرور گسترده: ${config.reviewCard} منتقل‌شده به ${config.reviewDeck} (cardIds)`,
+          cardsToMove,
+        );
+
+        const cardsToAnswerAgain = reviewCardsToAnswerAgain;
+        const againRes = await pressAgainOnce(cardsToAnswerAgain);
+        if (!againRes.ok) throw new Error(againRes.error);
+        if (againRes.value.failedCardIds.length) {
+          throw new Error(
+            `Failed to answer Again for cardIds: ${againRes.value.failedCardIds.join(", ")}`,
+          );
+        }
+        answeredAgainCount += againRes.value.okCardIds.length;
+        appendPhaseLogIds(
+          `فاز ایجاد مرور گسترده: ${config.reviewCard} با پاسخ Again (cardIds)`,
+          againRes.value.okCardIds,
+        );
+      }
+
+      setExpandedReviewPhaseStatusText(
+        `Done. Sources in Learn/Review=${eligibleSourceCount}. Review cards moved=${movedCount}. Sources with Again in last 24h=${sourceAgainCount}. Review cards answered Again=${answeredAgainCount}.`,
+      );
+    } catch (error) {
+      setExpandedReviewPhaseError(
+        error instanceof Error ? error.message : String(error),
+      );
+    } finally {
+      setExpandedReviewPhaseRunning(false);
+    }
+  }
+
   async function handleSearch() {
     setIsLoading(true);
     setError(null);
@@ -1369,6 +1638,26 @@ export default function AnkiNotePage() {
   useEffect(() => {
     if (phase3Error) appendPhaseLog(`فاز ۳ (خطا): ${phase3Error}`);
   }, [phase3Error]);
+
+  useEffect(() => {
+    if (reviewPhaseStatusText)
+      appendPhaseLog(`فاز ایجاد مرور: ${reviewPhaseStatusText}`);
+  }, [reviewPhaseStatusText]);
+
+  useEffect(() => {
+    if (reviewPhaseError)
+      appendPhaseLog(`فاز ایجاد مرور (خطا): ${reviewPhaseError}`);
+  }, [reviewPhaseError]);
+
+  useEffect(() => {
+    if (expandedReviewPhaseStatusText)
+      appendPhaseLog(`فاز ایجاد مرور گسترده: ${expandedReviewPhaseStatusText}`);
+  }, [expandedReviewPhaseStatusText]);
+
+  useEffect(() => {
+    if (expandedReviewPhaseError)
+      appendPhaseLog(`فاز ایجاد مرور گسترده (خطا): ${expandedReviewPhaseError}`);
+  }, [expandedReviewPhaseError]);
 
   useEffect(() => {
     const el = phaseLogBoxRef.current;
@@ -2229,8 +2518,120 @@ export default function AnkiNotePage() {
                   </div>
                 )}
               </div>
-            );
-          })}
+	            );
+	          })}
+          <div className="rounded-xl border border-card bg-background p-3">
+            <div className="text-sm font-semibold text-foreground">
+              فاز ایجاد مرور
+              <span className="ms-2 text-xs font-semibold text-muted">
+                ساخت کارت‌های مرور معکوس
+              </span>
+            </div>
+            <div className="mt-2 grid gap-3">
+              <button
+                type="button"
+                onClick={() => void runReviewCreationPhase()}
+                disabled={reviewPhaseRunning || expandedReviewPhaseRunning}
+                className="h-11 rounded-xl bg-[var(--primary)] px-4 text-sm font-semibold text-[var(--primary-foreground)] shadow-elevated transition hover:opacity-95 disabled:opacity-60"
+              >
+                {reviewPhaseRunning ? "در حال انجام..." : "اجرای فاز ایجاد مرور"}
+              </button>
+
+              <div dir="rtl" className="grid gap-2 text-right">
+                <ol className="list-decimal space-y-1 ps-5 text-xs text-muted">
+                  <li>
+                    کارت‌های deckهای {WordAnkiConstants.decks.EnToFa} و{" "}
+                    {WordAnkiConstants.decks.FaToEn} بررسی می‌شوند.
+                  </li>
+                  <li>
+                    فقط کارت‌هایی انتخاب می‌شوند که در ۲۴ ساعت گذشته حداقل یک بار
+                    دکمه «بلد نیستم» (Again) برایشان زده شده باشد.
+                  </li>
+                  <li>
+                    کارت معادل آن‌ها، یعنی EnToFaRev یا FaToEnRev از همان نوت، پیدا
+                    می‌شود و یک بار پاسخ «بلد نیستم» (Again) برای آن ثبت می‌شود.
+                  </li>
+                  <li>
+                    اگر کارت مرور معادل در deck {WordAnkiConstants.decks.tempRoot} یا{" "}
+                    Default باشد، به deck متناظر {WordAnkiConstants.decks.EnToFaRev} یا{" "}
+                    {WordAnkiConstants.decks.FaToEnRev} منتقل می‌شود.
+                  </li>
+                  <li>
+                    بازه فقط ۲۴ ساعت گذاشته شده، چون اگر مدت بیشتری گذشته باشد و ما
+                    Anki را نخوانده باشیم، ممکن است در مرور جدید کارت را بلد باشیم؛ پس
+                    آن کارت دیگر واقعاً جزو «بلد نیستم‌ها» محسوب نمی‌شود.
+                  </li>
+                </ol>
+
+                {reviewPhaseStatusText ? (
+                  <div className="text-xs text-foreground/80">
+                    {reviewPhaseStatusText}
+                  </div>
+                ) : null}
+                {reviewPhaseError ? (
+                  <div className="text-xs text-red-700">{reviewPhaseError}</div>
+                ) : null}
+              </div>
+            </div>
+          </div>
+          <div className="rounded-xl border border-card bg-background p-3">
+            <div className="text-sm font-semibold text-foreground">
+              فاز ایجاد مرور گسترده
+              <span className="ms-2 text-xs font-semibold text-muted">
+                ساخت و به‌روزرسانی کارت‌های مرور معکوس
+              </span>
+            </div>
+            <div className="mt-2 grid gap-3">
+              <button
+                type="button"
+                onClick={() => void runExpandedReviewCreationPhase()}
+                disabled={expandedReviewPhaseRunning || reviewPhaseRunning}
+                className="h-11 rounded-xl bg-[var(--primary)] px-4 text-sm font-semibold text-[var(--primary-foreground)] shadow-elevated transition hover:opacity-95 disabled:opacity-60"
+              >
+                {expandedReviewPhaseRunning
+                  ? "در حال انجام..."
+                  : "اجرای فاز ایجاد مرور گسترده"}
+              </button>
+
+              <div dir="rtl" className="grid gap-2 text-right">
+                <ol className="list-decimal space-y-1 ps-5 text-xs text-muted">
+                  <li>
+                    کارت‌های {WordAnkiConstants.cardTypes.EnToFa} و{" "}
+                    {WordAnkiConstants.cardTypes.FaToEn} در deckهای متناظر بررسی
+                    می‌شوند.
+                  </li>
+                  <li>
+                    کارت‌هایی انتخاب می‌شوند که از حالت New خارج شده و وارد Learn،
+                    Relearn یا Review شده‌اند.
+                  </li>
+                  <li>
+                    کارت Rev متناظر هر نوت پیدا می‌شود و به deck متناظر{" "}
+                    {WordAnkiConstants.decks.EnToFaRev} یا{" "}
+                    {WordAnkiConstants.decks.FaToEnRev} منتقل می‌شود.
+                  </li>
+                  <li>
+                    از میان همین کارت‌های منبع، مواردی که در ۲۴ ساعت گذشته حداقل یک
+                    پاسخ «بلد نیستم» (Again) داشته‌اند مشخص می‌شوند.
+                  </li>
+                  <li>
+                    برای کارت Rev متناظر آن‌ها نیز یک بار پاسخ «بلد نیستم» (Again)
+                    ثبت می‌شود.
+                  </li>
+                </ol>
+
+                {expandedReviewPhaseStatusText ? (
+                  <div className="text-xs text-foreground/80">
+                    {expandedReviewPhaseStatusText}
+                  </div>
+                ) : null}
+                {expandedReviewPhaseError ? (
+                  <div className="text-xs text-red-700">
+                    {expandedReviewPhaseError}
+                  </div>
+                ) : null}
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="mt-4 rounded-xl border border-card bg-background p-3">

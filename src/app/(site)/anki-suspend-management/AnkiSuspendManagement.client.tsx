@@ -7,7 +7,11 @@ import { ankiOperations, WordAnkiConstants } from "@/lib/anki";
 
 const DECKS = [
   { label: "FaToEn", value: WordAnkiConstants.decks.FaToEn },
+  { label: "1FaToEnKnowingFilter", value: WordAnkiConstants.decks.FaToEnKnowingFilter },
+  { label: "FaToEnRev", value: WordAnkiConstants.decks.FaToEnRev },
   { label: "EnToFa", value: WordAnkiConstants.decks.EnToFa },
+  { label: "1EnToFaKnowingFilter", value: WordAnkiConstants.decks.EnToFaKnowingFilter },
+  { label: "EnToFaRev", value: WordAnkiConstants.decks.EnToFaRev },
 ] as const;
 
 type DeckName = (typeof DECKS)[number]["value"];

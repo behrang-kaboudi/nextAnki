@@ -72,6 +72,8 @@ export async function getDbFingerprint(prisma: PrismaClient) {
     ipaKeywordMax,
     pictureWordCount,
     pictureWordMax,
+    ankiStructureSettingsCount,
+    ankiStructureSettingsMax,
     userCount,
     userMax,
     accountCount,
@@ -101,6 +103,11 @@ export async function getDbFingerprint(prisma: PrismaClient) {
     maxDateOrNull(
       async () => (await prisma.pictureWord.aggregate({ _max: { updatedAt: true } }))._max.updatedAt ?? null
     ),
+    countOrNull(() => prisma.ankiStructureSettings.count()),
+    maxDateOrNull(
+      async () =>
+        (await prisma.ankiStructureSettings.aggregate({ _max: { updatedAt: true } }))._max.updatedAt ?? null
+    ),
     countOrNull(() => prisma.user.count()),
     maxDateOrNull(async () => (await prisma.user.aggregate({ _max: { updatedAt: true } }))._max.updatedAt ?? null),
     countOrNull(() => prisma.account.count()),
@@ -127,6 +134,10 @@ export async function getDbFingerprint(prisma: PrismaClient) {
     sentenceWordLink: { count: sentenceWordLinkCount, max: sentenceWordLinkMax?.toISOString() ?? null },
     ipaKeyword: { count: ipaKeywordCount, max: ipaKeywordMax?.toISOString() ?? null },
     pictureWord: { count: pictureWordCount, max: pictureWordMax?.toISOString() ?? null },
+    ankiStructureSettings: {
+      count: ankiStructureSettingsCount,
+      max: ankiStructureSettingsMax?.toISOString() ?? null,
+    },
     user: { count: userCount, max: userMax?.toISOString() ?? null },
     account: { count: accountCount },
     session: { count: sessionCount },
@@ -207,6 +218,7 @@ async function writeJsonBackup(prisma: PrismaClient, outputFile: string) {
       sentenceWordLink: await prisma.sentenceWordLink.findMany(),
       ipaKeyword: await prisma.ipaKeyword.findMany(),
       pictureWord: await prisma.pictureWord.findMany(),
+      ankiStructureSettings: await prisma.ankiStructureSettings.findMany(),
       user: await prisma.user.findMany(),
       account: await prisma.account.findMany(),
       session: await prisma.session.findMany(),

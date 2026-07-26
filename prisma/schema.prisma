@@ -41,14 +41,14 @@ enum PictureWordUsage {
 }
 
 model Word {
-  id                               Int      @id @default(autoincrement())
-  anki_link_id                     String   @unique(map: "Word_anki_link_id_key")
+  id                               Int                @id @default(autoincrement())
+  anki_link_id                     String             @unique(map: "Word_anki_link_id_key")
   base_form                        String
   phonetic_us                      String?
   phonetic_us_normalized           String?
   meaning_fa                       String
   meaning_fa_IPA                   String
-  meaning_fa_IPA_normalized        String   @default("")
+  meaning_fa_IPA_normalized        String             @default("")
   pos                              String?
   concept_explained                String?
   concept_explained_fa             String?
@@ -59,18 +59,18 @@ model Word {
   other_meanings_fa                String?
   other_meanings_en                String?
   category                         String?
-  typeOfWordInDb                   String   @default("temp")
+  typeOfWordInDb                   String             @default("temp")
   hint_sentence                    String?
   first_letter_en_hint             String?
   first_letter_fa_hint             String?
   hint_to_select                   String?
-  json_hint                        String?  @db.LongText
+  json_hint                        String?            @db.LongText
   word_note                        String?
   common_error                     String?
   /// Score 0-100: how imageable/visual the word is (NULL means unset).
   imageability                     Int?
-  createdAt                        DateTime @default(now())
-  updatedAt                        DateTime @updatedAt
+  createdAt                        DateTime           @default(now())
+  updatedAt                        DateTime           @updatedAt
   sentenceLinks                    SentenceWordLink[]
 
   @@index([base_form], map: "Word_base_form_idx")
@@ -135,6 +135,14 @@ model PictureWord {
   @@unique([fa, en])
   @@index([fa])
   @@index([en])
+}
+
+model AnkiStructureSettings {
+  id        String   @id @default("default")
+  config    Json
+  version   Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model User {

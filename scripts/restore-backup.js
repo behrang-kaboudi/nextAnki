@@ -109,6 +109,7 @@ async function main() {
     prisma.word.deleteMany(),
     prisma.ipaKeyword.deleteMany(),
     prisma.pictureWord.deleteMany(),
+    prisma.ankiStructureSettings.deleteMany(),
     prisma.role.deleteMany(),
     prisma.permission.deleteMany(),
     prisma.user.deleteMany(),
@@ -131,6 +132,12 @@ async function main() {
     "PictureWord",
     sanitizePictureWord(withDates(data.pictureWord ?? [])),
     (rows) => prisma.pictureWord.createMany({ data: rows, skipDuplicates: true })
+  );
+
+  await createMany(
+    "AnkiStructureSettings",
+    withDates(data.ankiStructureSettings ?? []),
+    (rows) => prisma.ankiStructureSettings.createMany({ data: rows, skipDuplicates: true })
   );
 
   await createMany(

@@ -1,9 +1,10 @@
 import { ankiOperations } from "@/lib/anki";
 import { AnkiNoteTypes, WordAnkiConstants } from "@/lib/anki";
+import type { AnkiStructureConfig } from "@/lib/anki/structureSettings";
 
 import type { LogFn, StepResult } from "./types";
 
-async function ensureAnkiPermission(appendLog: LogFn): Promise<StepResult> {
+export async function ensureAnkiPermission(appendLog: LogFn): Promise<StepResult> {
   const permRes = await ankiOperations.requestPermission();
   if (!permRes.ok) {
     appendLog(`✗ requestPermission failed: ${permRes.error}`);
@@ -20,9 +21,8 @@ async function ensureAnkiPermission(appendLog: LogFn): Promise<StepResult> {
   return { ok: true };
 }
 
-async function ensureModelExists(
+async function requireModelExists(
   modelName: string,
-  desiredFields: string[],
   appendLog: LogFn,
 ): Promise<StepResult> {
   const modelNamesRes = await ankiOperations.modelNames();
@@ -38,43 +38,9 @@ async function ensureModelExists(
     return { ok: true };
   }
 
-  appendLog(`Creating model: ${modelName} ...`);
-  const templates = WordAnkiConstants.noteTemplates;
-  const cardTemplates = [
-    {
-      Name: "EnToFa",
-      Front: templates.EnToFa.Front,
-      Back: templates.EnToFa.Back,
-    },
-    {
-      Name: "FaToEn",
-      Front: templates.FaToEn.Front,
-      Back: templates.FaToEn.Back,
-    },
-    { Name: "Emla", Front: templates.Emla.Front, Back: templates.Emla.Back },
-    {
-      Name: "Rahnama",
-      Front: templates.Rahnama.Front,
-      Back: templates.Rahnama.Back,
-    },
-    {
-      Name: "Rahnama2",
-      Front: templates.Rahnama2.Front,
-      Back: templates.Rahnama2.Back,
-    },
-  ];
-  const createRes = await ankiOperations.createModel({
-    modelName,
-    inOrderFields: desiredFields,
-    cardTemplates,
-  });
-  if (!createRes.ok) {
-    appendLog(`✗ createModel failed: ${createRes.error}`);
-    return { ok: false };
-  }
-
-  appendLog("✓ Model created.");
-  return { ok: true };
+  appendLog(`✗ Note Type ${modelName} does not exist.`);
+  appendLog("Run Step 3: Ensure Card Types first. This Step never creates Card Types.");
+  return { ok: false };
 }
 
 async function loadCurrentFields(modelName: string, appendLog: LogFn) {
@@ -150,23 +116,20 @@ async function repositionFields(
 
 export async function ensureMetaLexVr9NoteType(
   appendLog: LogFn,
+  config?: AnkiStructureConfig,
 ): Promise<StepResult> {
+  const modelName = config?.noteType.name ?? AnkiNoteTypes.META_LEX_VR9;
   appendLog(
-    `Step 3: Ensure note type (${AnkiNoteTypes.META_LEX_VR9}) + exact fields...`,
+    `Step 4: Ensure note fields (${modelName})...`,
   );
 
   const permissionResult = await ensureAnkiPermission(appendLog);
   if (!permissionResult.ok) return permissionResult;
 
-  const modelName = AnkiNoteTypes.META_LEX_VR9;
-  const desiredFields = WordAnkiConstants.noteFields.slice().map(String);
+  const desiredFields = config?.noteType.fields ?? WordAnkiConstants.noteFields.slice().map(String);
   const desiredSet = new Set<string>(desiredFields);
 
-  const modelResult = await ensureModelExists(
-    modelName,
-    desiredFields,
-    appendLog,
-  );
+  const modelResult = await requireModelExists(modelName, appendLog);
   if (!modelResult.ok) return modelResult;
 
   const fieldsResult = await loadCurrentFields(modelName, appendLog);
@@ -193,6 +156,6 @@ export async function ensureMetaLexVr9NoteType(
   );
   if (!repositionResult.ok) return repositionResult;
 
-  appendLog("Step 3: Done.");
+  appendLog("Step 4: Done.");
   return { ok: true };
 }

@@ -1,5 +1,10 @@
 import type { AnkiDeckConfig } from "@/lib/anki";
 import { WordAnkiConstants } from "@/lib/anki";
+import {
+  findStructureDeck,
+  type AnkiStructureConfig,
+  type EditableDeckConfig,
+} from "@/lib/anki/structureSettings";
 
 export function asNumber(v: unknown): number | null {
   return typeof v === "number" && Number.isFinite(v) ? v : null;
@@ -81,12 +86,37 @@ export function setGraduatingAndEasyIntervals(
   section.ints = ints;
 }
 
-export function deckConfigPairs() {
+export type DeckConfigPair = {
+  deck: string;
+  configName: string;
+  desired: EditableDeckConfig | null;
+};
+
+export function deckConfigPairs(config?: AnkiStructureConfig): DeckConfigPair[] {
+  if (config) {
+    return config.deckConfigs.flatMap((item) => {
+      const deck = findStructureDeck(config, item.deckId);
+      return deck ? [{ deck: deck.name, configName: item.configName, desired: item }] : [];
+    });
+  }
   return [
     { deck: WordAnkiConstants.decks.EnToFa, configName: "WordsForNewStudyEnToFa" as const },
+    {
+      deck: WordAnkiConstants.decks.EnToFaKnowingFilter,
+      configName: "WordsForNewStudy1EnToFaKnowingFilter" as const,
+    },
+    { deck: WordAnkiConstants.decks.EnToFaRev, configName: "WordsForNewStudyEnToFaRev" as const },
     { deck: WordAnkiConstants.decks.FaToEn, configName: "WordsForNewStudyFaToEn" as const },
+    {
+      deck: WordAnkiConstants.decks.FaToEnKnowingFilter,
+      configName: "WordsForNewStudy1FaToEnKnowingFilter" as const,
+    },
+    { deck: WordAnkiConstants.decks.FaToEnRev, configName: "WordsForNewStudyFaToEnRev" as const },
     { deck: WordAnkiConstants.decks.Emla, configName: "WordsForNewStudyEmla" as const },
     { deck: WordAnkiConstants.decks.Rahnama, configName: "WordsForNewStudyRahnama" as const },
     { deck: WordAnkiConstants.decks.Rahnama2, configName: "WordsForNewStudyRahnama2" as const },
-  ] as const;
+  ].map((pair) => ({
+    ...pair,
+    desired: null,
+  }));
 }

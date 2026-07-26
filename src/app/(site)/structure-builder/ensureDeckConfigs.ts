@@ -1,9 +1,14 @@
 import { ankiOperations, type AnkiDeckConfig } from "@/lib/anki";
 import { WordAnkiConstants, WordDeckConfigs } from "@/lib/anki";
+import type {
+  AnkiStructureConfig,
+  EditableDeckConfig,
+} from "@/lib/anki/structureSettings";
 
 import {
   arraysEqual,
   asNumber,
+  type DeckConfigPair,
   deckConfigPairs,
   getInitialFactor,
   getNewInts,
@@ -18,7 +23,6 @@ import { loadDeckNames } from "./deckNames";
 import type { LogFn, StepResult } from "./types";
 
 type ManualIntervalSetter = (decks: string[]) => void;
-type DeckConfigPair = ReturnType<typeof deckConfigPairs>[number];
 
 type DesiredDeckConfig = {
   newCardsPerDay: number;
@@ -31,7 +35,23 @@ type DesiredDeckConfig = {
   easyIntervalDays: number | null;
 };
 
-function desiredDeckConfig(configName: DeckConfigPair["configName"]): DesiredDeckConfig {
+function desiredDeckConfig(
+  configName: keyof typeof WordDeckConfigs,
+  editable?: EditableDeckConfig | null,
+): DesiredDeckConfig {
+  if (editable) {
+    const startingEase = editable.startingEase ? parseNumber(editable.startingEase) : null;
+    return {
+      newCardsPerDay: editable.newCardsPerDay,
+      maximumReviewsPerDay: editable.maximumReviewsPerDay,
+      learningSteps: editable.learningSteps ? parseSteps(editable.learningSteps) : null,
+      relearningSteps: editable.relearningSteps ? parseSteps(editable.relearningSteps) : null,
+      initialFactor: startingEase !== null ? Math.round(startingEase * 1000) : null,
+      easyBonus: editable.easyBonus ? parseNumber(editable.easyBonus) : null,
+      graduatingIntervalDays: editable.graduatingInterval ? parseNumber(editable.graduatingInterval) : null,
+      easyIntervalDays: editable.easyInterval ? parseNumber(editable.easyInterval) : null,
+    };
+  }
   const desired = WordDeckConfigs[configName];
 
   const wantsLearningStepsRaw = (desired as { learningSteps?: string }).learningSteps ?? null;
@@ -165,7 +185,10 @@ async function ensureConfigGroup(
   configByName: Map<string, AnkiDeckConfig>,
   appendLog: LogFn,
 ) {
-  const desired = desiredDeckConfig(pair.configName);
+  const desired = desiredDeckConfig(
+    (pair.desired?.id.replace(/^config-/, "") ?? pair.configName) as keyof typeof WordDeckConfigs,
+    pair.desired,
+  );
   appendLog(`Deck: ${pair.deck}`);
   appendLog(`Config: ${pair.configName}`);
 
@@ -231,9 +254,17 @@ async function confirmDeckConfig(pair: DeckConfigPair, desired: DesiredDeckConfi
 export async function ensureDeckConfigs(
   appendLog: LogFn,
   setManualIntervalsRequiredDecks: ManualIntervalSetter,
+  config?: AnkiStructureConfig,
 ): Promise<StepResult> {
   appendLog("Step 2: Ensure deck configs (create + apply)...");
-  setManualIntervalsRequiredDecks([WordAnkiConstants.decks.Rahnama, WordAnkiConstants.decks.Rahnama2]);
+  setManualIntervalsRequiredDecks(
+    config
+      ? config.deckConfigs
+          .filter((item) => item.graduatingInterval || item.easyInterval)
+          .map((item) => config.decks.find((deck) => deck.id === item.deckId)?.name)
+          .filter((name): name is string => Boolean(name))
+      : [WordAnkiConstants.decks.Rahnama, WordAnkiConstants.decks.Rahnama2],
+  );
 
   const deckNamesRes = await loadDeckNames();
   if (!deckNamesRes.ok) {
@@ -243,7 +274,7 @@ export async function ensureDeckConfigs(
 
   const configByName = await loadConfigGroupsByName(deckNamesRes.deckNames);
 
-  for (const pair of deckConfigPairs()) {
+  for (const pair of deckConfigPairs(config)) {
     const ensureResult = await ensureConfigGroup(pair, configByName, appendLog);
     if (!ensureResult.ok) {
       appendLog(`✗ ${ensureResult.error}`);
