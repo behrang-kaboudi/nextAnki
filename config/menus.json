@@ -162,11 +162,17 @@
         "icon": "app"
       },
       {
-        "type": "link",
-        "label": "About",
-        "href": "/about",
-        "icon": "about",
-        "description": "Project info and notes"
+        "type": "group",
+        "label": "Card Management",
+        "items": [
+          {
+            "type": "link",
+            "label": "Add Cards for Studying",
+            "href": "/add-cards-for-studying",
+            "icon": "link"
+          }
+        ],
+        "icon": "app"
       },
       {
         "type": "group",
@@ -180,6 +186,13 @@
           }
         ],
         "icon": "tools"
+      },
+      {
+        "type": "link",
+        "label": "About",
+        "href": "/about",
+        "icon": "about",
+        "description": "Project info and notes"
       }
     ]
   },
