@@ -110,8 +110,8 @@ export function useStructureBuilder() {
     setStepStatuses(idleSteps);
   }, []);
 
-  const saveSettings = useCallback(async () => {
-    const errors = validateAnkiStructureConfig(settings);
+  const saveSettings = useCallback(async (nextSettings: AnkiStructureConfig = settings) => {
+    const errors = validateAnkiStructureConfig(nextSettings);
     setSettingsErrors(errors);
     if (errors.length) return false;
     setIsSavingSettings(true);
@@ -119,7 +119,7 @@ export function useStructureBuilder() {
       const response = await fetch("/api/anki/structure-settings", {
         method: "PUT",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ config: settings }),
+        body: JSON.stringify({ config: nextSettings }),
       });
       const body = (await response.json()) as SettingsResponse;
       if (!response.ok || !body.ok) {

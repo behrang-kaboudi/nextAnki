@@ -68,6 +68,7 @@ export type AnkiStructureCardType = {
   id: string;
   name: string;
   deckId: string | null;
+  deckConfigId: string | null;
   front: string;
   back: string;
 };
@@ -79,7 +80,7 @@ export type AnkiStructureNoteType = {
 };
 
 export type AnkiStructureConfig = {
-  schemaVersion: 2;
+  schemaVersion: 3;
   profileName: string;
   decks: AnkiStructureDeck[];
   deckConfigs: EditableDeckConfig[];
@@ -142,22 +143,32 @@ export function createDefaultAnkiStructureConfig(): AnkiStructureConfig {
     managed: key !== "default",
   }));
   const deckIdByName = new Map(decks.map((deck) => [deck.name, deck.id]));
-  const cardTypes = Object.entries(WordAnkiConstants.noteTemplates).map(([name, template]) => ({
+  const deckConfigs = legacyConfigKeys.map(defaultDeckConfig);
+  const deckConfigIdByDeckId = new Map(
+    deckConfigs.map((config) => [config.deckId, config.id]),
+  );
+  const cardTypes: AnkiStructureCardType[] = Object.entries(WordAnkiConstants.noteTemplates).map(([name, template]) => ({
     id: `card-${name}`,
     name,
     deckId:
       deckIdByName.get(
         WordDeckByCardType[name as keyof typeof WordDeckByCardType] ?? "",
       ) ?? null,
+    deckConfigId: null,
     front: template.Front,
     back: template.Back,
   }));
+  cardTypes.forEach((card) => {
+    card.deckConfigId = card.deckId
+      ? deckConfigIdByDeckId.get(card.deckId) ?? null
+      : null;
+  });
 
   return {
-    schemaVersion: 2,
+    schemaVersion: 3,
     profileName: "پروفایل اصلی",
     decks,
-    deckConfigs: legacyConfigKeys.map(defaultDeckConfig),
+    deckConfigs,
     noteType: {
       name: AnkiNoteTypes.META_LEX_VR9,
       fields: WordAnkiConstants.noteFields.map(String),
@@ -254,7 +265,11 @@ function normalizeDeckConfigs(input: Record<string, unknown>, defaults: AnkiStru
   });
 }
 
-function normalizeNoteType(input: Record<string, unknown>, defaults: AnkiStructureConfig) {
+function normalizeNoteType(
+  input: Record<string, unknown>,
+  defaults: AnkiStructureConfig,
+  deckConfigs: EditableDeckConfig[],
+) {
   const raw =
     input.noteType && typeof input.noteType === "object"
       ? (input.noteType as Record<string, unknown>)
@@ -265,13 +280,26 @@ function normalizeNoteType(input: Record<string, unknown>, defaults: AnkiStructu
   const cardTypes = Array.isArray(raw.cardTypes)
     ? raw.cardTypes
         .filter((item): item is Record<string, unknown> => Boolean(item) && typeof item === "object")
-        .map((item, index) => ({
-          id: optionalString(item.id).trim() || `card-${index + 1}`,
-          name: optionalString(item.name).trim(),
-          deckId: typeof item.deckId === "string" && item.deckId ? item.deckId : null,
-          front: optionalString(item.front),
-          back: optionalString(item.back),
-        }))
+        .map((item, index) => {
+          const deckId =
+            typeof item.deckId === "string" && item.deckId ? item.deckId : null;
+          const storedDeckConfigId =
+            typeof item.deckConfigId === "string" && item.deckConfigId
+              ? item.deckConfigId
+              : null;
+          const deckConfigId =
+            storedDeckConfigId ??
+            deckConfigs.find((config) => config.deckId === deckId)?.id ??
+            null;
+          return {
+            id: optionalString(item.id).trim() || `card-${index + 1}`,
+            name: optionalString(item.name).trim(),
+            deckId,
+            deckConfigId,
+            front: optionalString(item.front),
+            back: optionalString(item.back),
+          };
+        })
     : defaults.noteType.cardTypes;
   return {
     name: optionalString(raw.name).trim() || defaults.noteType.name,
@@ -285,14 +313,14 @@ export function normalizeAnkiStructureConfig(value: unknown): AnkiStructureConfi
   const input = value && typeof value === "object" ? (value as Record<string, unknown>) : {};
   const decks = normalizeDecks(input, defaults);
   const deckConfigs = normalizeDeckConfigs(input, defaults);
-  const noteType = normalizeNoteType(input, defaults);
+  const noteType = normalizeNoteType(input, defaults, deckConfigs);
   const rawMove =
     input.moveCards && typeof input.moveCards === "object"
       ? (input.moveCards as Record<string, unknown>)
       : {};
 
   return {
-    schemaVersion: 2,
+    schemaVersion: 3,
     profileName:
       typeof input.profileName === "string" && input.profileName.trim()
         ? input.profileName.trim()
@@ -349,6 +377,9 @@ export function validateAnkiStructureConfig(config: AnkiStructureConfig) {
   });
 
   const deckIdSet = new Set(deckIds);
+  const deckConfigById = new Map(
+    config.deckConfigs.map((item) => [item.id, item]),
+  );
   config.deckConfigs.forEach((item, index) => {
     if (!item.id.trim()) errors.push(`شناسه Deck Config ردیف ${index + 1} خالی است.`);
     if (!item.configName.trim()) errors.push(`نام Deck Config ردیف ${index + 1} خالی است.`);
@@ -371,6 +402,14 @@ export function validateAnkiStructureConfig(config: AnkiStructureConfig) {
     if (!card.id.trim()) errors.push(`شناسه Card Type ردیف ${index + 1} خالی است.`);
     if (!card.name.trim()) errors.push(`نام Card Type ردیف ${index + 1} خالی است.`);
     if (card.deckId && !deckIdSet.has(card.deckId)) errors.push(`دک Card Type «${card.name || index + 1}» معتبر نیست.`);
+    if (card.deckConfigId) {
+      const deckConfig = deckConfigById.get(card.deckConfigId);
+      if (!deckConfig) {
+        errors.push(`Deck Config مربوط به Card Type «${card.name || index + 1}» معتبر نیست.`);
+      } else if (deckConfig.deckId !== card.deckId) {
+        errors.push(`Deck و Deck Config مربوط به Card Type «${card.name || index + 1}» با هم هماهنگ نیستند.`);
+      }
+    }
     if (!card.front.trim()) errors.push(`Front مربوط به Card Type «${card.name || index + 1}» خالی است.`);
     if (!card.back.trim()) errors.push(`Back مربوط به Card Type «${card.name || index + 1}» خالی است.`);
   });

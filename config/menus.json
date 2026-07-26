@@ -138,6 +138,25 @@
             "label": "AnkiSuspendManagement",
             "href": "/anki-suspend-management",
             "icon": "link"
+          },
+          {
+            "type": "link",
+            "label": "Knowing Filter Card Management",
+            "href": "/anki-knowing-filter-management",
+            "icon": "link"
+          },
+          {
+            "type": "link",
+            "label": "Structure Builder",
+            "href": "/structure-builder",
+            "icon": "link"
+          },
+          {
+            "type": "link",
+            "label": "Migration",
+            "href": "/anki-migration",
+            "icon": "tools",
+            "description": "One-time Anki user migrations and execution logs"
           }
         ],
         "icon": "app"

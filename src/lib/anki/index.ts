@@ -5,3 +5,4 @@
 export * from "./client";
 export * from "./deck";
 export * from "./operations";
+export * from "./tags";

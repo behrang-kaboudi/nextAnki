@@ -47,7 +47,7 @@ export const structureBuilderHelpContent: Record<HelpKey, { title: string; body:
     title: "Step 3: Ensure Card Types",
     body: (
       <div className="space-y-2 text-sm leading-6">
-        <p>Card Typeهای تعریف‌شده در تب «Note Type و کارت‌ها» را با Note Type انتخابی هماهنگ می‌کند.</p>
+        <p>Card Typeهای تعریف‌شده در تب «Card Typeها و Templateها» را با Note Type انتخابی هماهنگ می‌کند.</p>
         <p>
           اگر Note Type وجود نداشته باشد، همراه فیلدها و Card Typeهای فعلی ساخته می‌شود. Card Type مفقود اضافه و
           Card Type اضافه حذف می‌شود.

@@ -25,6 +25,7 @@ async function main() {
         sentenceWordLink: await prisma.sentenceWordLink.findMany(),
         ipaKeyword: await prisma.ipaKeyword.findMany(),
         pictureWord: await prisma.pictureWord.findMany(),
+        ankiStructureSettings: await prisma.ankiStructureSettings.findMany(),
         user: await prisma.user.findMany(),
         account: await prisma.account.findMany(),
         session: await prisma.session.findMany(),

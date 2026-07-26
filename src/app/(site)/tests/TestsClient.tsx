@@ -47,11 +47,15 @@ const sections: Section[] = [
   {
     title: "Anki",
     links: [
-      { href: "/structure-builder", label: "Structure Builder" },
       { href: "/anki-connect-playground", label: "AnkiConnect Playground" },
       {
         href: "/anki-suspend-management",
         label: "AnkiSuspendManagement",
+      },
+      {
+        href: "/anki-knowing-filter-management",
+        label: "Knowing Filter Card Management",
+        note: "Browse knowing-filter decks by Filtered tag",
       },
       {
         href: "/tests/anki-revlog",

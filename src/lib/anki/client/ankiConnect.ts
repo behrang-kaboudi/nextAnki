@@ -1,5 +1,7 @@
 import axios from "axios";
 
+import type { AnkiTag } from "../tags";
+
 export type AnkiConnectError = {
   message: string;
 };
@@ -23,7 +25,7 @@ export type AnkiNote = {
   deckName: string;
   modelName: string;
   fields: AnkiNoteFields;
-  tags?: string[];
+  tags?: AnkiTag[];
   options?: {
     allowDuplicate?: boolean;
     duplicateScope?: "deck" | "collection";
@@ -243,8 +245,8 @@ export type AnkiConnectActionMap = {
   };
   deleteNotes: { params: { notes: number[] }; result: null };
 
-  addTags: { params: { notes: number[]; tags: string }; result: null };
-  removeTags: { params: { notes: number[]; tags: string }; result: null };
+  addTags: { params: { notes: number[]; tags: AnkiTag }; result: null };
+  removeTags: { params: { notes: number[]; tags: AnkiTag }; result: null };
 };
 
 export type AnkiConnectAction = keyof AnkiConnectActionMap;
