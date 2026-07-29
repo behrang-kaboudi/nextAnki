@@ -177,6 +177,13 @@
             "label": "Add Cards for Studying",
             "href": "/add-cards-for-studying",
             "icon": "link"
+          },
+          {
+            "type": "link",
+            "label": "Reset Manager",
+            "href": "/card-transfer-management",
+            "icon": "tools",
+            "description": "Review and reset equivalent Anki cards"
           }
         ],
         "icon": "app"

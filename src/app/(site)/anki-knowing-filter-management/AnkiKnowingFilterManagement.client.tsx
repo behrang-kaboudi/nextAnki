@@ -16,6 +16,8 @@ const BATCH_SIZE = 200;
 const DEFAULT_PAGE_SIZE = 100;
 const PAGE_SIZE_OPTIONS = [25, 50, 100, 200] as const;
 const FILTER_KNOWING_DECK = "WordsForNewStudy::FilterKnowing" as const;
+const REVIEW_CARD = "WordsForNewStudy-Review" as const;
+const REVIEW_DECK = "WordsForNewStudy::Review" as const;
 
 type DeckName = typeof FILTER_KNOWING_DECK;
 
@@ -31,8 +33,8 @@ type KnowledgeAction = "again" | "familiar" | "good" | "easy";
 type HelpActionSummary = {
   title: string;
   description: string;
-  reviewMove: string;
-  simpleMove: string;
+  moves: string;
+  answers: string;
   extra?: string;
   toneClassName: string;
 };
@@ -40,34 +42,26 @@ type HelpActionSummary = {
 const ACTIONS: Array<{
   value: KnowledgeAction;
   label: string;
-  moveSimpleCard: boolean;
-  ease?: 3 | 4;
   className: string;
 }> = [
   {
     value: "again",
     label: "بلد نیستم",
-    moveSimpleCard: false,
     className: "border-red-500/30 text-red-700 dark:text-red-400",
   },
   {
     value: "familiar",
     label: "آشنا هستم",
-    moveSimpleCard: true,
     className: "border-amber-500/30 text-amber-700 dark:text-amber-400",
   },
   {
     value: "good",
     label: "بلدم",
-    moveSimpleCard: true,
-    ease: 3,
     className: "border-emerald-500/30 text-emerald-700 dark:text-emerald-400",
   },
   {
     value: "easy",
     label: "عالی",
-    moveSimpleCard: true,
-    ease: 4,
     className: "border-sky-500/30 text-sky-700 dark:text-sky-400",
   },
 ];
@@ -78,11 +72,49 @@ function fieldValue(row: CardRow, fieldName: string) {
 
 function actionTargets() {
   return {
-    reviewCard: WordAnkiConstants.cardTypes.EnToFaRev,
-    reviewDeck: WordAnkiConstants.decks.EnToFaRev,
-    simpleCard: WordAnkiConstants.cardTypes.EnToFa,
-    simpleDeck: WordAnkiConstants.decks.EnToFa,
+    enToFa: {
+      cardType: WordAnkiConstants.cardTypes.EnToFa,
+      deck: WordAnkiConstants.decks.EnToFa,
+    },
+    faToEn: {
+      cardType: WordAnkiConstants.cardTypes.FaToEn,
+      deck: WordAnkiConstants.decks.FaToEn,
+    },
+    review: {
+      cardType: REVIEW_CARD,
+      deck: REVIEW_DECK,
+    },
   };
+}
+
+type AnswerInstruction = {
+  target: keyof ReturnType<typeof actionTargets>;
+  ease: 1 | 3 | 4;
+  repetitions: number;
+};
+
+function answerInstructions(action: KnowledgeAction): AnswerInstruction[] {
+  switch (action) {
+    case "again":
+      return [
+        { target: "enToFa", ease: 1, repetitions: 1 },
+        { target: "faToEn", ease: 1, repetitions: 1 },
+      ];
+    case "familiar":
+      return [{ target: "enToFa", ease: 3, repetitions: 1 }];
+    case "good":
+      return [
+        { target: "enToFa", ease: 4, repetitions: 2 },
+        { target: "faToEn", ease: 3, repetitions: 1 },
+        { target: "review", ease: 4, repetitions: 1 },
+      ];
+    case "easy":
+      return [
+        { target: "enToFa", ease: 4, repetitions: 2 },
+        { target: "faToEn", ease: 4, repetitions: 1 },
+        { target: "review", ease: 4, repetitions: 1 },
+      ];
+  }
 }
 
 function buildQuery(
@@ -101,49 +133,45 @@ function buildQuery(
   return deckQuery;
 }
 
-function buildHelpSummaries(deck: DeckName): HelpActionSummary[] {
-  const targets = actionTargets();
-
+function buildHelpSummaries(): HelpActionSummary[] {
   return [
     {
       title: "بلد نیستم",
       description:
-        "برای زمانی است که کلمه را بلد نیستی. فقط کارت مروری همان نوت از Knowing Filter خارج می‌شود و کارت ساده عمداً در Knowing Filter باقی می‌ماند.",
-      reviewMove: `کارت ${WordAnkiConstants.cardTypes.EnToFaRev} به دک ${WordAnkiConstants.decks.EnToFaRev} منتقل می‌شود.`,
-      simpleMove: `کارت ${WordAnkiConstants.cardTypes.EnToFa} جابه‌جا نمی‌شود و در همان دک باقی می‌ماند.`,
-      extra: `تگ ${AnkiTag.Filtered} روی نوت اضافه می‌شود؛ این تگ حذف نمی‌شود، اما کارت مرور دیگر در Deck فیلتر شناخت نیست.`,
+        "برای زمانی است که کلمه را بلد نیستی. کارت‌های متناظر همین Note با نوع‌های EnToFa، FaToEn و WordsForNewStudy-Review پیدا می‌شوند و به دک‌های اصلی خودشان منتقل می‌شوند.",
+      moves: `کارت ${WordAnkiConstants.cardTypes.EnToFa} به ${WordAnkiConstants.decks.EnToFa}، کارت ${WordAnkiConstants.cardTypes.FaToEn} به ${WordAnkiConstants.decks.FaToEn} و کارت ${REVIEW_CARD} به ${REVIEW_DECK} منتقل می‌شود.`,
+      answers: "برای کارت‌های EnToFa و FaToEn یک بار Again با ease=1 اجرا می‌شود. روی کارت Review هیچ پاسخی اجرا نمی‌شود.",
+      extra: `تگ ${AnkiTag.Filtered} روی نوت باقی می‌ماند.`,
       toneClassName:
         "border-red-500/20 bg-red-500/5 text-red-800 dark:text-red-300",
     },
     {
       title: "آشنا هستم",
       description:
-        "برای زمانی است که کلمه برایت آشناست، اما نمی‌خواهی فعلاً آن را به‌عنوان پاسخ درست در Anki ثبت کنی. هر دو کارت از Knowing Filter خارج می‌شوند و هیچ answerCards اجرا نمی‌شود.",
-      reviewMove: `اگر دک انتخاب‌شده «${deck}» باشد، کارت ${targets.reviewCard} به دک ${targets.reviewDeck} منتقل می‌شود.`,
-      simpleMove: `کارت ${targets.simpleCard} نیز به دک ${targets.simpleDeck} منتقل می‌شود.`,
-      extra: `تگ ${AnkiTag.Filtered} روی نوت اضافه می‌شود؛ چون هر دو کارت به Deck عادی منتقل شده‌اند، این تگ باعث باقی‌ماندن آن‌ها در Knowing Filter نمی‌شود.`,
+        "برای زمانی است که کلمه برایت آشناست، اما نمی‌خواهی برای همهٔ کارت‌ها پاسخ ثبت شود. کارت‌های متناظر همین Note پیدا می‌شوند و فقط برای EnToFa پاسخ ثبت می‌شود.",
+      moves: `کارت‌های ${WordAnkiConstants.cardTypes.EnToFa}، ${WordAnkiConstants.cardTypes.FaToEn} و ${REVIEW_CARD} به‌ترتیب به ${WordAnkiConstants.decks.EnToFa}، ${WordAnkiConstants.decks.FaToEn} و ${REVIEW_DECK} منتقل می‌شوند.`,
+      answers: "فقط برای کارت EnToFa یک بار Good با ease=3 اجرا می‌شود. برای کارت FaToEn و Review هیچ عملی انجام نمی‌شود.",
+      extra: `تگ ${AnkiTag.Filtered} روی نوت باقی می‌ماند.`,
       toneClassName:
         "border-amber-500/20 bg-amber-500/5 text-amber-800 dark:text-amber-300",
     },
     {
       title: "بلدم",
       description:
-        "برای زمانی است که کلمه را می‌دانی. هر دو کارت به Deckهای عادی برمی‌گردند و سپس برای هر دو کارت پاسخ خوب در Anki ثبت می‌شود.",
-      reviewMove: `اگر دک انتخاب‌شده «${deck}» باشد، کارت ${targets.reviewCard} به دک ${targets.reviewDeck} منتقل می‌شود.`,
-      simpleMove: `کارت ${targets.simpleCard} نیز به دک ${targets.simpleDeck} منتقل می‌شود.`,
-      extra:
-        "پس از انتقال، برای هر دو کارت answerCards با ease=3 اجرا می‌شود؛ یعنی معادل انتخاب Good در Anki.",
+        "برای زمانی است که کلمه را می‌دانی. کارت‌های متناظر همین Note پیدا می‌شوند، به دک‌های اصلی می‌روند و سپس برای هر نوع کارت پاسخ مخصوص خودش ثبت می‌شود.",
+      moves: `کارت‌های EnToFa، FaToEn و ${REVIEW_CARD} به دک‌های ${WordAnkiConstants.decks.EnToFa}، ${WordAnkiConstants.decks.FaToEn} و ${REVIEW_DECK} منتقل می‌شوند.`,
+      answers: "برای EnToFa دو بار Easy با ease=4، برای FaToEn یک بار Good با ease=3 و برای Review یک بار Easy با ease=4 اجرا می‌شود.",
+      extra: `تگ ${AnkiTag.Filtered} روی نوت باقی می‌ماند.`,
       toneClassName:
         "border-emerald-500/20 bg-emerald-500/5 text-emerald-800 dark:text-emerald-300",
     },
     {
       title: "عالی",
       description:
-        "برای زمانی است که کلمه را کاملاً و بدون زحمت می‌دانی. هر دو کارت به Deckهای عادی برمی‌گردند و پاسخ آسان در Anki ثبت می‌شود.",
-      reviewMove: `اگر دک انتخاب‌شده «${deck}» باشد، کارت ${targets.reviewCard} به دک ${targets.reviewDeck} منتقل می‌شود.`,
-      simpleMove: `کارت ${targets.simpleCard} نیز به دک ${targets.simpleDeck} منتقل می‌شود.`,
-      extra:
-        "پس از انتقال، برای هر دو کارت answerCards با ease=4 اجرا می‌شود؛ یعنی معادل انتخاب Easy در Anki.",
+        "برای زمانی است که کلمه را کاملاً و بدون زحمت می‌دانی. کارت‌های متناظر همین Note به دک‌های اصلی می‌روند و پاسخ Easy ثبت می‌شود؛ EnToFa دو بار پاسخ می‌گیرد.",
+      moves: `کارت‌های EnToFa، FaToEn و ${REVIEW_CARD} به دک‌های ${WordAnkiConstants.decks.EnToFa}، ${WordAnkiConstants.decks.FaToEn} و ${REVIEW_DECK} منتقل می‌شوند.`,
+      answers: "برای EnToFa دو بار Easy با ease=4، برای FaToEn یک بار Easy با ease=4 و برای Review یک بار Easy با ease=4 اجرا می‌شود.",
+      extra: `تگ ${AnkiTag.Filtered} روی نوت باقی می‌ماند.`,
       toneClassName:
         "border-sky-500/20 bg-sky-500/5 text-sky-800 dark:text-sky-300",
     },
@@ -289,10 +317,26 @@ export default function AnkiKnowingFilterManagementClient() {
 
     try {
       const targets = actionTargets();
-      const reviewCardIds = await findNoteCards(row.noteId, targets.reviewCard);
-      const simpleCardIds = action.moveSimpleCard
-        ? await findNoteCards(row.noteId, targets.simpleCard)
-        : [];
+      const enToFaCardIds = await findNoteCards(
+        row.noteId,
+        targets.enToFa.cardType,
+      );
+      const faToEnCardIds = await findNoteCards(
+        row.noteId,
+        targets.faToEn.cardType,
+      );
+      const reviewCardIds = await findNoteCards(
+        row.noteId,
+        targets.review.cardType,
+      );
+      const cardIdsByTarget = {
+        enToFa: enToFaCardIds,
+        faToEn: faToEnCardIds,
+        review: reviewCardIds,
+      } satisfies Record<
+        keyof ReturnType<typeof actionTargets>,
+        number[]
+      >;
 
       const tagResponse = await ankiOperations.addTags({
         notes: [row.noteId],
@@ -300,31 +344,31 @@ export default function AnkiKnowingFilterManagementClient() {
       });
       if (!tagResponse.ok) throw new Error(tagResponse.error);
 
-      const reviewMoveResponse = await ankiOperations.changeDeck({
-        cards: reviewCardIds,
-        deck: targets.reviewDeck,
-      });
-      if (!reviewMoveResponse.ok) throw new Error(reviewMoveResponse.error);
-      await confirmCardsInDeck(reviewCardIds, targets.reviewDeck);
-
-      if (simpleCardIds.length > 0) {
-        const simpleMoveResponse = await ankiOperations.changeDeck({
-          cards: simpleCardIds,
-          deck: targets.simpleDeck,
+      const cardsToMove = [
+        [targets.enToFa, enToFaCardIds],
+        [targets.faToEn, faToEnCardIds],
+        [targets.review, reviewCardIds],
+      ] as const;
+      for (const [target, cardIds] of cardsToMove) {
+        const moveResponse = await ankiOperations.changeDeck({
+          cards: cardIds,
+          deck: target.deck,
         });
-        if (!simpleMoveResponse.ok) throw new Error(simpleMoveResponse.error);
-        await confirmCardsInDeck(simpleCardIds, targets.simpleDeck);
+        if (!moveResponse.ok) throw new Error(moveResponse.error);
+        await confirmCardsInDeck(cardIds, target.deck);
       }
 
-      if (action.ease !== undefined) {
-        const answerCardIds = [...reviewCardIds, ...simpleCardIds];
-        const answerResponse = await ankiOperations.answerCards({
-          answers: answerCardIds.map((cardId) => ({
-            cardId,
-            ease: action.ease as 3 | 4,
-          })),
-        });
-        if (!answerResponse.ok) throw new Error(answerResponse.error);
+      for (const instruction of answerInstructions(action.value)) {
+        const answerCardIds = cardIdsByTarget[instruction.target];
+        for (let repetition = 0; repetition < instruction.repetitions; repetition += 1) {
+          const answerResponse = await ankiOperations.answerCards({
+            answers: answerCardIds.map((cardId) => ({
+              cardId,
+              ease: instruction.ease,
+            })),
+          });
+          if (!answerResponse.ok) throw new Error(answerResponse.error);
+        }
       }
 
       setRows(
@@ -430,7 +474,7 @@ export default function AnkiKnowingFilterManagementClient() {
         <div className="flex items-start justify-between gap-3">
           <PageHeader
             title="Knowing Filter Card Management"
-            subtitle="مدیریت کارت‌های دو Deck فیلتر شناخت"
+            subtitle="مدیریت سه کارت متناظر هر کلمه در دک فیلتر شناخت"
           />
           <button
             type="button"
@@ -659,9 +703,9 @@ export default function AnkiKnowingFilterManagementClient() {
                     راهنمای اکشن‌های این صفحه
                   </h2>
                   <p className="mt-1 text-sm text-muted">
-                    برای دک انتخاب‌شده یعنی{" "}
+                    کارت‌های متناظر از دک انتخاب‌شده یعنی{" "}
                     <span dir="ltr">{selectedDeck}</span> این دکمه‌ها این
-                    جابه‌جایی‌ها را انجام می‌دهند.
+                    جابه‌جایی‌ها و پاسخ‌ها را اجرا می‌کنند.
                   </p>
                 </div>
                 <button
@@ -677,25 +721,74 @@ export default function AnkiKnowingFilterManagementClient() {
               <div className="overflow-y-auto p-5 sm:p-6">
                 <div className="grid gap-4">
                   <div className="rounded-2xl border border-card bg-background p-4 text-sm leading-7 text-foreground">
-                    <p>
-                      هر ردیف مربوط به یک کارت از یک نوت است. دکمه‌ای که می‌زنی
-                      روی همان نوت و کارت‌های متناظر آن اجرا می‌شود؛ بنابراین
-                      نتیجه ممکن است روی دو کارتِ یک کلمه اثر بگذارد.
+                    <h3 className="font-bold">این صفحه چه کاری انجام می‌دهد؟</h3>
+                    <p className="mt-2">
+                      این صفحه کلمه‌ها را از دک فیلتر شناخت بررسی می‌کند تا مشخص
+                      کنی کدام کلمه را بلدی. دک انتخاب‌شده همیشه{" "}
+                      <span dir="ltr">{selectedDeck}</span> است و نتیجهٔ هر
+                      عملیات مستقیماً در Anki ثبت می‌شود.
+                    </p>
+                    <div className="mt-3 rounded-xl border border-card bg-card p-3">
+                      <p className="font-semibold">روند کار</p>
+                      <ol className="mt-1 list-inside list-decimal text-muted">
+                        <li>تگ‌ها را انتخاب کن و روی «Show Cards» بزن.</li>
+                        <li>برای هر ردیف، میزان شناختت از کلمه را انتخاب کن.</li>
+                        <li>کارت‌ها به دک مناسب منتقل می‌شوند و در صورت نیاز پاسخ Anki ثبت می‌شود.</li>
+                        <li>برای دیدن وضعیت واقعی پس از عملیات، دوباره «Show Cards» را اجرا کن.</li>
+                      </ol>
+                    </div>
+                    <p className="mt-3 text-muted">
+                      هر ردیف یک کارت است، اما دکمه روی نوت همان ردیف اجرا می‌شود
+                      و کارت‌های متناظر همان نوت را هم پیدا می‌کند. بنابراین ممکن
+                      است یک کلیک روی هر سه کارتِ یک کلمه اثر بگذارد.
                     </p>
                     <p className="mt-2 text-muted">
-                      در هر اکشن ابتدا تگ <span dir="ltr">{AnkiTag.Filtered}</span>
-                      روی نوت ثبت می‌شود. این تگ فقط علامت پردازش‌شدن نوت است و
-                      با انتقال کارت‌ها حذف نمی‌شود.
+                      در شروع هر عملیات تگ <span dir="ltr">{AnkiTag.Filtered}</span>
+                      روی نوت اضافه می‌شود و حذف نمی‌شود. این تگ فقط نشان می‌دهد
+                      نوت بررسی شده است؛ جابه‌جایی کارت‌ها بر اساس خود کارت انجام
+                      می‌شود، نه حذف تگ.
                     </p>
                     <p className="mt-2 text-muted">
-                      «کارت مرور» همان کارت <span dir="ltr">Rev</span> است و
-                      «کارت ساده» همان کارت اصلی بدون پسوند <span dir="ltr">Rev</span>.
-                      تفاوت دکمه‌ها در این است که کدام کارت جابه‌جا شود و آیا
-                      برای آن پاسخ Anki با ease ثبت شود یا نه.
+                      سه کارت متناظر هر Note عبارت‌اند از{" "}
+                      <span dir="ltr">EnToFa</span>،{" "}
+                      <span dir="ltr">FaToEn</span> و{" "}
+                      <span dir="ltr">{REVIEW_CARD}</span>. اپ این کارت‌ها را
+                      برای همان Note پیدا می‌کند و به دک اصلی خودشان منتقل
+                      می‌کند؛ سپس بسته به دکمه، پاسخ متفاوتی برای هر کارت اجرا
+                      می‌شود.
+                    </p>
+                    <p className="mt-2 rounded-xl border border-amber-500/20 bg-amber-500/5 p-3 text-amber-800 dark:text-amber-300">
+                      منظور از «کارت متناظر» کارت جدید یا کارت مخصوص فیلتر
+                      نیست؛ منظور کارت همان Note با نوع EnToFa، FaToEn یا{" "}
+                      <span dir="ltr">{REVIEW_CARD}</span> است. ردیف فعلی فقط
+                      Note و کلمه را مشخص می‌کند؛ عملیات روی کارت‌های متناظر
+                      انجام می‌شود، نه صرفاً روی کارت فیلتر نمایش‌داده‌شده.
                     </p>
                   </div>
 
-                  {buildHelpSummaries(selectedDeck).map((item) => (
+                  <section className="rounded-2xl border border-card bg-background p-4 text-sm leading-7">
+                    <h3 className="font-bold text-foreground">فیلترهای نمایش</h3>
+                    <div className="mt-3 grid gap-3 sm:grid-cols-3">
+                      <div className="rounded-xl border border-card bg-card p-3">
+                        <p className="font-semibold text-foreground">With Filtered</p>
+                        <p className="mt-1 text-muted">فقط کارت‌هایی که نوتشان تگ <span dir="ltr">Filtered</span> دارد.</p>
+                      </div>
+                      <div className="rounded-xl border border-card bg-card p-3">
+                        <p className="font-semibold text-foreground">Without Filtered</p>
+                        <p className="mt-1 text-muted">فقط کارت‌هایی که نوتشان این تگ را ندارد.</p>
+                      </div>
+                      <div className="rounded-xl border border-card bg-card p-3">
+                        <p className="font-semibold text-foreground">هر دو</p>
+                        <p className="mt-1 text-muted">همهٔ کارت‌های دک را نشان می‌دهد؛ یکی از دو گزینه باید فعال بماند.</p>
+                      </div>
+                    </div>
+                    <p className="mt-3 text-xs text-muted">
+                      توجه: تگ روی Note ذخیره می‌شود، پس همهٔ کارت‌های آن Note
+                      در فیلتر تگ یکسان دیده می‌شوند.
+                    </p>
+                  </section>
+
+                  {buildHelpSummaries().map((item) => (
                     <section
                       key={item.title}
                       className={`rounded-2xl border p-4 ${item.toneClassName}`}
@@ -704,17 +797,26 @@ export default function AnkiKnowingFilterManagementClient() {
                       <p className="mt-2 text-sm leading-7">
                         {item.description}
                       </p>
-                      <p className="mt-3 text-sm leading-7">
-                        {item.reviewMove}
-                      </p>
-                      <p className="mt-1 text-sm leading-7">
-                        {item.simpleMove}
-                      </p>
+                      <p className="mt-3 text-sm leading-7">{item.moves}</p>
+                      <p className="mt-1 text-sm leading-7">{item.answers}</p>
                       {item.extra ? (
                         <p className="mt-1 text-sm leading-7">{item.extra}</p>
                       ) : null}
                     </section>
                   ))}
+
+                  <section className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4 text-sm leading-7 text-amber-800 dark:text-amber-300">
+                    <h3 className="font-bold">نکات مهم</h3>
+                    <ul className="mt-2 list-inside list-disc">
+                      <li>در هر چهار دکمه، کارت‌های متناظر EnToFa، FaToEn و {REVIEW_CARD} برای همان Note پیدا و به دک‌های اصلی منتقل می‌شوند.</li>
+                      <li>«بلد نیستم» برای EnToFa و FaToEn یک بار Again می‌زند و Review را دست‌نخورده می‌گذارد.</li>
+                      <li>«آشنا هستم» فقط برای EnToFa یک بار Good با <span dir="ltr">ease=3</span> اجرا می‌کند.</li>
+                      <li>«بلدم»: برای EnToFa دو بار Easy با <span dir="ltr">ease=4</span>، برای FaToEn یک بار Good با <span dir="ltr">ease=3</span> و برای Review یک بار Easy با <span dir="ltr">ease=4</span>.</li>
+                      <li>«عالی»: برای هر سه کارت Easy با <span dir="ltr">ease=4</span> اجرا می‌شود و EnToFa دو بار پاسخ می‌گیرد.</li>
+                      <li>اگر عملیات موفق شود، همان ردیف تا زمان بارگذاری دوباره «فیلتر شده» نشان داده می‌شود و دکمه‌ها دوباره فعال نمی‌شوند.</li>
+                      <li>اگر خطا دیدی، ابتدا وضعیت Deck و اتصال AnkiConnect را بررسی کن و سپس فهرست را دوباره بارگذاری کن.</li>
+                    </ul>
+                  </section>
                 </div>
               </div>
             </div>
