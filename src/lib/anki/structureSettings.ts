@@ -52,7 +52,7 @@ export type AnkiStructureDeck = {
 
 export type EditableDeckConfig = {
   id: string;
-  deckId: string;
+  deckIds: string[];
   configName: string;
   newCardsPerDay: number;
   maximumReviewsPerDay: number;
@@ -62,13 +62,53 @@ export type EditableDeckConfig = {
   easyBonus: string;
   graduatingInterval: string;
   easyInterval: string;
+  minimumInterval: string;
 };
+
+export const DECK_CONFIG_NAME_PREFIX = "WordsForNewStudy";
+export const DEFAULT_STUDY_CONFIG_NAME = `${DECK_CONFIG_NAME_PREFIX}-Default`;
+
+export function normalizeDeckConfigName(value: string, fallbackSuffix = "Default") {
+  const raw = value.trim();
+  if (!raw || raw === "DefaultStudyConfig" || raw === "Default") {
+    return `${DECK_CONFIG_NAME_PREFIX}-${fallbackSuffix}`;
+  }
+  let suffix = raw.startsWith(`${DECK_CONFIG_NAME_PREFIX}-`)
+    ? raw.slice(DECK_CONFIG_NAME_PREFIX.length + 1)
+    : raw.startsWith(DECK_CONFIG_NAME_PREFIX)
+      ? raw.slice(DECK_CONFIG_NAME_PREFIX.length).replace(/^[-\s]+/, "")
+      : raw;
+  while (suffix.startsWith(`${DECK_CONFIG_NAME_PREFIX}-`)) {
+    suffix = suffix.slice(DECK_CONFIG_NAME_PREFIX.length + 1);
+  }
+  return `${DECK_CONFIG_NAME_PREFIX}-${suffix || fallbackSuffix}`;
+}
+
+export function createDefaultEditableDeckConfig(
+  id: string,
+  deckIds: string[],
+  configName = DEFAULT_STUDY_CONFIG_NAME,
+): EditableDeckConfig {
+  return {
+    id,
+    deckIds,
+    configName: normalizeDeckConfigName(configName),
+    newCardsPerDay: 9999,
+    maximumReviewsPerDay: 9999,
+    learningSteps: "2m 10m",
+    relearningSteps: "2m 10m",
+    startingEase: "3.5",
+    easyBonus: "1.8",
+    graduatingInterval: "1",
+    easyInterval: "4",
+    minimumInterval: "1",
+  };
+}
 
 export type AnkiStructureCardType = {
   id: string;
   name: string;
   deckId: string | null;
-  deckConfigId: string | null;
   front: string;
   back: string;
 };
@@ -122,8 +162,8 @@ function defaultDeckConfig(key: LegacyConfigKey): EditableDeckConfig {
   const source = WordDeckConfigs[key] as Record<string, unknown>;
   return {
     id: `config-${key}`,
-    deckId: `deck-${legacyConfigDeckMap[key]}`,
-    configName: key,
+    deckIds: [`deck-${legacyConfigDeckMap[key]}`],
+    configName: normalizeDeckConfigName(key, key),
     newCardsPerDay: Number(source.newCardsPerDay),
     maximumReviewsPerDay: Number(source.maximumReviewsPerDay),
     learningSteps: optionalString(source.learningSteps),
@@ -132,6 +172,7 @@ function defaultDeckConfig(key: LegacyConfigKey): EditableDeckConfig {
     easyBonus: optionalString(source.EasyBonus ?? source.easyBonus),
     graduatingInterval: optionalString(source.graduatingInterval ?? source.GraduatingInterval),
     easyInterval: optionalString(source.easyInterval ?? source.EasyInterval),
+    minimumInterval: optionalString(source.minimumInterval ?? source.MinimumInterval ?? "1"),
   };
 }
 
@@ -144,9 +185,6 @@ export function createDefaultAnkiStructureConfig(): AnkiStructureConfig {
   }));
   const deckIdByName = new Map(decks.map((deck) => [deck.name, deck.id]));
   const deckConfigs = legacyConfigKeys.map(defaultDeckConfig);
-  const deckConfigIdByDeckId = new Map(
-    deckConfigs.map((config) => [config.deckId, config.id]),
-  );
   const cardTypes: AnkiStructureCardType[] = Object.entries(WordAnkiConstants.noteTemplates).map(([name, template]) => ({
     id: `card-${name}`,
     name,
@@ -154,15 +192,9 @@ export function createDefaultAnkiStructureConfig(): AnkiStructureConfig {
       deckIdByName.get(
         WordDeckByCardType[name as keyof typeof WordDeckByCardType] ?? "",
       ) ?? null,
-    deckConfigId: null,
     front: template.Front,
     back: template.Back,
   }));
-  cardTypes.forEach((card) => {
-    card.deckConfigId = card.deckId
-      ? deckConfigIdByDeckId.get(card.deckId) ?? null
-      : null;
-  });
 
   return {
     schemaVersion: 3,
@@ -212,12 +244,19 @@ function normalizeDeckConfigItem(
   fallback: EditableDeckConfig,
   index: number,
 ): EditableDeckConfig {
-  const text = (field: keyof EditableDeckConfig) =>
+  const text = (field: Exclude<keyof EditableDeckConfig, "deckIds">) =>
     typeof item[field] === "string" ? item[field].trim() : String(fallback[field]);
+  const legacyDeckId = typeof item.deckId === "string" ? item.deckId.trim() : "";
   return {
     id: text("id") || `config-${index + 1}`,
-    deckId: text("deckId"),
-    configName: text("configName"),
+    deckIds: Array.isArray(item.deckIds)
+      ? item.deckIds
+        .filter((value): value is string => typeof value === "string" && Boolean(value.trim()))
+        .map((value) => value.trim())
+      : legacyDeckId
+        ? [legacyDeckId]
+        : fallback.deckIds,
+    configName: normalizeDeckConfigName(text("configName"), fallback.configName),
     newCardsPerDay: finiteNumber(item.newCardsPerDay, fallback.newCardsPerDay),
     maximumReviewsPerDay: finiteNumber(item.maximumReviewsPerDay, fallback.maximumReviewsPerDay),
     learningSteps: text("learningSteps"),
@@ -226,6 +265,7 @@ function normalizeDeckConfigItem(
     easyBonus: text("easyBonus"),
     graduatingInterval: text("graduatingInterval"),
     easyInterval: text("easyInterval"),
+    minimumInterval: text("minimumInterval"),
   };
 }
 
@@ -236,16 +276,17 @@ function normalizeDeckConfigs(input: Record<string, unknown>, defaults: AnkiStru
       .map((item, index) =>
         normalizeDeckConfigItem(item, defaults.deckConfigs[index] ?? {
           id: `config-${index + 1}`,
-          deckId: "",
+          deckIds: [],
           configName: "",
-          newCardsPerDay: 20,
-          maximumReviewsPerDay: 200,
-          learningSteps: "1m 10m",
-          relearningSteps: "10m",
-          startingEase: "2.50",
-          easyBonus: "1.3",
+          newCardsPerDay: 9999,
+          maximumReviewsPerDay: 9999,
+          learningSteps: "2m 10m",
+          relearningSteps: "2m 10m",
+          startingEase: "3.5",
+          easyBonus: "1.8",
           graduatingInterval: "1",
           easyInterval: "4",
+          minimumInterval: "1",
         }, index),
       );
   }
@@ -268,7 +309,6 @@ function normalizeDeckConfigs(input: Record<string, unknown>, defaults: AnkiStru
 function normalizeNoteType(
   input: Record<string, unknown>,
   defaults: AnkiStructureConfig,
-  deckConfigs: EditableDeckConfig[],
 ) {
   const raw =
     input.noteType && typeof input.noteType === "object"
@@ -283,19 +323,10 @@ function normalizeNoteType(
         .map((item, index) => {
           const deckId =
             typeof item.deckId === "string" && item.deckId ? item.deckId : null;
-          const storedDeckConfigId =
-            typeof item.deckConfigId === "string" && item.deckConfigId
-              ? item.deckConfigId
-              : null;
-          const deckConfigId =
-            storedDeckConfigId ??
-            deckConfigs.find((config) => config.deckId === deckId)?.id ??
-            null;
           return {
             id: optionalString(item.id).trim() || `card-${index + 1}`,
             name: optionalString(item.name).trim(),
             deckId,
-            deckConfigId,
             front: optionalString(item.front),
             back: optionalString(item.back),
           };
@@ -313,7 +344,7 @@ export function normalizeAnkiStructureConfig(value: unknown): AnkiStructureConfi
   const input = value && typeof value === "object" ? (value as Record<string, unknown>) : {};
   const decks = normalizeDecks(input, defaults);
   const deckConfigs = normalizeDeckConfigs(input, defaults);
-  const noteType = normalizeNoteType(input, defaults, deckConfigs);
+  const noteType = normalizeNoteType(input, defaults);
   const rawMove =
     input.moveCards && typeof input.moveCards === "object"
       ? (input.moveCards as Record<string, unknown>)
@@ -347,6 +378,27 @@ function duplicateValues(values: string[]) {
   return Array.from(new Set(values.filter((value, index) => values.indexOf(value) !== index)));
 }
 
+function parseStudyStepsToMinutes(value: string) {
+  const raw = value.trim();
+  if (!raw) return { value: null as number | null, invalid: false };
+  let finalStep = 0;
+  for (const token of raw.split(/\s+/g)) {
+    const match = /^(\d+(?:\.\d+)?)([smhd])$/i.exec(token);
+    if (!match) return { value: null, invalid: true };
+    const amount = Number(match[1]);
+    const unit = match[2].toLowerCase();
+    const minutes = unit === "s" ? amount / 60 : unit === "m" ? amount : unit === "h" ? amount * 60 : amount * 1440;
+    finalStep = minutes;
+  }
+  return { value: finalStep, invalid: false };
+}
+
+function parseStudyDays(value: string) {
+  if (!value.trim()) return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+}
+
 export function validateAnkiStructureConfig(config: AnkiStructureConfig) {
   const errors: string[] = [];
   const deckIds = config.decks.map((deck) => deck.id.trim());
@@ -377,18 +429,43 @@ export function validateAnkiStructureConfig(config: AnkiStructureConfig) {
   });
 
   const deckIdSet = new Set(deckIds);
-  const deckConfigById = new Map(
-    config.deckConfigs.map((item) => [item.id, item]),
-  );
   config.deckConfigs.forEach((item, index) => {
     if (!item.id.trim()) errors.push(`شناسه Deck Config ردیف ${index + 1} خالی است.`);
     if (!item.configName.trim()) errors.push(`نام Deck Config ردیف ${index + 1} خالی است.`);
-    if (!deckIdSet.has(item.deckId)) errors.push(`دک Deck Config «${item.configName || index + 1}» معتبر نیست.`);
+    if (!item.deckIds.length || item.deckIds.some((deckId) => !deckIdSet.has(deckId))) {
+      errors.push(`دک Deck Config «${item.configName || index + 1}» معتبر نیست.`);
+    }
     if (!Number.isFinite(item.newCardsPerDay) || item.newCardsPerDay < 0) {
       errors.push(`New cards/day در ${item.configName || index + 1} معتبر نیست.`);
     }
     if (!Number.isFinite(item.maximumReviewsPerDay) || item.maximumReviewsPerDay < 0) {
       errors.push(`Maximum reviews/day در ${item.configName || index + 1} معتبر نیست.`);
+    }
+
+    const learningSteps = parseStudyStepsToMinutes(item.learningSteps);
+    const relearningSteps = parseStudyStepsToMinutes(item.relearningSteps);
+    const graduatingInterval = parseStudyDays(item.graduatingInterval);
+    const easyInterval = parseStudyDays(item.easyInterval);
+    const minimumInterval = parseStudyDays(item.minimumInterval);
+    if (learningSteps.invalid) errors.push(`Learning steps در ${item.configName || index + 1} معتبر نیست.`);
+    if (relearningSteps.invalid) errors.push(`Relearning steps در ${item.configName || index + 1} معتبر نیست.`);
+    if (item.graduatingInterval.trim() && graduatingInterval === null) {
+      errors.push(`Graduating interval در ${item.configName || index + 1} باید عدد روز معتبر باشد.`);
+    }
+    if (item.easyInterval.trim() && easyInterval === null) {
+      errors.push(`Easy interval در ${item.configName || index + 1} باید عدد روز معتبر باشد.`);
+    }
+    if (item.minimumInterval.trim() && minimumInterval === null) {
+      errors.push(`Minimum interval در ${item.configName || index + 1} باید عدد روز معتبر باشد.`);
+    }
+    if (graduatingInterval !== null && learningSteps.value !== null && graduatingInterval * 1440 < learningSteps.value) {
+      errors.push(`Graduating interval در ${item.configName || index + 1} باید حداقل به اندازه آخرین Learning step باشد.`);
+    }
+    if (graduatingInterval !== null && easyInterval !== null && easyInterval < graduatingInterval) {
+      errors.push(`Easy interval در ${item.configName || index + 1} باید حداقل به اندازه Graduating interval باشد.`);
+    }
+    if (minimumInterval !== null && relearningSteps.value !== null && minimumInterval * 1440 < relearningSteps.value) {
+      errors.push(`Minimum interval در ${item.configName || index + 1} باید حداقل به اندازه آخرین Relearning step باشد.`);
     }
   });
 
@@ -402,14 +479,6 @@ export function validateAnkiStructureConfig(config: AnkiStructureConfig) {
     if (!card.id.trim()) errors.push(`شناسه Card Type ردیف ${index + 1} خالی است.`);
     if (!card.name.trim()) errors.push(`نام Card Type ردیف ${index + 1} خالی است.`);
     if (card.deckId && !deckIdSet.has(card.deckId)) errors.push(`دک Card Type «${card.name || index + 1}» معتبر نیست.`);
-    if (card.deckConfigId) {
-      const deckConfig = deckConfigById.get(card.deckConfigId);
-      if (!deckConfig) {
-        errors.push(`Deck Config مربوط به Card Type «${card.name || index + 1}» معتبر نیست.`);
-      } else if (deckConfig.deckId !== card.deckId) {
-        errors.push(`Deck و Deck Config مربوط به Card Type «${card.name || index + 1}» با هم هماهنگ نیستند.`);
-      }
-    }
     if (!card.front.trim()) errors.push(`Front مربوط به Card Type «${card.name || index + 1}» خالی است.`);
     if (!card.back.trim()) errors.push(`Back مربوط به Card Type «${card.name || index + 1}» خالی است.`);
   });

@@ -13,6 +13,9 @@ import {
 } from "@/lib/anki";
 
 const BATCH_SIZE = 200;
+const REVIEW_DECK = "WordsForNewStudy::Review";
+const REVIEW_FILTER_CARD = WordAnkiConstants.cardTypes.EnToFaKnowingFilter;
+const REVIEW_FILTER_DECK = WordAnkiConstants.decks.EnToFaKnowingFilter;
 
 const MIGRATION_DIRECTIONS = [
   {
@@ -65,6 +68,19 @@ type EasyBoostResult = {
   cardsBoosted: number;
   totalEasyAnswers: number;
   missingReviewCards: number;
+};
+
+type ReviewDeckEasyResult = {
+  deck: string;
+  cardsFound: number;
+  easyAnswers: number;
+};
+
+type ReviewFilterTagResult = {
+  sourceCards: number;
+  matchingFilterCards: number;
+  taggedNotes: number;
+  missingFilterCards: number;
 };
 
 type ReviewSnapshot = {
@@ -240,6 +256,47 @@ async function applyRandomEasyAnswers(cardIds: number[]) {
   };
 }
 
+async function applyOneEasyAnswerToReviewDeck() {
+  const cardIds = await findCards(`deck:${quoteAnkiSearchValue(REVIEW_DECK)}`);
+  if (!cardIds.length) {
+    return { deck: REVIEW_DECK, cardsFound: 0, easyAnswers: 0 } satisfies ReviewDeckEasyResult;
+  }
+
+  const previousSnapshots = await loadReviewSnapshots(cardIds);
+  await answerCards(cardIds, 4);
+  await confirmAnswerApplied(cardIds, previousSnapshots, 4);
+
+  return {
+    deck: REVIEW_DECK,
+    cardsFound: cardIds.length,
+    easyAnswers: cardIds.length,
+  } satisfies ReviewDeckEasyResult;
+}
+
+async function tagReviewFilterNotes() {
+  const sourceCardIds = await findCards(`deck:${quoteAnkiSearchValue(REVIEW_DECK)}`);
+  const sourceCards = await loadCardsInfo(sourceCardIds);
+  const sourceNoteIds = Array.from(new Set(sourceCards.map((card) => card.note)));
+  const filterCardIds = await findCardsForNotes(
+    sourceNoteIds,
+    REVIEW_FILTER_CARD,
+    REVIEW_FILTER_DECK,
+  );
+  const filterCards = await loadCardsInfo(filterCardIds);
+  const filterNoteIds = Array.from(new Set(filterCards.map((card) => card.note)));
+
+  if (filterNoteIds.length > 0) {
+    await tagNotes(filterNoteIds);
+  }
+
+  return {
+    sourceCards: sourceCards.length,
+    matchingFilterCards: filterCards.length,
+    taggedNotes: filterNoteIds.length,
+    missingFilterCards: Math.max(sourceNoteIds.length - filterNoteIds.length, 0),
+  } satisfies ReviewFilterTagResult;
+}
+
 async function prepareDirection(direction: MigrationDirection) {
   const sourceCardIds = await findCards(
     `deck:${quoteAnkiSearchValue(direction.sourceDeck)} card:${quoteAnkiSearchValue(direction.sourceCard)}`,
@@ -307,11 +364,13 @@ async function runReviewBoostForDirection(direction: ReviewBoostDirection) {
 
 export default function AnkiMigrationClient() {
   const [isRunning, setIsRunning] = useState(false);
-  const [activeJob, setActiveJob] = useState<"migration" | "reviewBoost" | null>(null);
+  const [activeJob, setActiveJob] = useState<"migration" | "reviewBoost" | "reviewDeckEasy" | "reviewFilterTag" | null>(null);
   const [status, setStatus] = useState("Ready to run.");
   const [error, setError] = useState<string | null>(null);
   const [migrationResults, setMigrationResults] = useState<DirectionResult[]>([]);
   const [easyBoostResults, setEasyBoostResults] = useState<EasyBoostResult[]>([]);
+  const [reviewDeckEasyResult, setReviewDeckEasyResult] = useState<ReviewDeckEasyResult | null>(null);
+  const [reviewFilterTagResult, setReviewFilterTagResult] = useState<ReviewFilterTagResult | null>(null);
 
   async function runMigration() {
     if (isRunning) return;
@@ -321,6 +380,8 @@ export default function AnkiMigrationClient() {
     setError(null);
     setMigrationResults([]);
     setEasyBoostResults([]);
+    setReviewDeckEasyResult(null);
+    setReviewFilterTagResult(null);
 
     try {
       setStatus("Reading source cards and locating corresponding filter cards…");
@@ -384,6 +445,8 @@ export default function AnkiMigrationClient() {
     setError(null);
     setMigrationResults([]);
     setEasyBoostResults([]);
+    setReviewDeckEasyResult(null);
+    setReviewFilterTagResult(null);
 
     try {
       setStatus("Finding source cards that have entered review…");
@@ -405,6 +468,72 @@ export default function AnkiMigrationClient() {
           : "The review boost failed.",
       );
       setStatus("Review boost stopped.");
+    } finally {
+      setIsRunning(false);
+      setActiveJob(null);
+    }
+  }
+
+  async function runReviewDeckEasy() {
+    if (isRunning) return;
+
+    setIsRunning(true);
+    setActiveJob("reviewDeckEasy");
+    setError(null);
+    setMigrationResults([]);
+    setEasyBoostResults([]);
+    setReviewDeckEasyResult(null);
+    setReviewFilterTagResult(null);
+
+    try {
+      setStatus(`Finding all cards in ${REVIEW_DECK}…`);
+      const result = await applyOneEasyAnswerToReviewDeck();
+      setReviewDeckEasyResult(result);
+      setStatus(
+        result.cardsFound
+          ? `Easy was answered once for all ${result.cardsFound} cards in ${REVIEW_DECK}.`
+          : `No cards were found in ${REVIEW_DECK}.`,
+      );
+    } catch (caughtError) {
+      setError(
+        caughtError instanceof Error
+          ? caughtError.message
+          : "The Review deck Easy action failed.",
+      );
+      setStatus("Review deck Easy action stopped.");
+    } finally {
+      setIsRunning(false);
+      setActiveJob(null);
+    }
+  }
+
+  async function runReviewFilterTag() {
+    if (isRunning) return;
+
+    setIsRunning(true);
+    setActiveJob("reviewFilterTag");
+    setError(null);
+    setMigrationResults([]);
+    setEasyBoostResults([]);
+    setReviewDeckEasyResult(null);
+    setReviewFilterTagResult(null);
+
+    try {
+      setStatus(`Finding ${REVIEW_FILTER_CARD} cards for notes in ${REVIEW_DECK}…`);
+      const result = await tagReviewFilterNotes();
+      setReviewFilterTagResult(result);
+      setStatus(
+        result.taggedNotes
+          ? `The ${AnkiTag.Filtered} tag was added to ${result.taggedNotes} matching notes.`
+          : `No matching ${REVIEW_FILTER_CARD} cards were found.`,
+      );
+    } catch (caughtError) {
+      setError(
+        caughtError instanceof Error
+          ? caughtError.message
+          : "The Review filter tagging action failed.",
+      );
+      setStatus("Review filter tagging stopped.");
     } finally {
       setIsRunning(false);
       setActiveJob(null);
@@ -477,6 +606,54 @@ export default function AnkiMigrationClient() {
                   {activeJob === "reviewBoost"
                     ? "Running review boost…"
                     : "Boost Review Cards"}
+                </button>
+              </div>
+            </div>
+
+            <div className="grid gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/5 p-4">
+              <div>
+                <h3 className="text-sm font-semibold text-foreground">
+                  ثبت «راحت» برای دک Review
+                </h3>
+                <p className="mt-1 text-sm leading-6 text-muted">
+                  همه کارت‌های دک <code>{REVIEW_DECK}</code> را پیدا می‌کند و برای هر کارت دقیقاً یک‌بار پاسخ Easy ثبت می‌کند.
+                </p>
+              </div>
+
+              <div>
+                <button
+                  type="button"
+                  onClick={() => void runReviewDeckEasy()}
+                  disabled={isRunning}
+                  className="h-11 rounded-xl border border-amber-600/40 bg-background px-5 text-sm font-semibold text-amber-800 shadow-elevated transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {activeJob === "reviewDeckEasy"
+                    ? "در حال ثبت پاسخ راحت…"
+                    : "یک‌بار زدن «راحت» برای همه کارت‌ها"}
+                </button>
+              </div>
+            </div>
+
+            <div className="grid gap-3 rounded-2xl border border-blue-500/30 bg-blue-500/5 p-4">
+              <div>
+                <h3 className="text-sm font-semibold text-foreground">
+                  تگ‌گذاری Filtered برای کارت‌های معادل
+                </h3>
+                <p className="mt-1 text-sm leading-6 text-muted">
+                  کارت‌های دک <code>{REVIEW_DECK}</code> را با Note مشترک به کارت نوع <code>{REVIEW_FILTER_CARD}</code> در دک <code>{REVIEW_FILTER_DECK}</code> وصل می‌کند و روی Noteهای معادل تگ <code>{AnkiTag.Filtered}</code> می‌زند.
+                </p>
+              </div>
+
+              <div>
+                <button
+                  type="button"
+                  onClick={() => void runReviewFilterTag()}
+                  disabled={isRunning}
+                  className="h-11 rounded-xl border border-blue-600/40 bg-background px-5 text-sm font-semibold text-blue-800 shadow-elevated transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {activeJob === "reviewFilterTag"
+                    ? "در حال تگ‌گذاری کارت‌های معادل…"
+                    : "تگ Filtered برای کارت‌های معادل"}
                 </button>
               </div>
             </div>
@@ -568,6 +745,46 @@ export default function AnkiMigrationClient() {
                         <td className="py-3">{result.missingReviewCards}</td>
                       </tr>
                     ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : reviewDeckEasyResult ? (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm">
+                  <thead className="text-xs text-muted">
+                    <tr>
+                      <th className="pb-3 pr-4 font-semibold">Deck</th>
+                      <th className="pb-3 pr-4 font-semibold">Cards found</th>
+                      <th className="pb-3 font-semibold">Easy answers</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className="border-t border-card text-foreground">
+                      <td className="py-3 pr-4 font-medium">{reviewDeckEasyResult.deck}</td>
+                      <td className="py-3 pr-4">{reviewDeckEasyResult.cardsFound}</td>
+                      <td className="py-3">{reviewDeckEasyResult.easyAnswers}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            ) : reviewFilterTagResult ? (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm">
+                  <thead className="text-xs text-muted">
+                    <tr>
+                      <th className="pb-3 pr-4 font-semibold">Source cards</th>
+                      <th className="pb-3 pr-4 font-semibold">Matching Filter cards</th>
+                      <th className="pb-3 pr-4 font-semibold">Tagged notes</th>
+                      <th className="pb-3 font-semibold">Missing Filter cards</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className="border-t border-card text-foreground">
+                      <td className="py-3 pr-4">{reviewFilterTagResult.sourceCards}</td>
+                      <td className="py-3 pr-4">{reviewFilterTagResult.matchingFilterCards}</td>
+                      <td className="py-3 pr-4">{reviewFilterTagResult.taggedNotes}</td>
+                      <td className="py-3">{reviewFilterTagResult.missingFilterCards}</td>
+                    </tr>
                   </tbody>
                 </table>
               </div>

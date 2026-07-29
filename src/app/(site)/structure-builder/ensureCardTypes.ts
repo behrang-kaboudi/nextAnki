@@ -93,6 +93,27 @@ async function removeExtraCardTypes(
   return { ok: true };
 }
 
+async function renameCardTypes(
+  modelName: string,
+  renames: Array<{ oldName: string; newName: string }>,
+  appendLog: LogFn,
+): Promise<StepResult> {
+  for (const rename of renames) {
+    appendLog(`Renaming Card Type: ${rename.oldName} → ${rename.newName} ...`);
+    const renameRes = await cardTypeOperations.modelTemplateRename({
+      modelName,
+      oldTemplateName: rename.oldName,
+      newTemplateName: rename.newName,
+    });
+    if (!renameRes.ok) {
+      appendLog(`✗ modelTemplateRename failed for ${rename.oldName}: ${renameRes.error}`);
+      return { ok: false };
+    }
+    appendLog(`✓ Renamed Card Type: ${rename.oldName} → ${rename.newName}`);
+  }
+  return { ok: true };
+}
+
 async function confirmAllCardTypesExist(modelName: string, desiredNames: string[], appendLog: LogFn) {
   const confirmRes = await cardTypeOperations.modelTemplates({ modelName });
   if (!confirmRes.ok || !confirmRes.result) {
@@ -129,6 +150,7 @@ export async function ensureMetaLexVr9CardTypes(
   );
   const desiredNames = Object.keys(desiredTemplates);
   appendLog(`Step 3: Ensure Card Types for ${modelName}...`);
+  appendLog(`Target Note Type: ${modelName}`);
   appendLog(`Required Card Types (${desiredNames.length}): ${desiredNames.join(", ")}`);
 
   const permissionResult = await ensureAnkiPermission(appendLog);
@@ -155,9 +177,39 @@ export async function ensureMetaLexVr9CardTypes(
       return { ok: false };
     }
 
-    const existingNames = new Set(Object.keys(templatesRes.result));
-    const missingNames = desiredNames.filter((name) => !existingNames.has(name));
-    const extraNames = Object.keys(templatesRes.result).filter((name) => !desiredNames.includes(name));
+    const existingTemplates = templatesRes.result;
+    const existingNames = new Set(Object.keys(existingTemplates));
+    let missingNames = desiredNames.filter((name) => !existingNames.has(name));
+    let extraNames = Object.keys(existingTemplates).filter((name) => !desiredNames.includes(name));
+    appendLog(`Anki currently has ${existingNames.size} Card Types; missing=${missingNames.length}, extra=${extraNames.length}.`);
+    const renames = missingNames.flatMap((newName) => {
+      const desired = desiredTemplates[newName];
+      const oldName = extraNames.find((candidate) => {
+        const existing = existingTemplates[candidate];
+        return existing?.Front.trim() === desired.Front.trim() && existing?.Back.trim() === desired.Back.trim();
+      });
+      return oldName ? [{ oldName, newName }] : [];
+    });
+    if (renames.length) {
+      const renameResult = await renameCardTypes(modelName, renames, appendLog);
+      if (!renameResult.ok) return renameResult;
+      const renamedOldNames = new Set(renames.map((rename) => rename.oldName));
+      const renamedNewNames = new Set(renames.map((rename) => rename.newName));
+      missingNames = missingNames.filter((name) => !renamedNewNames.has(name));
+      extraNames = extraNames.filter((name) => !renamedOldNames.has(name));
+    }
+    const existingFrontOwners = new Map(
+      Object.entries(existingTemplates).map(([name, template]) => [template.Front.trim(), name]),
+    );
+    const frontConflicts = missingNames.flatMap((name) => {
+      const owner = existingFrontOwners.get(desiredTemplates[name].Front.trim());
+      return owner ? [`${name} با ${owner}`] : [];
+    });
+    if (frontConflicts.length) {
+      appendLog(`✗ Card Type جدید به‌دلیل Front تکراری اضافه نشد: ${frontConflicts.join("، ")}.`);
+      appendLog("Front این Card Type را تغییر دهید یا Card Type تکراری را از تنظیمات اپ حذف کنید، سپس دوباره Step 3 را اجرا کنید.");
+      return { ok: false };
+    }
     if (missingNames.length === 0) appendLog("✓ All required Card Types already exist.");
     else {
       appendLog(`Missing Card Types (${missingNames.length}): ${missingNames.join(", ")}`);

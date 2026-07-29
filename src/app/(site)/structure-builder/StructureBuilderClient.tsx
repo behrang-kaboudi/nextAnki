@@ -1,12 +1,15 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { ActionIcon } from "@/components/icons";
 import { PageHeader } from "@/components/page-header";
 import {
   createStructureId,
+  createDefaultEditableDeckConfig,
+  DEFAULT_STUDY_CONFIG_NAME,
   findStructureDeck,
+  normalizeDeckConfigName,
   type AnkiStructureCardType,
   type AnkiStructureDeck,
   type EditableDeckConfig,
@@ -22,6 +25,21 @@ import type {
 import { useStructureBuilder } from "./useStructureBuilder";
 
 type TabKey = "overview" | "decks" | "configs" | "cardTypes" | "noteType" | "guide" | "logs";
+
+function getCardTypeIssues(cards: AnkiStructureCardType[], card: AnkiStructureCardType) {
+  const issues: string[] = [];
+  const isNewCard = card.id.startsWith("card-ms");
+  const front = card.front.trim();
+  if (!front) issues.push("Front Template نباید خالی باشد.");
+  if (!card.back.trim()) issues.push("Back Template نباید خالی باشد.");
+  if (isNewCard && front) {
+    const duplicate = cards.find((candidate) => candidate.id !== card.id && candidate.front.trim() === front);
+    if (duplicate) {
+      issues.push(`Front Template با Card Type «${duplicate.name}» یکسان است. Anki این Card Type را اضافه نمی‌کند.`);
+    }
+  }
+  return issues;
+}
 
 const steps: Array<{
   number: number;
@@ -156,21 +174,29 @@ function HelpModal({ helpKey, onClose }: { helpKey: HelpKey; onClose: () => void
 
 function AddDeckModal({
   value,
+  configId,
+  configs,
+  isEditing,
   error,
   isSaving,
   onChange,
+  onConfigChange,
   onConfirm,
   onClose,
 }: {
   value: AnkiStructureDeck;
+  configId: string;
+  configs: EditableDeckConfig[];
+  isEditing: boolean;
   error: string | null;
   isSaving: boolean;
   onChange: (value: AnkiStructureDeck) => void;
+  onConfigChange: (value: string) => void;
   onConfirm: () => Promise<void>;
   onClose: () => void;
 }) {
   return (
-    <Modal title="افزودن دک" subtitle="مشخصات دک جدید را وارد کنید؛ پس از تأیید در دیتابیس ذخیره می‌شود." onClose={onClose}>
+    <Modal title={isEditing ? "ویرایش دک" : "افزودن دک"} subtitle={isEditing ? "مشخصات دک و تنظیمات مطالعه‌ی آن را ویرایش کنید." : "مشخصات دک جدید و تنظیمات مطالعه‌ی آن را مشخص کنید."} onClose={onClose}>
       <form
         className="grid gap-4"
         onSubmit={(event) => {
@@ -192,6 +218,21 @@ function AddDeckModal({
           onChange={(name) => onChange({ ...value, name })}
           hint="همان نامی که در Anki استفاده می‌شود."
         />
+        <label className="grid gap-1.5">
+          <span className="text-xs font-semibold text-foreground">تنظیمات مطالعه</span>
+          <select
+            required={configs.length > 0}
+            value={configId}
+            onChange={(event) => onConfigChange(event.target.value)}
+            className="h-11 rounded-xl border border-card bg-background px-3 text-sm text-foreground outline-none focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--ring)]"
+          >
+            <option value="">انتخاب Config</option>
+            {configs.map((config) => (
+              <option key={config.id} value={config.id}>{config.configName}</option>
+            ))}
+          </select>
+          {!configs.length ? <span className="text-[11px] leading-5 text-amber-700">ابتدا حداقل یک Deck Config بسازید.</span> : null}
+        </label>
         <label className="flex items-center justify-between rounded-xl border border-card bg-background px-3 py-3 text-xs font-semibold">
           در Step 1 ساخته و مدیریت شود
           <input
@@ -220,7 +261,7 @@ function AddDeckModal({
             disabled={isSaving}
             className="h-10 rounded-xl bg-[var(--primary)] px-5 text-sm font-semibold text-white disabled:opacity-40"
           >
-            {isSaving ? "در حال ذخیره…" : "افزودن و ذخیره"}
+            {isSaving ? "در حال ذخیره…" : isEditing ? "ذخیره تغییرات" : "افزودن و ذخیره"}
           </button>
         </div>
       </form>
@@ -239,9 +280,11 @@ function ConfigEditor({
   onChange: (value: EditableDeckConfig) => void;
   onClose: () => void;
 }) {
+  const [draft, setDraft] = useState(value);
+
   const update = (field: keyof EditableDeckConfig, raw: string) => {
-    onChange({
-      ...value,
+    setDraft({
+      ...draft,
       [field]:
         field === "newCardsPerDay" || field === "maximumReviewsPerDay"
           ? Number(raw)
@@ -250,36 +293,64 @@ function ConfigEditor({
   };
 
   return (
-    <Modal title={`ویرایش ${value.configName || "Deck Config"}`} subtitle="تنظیمات مطالعه و دک مقصد" onClose={onClose}>
+    <Modal title={`ویرایش ${draft.configName || "Deck Config"}`} subtitle="تنظیمات مطالعه و دک مقصد" onClose={onClose}>
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="sm:col-span-2">
-          <Field label="نام Deck Config" value={value.configName} onChange={(raw) => update("configName", raw)} />
+        <Field label="نام Deck Config" value={draft.configName} onChange={(raw) => update("configName", raw)} />
         </div>
-        <label className="grid gap-1.5 sm:col-span-2">
-          <span className="text-xs font-semibold">دک متصل</span>
-          <select
-            value={value.deckId}
-            onChange={(event) => update("deckId", event.target.value)}
-            className="h-11 rounded-xl border border-card bg-background px-3 text-sm"
-          >
-            {decks.map((deck) => <option key={deck.id} value={deck.id}>{deck.title} — {deck.name}</option>)}
-          </select>
-        </label>
-        <Field label="کارت جدید در روز" type="number" value={value.newCardsPerDay} onChange={(raw) => update("newCardsPerDay", raw)} />
-        <Field label="حداکثر مرور در روز" type="number" value={value.maximumReviewsPerDay} onChange={(raw) => update("maximumReviewsPerDay", raw)} />
-        <Field label="Learning steps" value={value.learningSteps} onChange={(raw) => update("learningSteps", raw)} hint="مثال: 1m 10m 5d" />
-        <Field label="Relearning steps" value={value.relearningSteps} onChange={(raw) => update("relearningSteps", raw)} hint="خالی یعنی تغییر داده نشود" />
-        <Field label="Starting ease" value={value.startingEase} onChange={(raw) => update("startingEase", raw)} hint="مثال: 2.50" />
-        <Field label="Easy bonus" value={value.easyBonus} onChange={(raw) => update("easyBonus", raw)} hint="مثال: 1.3" />
-        <Field label="Graduating interval" value={value.graduatingInterval} onChange={(raw) => update("graduatingInterval", raw)} hint="بر حسب روز" />
-        <Field label="Easy interval" value={value.easyInterval} onChange={(raw) => update("easyInterval", raw)} hint="بر حسب روز" />
+        <div className="grid gap-2 sm:col-span-2">
+          <span className="text-xs font-semibold">دک‌های متصل</span>
+          <div className="grid gap-2 rounded-xl border border-card bg-background p-3 sm:grid-cols-2">
+            {decks.map((deck) => (
+              <label key={deck.id} className="flex items-center gap-2 text-xs">
+                <input
+                  type="checkbox"
+                  checked={draft.deckIds.includes(deck.id)}
+                  onChange={(event) => setDraft({
+                    ...draft,
+                    deckIds: event.target.checked
+                      ? Array.from(new Set([...draft.deckIds, deck.id]))
+                      : draft.deckIds.filter((id) => id !== deck.id),
+                  })}
+                  className="size-4 accent-[var(--primary)]"
+                />
+                <span>{deck.title} — {deck.name}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+        <Field label="کارت جدید در روز" type="number" value={draft.newCardsPerDay} onChange={(raw) => update("newCardsPerDay", raw)} />
+        <Field label="حداکثر مرور در روز" type="number" value={draft.maximumReviewsPerDay} onChange={(raw) => update("maximumReviewsPerDay", raw)} />
+        <div className="grid gap-3 rounded-2xl border border-card bg-background p-3 sm:col-span-2">
+          <div>
+            <h3 className="text-xs font-bold">تنظیمات یادگیری</h3>
+            <p className="mt-1 text-[11px] text-muted">Learning steps و فاصله‌های پایان یادگیری</p>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <Field label="Learning steps" value={draft.learningSteps} onChange={(raw) => update("learningSteps", raw)} hint="مثال: 1m 10m 5d" />
+            <Field label="Graduating interval" value={draft.graduatingInterval} onChange={(raw) => update("graduatingInterval", raw)} hint="روز؛ حداقل به اندازه آخرین Learning step" />
+            <Field label="Easy interval" value={draft.easyInterval} onChange={(raw) => update("easyInterval", raw)} hint="روز؛ حداقل به اندازه Graduating interval" />
+          </div>
+        </div>
+        <div className="grid gap-3 rounded-2xl border border-card bg-background p-3 sm:col-span-2">
+          <div>
+            <h3 className="text-xs font-bold">تنظیمات Relearning</h3>
+            <p className="mt-1 text-[11px] text-muted">Relearning steps و حداقل فاصله پس از lapse</p>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Field label="Relearning steps" value={draft.relearningSteps} onChange={(raw) => update("relearningSteps", raw)} hint="مثال: 2m 10m" />
+            <Field label="Minimum interval" value={draft.minimumInterval} onChange={(raw) => update("minimumInterval", raw)} hint="روز؛ حداقل به اندازه آخرین Relearning step" />
+          </div>
+        </div>
+        <Field label="Starting ease" value={draft.startingEase} onChange={(raw) => update("startingEase", raw)} hint="مثال: 2.50" />
+        <Field label="Easy bonus" value={draft.easyBonus} onChange={(raw) => update("easyBonus", raw)} hint="مثال: 1.3" />
       </div>
       <div className="mt-6 rounded-2xl border border-blue-500/20 bg-blue-500/5 p-4 text-xs leading-6 text-muted">
-        تغییرات فعلاً فقط در فرم نگهداری می‌شوند. برای ماندگارشدن آن‌ها دکمهٔ «ذخیره در دیتابیس» را بزنید؛ برای اعمال روی Anki نیز Step 2 را اجرا کنید.
+        تغییرات تا زمان زدن دکمه «ذخیره و پایان ویرایش» فقط در همین فرم باقی می‌مانند و سپس یک‌بار در دیتابیس و Anki اعمال می‌شوند.
       </div>
       <div className="mt-5 flex justify-end">
-        <button type="button" onClick={onClose} className="h-10 rounded-xl bg-[var(--primary)] px-5 text-sm font-semibold text-white">
-          پایان ویرایش
+        <button type="button" onClick={() => { onChange(draft); onClose(); }} className="h-10 rounded-xl bg-[var(--primary)] px-5 text-sm font-semibold text-white">
+          ذخیره و پایان ویرایش
         </button>
       </div>
     </Modal>
@@ -289,57 +360,27 @@ function ConfigEditor({
 function CardTypeEditor({
   value,
   decks,
-  deckConfigs,
   onChange,
   onClose,
 }: {
   value: AnkiStructureCardType;
   decks: AnkiStructureDeck[];
-  deckConfigs: EditableDeckConfig[];
   onChange: (value: AnkiStructureCardType) => void;
   onClose: () => void;
 }) {
+  const [draft, setDraft] = useState(value);
+
   return (
-    <Modal title={`ویرایش ${value.name || "Card Type"}`} subtitle="نام کارت، دک و Config مرتبط و Template" onClose={onClose}>
+    <Modal title={`ویرایش ${draft.name || "Card Type"}`} subtitle="تغییرات ابتدا فقط به‌صورت پیش‌نویس نگه‌داری می‌شوند." onClose={onClose}>
       <div className="grid gap-4">
-        <Field label="نام Card Type" value={value.name} onChange={(name) => onChange({ ...value, name })} />
-        <label className="grid gap-1.5">
-          <span className="text-xs font-semibold">Config مطالعه</span>
-          <select
-            value={value.deckConfigId ?? ""}
-            onChange={(event) => {
-              const config = deckConfigs.find((item) => item.id === event.target.value);
-              onChange({
-                ...value,
-                deckId: config?.deckId ?? value.deckId,
-                deckConfigId: config?.id ?? null,
-              });
-            }}
-            className="h-11 rounded-xl border border-card bg-background px-3 text-sm"
-          >
-            <option value="">بدون Config مشخص</option>
-            {deckConfigs.map((config) => {
-              const deck = decks.find((item) => item.id === config.deckId);
-              return (
-                <option key={config.id} value={config.id}>
-                  {config.configName} — {deck?.title ?? "دک نامعتبر"}
-                </option>
-              );
-            })}
-          </select>
-          <span className="text-[11px] leading-5 text-muted">
-            انتخاب Config، دک متصل به آن را نیز برای این Card Type انتخاب می‌کند.
-          </span>
-        </label>
+        <Field label="نام Card Type" value={draft.name} onChange={(name) => setDraft({ ...draft, name })} />
         <label className="grid gap-1.5">
           <span className="text-xs font-semibold">دک مرتبط</span>
           <select
-            value={value.deckId ?? ""}
+            value={draft.deckId ?? ""}
             onChange={(event) => {
               const deckId = event.target.value || null;
-              const deckConfigId =
-                deckConfigs.find((item) => item.deckId === deckId)?.id ?? null;
-              onChange({ ...value, deckId, deckConfigId });
+              setDraft({ ...draft, deckId });
             }}
             className="h-11 rounded-xl border border-card bg-background px-3 text-sm"
           >
@@ -351,8 +392,8 @@ function CardTypeEditor({
           <span className="text-xs font-semibold">Front Template</span>
           <textarea
             dir="ltr"
-            value={value.front}
-            onChange={(event) => onChange({ ...value, front: event.target.value })}
+            value={draft.front}
+            onChange={(event) => setDraft({ ...draft, front: event.target.value })}
             className="min-h-48 resize-y rounded-2xl border border-card bg-[#111318] p-4 font-mono text-xs leading-6 text-zinc-100 outline-none focus:ring-4 focus:ring-[var(--ring)]"
           />
         </label>
@@ -360,15 +401,15 @@ function CardTypeEditor({
           <span className="text-xs font-semibold">Back Template</span>
           <textarea
             dir="ltr"
-            value={value.back}
-            onChange={(event) => onChange({ ...value, back: event.target.value })}
+            value={draft.back}
+            onChange={(event) => setDraft({ ...draft, back: event.target.value })}
             className="min-h-48 resize-y rounded-2xl border border-card bg-[#111318] p-4 font-mono text-xs leading-6 text-zinc-100 outline-none focus:ring-4 focus:ring-[var(--ring)]"
           />
         </label>
       </div>
       <div className="mt-5 flex justify-end">
-        <button type="button" onClick={onClose} className="h-10 rounded-xl bg-[var(--primary)] px-5 text-sm font-semibold text-white">
-          پایان ویرایش
+        <button type="button" onClick={() => { onChange(draft); onClose(); }} className="h-10 rounded-xl bg-[var(--primary)] px-5 text-sm font-semibold text-white">
+          ذخیره پیش‌نویس
         </button>
       </div>
     </Modal>
@@ -392,6 +433,12 @@ function LogPanel({
     warning: "border-amber-500/20 bg-amber-500/5 text-amber-800",
     error: "border-red-500/20 bg-red-500/5 text-red-800",
   };
+
+  useEffect(() => {
+    const element = logBoxRef.current;
+    if (!element) return;
+    element.scrollTop = element.scrollHeight;
+  }, [filtered.length, logBoxRef]);
 
   const copyLogs = async () => {
     await navigator.clipboard.writeText(
@@ -430,8 +477,8 @@ function LogPanel({
       <div ref={logBoxRef} dir="ltr" className="mt-4 max-h-[360px] min-h-40 overflow-auto rounded-2xl bg-[#111318] p-3 text-left">
         {filtered.length ? (
           <div className="grid gap-2">
-            {filtered.map((log) => (
-              <div key={log.id} className={`rounded-xl border px-3 py-2 font-mono text-[11px] leading-5 ${colors[log.level]}`}>
+            {filtered.map((log, index) => (
+              <div key={`${log.id}-${log.at}-${index}`} className={`rounded-xl border px-3 py-2 font-mono text-[11px] leading-5 ${colors[log.level]}`}>
                 <span className="me-2 opacity-60">{new Date(log.at).toLocaleTimeString("en-CA")}</span>
                 {log.message}
               </div>
@@ -449,9 +496,13 @@ export default function StructureBuilderClient() {
   const [activeTab, setActiveTab] = useState<TabKey>("overview");
   const [helpKey, setHelpKey] = useState<HelpKey | null>(null);
   const [newDeck, setNewDeck] = useState<AnkiStructureDeck | null>(null);
+  const [editingDeckId, setEditingDeckId] = useState<string | null>(null);
+  const [newDeckConfigId, setNewDeckConfigId] = useState("");
   const [newDeckError, setNewDeckError] = useState<string | null>(null);
   const [editingConfig, setEditingConfig] = useState<string | null>(null);
   const [editingCardType, setEditingCardType] = useState<string | null>(null);
+  const [pendingCardType, setPendingCardType] = useState<AnkiStructureCardType | null>(null);
+  const [cardWarningId, setCardWarningId] = useState<string | null>(null);
   const {
     isRunning,
     isLoadingSettings,
@@ -468,7 +519,8 @@ export default function StructureBuilderClient() {
     stepStatuses,
     manualIntervalsRequiredDecks,
     setSettings,
-    saveSettings,
+    saveAndSyncSettings,
+    syncCardTypes,
     resetSettings,
     checkStructure,
     clearLogs,
@@ -500,13 +552,12 @@ export default function StructureBuilderClient() {
       step6MoveDefaultCardsToTemp,
     ],
   );
-
-  const updateDeck = (id: string, patch: Partial<AnkiStructureDeck>) => {
-    setSettings({
-      ...settings,
-      decks: settings.decks.map((deck) => deck.id === id ? { ...deck, ...patch } : deck),
-    });
-  };
+  const cardTypeIssues = useMemo(
+    () => new Map(settings.noteType.cardTypes.map((card) => [card.id, getCardTypeIssues(settings.noteType.cardTypes, card)])),
+    [settings.noteType.cardTypes],
+  );
+  const hasCardTypeIssues = Array.from(cardTypeIssues.values()).some((issues) => issues.length > 0);
+  const warningCard = settings.noteType.cardTypes.find((card) => card.id === cardWarningId) ?? null;
 
   const openAddDeckModal = () => {
     const deckNumber = settings.decks.length + 1;
@@ -516,6 +567,17 @@ export default function StructureBuilderClient() {
       name: `NewDeck${deckNumber}`,
       managed: true,
     });
+    setEditingDeckId(null);
+    setNewDeckConfigId(settings.deckConfigs[0]?.id ?? "");
+    setNewDeckError(null);
+  };
+
+  const openEditDeckModal = (id: string) => {
+    const deck = findStructureDeck(settings, id);
+    if (!deck) return;
+    setNewDeck({ ...deck });
+    setEditingDeckId(id);
+    setNewDeckConfigId(settings.deckConfigs.find((item) => item.deckIds.includes(id))?.id ?? "");
     setNewDeckError(null);
   };
 
@@ -530,18 +592,38 @@ export default function StructureBuilderClient() {
       setNewDeckError("عنوان نمایشی و نام واقعی دک الزامی هستند.");
       return;
     }
-    if (settings.decks.some((item) => item.name.trim() === deck.name)) {
+    if (settings.decks.some((item) => item.id !== editingDeckId && item.name.trim() === deck.name)) {
       setNewDeckError(`دکی با نام «${deck.name}» از قبل وجود دارد.`);
       return;
     }
 
     setNewDeckError(null);
-    const saved = await saveSettings({
-      ...settings,
-      decks: [...settings.decks, deck],
-    });
+    const nextDeckConfigs = settings.deckConfigs.map((item) =>
+      item.id === newDeckConfigId
+        ? { ...item, deckIds: Array.from(new Set([...item.deckIds, deck.id])) }
+        : item,
+    );
+    const nextSettings = editingDeckId
+      ? {
+          ...settings,
+          decks: settings.decks.map((item) => item.id === editingDeckId ? deck : item),
+          deckConfigs: nextDeckConfigs.map((item) =>
+            item.id === newDeckConfigId
+              ? item
+              : { ...item, deckIds: item.deckIds.filter((deckId) => deckId !== editingDeckId) },
+          ),
+          noteType: {
+            ...settings.noteType,
+            cardTypes: settings.noteType.cardTypes.map((card) =>
+              card,
+            ),
+          },
+        }
+      : { ...settings, decks: [...settings.decks, deck], deckConfigs: nextDeckConfigs };
+    const saved = await saveAndSyncSettings(nextSettings);
     if (saved) {
       setNewDeck(null);
+      setEditingDeckId(null);
       return;
     }
     setNewDeckError("ذخیره انجام نشد؛ خطاهای تنظیمات یا گزارش اجرا را بررسی کنید.");
@@ -555,12 +637,14 @@ export default function StructureBuilderClient() {
     setSettings({
       ...settings,
       decks: remaining,
-      deckConfigs: settings.deckConfigs.filter((item) => item.deckId !== id),
+      deckConfigs: settings.deckConfigs
+        .map((item) => ({ ...item, deckIds: item.deckIds.filter((deckId) => deckId !== id) }))
+        .filter((item) => item.deckIds.length > 0),
       noteType: {
         ...settings.noteType,
         cardTypes: settings.noteType.cardTypes.map((item) =>
           item.deckId === id
-            ? { ...item, deckId: null, deckConfigId: null }
+            ? { ...item, deckId: null }
             : item,
         ),
       },
@@ -574,12 +658,11 @@ export default function StructureBuilderClient() {
   const updateDeckConfig = (id: string, value: EditableDeckConfig) => {
     setSettings({
       ...settings,
-      deckConfigs: settings.deckConfigs.map((item) => item.id === id ? value : item),
+      deckConfigs: settings.deckConfigs.map((item) => item.id === id
+        ? { ...value, configName: normalizeDeckConfigName(value.configName) }
+        : item),
       noteType: {
         ...settings.noteType,
-        cardTypes: settings.noteType.cardTypes.map((item) =>
-          item.deckConfigId === id ? { ...item, deckId: value.deckId } : item,
-        ),
       },
     });
   };
@@ -587,35 +670,43 @@ export default function StructureBuilderClient() {
   const addDeckConfig = () => {
     const id = createStructureId("config");
     const deckId = settings.decks[0]?.id ?? "";
-    const next: EditableDeckConfig = {
+    const next: EditableDeckConfig = createDefaultEditableDeckConfig(
       id,
-      deckId,
-      configName: `NewDeckConfig${settings.deckConfigs.length + 1}`,
-      newCardsPerDay: 20,
-      maximumReviewsPerDay: 200,
-      learningSteps: "1m 10m",
-      relearningSteps: "10m",
-      startingEase: "2.50",
-      easyBonus: "1.3",
-      graduatingInterval: "1",
-      easyInterval: "4",
-    };
+      [deckId],
+      normalizeDeckConfigName(`NewDeckConfig${settings.deckConfigs.length + 1}`),
+    );
     setSettings({ ...settings, deckConfigs: [...settings.deckConfigs, next] });
     setEditingConfig(id);
   };
 
   const removeDeckConfig = (id: string) => {
     const item = settings.deckConfigs.find((candidate) => candidate.id === id);
-    if (!item || !window.confirm(`Deck Config «${item.configName}» از تنظیمات حذف شود؟`)) return;
+    if (!item) return;
+    const affectedDeckIds = item.deckIds;
+    const usageMessage = affectedDeckIds.length
+      ? `\n${affectedDeckIds.length} دک استفاده‌کننده به Config پیش‌فرض منتقل می‌شوند.`
+      : "";
+    if (!window.confirm(`Deck Config «${item.configName}» از تنظیمات حذف شود؟${usageMessage}`)) return;
+    const fallback = settings.deckConfigs.find(
+      (candidate) => candidate.id !== id && candidate.configName === DEFAULT_STUDY_CONFIG_NAME,
+    ) ?? createDefaultEditableDeckConfig(
+      createStructureId("config"),
+      affectedDeckIds,
+    );
+    const remainingConfigs = settings.deckConfigs
+      .filter((candidate) => candidate.id !== id && candidate.id !== fallback.id)
+      .map((candidate) => ({
+        ...candidate,
+        deckIds: candidate.deckIds.filter((deckId) => !affectedDeckIds.includes(deckId)),
+      }))
+      .filter((candidate) => candidate.deckIds.length > 0);
+    remainingConfigs.push({
+      ...fallback,
+      deckIds: Array.from(new Set([...fallback.deckIds, ...affectedDeckIds])),
+    });
     setSettings({
       ...settings,
-      deckConfigs: settings.deckConfigs.filter((candidate) => candidate.id !== id),
-      noteType: {
-        ...settings.noteType,
-        cardTypes: settings.noteType.cardTypes.map((card) =>
-          card.deckConfigId === id ? { ...card, deckConfigId: null } : card,
-        ),
-      },
+      deckConfigs: remainingConfigs,
     });
   };
 
@@ -637,17 +728,10 @@ export default function StructureBuilderClient() {
       id,
       name: `CardType${settings.noteType.cardTypes.length + 1}`,
       deckId: settings.decks[0]?.id ?? null,
-      deckConfigId:
-        settings.deckConfigs.find((item) => item.deckId === settings.decks[0]?.id)?.id ??
-        null,
       front: `{{${frontField}}}`,
       back: `{{FrontSide}}\n\n<hr id="answer">\n\n{{${backField}}}`,
     };
-    setSettings({
-      ...settings,
-      noteType: { ...settings.noteType, cardTypes: [...settings.noteType.cardTypes, next] },
-    });
-    setEditingCardType(id);
+    setPendingCardType(next);
   };
 
   const removeCardType = (id: string) => {
@@ -844,7 +928,7 @@ export default function StructureBuilderClient() {
               <div className="mt-4 grid gap-2">
                 <button
                   type="button"
-                  onClick={() => void saveSettings()}
+                  onClick={() => void saveAndSyncSettings()}
                   disabled={isSavingSettings || !isSettingsDirty || settingsErrors.length > 0}
                   className="h-11 rounded-xl bg-[var(--primary)] px-4 text-sm font-bold text-white disabled:opacity-40"
                 >
@@ -883,7 +967,7 @@ export default function StructureBuilderClient() {
       ) : null}
 
       {activeTab === "decks" ? (
-        <section className="rounded-3xl border border-card bg-card p-4 shadow-elevated sm:p-6">
+        <section className="rounded-3xl border border-card bg-card p-3 shadow-elevated sm:p-4">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
               <h2 className="text-lg font-bold text-foreground">نام و ساختار دک‌ها</h2>
@@ -893,26 +977,38 @@ export default function StructureBuilderClient() {
             </div>
             <div className="flex gap-2">
               <button type="button" onClick={openAddDeckModal} className="h-10 rounded-xl border border-[var(--primary)] px-4 text-xs font-bold text-[var(--primary)]">+ افزودن دک</button>
-              <button type="button" onClick={() => void saveSettings()} disabled={isSavingSettings || !isSettingsDirty || settingsErrors.length > 0} className="h-10 rounded-xl bg-[var(--primary)] px-4 text-xs font-bold text-white disabled:opacity-40">ذخیره تغییرات</button>
+              <button type="button" onClick={() => void saveAndSyncSettings()} disabled={isSavingSettings || !isSettingsDirty || settingsErrors.length > 0} className="h-10 rounded-xl bg-[var(--primary)] px-4 text-xs font-bold text-white disabled:opacity-40">ذخیره تغییرات</button>
             </div>
           </div>
-          <div className="mt-6 grid gap-3 lg:grid-cols-2">
-            {settings.decks.map((deck) => (
-              <article key={deck.id} className="rounded-2xl border border-card bg-background p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <code className="rounded-lg bg-black/5 px-2 py-1 text-[10px] text-muted dark:bg-white/10">{deck.id}</code>
-                  <button type="button" onClick={() => removeDeck(deck.id)} className="text-xs font-bold text-red-700">حذف</button>
-                </div>
-                <div className="mt-3 grid gap-3">
-                  <Field label="عنوان نمایشی" dir="rtl" value={deck.title} onChange={(title) => updateDeck(deck.id, { title })} />
-                  <Field label="نام واقعی دک" value={deck.name} onChange={(name) => updateDeck(deck.id, { name })} />
-                  <label className="flex items-center justify-between rounded-xl border border-card bg-card px-3 py-2.5 text-xs font-semibold">
-                    در Step 1 ساخته و مدیریت شود
-                    <input type="checkbox" checked={deck.managed} onChange={(event) => updateDeck(deck.id, { managed: event.target.checked })} className="size-4 accent-[var(--primary)]" />
-                  </label>
-                </div>
-              </article>
-            ))}
+          <div className="mt-4 grid gap-2 md:grid-cols-2 xl:grid-cols-4">
+            {settings.decks.map((deck) => {
+              const deckConfig = settings.deckConfigs.find((item) => item.deckIds.includes(deck.id));
+              return (
+                <article key={deck.id} className="rounded-xl border border-card bg-background p-3 transition hover:border-[var(--primary)]/40 hover:shadow-md">
+                  <div className="flex min-w-0 items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <h3 className="truncate text-sm font-bold text-foreground" title={deck.title}>{deck.title}</h3>
+                      <p dir="ltr" className="mt-1 truncate text-left font-mono text-[10px] text-muted" title={deck.name}>{deck.name}</p>
+                    </div>
+                    <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${deck.managed ? "bg-emerald-500/10 text-emerald-700" : "bg-black/5 text-muted dark:bg-white/10"}`}>
+                      {deck.managed ? "مدیریت‌شده" : "مرجع"}
+                    </span>
+                  </div>
+                  <div className="mt-3 flex items-center justify-between gap-2 border-t border-card pt-3">
+                    <div className="min-w-0">
+                      <div className="text-[10px] text-muted">تنظیمات مطالعه</div>
+                      <div className="mt-1 truncate text-xs font-bold text-foreground">
+                        {deckConfig?.configName ?? "انتخاب نشده"}
+                      </div>
+                    </div>
+                    <div className="flex shrink-0 gap-1">
+                      <button type="button" onClick={() => openEditDeckModal(deck.id)} className="h-8 rounded-lg border border-card bg-card px-2.5 text-[11px] font-bold text-[var(--primary)]">ویرایش</button>
+                      <button type="button" onClick={() => removeDeck(deck.id)} aria-label={`حذف ${deck.title}`} className="grid size-8 place-items-center rounded-lg border border-red-500/20 bg-red-500/5 text-sm font-bold text-red-700">×</button>
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
           </div>
           {!settings.decks.length ? <div className="mt-6 rounded-2xl border border-dashed border-card p-10 text-center text-sm text-muted">هیچ دکی تعریف نشده است.</div> : null}
         </section>
@@ -923,33 +1019,32 @@ export default function StructureBuilderClient() {
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
               <h2 className="text-lg font-bold text-foreground">تنظیمات مطالعه</h2>
-              <p className="mt-1 text-xs leading-6 text-muted">هر تنظیم به یک دک معنایی متصل است و با Step 2 روی Anki اعمال می‌شود.</p>
+              <p className="mt-1 text-xs leading-6 text-muted">هر تنظیم می‌تواند به چند دک متصل باشد و با Step 2 روی همه‌ی آن‌ها اعمال می‌شود.</p>
             </div>
             <div className="flex gap-2">
-              <button type="button" onClick={addDeckConfig} disabled={!settings.decks.length} className="h-10 rounded-xl border border-[var(--primary)] px-4 text-xs font-bold text-[var(--primary)] disabled:opacity-40">+ افزودن Config</button>
-              <button type="button" onClick={() => void saveSettings()} disabled={isSavingSettings || !isSettingsDirty || settingsErrors.length > 0} className="h-10 rounded-xl bg-[var(--primary)] px-4 text-xs font-bold text-white disabled:opacity-40">ذخیره تغییرات</button>
+              <button type="button" onClick={addDeckConfig} disabled={!settings.decks.length} className="h-9 rounded-lg border border-[var(--primary)] px-3 text-xs font-bold text-[var(--primary)] disabled:opacity-40">+ افزودن Config</button>
+              <button type="button" onClick={() => void saveAndSyncSettings()} disabled={isSavingSettings || !isSettingsDirty || settingsErrors.length > 0} className="h-9 rounded-lg bg-[var(--primary)] px-3 text-xs font-bold text-white disabled:opacity-40">ذخیره تغییرات</button>
             </div>
           </div>
-          <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+          <div className="mt-4 grid gap-2 md:grid-cols-2 xl:grid-cols-4">
             {settings.deckConfigs.map((item) => {
-              const deck = findStructureDeck(settings, item.deckId);
+              const decks = item.deckIds
+                .map((deckId) => findStructureDeck(settings, deckId))
+                .filter((deck): deck is NonNullable<typeof deck> => Boolean(deck));
               return (
-                <article key={item.id} className="rounded-2xl border border-card bg-background p-4 transition hover:shadow-lg">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <h3 className="text-sm font-bold text-foreground">{item.configName}</h3>
-                      <p dir="ltr" className="mt-1 truncate text-left font-mono text-[10px] text-muted">{deck?.name ?? "دک نامعتبر"}</p>
+                <article key={item.id} className="rounded-xl border border-card bg-background p-3 transition hover:border-[var(--primary)]/40 hover:shadow-md">
+                  <div className="flex min-w-0 items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <h3 className="truncate text-sm font-bold text-foreground" title={item.configName}>{item.configName}</h3>
+                      <span className="mt-1 inline-flex items-center rounded-full bg-card px-2 py-0.5 text-[10px] font-semibold text-muted">
+                        {decks.length} دک استفاده‌کننده
+                      </span>
                     </div>
-                    <div className="flex gap-1">
-                      <button type="button" onClick={() => setEditingConfig(item.id)} className="h-8 shrink-0 rounded-lg border border-card bg-card px-3 text-[11px] font-bold text-[var(--primary)]">ویرایش</button>
-                      <button type="button" onClick={() => removeDeckConfig(item.id)} className="h-8 shrink-0 rounded-lg border border-red-500/20 bg-red-500/5 px-2 text-[11px] font-bold text-red-700">حذف</button>
+                    <div className="flex shrink-0 gap-1">
+                      <button type="button" onClick={() => setEditingConfig(item.id)} className="h-8 rounded-lg border border-card bg-card px-2.5 text-[11px] font-bold text-[var(--primary)]">ویرایش</button>
+                      <button type="button" onClick={() => removeDeckConfig(item.id)} aria-label={`حذف ${item.configName}`} className="grid size-8 place-items-center rounded-lg border border-red-500/20 bg-red-500/5 text-sm font-bold text-red-700">×</button>
                     </div>
                   </div>
-                  <dl className="mt-4 grid grid-cols-2 gap-2 text-xs">
-                    <div className="rounded-xl bg-card p-2.5"><dt className="text-[10px] text-muted">New/day</dt><dd className="mt-1 font-bold">{item.newCardsPerDay}</dd></div>
-                    <div className="rounded-xl bg-card p-2.5"><dt className="text-[10px] text-muted">Reviews/day</dt><dd className="mt-1 font-bold">{item.maximumReviewsPerDay}</dd></div>
-                    <div className="col-span-2 rounded-xl bg-card p-2.5"><dt className="text-[10px] text-muted">Learning steps</dt><dd dir="ltr" className="mt-1 truncate text-left font-mono font-bold">{item.learningSteps || "—"}</dd></div>
-                  </dl>
                 </article>
               );
             })}
@@ -966,7 +1061,13 @@ export default function StructureBuilderClient() {
                 <h2 className="text-lg font-bold text-foreground">Note Type</h2>
                 <p className="mt-1 text-xs leading-6 text-muted">نام مدل و فیلدها از این بخش مدیریت می‌شوند.</p>
               </div>
-              <button type="button" onClick={() => void saveSettings()} disabled={isSavingSettings || !isSettingsDirty || settingsErrors.length > 0} className="h-10 rounded-xl bg-[var(--primary)] px-4 text-xs font-bold text-white disabled:opacity-40">ذخیره تغییرات</button>
+              <button type="button" onClick={() => void saveAndSyncSettings()} disabled={isSavingSettings || !isSettingsDirty || settingsErrors.length > 0} className="h-10 rounded-xl bg-[var(--primary)] px-4 text-xs font-bold text-white disabled:opacity-40">ذخیره تغییرات</button>
+            </div>
+            <div className="mt-5 rounded-2xl border border-blue-500/25 bg-blue-500/5 p-4 text-xs leading-6 text-blue-950">
+              <p className="font-bold">Note Type مبدا: {settings.noteType.name || "Meta-LEX-vR9"}</p>
+              <p className="mt-1 text-blue-950/75">
+                Card Typeهایی که در بخش «Card Typeها و Templateها» اضافه می‌کنید، به همین Note Type در Anki اضافه می‌شوند. برای اعمال در Anki، ذخیره‌سازی را انجام دهید یا Step 3 «Card Typeها» را اجرا کنید؛ صرفاً اضافه‌شدن کارت در فرم، تغییر Anki را تضمین نمی‌کند.
+              </p>
             </div>
             <div className="mt-5 max-w-xl">
               <Field label="نام Note Type" value={settings.noteType.name} onChange={(name) => setSettings({ ...settings, noteType: { ...settings.noteType, name } })} />
@@ -1026,39 +1127,44 @@ export default function StructureBuilderClient() {
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
               <h2 className="text-lg font-bold text-foreground">Card Typeها و Templateها</h2>
+              <p className="mt-2 rounded-xl border border-blue-500/25 bg-blue-500/5 px-3 py-2 text-xs font-bold leading-6 text-blue-950">
+                ایجاد Card Type برای Note Type: Meta-LEX-vR9
+              </p>
               <p className="mt-1 max-w-3xl text-xs leading-6 text-muted">
-                افزودن در Step 3، Config انتخابی در Step 2 و محتوای Front/Back در Step 5 اعمال می‌شود. حذف، Card Type و کارت‌های مرتبط را از Anki حذف می‌کند.
+                افزودن در Step 3، دک مرتبط و محتوای Front/Back در Step 5 اعمال می‌شود. تنظیمات مطالعه فقط به دک‌ها مربوط است. حذف، Card Type و کارت‌های مرتبط را از Anki حذف می‌کند.
               </p>
             </div>
             <div className="flex gap-2">
-              <button type="button" onClick={addCardType} className="h-10 rounded-xl border border-[var(--primary)] px-4 text-xs font-bold text-[var(--primary)]">+ افزودن Card Type</button>
-              <button type="button" onClick={() => void saveSettings()} disabled={isSavingSettings || !isSettingsDirty || settingsErrors.length > 0} className="h-10 rounded-xl bg-[var(--primary)] px-4 text-xs font-bold text-white disabled:opacity-40">ذخیره تغییرات</button>
+              <button type="button" onClick={addCardType} disabled={Boolean(pendingCardType) || isRunning} className="h-10 rounded-xl border border-[var(--primary)] px-4 text-xs font-bold text-[var(--primary)] disabled:opacity-40">+ افزودن Card Type</button>
+              <button type="button" onClick={() => void syncCardTypes()} disabled={isRunning || isSavingSettings || settingsErrors.length > 0 || hasCardTypeIssues} className="h-10 rounded-xl border border-[var(--primary)] px-4 text-xs font-bold text-[var(--primary)] disabled:opacity-40">اعمال Card Typeها در Anki</button>
+              <button type="button" onClick={() => void saveAndSyncSettings()} disabled={isRunning || isSavingSettings || !isSettingsDirty || settingsErrors.length > 0 || hasCardTypeIssues} className="h-10 rounded-xl bg-[var(--primary)] px-4 text-xs font-bold text-white disabled:opacity-40">ذخیره و هماهنگ‌سازی کامل</button>
             </div>
           </div>
           <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
             {settings.noteType.cardTypes.map((card) => {
               const deck = findStructureDeck(settings, card.deckId);
-              const deckConfig = settings.deckConfigs.find((item) => item.id === card.deckConfigId);
+              const issues = cardTypeIssues.get(card.id) ?? [];
               return (
-                <article key={card.id} className="rounded-2xl border border-card bg-background p-4">
+                <article key={card.id} className={`rounded-2xl border bg-background p-4 ${issues.length ? "border-red-500/60" : "border-card"}`}>
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <h3 className="truncate text-sm font-bold">{card.name}</h3>
                       <p className="mt-1 truncate text-[10px] text-muted">{deck?.name ?? "بدون دک مشخص"}</p>
                     </div>
-                    <code className="rounded-lg bg-card px-2 py-1 text-[9px] text-muted">{card.id}</code>
+                    <div className="flex items-center gap-2">
+                      {issues.length ? (
+                        <button type="button" onClick={() => setCardWarningId(card.id)} aria-label={`هشدارهای ${card.name}`} className="grid size-7 place-items-center rounded-full bg-red-600 text-sm font-black text-white">!</button>
+                      ) : null}
+                      <code className="rounded-lg bg-card px-2 py-1 text-[9px] text-muted">{card.id}</code>
+                    </div>
                   </div>
-                  <dl className="mt-4 grid gap-2 text-[10px]">
-                    <div className="rounded-xl bg-card p-2.5">
-                      <dt className="text-muted">Config مطالعه</dt>
-                      <dd className="mt-1 truncate font-bold text-foreground">{deckConfig?.configName ?? "بدون Config مشخص"}</dd>
+                  {issues.length ? (
+                    <div className="mt-3 rounded-xl border border-red-500/30 bg-red-500/5 p-3 text-xs leading-5 text-red-800">
+                      {issues.map((issue) => <p key={issue}>• {issue}</p>)}
+                      <p className="mt-1 font-bold">برای رفع: Front Template را کمی تغییر دهید یا Card Type تکراری را حذف کنید.</p>
                     </div>
-                    <div className="grid grid-cols-2 gap-2 text-center text-muted">
-                      <div className="rounded-xl bg-card p-2">Front: {card.front.length} chars</div>
-                      <div className="rounded-xl bg-card p-2">Back: {card.back.length} chars</div>
-                    </div>
-                  </dl>
-                  <div className="mt-3 flex gap-2">
+                  ) : null}
+                  <div className="mt-4 flex gap-2 border-t border-card pt-4">
                     <button type="button" onClick={() => setEditingCardType(card.id)} className="h-9 flex-1 rounded-xl bg-[var(--primary)] text-xs font-bold text-white">ویرایش Card Type</button>
                     <button type="button" onClick={() => removeCardType(card.id)} className="h-9 rounded-xl border border-red-500/20 px-3 text-xs font-bold text-red-700">حذف</button>
                   </div>
@@ -1143,15 +1249,25 @@ export default function StructureBuilderClient() {
       {newDeck ? (
         <AddDeckModal
           value={newDeck}
+          configId={newDeckConfigId}
+          configs={settings.deckConfigs}
+          isEditing={Boolean(editingDeckId)}
           error={newDeckError}
           isSaving={isSavingSettings}
           onChange={(value) => {
             setNewDeck(value);
             setNewDeckError(null);
           }}
+          onConfigChange={(value) => {
+            setNewDeckConfigId(value);
+            setNewDeckError(null);
+          }}
           onConfirm={confirmAddDeck}
           onClose={() => {
-            if (!isSavingSettings) setNewDeck(null);
+            if (!isSavingSettings) {
+              setNewDeck(null);
+              setEditingDeckId(null);
+            }
           }}
         />
       ) : null}
@@ -1163,11 +1279,44 @@ export default function StructureBuilderClient() {
           onClose={() => setEditingConfig(null)}
         />
       ) : null}
-      {editingCardType && settings.noteType.cardTypes.find((item) => item.id === editingCardType) ? (
+      {warningCard ? (
+        <Modal
+          title={`هشدار Card Type: ${warningCard.name}`}
+          subtitle="این Card Type فعلاً قابل اعمال در Anki نیست."
+          onClose={() => setCardWarningId(null)}
+        >
+          <div className="grid gap-4 text-sm leading-7">
+            <div className="rounded-2xl border border-red-500/30 bg-red-500/5 p-4 text-red-900">
+              {(cardTypeIssues.get(warningCard.id) ?? []).map((issue) => <p key={issue}>• {issue}</p>)}
+            </div>
+            <div className="rounded-2xl border border-blue-500/25 bg-blue-500/5 p-4 text-blue-950">
+              <p className="font-bold">نحوه رفع</p>
+              <p className="mt-1">در ویرایش Card Type، Front Template را کمی تغییر دهید تا با Front کارت‌های دیگر یکسان نباشد؛ مثلاً یک wrapper یا متن/شرط متفاوت اضافه کنید. سپس ذخیره کنید و دوباره «اعمال Card Typeها در Anki» را بزنید.</p>
+            </div>
+            <div className="flex justify-end">
+              <button type="button" onClick={() => { setCardWarningId(null); setEditingCardType(warningCard.id); }} className="h-10 rounded-xl bg-[var(--primary)] px-5 text-sm font-semibold text-white">ویرایش Front Template</button>
+            </div>
+          </div>
+        </Modal>
+      ) : null}
+      {pendingCardType ? (
+        <CardTypeEditor
+          value={pendingCardType}
+          decks={settings.decks}
+          onChange={(value) => {
+            setSettings({
+              ...settings,
+              noteType: { ...settings.noteType, cardTypes: [...settings.noteType.cardTypes, value] },
+            });
+            setPendingCardType(null);
+          }}
+          onClose={() => setPendingCardType(null)}
+        />
+      ) : null}
+      {!pendingCardType && editingCardType && settings.noteType.cardTypes.find((item) => item.id === editingCardType) ? (
         <CardTypeEditor
           value={settings.noteType.cardTypes.find((item) => item.id === editingCardType)!}
           decks={settings.decks}
-          deckConfigs={settings.deckConfigs}
           onChange={(value) => updateCardType(editingCardType, value)}
           onClose={() => setEditingCardType(null)}
         />

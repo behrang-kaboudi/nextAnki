@@ -33,6 +33,7 @@ type DesiredDeckConfig = {
   easyBonus: number | null;
   graduatingIntervalDays: number | null;
   easyIntervalDays: number | null;
+  minimumIntervalDays: number | null;
 };
 
 function desiredDeckConfig(
@@ -50,6 +51,7 @@ function desiredDeckConfig(
       easyBonus: editable.easyBonus ? parseNumber(editable.easyBonus) : null,
       graduatingIntervalDays: editable.graduatingInterval ? parseNumber(editable.graduatingInterval) : null,
       easyIntervalDays: editable.easyInterval ? parseNumber(editable.easyInterval) : null,
+      minimumIntervalDays: editable.minimumInterval ? parseNumber(editable.minimumInterval) : null,
     };
   }
   const desired = WordDeckConfigs[configName];
@@ -73,6 +75,10 @@ function desiredDeckConfig(
     (desired as { easyInterval?: string }).easyInterval ??
     (desired as { EasyInterval?: string }).EasyInterval ??
     null;
+  const wantsMinimumIntervalRaw =
+    (desired as { minimumInterval?: string }).minimumInterval ??
+    (desired as { MinimumInterval?: string }).MinimumInterval ??
+    null;
 
   const startingEase = wantsStartingEaseRaw ? parseNumber(wantsStartingEaseRaw) : null;
 
@@ -85,6 +91,7 @@ function desiredDeckConfig(
     easyBonus: wantsEasyBonusRaw ? parseNumber(wantsEasyBonusRaw) : null,
     graduatingIntervalDays: wantsGraduatingIntervalRaw ? parseNumber(wantsGraduatingIntervalRaw) : null,
     easyIntervalDays: wantsEasyIntervalRaw ? parseNumber(wantsEasyIntervalRaw) : null,
+    minimumIntervalDays: wantsMinimumIntervalRaw ? parseNumber(wantsMinimumIntervalRaw) : null,
   };
 }
 
@@ -103,6 +110,10 @@ function applyDesiredValues(config: AnkiDeckConfig, desired: DesiredDeckConfig) 
   setPerDay(config.rev, desired.maximumReviewsPerDay);
   if (desired.learningSteps) config.new.delays = desired.learningSteps;
   if (desired.relearningSteps) config.lapse.delays = desired.relearningSteps;
+  if (desired.minimumIntervalDays !== null) {
+    config.lapse.minInt = desired.minimumIntervalDays;
+    (config.lapse as { min_int?: number }).min_int = desired.minimumIntervalDays;
+  }
   if (desired.initialFactor !== null) setInitialFactor(config.new, desired.initialFactor);
   if (desired.easyBonus !== null) config.rev.ease4 = desired.easyBonus;
   if (desired.graduatingIntervalDays !== null && desired.easyIntervalDays !== null) {
@@ -115,6 +126,10 @@ function configNeedsUpdate(current: AnkiDeckConfig, desired: DesiredDeckConfig) 
   const curRev = getPerDay(current.rev);
   const curLearning = current.new?.delays ?? null;
   const curRelearning = current.lapse?.delays ?? null;
+  const curMinimumInterval =
+    asNumber((current.lapse as { minInt?: unknown } | undefined)?.minInt) ??
+    asNumber((current.lapse as { min_int?: unknown } | undefined)?.min_int) ??
+    null;
   const curInitialFactor = getInitialFactor(current.new);
   const curEase4 = asNumber(current.rev?.ease4) ?? null;
   const curInts = getNewInts(current.new);
@@ -128,6 +143,7 @@ function configNeedsUpdate(current: AnkiDeckConfig, desired: DesiredDeckConfig) 
     curRev !== desired.maximumReviewsPerDay ||
     (desired.learningSteps ? !arraysEqual(curLearning, desired.learningSteps) : false) ||
     (desired.relearningSteps ? !arraysEqual(curRelearning, desired.relearningSteps) : false) ||
+    (desired.minimumIntervalDays !== null ? curMinimumInterval !== desired.minimumIntervalDays : false) ||
     (desired.initialFactor !== null ? curInitialFactor !== desired.initialFactor : false) ||
     (desired.easyBonus !== null ? curEase4 !== desired.easyBonus : false) ||
     (wantsInts ? !(Array.isArray(curInts) && curInts[0] === wantsInts[0] && curInts[1] === wantsInts[1]) : false)
@@ -196,13 +212,14 @@ async function ensureConfigGroup(
   if (!currentRes.ok) return { ok: false as const, error: `getDeckConfig failed: ${currentRes.error}` };
   const current = currentRes.result;
   if (!current) return { ok: false as const, error: "getDeckConfig returned null." };
+  const previousConfigId = current.name === pair.configName ? null : current.id;
 
   const existingTarget = current.name === pair.configName ? current : (configByName.get(pair.configName) ?? null);
   if (!existingTarget) {
     const createResult = await createConfigGroup(pair, current, desired, appendLog);
     if (!createResult.ok) return createResult;
     configByName.set(pair.configName, createResult.config);
-    return { ok: true as const, config: createResult.config, desired };
+    return { ok: true as const, config: createResult.config, desired, previousConfigId };
   }
 
   const updated = cloneConfigForUpdate(existingTarget);
@@ -213,11 +230,36 @@ async function ensureConfigGroup(
     if (!saveRes.ok) return saveRes;
     configByName.set(pair.configName, updated);
     appendLog("✓ Config updated.");
-    return { ok: true as const, config: updated, desired };
+    return { ok: true as const, config: updated, desired, previousConfigId };
   }
 
   appendLog("✓ Config already matches.");
-  return { ok: true as const, config: existingTarget, desired };
+  return { ok: true as const, config: existingTarget, desired, previousConfigId };
+}
+
+async function removeUnusedConfigGroups(
+  deckNames: string[],
+  candidateIds: Set<number>,
+  appendLog: LogFn,
+) {
+  if (!candidateIds.size) return;
+  const readings = await Promise.all(deckNames.map((deck) => ankiOperations.getDeckConfig({ deck })));
+  if (readings.some((reading) => !reading.ok || !reading.result)) {
+    appendLog("⚠ Config قبلی حذف نشد چون وضعیت همه‌ی دک‌ها قابل بررسی نبود.");
+    return;
+  }
+  const activeIds = new Set(
+    readings.flatMap((reading) => reading.ok && reading.result ? [reading.result.id] : []),
+  );
+  for (const configId of candidateIds) {
+    if (configId === 1 || activeIds.has(configId)) continue;
+    const removeRes = await ankiOperations.removeDeckConfigId({ configId });
+    if (!removeRes.ok || removeRes.result !== true) {
+      appendLog(`⚠ Config قبلی با id=${configId} حذف نشد؛ هنوز ممکن است در Anki باقی مانده باشد.`);
+      continue;
+    }
+    appendLog(`✓ Config قبلی با id=${configId} حذف شد.`);
+  }
 }
 
 async function confirmDeckConfig(pair: DeckConfigPair, desired: DesiredDeckConfig, appendLog: LogFn): Promise<StepResult> {
@@ -261,7 +303,8 @@ export async function ensureDeckConfigs(
     config
       ? config.deckConfigs
           .filter((item) => item.graduatingInterval || item.easyInterval)
-          .map((item) => config.decks.find((deck) => deck.id === item.deckId)?.name)
+          .flatMap((item) => item.deckIds)
+          .map((deckId) => config.decks.find((deck) => deck.id === deckId)?.name)
           .filter((name): name is string => Boolean(name))
       : [WordAnkiConstants.decks.Rahnama, WordAnkiConstants.decks.Rahnama2],
   );
@@ -273,6 +316,7 @@ export async function ensureDeckConfigs(
   }
 
   const configByName = await loadConfigGroupsByName(deckNamesRes.deckNames);
+  const obsoleteConfigIds = new Set<number>();
 
   for (const pair of deckConfigPairs(config)) {
     const ensureResult = await ensureConfigGroup(pair, configByName, appendLog);
@@ -280,6 +324,7 @@ export async function ensureDeckConfigs(
       appendLog(`✗ ${ensureResult.error}`);
       return { ok: false };
     }
+    if (ensureResult.previousConfigId !== null) obsoleteConfigIds.add(ensureResult.previousConfigId);
 
     appendLog(`Applying config to deck (id=${ensureResult.config.id}) ...`);
     const applyRes = await applyConfigToDeck(pair.deck, ensureResult.config.id);
@@ -293,6 +338,8 @@ export async function ensureDeckConfigs(
 
     appendLog(`✓ Applied: ${pair.configName}`);
   }
+
+  await removeUnusedConfigGroups(deckNamesRes.deckNames, obsoleteConfigIds, appendLog);
 
   appendLog("Step 2: Done.");
   return { ok: true };

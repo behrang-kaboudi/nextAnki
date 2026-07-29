@@ -132,6 +132,10 @@ export type AnkiConnectActionMap = {
     params: { name: string; cloneFrom?: number };
     result: number | false;
   };
+  removeDeckConfigId: {
+    params: { configId: number };
+    result: boolean;
+  };
 
   modelNames: { params?: Record<string, never>; result: string[] };
   modelFieldNames: { params: { modelName: string }; result: string[] };
@@ -172,6 +176,14 @@ export type AnkiConnectActionMap = {
     params: {
       modelName: string;
       templateName: string;
+    };
+    result: null;
+  };
+  modelTemplateRename: {
+    params: {
+      modelName: string;
+      oldTemplateName: string;
+      newTemplateName: string;
     };
     result: null;
   };
@@ -283,4 +295,3 @@ export type AnkiConnectClient = {
     | { ok: false; error: string }
   >;
 };
-

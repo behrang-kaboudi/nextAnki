@@ -1,5 +1,5 @@
 {
-  "createdAt": "2026-07-26T06:26:15.934Z",
+  "createdAt": "2026-07-29T00:26:53.785Z",
   "data": {
     "word": [
       {
@@ -252294,33 +252294,9 @@
               "managed": true
             },
             {
-              "id": "deck-EnToFaKnowingFilter",
-              "name": "WordsForNewStudy::1EnToFaKnowingFilter",
-              "title": "فیلتر شناخت En → Fa",
-              "managed": true
-            },
-            {
-              "id": "deck-EnToFaRev",
-              "name": "WordsForNewStudy::EnToFaRev",
-              "title": "مرور معکوس En → Fa",
-              "managed": true
-            },
-            {
               "id": "deck-FaToEn",
               "name": "WordsForNewStudy::FaToEn",
               "title": "فارسی به انگلیسی",
-              "managed": true
-            },
-            {
-              "id": "deck-FaToEnKnowingFilter",
-              "name": "WordsForNewStudy::1FaToEnKnowingFilter",
-              "title": "فیلتر شناخت Fa → En",
-              "managed": true
-            },
-            {
-              "id": "deck-FaToEnRev",
-              "name": "WordsForNewStudy::FaToEnRev",
-              "title": "مرور معکوس Fa → En",
               "managed": true
             },
             {
@@ -252330,15 +252306,15 @@
               "managed": true
             },
             {
-              "id": "deck-Rahnama",
-              "name": "WordsForNewStudy::Rahnama",
-              "title": "راهنمای اول",
+              "id": "deck-ms2xg003-wd2j8",
+              "name": "WordsForNewStudy::FilterKnowing",
+              "title": "فیلتر کننده",
               "managed": true
             },
             {
-              "id": "deck-Rahnama2",
-              "name": "WordsForNewStudy::Rahnama2",
-              "title": "راهنمای دوم",
+              "id": "deck-ms31e580-149oo",
+              "name": "WordsForNewStudy::Review",
+              "title": "Review",
               "managed": true
             }
           ],
@@ -252377,76 +252353,39 @@
             ],
             "cardTypes": [
               {
-                "id": "card-1EnToFaKnowingFilter",
-                "back": "{{meaning_fa}}",
-                "name": "1EnToFaKnowingFilter",
-                "front": "{{base_form}}",
-                "deckId": "deck-EnToFaKnowingFilter",
-                "deckConfigId": "config-ms16kc84-ryo55"
-              },
-              {
-                "id": "card-1FaToEnKnowingFilter",
-                "back": "{{base_form}}",
-                "name": "1FaToEnKnowingFilter",
-                "front": "{{meaning_fa}}",
-                "deckId": "deck-EnToFaKnowingFilter",
-                "deckConfigId": "config-ms16kc84-ryo55"
-              },
-              {
                 "id": "card-EnToFa",
                 "back": "<div style=\"display:none;\">\n[sound:rec1784581227.mp3]\n</div>\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{base_form}} <span> /{{phonetic_us}}/</span></div>\n<hr id='answer'>\n\n<div style=\"direction:rtl;text-align:right\">\n<table style=\"width:100%\">\n<tr>\n<td>\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{meaning_fa_audio}}</div>\n</td>\n<td>\n{{meaning_fa}}\n</td>\n</tr>\n\n<tr>\n<td>\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{other_meanings_fa_audio}}</div>\n</td>\n<td>\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{other_meanings_fa}}</div>\n</td>\n</tr>\n\n<tr>\n<td>\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{concept_explained_fa_audio}}</div>\n</td>\n<td>\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{concept_explained_fa}}</div>\n</td>\n</tr>\n\n\n<tr>\n<td>\n\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{sentence_en_meaning_fa_audio}}</div>\n</td>\n<td>\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{sentence_en_meaning_fa}}</div>\n</td>\n</tr>\n\n</table>\n</div>\n\n\n\n\n<div style=\"display:none\">\n\n[sound:rec1778206722.mp3]\n\n</div>\n\n<hr>\n\n\n\n",
                 "name": "EnToFa",
                 "front": "<div style=\"display:none;\">\n[sound:rec1784581227.mp3]\n</div>\n<div style=\"\">\n<table style=\"\">\n<tr >\n<td  >\n{{base_form}} \n<div style=\"white-space: nowrap\"> /{{phonetic_us}}/</div>\n</td>\n<td  style=\"text-align:right\">\n{{base_form_audio}}\n</td>\n\n</tr>\n\n<tr>\n<td>\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{sentence_en}}</div>\n\n</td>\n<td  style=\"text-align:right\">\n<div style=\"display:none\">\n\n[sound:rec1778206722.mp3]\n\n</div>{{sentence_en_audio}}\n\n</td>\n\n</tr>\n\n\n</table>\n</div>\n\n\n\n\n\n",
-                "deckId": "deck-EnToFa",
-                "deckConfigId": "config-WordsForNewStudyEnToFa"
+                "deckId": "deck-EnToFa"
               },
               {
                 "id": "card-FaToEn",
                 "back": "<div style=\"display:none;\">\n[sound:rec1784581227.mp3]\n</div>\n<div style=\"direction:rtl; text-align:right\">\n\n{{meaning_fa}}. {{concept_explained_fa}}\n\n</div>\n<hr>\n<div style=\"\">\n<table >\n\n<tr >\n<td  >\n{{base_form}} \n<div style=\"white-space: nowrap\"> /{{phonetic_us}}/</div>\n</td>\n<td  style=\"text-align:right\">\n{{base_form_audio}}\n</td>\n\n</tr>\n\n<tr>\n<td>\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{sentence_en}}</div>\n\n</td>\n<td  style=\"text-align:right\">\n<div style=\"display:none\">\n\n[sound:rec1778206722.mp3]\n\n</div>{{sentence_en_audio}}\n\n</td>\n\n</tr>\n\n\n\n\n</table>\n</div>\n\n<div style=\"display:none\">\n\n[sound:rec1778206722.mp3]\n\n</div>\n\n<hr>\n\n\n\n\n",
                 "name": "FaToEn",
                 "front": "<div style=\"display:none;\">\n[sound:rec1784581227.mp3]\n</div>\n<div style=\"direction:rtl;text-align:right\">\n<table style=\"width:100%\">\n<tr>\n<td>\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{meaning_fa_audio}}</div>\n</td>\n<td>\n{{meaning_fa}}\n</td>\n</tr>\n\n<tr>\n<td>\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{other_meanings_fa_audio}}</div>\n</td>\n<td>\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{other_meanings_fa}}</div>\n</td>\n</tr>\n\n<tr>\n<td>\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{concept_explained_fa_audio}}</div>\n</td>\n<td>\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{concept_explained_fa}}</div>\n</td>\n</tr>\n\n\n<tr>\n<td>\n\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{sentence_en_meaning_fa_audio}}</div>\n</td>\n<td>\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{sentence_en_meaning_fa}}</div>\n</td>\n</tr>\n\n</table>\n</div>\n\n\n\n\n<div style=\"display:none\">\n\n[sound:rec1778206722.mp3]\n\n</div>\n\n<hr>\n\n<div style=\";text-align:right\">\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{hint_to_select_letters}}</div>\n\n</div>\n\n\n\n\n\n\n\n\n\n",
-                "deckId": "deck-FaToEn",
-                "deckConfigId": "config-WordsForNewStudyFaToEn"
+                "deckId": "deck-FaToEn"
               },
               {
                 "id": "card-Emla",
                 "back": "{{base_form}}{{phonetic_us}}\n<br>\n{{sentence_en}}\n<hr>\n<div style=\";text-align:right\">\n<div style='display:none'>[sound:rec1765049893.mp3]</div>\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{first_letter_fa_hint}}</div>\n<div style='display:none'>[sound:rec1765049893.mp3]</div>\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{first_letter_en_hint}}</div>\n</div>",
                 "name": "Emla",
                 "front": "<div style=\";text-align:right\">\n<div style='display:none'>[sound:rec1765049893.mp3]</div>\n\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{meaning_fa}}</div>\n\n<div style='display:none'>[sound:rec1765487198.mp3]</div>\n\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{concept_explained_fa}}</div>\n</div>\n<hr>\n{{base_form}}{{phonetic_us}}\n\n<div style=\";text-align:right\">\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{first_letter_fa_hint}}</div>\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{first_letter_en_hint}}</div>\n</div>",
-                "deckId": "deck-Emla",
-                "deckConfigId": "config-WordsForNewStudyEmla"
+                "deckId": "deck-Emla"
               },
               {
-                "id": "card-Rahnama",
-                "back": "{{FrontSide}}\n\n\n{{#selfGuide}}<div style='font-family: \"Arial\"; font-size: 20px;'>{{selfGuide}}</div>{{/selfGuide}}{{^selfGuide}}<div style='font-family: \"Arial\"; font-size: 20px;'>{{first_letter_en_hint}}</div>{{/selfGuide}}\n\n",
-                "name": "Rahnama",
-                "front": "<div style='display:none'>[sound:rec1765049893.mp3]</div>{{base_form}} {{base_form_audio}}{{phonetic_us}}\n\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{meaning_fa}}</div>\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{meaning_fa_audio}}</div>\n\n\n<div style='display:none'>\n[sound:rec1771027001.mp3]\n\n[sound:6s_Stop.mp3]</div>\n\n\n\n\n\n",
-                "deckId": "deck-Rahnama",
-                "deckConfigId": "config-WordsForNewStudyRahnama"
+                "id": "card-ms2xjo67-fzln3",
+                "back": "{{FrontSide}}\n\n<hr id=\"answer\">\n\n{{base_form}}",
+                "name": "WordsForNewStudy-Filter",
+                "front": "این خطا از محتوای `Front Template` می‌آید، نه از نام Card Type.\n\nدر وضعیت فعلی:\n\n- Card Type اپ: `فیلتر`\n- Front آن: `{{anki_link_id}}`\n- Card Type موجود در Anki: `Filter`\n- Front آن هم: `{{anki_link_id}}`\n\nAnki اجازه نمی‌دهد در یک Note Type، دو Card Type با Front یکسان ساخته شوند؛ چون هر دو کارت از نظر سؤال/سمت Front یکسان هستند.\n\nاین بررسی در [ensureCardTypes.ts](/Users/seyedbehrangkaboudi/Personal-Local/Projects/NextJS/Anki/src/app/(site)/structure-builder/ensureCardTypes.ts:163) انجام می‌شود و خطا در همان فایل گزارش می‌شود.\n\nبرای رفع:\n\n- Front کارت `فیلتر` را کمی تغییر دهید؛ مثلاً:\n\n```text\n<div class=\"filter-card\">\n  {{anki_link_id}}\n</div>\n```\n\nیا اگر `Filter` قدیمی لازم نیست، آن را از تنظیمات اپ حذف کنید تا از Anki هم حذف شود.",
+                "deckId": null
               },
               {
-                "id": "card-Rahnama2",
-                "back": "{{FrontSide}}\n<div style=\";text-align:right\">\n\t{{meaning_fa}} {{meaning_fa_audio}}\n</div>",
-                "name": "Rahnama2",
-                "front": "{{#selfGuide}}<div style='font-family: \"Arial\"; font-size: 20px;'>{{selfGuide}}</div>{{/selfGuide}}{{^selfGuide}}<div style='font-family: \"Arial\"; font-size: 20px;'>{{first_letter_en_hint}}</div>{{/selfGuide}}\n\n",
-                "deckId": "deck-Rahnama2",
-                "deckConfigId": "config-WordsForNewStudyRahnama2"
-              },
-              {
-                "id": "card-EnToFaRev",
-                "back": "<div style=\"display:none;\">\n[sound:rec1784581227.mp3]\n</div>\n\n\n\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{base_form}} <span> /{{phonetic_us}}/</span></div>\n<hr id='answer'>\n\n<div style=\"direction:rtl;text-align:right\">\n<table style=\"width:100%\">\n<tr>\n<td>\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{meaning_fa_audio}}</div>\n</td>\n<td>\n{{meaning_fa}}\n</td>\n</tr>\n\n<tr>\n<td>\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{other_meanings_fa_audio}}</div>\n</td>\n<td>\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{other_meanings_fa}}</div>\n</td>\n</tr>\n\n<tr>\n<td>\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{concept_explained_fa_audio}}</div>\n</td>\n<td>\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{concept_explained_fa}}</div>\n</td>\n</tr>\n\n\n<tr>\n<td>\n\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{sentence_en_meaning_fa_audio}}</div>\n</td>\n<td>\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{sentence_en_meaning_fa}}</div>\n</td>\n</tr>\n\n</table>\n</div>\n\n\n\n\n<div style=\"display:none\">\n\n[sound:rec1778206722.mp3]\n\n</div>\n\n\n\n",
-                "name": "EnToFaRev",
-                "front": "<div style=\"display:none;\">\n[sound:rec1784581227.mp3]\n</div>\n<div style=\"\">\n<table style=\"\">\n<tr >\n<td  >\n{{base_form}} \n<div style=\"white-space: nowrap\"> /{{phonetic_us}}/</div>\n</td>\n<td  style=\"text-align:right\">\n{{base_form_audio}}\n</td>\n\n</tr>\n\n<tr>\n<td>\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{sentence_en}}</div>\n\n</td>\n<td  style=\"text-align:right\">\n<div style=\"display:none\">\n\n[sound:rec1778206722.mp3]\n\n</div>{{sentence_en_audio}}\n\n</td>\n\n</tr>\n\n\n</table>\n</div>\n\n",
-                "deckId": "deck-EnToFaRev",
-                "deckConfigId": "config-WordsForNewStudyEnToFaRev"
-              },
-              {
-                "id": "card-FaToEnRev",
-                "back": "<div style=\"display:none;\">\n[sound:rec1784581227.mp3]\n</div>\n<div style=\"direction:rtl; text-align:right\">\n\n{{meaning_fa}}. {{concept_explained_fa}}\n\n</div>\n<hr>\n<div style=\"\">\n<table >\n\n<tr >\n<td  >\n{{base_form}} \n<div style=\"white-space: nowrap\"> /{{phonetic_us}}/</div>\n</td>\n<td  style=\"text-align:right\">\n{{base_form_audio}}\n</td>\n\n</tr>\n\n<tr>\n<td>\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{sentence_en}}</div>\n\n</td>\n<td  style=\"text-align:right\">\n<div style=\"display:none\">\n\n[sound:rec1778206722.mp3]\n\n</div>{{sentence_en_audio}}\n\n</td>\n\n</tr>\n\n\n\n\n</table>\n</div>\n\n<div style=\"display:none\">\n\n[sound:rec1778206722.mp3]\n\n</div>\n\n\n\n\n",
-                "name": "FaToEnRev",
-                "front": "<div style=\"display:none;\">\n[sound:rec1784581227.mp3]\n</div>\n<div style=\"direction:rtl;text-align:right\">\n<table style=\"width:100%\">\n<tr>\n<td>\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{meaning_fa_audio}}</div>\n</td>\n<td>\n{{meaning_fa}}\n</td>\n</tr>\n\n<tr>\n<td>\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{other_meanings_fa_audio}}</div>\n</td>\n<td>\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{other_meanings_fa}}</div>\n</td>\n</tr>\n\n<tr>\n<td>\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{concept_explained_fa_audio}}</div>\n</td>\n<td>\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{concept_explained_fa}}</div>\n</td>\n</tr>\n\n\n<tr>\n<td>\n\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{sentence_en_meaning_fa_audio}}</div>\n</td>\n<td>\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{sentence_en_meaning_fa}}</div>\n</td>\n</tr>\n\n</table>\n</div>\n\n\n\n\n<div style=\"display:none\">\n\n[sound:rec1778206722.mp3]\n\n</div>\n\n<hr>\n\n<div style=\";text-align:right\">\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{hint_to_select_letters}}</div>\n\n</div>\n\n\n",
-                "deckId": "deck-FaToEnRev",
-                "deckConfigId": "config-WordsForNewStudyFaToEnRev"
+                "id": "card-ms4g7i7m-oil5w",
+                "back": "{{FrontSide}}\n\n<hr id=\"answer\">\n\n{{base_form}}",
+                "name": "WordsForNewStudy-Review",
+                "front": "<div style=\"display:none;\">\n[sound:rec1784581227.mp3]\n</div>\n<div style=\"direction:rtl; text-align:right\">\n\n{{meaning_fa}}. {{concept_explained_fa}}\n\n</div>\n<hr>\n<div style=\"\">\n<table >\n\n<tr >\n<td  >\n{{base_form}} \n<div style=\"white-space: nowrap\"> /{{phonetic_us}}/</div>\n</td>\n<td  style=\"text-align:right\">\n{{base_form_audio}}\n</td>\n\n</tr>\n\n<tr>\n<td>\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{sentence_en}}</div>\n\n</td>\n<td  style=\"text-align:right\">\n<div style=\"display:none\">\n\n[sound:rec1778206722.mp3]\n\n</div>{{sentence_en_audio}}\n\n</td>\n\n</tr>\n\n\n\n\n</table>\n</div>\n\n<div style=\"display:none\">\n\n[sound:rec1778206722.mp3]\n\n</div>\n",
+                "deckId": "deck-default"
               }
             ]
           },
@@ -252457,105 +252396,69 @@
           "deckConfigs": [
             {
               "id": "config-WordsForNewStudyEnToFa",
-              "deckId": "deck-EnToFa",
+              "deckIds": [
+                "deck-EnToFa"
+              ],
               "easyBonus": "1.8",
-              "configName": "WordsForNewStudyEnToFa",
-              "easyInterval": "",
-              "startingEase": "3.50",
-              "learningSteps": "5d 10m 30m",
-              "newCardsPerDay": 2000,
-              "relearningSteps": "5d 10m 30m",
-              "graduatingInterval": "",
-              "maximumReviewsPerDay": 9999
-            },
-            {
-              "id": "config-WordsForNewStudyEnToFaRev",
-              "deckId": "deck-EnToFaRev",
-              "easyBonus": "1.8",
-              "configName": "WordsForNewStudyEnToFaRev",
-              "easyInterval": "",
-              "startingEase": "3.50",
-              "learningSteps": "5d 10m 30m",
-              "newCardsPerDay": 2000,
-              "relearningSteps": "5d 10m 30m",
-              "graduatingInterval": "",
+              "configName": "WordsForNewStudy-EnToFa",
+              "easyInterval": "4",
+              "startingEase": "3.5",
+              "learningSteps": "9999d 10m 30m",
+              "newCardsPerDay": 9999,
+              "minimumInterval": "1",
+              "relearningSteps": "9999d 10m 30m",
+              "graduatingInterval": "1",
               "maximumReviewsPerDay": 9999
             },
             {
               "id": "config-WordsForNewStudyFaToEn",
-              "deckId": "deck-FaToEn",
-              "easyBonus": "",
-              "configName": "WordsForNewStudyFaToEn",
-              "easyInterval": "",
-              "startingEase": "3.50",
-              "learningSteps": "5d 10m 30m 50m",
+              "deckIds": [
+                "deck-FaToEn"
+              ],
+              "easyBonus": "1.3",
+              "configName": "WordsForNewStudy-FaToEn",
+              "easyInterval": "4",
+              "startingEase": "3.5",
+              "learningSteps": "9999d 10m 30m 50m",
               "newCardsPerDay": 2000,
-              "relearningSteps": "",
-              "graduatingInterval": "",
+              "minimumInterval": "1",
+              "relearningSteps": "9999d 20m 50m",
+              "graduatingInterval": "1",
               "maximumReviewsPerDay": 9999
             },
             {
               "id": "config-WordsForNewStudyFaToEnRev",
-              "deckId": "deck-FaToEnRev",
-              "easyBonus": "",
-              "configName": "WordsForNewStudyFaToEnRev",
-              "easyInterval": "",
-              "startingEase": "3.50",
-              "learningSteps": "5d 10m 30m 50m",
-              "newCardsPerDay": 2000,
-              "relearningSteps": "",
-              "graduatingInterval": "",
-              "maximumReviewsPerDay": 9999
-            },
-            {
-              "id": "config-WordsForNewStudyEmla",
-              "deckId": "deck-Emla",
-              "easyBonus": "",
-              "configName": "WordsForNewStudyEmla",
-              "easyInterval": "",
-              "startingEase": "3.50",
-              "learningSteps": "10m 50m",
-              "newCardsPerDay": 2000,
-              "relearningSteps": "",
-              "graduatingInterval": "",
-              "maximumReviewsPerDay": 9999
-            },
-            {
-              "id": "config-WordsForNewStudyRahnama",
-              "deckId": "deck-Rahnama",
-              "easyBonus": "",
-              "configName": "WordsForNewStudyRahnama",
-              "easyInterval": "6",
-              "startingEase": "",
-              "learningSteps": "1m 5m 10m 5d",
-              "newCardsPerDay": 2000,
-              "relearningSteps": "",
-              "graduatingInterval": "5",
-              "maximumReviewsPerDay": 9999
-            },
-            {
-              "id": "config-WordsForNewStudyRahnama2",
-              "deckId": "deck-Rahnama2",
-              "easyBonus": "",
-              "configName": "WordsForNewStudyRahnama2",
-              "easyInterval": "6",
-              "startingEase": "",
-              "learningSteps": "1m 5m 10m 5d",
-              "newCardsPerDay": 2000,
-              "relearningSteps": "",
-              "graduatingInterval": "5",
-              "maximumReviewsPerDay": 9999
-            },
-            {
-              "id": "config-ms16kc84-ryo55",
-              "deckId": "deck-EnToFaKnowingFilter",
+              "deckIds": [
+                "deck-ms31e580-149oo"
+              ],
               "easyBonus": "1.3",
-              "configName": "WordsForNewKnowingFilter",
+              "configName": "WordsForNewStudy-Review",
+              "easyInterval": "9999",
+              "startingEase": "2.5",
+              "learningSteps": "2m 5m 10m 14398560m",
+              "newCardsPerDay": 9999,
+              "minimumInterval": "9999",
+              "relearningSteps": "2m 5m 10m 14398560m",
+              "graduatingInterval": "9999",
+              "maximumReviewsPerDay": 9999
+            },
+            {
+              "id": "config-anki-deck-default",
+              "deckIds": [
+                "deck-default",
+                "deck-tempRoot",
+                "deck-root",
+                "deck-ms2xg003-wd2j8",
+                "deck-Emla"
+              ],
+              "easyBonus": "1.3",
+              "configName": "WordsForNewStudy-Default",
               "easyInterval": "4",
-              "startingEase": "2.50",
-              "learningSteps": "20d",
-              "newCardsPerDay": 9998,
-              "relearningSteps": "20d",
+              "startingEase": "2.5",
+              "learningSteps": "1m 10m",
+              "newCardsPerDay": 9999,
+              "minimumInterval": "1",
+              "relearningSteps": "10m",
               "graduatingInterval": "1",
               "maximumReviewsPerDay": 9999
             }
@@ -252563,9 +252466,9 @@
           "profileName": "پروفایل اصلی",
           "schemaVersion": 3
         },
-        "version": 5,
+        "version": 69,
         "createdAt": "2026-07-26T01:51:48.862Z",
-        "updatedAt": "2026-07-26T04:23:37.028Z"
+        "updatedAt": "2026-07-28T10:41:34.263Z"
       }
     ],
     "user": [

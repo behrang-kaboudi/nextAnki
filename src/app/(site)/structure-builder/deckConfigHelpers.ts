@@ -94,10 +94,12 @@ export type DeckConfigPair = {
 
 export function deckConfigPairs(config?: AnkiStructureConfig): DeckConfigPair[] {
   if (config) {
-    return config.deckConfigs.flatMap((item) => {
-      const deck = findStructureDeck(config, item.deckId);
-      return deck ? [{ deck: deck.name, configName: item.configName, desired: item }] : [];
-    });
+    return config.deckConfigs.flatMap((item) =>
+      item.deckIds.flatMap((deckId) => {
+        const deck = findStructureDeck(config, deckId);
+        return deck ? [{ deck: deck.name, configName: item.configName, desired: item }] : [];
+      }),
+    );
   }
   return [
     { deck: WordAnkiConstants.decks.EnToFa, configName: "WordsForNewStudyEnToFa" as const },

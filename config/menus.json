@@ -157,6 +157,13 @@
             "href": "/anki-migration",
             "icon": "tools",
             "description": "One-time Anki user migrations and execution logs"
+          },
+          {
+            "type": "link",
+            "label": "انتقال کارت بین Deckها",
+            "href": "/anki-card-transfer",
+            "icon": "tools",
+            "description": "انتقال کارت متناظر یک Note به Deck دیگر"
           }
         ],
         "icon": "app"

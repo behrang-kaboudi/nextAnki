@@ -60,20 +60,22 @@ export async function inspectAnkiStructure(config: AnkiStructureConfig): Promise
 
   const configMismatches: string[] = [];
   for (const desired of config.deckConfigs) {
-    const deck = findStructureDeck(config, desired.deckId);
-    if (!deck || !deckNames.has(deck.name)) {
-      configMismatches.push(desired.configName);
-      continue;
-    }
-    const currentRes = await ankiOperations.getDeckConfig({ deck: deck.name });
-    const current = currentRes.ok ? currentRes.result : null;
-    if (
-      !current ||
-      current.name !== desired.configName ||
-      getPerDay(current.new) !== desired.newCardsPerDay ||
-      getPerDay(current.rev) !== desired.maximumReviewsPerDay
-    ) {
-      configMismatches.push(desired.configName);
+    for (const deckId of desired.deckIds) {
+      const deck = findStructureDeck(config, deckId);
+      if (!deck || !deckNames.has(deck.name)) {
+        configMismatches.push(desired.configName);
+        continue;
+      }
+      const currentRes = await ankiOperations.getDeckConfig({ deck: deck.name });
+      const current = currentRes.ok ? currentRes.result : null;
+      if (
+        !current ||
+        current.name !== desired.configName ||
+        getPerDay(current.new) !== desired.newCardsPerDay ||
+        getPerDay(current.rev) !== desired.maximumReviewsPerDay
+      ) {
+        configMismatches.push(desired.configName);
+      }
     }
   }
   initialSteps[2] = configMismatches.length

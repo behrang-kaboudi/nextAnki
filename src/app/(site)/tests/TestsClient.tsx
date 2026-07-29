@@ -58,6 +58,11 @@ const sections: Section[] = [
         note: "Browse knowing-filter decks by Filtered tag",
       },
       {
+        href: "/anki-card-transfer",
+        label: "انتقال کارت بین Deckها",
+        note: "Move matching card types by Note from one deck to another",
+      },
+      {
         href: "/tests/anki-revlog",
         label: "Anki Revlog (AnkiDroid)",
         note: "View getReviewsOfCards output",
