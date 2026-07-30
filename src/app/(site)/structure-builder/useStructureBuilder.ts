@@ -56,8 +56,7 @@ function minutesToSteps(value: unknown) {
 function ensureMissingConsumerDecksUseDefault(config: AnkiStructureConfig) {
   const consumerDeckIds = new Set(
     config.noteType.cardTypes
-      .map((card) => card.deckId)
-      .filter((deckId): deckId is string => Boolean(deckId)),
+      .flatMap((card) => card.deckIds),
   );
   const assignedDeckIds = new Set(config.deckConfigs.flatMap((item) => item.deckIds));
   const missingDeckIds = config.decks
@@ -94,8 +93,7 @@ async function readDeckConfigsFromAnki(config: AnkiStructureConfig) {
   const deckConfigs = [...config.deckConfigs];
   const consumerDeckIds = new Set(
     config.noteType.cardTypes
-      .map((card) => card.deckId)
-      .filter((deckId): deckId is string => Boolean(deckId)),
+      .flatMap((card) => card.deckIds),
   );
   let fallbackConfig = deckConfigs.find((item) => item.configName === DEFAULT_STUDY_CONFIG_NAME);
   for (const reading of readings) {

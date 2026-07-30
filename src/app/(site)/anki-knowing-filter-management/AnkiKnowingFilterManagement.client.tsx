@@ -18,6 +18,8 @@ const PAGE_SIZE_OPTIONS = [25, 50, 100, 200] as const;
 const FILTER_KNOWING_DECK = "WordsForNewStudy::FilterKnowing" as const;
 const REVIEW_CARD = "WordsForNewStudy-Review" as const;
 const REVIEW_DECK = "WordsForNewStudy::Review" as const;
+const PRONUNCIATION_CARD = "WordsForNewStudy-Pronunciation" as const;
+const PRONUNCIATION_DECK = "WordsForNewStudy::Pronunciation" as const;
 
 type DeckName = typeof FILTER_KNOWING_DECK;
 
@@ -84,6 +86,10 @@ function actionTargets() {
       cardType: REVIEW_CARD,
       deck: REVIEW_DECK,
     },
+    pronunciation: {
+      cardType: PRONUNCIATION_CARD,
+      deck: PRONUNCIATION_DECK,
+    },
   };
 }
 
@@ -107,12 +113,14 @@ function answerInstructions(action: KnowledgeAction): AnswerInstruction[] {
         { target: "enToFa", ease: 4, repetitions: 2 },
         { target: "faToEn", ease: 3, repetitions: 1 },
         { target: "review", ease: 4, repetitions: 1 },
+        { target: "pronunciation", ease: 4, repetitions: 1 },
       ];
     case "easy":
       return [
         { target: "enToFa", ease: 4, repetitions: 2 },
         { target: "faToEn", ease: 4, repetitions: 1 },
         { target: "review", ease: 4, repetitions: 1 },
+        { target: "pronunciation", ease: 4, repetitions: 1 },
       ];
   }
 }
@@ -138,9 +146,9 @@ function buildHelpSummaries(): HelpActionSummary[] {
     {
       title: "بلد نیستم",
       description:
-        "برای زمانی است که کلمه را بلد نیستی. کارت‌های متناظر همین Note با نوع‌های EnToFa، FaToEn و WordsForNewStudy-Review پیدا می‌شوند و به دک‌های اصلی خودشان منتقل می‌شوند.",
-      moves: `کارت ${WordAnkiConstants.cardTypes.EnToFa} به ${WordAnkiConstants.decks.EnToFa}، کارت ${WordAnkiConstants.cardTypes.FaToEn} به ${WordAnkiConstants.decks.FaToEn} و کارت ${REVIEW_CARD} به ${REVIEW_DECK} منتقل می‌شود.`,
-      answers: "برای کارت‌های EnToFa و FaToEn یک بار Again با ease=1 اجرا می‌شود. روی کارت Review هیچ پاسخی اجرا نمی‌شود.",
+        "برای زمانی است که کلمه را بلد نیستی. کارت‌های متناظر همین Note با نوع‌های EnToFa، FaToEn، WordsForNewStudy-Review و WordsForNewStudy-Pronunciation پیدا می‌شوند و به دک‌های اصلی خودشان منتقل می‌شوند.",
+      moves: `کارت ${WordAnkiConstants.cardTypes.EnToFa} به ${WordAnkiConstants.decks.EnToFa}، کارت ${WordAnkiConstants.cardTypes.FaToEn} به ${WordAnkiConstants.decks.FaToEn}، کارت ${REVIEW_CARD} به ${REVIEW_DECK} و کارت ${PRONUNCIATION_CARD} به ${PRONUNCIATION_DECK} منتقل می‌شوند.`,
+      answers: "برای کارت‌های EnToFa و FaToEn یک بار Again با ease=1 اجرا می‌شود. روی کارت‌های Review و Pronunciation هیچ پاسخی اجرا نمی‌شود.",
       extra: `تگ ${AnkiTag.Filtered} روی نوت باقی می‌ماند.`,
       toneClassName:
         "border-red-500/20 bg-red-500/5 text-red-800 dark:text-red-300",
@@ -149,8 +157,8 @@ function buildHelpSummaries(): HelpActionSummary[] {
       title: "آشنا هستم",
       description:
         "برای زمانی است که کلمه برایت آشناست، اما نمی‌خواهی برای همهٔ کارت‌ها پاسخ ثبت شود. کارت‌های متناظر همین Note پیدا می‌شوند و فقط برای EnToFa پاسخ ثبت می‌شود.",
-      moves: `کارت‌های ${WordAnkiConstants.cardTypes.EnToFa}، ${WordAnkiConstants.cardTypes.FaToEn} و ${REVIEW_CARD} به‌ترتیب به ${WordAnkiConstants.decks.EnToFa}، ${WordAnkiConstants.decks.FaToEn} و ${REVIEW_DECK} منتقل می‌شوند.`,
-      answers: "فقط برای کارت EnToFa یک بار Good با ease=3 اجرا می‌شود. برای کارت FaToEn و Review هیچ عملی انجام نمی‌شود.",
+      moves: `کارت‌های ${WordAnkiConstants.cardTypes.EnToFa}، ${WordAnkiConstants.cardTypes.FaToEn}، ${REVIEW_CARD} و ${PRONUNCIATION_CARD} به دک‌های اصلی خودشان منتقل می‌شوند.`,
+      answers: "فقط برای کارت EnToFa یک بار Good با ease=3 اجرا می‌شود. برای کارت‌های FaToEn، Review و Pronunciation هیچ عملی انجام نمی‌شود.",
       extra: `تگ ${AnkiTag.Filtered} روی نوت باقی می‌ماند.`,
       toneClassName:
         "border-amber-500/20 bg-amber-500/5 text-amber-800 dark:text-amber-300",
@@ -159,8 +167,8 @@ function buildHelpSummaries(): HelpActionSummary[] {
       title: "بلدم",
       description:
         "برای زمانی است که کلمه را می‌دانی. کارت‌های متناظر همین Note پیدا می‌شوند، به دک‌های اصلی می‌روند و سپس برای هر نوع کارت پاسخ مخصوص خودش ثبت می‌شود.",
-      moves: `کارت‌های EnToFa، FaToEn و ${REVIEW_CARD} به دک‌های ${WordAnkiConstants.decks.EnToFa}، ${WordAnkiConstants.decks.FaToEn} و ${REVIEW_DECK} منتقل می‌شوند.`,
-      answers: "برای EnToFa دو بار Easy با ease=4، برای FaToEn یک بار Good با ease=3 و برای Review یک بار Easy با ease=4 اجرا می‌شود.",
+      moves: `کارت‌های EnToFa، FaToEn، ${REVIEW_CARD} و ${PRONUNCIATION_CARD} به دک‌های اصلی خودشان منتقل می‌شوند.`,
+      answers: "برای EnToFa دو بار Easy با ease=4، برای FaToEn یک بار Good با ease=3 و برای Review و Pronunciation یک بار Easy با ease=4 اجرا می‌شود.",
       extra: `تگ ${AnkiTag.Filtered} روی نوت باقی می‌ماند.`,
       toneClassName:
         "border-emerald-500/20 bg-emerald-500/5 text-emerald-800 dark:text-emerald-300",
@@ -169,8 +177,8 @@ function buildHelpSummaries(): HelpActionSummary[] {
       title: "عالی",
       description:
         "برای زمانی است که کلمه را کاملاً و بدون زحمت می‌دانی. کارت‌های متناظر همین Note به دک‌های اصلی می‌روند و پاسخ Easy ثبت می‌شود؛ EnToFa دو بار پاسخ می‌گیرد.",
-      moves: `کارت‌های EnToFa، FaToEn و ${REVIEW_CARD} به دک‌های ${WordAnkiConstants.decks.EnToFa}، ${WordAnkiConstants.decks.FaToEn} و ${REVIEW_DECK} منتقل می‌شوند.`,
-      answers: "برای EnToFa دو بار Easy با ease=4، برای FaToEn یک بار Easy با ease=4 و برای Review یک بار Easy با ease=4 اجرا می‌شود.",
+      moves: `کارت‌های EnToFa، FaToEn، ${REVIEW_CARD} و ${PRONUNCIATION_CARD} به دک‌های اصلی خودشان منتقل می‌شوند.`,
+      answers: "برای EnToFa دو بار Easy با ease=4، برای FaToEn یک بار Easy با ease=4 و برای Review و Pronunciation یک بار Easy با ease=4 اجرا می‌شود.",
       extra: `تگ ${AnkiTag.Filtered} روی نوت باقی می‌ماند.`,
       toneClassName:
         "border-sky-500/20 bg-sky-500/5 text-sky-800 dark:text-sky-300",
@@ -329,10 +337,15 @@ export default function AnkiKnowingFilterManagementClient() {
         row.noteId,
         targets.review.cardType,
       );
+      const pronunciationCardIds = await findNoteCards(
+        row.noteId,
+        targets.pronunciation.cardType,
+      );
       const cardIdsByTarget = {
         enToFa: enToFaCardIds,
         faToEn: faToEnCardIds,
         review: reviewCardIds,
+        pronunciation: pronunciationCardIds,
       } satisfies Record<
         keyof ReturnType<typeof actionTargets>,
         number[]
@@ -348,6 +361,7 @@ export default function AnkiKnowingFilterManagementClient() {
         [targets.enToFa, enToFaCardIds],
         [targets.faToEn, faToEnCardIds],
         [targets.review, reviewCardIds],
+        [targets.pronunciation, pronunciationCardIds],
       ] as const;
       for (const [target, cardIds] of cardsToMove) {
         const moveResponse = await ankiOperations.changeDeck({
@@ -474,7 +488,7 @@ export default function AnkiKnowingFilterManagementClient() {
         <div className="flex items-start justify-between gap-3">
           <PageHeader
             title="Knowing Filter Card Management"
-            subtitle="مدیریت سه کارت متناظر هر کلمه در دک فیلتر شناخت"
+            subtitle="مدیریت چهار کارت متناظر هر کلمه در دک فیلتر شناخت"
           />
           <button
             type="button"
@@ -740,7 +754,7 @@ export default function AnkiKnowingFilterManagementClient() {
                     <p className="mt-3 text-muted">
                       هر ردیف یک کارت است، اما دکمه روی نوت همان ردیف اجرا می‌شود
                       و کارت‌های متناظر همان نوت را هم پیدا می‌کند. بنابراین ممکن
-                      است یک کلیک روی هر سه کارتِ یک کلمه اثر بگذارد.
+                      است یک کلیک روی هر چهار کارتِ یک کلمه اثر بگذارد.
                     </p>
                     <p className="mt-2 text-muted">
                       در شروع هر عملیات تگ <span dir="ltr">{AnkiTag.Filtered}</span>
@@ -749,18 +763,20 @@ export default function AnkiKnowingFilterManagementClient() {
                       می‌شود، نه حذف تگ.
                     </p>
                     <p className="mt-2 text-muted">
-                      سه کارت متناظر هر Note عبارت‌اند از{" "}
+                      چهار کارت متناظر هر Note عبارت‌اند از{" "}
                       <span dir="ltr">EnToFa</span>،{" "}
                       <span dir="ltr">FaToEn</span> و{" "}
-                      <span dir="ltr">{REVIEW_CARD}</span>. اپ این کارت‌ها را
+                      <span dir="ltr">{REVIEW_CARD}</span> و{" "}
+                      <span dir="ltr">{PRONUNCIATION_CARD}</span>. اپ این کارت‌ها را
                       برای همان Note پیدا می‌کند و به دک اصلی خودشان منتقل
                       می‌کند؛ سپس بسته به دکمه، پاسخ متفاوتی برای هر کارت اجرا
                       می‌شود.
                     </p>
                     <p className="mt-2 rounded-xl border border-amber-500/20 bg-amber-500/5 p-3 text-amber-800 dark:text-amber-300">
                       منظور از «کارت متناظر» کارت جدید یا کارت مخصوص فیلتر
-                      نیست؛ منظور کارت همان Note با نوع EnToFa، FaToEn یا{" "}
-                      <span dir="ltr">{REVIEW_CARD}</span> است. ردیف فعلی فقط
+                      نیست؛ منظور کارت همان Note با نوع EnToFa، FaToEn،{" "}
+                      <span dir="ltr">{REVIEW_CARD}</span> یا{" "}
+                      <span dir="ltr">{PRONUNCIATION_CARD}</span> است. ردیف فعلی فقط
                       Note و کلمه را مشخص می‌کند؛ عملیات روی کارت‌های متناظر
                       انجام می‌شود، نه صرفاً روی کارت فیلتر نمایش‌داده‌شده.
                     </p>
@@ -808,11 +824,11 @@ export default function AnkiKnowingFilterManagementClient() {
                   <section className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4 text-sm leading-7 text-amber-800 dark:text-amber-300">
                     <h3 className="font-bold">نکات مهم</h3>
                     <ul className="mt-2 list-inside list-disc">
-                      <li>در هر چهار دکمه، کارت‌های متناظر EnToFa، FaToEn و {REVIEW_CARD} برای همان Note پیدا و به دک‌های اصلی منتقل می‌شوند.</li>
-                      <li>«بلد نیستم» برای EnToFa و FaToEn یک بار Again می‌زند و Review را دست‌نخورده می‌گذارد.</li>
+                      <li>در هر چهار دکمه، کارت‌های متناظر EnToFa، FaToEn، {REVIEW_CARD} و {PRONUNCIATION_CARD} برای همان Note پیدا و به دک‌های اصلی منتقل می‌شوند.</li>
+                      <li>«بلد نیستم» برای EnToFa و FaToEn یک بار Again می‌زند و Review و Pronunciation را دست‌نخورده می‌گذارد.</li>
                       <li>«آشنا هستم» فقط برای EnToFa یک بار Good با <span dir="ltr">ease=3</span> اجرا می‌کند.</li>
-                      <li>«بلدم»: برای EnToFa دو بار Easy با <span dir="ltr">ease=4</span>، برای FaToEn یک بار Good با <span dir="ltr">ease=3</span> و برای Review یک بار Easy با <span dir="ltr">ease=4</span>.</li>
-                      <li>«عالی»: برای هر سه کارت Easy با <span dir="ltr">ease=4</span> اجرا می‌شود و EnToFa دو بار پاسخ می‌گیرد.</li>
+                      <li>«بلدم»: برای EnToFa دو بار Easy با <span dir="ltr">ease=4</span>، برای FaToEn یک بار Good با <span dir="ltr">ease=3</span> و برای Review و Pronunciation یک بار Easy با <span dir="ltr">ease=4</span>.</li>
+                      <li>«عالی»: برای هر چهار کارت Easy با <span dir="ltr">ease=4</span> اجرا می‌شود و EnToFa دو بار پاسخ می‌گیرد.</li>
                       <li>اگر عملیات موفق شود، همان ردیف تا زمان بارگذاری دوباره «فیلتر شده» نشان داده می‌شود و دکمه‌ها دوباره فعال نمی‌شوند.</li>
                       <li>اگر خطا دیدی، ابتدا وضعیت Deck و اتصال AnkiConnect را بررسی کن و سپس فهرست را دوباره بارگذاری کن.</li>
                     </ul>

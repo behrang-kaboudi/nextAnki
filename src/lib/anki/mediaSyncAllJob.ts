@@ -26,6 +26,7 @@ export type MediaSyncAllStatus = {
   mediaUploaded: number;
   mediaDeleted: number;
   currentNoteId: number | null;
+  mode: "missing" | "changed";
 };
 
 type State = MediaSyncAllStatus & { _started: boolean };
@@ -87,6 +88,7 @@ function getState(): State {
       mediaUploaded: 0,
       mediaDeleted: 0,
       currentNoteId: null,
+      mode: "missing",
       _started: false,
     };
   }
@@ -100,7 +102,7 @@ export function getMediaSyncAllStatus(): MediaSyncAllStatus {
   return pub;
 }
 
-function listMediaFiles(): Array<{ filename: string; absPath: string; size: number }> {
+function listMediaFiles(): Array<{ filename: string; absPath: string; size: number; mtimeMs: number }> {
   const dirs = [
     path.join(process.cwd(), "public", "audio", "pictureWord"),
     path.join(process.cwd(), "public", "audio", "words"),
@@ -128,13 +130,13 @@ function listMediaFiles(): Array<{ filename: string; absPath: string; size: numb
 
       const prev = byFilename.get(filename);
       if (!prev || st.size > prev.size) {
-        byFilename.set(filename, { absPath, size: st.size });
+        byFilename.set(filename, { absPath, size: st.size, mtimeMs: st.mtimeMs });
       }
     }
   }
 
   return Array.from(byFilename.entries())
-    .map(([filename, info]) => ({ filename, absPath: info.absPath, size: info.size }))
+    .map(([filename, info]) => ({ filename, absPath: info.absPath, size: info.size, mtimeMs: info.mtimeMs }))
     .sort((a, b) => a.filename.localeCompare(b.filename));
 }
 
@@ -142,11 +144,12 @@ async function storeMediaFile(
   filename: string,
   dataB64: string,
   anki: ReturnType<typeof createAnkiConnectClient>,
+  deleteExisting = false,
 ) {
   const res = await anki.requestDetailed("storeMediaFile", {
     filename,
     data: dataB64,
-    deleteExisting: false,
+    deleteExisting,
   });
   if (!res.ok) return { ok: false as const, error: res.error };
   return { ok: true as const };
@@ -165,6 +168,16 @@ function listAnkiMediaDirNames(mediaDir: string): Set<string> {
     return new Set();
   }
   return new Set(entries);
+}
+
+function mediaFileContentDiffers(sourcePath: string, targetPath: string): boolean {
+  try {
+    const source = fs.readFileSync(sourcePath);
+    const target = fs.readFileSync(targetPath);
+    return source.length !== target.length || !source.equals(target);
+  } catch {
+    return false;
+  }
 }
 
 async function runJob(state: State) {
@@ -195,19 +208,48 @@ async function runJob(state: State) {
 
   if (mediaDir) {
     const existing = listAnkiMediaDirNames(mediaDir);
-    const missing = files.filter((f) => !existing.has(f.filename));
-    const alreadyCount = Math.max(0, files.length - missing.length);
+    const candidates = state.mode === "changed"
+      ? files.filter((file) => {
+          if (!existing.has(file.filename)) return false;
+          try {
+            const target = fs.statSync(path.join(mediaDir, file.filename));
+            return target.isFile() &&
+              target.mtimeMs !== file.mtimeMs &&
+              mediaFileContentDiffers(file.absPath, path.join(mediaDir, file.filename));
+          } catch {
+            return false;
+          }
+        })
+      : files.filter((f) => !existing.has(f.filename));
+    const alreadyCount = Math.max(0, files.length - candidates.length);
     state.skippedSame = alreadyCount;
     state.processed = alreadyCount;
 
     const concurrency = 32;
-    await runWithConcurrency(missing, concurrency, async (file) => {
+    const changedClients = state.mode === "changed"
+      ? Array.from({ length: 12 }, () =>
+          createAnkiConnectClient({ timeoutMs: 30000, retryDelayMs: 1000 }),
+        )
+      : [];
+    await runWithConcurrency(candidates, concurrency, async (file) => {
       if (state.stopRequested) return;
       state.currentNoteId = null;
 
       const outPath = path.join(mediaDir, file.filename);
       try {
-        fs.copyFileSync(file.absPath, outPath, fs.constants.COPYFILE_EXCL);
+        if (state.mode === "changed") {
+          const dataB64 = fs.readFileSync(file.absPath).toString("base64");
+          const client = changedClients[Math.abs(hashString(file.filename)) % changedClients.length]!;
+          const uploaded = await storeMediaFile(file.filename, dataB64, client, true);
+          if (!uploaded.ok) {
+            state.failed += 1;
+            state.processed += 1;
+            return;
+          }
+        } else {
+          fs.copyFileSync(file.absPath, outPath, fs.constants.COPYFILE_EXCL);
+          fs.utimesSync(outPath, file.mtimeMs / 1000, file.mtimeMs / 1000);
+        }
       } catch (e) {
         const code = (e as NodeJS.ErrnoException | null)?.code ?? "";
         if (code === "EEXIST") {
@@ -267,7 +309,7 @@ async function runJob(state: State) {
       }
 
       const client = clients[Math.abs(hashString(file.filename)) % clients.length]!;
-      const res = await storeMediaFile(file.filename, dataB64, client);
+      const res = await storeMediaFile(file.filename, dataB64, client, state.mode === "changed");
       if (!res.ok) {
         if (isFileAlreadyExistsError(res.error)) state.skippedSame += 1;
         else state.failed += 1;
@@ -295,13 +337,14 @@ function hashString(input: string): number {
   return h;
 }
 
-export function startMediaSyncAllIfNeeded(): MediaSyncAllStatus {
+export function startMediaSyncAllIfNeeded(opts?: { mode?: "missing" | "changed" }): MediaSyncAllStatus {
   const state = getState();
   if (state.running) return getMediaSyncAllStatus();
   if (state._started && !state.done) return getMediaSyncAllStatus();
 
   state.jobId = `media_sync_${Date.now()}`;
   state._started = true;
+  state.mode = opts?.mode ?? "missing";
   state.stopRequested = false;
   state.stoppedEarly = false;
 

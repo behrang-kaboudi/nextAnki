@@ -374,20 +374,28 @@ function CardTypeEditor({
     <Modal title={`ویرایش ${draft.name || "Card Type"}`} subtitle="تغییرات ابتدا فقط به‌صورت پیش‌نویس نگه‌داری می‌شوند." onClose={onClose}>
       <div className="grid gap-4">
         <Field label="نام Card Type" value={draft.name} onChange={(name) => setDraft({ ...draft, name })} />
-        <label className="grid gap-1.5">
-          <span className="text-xs font-semibold">دک مرتبط</span>
-          <select
-            value={draft.deckId ?? ""}
-            onChange={(event) => {
-              const deckId = event.target.value || null;
-              setDraft({ ...draft, deckId });
-            }}
-            className="h-11 rounded-xl border border-card bg-background px-3 text-sm"
-          >
-            <option value="">بدون دک مشخص</option>
-            {decks.map((deck) => <option key={deck.id} value={deck.id}>{deck.title} — {deck.name}</option>)}
-          </select>
-        </label>
+        <div className="grid gap-2">
+          <span className="text-xs font-semibold">دک‌های مرتبط</span>
+          <div className="grid gap-2 rounded-xl border border-card bg-background p-3 sm:grid-cols-2">
+            {decks.map((deck) => (
+              <label key={deck.id} className="flex items-center gap-2 text-xs">
+                <input
+                  type="checkbox"
+                  checked={draft.deckIds.includes(deck.id)}
+                  onChange={(event) => setDraft({
+                    ...draft,
+                    deckIds: event.target.checked
+                      ? Array.from(new Set([...draft.deckIds, deck.id]))
+                      : draft.deckIds.filter((id) => id !== deck.id),
+                  })}
+                  className="size-4 accent-[var(--primary)]"
+                />
+                <span>{deck.title} — {deck.name}</span>
+              </label>
+            ))}
+          </div>
+          <span className="text-[11px] leading-5 text-muted">یک Card Type می‌تواند در چند دک استفاده شود؛ انتخاب دک اختیاری است.</span>
+        </div>
         <label className="grid gap-1.5">
           <span className="text-xs font-semibold">Front Template</span>
           <textarea
@@ -643,8 +651,8 @@ export default function StructureBuilderClient() {
       noteType: {
         ...settings.noteType,
         cardTypes: settings.noteType.cardTypes.map((item) =>
-          item.deckId === id
-            ? { ...item, deckId: null }
+          item.deckIds.includes(id)
+            ? { ...item, deckIds: item.deckIds.filter((deckId) => deckId !== id) }
             : item,
         ),
       },
@@ -727,7 +735,7 @@ export default function StructureBuilderClient() {
     const next: AnkiStructureCardType = {
       id,
       name: `CardType${settings.noteType.cardTypes.length + 1}`,
-      deckId: settings.decks[0]?.id ?? null,
+      deckIds: [],
       front: `{{${frontField}}}`,
       back: `{{FrontSide}}\n\n<hr id="answer">\n\n{{${backField}}}`,
     };
@@ -1131,7 +1139,7 @@ export default function StructureBuilderClient() {
                 ایجاد Card Type برای Note Type: Meta-LEX-vR9
               </p>
               <p className="mt-1 max-w-3xl text-xs leading-6 text-muted">
-                افزودن در Step 3، دک مرتبط و محتوای Front/Back در Step 5 اعمال می‌شود. تنظیمات مطالعه فقط به دک‌ها مربوط است. حذف، Card Type و کارت‌های مرتبط را از Anki حذف می‌کند.
+                افزودن در Step 3 و محتوای Front/Back در Step 5 اعمال می‌شود. هر Card Type می‌تواند به چند دک مرتبط باشد؛ تنظیمات مطالعه فقط به دک‌ها مربوط است. حذف، Card Type و کارت‌های مرتبط را از Anki حذف می‌کند.
               </p>
             </div>
             <div className="flex gap-2">
@@ -1142,14 +1150,16 @@ export default function StructureBuilderClient() {
           </div>
           <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
             {settings.noteType.cardTypes.map((card) => {
-              const deck = findStructureDeck(settings, card.deckId);
+              const decks = card.deckIds
+                .map((deckId) => findStructureDeck(settings, deckId))
+                .filter((deck): deck is NonNullable<typeof deck> => Boolean(deck));
               const issues = cardTypeIssues.get(card.id) ?? [];
               return (
                 <article key={card.id} className={`rounded-2xl border bg-background p-4 ${issues.length ? "border-red-500/60" : "border-card"}`}>
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <h3 className="truncate text-sm font-bold">{card.name}</h3>
-                      <p className="mt-1 truncate text-[10px] text-muted">{deck?.name ?? "بدون دک مشخص"}</p>
+                      <p className="mt-1 truncate text-[10px] text-muted">{decks.length ? decks.map((deck) => deck.name).join("، ") : "بدون دک مشخص"}</p>
                     </div>
                     <div className="flex items-center gap-2">
                       {issues.length ? (

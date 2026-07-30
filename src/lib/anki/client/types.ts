@@ -218,6 +218,7 @@ export type AnkiConnectActionMap = {
       lapses: number;
       left: number;
       mod: number;
+      flags?: number;
     }>;
   };
   getIntervals: {
@@ -247,6 +248,15 @@ export type AnkiConnectActionMap = {
     result: null;
   };
   forgetCards: { params: { cards: number[] }; result: null };
+  setSpecificValueOfCard: {
+    params: {
+      card: number;
+      keys: string[];
+      newValues: Array<string | number>;
+      warning_check?: boolean;
+    };
+    result: boolean[];
+  };
 
   addNote: { params: { note: AnkiNote }; result: number | null };
   updateNoteFields: {

@@ -1,7 +1,8 @@
 import "server-only";
 
 import { createAnkiConnectClient } from "@/lib/anki";
-import { AnkiNoteTypes, WordAnkiConstants } from "@/lib/anki";
+import { AnkiNoteTypes } from "@/lib/anki";
+import { getAnkiStructureSettings } from "@/lib/anki/structureSettingsRepo";
 
 export async function ensureMetaLexVr9ModelFields(
   anki: ReturnType<typeof createAnkiConnectClient>,
@@ -14,7 +15,17 @@ export async function ensureMetaLexVr9ModelFields(
   }
 
   const modelName = AnkiNoteTypes.META_LEX_VR9;
-  const desiredFields = WordAnkiConstants.noteFields.slice().map(String);
+  // Structure Builder is the source of truth for the templates. The repository
+  // returns code defaults when no profile has ever been saved, but a persisted
+  // profile must not have its deleted Card Types resurrected by Full Sync.
+  const structureSettings = await getAnkiStructureSettings();
+  const desiredFields = structureSettings.config.noteType.fields.slice().map(String);
+  const desiredTemplates = Object.fromEntries(
+    structureSettings.config.noteType.cardTypes.map((template) => [
+      template.name,
+      { Front: template.front, Back: template.back },
+    ]),
+  );
 
   const modelNamesRes = await anki.requestDetailed("modelNames");
   if (!modelNamesRes.ok) throw new Error(modelNamesRes.error);
@@ -22,8 +33,7 @@ export async function ensureMetaLexVr9ModelFields(
   if (!modelNames) throw new Error("AnkiConnect returned null for modelNames.");
 
   if (!modelNames.includes(modelName)) {
-    const templates = WordAnkiConstants.noteTemplates;
-    const cardTemplates = Object.entries(templates).map(([Name, template]) => ({
+    const cardTemplates = Object.entries(desiredTemplates).map(([Name, template]) => ({
       Name,
       Front: template.Front,
       Back: template.Back,
@@ -50,8 +60,6 @@ export async function ensureMetaLexVr9ModelFields(
   }
 
   // Keep card templates in sync as well (especially important for existing users/models).
-  const desiredTemplates = WordAnkiConstants.noteTemplates;
-
   const currentTemplatesRes = await anki.requestDetailed("modelTemplates", { modelName });
   if (!currentTemplatesRes.ok) throw new Error(currentTemplatesRes.error);
   const currentTemplates = currentTemplatesRes.result;

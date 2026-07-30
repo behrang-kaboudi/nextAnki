@@ -216,10 +216,27 @@ function latestAudioTag(audioKey: string, field: WordAudioFieldKey): string {
   return `[sound:${latest.filename}]`;
 }
 
+function getFirstPartSpell(word: string): string {
+  return String(word ?? "").trim().slice(0, 3).toUpperCase().split("").join("-");
+}
+
+function getFirstPartSpellAudio(word: string): string {
+  return String(word ?? "")
+    .trim()
+    .slice(0, 3)
+    .toLowerCase()
+    .split("")
+    .filter((letter) => /^[a-z]$/.test(letter))
+    .map((letter) => `[sound:alphabet-${letter}.mp3]`)
+    .join(" ");
+}
+
 export const WORD_ANKI_FIELD_GENERATORS = {
   anki_link_id: (w) => w.anki_link_id,
   base_form: (w) => w.base_form,
   base_form_audio: (w) => latestAudioTag(w.anki_link_id, "base_form"),
+  "first-part-spell": (w) => getFirstPartSpell(w.base_form),
+  "first-part-spell-audio": (w) => getFirstPartSpellAudio(w.base_form),
   phonetic_us: (w) => w.phonetic_us ?? "",
   pos: (w) => w.pos ?? "",
   meaning_fa: (w) => w.meaning_fa,

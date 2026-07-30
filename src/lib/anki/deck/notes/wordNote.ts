@@ -16,6 +16,8 @@ export const WordAnkiConstants = {
     "anki_link_id",
     "base_form",
     "base_form_audio",
+    "first-part-spell",
+    "first-part-spell-audio",
     "phonetic_us",
     "pos",
     "meaning_fa",

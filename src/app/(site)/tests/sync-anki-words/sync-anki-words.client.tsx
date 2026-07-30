@@ -731,15 +731,23 @@ export default function SyncAnkiWordsClient() {
     }
   }
 
-  async function startSyncAllMedia() {
+  async function startSyncAllMedia(mode: "missing" | "changed" = "missing") {
     if (isRunning || mediaSyncStatus?.running) return;
     setPollingEnabled(true);
     setIsRunning(true);
     setPreview(null);
 
     try {
-      append({ level: "info", message: "Starting media copy (pictureWord + words)..." });
-      const res = await fetch("/api/tests/sync-anki-words/media/sync-all/start", { method: "POST" });
+      append({
+        level: "info",
+        message: mode === "changed"
+          ? "Starting changed media copy (different local modification time)..."
+          : "Starting media copy (pictureWord + words)...",
+      });
+      const endpoint = mode === "changed"
+        ? "/api/tests/sync-anki-words/media/sync-changed/start"
+        : "/api/tests/sync-anki-words/media/sync-all/start";
+      const res = await fetch(endpoint, { method: "POST" });
       const data = (await res.json()) as { status?: SyncAllStatus } | unknown;
       setPreview(data);
       if (data && typeof data === "object" && "status" in data) {
@@ -1089,6 +1097,14 @@ export default function SyncAnkiWordsClient() {
                   className="h-10 rounded-xl bg-foreground px-3 text-sm font-semibold text-background transition disabled:opacity-50"
                 >
                   Copy all media
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void startSyncAllMedia("changed")}
+                  disabled={isRunning || Boolean(mediaSyncStatus?.running)}
+                  className="h-10 rounded-xl border border-card bg-background px-3 text-sm font-semibold text-foreground transition disabled:opacity-50"
+                >
+                  Copy changed media
                 </button>
                 <HelpButton id="media_copy" />
               </div>
