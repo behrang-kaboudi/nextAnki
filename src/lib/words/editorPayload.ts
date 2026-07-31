@@ -34,6 +34,7 @@ export type WordEditorInitial = {
   word_note: string | null;
   common_error: string | null;
   imageability: number | null;
+  productive_target: number | null;
 
   createdAt: string;
   updatedAt: string;
@@ -85,6 +86,7 @@ export async function getWordEditorInitial(id: number): Promise<WordEditorInitia
     word_note: word.word_note,
     common_error: word.common_error,
     imageability: word.imageability,
+    productive_target: word.productive_target,
     createdAt: word.createdAt.toISOString(),
     updatedAt: word.updatedAt.toISOString(),
   };

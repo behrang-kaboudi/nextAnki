@@ -35,6 +35,12 @@ export const WORD_EXTRACTION_PROMPTS_PHASE3: WordExtractionPromptSpec[] = [
     path: "src/prompts/word-extraction/learning_depth/rulseV1.md",
   },
   {
+    id: "productive_target",
+    label: "PRODUCTIVE_TARGET",
+    fieldKey: "productive_target",
+    path: "src/prompts/word-extraction/productive_target/rulseV1.md",
+  },
+  {
     id: "pos",
     label: "POS",
     fieldKey: "pos",

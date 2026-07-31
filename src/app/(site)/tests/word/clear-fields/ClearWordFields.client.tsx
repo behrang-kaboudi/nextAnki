@@ -9,22 +9,25 @@ type FieldOption = {
 };
 
 const FIELD_OPTIONS: FieldOption[] = [
-  { field: "imageability", label: "imageability", note: "clear => NULL" },
   { field: "phonetic_us", label: "phonetic_us" },
   { field: "phonetic_us_normalized", label: "phonetic_us_normalized" },
+  { field: "meaning_fa", label: "meaning_fa" },
+  { field: "meaning_fa_IPA", label: "meaning_fa_IPA" },
+  { field: "meaning_fa_IPA_normalized", label: "meaning_fa_IPA_normalized" },
   { field: "pos", label: "pos" },
   { field: "concept_explained", label: "concept_explained" },
   { field: "concept_explained_fa", label: "concept_explained_fa" },
   { field: "word_hint_story", label: "word_hint_story" },
-  { field: "sentence_en_meaning_fa", label: "sentence_en_meaning_fa" },
   {
     field: "explanation_for_sentence_meaning",
     label: "explanation_for_sentence_meaning",
   },
-  { field: "learning_depth", label: "learning_depth", note: "set NULL" },
+  { field: "learning_depth", label: "learning_depth", note: "set 0" },
   { field: "mixed_sentence", label: "mixed_sentence" },
   { field: "other_meanings_fa", label: "other_meanings_fa" },
+  { field: "other_meanings_en", label: "other_meanings_en" },
   { field: "category", label: "category" },
+  { field: "typeOfWordInDb", label: "typeOfWordInDb" },
   { field: "hint_sentence", label: "hint_sentence" },
   { field: "first_letter_en_hint", label: "first_letter_en_hint" },
   { field: "first_letter_fa_hint", label: "first_letter_fa_hint" },
@@ -32,6 +35,10 @@ const FIELD_OPTIONS: FieldOption[] = [
   { field: "json_hint", label: "json_hint" },
   { field: "word_note", label: "word_note" },
   { field: "common_error", label: "common_error" },
+  { field: "imageability", label: "imageability", note: "set 0" },
+  { field: "productive_target", label: "productive_target", note: "set 0" },
+  { field: "createdAt", label: "createdAt", note: "set 1970-01-01" },
+  { field: "updatedAt", label: "updatedAt", note: "set automatically" },
 ];
 
 export function ClearWordFieldsClient() {
@@ -45,17 +52,14 @@ export function ClearWordFieldsClient() {
   } | null>(null);
 
   const selectedFields = useMemo(
-    () =>
-      FIELD_OPTIONS.map((o) => o.field).filter((f) => Boolean(selected[f])),
+    () => FIELD_OPTIONS.map((o) => o.field).filter((f) => Boolean(selected[f])),
     [selected],
   );
 
   const canSubmit = selectedFields.length > 0 && confirm && !busy;
 
   function toggleAll(next: boolean) {
-    setSelected(
-      Object.fromEntries(FIELD_OPTIONS.map((o) => [o.field, next])),
-    );
+    setSelected(Object.fromEntries(FIELD_OPTIONS.map((o) => [o.field, next])));
   }
 
   async function runClear() {
@@ -69,14 +73,12 @@ export function ClearWordFieldsClient() {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ fields: selectedFields, confirm: true }),
       });
-      const json = (await res.json().catch(() => null)) as
-        | {
-            ok?: boolean;
-            error?: string;
-            clearedFields?: string[];
-            updatedCount?: number;
-          }
-        | null;
+      const json = (await res.json().catch(() => null)) as {
+        ok?: boolean;
+        error?: string;
+        clearedFields?: string[];
+        updatedCount?: number;
+      } | null;
       if (!res.ok || !json?.ok) {
         throw new Error(json?.error ?? `Request failed (${res.status})`);
       }
@@ -97,16 +99,22 @@ export function ClearWordFieldsClient() {
         <div>
           <h1 className="text-xl font-semibold">Clear Word fields</h1>
           <p className="mt-1 text-sm opacity-80">
-            Select nullable <span className="font-mono">Word</span> columns and
-            clear them for all DB rows.
+            همهٔ فیلدهای جدول <span className="font-mono">Word</span>، به‌جز{" "}
+            <span className="font-mono">id</span>،{" "}
+            <span className="font-mono">anki_link_id</span> و{" "}
+            <span className="font-mono">base_form</span> را می‌توانید برای همهٔ
+            رکوردها خالی کنید. متن‌ها خالی، عددها{" "}
+            <span className="font-mono">0</span> و{" "}
+            <span className="font-mono">createdAt</span> برابر 1970-01-01
+            می‌شود؛ <span className="font-mono">updatedAt</span> خودکار به زمان
+            اجرای عملیات تغییر می‌کند.
           </p>
         </div>
       </div>
 
       <div className="mt-4 rounded border bg-yellow-50 px-3 py-2 text-xs text-yellow-900 dark:bg-yellow-950/30 dark:text-yellow-100">
-        This action updates the database. Selected fields are set to{" "}
-        <span className="font-mono">NULL</span> for every{" "}
-        <span className="font-mono">Word</span> row.
+        این عملیات دیتابیس را برای همهٔ ردیف‌های{" "}
+        <span className="font-mono">Word</span> تغییر می‌دهد.
       </div>
 
       <div className="mt-4 flex flex-wrap items-center gap-2">

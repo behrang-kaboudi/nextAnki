@@ -1,32 +1,46 @@
 import "server-only";
 
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import type { Prisma } from "@prisma/client";
+import { updateManyWords } from "@/lib/words/wordRepo";
 
 export const runtime = "nodejs";
 
-const CLEARABLE_FIELDS = [
-  "imageability",
-  "phonetic_us",
-  "phonetic_us_normalized",
-  "pos",
-  "concept_explained",
-  "concept_explained_fa",
-  "word_hint_story",
-  "sentence_en_meaning_fa",
-  "explanation_for_sentence_meaning",
-  "learning_depth",
-  "mixed_sentence",
-  "other_meanings_fa",
-  "category",
-  "hint_sentence",
-  "first_letter_en_hint",
-  "first_letter_fa_hint",
-  "hint_to_select",
-  "json_hint",
-  "word_note",
-  "common_error",
-] as const;
+const CLEARABLE_FIELD_VALUES = {
+  phonetic_us: "",
+  phonetic_us_normalized: "",
+  meaning_fa: "",
+  meaning_fa_IPA: "",
+  meaning_fa_IPA_normalized: "",
+  pos: "",
+  concept_explained: "",
+  concept_explained_fa: "",
+  word_hint_story: "",
+  explanation_for_sentence_meaning: "",
+  learning_depth: 0,
+  mixed_sentence: "",
+  other_meanings_fa: "",
+  other_meanings_en: "",
+  category: "",
+  typeOfWordInDb: "",
+  hint_sentence: "",
+  first_letter_en_hint: "",
+  first_letter_fa_hint: "",
+  hint_to_select: "",
+  json_hint: "",
+  word_note: "",
+  common_error: "",
+  imageability: 0,
+  productive_target: 0,
+  createdAt: new Date(0),
+  updatedAt: new Date(0),
+} satisfies Prisma.WordUpdateManyMutationInput;
+
+type ClearableField = keyof typeof CLEARABLE_FIELD_VALUES;
+
+const CLEARABLE_FIELDS = Object.keys(
+  CLEARABLE_FIELD_VALUES,
+) as ClearableField[];
 
 const clearableSet = new Set<string>(CLEARABLE_FIELDS);
 
@@ -71,10 +85,14 @@ export async function POST(req: Request) {
     );
   }
 
-  const data: Record<string, null> = {};
-  for (const f of fields) data[f] = null;
+  const data = Object.fromEntries(
+    fields.map((field) => [
+      field,
+      CLEARABLE_FIELD_VALUES[field as ClearableField],
+    ]),
+  ) as Prisma.WordUpdateManyMutationInput;
 
-  const res = await prisma.word.updateMany({ data });
+  const res = await updateManyWords({ data });
 
   return NextResponse.json({
     ok: true,

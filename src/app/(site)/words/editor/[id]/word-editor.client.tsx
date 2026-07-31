@@ -68,6 +68,7 @@ export type WordEditorState = {
   word_note: string | null;
   common_error: string | null;
   imageability: number | null;
+  productive_target: number | null;
 
   createdAt: string;
   updatedAt: string;
@@ -89,6 +90,7 @@ type EditableFieldKey =
   | "phonetic_us_normalized"
   | "learning_depth"
   | "imageability"
+  | "productive_target"
   | "typeOfWordInDb"
   | "category"
   | "mixed_sentence"
@@ -275,6 +277,7 @@ export default function WordEditorClient({
             word_note: word.word_note,
             common_error: word.common_error,
             imageability: word.imageability,
+            productive_target: word.productive_target,
           },
         }),
       });
@@ -784,6 +787,20 @@ export default function WordEditorClient({
                 onFocus={registerFieldFocus("imageability")}
                 className="w-full rounded border px-3 py-2 text-sm"
                 placeholder="(nullable number)"
+              />
+            </InputRow>
+
+            <InputRow label="productive_target (0-101)">
+              <input
+                type="number"
+                min={0}
+                max={101}
+                step={1}
+                value={word.productive_target == null ? "" : String(word.productive_target)}
+                onChange={(e) => setWord((p) => ({ ...p, productive_target: asNullableNumber(e.target.value) }))}
+                onFocus={registerFieldFocus("productive_target")}
+                className="w-full rounded border px-3 py-2 text-sm"
+                placeholder="(nullable integer)"
               />
             </InputRow>
 

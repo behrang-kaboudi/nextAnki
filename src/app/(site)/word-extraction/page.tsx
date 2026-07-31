@@ -549,6 +549,7 @@ export default function WordExtractionPage() {
   const [isPhase4PromptModalLoading, setIsPhase4PromptModalLoading] =
     useState(false);
   const [isPhase4MissingLoading, setIsPhase4MissingLoading] = useState(false);
+  const [phase4TailLimit, setPhase4TailLimit] = useState<string>("500");
   const [phase4PromptModalError, setPhase4PromptModalError] = useState<
     string | null
   >(null);
@@ -557,6 +558,7 @@ export default function WordExtractionPage() {
   >([]);
   const [phase4PromptModalTailJson, setPhase4PromptModalTailJson] =
     useState<string>("");
+  const [phase4MissingReport, setPhase4MissingReport] = useState<string | null>(null);
   const [phase4PromptModalCopied, setPhase4PromptModalCopied] = useState(false);
   const [promptPathModal, setPromptPathModal] = useState<{
     title: string;
@@ -680,6 +682,7 @@ export default function WordExtractionPage() {
     setIsPhase4PromptModalLoading(true);
     setPhase4PromptModalError(null);
     setPhase4PromptModalTailJson("");
+    setPhase4MissingReport(null);
     setPhase4PromptModalCopied(false);
     try {
       const paths = helperSpecs.map((spec) => spec.path);
@@ -699,6 +702,12 @@ export default function WordExtractionPage() {
       );
       setPhase4PromptModalItems(results);
 
+      const limitParsed = Number.parseInt(phase4TailLimit, 10);
+      const limit =
+        Number.isFinite(limitParsed) && limitParsed > 0
+          ? Math.min(Math.floor(limitParsed), 10000)
+          : 500;
+
       const active =
         helperSpecs.find((s) => s.id === phase4ActiveId) ??
         helperSpecs.find((s) => s.fieldKey) ??
@@ -708,13 +717,16 @@ export default function WordExtractionPage() {
       }
       setIsPhase4MissingLoading(true);
       const missingRes = await fetch(
-        `/api/word-extraction/helper/missing-by-field?field=${encodeURIComponent(active.fieldKey)}`,
+        `/api/word-extraction/helper/missing-by-field?field=${encodeURIComponent(active.fieldKey)}&limit=${encodeURIComponent(String(limit))}`,
         { method: "GET" },
       );
       const missingJson = (await missingRes.json().catch(() => null)) as {
         ok?: boolean;
         error?: string;
         items?: unknown;
+        total?: number;
+        fetched?: number;
+        limit?: number;
       } | null;
       if (!missingRes.ok || !missingJson?.ok) {
         throw new Error(
@@ -724,6 +736,9 @@ export default function WordExtractionPage() {
       }
       setPhase4PromptModalTailJson(
         JSON.stringify(missingJson.items ?? [], null, 2),
+      );
+      setPhase4MissingReport(
+        `field: ${active.fieldKey} · total matching: ${missingJson.total ?? 0} · loaded: ${missingJson.fetched ?? 0} · limit: ${missingJson.limit ?? limit}`,
       );
     } catch (error) {
       setPhase4PromptModalError(
@@ -733,20 +748,29 @@ export default function WordExtractionPage() {
       setIsPhase4MissingLoading(false);
       setIsPhase4PromptModalLoading(false);
     }
-  }, [helperSpecs, phase4ActiveId]);
+  }, [helperSpecs, phase4ActiveId, phase4TailLimit]);
 
   const loadPhase4Missing = useCallback(async (fieldKey: string) => {
     setIsPhase4MissingLoading(true);
     setPhase4PromptModalError(null);
+    setPhase4MissingReport(null);
     try {
+      const limitParsed = Number.parseInt(phase4TailLimit, 10);
+      const limit =
+        Number.isFinite(limitParsed) && limitParsed > 0
+          ? Math.min(Math.floor(limitParsed), 10000)
+          : 500;
       const missingRes = await fetch(
-        `/api/word-extraction/helper/missing-by-field?field=${encodeURIComponent(fieldKey)}`,
+        `/api/word-extraction/helper/missing-by-field?field=${encodeURIComponent(fieldKey)}&limit=${encodeURIComponent(String(limit))}`,
         { method: "GET" },
       );
       const missingJson = (await missingRes.json().catch(() => null)) as {
         ok?: boolean;
         error?: string;
         items?: unknown;
+        total?: number;
+        fetched?: number;
+        limit?: number;
       } | null;
       if (!missingRes.ok || !missingJson?.ok) {
         throw new Error(
@@ -757,6 +781,9 @@ export default function WordExtractionPage() {
       setPhase4PromptModalTailJson(
         JSON.stringify(missingJson.items ?? [], null, 2),
       );
+      setPhase4MissingReport(
+        `field: ${fieldKey} · total matching: ${missingJson.total ?? 0} · loaded: ${missingJson.fetched ?? 0} · limit: ${missingJson.limit ?? limit}`,
+      );
     } catch (error) {
       setPhase4PromptModalError(
         error instanceof Error ? error.message : String(error),
@@ -764,7 +791,7 @@ export default function WordExtractionPage() {
     } finally {
       setIsPhase4MissingLoading(false);
     }
-  }, []);
+  }, [phase4TailLimit]);
 
   const buildHelperPromptText = useCallback(() => {
     const checkedSpecs = helperSpecs.filter((s) =>
@@ -858,7 +885,7 @@ export default function WordExtractionPage() {
       const parsed = JSON.parse(promptText) as unknown;
       if (!Array.isArray(parsed)) {
         throw new Error(
-          "Input must be a JSON array: [{ id, phonetic_us?, imageability?, learning_depth?, pos?, other_meanings_fa?, concept_explained_fa? }]",
+          "Input must be a JSON array: [{ id, phonetic_us?, imageability?, learning_depth?, productive_target?, pos?, other_meanings_fa?, concept_explained_fa? }]",
         );
       }
 
@@ -897,7 +924,7 @@ export default function WordExtractionPage() {
       const parsed = JSON.parse(promptText) as unknown;
       if (!Array.isArray(parsed)) {
         throw new Error(
-          "Input must be a JSON array: [{ id, phonetic_us?, imageability?, learning_depth?, pos?, other_meanings_fa?, concept_explained_fa? }]",
+          "Input must be a JSON array: [{ id, phonetic_us?, imageability?, learning_depth?, productive_target?, pos?, other_meanings_fa?, concept_explained_fa? }]",
         );
       }
 
@@ -1561,7 +1588,7 @@ export default function WordExtractionPage() {
         <div className="grid gap-3 rounded-2xl border border-card bg-background/60 p-4 backdrop-blur lg:grid-cols-2">
           <div className="grid gap-3 rounded-xl border border-card bg-background/70 p-3">
             <div className="text-xs font-semibold tracking-wide text-muted">
-              PHASE 3 — PHONETIC_US + IMAGEABILITY + LEARNING_DEPTH +
+              PHASE 3 — PHONETIC_US + IMAGEABILITY + LEARNING_DEPTH + PRODUCTIVE_TARGET +
               POS + OTHER_MEANINGS_FA + CONCEPT_EXPLAINED_FA
             </div>
             <div className="grid gap-3">
@@ -1572,7 +1599,7 @@ export default function WordExtractionPage() {
                   onClick={openBase2PromptModal}
                   disabled={isBase2ModalLoading}
                 >
-                  3.1 PROMPT FOR: PHONETIC_US + IMAGEABILITY + LEARNING_DEPTH +
+                  3.1 PROMPT FOR: PHONETIC_US + IMAGEABILITY + LEARNING_DEPTH + PRODUCTIVE_TARGET +
                   POS + OTHER_MEANINGS_FA + CONCEPT_EXPLAINED_FA
                 </button>
                 <input
@@ -1603,14 +1630,27 @@ export default function WordExtractionPage() {
               HELPER (PHASE 4 AREA)
             </div>
             <div className="grid gap-3">
-              <button
-                type="button"
-                className={`${buttonBase} bg-gradient-to-r from-blue-700 to-cyan-600 text-white`}
-                onClick={openPhase4PromptModal}
-                disabled={isPhase4PromptModalLoading}
-              >
-                4.1 PROMPT FILES + MISSING (SELECT FIELD)
-              </button>
+              <div className="flex items-stretch gap-2">
+                <button
+                  type="button"
+                  className={`${buttonBase} flex-1 bg-gradient-to-r from-blue-700 to-cyan-600 text-white`}
+                  onClick={openPhase4PromptModal}
+                  disabled={isPhase4PromptModalLoading}
+                >
+                  4.1 PROMPT FILES + MISSING (SELECT FIELD)
+                </button>
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  min={1}
+                  max={10000}
+                  value={phase4TailLimit}
+                  onChange={(event) => setPhase4TailLimit(event.target.value)}
+                  className="h-11 w-20 rounded-xl border border-card bg-background px-3 text-xs font-semibold text-foreground shadow-elevated outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[color-mix(in_oklab,var(--primary),transparent_70%)]"
+                  aria-label="Count (phase 4 helper rows)"
+                  title="تعداد رکوردهای Helper (Phase 4)"
+                />
+              </div>
               <button
                 type="button"
                 className={`${buttonBase} bg-gradient-to-r from-blue-700 to-cyan-600 text-white`}
@@ -2396,9 +2436,14 @@ export default function WordExtractionPage() {
                   Helper — prompt files + missing rows
                 </div>
                 <div className="mt-1 text-xs opacity-70">
-                  Select a field to load 20 missing rows; check files to include
-                  in the shown prompt text.
+                  Select a field to load the chosen number of missing rows;
+                  check files to include in the shown prompt text.
                 </div>
+                {phase4MissingReport ? (
+                  <div className="mt-2 truncate text-xs opacity-70">
+                    {phase4MissingReport}
+                  </div>
+                ) : null}
               </div>
               <button
                 type="button"

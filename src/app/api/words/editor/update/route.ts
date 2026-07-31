@@ -45,6 +45,15 @@ function normalizeNullableNumber(value: unknown): number | null | undefined {
   return value;
 }
 
+function normalizeProductiveTarget(value: unknown): number | null | undefined {
+  if (value === undefined) return undefined;
+  if (value === null) return null;
+  if (typeof value !== "number" || !Number.isInteger(value) || value < 0 || value > 101) {
+    return undefined;
+  }
+  return value;
+}
+
 export async function POST(req: Request) {
   try {
     const body = (await req.json().catch(() => null)) as unknown;
@@ -65,6 +74,14 @@ export async function POST(req: Request) {
     const meaning_fa_IPA = normalizeRequiredString(d.meaning_fa_IPA);
     const sentence_en = normalizeRequiredString(d.sentence_en);
     const typeOfWordInDb = normalizeRequiredString(d.typeOfWordInDb);
+    const productive_target = normalizeProductiveTarget(d.productive_target);
+
+    if (d.productive_target !== undefined && productive_target === undefined) {
+      return NextResponse.json(
+        { ok: false, error: "productive_target must be an integer between 0 and 101, or null." },
+        { status: 400 },
+      );
+    }
 
     if (
       base_form == null ||
@@ -140,6 +157,7 @@ export async function POST(req: Request) {
         word_note: normalizeNullableString(d.word_note),
         common_error: normalizeNullableString(d.common_error),
         imageability: normalizeNullableNumber(d.imageability),
+        productive_target,
       },
       select: {
         id: true,

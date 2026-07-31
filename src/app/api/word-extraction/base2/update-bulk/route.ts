@@ -3,7 +3,7 @@ import "server-only";
 import { NextResponse } from "next/server";
 
 import { normalizeIpaForDb } from "@/lib/ipa/normalize";
-import { prisma } from "@/lib/prisma";
+import { updateWord } from "@/lib/words/wordRepo";
 
 export const runtime = "nodejs";
 
@@ -12,6 +12,7 @@ type PayloadItem = {
   phonetic_us?: string;
   imageability?: number;
   learning_depth?: number;
+  productive_target?: number;
   pos?: string;
   other_meanings_fa?: string | null;
   concept_explained_fa?: string;
@@ -22,6 +23,7 @@ const optionalKeys = [
   "phonetic_us",
   "imageability",
   "learning_depth",
+  "productive_target",
   "pos",
   "other_meanings_fa",
   "concept_explained_fa",
@@ -57,6 +59,12 @@ function asLearningDepth(value: unknown): number | null {
   if (typeof value !== "number" || !Number.isFinite(value)) return null;
   if (value === -100) return -100;
   if (value < 0 || value > 1) return null;
+  return value;
+}
+
+function asProductiveTarget(value: unknown): number | null {
+  if (typeof value !== "number" || !Number.isInteger(value)) return null;
+  if (value < 0 || value > 101) return null;
   return value;
 }
 
@@ -99,6 +107,14 @@ function validateItem(value: unknown): { ok: true; item: PayloadItem } | { ok: f
     : undefined;
   if (hasLearningDepth && learning_depth === null) issues.push("learning_depth must be -100 or a number between 0 and 1");
 
+  const hasProductiveTarget = "productive_target" in value;
+  const productive_target = hasProductiveTarget
+    ? asProductiveTarget((value as Record<string, unknown>).productive_target)
+    : undefined;
+  if (hasProductiveTarget && productive_target === null) {
+    issues.push("productive_target must be an integer between 0 and 101");
+  }
+
   const hasPos = "pos" in value;
   const pos = hasPos ? asNonEmptyString((value as Record<string, unknown>).pos) : undefined;
   if (hasPos && !pos) issues.push("pos must be a non-empty string");
@@ -129,6 +145,7 @@ function validateItem(value: unknown): { ok: true; item: PayloadItem } | { ok: f
       ...(phonetic_us == null ? {} : { phonetic_us }),
       ...(imageability == null ? {} : { imageability }),
       ...(learning_depth == null ? {} : { learning_depth }),
+      ...(productive_target == null ? {} : { productive_target }),
       ...(pos == null ? {} : { pos }),
       ...(other_meanings_fa === undefined ? {} : { other_meanings_fa }),
       ...(concept_explained_fa == null ? {} : { concept_explained_fa }),
@@ -166,7 +183,7 @@ export async function POST(req: Request) {
         {
           ok: false,
           error:
-            "Invalid input items (must be { id } plus one or more of: phonetic_us, imageability, learning_depth, pos, other_meanings_fa, concept_explained_fa)",
+            "Invalid input items (must be { id } plus one or more of: phonetic_us, imageability, learning_depth, productive_target, pos, other_meanings_fa, concept_explained_fa)",
           errors,
         },
         { status: 400 }
@@ -181,6 +198,7 @@ export async function POST(req: Request) {
           phonetic_us_normalized?: string;
           imageability?: number;
           learning_depth?: number;
+          productive_target?: number;
           pos?: string;
           other_meanings_fa?: string | null;
           concept_explained_fa?: string;
@@ -200,11 +218,12 @@ export async function POST(req: Request) {
         }
         if (item.imageability !== undefined) patch.imageability = item.imageability;
         if (item.learning_depth !== undefined) patch.learning_depth = item.learning_depth;
+        if (item.productive_target !== undefined) patch.productive_target = item.productive_target;
         if (item.pos !== undefined) patch.pos = item.pos;
         if (item.other_meanings_fa !== undefined) patch.other_meanings_fa = item.other_meanings_fa;
         if (item.concept_explained_fa !== undefined) patch.concept_explained_fa = item.concept_explained_fa;
 
-        const row = await prisma.word.update({
+        const row = await updateWord({
           where: { id: item.id },
           data: {
             ...patch,
@@ -218,6 +237,7 @@ export async function POST(req: Request) {
           ...(phonetic_us_normalized === undefined ? {} : { phonetic_us_normalized }),
           ...(item.imageability === undefined ? {} : { imageability: item.imageability }),
           ...(item.learning_depth === undefined ? {} : { learning_depth: item.learning_depth }),
+          ...(item.productive_target === undefined ? {} : { productive_target: item.productive_target }),
           ...(item.pos === undefined ? {} : { pos: item.pos }),
           ...(item.other_meanings_fa === undefined ? {} : { other_meanings_fa: item.other_meanings_fa }),
           ...(item.concept_explained_fa === undefined ? {} : { concept_explained_fa: item.concept_explained_fa }),

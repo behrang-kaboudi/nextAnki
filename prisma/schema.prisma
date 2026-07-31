@@ -69,6 +69,8 @@ model Word {
   common_error                     String?
   /// Score 0-100: how imageable/visual the word is (NULL means unset).
   imageability                     Int?
+  /// Productive target score 0-101 (NULL means unset).
+  productive_target                Int?
   createdAt                        DateTime           @default(now())
   updatedAt                        DateTime           @updatedAt
   sentenceLinks                    SentenceWordLink[]

@@ -3,7 +3,7 @@ Field name: productive_target
 
 productive_target:
 
-Assign a `Productive Target` score from `1` to `100` for each specific meaning of a word.
+Assign a `Productive Target` score from `1` to `101` for each specific meaning of a word.
 
 `Productive Target` indicates how important it is for an average person to recall and use that word quickly, accurately, and naturally in spoken English.
 
@@ -43,7 +43,7 @@ Evaluate each meaning and each part of speech separately.
 - Give names of specific flowers, animals, objects, species, and similar items a high score only when there is a genuine need to produce them.
 - Determine the score from the combined criteria, not from a single factor.
 - Example: `stone` meaning a fruit seed should receive a low score because `pit` is normally used in North American English.
-- The output must be one integer from `1` to `100`.
+- The output must be one integer from `1` to `101`.
 
 ## Output
 
