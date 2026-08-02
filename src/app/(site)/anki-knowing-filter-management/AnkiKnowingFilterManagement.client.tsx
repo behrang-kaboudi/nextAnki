@@ -35,8 +35,7 @@ type KnowledgeAction = "again" | "familiar" | "good" | "easy";
 type HelpActionSummary = {
   title: string;
   description: string;
-  moves: string;
-  answers: string;
+  results: string[];
   extra?: string;
   toneClassName: string;
 };
@@ -146,9 +145,13 @@ function buildHelpSummaries(): HelpActionSummary[] {
     {
       title: "بلد نیستم",
       description:
-        "برای زمانی است که کلمه را بلد نیستی. کارت‌های متناظر همین Note با نوع‌های EnToFa، FaToEn، WordsForNewStudy-Review و WordsForNewStudy-Pronunciation پیدا می‌شوند و به دک‌های اصلی خودشان منتقل می‌شوند.",
-      moves: `کارت ${WordAnkiConstants.cardTypes.EnToFa} به ${WordAnkiConstants.decks.EnToFa}، کارت ${WordAnkiConstants.cardTypes.FaToEn} به ${WordAnkiConstants.decks.FaToEn}، کارت ${REVIEW_CARD} به ${REVIEW_DECK} و کارت ${PRONUNCIATION_CARD} به ${PRONUNCIATION_DECK} منتقل می‌شوند.`,
-      answers: "برای کارت‌های EnToFa و FaToEn یک بار Again با ease=1 اجرا می‌شود. روی کارت‌های Review و Pronunciation هیچ پاسخی اجرا نمی‌شود.",
+        "هر چهار کارت به دک خودشان برمی‌گردند؛ فقط کارت‌های اصلی ریست می‌شوند.",
+      results: [
+        `${WordAnkiConstants.cardTypes.EnToFa} → ${WordAnkiConstants.decks.EnToFa}: یک بار Again (ease=1).`,
+        `${WordAnkiConstants.cardTypes.FaToEn} → ${WordAnkiConstants.decks.FaToEn}: یک بار Again (ease=1).`,
+        `${REVIEW_CARD} → ${REVIEW_DECK}: فقط انتقال؛ بدون پاسخ یا ریست.`,
+        `${PRONUNCIATION_CARD} → ${PRONUNCIATION_DECK}: فقط انتقال؛ بدون پاسخ یا ریست.`,
+      ],
       extra: `تگ ${AnkiTag.Filtered} روی نوت باقی می‌ماند.`,
       toneClassName:
         "border-red-500/20 bg-red-500/5 text-red-800 dark:text-red-300",
@@ -156,9 +159,13 @@ function buildHelpSummaries(): HelpActionSummary[] {
     {
       title: "آشنا هستم",
       description:
-        "برای زمانی است که کلمه برایت آشناست، اما نمی‌خواهی برای همهٔ کارت‌ها پاسخ ثبت شود. کارت‌های متناظر همین Note پیدا می‌شوند و فقط برای EnToFa پاسخ ثبت می‌شود.",
-      moves: `کارت‌های ${WordAnkiConstants.cardTypes.EnToFa}، ${WordAnkiConstants.cardTypes.FaToEn}، ${REVIEW_CARD} و ${PRONUNCIATION_CARD} به دک‌های اصلی خودشان منتقل می‌شوند.`,
-      answers: "فقط برای کارت EnToFa یک بار Good با ease=3 اجرا می‌شود. برای کارت‌های FaToEn، Review و Pronunciation هیچ عملی انجام نمی‌شود.",
+        "هر چهار کارت به دک خودشان برمی‌گردند؛ فقط EnToFa پاسخ می‌گیرد.",
+      results: [
+        `${WordAnkiConstants.cardTypes.EnToFa} → ${WordAnkiConstants.decks.EnToFa}: یک بار Good (ease=3).`,
+        `${WordAnkiConstants.cardTypes.FaToEn} → ${WordAnkiConstants.decks.FaToEn}: فقط انتقال؛ بدون پاسخ یا ریست.`,
+        `${REVIEW_CARD} → ${REVIEW_DECK}: فقط انتقال؛ بدون پاسخ یا ریست.`,
+        `${PRONUNCIATION_CARD} → ${PRONUNCIATION_DECK}: فقط انتقال؛ بدون پاسخ یا ریست.`,
+      ],
       extra: `تگ ${AnkiTag.Filtered} روی نوت باقی می‌ماند.`,
       toneClassName:
         "border-amber-500/20 bg-amber-500/5 text-amber-800 dark:text-amber-300",
@@ -166,9 +173,13 @@ function buildHelpSummaries(): HelpActionSummary[] {
     {
       title: "بلدم",
       description:
-        "برای زمانی است که کلمه را می‌دانی. کارت‌های متناظر همین Note پیدا می‌شوند، به دک‌های اصلی می‌روند و سپس برای هر نوع کارت پاسخ مخصوص خودش ثبت می‌شود.",
-      moves: `کارت‌های EnToFa، FaToEn، ${REVIEW_CARD} و ${PRONUNCIATION_CARD} به دک‌های اصلی خودشان منتقل می‌شوند.`,
-      answers: "برای EnToFa دو بار Easy با ease=4، برای FaToEn یک بار Good با ease=3 و برای Review و Pronunciation یک بار Easy با ease=4 اجرا می‌شود.",
+        "هر چهار کارت به دک خودشان برمی‌گردند و پاسخ زیر برایشان ثبت می‌شود.",
+      results: [
+        `${WordAnkiConstants.cardTypes.EnToFa} → ${WordAnkiConstants.decks.EnToFa}: دو بار Easy (ease=4).`,
+        `${WordAnkiConstants.cardTypes.FaToEn} → ${WordAnkiConstants.decks.FaToEn}: یک بار Good (ease=3).`,
+        `${REVIEW_CARD} → ${REVIEW_DECK}: یک بار Easy (ease=4).`,
+        `${PRONUNCIATION_CARD} → ${PRONUNCIATION_DECK}: یک بار Easy (ease=4).`,
+      ],
       extra: `تگ ${AnkiTag.Filtered} روی نوت باقی می‌ماند.`,
       toneClassName:
         "border-emerald-500/20 bg-emerald-500/5 text-emerald-800 dark:text-emerald-300",
@@ -176,9 +187,13 @@ function buildHelpSummaries(): HelpActionSummary[] {
     {
       title: "عالی",
       description:
-        "برای زمانی است که کلمه را کاملاً و بدون زحمت می‌دانی. کارت‌های متناظر همین Note به دک‌های اصلی می‌روند و پاسخ Easy ثبت می‌شود؛ EnToFa دو بار پاسخ می‌گیرد.",
-      moves: `کارت‌های EnToFa، FaToEn، ${REVIEW_CARD} و ${PRONUNCIATION_CARD} به دک‌های اصلی خودشان منتقل می‌شوند.`,
-      answers: "برای EnToFa دو بار Easy با ease=4، برای FaToEn یک بار Easy با ease=4 و برای Review و Pronunciation یک بار Easy با ease=4 اجرا می‌شود.",
+        "هر چهار کارت به دک خودشان برمی‌گردند و Easy می‌گیرند؛ EnToFa دو بار پاسخ می‌گیرد.",
+      results: [
+        `${WordAnkiConstants.cardTypes.EnToFa} → ${WordAnkiConstants.decks.EnToFa}: دو بار Easy (ease=4).`,
+        `${WordAnkiConstants.cardTypes.FaToEn} → ${WordAnkiConstants.decks.FaToEn}: یک بار Easy (ease=4).`,
+        `${REVIEW_CARD} → ${REVIEW_DECK}: یک بار Easy (ease=4).`,
+        `${PRONUNCIATION_CARD} → ${PRONUNCIATION_DECK}: یک بار Easy (ease=4).`,
+      ],
       extra: `تگ ${AnkiTag.Filtered} روی نوت باقی می‌ماند.`,
       toneClassName:
         "border-sky-500/20 bg-sky-500/5 text-sky-800 dark:text-sky-300",
@@ -780,6 +795,17 @@ export default function AnkiKnowingFilterManagementClient() {
                       Note و کلمه را مشخص می‌کند؛ عملیات روی کارت‌های متناظر
                       انجام می‌شود، نه صرفاً روی کارت فیلتر نمایش‌داده‌شده.
                     </p>
+                    <div className="mt-3 rounded-xl border border-card bg-card p-3">
+                      <h4 className="font-semibold">قاعدهٔ کلی انتقال</h4>
+                      <p className="mt-1 text-muted">
+                        هر کارت متناظر به دک خودش برمی‌گردد. مثلاً کارت{" "}
+                        <span dir="ltr">EnToFa</span> به{" "}
+                        <span dir="ltr">{WordAnkiConstants.decks.EnToFa}</span>{" "}
+                        و کارت <span dir="ltr">FaToEn</span> به{" "}
+                        <span dir="ltr">{WordAnkiConstants.decks.FaToEn}</span>{" "}
+                        منتقل می‌شود؛ سپس نتیجهٔ همان دکمه روی کارت اعمال می‌شود.
+                      </p>
+                    </div>
                   </div>
 
                   <section className="rounded-2xl border border-card bg-background p-4 text-sm leading-7">
@@ -813,8 +839,13 @@ export default function AnkiKnowingFilterManagementClient() {
                       <p className="mt-2 text-sm leading-7">
                         {item.description}
                       </p>
-                      <p className="mt-3 text-sm leading-7">{item.moves}</p>
-                      <p className="mt-1 text-sm leading-7">{item.answers}</p>
+                      <ul className="mt-3 list-inside list-disc text-sm leading-7">
+                        {item.results.map((result) => (
+                          <li key={result} dir="ltr" className="text-left">
+                            {result}
+                          </li>
+                        ))}
+                      </ul>
                       {item.extra ? (
                         <p className="mt-1 text-sm leading-7">{item.extra}</p>
                       ) : null}
