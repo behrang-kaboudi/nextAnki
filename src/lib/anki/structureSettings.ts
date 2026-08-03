@@ -1,6 +1,43 @@
-import { WordDeckByCardType, WordDeckConfigs } from "./deck/constants";
-import { AnkiNoteTypes, WordAnkiConstants } from "./deck/notes";
+import { WordAnkiConstants, WordDeckByCardType, WordDeckConfigs } from "./deck/constants";
+import { AnkiNoteTypes } from "./deck/notes";
 import { defaultStructureCardTypeTemplates } from "./structureCardTypeDefaults";
+
+// Used only to seed a fresh database. Persisted structure settings are the
+// source of truth for note fields after the first save.
+export const DEFAULT_WORD_NOTE_FIELDS = [
+  "anki_link_id",
+  "base_form",
+  "base_form_audio",
+  "first-part-spell",
+  "first-part-spell-audio",
+  "phonetic_us",
+  "pos",
+  "meaning_fa",
+  "meaning_fa_audio",
+  "other_meanings_fa",
+  "other_meanings_fa_audio",
+  "other_meanings_en",
+  "other_meanings_en_audio",
+  "concept_explained_fa",
+  "concept_explained_fa_audio",
+  "sentence_en",
+  "sentence_en_audio",
+  "sentence_en_meaning_fa",
+  "sentence_en_meaning_fa_audio",
+  "best_translate",
+  "mixed_sentence",
+  "first_letter_fa_hint",
+  "first_letter_en_hint",
+  "selfGuide",
+  "hint_to_select_letters",
+  "hint_sentence",
+  "phonetic_us_normalized",
+  "learning_depth",
+  "imageability",
+  "productive_target",
+  "json_hint",
+  "updatedAt",
+] as const;
 
 const requiredStructureCardTypeTemplates = {
   "1EnToFaKnowingFilter": {
@@ -213,7 +250,7 @@ export function createDefaultAnkiStructureConfig(): AnkiStructureConfig {
     deckConfigs,
     noteType: {
       name: AnkiNoteTypes.META_LEX_VR9,
-      fields: WordAnkiConstants.noteFields.map(String),
+      fields: DEFAULT_WORD_NOTE_FIELDS.map(String),
       cardTypes,
     },
     moveCards: {

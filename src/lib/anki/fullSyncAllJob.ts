@@ -3,7 +3,12 @@ import "server-only";
 import { createAnkiConnectClient } from "@/lib/anki";
 import { AnkiNoteTypes, WordAnkiConstants } from "@/lib/anki";
 import { ensureMetaLexVr9ModelFields } from "@/lib/anki/ensureMetaLexVr9ModelFields";
-import { generateWordAnkiFieldsForMetaLexVr9, getAnkiLinkIdFromNoteFields } from "@/lib/anki/wordAnkiMapping";
+import { getAnkiStructureSettings } from "@/lib/anki/structureSettingsRepo";
+import {
+  generateWordAnkiFieldsForMetaLexVr9,
+  getAnkiLinkIdFromNoteFields,
+  getWordAnkiManagedFieldNames,
+} from "@/lib/anki/wordAnkiMapping";
 import { prisma } from "@/lib/prisma";
 
 export type FullSyncAllStatus = {
@@ -186,17 +191,17 @@ async function runJob(state: State) {
 
   // Ensure the note type exists and has the expected fields (including `updatedAt`).
   await ensureMetaLexVr9ModelFields(ankiFinder);
+  const structureSettings = await getAnkiStructureSettings();
+  const configuredFields = structureSettings.config.noteType.fields;
+  const managedFields = getWordAnkiManagedFieldNames(configuredFields).filter(
+    (field) => field !== "selfGuide" && field !== "anki_link_id",
+  );
 
   const idsRes = await ankiFinder.requestDetailed("findNotes", { query });
   if (!idsRes.ok) throw new Error(idsRes.error);
   const noteIds = idsRes.result ?? [];
 
   const noteByAnkiLinkId = new Map<string, ExistingAnkiNoteInfo>();
-  const wantedFields = WordAnkiConstants.noteFields;
-  const managedFields = wantedFields.filter(
-    (f) => f !== "selfGuide" && f !== "anki_link_id",
-  );
-
   for (const batch of chunk(noteIds, 250)) {
     const infoRes = await ankiFinder.requestDetailed("notesInfo", { notes: batch });
     if (!infoRes.ok) throw new Error(infoRes.error);
@@ -249,7 +254,7 @@ async function runJob(state: State) {
         }
       }
 
-      const fields = await generateWordAnkiFieldsForMetaLexVr9(word);
+      const fields = await generateWordAnkiFieldsForMetaLexVr9(word, configuredFields);
 
       if (!existing) {
         const client = clients[Math.abs(word.id) % clients.length]!;

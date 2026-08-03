@@ -47,6 +47,6 @@ Evaluate each meaning and each part of speech separately.
 
 ## Output
 
-Write only one integer from `1` to `100`. Do not add any explanation, label, punctuation, percentage sign, or other text.
+Write only one integer from `1` to `101`. Do not add any explanation, label, punctuation, percentage sign, or other text.
 
 ══════════════════════════════════════

@@ -1,5 +1,5 @@
-import { AnkiNoteTypes, createAnkiOperations, WordAnkiConstants } from "@/lib/anki";
-import { createDefaultAnkiStructureConfig, type AnkiStructureConfig, type AnkiStructureCardType } from "@/lib/anki/structureSettings";
+import { AnkiNoteTypes, createAnkiOperations } from "@/lib/anki";
+import { createDefaultAnkiStructureConfig, DEFAULT_WORD_NOTE_FIELDS, type AnkiStructureConfig, type AnkiStructureCardType } from "@/lib/anki/structureSettings";
 
 import { ensureAnkiPermission } from "./ensureNoteType";
 import type { LogFn, StepResult } from "./types";
@@ -165,7 +165,7 @@ export async function ensureMetaLexVr9CardTypes(
   if (!modelNamesRes.result.includes(modelName)) {
     const createResult = await createModelWithCardTypes(
       modelName,
-      config?.noteType.fields ?? WordAnkiConstants.noteFields.slice().map(String),
+      config?.noteType.fields ?? DEFAULT_WORD_NOTE_FIELDS.slice().map(String),
       config?.noteType.cardTypes ?? null,
       appendLog,
     );

@@ -6,7 +6,6 @@ import path from "node:path";
 import type { Prisma, Word } from "@prisma/client";
 
 import type { AnkiNotesInfo } from "@/lib/anki";
-import { WordAnkiConstants } from "@/lib/anki";
 import {
   parsePictureWordAudioFilename,
   pictureWordAudioKey,
@@ -292,14 +291,26 @@ export const WORD_ANKI_FIELD_GENERATORS = {
   learning_depth: (w) =>
     w.learning_depth == null ? "" : String(w.learning_depth),
   imageability: (w) => (w.imageability == null ? "" : String(w.imageability)),
+  productive_target: (w) =>
+    w.productive_target == null ? "" : String(w.productive_target),
   json_hint: (w) => w.json_hint ?? "",
   updatedAt: (w) => w.updatedAt.toISOString(),
 } as const satisfies Record<string, WordAnkiFieldGenerator>;
 
+export function getWordAnkiManagedFieldNames(
+  fields: readonly string[],
+): Array<keyof typeof WORD_ANKI_FIELD_GENERATORS> {
+  return fields.filter(
+    (field): field is keyof typeof WORD_ANKI_FIELD_GENERATORS =>
+      Object.hasOwn(WORD_ANKI_FIELD_GENERATORS, field),
+  );
+}
+
 export function generateWordAnkiFieldsForMetaLexVr9(
   word: Word,
+  configuredFields: readonly string[],
 ): Promise<Record<string, string>> {
-  const fields = WordAnkiConstants.noteFields;
+  const fields = getWordAnkiManagedFieldNames(configuredFields);
   return Promise.all(
     fields.map(
       async (f) => [f, await WORD_ANKI_FIELD_GENERATORS[f](word)] as const,

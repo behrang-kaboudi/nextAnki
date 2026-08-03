@@ -1,4 +1,28 @@
-import { WordAnkiConstants } from "./notes";
+export const WordAnkiConstants = {
+  cardTypes: {
+    EnToFa: "EnToFa",
+    EnToFaKnowingFilter: "1EnToFaKnowingFilter",
+    EnToFaRev: "EnToFaRev",
+    FaToEn: "FaToEn",
+    FaToEnKnowingFilter: "1FaToEnKnowingFilter",
+    FaToEnRev: "FaToEnRev",
+    Rahnama: "Rahnama",
+    Rahnama2: "Rahnama2",
+  },
+  decks: {
+    default: "Default",
+    tempRoot: "TempFor1WordsForNewStudy",
+    root: "WordsForNewStudy",
+    EnToFa: "WordsForNewStudy::EnToFa",
+    EnToFaKnowingFilter: "WordsForNewStudy::1EnToFaKnowingFilter",
+    EnToFaRev: "WordsForNewStudy::EnToFaRev",
+    FaToEn: "WordsForNewStudy::FaToEn",
+    FaToEnKnowingFilter: "WordsForNewStudy::1FaToEnKnowingFilter",
+    FaToEnRev: "WordsForNewStudy::FaToEnRev",
+    Rahnama: "WordsForNewStudy::Rahnama",
+    Rahnama2: "WordsForNewStudy::Rahnama2",
+  },
+} as const;
 
 export const requiredFields = [
   "word_en",

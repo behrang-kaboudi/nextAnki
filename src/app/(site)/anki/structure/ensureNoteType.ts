@@ -1,6 +1,6 @@
 import { ankiOperations } from "@/lib/anki";
-import { AnkiNoteTypes, WordAnkiConstants } from "@/lib/anki";
-import type { AnkiStructureConfig } from "@/lib/anki/structureSettings";
+import { AnkiNoteTypes } from "@/lib/anki";
+import { DEFAULT_WORD_NOTE_FIELDS, type AnkiStructureConfig } from "@/lib/anki/structureSettings";
 
 import type { LogFn, StepResult } from "./types";
 
@@ -126,7 +126,7 @@ export async function ensureMetaLexVr9NoteType(
   const permissionResult = await ensureAnkiPermission(appendLog);
   if (!permissionResult.ok) return permissionResult;
 
-  const desiredFields = config?.noteType.fields ?? WordAnkiConstants.noteFields.slice().map(String);
+  const desiredFields = config?.noteType.fields ?? DEFAULT_WORD_NOTE_FIELDS.slice().map(String);
   const desiredSet = new Set<string>(desiredFields);
 
   const modelResult = await requireModelExists(modelName, appendLog);
