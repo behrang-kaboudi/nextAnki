@@ -15,7 +15,7 @@ export default async function Home() {
           />
           <div className="flex flex-wrap justify-center gap-3">
             <Link
-              href="/word-extraction"
+              href="/words/extraction"
               className="inline-flex items-center justify-center rounded-full bg-[var(--primary)] px-5 py-2.5 text-sm font-semibold text-[var(--primary-foreground)] transition hover:opacity-90"
             >
               Word Extraction
@@ -51,13 +51,13 @@ export default async function Home() {
         <div className="text-center text-sm font-semibold text-foreground">Quick Actions</div>
         <div className="flex flex-wrap justify-center gap-3">
           <Link
-            href="/word-extraction"
+            href="/words/extraction"
             className="inline-flex items-center justify-center rounded-full bg-[var(--primary)] px-4 py-2.5 text-sm font-semibold text-[var(--primary-foreground)] transition hover:opacity-90"
           >
             Word Extraction
           </Link>
           <Link
-            href="/anki-note"
+            href="/anki/cards/manager"
             className="inline-flex items-center justify-center rounded-full bg-card px-4 py-2.5 text-sm font-semibold text-foreground transition hover:bg-white/70"
           >
             Card Management

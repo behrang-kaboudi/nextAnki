@@ -3,107 +3,18 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
+import { testSiteMapGroups } from "@/config/siteMap";
+
 type LinkItem = { href: string; label: string; note?: string };
 type Section = { title: string; links: LinkItem[]; defaultOpen?: boolean };
 
-const sections: Section[] = [
-  {
-    title: "IPA",
-    defaultOpen: true,
-    links: [
-      { href: "/ipa-test", label: "IPA Test" },
-      { href: "/ipa/keywords", label: "IPA Keywords" },
-      { href: "/ipa/picture-words", label: "Picture Words" },
-      {
-        href: "/ipa/picture-words/audio",
-        label: "Picture Words Audio",
-        note: "Record/upload/list audio",
-      },
-    ],
-  },
-  {
-    title: "Word",
-    defaultOpen: true,
-    links: [
-      {
-        href: "/sentences/editor",
-        label: "Sentence Editor",
-        note: "Edit sentence text, meaning, and audio",
-      },
-      {
-        href: "/words/sentence-fields",
-        label: "Sentence Fields",
-        note: "TEMP: sentence_en + sentence_en_meaning_fa",
-      },
-    ],
-  },
-  {
-    title: "AI",
-    links: [
-      { href: "/ai/test", label: "AI Test" },
-      { href: "/ai/prompt-builder", label: "Prompt Builder" },
-    ],
-  },
-  {
-    title: "Anki",
-    links: [
-      { href: "/anki-connect-playground", label: "AnkiConnect Playground" },
-      {
-        href: "/anki-suspend-management",
-        label: "AnkiSuspendManagement",
-      },
-      {
-        href: "/anki-knowing-filter-management",
-        label: "Knowing Filter Card Management",
-        note: "Browse knowing-filter decks by Filtered tag",
-      },
-      {
-        href: "/anki-card-transfer",
-        label: "انتقال کارت بین Deckها",
-        note: "Move matching card types by Note from one deck to another",
-      },
-      {
-        href: "/tests/anki-revlog",
-        label: "Anki Revlog (AnkiDroid)",
-        note: "View getReviewsOfCards output",
-      },
-    ],
-  },
-  {
-    title: "sync anki/words",
-    defaultOpen: true,
-    links: [],
-  },
-  {
-    title: "test functions",
-    defaultOpen: true,
-    links: [
-      {
-        href: "/tests/test-functions",
-        label: "Sample Page",
-        note: "Sample page for the test functions group",
-      },
-    ],
-  },
-  {
-    title: "Admin",
-    links: [],
-  },
-  {
-    title: "App",
-    links: [
-      { href: "/features", label: "Features" },
-      { href: "/connect", label: "Connect" },
-      { href: "/docs", label: "Docs" },
-      { href: "/editor-test", label: "Editor Test" },
-      { href: "/editor-demo", label: "Editor Demo" },
-    ],
-  },
-  {
-    title: "Other",
-    links: [{ href: "/about", label: "About" }],
-  },
-];
+const sections: Section[] = testSiteMapGroups.map((group, index) => ({
+  title: group.title,
+  defaultOpen: index < 3,
+  links: group.pages
+    .filter((page) => page.path !== "/tests")
+    .map((page) => ({ href: page.path, label: page.title, note: page.summary })),
+}));
 
 function normalize(value: string) {
   return value.trim().toLowerCase();

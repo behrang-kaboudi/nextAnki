@@ -6,16 +6,16 @@ export const siteMenu: Menu = {
   primary: [
     {
       type: "link",
-      href: "/features",
+      href: "/",
       label: "Home",
       icon: "home",
       description: "Main app entry (features overview)",
     },
     {
       type: "link",
-      href: "/how-to-do",
-      label: "How to do?",
-      icon: "app",
+      href: "/guides",
+      label: "Guides",
+      icon: "book",
       description: "How-to guides and walkthroughs",
     },
     {
@@ -24,6 +24,13 @@ export const siteMenu: Menu = {
       label: "Tests",
       icon: "tools",
       description: "Hub for internal dev/test pages",
+    },
+    {
+      type: "link",
+      href: "/site-map",
+      label: "Site Map",
+      icon: "search",
+      description: "Human-readable map of every canonical page",
     },
     {
       type: "link",

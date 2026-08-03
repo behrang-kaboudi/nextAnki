@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, type FocusEvent } from "react";
 
-import WordFieldVoiceCell from "@/app/(site)/word-hints/WordFieldVoiceCell.client";
+import WordFieldVoiceCell from "@/app/(site)/words/hints/WordFieldVoiceCell.client";
 import { SpecialCharactersBar } from "@/components/ipa/SpecialCharactersBar";
 import JsonHintPreviewModal from "./JsonHintPreviewModal.client";
 

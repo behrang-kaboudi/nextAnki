@@ -1,5 +1,5 @@
 {
-  "createdAt": "2026-08-03T04:46:17.310Z",
+  "createdAt": "2026-08-03T20:58:48.882Z",
   "data": {
     "word": [
       {
@@ -257444,12 +257444,6 @@
               "managed": true
             },
             {
-              "id": "deck-Emla",
-              "name": "WordsForNewStudy::Emla",
-              "title": "املا",
-              "managed": true
-            },
-            {
               "id": "deck-ms2xg003-wd2j8",
               "name": "WordsForNewStudy::FilterKnowing",
               "title": "فیلتر کننده",
@@ -257526,15 +257520,6 @@
                 "front": "<div style=\"display:none;\">\n[sound:rec1784581227.mp3]\n</div>\n<div style=\"direction:rtl;text-align:right\">\n<table style=\"width:100%\">\n<tr>\n<td>\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{meaning_fa_audio}}</div>\n</td>\n<td>\n{{meaning_fa}}\n</td>\n</tr>\n\n<tr>\n<td>\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{other_meanings_fa_audio}}</div>\n</td>\n<td>\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{other_meanings_fa}}</div>\n</td>\n</tr>\n\n<tr>\n<td>\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{concept_explained_fa_audio}}</div>\n</td>\n<td>\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{concept_explained_fa}}</div>\n</td>\n</tr>\n\n\n<tr>\n<td>\n\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{sentence_en_meaning_fa_audio}}</div>\n</td>\n<td>\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{sentence_en_meaning_fa}}</div>\n</td>\n</tr>\n\n</table>\n</div>\n\n\n\n\n<div style=\"display:none\">\n\n[sound:rec1778206722.mp3]\n\n</div>\n\n<hr>\n\n<div style=\";text-align:right\">\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{hint_to_select_letters}}</div>\n\n</div>\n\n\n\n\n\n\n\n\n\n",
                 "deckIds": [
                   "deck-FaToEn"
-                ]
-              },
-              {
-                "id": "card-Emla",
-                "back": "{{base_form}}{{phonetic_us}}\n<br>\n{{sentence_en}}\n<hr>\n<div style=\";text-align:right\">\n<div style='display:none'>[sound:rec1765049893.mp3]</div>\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{first_letter_fa_hint}}</div>\n<div style='display:none'>[sound:rec1765049893.mp3]</div>\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{first_letter_en_hint}}</div>\n</div>",
-                "name": "Emla",
-                "front": "<div style=\";text-align:right\">\n<div style='display:none'>[sound:rec1765049893.mp3]</div>\n\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{meaning_fa}}</div>\n\n<div style='display:none'>[sound:rec1765487198.mp3]</div>\n\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{concept_explained_fa}}</div>\n</div>\n<hr>\n{{base_form}}{{phonetic_us}}\n\n<div style=\";text-align:right\">\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{first_letter_fa_hint}}</div>\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{first_letter_en_hint}}</div>\n</div>",
-                "deckIds": [
-                  "deck-Emla"
                 ]
               },
               {
@@ -257631,8 +257616,7 @@
                 "deck-default",
                 "deck-tempRoot",
                 "deck-root",
-                "deck-ms2xg003-wd2j8",
-                "deck-Emla"
+                "deck-ms2xg003-wd2j8"
               ],
               "easyBonus": "1.3",
               "configName": "WordsForNewStudy-Default",
@@ -257666,9 +257650,9 @@
           "profileName": "پروفایل اصلی",
           "schemaVersion": 4
         },
-        "version": 84,
+        "version": 85,
         "createdAt": "2026-07-26T01:51:48.862Z",
-        "updatedAt": "2026-08-02T14:21:32.137Z"
+        "updatedAt": "2026-08-03T20:49:39.104Z"
       }
     ],
     "user": [

@@ -14,5 +14,5 @@ export default async function WordsPageRedirect({
   if (sp.pageSize) params.set("pageSize", String(sp.pageSize));
 
   const qs = params.toString();
-  redirect(qs ? `/word-hints?${qs}` : "/word-hints");
+  redirect(qs ? `/words/editor?${qs}` : "/words/editor");
 }

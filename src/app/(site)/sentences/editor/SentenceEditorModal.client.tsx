@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import WordFieldVoiceCell from "@/app/(site)/word-hints/WordFieldVoiceCell.client";
+import WordFieldVoiceCell from "@/app/(site)/words/hints/WordFieldVoiceCell.client";
 
 export type SentenceEditorItem = {
   id: number;
