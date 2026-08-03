@@ -58,12 +58,6 @@ export const WordDeckConfigs = {
     learningSteps: "5d 10m 30m 50m",
     StartingEase: "3.50",
   },
-  WordsForNewStudyEmla: {
-    newCardsPerDay: 2000,
-    maximumReviewsPerDay: 9999,
-    learningSteps: "10m 50m",
-    StartingEase: "3.50",
-  },
   WordsForNewStudyRahnama: {
     newCardsPerDay: 2000,
     maximumReviewsPerDay: 9999,
@@ -91,7 +85,6 @@ export const WordDeckByCardType = {
   FaToEn: WordAnkiConstants.decks.FaToEn,
   "1FaToEnKnowingFilter": WordAnkiConstants.decks.FaToEnKnowingFilter,
   FaToEnRev: WordAnkiConstants.decks.FaToEnRev,
-  Emla: WordAnkiConstants.decks.Emla,
   Rahnama: WordAnkiConstants.decks.Rahnama,
   Rahnama2: WordAnkiConstants.decks.Rahnama2,
 } as const;

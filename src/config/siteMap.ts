@@ -83,6 +83,15 @@ export const siteMapGroups: SiteMapGroup[] = [
     ],
   },
   {
+    id: "anki-synchronization",
+    category: "Workspace",
+    title: "Anki Synchronization",
+    summary: "Run and monitor the primary synchronization workflow between local word data and Anki.",
+    pages: [
+      { title: "Anki Word Sync", path: "/anki/sync/words", summary: "Synchronizes word fields, media, identifiers, and complete word records with Anki.", menu: true },
+    ],
+  },
+  {
     id: "ipa",
     category: "Workspace",
     title: "IPA Tools",
@@ -156,9 +165,8 @@ export const siteMapGroups: SiteMapGroup[] = [
     id: "tests-sync",
     category: "Tests",
     title: "Sync Tests",
-    summary: "Preview, run, and monitor synchronization between local records and Anki.",
+    summary: "Exercise the sentence-card synchronization test workflow.",
     pages: [
-      { title: "Anki Word Sync", path: "/tests/sync/anki-words", summary: "Runs field, media, identifier, and full synchronization for Anki words.", menu: true },
       { title: "Sentence Card Sync", path: "/tests/sync/sentence-cards", summary: "Ensures sentence decks and synchronizes selected or all sentence cards.", menu: true },
     ],
   },
@@ -198,4 +206,3 @@ export const siteMapGroups: SiteMapGroup[] = [
 ];
 
 export const testSiteMapGroups = siteMapGroups.filter((group) => group.category === "Tests");
-

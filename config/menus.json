@@ -63,6 +63,14 @@
               { "type": "link", "label": "Structure Builder", "href": "/anki/structure", "icon": "tools", "description": "Create and inspect required Anki structure." },
               { "type": "link", "label": "Migrations", "href": "/anki/migrations", "icon": "tools", "description": "Run one-time Anki migrations." }
             ]
+          },
+          {
+            "type": "group",
+            "label": "Synchronization",
+            "icon": "link",
+            "items": [
+              { "type": "link", "label": "Anki Word Sync", "href": "/anki/sync/words", "icon": "link", "description": "Run and monitor the primary word synchronization workflow." }
+            ]
           }
         ]
       },
@@ -140,7 +148,6 @@
             "label": "Sync Tests",
             "icon": "link",
             "items": [
-              { "type": "link", "label": "Anki Word Sync", "href": "/tests/sync/anki-words", "icon": "link", "description": "Run and monitor Anki word synchronization." },
               { "type": "link", "label": "Sentence Card Sync", "href": "/tests/sync/sentence-cards", "icon": "link", "description": "Ensure and synchronize sentence cards." }
             ]
           },

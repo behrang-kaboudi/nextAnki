@@ -114,7 +114,6 @@ export function deckConfigPairs(config?: AnkiStructureConfig): DeckConfigPair[] 
       configName: "WordsForNewStudy1FaToEnKnowingFilter" as const,
     },
     { deck: WordAnkiConstants.decks.FaToEnRev, configName: "WordsForNewStudyFaToEnRev" as const },
-    { deck: WordAnkiConstants.decks.Emla, configName: "WordsForNewStudyEmla" as const },
     { deck: WordAnkiConstants.decks.Rahnama, configName: "WordsForNewStudyRahnama" as const },
     { deck: WordAnkiConstants.decks.Rahnama2, configName: "WordsForNewStudyRahnama2" as const },
   ].map((pair) => ({

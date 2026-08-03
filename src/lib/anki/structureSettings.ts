@@ -1,5 +1,18 @@
 import { WordDeckByCardType, WordDeckConfigs } from "./deck/constants";
 import { AnkiNoteTypes, WordAnkiConstants } from "./deck/notes";
+import { defaultStructureCardTypeTemplates } from "./structureCardTypeDefaults";
+
+const requiredStructureCardTypeTemplates = {
+  "1EnToFaKnowingFilter": {
+    Front: `{{base_form}}`,
+    Back: `{{meaning_fa}}`,
+  },
+  "1FaToEnKnowingFilter": {
+    Front: `{{meaning_fa}}`,
+    Back: `{{base_form}}`,
+  },
+  ...defaultStructureCardTypeTemplates,
+} as const;
 
 const legacyDeckKeys = [
   "default",
@@ -11,7 +24,6 @@ const legacyDeckKeys = [
   "FaToEn",
   "FaToEnKnowingFilter",
   "FaToEnRev",
-  "Emla",
   "Rahnama",
   "Rahnama2",
 ] as const;
@@ -23,7 +35,6 @@ const legacyConfigKeys = [
   "WordsForNewStudyFaToEn",
   "WordsForNewStudy1FaToEnKnowingFilter",
   "WordsForNewStudyFaToEnRev",
-  "WordsForNewStudyEmla",
   "WordsForNewStudyRahnama",
   "WordsForNewStudyRahnama2",
 ] as const;
@@ -38,7 +49,6 @@ const legacyConfigDeckMap: Record<LegacyConfigKey, LegacyDeckKey> = {
   WordsForNewStudyFaToEn: "FaToEn",
   WordsForNewStudy1FaToEnKnowingFilter: "FaToEnKnowingFilter",
   WordsForNewStudyFaToEnRev: "FaToEnRev",
-  WordsForNewStudyEmla: "Emla",
   WordsForNewStudyRahnama: "Rahnama",
   WordsForNewStudyRahnama2: "Rahnama2",
 };
@@ -151,7 +161,6 @@ function deckTitle(key: LegacyDeckKey) {
     FaToEn: "فارسی به انگلیسی",
     FaToEnKnowingFilter: "فیلتر شناخت Fa → En",
     FaToEnRev: "مرور معکوس Fa → En",
-    Emla: "املا",
     Rahnama: "راهنمای اول",
     Rahnama2: "راهنمای دوم",
   };
@@ -185,7 +194,7 @@ export function createDefaultAnkiStructureConfig(): AnkiStructureConfig {
   }));
   const deckIdByName = new Map(decks.map((deck) => [deck.name, deck.id]));
   const deckConfigs = legacyConfigKeys.map(defaultDeckConfig);
-  const cardTypes: AnkiStructureCardType[] = Object.entries(WordAnkiConstants.noteTemplates).map(([name, template]) => ({
+  const cardTypes: AnkiStructureCardType[] = Object.entries(requiredStructureCardTypeTemplates).map(([name, template]) => ({
     id: `card-${name}`,
     name,
     deckIds: [

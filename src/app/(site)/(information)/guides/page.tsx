@@ -28,8 +28,8 @@ export default function HowToDoPage() {
             </li>
             <li>
               سینک فایل‌های صوتی از صفحه‌ی{" "}
-              <a className="underline" href="/tests/sync/anki-words">
-                /tests/sync/anki-words
+              <a className="underline" href="/anki/sync/words">
+                /anki/sync/words
               </a>
               .
             </li>
@@ -49,8 +49,8 @@ export default function HowToDoPage() {
               </Link>
             </li>
             <li>
-              <a className="underline" href="/tests/sync/anki-words">
-                /tests/sync/anki-words
+              <a className="underline" href="/anki/sync/words">
+                /anki/sync/words
               </a>
             </li>
           </ul>

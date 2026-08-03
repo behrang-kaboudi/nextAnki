@@ -14,7 +14,6 @@ export const requiredStructureDecks = [
   WordAnkiConstants.decks.FaToEn,
   WordAnkiConstants.decks.FaToEnKnowingFilter,
   WordAnkiConstants.decks.FaToEnRev,
-  WordAnkiConstants.decks.Emla,
   WordAnkiConstants.decks.Rahnama,
   WordAnkiConstants.decks.Rahnama2,
 ];

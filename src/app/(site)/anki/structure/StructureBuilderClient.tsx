@@ -1227,13 +1227,13 @@ export default function StructureBuilderClient() {
           <section className="rounded-3xl border border-red-500/20 bg-red-500/5 p-5">
             <h3 className="text-sm font-bold text-red-800">ابزار توسعه: دریافت Template از Anki</h3>
             <p className="mt-2 text-xs leading-6 text-red-800/75">
-              این عملیات فایل Template داخل سورس پروژه را بازنویسی می‌کند و برای استفاده روزمره نیست.
+              این عملیات Templateهای فعلی Anki را در تنظیمات Structure Builder جایگزین می‌کند و برای استفاده روزمره نیست.
             </p>
             <button type="button" onClick={() => setHelpKey("copyTemplates")} className="mt-3 text-xs font-bold text-red-700">جزئیات عملیات</button>
             <button
               type="button"
               onClick={() => {
-                if (window.confirm("Templateهای سورس پروژه با نسخه فعلی Anki بازنویسی شوند؟")) {
+                if (window.confirm("Templateهای ذخیره‌شده در Structure Builder با نسخه فعلی Anki جایگزین شوند؟")) {
                   void handleCopyTemplatesFromAnki();
                 }
               }}

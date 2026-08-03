@@ -434,11 +434,12 @@ export function useStructureBuilder() {
     if (isRunning) return;
     setIsRunning(true);
     try {
-      await copyTemplatesFromAnki(appendLog);
+      const copied = await copyTemplatesFromAnki(appendLog);
+      if (copied.ok) await loadSettings();
     } finally {
       setIsRunning(false);
     }
-  }, [appendLog, isRunning]);
+  }, [appendLog, isRunning, loadSettings]);
 
   const handleCreateStructure = useCallback(async () => {
     if (isRunning) return;

@@ -1051,7 +1051,7 @@ export default function SyncAnkiWordsClient() {
     <main className="mx-auto w-full max-w-6xl select-text p-4">
       <div className="flex flex-col gap-4">
         <PageHeader
-          title="Sync Anki/Words"
+          title="Anki Word Synchronization"
           subtitle="Internal tool for syncing Anki note fields from the DB."
         />
 
@@ -1235,7 +1235,7 @@ export default function SyncAnkiWordsClient() {
                   <div>
                     <div className="text-base font-semibold">{helpContent[helpOpen].title}</div>
                     <div className="mt-1 text-xs opacity-80">
-                      صفحه: <Code>/tests/sync/anki-words</Code>
+                      صفحه: <Code>/anki/sync/words</Code>
                     </div>
                   </div>
                   <button

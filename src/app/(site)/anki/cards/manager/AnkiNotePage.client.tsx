@@ -87,13 +87,16 @@ function toBaseFormLookupItem(value: unknown): BaseFormLookupInputItem | null {
   };
 }
 
-function normalizeBaseFormLookupInput(value: unknown): NormalizedBaseFormLookupInput {
+function normalizeBaseFormLookupInput(
+  value: unknown,
+): NormalizedBaseFormLookupInput {
   if (!Array.isArray(value)) {
     throw new Error("JSON must be an array.");
   }
 
   const sentenceExtractionItems = value.flatMap((sentenceItem) => {
-    if (!isRecord(sentenceItem) || !Array.isArray(sentenceItem.items)) return [];
+    if (!isRecord(sentenceItem) || !Array.isArray(sentenceItem.items))
+      return [];
     return sentenceItem.items
       .map(toBaseFormLookupItem)
       .filter((item): item is BaseFormLookupInputItem => item !== null);
@@ -191,11 +194,17 @@ export default function AnkiNotePage() {
   const [phase3StatusText, setPhase3StatusText] = useState<string | null>(null);
   const [phase3Error, setPhase3Error] = useState<string | null>(null);
   const [reviewPhaseRunning, setReviewPhaseRunning] = useState(false);
-  const [reviewPhaseStatusText, setReviewPhaseStatusText] = useState<string | null>(null);
+  const [reviewPhaseStatusText, setReviewPhaseStatusText] = useState<
+    string | null
+  >(null);
   const [reviewPhaseError, setReviewPhaseError] = useState<string | null>(null);
-  const [expandedReviewPhaseRunning, setExpandedReviewPhaseRunning] = useState(false);
-  const [expandedReviewPhaseStatusText, setExpandedReviewPhaseStatusText] = useState<string | null>(null);
-  const [expandedReviewPhaseError, setExpandedReviewPhaseError] = useState<string | null>(null);
+  const [expandedReviewPhaseRunning, setExpandedReviewPhaseRunning] =
+    useState(false);
+  const [expandedReviewPhaseStatusText, setExpandedReviewPhaseStatusText] =
+    useState<string | null>(null);
+  const [expandedReviewPhaseError, setExpandedReviewPhaseError] = useState<
+    string | null
+  >(null);
   const [runAllRunning, setRunAllRunning] = useState(false);
   const [runAllStatusText, setRunAllStatusText] = useState<string | null>(null);
   const [runAllError, setRunAllError] = useState<string | null>(null);
@@ -227,27 +236,41 @@ export default function AnkiNotePage() {
     null,
   );
   const [baseFormLookupLog, setBaseFormLookupLog] = useState("[]");
-  const [baseFormLookupNoteIds, setBaseFormLookupNoteIds] = useState<string[]>([]);
-  const [baseFormLookupInputStatus, setBaseFormLookupInputStatus] = useState<string | null>(
+  const [baseFormLookupNoteIds, setBaseFormLookupNoteIds] = useState<string[]>(
+    [],
+  );
+  const [baseFormLookupInputStatus, setBaseFormLookupInputStatus] = useState<
+    string | null
+  >(null);
+  const [baseFormQueueLoading, setBaseFormQueueLoading] = useState(false);
+  const [baseFormQueueStatus, setBaseFormQueueStatus] = useState<string | null>(
     null,
   );
-  const [baseFormQueueLoading, setBaseFormQueueLoading] = useState(false);
-  const [baseFormQueueStatus, setBaseFormQueueStatus] = useState<string | null>(null);
-  const [studyCandidatesModalOpen, setStudyCandidatesModalOpen] = useState(false);
+  const [studyCandidatesModalOpen, setStudyCandidatesModalOpen] =
+    useState(false);
   const [studyCandidatesQuery, setStudyCandidatesQuery] = useState("");
   const [studyCandidatesLoading, setStudyCandidatesLoading] = useState(false);
-  const [studyCandidatesError, setStudyCandidatesError] = useState<string | null>(null);
-  const [studyCandidatesStatus, setStudyCandidatesStatus] = useState<string | null>(null);
-  const [studyCandidates, setStudyCandidates] = useState<StudyCandidateResolvedRow[]>([]);
+  const [studyCandidatesError, setStudyCandidatesError] = useState<
+    string | null
+  >(null);
+  const [studyCandidatesStatus, setStudyCandidatesStatus] = useState<
+    string | null
+  >(null);
+  const [studyCandidates, setStudyCandidates] = useState<
+    StudyCandidateResolvedRow[]
+  >([]);
   const [selectedStudyCandidateIds, setSelectedStudyCandidateIds] = useState<
     Record<string, StudyCandidateResolvedRow>
   >({});
-  const [studyCandidatesApplyLoading, setStudyCandidatesApplyLoading] = useState(false);
-  const [studyCandidatesApplyStatus, setStudyCandidatesApplyStatus] = useState<string | null>(
-    null,
-  );
+  const [studyCandidatesApplyLoading, setStudyCandidatesApplyLoading] =
+    useState(false);
+  const [studyCandidatesApplyStatus, setStudyCandidatesApplyStatus] = useState<
+    string | null
+  >(null);
   const [topLearningDepthLoading, setTopLearningDepthLoading] = useState(false);
-  const [topLearningDepthStatus, setTopLearningDepthStatus] = useState<string | null>(null);
+  const [topLearningDepthStatus, setTopLearningDepthStatus] = useState<
+    string | null
+  >(null);
   const [topLearningDepthCount, setTopLearningDepthCount] = useState(10);
 
   const queries = useMemo(() => buildQueries(ankiLinkId), [ankiLinkId]);
@@ -417,7 +440,8 @@ export default function AnkiNotePage() {
 
   async function runAllPhases() {
     if (runAllRunning) return;
-    if (phase0Running || phase1Running || phase2Running || phase3Running) return;
+    if (phase0Running || phase1Running || phase2Running || phase3Running)
+      return;
 
     setRunAllRunning(true);
     setRunAllError(null);
@@ -615,8 +639,13 @@ export default function AnkiNotePage() {
         againCardIds,
       );
 
-      setPhase0StatusText(`Moving ${againCardIds.length} cards to ${tempDeck}…`);
-      const moveMainsRes = await ankiOperations.changeDeck({ cards: againCardIds, deck: tempDeck });
+      setPhase0StatusText(
+        `Moving ${againCardIds.length} cards to ${tempDeck}…`,
+      );
+      const moveMainsRes = await ankiOperations.changeDeck({
+        cards: againCardIds,
+        deck: tempDeck,
+      });
       if (!moveMainsRes.ok) {
         setPhase0Error(moveMainsRes.error);
         return;
@@ -634,7 +663,9 @@ export default function AnkiNotePage() {
         return;
       }
 
-      setPhase0StatusText(`Finding Rahnama cards in ${tempDeck} for ${noteIds.length} notes…`);
+      setPhase0StatusText(
+        `Finding Rahnama cards in ${tempDeck} for ${noteIds.length} notes…`,
+      );
       const rahnamaTempCardIds = new Set<number>();
       for (const noteId of noteIds) {
         const res = await ankiOperations.findCards({
@@ -649,27 +680,41 @@ export default function AnkiNotePage() {
 
       const rahnamaIds = Array.from(rahnamaTempCardIds);
       if (!rahnamaIds.length) {
-        setPhase0StatusText(`Done. Moved mains to ${tempDeck}. No Rahnama cards found in temp to activate.`);
+        setPhase0StatusText(
+          `Done. Moved mains to ${tempDeck}. No Rahnama cards found in temp to activate.`,
+        );
         return;
       }
 
-      appendPhaseLogIds(`فاز ۰: کارت‌های Rahnama که در ${tempDeck} بودند (cardIds)`, rahnamaIds);
+      appendPhaseLogIds(
+        `فاز ۰: کارت‌های Rahnama که در ${tempDeck} بودند (cardIds)`,
+        rahnamaIds,
+      );
 
-      setPhase0StatusText(`Moving ${rahnamaIds.length} Rahnama cards to ${rahnamaDeck}…`);
-      const moveRahnamaRes = await ankiOperations.changeDeck({ cards: rahnamaIds, deck: rahnamaDeck });
+      setPhase0StatusText(
+        `Moving ${rahnamaIds.length} Rahnama cards to ${rahnamaDeck}…`,
+      );
+      const moveRahnamaRes = await ankiOperations.changeDeck({
+        cards: rahnamaIds,
+        deck: rahnamaDeck,
+      });
       if (!moveRahnamaRes.ok) {
         setPhase0Error(moveRahnamaRes.error);
         return;
       }
 
-      setPhase0StatusText(`Resetting (due today + forget) ${rahnamaIds.length} Rahnama cards…`);
+      setPhase0StatusText(
+        `Resetting (due today + forget) ${rahnamaIds.length} Rahnama cards…`,
+      );
       const resetRes = await resetCardsToToday(rahnamaIds);
       if (!resetRes.ok) {
         setPhase0Error(resetRes.error);
         return;
       }
 
-      setPhase0StatusText(`Done. Moved mains=${againCardIds.length} to ${tempDeck}. Activated+reset Rahnama=${rahnamaIds.length}.`);
+      setPhase0StatusText(
+        `Done. Moved mains=${againCardIds.length} to ${tempDeck}. Activated+reset Rahnama=${rahnamaIds.length}.`,
+      );
     } finally {
       setPhase0Running(false);
     }
@@ -737,7 +782,10 @@ export default function AnkiNotePage() {
       setPhase1StatusText(
         `Moving ${intervalFiltered.length} cards to ${tempDeck}…`,
       );
-      const moveToTempRes = await ankiOperations.changeDeck({ cards: intervalFiltered, deck: tempDeck });
+      const moveToTempRes = await ankiOperations.changeDeck({
+        cards: intervalFiltered,
+        deck: tempDeck,
+      });
       if (!moveToTempRes.ok) return void setPhase1Error(moveToTempRes.error);
 
       setPhase1StatusText(
@@ -771,20 +819,32 @@ export default function AnkiNotePage() {
 
       const targetCardIds = Array.from(rahnama2Ids);
       if (!targetCardIds.length) {
-        setPhase1StatusText("No Rahnama2 cards found for these notes (unexpected).");
+        setPhase1StatusText(
+          "No Rahnama2 cards found for these notes (unexpected).",
+        );
         return;
       }
 
-      appendPhaseLogIds("فاز ۱: کارت‌های Rahnama2 انتخاب‌شده (cardIds)", targetCardIds);
+      appendPhaseLogIds(
+        "فاز ۱: کارت‌های Rahnama2 انتخاب‌شده (cardIds)",
+        targetCardIds,
+      );
 
-      setPhase1StatusText(`Moving ${targetCardIds.length} Rahnama2 cards to ${targetDeck}…`);
-      const moveRes = await ankiOperations.changeDeck({ cards: targetCardIds, deck: targetDeck });
+      setPhase1StatusText(
+        `Moving ${targetCardIds.length} Rahnama2 cards to ${targetDeck}…`,
+      );
+      const moveRes = await ankiOperations.changeDeck({
+        cards: targetCardIds,
+        deck: targetDeck,
+      });
       if (!moveRes.ok) {
         setPhase1Error(moveRes.error);
         return;
       }
 
-      setPhase1StatusText(`Resetting (due today + forget) ${targetCardIds.length} Rahnama2 cards…`);
+      setPhase1StatusText(
+        `Resetting (due today + forget) ${targetCardIds.length} Rahnama2 cards…`,
+      );
       const resetRes = await resetCardsToToday(targetCardIds);
       if (!resetRes.ok) {
         setPhase1Error(resetRes.error);
@@ -825,9 +885,14 @@ export default function AnkiNotePage() {
         return;
       }
 
-      appendPhaseLogIds(`فاز ۲: کارت‌های پیدا شده در ${sourceDeck} (cardIds)`, cardIds);
+      appendPhaseLogIds(
+        `فاز ۲: کارت‌های پیدا شده در ${sourceDeck} (cardIds)`,
+        cardIds,
+      );
 
-      setPhase2StatusText(`Loading revlog (getReviewsOfCards, 100 per batch) for ${cardIds.length} cards…`);
+      setPhase2StatusText(
+        `Loading revlog (getReviewsOfCards, 100 per batch) for ${cardIds.length} cards…`,
+      );
       const revlogRes = await getLastRevlogByCardIds(cardIds, 100);
       if (!revlogRes.ok) {
         setPhase2Error(revlogRes.error);
@@ -838,24 +903,37 @@ export default function AnkiNotePage() {
       for (const cardId of cardIds) {
         const last = revlogRes.value.get(cardId) ?? null;
         const interval = Number(last?.ivl);
-        if (Number.isFinite(interval) && interval > 1) intervalFiltered.push(cardId);
+        if (Number.isFinite(interval) && interval > 1)
+          intervalFiltered.push(cardId);
       }
 
       if (intervalFiltered.length === 0) {
-        setPhase2StatusText("No Rahnama2 cards matched interval > 1 day (from revlog).");
+        setPhase2StatusText(
+          "No Rahnama2 cards matched interval > 1 day (from revlog).",
+        );
         return;
       }
 
-      appendPhaseLogIds(`فاز ۲: کارت‌های Rahnama2 با interval>1 (از revlog) (cardIds)`, intervalFiltered);
+      appendPhaseLogIds(
+        `فاز ۲: کارت‌های Rahnama2 با interval>1 (از revlog) (cardIds)`,
+        intervalFiltered,
+      );
 
-      setPhase2StatusText(`Moving ${intervalFiltered.length} cards to ${tempDeck}…`);
-      const moveGuideRes = await ankiOperations.changeDeck({ cards: intervalFiltered, deck: tempDeck });
+      setPhase2StatusText(
+        `Moving ${intervalFiltered.length} cards to ${tempDeck}…`,
+      );
+      const moveGuideRes = await ankiOperations.changeDeck({
+        cards: intervalFiltered,
+        deck: tempDeck,
+      });
       if (!moveGuideRes.ok) {
         setPhase2Error(moveGuideRes.error);
         return;
       }
 
-      setPhase2StatusText(`Finding related notes for ${intervalFiltered.length} cards…`);
+      setPhase2StatusText(
+        `Finding related notes for ${intervalFiltered.length} cards…`,
+      );
       const noteIdsRes = await getNoteIdsForCardIds(intervalFiltered);
       if (!noteIdsRes.ok) {
         setPhase2Error(noteIdsRes.error);
@@ -867,7 +945,9 @@ export default function AnkiNotePage() {
         return;
       }
 
-      setPhase2StatusText(`Finding EnToFa/FaToEn cards in ${tempDeck} for ${noteIds.length} notes…`);
+      setPhase2StatusText(
+        `Finding EnToFa/FaToEn cards in ${tempDeck} for ${noteIds.length} notes…`,
+      );
       const enToFaTemp = new Set<number>();
       const faToEnTemp = new Set<number>();
       for (const noteId of noteIds) {
@@ -893,13 +973,21 @@ export default function AnkiNotePage() {
       const enToFaIds = Array.from(enToFaTemp);
       const faToEnIds = Array.from(faToEnTemp);
       if (!enToFaIds.length && !faToEnIds.length) {
-        setPhase2StatusText(`Done. Moved Rahnama2(interval>1) to temp: ${intervalFiltered.length}. No mains found in temp to return.`);
+        setPhase2StatusText(
+          `Done. Moved Rahnama2(interval>1) to temp: ${intervalFiltered.length}. No mains found in temp to return.`,
+        );
         return;
       }
 
       if (enToFaIds.length) {
-        appendPhaseLogIds(`فاز ۲: کارت‌های EnToFa که در ${tempDeck} بودند (cardIds)`, enToFaIds);
-        const moveRes = await ankiOperations.changeDeck({ cards: enToFaIds, deck: enToFaDeck });
+        appendPhaseLogIds(
+          `فاز ۲: کارت‌های EnToFa که در ${tempDeck} بودند (cardIds)`,
+          enToFaIds,
+        );
+        const moveRes = await ankiOperations.changeDeck({
+          cards: enToFaIds,
+          deck: enToFaDeck,
+        });
         if (!moveRes.ok) {
           setPhase2Error(moveRes.error);
           return;
@@ -912,8 +1000,14 @@ export default function AnkiNotePage() {
       }
 
       if (faToEnIds.length) {
-        appendPhaseLogIds(`فاز ۲: کارت‌های FaToEn که در ${tempDeck} بودند (cardIds)`, faToEnIds);
-        const moveRes = await ankiOperations.changeDeck({ cards: faToEnIds, deck: faToEnDeck });
+        appendPhaseLogIds(
+          `فاز ۲: کارت‌های FaToEn که در ${tempDeck} بودند (cardIds)`,
+          faToEnIds,
+        );
+        const moveRes = await ankiOperations.changeDeck({
+          cards: faToEnIds,
+          deck: faToEnDeck,
+        });
         if (!moveRes.ok) {
           setPhase2Error(moveRes.error);
           return;
@@ -960,7 +1054,7 @@ export default function AnkiNotePage() {
 
       const enToFaDeck = WordAnkiConstants.decks.EnToFa;
       const faToEnDeck = WordAnkiConstants.decks.FaToEn;
-      const emlaDeck = WordAnkiConstants.decks.Emla;
+
       const tempRootDeck = WordAnkiConstants.decks.tempRoot;
 
       setPhase3StatusText(
@@ -1096,7 +1190,6 @@ export default function AnkiNotePage() {
       );
       const candidateEnToFa = new Set<number>();
       const candidateFaToEn = new Set<number>();
-      const candidateEmla = new Set<number>();
 
       for (const noteId of pickedNoteIds) {
         const enRes = await ankiOperations.findCards({
@@ -1117,34 +1210,22 @@ export default function AnkiNotePage() {
         }
         for (const id of faRes.result ?? []) candidateFaToEn.add(id);
 
-        const emRes = await ankiOperations.findCards({
-          query: `nid:${noteId} card:"Emla"`,
-        });
-        if (!emRes.ok) {
-          setPhase3Error(emRes.error);
-          return;
-        }
-        for (const id of emRes.result ?? []) candidateEmla.add(id);
       }
 
       const candidateEnToFaIds = Array.from(candidateEnToFa);
       const candidateFaToEnIds = Array.from(candidateFaToEn);
-      const candidateEmlaIds = Array.from(candidateEmla);
-
       if (
         candidateEnToFaIds.length === 0 &&
-        candidateFaToEnIds.length === 0 &&
-        candidateEmlaIds.length === 0
+        candidateFaToEnIds.length === 0
       ) {
         setPhase3StatusText(
-          "No EnToFa/FaToEn/Emla cards found for selected notes.",
+          "No EnToFa/FaToEn cards found for selected notes.",
         );
         return;
       }
 
       const moveEnToFa = candidateEnToFaIds;
       const moveFaToEn = candidateFaToEnIds;
-      const moveEmla = candidateEmlaIds;
 
       setPhase3StatusText("Moving cards to target decks…");
       if (moveEnToFa.length) {
@@ -1171,21 +1252,8 @@ export default function AnkiNotePage() {
           }
         }
       }
-      if (moveEmla.length) {
-        for (const chunk of chunkArray(moveEmla, 200)) {
-          const res = await ankiOperations.changeDeck({
-            cards: chunk,
-            deck: emlaDeck,
-          });
-          if (!res.ok) {
-            setPhase3Error(res.error);
-            return;
-          }
-        }
-      }
-
       setPhase3StatusText(
-        `Done. Available(before)=${availableTotalCount}/${desiredCount}. Picked notes: ${pickedNoteIds.length}. Requested moves: EnToFa=${moveEnToFa.length}, FaToEn=${moveFaToEn.length}, Emla=${moveEmla.length}.`,
+        `Done. Available(before)=${availableTotalCount}/${desiredCount}. Picked notes: ${pickedNoteIds.length}. Requested moves: EnToFa=${moveEnToFa.length}, FaToEn=${moveFaToEn.length}.`,
       );
     } finally {
       setPhase3Running(false);
@@ -1230,7 +1298,9 @@ export default function AnkiNotePage() {
         const sourceCardIds = cardsRes.result ?? [];
         const recentAgainCardIds: number[] = [];
         for (const chunk of chunkArray(sourceCardIds, 200)) {
-          const reviewsRes = await ankiOperations.getReviewsOfCards({ cards: chunk });
+          const reviewsRes = await ankiOperations.getReviewsOfCards({
+            cards: chunk,
+          });
           if (!reviewsRes.ok) throw new Error(reviewsRes.error);
           const reviewsByCardId = reviewsRes.result ?? {};
           for (const cardId of chunk) {
@@ -1263,9 +1333,11 @@ export default function AnkiNotePage() {
           if (!infoRes.ok) throw new Error(infoRes.error);
           for (const card of infoRes.result ?? []) {
             const isInTemp =
-              card.deckName === tempDeck || card.deckName.startsWith(`${tempDeck}::`);
+              card.deckName === tempDeck ||
+              card.deckName.startsWith(`${tempDeck}::`);
             const isInDefault =
-              card.deckName === "Default" || card.deckName.startsWith("Default::");
+              card.deckName === "Default" ||
+              card.deckName.startsWith("Default::");
             if (isInTemp || isInDefault) movableReviewCardIds.push(card.cardId);
           }
         }
@@ -1299,7 +1371,9 @@ export default function AnkiNotePage() {
         `Done. Sources with Again in last 24h=${sourceAgainCount}. Review cards answered Again=${answeredAgainCount}. Moved from temp/default=${movedCount}.`,
       );
     } catch (error) {
-      setReviewPhaseError(error instanceof Error ? error.message : String(error));
+      setReviewPhaseError(
+        error instanceof Error ? error.message : String(error),
+      );
     } finally {
       setReviewPhaseRunning(false);
     }
@@ -1365,7 +1439,9 @@ export default function AnkiNotePage() {
           eligibleCards.map((card) => card.cardId),
           200,
         )) {
-          const reviewsRes = await ankiOperations.getReviewsOfCards({ cards: chunk });
+          const reviewsRes = await ankiOperations.getReviewsOfCards({
+            cards: chunk,
+          });
           if (!reviewsRes.ok) throw new Error(reviewsRes.error);
           const reviewsByCardId = reviewsRes.result ?? {};
           for (const cardId of chunk) {
@@ -1393,7 +1469,8 @@ export default function AnkiNotePage() {
           const infoRes = await ankiOperations.cardsInfo({ cards: chunk });
           if (!infoRes.ok) throw new Error(infoRes.error);
           for (const card of infoRes.result ?? []) {
-            if (againNoteIds.has(card.note)) reviewCardsToAnswerAgain.push(card.cardId);
+            if (againNoteIds.has(card.note))
+              reviewCardsToAnswerAgain.push(card.cardId);
           }
         }
 
@@ -1656,7 +1733,9 @@ export default function AnkiNotePage() {
 
   useEffect(() => {
     if (expandedReviewPhaseError)
-      appendPhaseLog(`فاز ایجاد مرور گسترده (خطا): ${expandedReviewPhaseError}`);
+      appendPhaseLog(
+        `فاز ایجاد مرور گسترده (خطا): ${expandedReviewPhaseError}`,
+      );
   }, [expandedReviewPhaseError]);
 
   useEffect(() => {
@@ -1749,9 +1828,11 @@ export default function AnkiNotePage() {
         headers: { "content-type": "application/json" },
         body: JSON.stringify(normalized.items),
       });
-      const data = (await res.json().catch(() => null)) as
-        | { ok?: boolean; error?: string; noteIds?: string[] }
-        | null;
+      const data = (await res.json().catch(() => null)) as {
+        ok?: boolean;
+        error?: string;
+        noteIds?: string[];
+      } | null;
       if (!res.ok || !data?.ok) {
         throw new Error(data?.error || `Request failed (${res.status})`);
       }
@@ -1812,15 +1893,21 @@ export default function AnkiNotePage() {
         })),
       ),
     });
-    const lookupData = (await lookupRes.json().catch(() => null)) as
-      | { ok?: boolean; error?: string; noteIds?: string[] }
-      | null;
+    const lookupData = (await lookupRes.json().catch(() => null)) as {
+      ok?: boolean;
+      error?: string;
+      noteIds?: string[];
+    } | null;
     if (!lookupRes.ok || !lookupData?.ok) {
-      throw new Error(lookupData?.error || `Request failed (${lookupRes.status})`);
+      throw new Error(
+        lookupData?.error || `Request failed (${lookupRes.status})`,
+      );
     }
 
     const expandedAnkiLinkIds = Array.from(
-      new Set((lookupData.noteIds ?? []).map((item) => item.trim()).filter(Boolean)),
+      new Set(
+        (lookupData.noteIds ?? []).map((item) => item.trim()).filter(Boolean),
+      ),
     );
     if (expandedAnkiLinkIds.length === 0) {
       setStatus("هیچ anki_link_id معتبری برای انتقال پیدا نشد.");
@@ -1856,7 +1943,6 @@ export default function AnkiNotePage() {
 
     const candidateEnToFa = new Set<number>();
     const candidateFaToEn = new Set<number>();
-    const candidateEmla = new Set<number>();
 
     for (const noteId of ankiNoteIds) {
       const enRes = await ankiOperations.findCards({
@@ -1871,23 +1957,15 @@ export default function AnkiNotePage() {
       if (!faRes.ok) throw new Error(faRes.error);
       for (const id of faRes.result ?? []) candidateFaToEn.add(id);
 
-      const emlaRes = await ankiOperations.findCards({
-        query: `nid:${noteId} card:"Emla"`,
-      });
-      if (!emlaRes.ok) throw new Error(emlaRes.error);
-      for (const id of emlaRes.result ?? []) candidateEmla.add(id);
     }
 
     const moveEnToFa = Array.from(candidateEnToFa);
     const moveFaToEn = Array.from(candidateFaToEn);
-    const moveEmla = Array.from(candidateEmla);
-
     if (
       moveEnToFa.length === 0 &&
-      moveFaToEn.length === 0 &&
-      moveEmla.length === 0
+      moveFaToEn.length === 0
     ) {
-      setStatus("No EnToFa/FaToEn/Emla cards found for extracted notes.");
+      setStatus("No EnToFa/FaToEn cards found for extracted notes.");
       return;
     }
 
@@ -1913,18 +1991,8 @@ export default function AnkiNotePage() {
       }
     }
 
-    if (moveEmla.length) {
-      for (const chunk of chunkArray(moveEmla, 200)) {
-        const res = await ankiOperations.changeDeck({
-          cards: chunk,
-          deck: WordAnkiConstants.decks.Emla,
-        });
-        if (!res.ok) throw new Error(res.error);
-      }
-    }
-
     setStatus(
-      `Done. Notes=${ankiNoteIds.length}. Moves: EnToFa=${moveEnToFa.length}, FaToEn=${moveFaToEn.length}, Emla=${moveEmla.length}.`,
+      `Done. Notes=${ankiNoteIds.length}. Moves: EnToFa=${moveEnToFa.length}, FaToEn=${moveFaToEn.length}.`,
     );
   }
 
@@ -1940,7 +2008,10 @@ export default function AnkiNotePage() {
     setBaseFormQueueStatus(null);
 
     try {
-      await addAnkiLinkIdsToStudyQueue(baseFormLookupNoteIds, setBaseFormQueueStatus);
+      await addAnkiLinkIdsToStudyQueue(
+        baseFormLookupNoteIds,
+        setBaseFormQueueStatus,
+      );
     } catch (e) {
       setBaseFormLookupError(e instanceof Error ? e.message : String(e));
       setBaseFormQueueStatus(null);
@@ -1956,16 +2027,21 @@ export default function AnkiNotePage() {
     setStudyCandidates([]);
 
     try {
-      const url = new URL("/api/anki-note/study-candidate-notes", window.location.origin);
+      const url = new URL(
+        "/api/anki-note/study-candidate-notes",
+        window.location.origin,
+      );
       if (studyCandidatesQuery.trim()) {
         url.searchParams.set("q", studyCandidatesQuery.trim());
       }
       url.searchParams.set("limit", "60");
 
       const res = await fetch(url.toString());
-      const data = (await res.json().catch(() => null)) as
-        | { ok?: boolean; error?: string; items?: StudyCandidateRow[] }
-        | null;
+      const data = (await res.json().catch(() => null)) as {
+        ok?: boolean;
+        error?: string;
+        items?: StudyCandidateRow[];
+      } | null;
       if (!res.ok || !data?.ok) {
         throw new Error(data?.error || `Request failed (${res.status})`);
       }
@@ -2030,8 +2106,7 @@ export default function AnkiNotePage() {
         const hasAnyStudyDeckCard = cardsInfo.some(
           (card) =>
             card.deckName === WordAnkiConstants.decks.EnToFa ||
-            card.deckName === WordAnkiConstants.decks.FaToEn ||
-            card.deckName === WordAnkiConstants.decks.Emla,
+            card.deckName === WordAnkiConstants.decks.FaToEn,
         );
         if (hasAnyStudyDeckCard) continue;
 
@@ -2052,20 +2127,30 @@ export default function AnkiNotePage() {
 
   async function addTopLearningDepthNotesToStudyQueue() {
     if (topLearningDepthLoading) return;
-    const desiredCount = Math.max(1, Math.min(100, Math.trunc(topLearningDepthCount) || 10));
+    const desiredCount = Math.max(
+      1,
+      Math.min(100, Math.trunc(topLearningDepthCount) || 10),
+    );
 
     setTopLearningDepthLoading(true);
-    setTopLearningDepthStatus("در حال پیدا کردن نوت‌های با learning_depth بالاتر…");
+    setTopLearningDepthStatus(
+      "در حال پیدا کردن نوت‌های با learning_depth بالاتر…",
+    );
     setStudyCandidatesError(null);
 
     try {
-      const url = new URL("/api/anki-note/study-candidate-notes", window.location.origin);
+      const url = new URL(
+        "/api/anki-note/study-candidate-notes",
+        window.location.origin,
+      );
       url.searchParams.set("mode", "top-learning-depth");
 
       const res = await fetch(url.toString());
-      const data = (await res.json().catch(() => null)) as
-        | { ok?: boolean; error?: string; items?: StudyCandidateRow[] }
-        | null;
+      const data = (await res.json().catch(() => null)) as {
+        ok?: boolean;
+        error?: string;
+        items?: StudyCandidateRow[];
+      } | null;
       if (!res.ok || !data?.ok) {
         throw new Error(data?.error || `Request failed (${res.status})`);
       }
@@ -2094,7 +2179,10 @@ export default function AnkiNotePage() {
     }
   }
 
-  function toggleStudyCandidate(row: StudyCandidateResolvedRow, checked: boolean) {
+  function toggleStudyCandidate(
+    row: StudyCandidateResolvedRow,
+    checked: boolean,
+  ) {
     setSelectedStudyCandidateIds((prev) => {
       if (checked) {
         return { ...prev, [row.anki_link_id]: row };
@@ -2170,7 +2258,10 @@ export default function AnkiNotePage() {
             value={topLearningDepthCount}
             onChange={(e) =>
               setTopLearningDepthCount(
-                Math.max(1, Math.min(100, Math.trunc(Number(e.target.value) || 1))),
+                Math.max(
+                  1,
+                  Math.min(100, Math.trunc(Number(e.target.value) || 1)),
+                ),
               )
             }
             className="w-20 rounded-xl border border-card bg-background px-3 py-2 text-sm text-foreground shadow-elevated outline-none transition focus:border-foreground/30"
@@ -2200,10 +2291,10 @@ export default function AnkiNotePage() {
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <div>
             <div className="text-sm font-semibold text-foreground">فازها</div>
-	            <div className="mt-1 text-xs text-muted">
-	              این کادر برای اجرای چند فازِ گردش کارت‌ها بین deckها است.
-	            </div>
-	          </div>
+            <div className="mt-1 text-xs text-muted">
+              این کادر برای اجرای چند فازِ گردش کارت‌ها بین deckها است.
+            </div>
+          </div>
 
           <div className="w-full sm:w-[160px]">
             <div className="mb-1 text-xs font-semibold text-muted">
@@ -2239,21 +2330,21 @@ export default function AnkiNotePage() {
               />
               فعال شدن دکمه‌های فاز ۰، ۱، ۲ و اجرای کامل
             </label>
-	            <button
-	              type="button"
-	              onClick={() => void runAllPhases()}
-	              disabled={
-	                !phaseActionsEnabled ||
-	                runAllRunning ||
-	                phase0Running ||
-	                phase1Running ||
-	                phase2Running ||
-	                phase3Running
-	              }
-	              className="h-11 w-full rounded-xl bg-[var(--primary)] px-4 text-sm font-semibold text-[var(--primary-foreground)] shadow-elevated transition hover:opacity-95 disabled:opacity-60 sm:w-auto"
-	            >
-	              {runAllRunning ? "در حال انجام..." : "اجرای فاز ۰ تا ۳"}
-	            </button>
+            <button
+              type="button"
+              onClick={() => void runAllPhases()}
+              disabled={
+                !phaseActionsEnabled ||
+                runAllRunning ||
+                phase0Running ||
+                phase1Running ||
+                phase2Running ||
+                phase3Running
+              }
+              className="h-11 w-full rounded-xl bg-[var(--primary)] px-4 text-sm font-semibold text-[var(--primary-foreground)] shadow-elevated transition hover:opacity-95 disabled:opacity-60 sm:w-auto"
+            >
+              {runAllRunning ? "در حال انجام..." : "اجرای فاز ۰ تا ۳"}
+            </button>
             {runAllStatusText ? (
               <div className="mt-1 text-xs text-foreground/80">
                 {runAllStatusText}
@@ -2265,124 +2356,126 @@ export default function AnkiNotePage() {
           </div>
         </div>
 
-	        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-	          {Array.from({ length: phaseCount }, (_, idx) => {
-	            const phaseNumber = idx;
-	            return (
-	              <div
-	                key={phaseNumber}
-	                className="rounded-xl border border-card bg-background p-3"
-	              >
-	                <div className="text-sm font-semibold text-foreground">
-	                  فاز {phaseNumber}
-	                  <span className="ms-2 text-xs font-semibold text-muted">
-	                    {phaseNumber === 0
-	                      ? "شروع / قرنطینه"
-	                      : phaseNumber === 1
-	                        ? "Rahnama → Rahnama2"
-	                        : phaseNumber === 2
-	                          ? "بازگشت کارت‌های اصلی"
-	                          : phaseNumber === 3
-	                            ? "افزودن کارت"
-	                            : ""}
-	                  </span>
-	                </div>
-	                {phaseNumber === 0 ? (
-	                  <div className="mt-2 grid gap-3">
-	                    <button
-	                      type="button"
-	                      onClick={() => void runPhase0()}
-	                      disabled={!phaseActionsEnabled || phase0Running}
-	                      className="h-11 rounded-xl bg-[var(--primary)] px-4 text-sm font-semibold text-[var(--primary-foreground)] shadow-elevated transition hover:opacity-95 disabled:opacity-60"
-	                    >
-	                      {phase0Running ? "در حال انجام..." : "اجرای فاز ۰"}
-	                    </button>
+        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: phaseCount }, (_, idx) => {
+            const phaseNumber = idx;
+            return (
+              <div
+                key={phaseNumber}
+                className="rounded-xl border border-card bg-background p-3"
+              >
+                <div className="text-sm font-semibold text-foreground">
+                  فاز {phaseNumber}
+                  <span className="ms-2 text-xs font-semibold text-muted">
+                    {phaseNumber === 0
+                      ? "شروع / قرنطینه"
+                      : phaseNumber === 1
+                        ? "Rahnama → Rahnama2"
+                        : phaseNumber === 2
+                          ? "بازگشت کارت‌های اصلی"
+                          : phaseNumber === 3
+                            ? "افزودن کارت"
+                            : ""}
+                  </span>
+                </div>
+                {phaseNumber === 0 ? (
+                  <div className="mt-2 grid gap-3">
+                    <button
+                      type="button"
+                      onClick={() => void runPhase0()}
+                      disabled={!phaseActionsEnabled || phase0Running}
+                      className="h-11 rounded-xl bg-[var(--primary)] px-4 text-sm font-semibold text-[var(--primary-foreground)] shadow-elevated transition hover:opacity-95 disabled:opacity-60"
+                    >
+                      {phase0Running ? "در حال انجام..." : "اجرای فاز ۰"}
+                    </button>
 
-   	                <div dir="rtl" className="grid gap-2 text-right">
-	                      <ol className="list-decimal space-y-1 ps-5 text-xs text-muted">
-	                        <li>
-	                          کارت‌های deck های {WordAnkiConstants.decks.EnToFa} و{" "}
-	                          {WordAnkiConstants.decks.FaToEn} پیدا می‌شوند.
-	                        </li>
-	                        <li>
-	                          از بین آن‌ها کارت‌هایی که آخرین پاسخشان{" "}
-	                          <span className="font-mono text-xs">Again</span> بوده
-	                          انتخاب می‌شوند.
-	                        </li>
-	                        <li>
-	                          برای جلوگیری از این‌که کارت‌هایی که فاز ۲ به deckهای
-	                          اصلی برمی‌گرداند (اما آخرین پاسخشان هنوز Again است)
-	                          دوباره در فاز ۰ انتخاب شوند، در فاز ۲ بعد از ریست
-	                          یک بار هم «بلدم» زده می‌شود تا آخرین پاسخشان Again
-	                          نباشد.
-	                        </li>
-	                        <li>
-	                          آن کارت‌ها به deck {WordAnkiConstants.decks.tempRoot}{" "}
-	                          منتقل می‌شوند (برای جلوگیری از تداخل).
-	                        </li>
-	                        <li>
-	                          برای نوت‌های معادل، کارت{" "}
-	                          <span className="font-mono text-xs">card:&quot;Rahnama&quot;</span>{" "}
-	                          که در {WordAnkiConstants.decks.tempRoot} باشد پیدا می‌شود.
-	                        </li>
-	                        <li>
-	                          کارت‌های Rahnama پیدا‌شده به deck{" "}
-	                          {WordAnkiConstants.decks.Rahnama} منتقل می‌شوند و ریست
-	                          می‌شوند (due=today سپس forget).
-	                        </li>
-	                      </ol>
+                    <div dir="rtl" className="grid gap-2 text-right">
+                      <ol className="list-decimal space-y-1 ps-5 text-xs text-muted">
+                        <li>
+                          کارت‌های deck های {WordAnkiConstants.decks.EnToFa} و{" "}
+                          {WordAnkiConstants.decks.FaToEn} پیدا می‌شوند.
+                        </li>
+                        <li>
+                          از بین آن‌ها کارت‌هایی که آخرین پاسخشان{" "}
+                          <span className="font-mono text-xs">Again</span> بوده
+                          انتخاب می‌شوند.
+                        </li>
+                        <li>
+                          برای جلوگیری از این‌که کارت‌هایی که فاز ۲ به deckهای
+                          اصلی برمی‌گرداند (اما آخرین پاسخشان هنوز Again است)
+                          دوباره در فاز ۰ انتخاب شوند، در فاز ۲ بعد از ریست یک
+                          بار هم «بلدم» زده می‌شود تا آخرین پاسخشان Again نباشد.
+                        </li>
+                        <li>
+                          آن کارت‌ها به deck {WordAnkiConstants.decks.tempRoot}{" "}
+                          منتقل می‌شوند (برای جلوگیری از تداخل).
+                        </li>
+                        <li>
+                          برای نوت‌های معادل، کارت{" "}
+                          <span className="font-mono text-xs">
+                            card:&quot;Rahnama&quot;
+                          </span>{" "}
+                          که در {WordAnkiConstants.decks.tempRoot} باشد پیدا
+                          می‌شود.
+                        </li>
+                        <li>
+                          کارت‌های Rahnama پیدا‌شده به deck{" "}
+                          {WordAnkiConstants.decks.Rahnama} منتقل می‌شوند و ریست
+                          می‌شوند (due=today سپس forget).
+                        </li>
+                      </ol>
 
-	                      {phase0StatusText ? (
-	                        <div className="text-xs text-foreground/80">
-	                          {phase0StatusText}
-	                        </div>
-	                      ) : null}
-	                      {phase0Error ? (
-	                        <div className="text-xs text-red-700">
-	                          {phase0Error}
-	                        </div>
-	                      ) : null}
-	                    </div>
-	                  </div>
-	                ) : phaseNumber === 1 ? (
-	                  <div className="mt-2 grid gap-3">
-	                    <button
-	                      type="button"
-	                      onClick={() => void runPhase1()}
+                      {phase0StatusText ? (
+                        <div className="text-xs text-foreground/80">
+                          {phase0StatusText}
+                        </div>
+                      ) : null}
+                      {phase0Error ? (
+                        <div className="text-xs text-red-700">
+                          {phase0Error}
+                        </div>
+                      ) : null}
+                    </div>
+                  </div>
+                ) : phaseNumber === 1 ? (
+                  <div className="mt-2 grid gap-3">
+                    <button
+                      type="button"
+                      onClick={() => void runPhase1()}
                       disabled={!phaseActionsEnabled || phase1Running}
                       className="h-11 rounded-xl bg-[var(--primary)] px-4 text-sm font-semibold text-[var(--primary-foreground)] shadow-elevated transition hover:opacity-95 disabled:opacity-60"
                     >
                       {phase1Running ? "در حال انجام..." : "اجرای فاز ۱"}
                     </button>
 
-	                    <div dir="rtl" className="grid gap-2 text-right">
-	                      <ol className="list-decimal space-y-1 ps-5 text-xs text-muted">
-	                        <li>
-	                          آیدی کارت‌های deck {WordAnkiConstants.decks.Rahnama}{" "}
-	                          پیدا می‌شود.
-	                        </li>
-	                        <li>
-	                          از روی revlog (آخرین ivl) فقط کارت‌های Rahnama با
-	                          interval&gt;1 جدا می‌شوند.
-	                        </li>
-	                        <li>
-	                          آن کارت‌ها به deck {WordAnkiConstants.decks.tempRoot}{" "}
-	                          منتقل می‌شوند.
-	                        </li>
-	                        <li>نوت‌های معادلِ آن کارت‌ها پیدا می‌شوند.</li>
-	                        <li>
-	                          از همان نوت‌ها کارت{" "}
-	                          <span className="font-mono text-xs">
-	                            card:&quot;Rahnama2&quot;
-	                          </span>{" "}
-	                          پیدا می‌شود.
-	                        </li>
-	                        <li>
-	                          کارت Rahnama2 به deck{" "}
-	                          {WordAnkiConstants.decks.Rahnama2} منتقل می‌شود و ریست
-	                          می‌شود (due=today سپس forget).
-	                        </li>
-	                      </ol>
+                    <div dir="rtl" className="grid gap-2 text-right">
+                      <ol className="list-decimal space-y-1 ps-5 text-xs text-muted">
+                        <li>
+                          آیدی کارت‌های deck {WordAnkiConstants.decks.Rahnama}{" "}
+                          پیدا می‌شود.
+                        </li>
+                        <li>
+                          از روی revlog (آخرین ivl) فقط کارت‌های Rahnama با
+                          interval&gt;1 جدا می‌شوند.
+                        </li>
+                        <li>
+                          آن کارت‌ها به deck {WordAnkiConstants.decks.tempRoot}{" "}
+                          منتقل می‌شوند.
+                        </li>
+                        <li>نوت‌های معادلِ آن کارت‌ها پیدا می‌شوند.</li>
+                        <li>
+                          از همان نوت‌ها کارت{" "}
+                          <span className="font-mono text-xs">
+                            card:&quot;Rahnama2&quot;
+                          </span>{" "}
+                          پیدا می‌شود.
+                        </li>
+                        <li>
+                          کارت Rahnama2 به deck{" "}
+                          {WordAnkiConstants.decks.Rahnama2} منتقل می‌شود و ریست
+                          می‌شود (due=today سپس forget).
+                        </li>
+                      </ol>
 
                       {phase1StatusText ? (
                         <div className="text-xs text-foreground/80">
@@ -2394,10 +2487,10 @@ export default function AnkiNotePage() {
                           {phase1Error}
                         </div>
                       ) : null}
-	                    </div>
-	                  </div>
-	                ) : phaseNumber === 2 ? (
-	                  <div className="mt-2 grid gap-3">
+                    </div>
+                  </div>
+                ) : phaseNumber === 2 ? (
+                  <div className="mt-2 grid gap-3">
                     <button
                       type="button"
                       onClick={() => void runPhase2()}
@@ -2407,32 +2500,33 @@ export default function AnkiNotePage() {
                       {phase2Running ? "در حال انجام..." : "اجرای فاز ۲"}
                     </button>
 
-	                    <div dir="rtl" className="grid gap-2 text-right">
-	                      <ol className="list-decimal space-y-1 ps-5 text-xs text-muted">
-	                        <li>
-	                          آیدی کارت‌های deck {WordAnkiConstants.decks.Rahnama2}{" "}
-	                          پیدا می‌شود.
-	                        </li>
-	                        <li>
-	                          از روی revlog (آخرین ivl) فقط کارت‌های Rahnama2 با
-	                          interval&gt;1 جدا می‌شوند.
-	                        </li>
-	                        <li>
-	                          آن کارت‌ها به deck {WordAnkiConstants.decks.tempRoot}{" "}
-	                          منتقل می‌شوند.
-	                        </li>
-	                        <li>
-	                          برای نوت‌های معادل، اگر کارت‌های{" "}
-	                          {WordAnkiConstants.decks.EnToFa} /{" "}
-	                          {WordAnkiConstants.decks.FaToEn} در{" "}
-	                          {WordAnkiConstants.decks.tempRoot} باشند پیدا می‌شوند.
-	                        </li>
-	                        <li>
-	                          کارت‌های پیدا‌شده به deckهای اصلی‌شان برگردانده می‌شوند
-	                          و ریست می‌شوند (due=today سپس forget)، و سپس یک بار هم
-	                          «بلدم» زده می‌شود تا آخرین پاسخشان Again نباشد.
-	                        </li>
-	                      </ol>
+                    <div dir="rtl" className="grid gap-2 text-right">
+                      <ol className="list-decimal space-y-1 ps-5 text-xs text-muted">
+                        <li>
+                          آیدی کارت‌های deck {WordAnkiConstants.decks.Rahnama2}{" "}
+                          پیدا می‌شود.
+                        </li>
+                        <li>
+                          از روی revlog (آخرین ivl) فقط کارت‌های Rahnama2 با
+                          interval&gt;1 جدا می‌شوند.
+                        </li>
+                        <li>
+                          آن کارت‌ها به deck {WordAnkiConstants.decks.tempRoot}{" "}
+                          منتقل می‌شوند.
+                        </li>
+                        <li>
+                          برای نوت‌های معادل، اگر کارت‌های{" "}
+                          {WordAnkiConstants.decks.EnToFa} /{" "}
+                          {WordAnkiConstants.decks.FaToEn} در{" "}
+                          {WordAnkiConstants.decks.tempRoot} باشند پیدا می‌شوند.
+                        </li>
+                        <li>
+                          کارت‌های پیدا‌شده به deckهای اصلی‌شان برگردانده
+                          می‌شوند و ریست می‌شوند (due=today سپس forget)، و سپس
+                          یک بار هم «بلدم» زده می‌شود تا آخرین پاسخشان Again
+                          نباشد.
+                        </li>
+                      </ol>
 
                       {phase2StatusText ? (
                         <div className="text-xs text-foreground/80">
@@ -2459,11 +2553,11 @@ export default function AnkiNotePage() {
 
                     <div className="grid gap-2">
                       <ol className="list-decimal space-y-1 ps-5 text-xs text-muted">
-	                        <li>
-	                          تعداد کارت‌های آماده‌ی مطالعه را از deck{" "}
-	                          {WordAnkiConstants.decks.EnToFa} می‌شمارد (is:new OR
-	                          is:due).
-	                        </li>
+                        <li>
+                          تعداد کارت‌های آماده‌ی مطالعه را از deck{" "}
+                          {WordAnkiConstants.decks.EnToFa} می‌شمارد (is:new OR
+                          is:due).
+                        </li>
                         <li>
                           اگر تعدادشان کمتر از مقدار «تعداد کارت ها برای مطالعه
                           جلسه» باشد، اختلاف را به صورت تعداد نوت از deck{" "}
@@ -2494,9 +2588,8 @@ export default function AnkiNotePage() {
                           تکمیل می‌شوند.
                         </li>
                         <li>
-                          از نوت‌های انتخاب‌شده کارت‌های نوع EnToFa / FaToEn /
-                          Emla انتخاب می‌شوند و به deck های متناظر خودشان منتقل
-                          می‌شوند.
+                          از نوت‌های انتخاب‌شده کارت‌های نوع EnToFa / FaToEn
+                          انتخاب می‌شوند و به deck های متناظر خودشان منتقل می‌شوند.
                         </li>
                       </ol>
 
@@ -2518,8 +2611,8 @@ export default function AnkiNotePage() {
                   </div>
                 )}
               </div>
-	            );
-	          })}
+            );
+          })}
           <div className="rounded-xl border border-card bg-background p-3">
             <div className="text-sm font-semibold text-foreground">
               فاز ایجاد مرور
@@ -2534,7 +2627,9 @@ export default function AnkiNotePage() {
                 disabled={reviewPhaseRunning || expandedReviewPhaseRunning}
                 className="h-11 rounded-xl bg-[var(--primary)] px-4 text-sm font-semibold text-[var(--primary-foreground)] shadow-elevated transition hover:opacity-95 disabled:opacity-60"
               >
-                {reviewPhaseRunning ? "در حال انجام..." : "اجرای فاز ایجاد مرور"}
+                {reviewPhaseRunning
+                  ? "در حال انجام..."
+                  : "اجرای فاز ایجاد مرور"}
               </button>
 
               <div dir="rtl" className="grid gap-2 text-right">
@@ -2544,22 +2639,25 @@ export default function AnkiNotePage() {
                     {WordAnkiConstants.decks.FaToEn} بررسی می‌شوند.
                   </li>
                   <li>
-                    فقط کارت‌هایی انتخاب می‌شوند که در ۲۴ ساعت گذشته حداقل یک بار
-                    دکمه «بلد نیستم» (Again) برایشان زده شده باشد.
+                    فقط کارت‌هایی انتخاب می‌شوند که در ۲۴ ساعت گذشته حداقل یک
+                    بار دکمه «بلد نیستم» (Again) برایشان زده شده باشد.
                   </li>
                   <li>
-                    کارت معادل آن‌ها، یعنی EnToFaRev یا FaToEnRev از همان نوت، پیدا
-                    می‌شود و یک بار پاسخ «بلد نیستم» (Again) برای آن ثبت می‌شود.
+                    کارت معادل آن‌ها، یعنی EnToFaRev یا FaToEnRev از همان نوت،
+                    پیدا می‌شود و یک بار پاسخ «بلد نیستم» (Again) برای آن ثبت
+                    می‌شود.
                   </li>
                   <li>
-                    اگر کارت مرور معادل در deck {WordAnkiConstants.decks.tempRoot} یا{" "}
-                    Default باشد، به deck متناظر {WordAnkiConstants.decks.EnToFaRev} یا{" "}
+                    اگر کارت مرور معادل در deck{" "}
+                    {WordAnkiConstants.decks.tempRoot} یا Default باشد، به deck
+                    متناظر {WordAnkiConstants.decks.EnToFaRev} یا{" "}
                     {WordAnkiConstants.decks.FaToEnRev} منتقل می‌شود.
                   </li>
                   <li>
-                    بازه فقط ۲۴ ساعت گذاشته شده، چون اگر مدت بیشتری گذشته باشد و ما
-                    Anki را نخوانده باشیم، ممکن است در مرور جدید کارت را بلد باشیم؛ پس
-                    آن کارت دیگر واقعاً جزو «بلد نیستم‌ها» محسوب نمی‌شود.
+                    بازه فقط ۲۴ ساعت گذاشته شده، چون اگر مدت بیشتری گذشته باشد و
+                    ما Anki را نخوانده باشیم، ممکن است در مرور جدید کارت را بلد
+                    باشیم؛ پس آن کارت دیگر واقعاً جزو «بلد نیستم‌ها» محسوب
+                    نمی‌شود.
                   </li>
                 </ol>
 
@@ -2601,8 +2699,8 @@ export default function AnkiNotePage() {
                     می‌شوند.
                   </li>
                   <li>
-                    کارت‌هایی انتخاب می‌شوند که از حالت New خارج شده و وارد Learn،
-                    Relearn یا Review شده‌اند.
+                    کارت‌هایی انتخاب می‌شوند که از حالت New خارج شده و وارد
+                    Learn، Relearn یا Review شده‌اند.
                   </li>
                   <li>
                     کارت Rev متناظر هر نوت پیدا می‌شود و به deck متناظر{" "}
@@ -2610,12 +2708,12 @@ export default function AnkiNotePage() {
                     {WordAnkiConstants.decks.FaToEnRev} منتقل می‌شود.
                   </li>
                   <li>
-                    از میان همین کارت‌های منبع، مواردی که در ۲۴ ساعت گذشته حداقل یک
-                    پاسخ «بلد نیستم» (Again) داشته‌اند مشخص می‌شوند.
+                    از میان همین کارت‌های منبع، مواردی که در ۲۴ ساعت گذشته حداقل
+                    یک پاسخ «بلد نیستم» (Again) داشته‌اند مشخص می‌شوند.
                   </li>
                   <li>
-                    برای کارت Rev متناظر آن‌ها نیز یک بار پاسخ «بلد نیستم» (Again)
-                    ثبت می‌شود.
+                    برای کارت Rev متناظر آن‌ها نیز یک بار پاسخ «بلد نیستم»
+                    (Again) ثبت می‌شود.
                   </li>
                 </ol>
 
@@ -2698,10 +2796,8 @@ export default function AnkiNotePage() {
           </div>
           <div className="mt-1 text-xs text-muted">
             Fetches notes of model{" "}
-            <span className="font-mono">
-              {AnkiNoteTypes.META_LEX_VR9}
-            </span>{" "}
-            via AnkiConnect search.
+            <span className="font-mono">{AnkiNoteTypes.META_LEX_VR9}</span> via
+            AnkiConnect search.
           </div>
 
           <div className="mt-3 flex flex-col gap-2 sm:flex-row">
@@ -2789,9 +2885,7 @@ export default function AnkiNotePage() {
             <div className="mt-4 flex flex-wrap items-end gap-3">
               <div className="text-sm">
                 Model:{" "}
-                <span className="font-mono">
-                  {AnkiNoteTypes.META_LEX_VR9}
-                </span>
+                <span className="font-mono">{AnkiNoteTypes.META_LEX_VR9}</span>
               </div>
 
               <button
@@ -2838,9 +2932,10 @@ export default function AnkiNotePage() {
                   قرار دادن در صف مطالعه
                 </div>
                 <div className="mt-1 text-xs text-muted">
-                  آرایه مستقیم کلمات یا خروجی <code>word-extraction</code> را paste کن.
-                  اگر ورودی شامل <code>items</code> باشد، همه آیتم‌ها flatten می‌شوند و بعد
-                  با <code>base_form</code> در جدول <code>Word</code> جستجو می‌شوند.
+                  آرایه مستقیم کلمات یا خروجی <code>word-extraction</code> را
+                  paste کن. اگر ورودی شامل <code>items</code> باشد، همه آیتم‌ها
+                  flatten می‌شوند و بعد با <code>base_form</code> در جدول{" "}
+                  <code>Word</code> جستجو می‌شوند.
                 </div>
               </div>
               <button
@@ -2865,7 +2960,9 @@ export default function AnkiNotePage() {
                     ورودی JSON: آرایه کلمات یا خروجی extract from sentences
                   </div>
                   {baseFormLookupInputStatus ? (
-                    <div className="text-xs text-muted">{baseFormLookupInputStatus}</div>
+                    <div className="text-xs text-muted">
+                      {baseFormLookupInputStatus}
+                    </div>
                   ) : null}
                 </div>
                 <textarea
@@ -2888,19 +2985,27 @@ export default function AnkiNotePage() {
                     disabled={baseFormLookupLoading}
                     className="h-11 rounded-xl bg-[var(--primary)] px-4 text-sm font-semibold text-[var(--primary-foreground)] shadow-elevated transition hover:opacity-95 disabled:opacity-60"
                   >
-                    {baseFormLookupLoading ? "در حال جستجو..." : "ساختن آرایه note"}
+                    {baseFormLookupLoading
+                      ? "در حال جستجو..."
+                      : "ساختن آرایه note"}
                   </button>
                   <button
                     type="button"
                     onClick={() => void addLookupNotesToStudyQueue()}
-                    disabled={baseFormQueueLoading || baseFormLookupNoteIds.length === 0}
+                    disabled={
+                      baseFormQueueLoading || baseFormLookupNoteIds.length === 0
+                    }
                     className="h-11 rounded-xl border border-card bg-background px-4 text-sm font-semibold text-foreground transition hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5"
                   >
-                    {baseFormQueueLoading ? "در حال افزودن..." : "افزودن به صف مطالعه"}
+                    {baseFormQueueLoading
+                      ? "در حال افزودن..."
+                      : "افزودن به صف مطالعه"}
                   </button>
                 </div>
                 {baseFormQueueStatus ? (
-                  <div className="text-xs text-muted">{baseFormQueueStatus}</div>
+                  <div className="text-xs text-muted">
+                    {baseFormQueueStatus}
+                  </div>
                 ) : null}
               </div>
 
@@ -2972,7 +3077,9 @@ export default function AnkiNotePage() {
             ) : null}
 
             {studyCandidatesStatus ? (
-              <div className="mt-3 text-xs text-muted">{studyCandidatesStatus}</div>
+              <div className="mt-3 text-xs text-muted">
+                {studyCandidatesStatus}
+              </div>
             ) : null}
 
             <div className="mt-4 grid min-h-0 flex-1 gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
@@ -2999,7 +3106,9 @@ export default function AnkiNotePage() {
                   </thead>
                   <tbody>
                     {studyCandidates.map((row) => {
-                      const checked = Boolean(selectedStudyCandidateIds[row.anki_link_id]);
+                      const checked = Boolean(
+                        selectedStudyCandidateIds[row.anki_link_id],
+                      );
                       return (
                         <tr
                           key={`${row.anki_link_id}_${row.noteId}`}
@@ -3009,13 +3118,21 @@ export default function AnkiNotePage() {
                             <input
                               type="checkbox"
                               checked={checked}
-                              onChange={(e) => toggleStudyCandidate(row, e.target.checked)}
+                              onChange={(e) =>
+                                toggleStudyCandidate(row, e.target.checked)
+                              }
                               className="h-4 w-4 rounded border border-card"
                             />
                           </td>
-                          <td className="px-3 py-3 text-foreground">{row.base_form}</td>
-                          <td className="px-3 py-3 text-foreground">{row.meaning_fa}</td>
-                          <td className="px-3 py-3 text-foreground">{row.sentence_en}</td>
+                          <td className="px-3 py-3 text-foreground">
+                            {row.base_form}
+                          </td>
+                          <td className="px-3 py-3 text-foreground">
+                            {row.meaning_fa}
+                          </td>
+                          <td className="px-3 py-3 text-foreground">
+                            {row.sentence_en}
+                          </td>
                           <td className="px-3 py-3 text-foreground">
                             {row.sentence_en_meaning_fa}
                           </td>
@@ -3024,7 +3141,10 @@ export default function AnkiNotePage() {
                     })}
                     {!studyCandidatesLoading && studyCandidates.length === 0 ? (
                       <tr>
-                        <td colSpan={5} className="px-3 py-6 text-center text-sm text-muted">
+                        <td
+                          colSpan={5}
+                          className="px-3 py-6 text-center text-sm text-muted"
+                        >
                           فعلاً رکوردی برای نمایش نیست.
                         </td>
                       </tr>
@@ -3038,8 +3158,8 @@ export default function AnkiNotePage() {
                   انتخاب‌شده‌ها
                 </div>
                 <div className="mt-1 text-xs text-muted">
-                  با زدن اعمال، خود کلمه و guide wordهای وابسته به‌صورت درختی وارد
-                  چرخه مطالعه می‌شوند.
+                  با زدن اعمال، خود کلمه و guide wordهای وابسته به‌صورت درختی
+                  وارد چرخه مطالعه می‌شوند.
                 </div>
 
                 <div className="mt-3 min-h-0 flex-1 overflow-auto rounded-xl border border-card bg-card p-3">
@@ -3053,12 +3173,16 @@ export default function AnkiNotePage() {
                           <div className="text-sm font-semibold text-foreground">
                             {row.base_form}
                           </div>
-                          <div className="text-xs text-muted">{row.meaning_fa}</div>
+                          <div className="text-xs text-muted">
+                            {row.meaning_fa}
+                          </div>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <div className="text-sm text-muted">هنوز چیزی انتخاب نشده است.</div>
+                    <div className="text-sm text-muted">
+                      هنوز چیزی انتخاب نشده است.
+                    </div>
                   )}
                 </div>
 

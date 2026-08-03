@@ -5,7 +5,6 @@ import type { LogFn, StepResult } from "./types";
 type ExportResponse = {
   ok: boolean;
   error?: string;
-  path?: string;
   templateNames?: string[];
 };
 
@@ -37,6 +36,6 @@ export async function copyTemplatesFromAnki(appendLog: LogFn): Promise<StepResul
     return { ok: false };
   }
 
-  appendLog(`✓ Copied ${result.templateNames?.length ?? 0} templates to ${result.path}.`);
+  appendLog(`✓ ${result.templateNames?.length ?? 0} Template از Anki در تنظیمات Structure Builder ذخیره شد.`);
   return { ok: true };
 }

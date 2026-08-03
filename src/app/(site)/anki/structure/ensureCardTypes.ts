@@ -1,5 +1,5 @@
 import { AnkiNoteTypes, createAnkiOperations, WordAnkiConstants } from "@/lib/anki";
-import type { AnkiStructureConfig, AnkiStructureCardType } from "@/lib/anki/structureSettings";
+import { createDefaultAnkiStructureConfig, type AnkiStructureConfig, type AnkiStructureCardType } from "@/lib/anki/structureSettings";
 
 import { ensureAnkiPermission } from "./ensureNoteType";
 import type { LogFn, StepResult } from "./types";
@@ -14,10 +14,10 @@ function desiredCardTemplates(config?: AnkiStructureConfig) {
       Back: template.back,
     }));
   }
-  return Object.entries(WordAnkiConstants.noteTemplates).map(([Name, template]) => ({
-    Name,
-    Front: template.Front,
-    Back: template.Back,
+  return createDefaultAnkiStructureConfig().noteType.cardTypes.map((template) => ({
+    Name: template.name,
+    Front: template.front,
+    Back: template.back,
   }));
 }
 

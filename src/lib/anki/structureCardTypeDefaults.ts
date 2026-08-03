@@ -1,6 +1,7 @@
-export const wordNoteTemplates = {
+export const defaultStructureCardTypeTemplates = {
   "EnToFa": {
-    Front: `<div style="display:none;">
+    Front: `<div style="display:none;">[sound:anki_question_gentle_chime.mp3]</div>
+<div style="display:none;">
 [sound:rec1784581227.mp3]
 </div>
 <div style="">
@@ -106,7 +107,8 @@ export const wordNoteTemplates = {
 `,
   },
   "FaToEn": {
-    Front: `<div style="display:none;">
+    Front: `<div style="display:none;">[sound:anki_question_gentle_chime.mp3]</div>
+<div style="display:none;">
 [sound:rec1784581227.mp3]
 </div>
 <div style="direction:rtl;text-align:right">
@@ -235,36 +237,9 @@ export const wordNoteTemplates = {
 
 `,
   },
-  "Emla": {
-    Front: `<div style=";text-align:right">
-<div style='display:none'>[sound:rec1765049893.mp3]</div>
-
-<div style='font-family: "Arial"; font-size: 20px;'>{{meaning_fa}}</div>
-
-<div style='display:none'>[sound:rec1765487198.mp3]</div>
-
-<div style='font-family: "Arial"; font-size: 20px;'>{{concept_explained_fa}}</div>
-</div>
-<hr>
-{{base_form}}{{phonetic_us}}
-
-<div style=";text-align:right">
-<div style='font-family: "Arial"; font-size: 20px;'>{{first_letter_fa_hint}}</div>
-<div style='font-family: "Arial"; font-size: 20px;'>{{first_letter_en_hint}}</div>
-</div>`,
-    Back: `{{base_form}}{{phonetic_us}}
-<br>
-{{sentence_en}}
-<hr>
-<div style=";text-align:right">
-<div style='display:none'>[sound:rec1765049893.mp3]</div>
-<div style='font-family: "Arial"; font-size: 20px;'>{{first_letter_fa_hint}}</div>
-<div style='display:none'>[sound:rec1765049893.mp3]</div>
-<div style='font-family: "Arial"; font-size: 20px;'>{{first_letter_en_hint}}</div>
-</div>`,
-  },
   "Rahnama": {
-    Front: `<div style='display:none'>[sound:rec1765049893.mp3]</div>{{base_form}} {{base_form_audio}}{{phonetic_us}}
+    Front: `<div style="display:none;">[sound:anki_question_gentle_chime.mp3]</div>
+<div style='display:none'>[sound:rec1765049893.mp3]</div>{{base_form}} {{base_form_audio}}{{phonetic_us}}
 
 <div style='font-family: "Arial"; font-size: 20px;'>{{meaning_fa}}</div>
 <div style='font-family: "Arial"; font-size: 20px;'>{{meaning_fa_audio}}</div>
@@ -288,7 +263,8 @@ export const wordNoteTemplates = {
 `,
   },
   "Rahnama2": {
-    Front: `{{#selfGuide}}<div style='font-family: "Arial"; font-size: 20px;'>{{selfGuide}}</div>{{/selfGuide}}{{^selfGuide}}<div style='font-family: "Arial"; font-size: 20px;'>{{first_letter_en_hint}}</div>{{/selfGuide}}
+    Front: `<div style="display:none;">[sound:anki_question_gentle_chime.mp3]</div>
+{{#selfGuide}}<div style='font-family: "Arial"; font-size: 20px;'>{{selfGuide}}</div>{{/selfGuide}}{{^selfGuide}}<div style='font-family: "Arial"; font-size: 20px;'>{{first_letter_en_hint}}</div>{{/selfGuide}}
 
 `,
     Back: `{{FrontSide}}
@@ -297,7 +273,8 @@ export const wordNoteTemplates = {
 </div>`,
   },
   "EnToFaRev": {
-    Front: `<div style="display:none;">
+    Front: `<div style="display:none;">[sound:anki_question_gentle_chime.mp3]</div>
+<div style="display:none;">
 [sound:rec1784581227.mp3]
 </div>
 <div style="">
@@ -400,7 +377,8 @@ export const wordNoteTemplates = {
 `,
   },
   "FaToEnRev": {
-    Front: `<div style="display:none;">
+    Front: `<div style="display:none;">[sound:anki_question_gentle_chime.mp3]</div>
+<div style="display:none;">
 [sound:rec1784581227.mp3]
 </div>
 <div style="direction:rtl;text-align:right">

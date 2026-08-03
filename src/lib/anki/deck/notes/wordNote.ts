@@ -1,16 +1,3 @@
-import { wordNoteTemplates } from "./wordNoteTemplates";
-
-const requiredWordNoteTemplateFallbacks = {
-  "1EnToFaKnowingFilter": {
-    Front: `{{base_form}}`,
-    Back: `{{meaning_fa}}`,
-  },
-  "1FaToEnKnowingFilter": {
-    Front: `{{meaning_fa}}`,
-    Back: `{{base_form}}`,
-  },
-} as const;
-
 export const WordAnkiConstants = {
   noteFields: [
     "anki_link_id",
@@ -45,10 +32,6 @@ export const WordAnkiConstants = {
     "json_hint",
     "updatedAt",
   ],
-  noteTemplates: {
-    ...requiredWordNoteTemplateFallbacks,
-    ...wordNoteTemplates,
-  },
   cardTypes: {
     EnToFa: "EnToFa",
     EnToFaKnowingFilter: "1EnToFaKnowingFilter",
@@ -56,7 +39,6 @@ export const WordAnkiConstants = {
     FaToEn: "FaToEn",
     FaToEnKnowingFilter: "1FaToEnKnowingFilter",
     FaToEnRev: "FaToEnRev",
-    Emla: "Emla",
     Rahnama: "Rahnama",
     Rahnama2: "Rahnama2",
   },
@@ -70,7 +52,6 @@ export const WordAnkiConstants = {
     FaToEn: "WordsForNewStudy::FaToEn",
     FaToEnKnowingFilter: "WordsForNewStudy::1FaToEnKnowingFilter",
     FaToEnRev: "WordsForNewStudy::FaToEnRev",
-    Emla: "WordsForNewStudy::Emla",
     Rahnama: "WordsForNewStudy::Rahnama",
     Rahnama2: "WordsForNewStudy::Rahnama2",
   },

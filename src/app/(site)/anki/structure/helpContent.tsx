@@ -108,11 +108,11 @@ export const structureBuilderHelpContent: Record<HelpKey, { title: string; body:
     body: (
       <div className="space-y-2 text-sm leading-6">
         <p>
-          Templateهای فعلی Note Type با نام {AnkiNoteTypes.META_LEX_VR9} را از Anki می‌خواند و داخل فایل
-          <span className="font-mono"> src/lib/anki/deck/notes/wordNoteTemplates.ts</span> ذخیره می‌کند.
+          Templateهای فعلی Note Type با نام {AnkiNoteTypes.META_LEX_VR9} را از Anki می‌خواند و در تنظیمات
+          Structure Builder ذخیره می‌کند.
         </p>
         <p className="text-xs opacity-80">
-          این عملیات محتوای فعلی فایل Templateها را بازنویسی می‌کند و فقط در محیط development در دسترس است.
+          این عملیات Templateهای ذخیره‌شده در Structure Builder را بازنویسی می‌کند و فقط در محیط development در دسترس است.
         </p>
       </div>
     ),

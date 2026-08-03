@@ -1,6 +1,6 @@
 import { createAnkiOperations } from "@/lib/anki";
-import { AnkiNoteTypes, WordAnkiConstants } from "@/lib/anki";
-import type { AnkiStructureConfig } from "@/lib/anki/structureSettings";
+import { AnkiNoteTypes } from "@/lib/anki";
+import { createDefaultAnkiStructureConfig, type AnkiStructureConfig } from "@/lib/anki/structureSettings";
 
 import type { LogFn, StepResult } from "./types";
 
@@ -55,7 +55,12 @@ export async function ensureMetaLexVr9Templates(
           { Front: template.front, Back: template.back },
         ]),
       )
-    : WordAnkiConstants.noteTemplates;
+    : Object.fromEntries(
+        createDefaultAnkiStructureConfig().noteType.cardTypes.map((template) => [
+          template.name,
+          { Front: template.front, Back: template.back },
+        ]),
+      );
   const desiredNames = Object.keys(desired) as Array<keyof typeof desired>;
 
   const templatesRes = await templateOperations.modelTemplates({ modelName });

@@ -1101,9 +1101,6 @@ const AddCardsForStudyingClient = () => {
                         <li>
                           کارت‌های <code>FaToEn</code> به دک <code>{WordAnkiConstants.decks.FaToEnKnowingFilter}</code>
                         </li>
-                        <li>
-                          کارت <code>Emla</code> در این بخش اضافه یا جابه‌جا نمی‌شود
-                        </li>
                       </ul>
                     </div>
 
