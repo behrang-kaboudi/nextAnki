@@ -17,6 +17,8 @@ const REVIEW_CARD_TEMPLATE = "WordsForNewStudy-Review";
 const REVIEW_DECK = "WordsForNewStudy::Review";
 const PRONUNCIATION_CARD_TEMPLATE = "WordsForNewStudy-Pronunciation";
 const PRONUNCIATION_DECK = "WordsForNewStudy::Pronunciation";
+const REVIEW_PRONUNCIATION_CARD_TEMPLATE = "WordsForNewStudy-ReviewPronunciation";
+const REVIEW_PRONUNCIATION_DECK = "WordsForNewStudy::ReviewPronunciation";
 // This Anki profile uses flag 7 for Purple (flag 4 is Blue).
 const PURPLE_FLAG = 7;
 
@@ -79,6 +81,21 @@ type PronunciationResetScanResult = {
   matchingPronunciationCards: PronunciationResetCandidate[];
 };
 
+type PronunciationSourceCandidate = {
+  sourceCardId: number;
+  reviewCardId: number;
+  reviewInterval?: number;
+  noteId: number;
+  baseForm: string;
+  meaningFa: string;
+  sourceInterval?: number;
+};
+
+type PronunciationSourceScanResult = {
+  sourceCardsChecked: number;
+  matchingCards: PronunciationSourceCandidate[];
+};
+
 function escapeAnkiQueryValue(value: string) {
   return value.replaceAll('"', '\\"');
 }
@@ -95,7 +112,15 @@ export default function CardTransferManagementClient() {
   const [pronunciationResetCandidates, setPronunciationResetCandidates] = useState<PronunciationResetCandidate[]>([]);
   const [pronunciationResetStatus, setPronunciationResetStatus] = useState<string | null>(null);
   const [pronunciationResetError, setPronunciationResetError] = useState<string | null>(null);
+  const [pronunciationSourceCandidates, setPronunciationSourceCandidates] = useState<PronunciationSourceCandidate[]>([]);
+  const [pronunciationSourceStatus, setPronunciationSourceStatus] = useState<string | null>(null);
+  const [pronunciationSourceError, setPronunciationSourceError] = useState<string | null>(null);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const [isPronunciationHelpOpen, setIsPronunciationHelpOpen] = useState(false);
+  const [mainRunAllStatus, setMainRunAllStatus] = useState<string | null>(null);
+  const [mainRunAllError, setMainRunAllError] = useState<string | null>(null);
+  const [pronunciationRunAllStatus, setPronunciationRunAllStatus] = useState<string | null>(null);
+  const [pronunciationRunAllError, setPronunciationRunAllError] = useState<string | null>(null);
 
   async function scanCandidates(): Promise<ScanResult> {
     const allCandidates: Candidate[] = [];
@@ -265,6 +290,107 @@ export default function CardTransferManagementClient() {
   function formatReviewResetStatus(result: ReviewResetScanResult, resetCount?: number) {
     const resetText = resetCount == null ? "" : ` | ریست‌شده: ${resetCount}`;
     return `کارت‌های مبدا با فلگ Orange: ${result.orangeSourceCards} | Review با interval بالای ۱۰ سال: ${result.reviewCardsOverTenYears} | کارت‌های مبدا قابل ریست: ${result.matchingSourceCards.length}${resetText}`;
+  }
+
+  async function scanPronunciationSourceCandidates(
+    mode: "orange" | "again",
+  ): Promise<PronunciationSourceScanResult> {
+    const sourceResponse = await ankiOperations.findCards({
+      query: `deck:"${escapeAnkiQueryValue(PRONUNCIATION_DECK)}" card:"${escapeAnkiQueryValue(PRONUNCIATION_CARD_TEMPLATE)}" ${mode === "orange" ? `flag:${ORANGE_FLAG}` : "flag:0"}`,
+    });
+    if (!sourceResponse.ok) throw new Error(sourceResponse.error);
+
+    const sourceCards: Array<{ cardId: number; note: number }> = [];
+    for (const batch of chunkArray(sourceResponse.result ?? [], BATCH_SIZE)) {
+      const infoResponse = await ankiOperations.cardsInfo({ cards: batch });
+      if (!infoResponse.ok) throw new Error(infoResponse.error);
+      sourceCards.push(...(infoResponse.result ?? []));
+    }
+
+    let eligibleSourceCards = sourceCards;
+    const lastSourceIntervals = new Map<number, number>();
+    if (mode === "again") {
+      const reviewsResponse = await getLastRevlogByCardIds(
+        sourceCards.map((card) => card.cardId),
+        BATCH_SIZE,
+      );
+      if (!reviewsResponse.ok) throw new Error(reviewsResponse.error);
+      for (const [cardId, review] of reviewsResponse.value) {
+        lastSourceIntervals.set(cardId, Number(review?.ivl ?? 0));
+      }
+      eligibleSourceCards = sourceCards.filter((card) => {
+        const lastReview = reviewsResponse.value.get(card.cardId);
+        return lastReview?.ease === 1 && Number(lastReview.ivl) > TEN_YEARS_IN_DAYS;
+      });
+    }
+
+    const noteIds = [...new Set(eligibleSourceCards.map((card) => card.note))];
+    if (!noteIds.length) return { sourceCardsChecked: sourceCards.length, matchingCards: [] };
+    const notesResponse = await ankiOperations.notesInfo({ notes: noteIds });
+    if (!notesResponse.ok) throw new Error(notesResponse.error);
+    const notesById = new Map((notesResponse.result ?? []).map((note) => [note.noteId, note]));
+    const sourcesByNoteId = new Map<number, typeof eligibleSourceCards>();
+    for (const sourceCard of eligibleSourceCards) {
+      sourcesByNoteId.set(sourceCard.note, [
+        ...(sourcesByNoteId.get(sourceCard.note) ?? []),
+        sourceCard,
+      ]);
+    }
+
+    const reviewCards: Array<{ cardId: number; note: number }> = [];
+    for (const noteBatch of chunkArray(noteIds, BATCH_SIZE)) {
+      const noteQuery = noteBatch.map((noteId) => `nid:${noteId}`).join(" OR ");
+      const reviewResponse = await ankiOperations.findCards({
+        query: `deck:"${escapeAnkiQueryValue(REVIEW_PRONUNCIATION_DECK)}" card:"${escapeAnkiQueryValue(REVIEW_PRONUNCIATION_CARD_TEMPLATE)}" (${noteQuery})`,
+      });
+      if (!reviewResponse.ok) throw new Error(reviewResponse.error);
+      for (const batch of chunkArray(reviewResponse.result ?? [], BATCH_SIZE)) {
+        const infoResponse = await ankiOperations.cardsInfo({ cards: batch });
+        if (!infoResponse.ok) throw new Error(infoResponse.error);
+        reviewCards.push(...(infoResponse.result ?? []));
+      }
+    }
+
+    let eligibleReviewCards = reviewCards;
+    const lastReviewIntervals = new Map<number, number>();
+    if (mode === "orange") {
+      const reviewsResponse = await getLastRevlogByCardIds(
+        reviewCards.map((card) => card.cardId),
+        BATCH_SIZE,
+      );
+      if (!reviewsResponse.ok) throw new Error(reviewsResponse.error);
+      for (const [cardId, review] of reviewsResponse.value) {
+        lastReviewIntervals.set(cardId, Number(review?.ivl ?? 0));
+      }
+      eligibleReviewCards = reviewCards.filter(
+        (card) => Number(reviewsResponse.value.get(card.cardId)?.ivl) > TEN_YEARS_IN_DAYS,
+      );
+    }
+
+    const matchingCards = eligibleReviewCards.flatMap((reviewCard) =>
+      (sourcesByNoteId.get(reviewCard.note) ?? []).flatMap((sourceCard) => {
+        const note = notesById.get(sourceCard.note);
+        return note ? [{
+          sourceCardId: sourceCard.cardId,
+          reviewCardId: reviewCard.cardId,
+          reviewInterval: mode === "orange" ? lastReviewIntervals.get(reviewCard.cardId) ?? 0 : undefined,
+          sourceInterval: mode === "again" ? lastSourceIntervals.get(sourceCard.cardId) ?? 0 : undefined,
+          noteId: sourceCard.note,
+          baseForm: note.fields.base_form?.value ?? "",
+          meaningFa: note.fields.meaning_fa?.value ?? "",
+        }] : [];
+      }),
+    );
+    return { sourceCardsChecked: sourceCards.length, matchingCards };
+  }
+
+  function formatPronunciationSourceStatus(
+    result: PronunciationSourceScanResult,
+    action: string,
+    count?: number,
+  ) {
+    const actionText = count == null ? "" : ` | ${action}: ${count}`;
+    return `کارت‌های Pronunciation بررسی‌شده: ${result.sourceCardsChecked} | کارت متناظر پیدا‌شده: ${result.matchingCards.length}${actionText}`;
   }
 
   async function scanPronunciationResetCandidates(): Promise<PronunciationResetScanResult> {
@@ -524,29 +650,180 @@ export default function CardTransferManagementClient() {
     }
   }
 
+  async function previewPronunciationSourceCards(mode: "orange" | "again") {
+    if (running || previewLoading) return;
+    setPreviewLoading(true);
+    setPronunciationSourceError(null);
+    setPronunciationSourceStatus("در حال ساخت Preview؛ هیچ کارتی تغییر نمی‌کند…");
+    try {
+      const result = await scanPronunciationSourceCandidates(mode);
+      setPronunciationSourceCandidates(result.matchingCards);
+      setPronunciationSourceStatus(
+        `Preview آماده است — ${formatPronunciationSourceStatus(result, "", undefined)}`,
+      );
+    } catch (caught) {
+      setPronunciationSourceCandidates([]);
+      setPronunciationSourceError(caught instanceof Error ? caught.message : "ارتباط با AnkiConnect ناموفق بود.");
+      setPronunciationSourceStatus(null);
+    } finally {
+      setPreviewLoading(false);
+    }
+  }
+
+  async function runPronunciationSourceOrangeStep() {
+    if (running || previewLoading) return;
+    setRunning(true);
+    setPronunciationSourceError(null);
+    setPronunciationSourceStatus("در حال بررسی و ریست کارت‌های Orange Pronunciation…");
+    let currentStage = "ریست کارت‌های Pronunciation";
+    try {
+      const result = await scanPronunciationSourceCandidates("orange");
+      setPronunciationSourceCandidates(result.matchingCards);
+      const sourceCardIds = [...new Set(result.matchingCards.map((candidate) => candidate.sourceCardId))];
+      await resetCardsToStudyQueue(sourceCardIds);
+      currentStage = "برداشتن فلگ Orange کارت‌های Pronunciation";
+      await updateCardFlagsWithRollback(sourceCardIds, 0, ORANGE_FLAG);
+      setPronunciationSourceStatus(
+        `انجام شد — ${formatPronunciationSourceStatus(result, "ریست‌شده", sourceCardIds.length)} | فلگ Orange برداشته‌شده: ${sourceCardIds.length}`,
+      );
+    } catch (caught) {
+      const message = caught instanceof Error ? caught.message : "ارتباط با AnkiConnect ناموفق بود.";
+      setPronunciationSourceError(`خطا در ${currentStage}: ${message}`);
+      setPronunciationSourceStatus(null);
+    } finally {
+      setRunning(false);
+    }
+  }
+
+  async function runPronunciationSourceAgainStep() {
+    if (running || previewLoading) return;
+    setRunning(true);
+    setPronunciationSourceError(null);
+    setPronunciationSourceStatus("در حال بررسی و ریست کارت‌های ReviewPronunciation…");
+    let currentStage = "ریست کارت‌های ReviewPronunciation";
+    try {
+      const result = await scanPronunciationSourceCandidates("again");
+      setPronunciationSourceCandidates(result.matchingCards);
+      const sourceCardIds = [...new Set(result.matchingCards.map((candidate) => candidate.sourceCardId))];
+      const reviewCardIds = [...new Set(result.matchingCards.map((candidate) => candidate.reviewCardId))];
+      await resetCardsToStudyQueue(reviewCardIds);
+      currentStage = "ثبت فلگ Orange روی کارت‌های Pronunciation";
+      await updateCardFlagsWithRollback(sourceCardIds, ORANGE_FLAG, 0);
+      setPronunciationSourceStatus(
+        `انجام شد — ${formatPronunciationSourceStatus(result, "ReviewPronunciation ریست‌شده", reviewCardIds.length)} | فلگ Orange زده‌شده: ${sourceCardIds.length}`,
+      );
+    } catch (caught) {
+      const message = caught instanceof Error ? caught.message : "ارتباط با AnkiConnect ناموفق بود.";
+      setPronunciationSourceError(`خطا در ${currentStage}: ${message}`);
+      setPronunciationSourceStatus(null);
+    } finally {
+      setRunning(false);
+    }
+  }
+
+  async function runAllMainSteps() {
+    if (running || previewLoading) return;
+    setRunning(true);
+    setMainRunAllError(null);
+    setMainRunAllStatus("در حال اجرای گام‌های ۱ تا ۳…");
+    let currentStep = "گام ۱: بلد نبودن صوت";
+    const report: string[] = [];
+    try {
+      const stepOne = await scanPronunciationResetCandidates();
+      const stepOneSourceIds = [...new Set(stepOne.matchingPronunciationCards.map((card) => card.sourceCardId))];
+      const stepOnePronunciationIds = [...new Set(stepOne.matchingPronunciationCards.map((card) => card.pronunciationCardId))];
+      for (const batch of chunkArray(stepOnePronunciationIds, BATCH_SIZE)) {
+        const answerResponse = await ankiOperations.answerCards({ answers: batch.map((cardId) => ({ cardId, ease: 1 })) });
+        if (!answerResponse.ok) throw new Error(answerResponse.error);
+      }
+      await updateCardFlagsWithRollback(stepOneSourceIds, 0, PURPLE_FLAG);
+      report.push(`گام ۱: ${stepOnePronunciationIds.length} کارت صوت`);
+
+      currentStep = "گام ۲: بلد نبودن کارت اصلی";
+      const stepTwo = await scanReviewResetCandidates();
+      const stepTwoSourceIds = [...new Set(stepTwo.matchingSourceCards.map((card) => card.sourceCardId))];
+      await resetCardsToStudyQueue(stepTwoSourceIds);
+      await updateCardFlagsWithRollback(stepTwoSourceIds, 0, ORANGE_FLAG);
+      report.push(`گام ۲: ${stepTwoSourceIds.length} کارت اصلی`);
+
+      currentStep = "گام ۳: اتمام مرور";
+      const stepThree = await scanCandidates();
+      const stepThreeReviewIds = [...new Set(stepThree.candidates.map((card) => card.reviewCardId))];
+      const stepThreeSourceIds = [...new Set(stepThree.candidates.map((card) => card.sourceCardId))];
+      await resetCardsToStudyQueue(stepThreeReviewIds);
+      await updateCardFlagsWithRollback(stepThreeSourceIds, ORANGE_FLAG, 0);
+      report.push(`گام ۳: ${stepThreeReviewIds.length} کارت Review`);
+      setMainRunAllStatus(`انجام شد — ${report.join(" | ")}`);
+    } catch (caught) {
+      const message = caught instanceof Error ? caught.message : "ارتباط با AnkiConnect ناموفق بود.";
+      setMainRunAllError(`خطا در ${currentStep}: ${message}`);
+      setMainRunAllStatus(null);
+    } finally {
+      setRunning(false);
+    }
+  }
+
+  async function runAllPronunciationSteps() {
+    if (running || previewLoading) return;
+    setRunning(true);
+    setPronunciationRunAllError(null);
+    setPronunciationRunAllStatus("در حال اجرای گام‌های Pronunciation…");
+    let currentStep = "گام ۱: بلد نبودن صوت";
+    const report: string[] = [];
+    try {
+      const stepOne = await scanPronunciationSourceCandidates("again");
+      const stepOneReviewIds = [...new Set(stepOne.matchingCards.map((card) => card.reviewCardId))];
+      const stepOneSourceIds = [...new Set(stepOne.matchingCards.map((card) => card.sourceCardId))];
+      await resetCardsToStudyQueue(stepOneReviewIds);
+      await updateCardFlagsWithRollback(stepOneSourceIds, ORANGE_FLAG, 0);
+      report.push(`گام ۱: ${stepOneReviewIds.length} کارت ReviewPronunciation`);
+
+      currentStep = "گام ۲: اتمام مرور صوت";
+      const stepTwo = await scanPronunciationSourceCandidates("orange");
+      const stepTwoSourceIds = [...new Set(stepTwo.matchingCards.map((card) => card.sourceCardId))];
+      await resetCardsToStudyQueue(stepTwoSourceIds);
+      await updateCardFlagsWithRollback(stepTwoSourceIds, 0, ORANGE_FLAG);
+      report.push(`گام ۲: ${stepTwoSourceIds.length} کارت صوت`);
+      setPronunciationRunAllStatus(`انجام شد — ${report.join(" | ")}`);
+    } catch (caught) {
+      const message = caught instanceof Error ? caught.message : "ارتباط با AnkiConnect ناموفق بود.";
+      setPronunciationRunAllError(`خطا در ${currentStep}: ${message}`);
+      setPronunciationRunAllStatus(null);
+    } finally {
+      setRunning(false);
+    }
+  }
+
   return (
     <main dir="rtl" className="mx-auto w-full max-w-6xl select-text p-4 text-right">
-      <div className="grid gap-4">
-        <div className="flex items-start justify-between gap-3">
+      <div className="grid gap-4 xl:grid-cols-2">
+        <div className="xl:col-span-2">
           <PageHeader
-            title="بررسی کارت‌های EnToFa و FaToEn"
-            subtitle="مدیریت کارت‌ها بر اساس فلگ و آخرین مرور"
+            title="مدیریت وضعیت کارت‌ها"
+            subtitle="بررسی مستقل کارت‌های اصلی و کارت‌های صوت"
           />
-          <button
-            type="button"
-            onClick={() => setIsHelpOpen(true)}
-            aria-label="راهنما"
-            className="grid size-10 shrink-0 place-items-center rounded-full border border-card bg-card text-lg font-bold text-foreground shadow-elevated"
-          >
-            ?
-          </button>
         </div>
-        <div className="grid gap-4 md:grid-cols-3">
-          <section className="grid gap-4 rounded-2xl border border-card bg-background p-4">
+        <section className="order-1 grid gap-3 rounded-2xl border border-card bg-background p-3 xl:col-span-1">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h2 className="text-lg font-bold text-foreground">بررسی کارت‌های EnToFa و FaToEn</h2>
+              <p className="mt-1 text-xs text-muted">چرخهٔ کارت‌های اصلی و کارت‌های Review متناظر</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <button type="button" onClick={() => void runAllMainSteps()} disabled={running || previewLoading} className="h-10 rounded-xl bg-[var(--primary)] px-3 text-xs font-bold text-[var(--primary-foreground)] disabled:opacity-60">
+                {running ? "در حال اجرا…" : "انجام ۳ مرحله"}
+              </button>
+              <button type="button" onClick={() => setIsHelpOpen(true)} aria-label="راهنمای کارت‌های اصلی" className="grid size-10 shrink-0 place-items-center rounded-full border border-card bg-card text-lg font-bold text-foreground shadow-elevated">?</button>
+            </div>
+          </div>
+          {mainRunAllError ? <p className="text-sm font-semibold text-red-700 dark:text-red-400">{mainRunAllError}</p> : null}
+          {mainRunAllStatus ? <p className="rounded-xl border border-card bg-card p-3 text-sm text-foreground">{mainRunAllStatus}</p> : null}
+          <div className="grid gap-3 md:grid-cols-2">
+          <section className="grid gap-3 rounded-2xl border border-card bg-background p-3">
           <div>
-            <h2 className="text-lg font-semibold text-foreground">گام ۱. بلد نبودن صوت</h2>
-            <p className="mt-2 text-sm leading-6 text-muted">
-              کارت‌های EN→FA و FA→EN با فلگ بنفش (کد ۷) پیدا می‌شوند. ابتدا روی کارت Pronunciation متناظر همان Note یک بار Again ثبت می‌شود؛ فقط پس از موفقیت، فلگ بنفش کارت مبدا حذف می‌شود.
+            <h2 className="text-base font-semibold text-foreground">۱. بلد نبودن صوت</h2>
+            <p className="mt-1 text-xs leading-5 text-muted">
+              Purple (۷): Pronunciation متناظر یک بار Again می‌گیرد؛ سپس Purple حذف می‌شود.
             </p>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
@@ -564,18 +841,18 @@ export default function CardTransferManagementClient() {
               disabled={running || previewLoading}
               className="h-11 rounded-xl bg-[var(--primary)] px-4 text-sm font-semibold text-[var(--primary-foreground)] disabled:opacity-60"
             >
-              {running ? "در حال انجام…" : "Apply Again to Pronunciation"}
+              {running ? "در حال انجام…" : "Again صوت"}
             </button>
           </div>
           {pronunciationResetError && <p className="text-sm font-semibold text-red-700 dark:text-red-400">{pronunciationResetError}</p>}
           {pronunciationResetStatus && <p className="rounded-xl border border-card p-3 text-sm text-foreground">{pronunciationResetStatus}</p>}
           </section>
 
-          <section className="grid gap-4 rounded-2xl border border-card bg-background p-4">
+          <section className="grid gap-3 rounded-2xl border border-card bg-background p-3">
           <div>
-            <h2 className="text-lg font-semibold text-foreground">گام ۲. بلد نبودن کارت‌های دک‌های اصلی</h2>
-            <p className="mt-2 text-sm leading-6 text-muted">
-              کارت‌های EnToFa و FaToEn با فلگ Orange (کد ۲) پیدا می‌شوند. اگر کارت Review متناظر همان Note آخرین interval بیشتر از ۱۰ سال داشته باشد، کارت‌های مبدا ریست می‌شوند؛ فقط پس از موفقیت، فلگ Orange آن‌ها حذف می‌شود.
+            <h2 className="text-base font-semibold text-foreground">۲. بلد نبودن کارت اصلی</h2>
+            <p className="mt-1 text-xs leading-5 text-muted">
+              Orange (۲): اگر Review متناظر <span dir="ltr">ivl &gt; 3650</span> دارد، کارت مبدا ریست و سپس فلگ حذف می‌شود.
             </p>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
@@ -593,18 +870,18 @@ export default function CardTransferManagementClient() {
               disabled={running || previewLoading}
               className="h-11 rounded-xl bg-[var(--primary)] px-4 text-sm font-semibold text-[var(--primary-foreground)] disabled:opacity-60"
             >
-              {running ? "در حال ریست…" : "Reset Orange Cards"}
+              {running ? "در حال ریست…" : "ریست Orange"}
             </button>
           </div>
           {reviewResetError && <p className="text-sm font-semibold text-red-700 dark:text-red-400">{reviewResetError}</p>}
           {reviewResetStatus && <p className="rounded-xl border border-card p-3 text-sm text-foreground">{reviewResetStatus}</p>}
           </section>
 
-          <section className="grid gap-4 rounded-2xl border border-card bg-background p-4">
+          <section className="grid gap-3 rounded-2xl border border-card bg-background p-3 md:col-span-2">
           <div>
-            <h2 className="text-lg font-semibold text-foreground">گام ۳. اتمام مرور</h2>
-            <p className="mt-2 text-sm leading-6 text-muted">
-              کارت‌های EnToFa و FaToEn بدون فلگ که آخرین مرورشان Again و interval آن‌ها بیشتر از ۱۰ سال است پیدا می‌شوند. ابتدا کارت Review متناظر همان Note ریست می‌شود؛ فقط پس از موفقیت، فلگ Orange روی کارت مبدا ثبت می‌شود.
+            <h2 className="text-base font-semibold text-foreground">۳. اتمام مرور</h2>
+            <p className="mt-1 text-xs leading-5 text-muted">
+              بدون فلگ + Again + <span dir="ltr">ivl &gt; 3650</span>: Review ریست و سپس Orange ثبت می‌شود.
             </p>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
@@ -622,15 +899,73 @@ export default function CardTransferManagementClient() {
               disabled={running || previewLoading}
               className="h-11 min-w-0 rounded-xl bg-[var(--primary)] px-3 text-xs font-semibold leading-5 text-[var(--primary-foreground)] disabled:opacity-60"
             >
-              {running ? "در حال انجام…" : "Flag Orange & Reset Review"}
+              {running ? "در حال انجام…" : "ریست مرور + Orange"}
             </button>
           </div>
           {error && <p className="text-sm font-semibold text-red-700 dark:text-red-400">{error}</p>}
           {status && <p className="rounded-xl border border-card p-3 text-sm text-foreground">{status}</p>}
           </section>
-        </div>
+          </div>
+        </section>
 
-        <section className="order-4 overflow-hidden rounded-2xl border border-card bg-background">
+        <section className="order-2 grid gap-3 rounded-2xl border border-card bg-background p-3 xl:col-span-1">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h2 className="text-lg font-bold text-foreground">بررسی کارت‌های Pronunciation</h2>
+              <p className="mt-1 text-xs text-muted">چرخهٔ Pronunciation و ReviewPronunciation</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <button type="button" onClick={() => void runAllPronunciationSteps()} disabled={running || previewLoading} className="h-10 rounded-xl bg-[var(--primary)] px-3 text-xs font-bold text-[var(--primary-foreground)] disabled:opacity-60">
+                {running ? "در حال اجرا…" : "انجام ۲ مرحله"}
+              </button>
+              <button type="button" onClick={() => setIsPronunciationHelpOpen(true)} aria-label="راهنمای کارت‌های Pronunciation" className="grid size-10 shrink-0 place-items-center rounded-full border border-card bg-card text-lg font-bold text-foreground shadow-elevated">?</button>
+            </div>
+          </div>
+          {pronunciationRunAllError ? <p className="text-sm font-semibold text-red-700 dark:text-red-400">{pronunciationRunAllError}</p> : null}
+          {pronunciationRunAllStatus ? <p className="rounded-xl border border-card bg-card p-3 text-sm text-foreground">{pronunciationRunAllStatus}</p> : null}
+          <div className="grid gap-3">
+            <section className="grid gap-3 rounded-2xl border border-card bg-card p-3">
+              <div>
+                <h3 className="text-base font-semibold text-foreground">۱. بلد نبودن صوت</h3>
+                <p className="mt-1 text-xs leading-5 text-muted">بدون فلگ + Again + interval قدیمی: ریست ReviewPronunciation، سپس ثبت Orange.</p>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <button type="button" onClick={() => void previewPronunciationSourceCards("again")} disabled={running || previewLoading} className="h-11 rounded-xl border border-card px-4 text-sm font-semibold text-foreground disabled:opacity-60">
+                  {previewLoading ? "در حال آماده‌سازی Preview…" : "Test / Preview"}
+                </button>
+                <button type="button" onClick={() => void runPronunciationSourceAgainStep()} disabled={running || previewLoading} className="h-11 rounded-xl bg-[var(--primary)] px-4 text-sm font-semibold text-[var(--primary-foreground)] disabled:opacity-60">
+                  {running ? "در حال انجام…" : "ریست مرور + Orange"}
+                </button>
+              </div>
+            </section>
+            <section className="grid gap-3 rounded-2xl border border-card bg-card p-3">
+              <div>
+                <h3 className="text-base font-semibold text-foreground">۲. اتمام مرور صوت</h3>
+                <p className="mt-1 text-xs leading-5 text-muted">Orange + ReviewPronunciation قدیمی: ریست Pronunciation، سپس حذف Orange.</p>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <button type="button" onClick={() => void previewPronunciationSourceCards("orange")} disabled={running || previewLoading} className="h-11 rounded-xl border border-card px-4 text-sm font-semibold text-foreground disabled:opacity-60">
+                  {previewLoading ? "در حال آماده‌سازی Preview…" : "Test / Preview"}
+                </button>
+                <button type="button" onClick={() => void runPronunciationSourceOrangeStep()} disabled={running || previewLoading} className="h-11 rounded-xl bg-[var(--primary)] px-4 text-sm font-semibold text-[var(--primary-foreground)] disabled:opacity-60">
+                  {running ? "در حال ریست…" : "ریست Orange"}
+                </button>
+              </div>
+            </section>
+          </div>
+          {pronunciationSourceError ? <p className="text-sm font-semibold text-red-700 dark:text-red-400">{pronunciationSourceError}</p> : null}
+          {pronunciationSourceStatus ? <p className="rounded-xl border border-card bg-card p-3 text-sm text-foreground">{pronunciationSourceStatus}</p> : null}
+          {pronunciationSourceCandidates.length > 0 ? (
+          <div className="overflow-x-auto rounded-xl border border-card bg-card">
+            <table className="min-w-full text-right text-sm">
+              <thead className="bg-background text-xs text-muted"><tr><th className="px-4 py-3">لغت</th><th className="px-4 py-3">معنی فارسی</th><th className="px-4 py-3">Source Interval</th><th className="px-4 py-3">ReviewPronunciation Interval</th><th className="px-4 py-3">Pronunciation Card</th><th className="px-4 py-3">ReviewPronunciation Card</th></tr></thead>
+              <tbody>{pronunciationSourceCandidates.length === 0 ? <tr><td colSpan={6} className="px-4 py-8 text-center text-muted">هنوز Preview اجرا نشده یا کارت واجد شرایطی پیدا نشده است.</td></tr> : pronunciationSourceCandidates.map((candidate) => <tr key={`${candidate.sourceCardId}-${candidate.reviewCardId}`} className="border-t border-card"><td className="px-4 py-3 font-semibold text-foreground">{candidate.baseForm || "—"}</td><td className="px-4 py-3">{candidate.meaningFa || "—"}</td><td className="px-4 py-3 text-muted">{candidate.sourceInterval ?? "—"}</td><td className="px-4 py-3 text-muted">{candidate.reviewInterval ?? "—"}</td><td className="px-4 py-3 font-mono text-xs text-muted">{candidate.sourceCardId}</td><td className="px-4 py-3 font-mono text-xs text-muted">{candidate.reviewCardId}</td></tr>)}</tbody>
+            </table>
+          </div>
+          ) : null}
+        </section>
+
+        <section className={`${candidates.length === 0 ? "hidden " : ""}order-4 overflow-hidden rounded-2xl border border-card bg-background xl:col-span-2`}>
           <div className="border-b border-card p-4">
             <h2 className="font-semibold text-foreground">نتیجهٔ گام ۳: اتمام مرور</h2>
             <p className="mt-1 text-sm text-muted">کارت‌های بدون فلگ Orange با Again و interval بالای ۱۰ سال و کارت Review متناظر</p>
@@ -671,7 +1006,7 @@ export default function CardTransferManagementClient() {
           </div>
         </section>
 
-        <section className="order-2 overflow-hidden rounded-2xl border border-card bg-background">
+        <section className={`${pronunciationResetCandidates.length === 0 ? "hidden " : ""}order-2 overflow-hidden rounded-2xl border border-card bg-background xl:col-span-2`}>
           <div className="border-b border-card p-4">
             <h2 className="font-semibold text-foreground">نتیجهٔ گام ۱: بلد نبودن صوت</h2>
             <p className="mt-1 text-sm text-muted">کارت‌های مبدا با فلگ بنفش و کارت Pronunciation متناظر آن‌ها</p>
@@ -710,7 +1045,7 @@ export default function CardTransferManagementClient() {
           </div>
         </section>
 
-        <section className="order-3 overflow-hidden rounded-2xl border border-card bg-background">
+        <section className={`${reviewResetCandidates.length === 0 ? "hidden " : ""}order-3 overflow-hidden rounded-2xl border border-card bg-background xl:col-span-2`}>
           <div className="border-b border-card p-4">
             <h2 className="font-semibold text-foreground">نتیجهٔ گام ۲: بلد نبودن کارت‌های دک‌های اصلی</h2>
             <p className="mt-1 text-sm text-muted">کارت‌های Orange که کارت Review متناظرشان interval بالای ۱۰ سال دارد</p>
@@ -750,6 +1085,22 @@ export default function CardTransferManagementClient() {
             </table>
           </div>
         </section>
+
+        {isPronunciationHelpOpen ? (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm" role="dialog" aria-modal="true">
+            <div className="w-full max-w-3xl rounded-3xl border border-card bg-card p-5 shadow-2xl sm:p-6">
+              <div className="flex items-start justify-between gap-4">
+                <div><h2 className="text-lg font-bold text-foreground">راهنمای بررسی کارت‌های Pronunciation</h2><p className="mt-1 text-sm text-muted">Preview فقط گزارش می‌سازد؛ دکمهٔ اصلی تغییرات را در Anki ثبت می‌کند.</p></div>
+                <button type="button" onClick={() => setIsPronunciationHelpOpen(false)} aria-label="بستن" className="grid size-10 shrink-0 place-items-center rounded-full border border-card bg-background text-xl text-muted">×</button>
+              </div>
+              <ol className="mt-5 list-inside list-decimal space-y-4 text-sm leading-7 text-foreground">
+                <li><span className="font-semibold">بلد نبودن کارت صوت:</span> فقط کارت‌های بدون فلگ <span dir="ltr">{PRONUNCIATION_CARD_TEMPLATE}</span> که آخرین review آن‌ها <span dir="ltr">Again (ease=1)</span> و <span dir="ltr">ivl</span> آن‌ها بیشتر از ۳۶۵۰ روز است انتخاب می‌شوند. ابتدا <span dir="ltr">{REVIEW_PRONUNCIATION_CARD_TEMPLATE}</span> متناظر ریست و فقط پس از موفقیت، فلگ Orange روی Pronunciation ثبت می‌شود.</li>
+                <li><span className="font-semibold">اتمام مرور صوت:</span> کارت‌های <span dir="ltr">{PRONUNCIATION_CARD_TEMPLATE}</span> با فلگ Orange (کد ۲) از <span dir="ltr">{PRONUNCIATION_DECK}</span> انتخاب می‌شوند. اگر کارت متناظر <span dir="ltr">{REVIEW_PRONUNCIATION_CARD_TEMPLATE}</span> در <span dir="ltr">{REVIEW_PRONUNCIATION_DECK}</span> آخرین <span dir="ltr">ivl</span> بیشتر از ۳۶۵۰ روز داشته باشد، ابتدا Pronunciation ریست و فقط پس از موفقیت، فلگ Orange حذف می‌شود.</li>
+              </ol>
+              <p className="mt-4 rounded-xl border border-card bg-background p-3 text-sm leading-7 text-muted">قبل از اجرا، همهٔ شرایط و کارت‌های متناظر بررسی می‌شوند. در خطای عملیات اصلی فلگ تغییر نمی‌کند؛ اگر تغییر فلگ نیمه‌کاره بماند، فلگ‌های تغییرکرده به مقدار قبلی برمی‌گردند و مرحلهٔ خطادار گزارش می‌شود.</p>
+            </div>
+          </div>
+        ) : null}
 
         {isHelpOpen ? (
           <div

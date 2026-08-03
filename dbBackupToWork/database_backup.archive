@@ -1,5 +1,5 @@
 {
-  "createdAt": "2026-07-31T06:28:58.956Z",
+  "createdAt": "2026-08-03T04:46:17.310Z",
   "data": {
     "word": [
       {
@@ -257466,6 +257466,12 @@
               "name": "WordsForNewStudy::Pronunciation",
               "title": "Pronunciation",
               "managed": true
+            },
+            {
+              "id": "deck-ms9tdyvt-1aqqx",
+              "name": "WordsForNewStudy::ReviewPronunciation",
+              "title": "ReviewPronunciation",
+              "managed": true
             }
           ],
           "noteType": {
@@ -257549,10 +257555,19 @@
               },
               {
                 "id": "card-ms5pi3dm-zdcpq",
-                "back": "<table >\n\n<tr >\n<td  >\n{{base_form}} \n<div style=\"white-space: nowrap\"> /{{phonetic_us}}/</div>\n</td>\n<td  style=\"text-align:right\">\n{{base_form_audio}}\n</td>\n\n</tr>\n\n<tr>\n<td>\n\n\n</td>\n<td  style=\"text-align:right\">\n<div style=\"display:none\">\n\n[sound:rec1778206722.mp3]\n\n</div>\n\n</td>\n\n</tr>\n\n\n\n\n</table>\n</div>\n\n<div style=\"display:none\">\n\n[sound:rec1778206722.mp3]\n\n</div>\n<div style=\"display:none\">\n\n[sound:rec1785290489.mp3]\nصوت تصویر\n\n</div>\n<hr>\n\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{first_letter_en_hint}}</div>",
+                "back": "<table >\n\n<tr >\n<td  >\n{{base_form}} \n<div style=\"white-space: nowrap\"> /{{phonetic_us}}/</div>\n</td>\n<td  style=\"text-align:right\">\n{{base_form_audio}}\n</td>\n\n</tr>\n\n<tr>\n<td>\n\n\n</td>\n<td  style=\"text-align:right\">\n<div style=\"display:none\">\n\n[sound:rec1778206722.mp3]\n\n</div>\n\n</td>\n\n</tr>\n\n\n\n\n</table>\n</div>\n<div style=\"display:none\">\n[sound:rec1778206722.mp3]\n</div>\n<hr>\n",
                 "name": "WordsForNewStudy-Pronunciation",
                 "front": "\n<div style=\"display:none;\">\n[sound:rec1784581227.mp3]\n</div>\n<div style=\"direction:rtl;text-align:right\">\n<table style=\"width:100%\">\n<tr>\n<td>\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{meaning_fa_audio}}</div>\n</td>\n<td>\n{{meaning_fa}}\n</td>\n</tr>\n\n<tr>\n<td>\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{other_meanings_fa_audio}}</div>\n</td>\n<td>\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{other_meanings_fa}}</div>\n</td>\n</tr>\n\n</tr>\n\n</table>\n</div>\n\n\n\n\n\n<hr>\n\n</div>\n\n<div style=\"\">\n\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{first-part-spell}}</div>\n\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{first-part-spell-audio}}</div>\n<hr>\n\n<div style=\"display:none\">\nصوت مکس ۵ ثانیه\n\n[sound:rec1785290393.mp3]\n\n</div>\n",
                 "deckIds": []
+              },
+              {
+                "id": "card-ms9tfduh-wutpq",
+                "back": "نیاز به چیزی نیست",
+                "name": "WordsForNewStudy-ReviewPronunciation",
+                "front": "\n<div style=\"display:none;\">\n[sound:rec1784581227.mp3]\n</div>\n<div style=\"direction:rtl;text-align:right\">\n<table style=\"width:100%\">\n<tr>\n<td>\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{meaning_fa_audio}}</div>\n</td>\n<td>\n{{meaning_fa}}\n</td>\n</tr>\n\n<tr>\n<td>\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{other_meanings_fa_audio}}</div>\n</td>\n<td>\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{other_meanings_fa}}</div>\n</td>\n</tr>\n\n</tr>\n\n</table>\n</div>\n\n<hr>\n\n</div>\n\n<div style=\"\">\n\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{first-part-spell}}</div>\n\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{first-part-spell-audio}}</div>\n<hr>\n\n<div style=\"display:none\">\nصوت مکس ۵ ثانیه\n\n[sound:rec1785290393.mp3]\n\n</div>\n<table >\n\n<tr >\n<td  >\n{{base_form}} \n<div style=\"white-space: nowrap\"> /{{phonetic_us}}/</div>\n</td>\n<td  style=\"text-align:right\">\n{{base_form_audio}}\n</td>\n\n</tr>\n\n<tr>\n<td>\n\n\n</td>\n<td  style=\"text-align:right\">\n<div style=\"display:none\">\n\n[sound:rec1778206722.mp3]\n\n</div>\n\n</td>\n\n</tr>\n\n\n\n\n</table>\n</div>\n\n<div style=\"display:none\">\n\n[sound:rec1778206722.mp3]\n\n</div>\n<div style=\"display:none\">\n\n[sound:rec1785290489.mp3]\nصوت تصویر\n\n</div>\n<hr>\n\n<div style='font-family: \"Arial\"; font-size: 20px;'>{{first_letter_en_hint}}</div>",
+                "deckIds": [
+                  "deck-ms9tdyvt-1aqqx"
+                ]
               }
             ]
           },
@@ -257573,7 +257588,7 @@
               "learningSteps": "14398560m 30m",
               "newCardsPerDay": 9999,
               "minimumInterval": "1",
-              "relearningSteps": "14398560m 10m 30m",
+              "relearningSteps": "14398560m 30m",
               "graduatingInterval": "1",
               "maximumReviewsPerDay": 9999
             },
@@ -257586,10 +257601,10 @@
               "configName": "WordsForNewStudy-FaToEn",
               "easyInterval": "4",
               "startingEase": "3.5",
-              "learningSteps": "14398560m 10m 30m 50m",
+              "learningSteps": "14398560m 30m",
               "newCardsPerDay": 2000,
               "minimumInterval": "1",
-              "relearningSteps": "14398560m 20m 50m",
+              "relearningSteps": "14398560m 30m",
               "graduatingInterval": "1",
               "maximumReviewsPerDay": 9999
             },
@@ -257600,13 +257615,13 @@
                 "deck-ms6q9g01-hyu0d"
               ],
               "easyBonus": "1.8",
-              "configName": "WordsForNewStudy-Review",
+              "configName": "WordsForNewStudy-Pronunciation",
               "easyInterval": "4",
               "startingEase": "3.5",
-              "learningSteps": "2m 10m 30m",
+              "learningSteps": "14398560m 2m 5m 10m",
               "newCardsPerDay": 9999,
               "minimumInterval": "1",
-              "relearningSteps": "2m 10m 30m",
+              "relearningSteps": "14398560m 2m 5m 10m",
               "graduatingInterval": "1",
               "maximumReviewsPerDay": 9999
             },
@@ -257631,28 +257646,29 @@
               "maximumReviewsPerDay": 9999
             },
             {
-              "id": "config-ms6xivsh-f7d96",
+              "id": "config-ms9qhj8x-96t1m",
               "deckIds": [
-                "deck-ms6q9g01-hyu0d"
+                "deck-ms31e580-149oo",
+                "deck-ms9tdyvt-1aqqx"
               ],
               "easyBonus": "1.8",
-              "configName": "WordsForNewStudy-Pronunciation",
-              "easyInterval": "4",
+              "configName": "WordsForNewStudy-Review",
+              "easyInterval": "9999",
               "startingEase": "3.5",
-              "learningSteps": "2m 5m 10m",
+              "learningSteps": "2m 10m 30m 14398560m",
               "newCardsPerDay": 9999,
-              "minimumInterval": "1",
-              "relearningSteps": "2m 5m 10m",
-              "graduatingInterval": "1",
+              "minimumInterval": "9999",
+              "relearningSteps": "2m 10m 30m 1438560m",
+              "graduatingInterval": "9999",
               "maximumReviewsPerDay": 9999
             }
           ],
           "profileName": "پروفایل اصلی",
           "schemaVersion": 4
         },
-        "version": 79,
+        "version": 84,
         "createdAt": "2026-07-26T01:51:48.862Z",
-        "updatedAt": "2026-07-30T03:04:13.693Z"
+        "updatedAt": "2026-08-02T14:21:32.137Z"
       }
     ],
     "user": [
