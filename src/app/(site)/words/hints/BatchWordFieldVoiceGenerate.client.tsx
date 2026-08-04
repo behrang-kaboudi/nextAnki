@@ -8,6 +8,23 @@ import {
   WORD_AUDIO_PUBLIC_DIR_RELATIVE,
 } from "@/lib/audio/wordFieldAudioNaming";
 import { ActionIcon } from "@/components/icons";
+import { wordFieldVoiceProgressTopic } from "@/lib/progress/topics";
+import { useJobProgress } from "@/lib/progress/useJobProgress";
+
+type WordFieldVoiceStatus = {
+  jobId: string;
+  running: boolean;
+  done: boolean;
+  error: string | null;
+  totalCandidates: number;
+  processedCandidates: number;
+  generated: number;
+  skippedExists: number;
+  skippedNoText: number;
+  zeroByteFound: number;
+  regeneratedZeroByte: number;
+  currentId: number | null;
+};
 
 const FIELD_LABEL: Record<WordAudioFieldKey, string> = {
   base_form: "base_form",
@@ -24,6 +41,9 @@ export default function BatchWordFieldVoiceGenerate({
 }: {
   field: WordAudioFieldKey;
 }) {
+  const { status: streamedStatus } = useJobProgress<WordFieldVoiceStatus>(
+    wordFieldVoiceProgressTopic(field),
+  );
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [statusText, setStatusText] = useState<string | null>(null);
@@ -82,45 +102,6 @@ export default function BatchWordFieldVoiceGenerate({
     }
   }, [field, statsBusy]);
 
-  const poll = useCallback(async () => {
-    const res = await fetch(
-      `/api/words/field-voice-generate-all?field=${encodeURIComponent(field)}`,
-      { method: "GET" }
-    );
-    const data = (await res.json().catch(() => null)) as
-      | {
-          ok?: boolean;
-          status?: {
-            jobId: string;
-            running: boolean;
-            done: boolean;
-            error: string | null;
-            totalCandidates: number;
-            processedCandidates: number;
-            generated: number;
-            skippedExists: number;
-            skippedNoText: number;
-            zeroByteFound: number;
-            regeneratedZeroByte: number;
-            currentId: number | null;
-          };
-        }
-      | null;
-    if (!res.ok || !data?.ok || !data.status) throw new Error("Failed to fetch status");
-
-    setJobId(data.status.jobId);
-    setRunning(Boolean(data.status.running));
-    setError(data.status.error);
-
-    const remaining = Math.max(
-      0,
-      (data.status.totalCandidates ?? 0) - (data.status.processedCandidates ?? 0)
-    );
-    setStatusText(
-      `done=${data.status.processedCandidates}/${data.status.totalCandidates} remaining=${remaining} currentId=${data.status.currentId ?? "—"} generated=${data.status.generated} skippedExists=${data.status.skippedExists} zeroByte=${data.status.zeroByteFound} regeneratedZeroByte=${data.status.regeneratedZeroByte}`
-    );
-  }, [field]);
-
   const generateAll = useCallback(async () => {
     if (busy || running) return;
     setBusy(true);
@@ -136,37 +117,27 @@ export default function BatchWordFieldVoiceGenerate({
         | null;
       if (!res.ok || data?.ok !== true) throw new Error(data?.error || `Request failed (${res.status})`);
       setJobId(data.status?.jobId ?? null);
-      await poll();
       window.dispatchEvent(new CustomEvent("wordFieldVoice:updated", { detail: { field, all: true } }));
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
       setBusy(false);
     }
-  }, [busy, field, poll, running]);
-
-  // keep UI in sync with server (resume after refresh)
-  useEffect(() => {
-    void poll().catch(() => null);
-  }, [poll]);
-
-  // refresh/poll when other components start jobs for this field
-  useEffect(() => {
-    const onUpdated = (evt: Event) => {
-      const detail = (evt as CustomEvent<{ field?: unknown; all?: unknown }>).detail;
-      if (!detail) return;
-      if (detail.field !== field) return;
-      if (detail.all === true) void poll().catch(() => null);
-    };
-    window.addEventListener("wordFieldVoice:updated", onUpdated);
-    return () => window.removeEventListener("wordFieldVoice:updated", onUpdated);
-  }, [field, poll]);
+  }, [busy, field, running]);
 
   useEffect(() => {
-    if (!running) return;
-    const t = setInterval(() => void poll().catch(() => null), 1000);
-    return () => clearInterval(t);
-  }, [poll, running]);
+    if (!streamedStatus) return;
+    setJobId(streamedStatus.jobId);
+    setRunning(Boolean(streamedStatus.running));
+    setError(streamedStatus.error);
+    const remaining = Math.max(
+      0,
+      streamedStatus.totalCandidates - streamedStatus.processedCandidates,
+    );
+    setStatusText(
+      `done=${streamedStatus.processedCandidates}/${streamedStatus.totalCandidates} remaining=${remaining} currentId=${streamedStatus.currentId ?? "—"} generated=${streamedStatus.generated} skippedExists=${streamedStatus.skippedExists} zeroByte=${streamedStatus.zeroByteFound} regeneratedZeroByte=${streamedStatus.regeneratedZeroByte}`,
+    );
+  }, [streamedStatus]);
 
   useEffect(() => {
     if (running) return;

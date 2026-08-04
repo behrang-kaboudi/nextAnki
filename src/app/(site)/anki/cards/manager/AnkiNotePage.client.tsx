@@ -16,6 +16,8 @@ import {
 } from "@/lib/anki";
 import { imageabilityBaseThreshold } from "@/lib/ipa/setPictures/types";
 import { PageHeader } from "@/components/page-header";
+import { JOB_PROGRESS_TOPICS } from "@/lib/progress/topics";
+import { useJobProgress } from "@/lib/progress/useJobProgress";
 
 function buildQueries(ankiLinkId: string) {
   const trimmed = ankiLinkId.trim();
@@ -144,7 +146,33 @@ type TempFilterSortKey =
   | "baseForm"
   | "meaningFa"
   | "learningDepth"
-  | "imageability";
+  | "imageability"
+  | "productiveTarget"
+  | "productiveLearningAverage"
+  | "threeFieldAverage";
+
+function tempFilterNumericField(row: TempFilterCardRow, name: string) {
+  return asFiniteNumber(row.fields[name]?.value.trim() ?? "");
+}
+
+function tempFilterAverage(
+  row: TempFilterCardRow,
+  fieldNames: string[],
+): number | null {
+  const values = fieldNames.map((fieldName) => {
+    const value = tempFilterNumericField(row, fieldName);
+    return fieldName === "learning_depth" && value !== null
+      ? value * 100
+      : value;
+  });
+  if (values.some((value) => value === null)) return null;
+  return values.reduce((sum, value) => sum + value, 0) / values.length;
+}
+
+function formatTempFilterAverage(value: number | null) {
+  if (value === null) return "—";
+  return Number.isInteger(value) ? String(value) : value.toFixed(2);
+}
 
 const TEMP_FILTER_DECK = "TempFor1WordsForNewStudy" as const;
 const FILTER_KNOWING_DECK = "WordsForNewStudy::FilterKnowing" as const;
@@ -193,6 +221,9 @@ const DEFAULT_BASE_FORM_LOOKUP_JSON = `[
 ]`;
 
 export default function AnkiNotePage() {
+  const { status: streamedSyncAllStatus } = useJobProgress<SyncAllStatus>(
+    JOB_PROGRESS_TOPICS.ankiHintSentence,
+  );
   const [ankiLinkId, setAnkiLinkId] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [notesInfo, setNotesInfo] = useState<AnkiNotesInfo | null>(null);
@@ -321,8 +352,6 @@ export default function AnkiNotePage() {
   const visibleTempFilterRows = useMemo(() => {
     const fieldValue = (row: TempFilterCardRow, name: string) =>
       row.fields[name]?.value.trim() ?? "";
-    const numericField = (row: TempFilterCardRow, name: string) =>
-      asFiniteNumber(fieldValue(row, name));
     const compareNumbers = (left: number | null, right: number | null) => {
       if (left === right) return 0;
       if (left === null) return 1;
@@ -337,14 +366,43 @@ export default function AnkiNotePage() {
             ? left.noteId - right.noteId
             : tempFilterSort.key === "learningDepth"
               ? compareNumbers(
-                  numericField(left, "learning_depth"),
-                  numericField(right, "learning_depth"),
+                  tempFilterNumericField(left, "learning_depth"),
+                  tempFilterNumericField(right, "learning_depth"),
                 )
               : tempFilterSort.key === "imageability"
                 ? compareNumbers(
-                    numericField(left, "imageability"),
-                    numericField(right, "imageability"),
+                    tempFilterNumericField(left, "imageability"),
+                    tempFilterNumericField(right, "imageability"),
                   )
+                : tempFilterSort.key === "productiveTarget"
+                  ? compareNumbers(
+                      tempFilterNumericField(left, "productive_target"),
+                      tempFilterNumericField(right, "productive_target"),
+                    )
+                  : tempFilterSort.key === "productiveLearningAverage"
+                    ? compareNumbers(
+                        tempFilterAverage(left, [
+                          "productive_target",
+                          "learning_depth",
+                        ]),
+                        tempFilterAverage(right, [
+                          "productive_target",
+                          "learning_depth",
+                        ]),
+                      )
+                    : tempFilterSort.key === "threeFieldAverage"
+                      ? compareNumbers(
+                          tempFilterAverage(left, [
+                            "learning_depth",
+                            "imageability",
+                            "productive_target",
+                          ]),
+                          tempFilterAverage(right, [
+                            "learning_depth",
+                            "imageability",
+                            "productive_target",
+                          ]),
+                        )
                 : fieldValue(
                     left,
                     tempFilterSort.key === "baseForm" ? "base_form" : "meaning_fa",
@@ -577,31 +635,6 @@ export default function AnkiNotePage() {
         throw new Error("Timeout while waiting for phase to finish.");
       await new Promise((r) => setTimeout(r, 75));
     }
-  }
-
-  async function fetchSyncAllStatusAndUpdate() {
-    const res = await fetch("/api/anki/hint-sentence/sync-all", {
-      method: "GET",
-    });
-    const data = (await res.json().catch(() => null)) as {
-      ok?: boolean;
-      status?: SyncAllStatus;
-      error?: string;
-    } | null;
-    if (!res.ok || !data?.ok || !data.status)
-      throw new Error(data?.error || "Failed to fetch sync-all status");
-
-    const status = data.status;
-    setSyncAllRunning(Boolean(status.running));
-    setSyncAllError(status.error);
-    const remaining = Math.max(
-      0,
-      (status.total ?? 0) - (status.processed ?? 0),
-    );
-    setSyncAllStatusText(
-      `done=${status.processed}/${status.total} remaining=${remaining} currentNoteId=${status.currentNoteId ?? "—"} updated=${status.updated} skipped=${status.skipped} failed=${status.failed} stopRequested=${status.stopRequested ? "yes" : "no"}`,
-    );
-    return status;
   }
 
   async function runAllPhases() {
@@ -1800,10 +1833,6 @@ export default function AnkiNotePage() {
     }
   }
 
-  async function pollSyncAll() {
-    await fetchSyncAllStatusAndUpdate();
-  }
-
   async function startSyncAll() {
     setSyncAllError(null);
     setSyncAllStatusText(null);
@@ -1818,7 +1847,6 @@ export default function AnkiNotePage() {
       } | null;
       if (!res.ok || !data?.ok)
         throw new Error(data?.error || `Request failed (${res.status})`);
-      await pollSyncAll();
     } catch (e) {
       setSyncAllError(e instanceof Error ? e.message : String(e));
       setSyncAllRunning(false);
@@ -1836,19 +1864,23 @@ export default function AnkiNotePage() {
       } | null;
       if (!res.ok || !data?.ok)
         throw new Error(data?.error || `Request failed (${res.status})`);
-      await pollSyncAll();
     } catch (e) {
       setSyncAllError(e instanceof Error ? e.message : String(e));
     }
   }
 
   useEffect(() => {
-    if (!syncAllRunning) return;
-    const t = setInterval(() => {
-      void pollSyncAll().catch(() => null);
-    }, 1000);
-    return () => clearInterval(t);
-  }, [syncAllRunning]);
+    if (!streamedSyncAllStatus) return;
+    setSyncAllRunning(Boolean(streamedSyncAllStatus.running));
+    setSyncAllError(streamedSyncAllStatus.error);
+    const remaining = Math.max(
+      0,
+      streamedSyncAllStatus.total - streamedSyncAllStatus.processed,
+    );
+    setSyncAllStatusText(
+      `done=${streamedSyncAllStatus.processed}/${streamedSyncAllStatus.total} remaining=${remaining} currentNoteId=${streamedSyncAllStatus.currentNoteId ?? "—"} updated=${streamedSyncAllStatus.updated} skipped=${streamedSyncAllStatus.skipped} failed=${streamedSyncAllStatus.failed} stopRequested=${streamedSyncAllStatus.stopRequested ? "yes" : "no"}`,
+    );
+  }, [streamedSyncAllStatus]);
 
   useEffect(() => {
     if (phase0StatusText) appendPhaseLog(`فاز ۰: ${phase0StatusText}`);
@@ -2381,6 +2413,54 @@ export default function AnkiNotePage() {
     );
   }
 
+  function tempFilterAbbreviatedSortButton(
+    key: TempFilterSortKey,
+    abbreviation: string,
+    description: string,
+  ) {
+    return (
+      <div className="flex flex-col items-start">
+        {tempFilterSortButton(key, abbreviation)}
+        <span className="mt-0.5 text-[9px] font-normal leading-tight text-muted">
+          {description}
+        </span>
+      </div>
+    );
+  }
+
+  function tempFilterPagination() {
+    return (
+      <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-muted">
+        <span>
+          {tempFilterRows.length} کارت · {TEMP_FILTER_PAGE_SIZE} کارت در هر صفحه
+        </span>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setTempFilterPage((page) => Math.max(1, page - 1))}
+            disabled={tempFilterPage === 1}
+            className="rounded-lg border border-card px-3 py-1.5 disabled:opacity-50"
+          >
+            قبلی
+          </button>
+          <span>
+            صفحه {tempFilterPage} از {tempFilterTotalPages}
+          </span>
+          <button
+            type="button"
+            onClick={() =>
+              setTempFilterPage((page) => Math.min(tempFilterTotalPages, page + 1))
+            }
+            disabled={tempFilterPage === tempFilterTotalPages}
+            className="rounded-lg border border-card px-3 py-1.5 disabled:opacity-50"
+          >
+            بعدی
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="grid gap-6">
       <PageHeader
@@ -2477,17 +2557,34 @@ export default function AnkiNotePage() {
           <p className="mt-3 text-sm text-foreground/80">{tempFilterStatus}</p>
         ) : null}
 
+        <div className="mt-3">{tempFilterPagination()}</div>
+
         <div className="mt-4 overflow-x-auto rounded-xl border border-card">
-          <table className="w-full min-w-[940px] text-sm">
+          <table className="w-full min-w-[1320px] text-sm">
             <thead className="bg-background text-muted">
               <tr>
-                <th className="px-3 py-2 text-right">{tempFilterSortButton("cardId", "کارت")}</th>
-                <th className="px-3 py-2 text-right">{tempFilterSortButton("noteId", "نوت")}</th>
-                <th className="px-3 py-2 text-right">{tempFilterSortButton("baseForm", "کلمه")}</th>
-                <th className="px-3 py-2 text-right">{tempFilterSortButton("meaningFa", "معنی")}</th>
+                <th className="px-3 py-2 text-right">{tempFilterSortButton("cardId", "Card")}</th>
+                <th className="px-3 py-2 text-right">{tempFilterSortButton("noteId", "Note")}</th>
+                <th className="px-3 py-2 text-right">{tempFilterSortButton("baseForm", "Base form")}</th>
+                <th className="px-3 py-2 text-right">{tempFilterSortButton("meaningFa", "Meaning (FA)")}</th>
                 <th className="px-3 py-2 text-right">{tempFilterSortButton("learningDepth", "learning_depth")}</th>
                 <th className="px-3 py-2 text-right">{tempFilterSortButton("imageability", "imageability")}</th>
-                <th className="px-3 py-2 text-right font-semibold">عملیات</th>
+                <th className="px-3 py-2 text-right">{tempFilterSortButton("productiveTarget", "productive_target")}</th>
+                <th className="px-3 py-2 text-right">
+                  {tempFilterAbbreviatedSortButton(
+                    "productiveLearningAverage",
+                    "PT+LD Avg",
+                    "productive_target + (learning_depth × 100)",
+                  )}
+                </th>
+                <th className="px-3 py-2 text-right">
+                  {tempFilterAbbreviatedSortButton(
+                    "threeFieldAverage",
+                    "LD+IM+PT Avg",
+                    "(learning_depth × 100) + imageability + productive_target",
+                  )}
+                </th>
+                <th className="px-3 py-2 text-right font-semibold">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -2507,6 +2604,26 @@ export default function AnkiNotePage() {
                   <td className="px-3 py-2 font-mono text-xs">
                     {row.fields.imageability?.value || "—"}
                   </td>
+                  <td className="px-3 py-2 font-mono text-xs">
+                    {row.fields.productive_target?.value || "—"}
+                  </td>
+                  <td className="px-3 py-2 font-mono text-xs">
+                    {formatTempFilterAverage(
+                      tempFilterAverage(row, [
+                        "productive_target",
+                        "learning_depth",
+                      ]),
+                    )}
+                  </td>
+                  <td className="px-3 py-2 font-mono text-xs">
+                    {formatTempFilterAverage(
+                      tempFilterAverage(row, [
+                        "learning_depth",
+                        "imageability",
+                        "productive_target",
+                      ]),
+                    )}
+                  </td>
                   <td className="px-3 py-2">
                     <button
                       type="button"
@@ -2523,7 +2640,7 @@ export default function AnkiNotePage() {
               ))}
               {!tempFilterLoading && visibleTempFilterRows.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-3 py-8 text-center text-muted">
+                  <td colSpan={10} className="px-3 py-8 text-center text-muted">
                     کارتی در دک موقت پیدا نشد.
                   </td>
                 </tr>
@@ -2532,34 +2649,7 @@ export default function AnkiNotePage() {
           </table>
         </div>
 
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs text-muted">
-          <span>
-            {tempFilterRows.length} کارت · {TEMP_FILTER_PAGE_SIZE} کارت در هر صفحه
-          </span>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setTempFilterPage((page) => Math.max(1, page - 1))}
-              disabled={tempFilterPage === 1}
-              className="rounded-lg border border-card px-3 py-1.5 disabled:opacity-50"
-            >
-              قبلی
-            </button>
-            <span>
-              صفحه {tempFilterPage} از {tempFilterTotalPages}
-            </span>
-            <button
-              type="button"
-              onClick={() =>
-                setTempFilterPage((page) => Math.min(tempFilterTotalPages, page + 1))
-              }
-              disabled={tempFilterPage === tempFilterTotalPages}
-              className="rounded-lg border border-card px-3 py-1.5 disabled:opacity-50"
-            >
-              بعدی
-            </button>
-          </div>
-        </div>
+        <div className="mt-3">{tempFilterPagination()}</div>
       </section>
 
       {false ? (

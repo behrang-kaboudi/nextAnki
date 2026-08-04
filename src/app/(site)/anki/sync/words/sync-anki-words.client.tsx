@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 
 import { PageHeader } from "@/components/page-header";
 import { createAnkiOperations } from "@/lib/anki";
+import { JOB_PROGRESS_TOPICS } from "@/lib/progress/topics";
+import { useJobProgressStatuses } from "@/lib/progress/useJobProgress";
 
 type SyncAllStatus = {
   jobId: string;
@@ -83,7 +85,7 @@ export default function SyncAnkiWordsClient() {
   );
 
   const [isRunning, setIsRunning] = useState(false);
-  const [pollingEnabled, setPollingEnabled] = useState(true);
+  const progress = useJobProgressStatuses();
   const [helpOpen, setHelpOpen] = useState<
     | null
     | "permission"
@@ -589,7 +591,6 @@ export default function SyncAnkiWordsClient() {
 
   async function startSyncJsonHint() {
     if (isRunning || jsonHintStatus?.running) return;
-    setPollingEnabled(true);
     setIsRunning(true);
     setPreview(null);
 
@@ -613,7 +614,6 @@ export default function SyncAnkiWordsClient() {
 
   async function startSyncSentenceEn() {
     if (isRunning || sentenceEnStatus?.running) return;
-    setPollingEnabled(true);
     setIsRunning(true);
     setPreview(null);
 
@@ -637,7 +637,6 @@ export default function SyncAnkiWordsClient() {
 
   async function startSyncSentenceEnMeaningFa() {
     if (isRunning || sentenceEnMeaningFaStatus?.running) return;
-    setPollingEnabled(true);
     setIsRunning(true);
     setPreview(null);
 
@@ -661,7 +660,6 @@ export default function SyncAnkiWordsClient() {
 
   async function startSyncOtherMeaningsFa() {
     if (isRunning || otherMeaningsFaStatus?.running) return;
-    setPollingEnabled(true);
     setIsRunning(true);
     setPreview(null);
 
@@ -685,7 +683,6 @@ export default function SyncAnkiWordsClient() {
 
   async function startSyncConceptExplainedFa() {
     if (isRunning || conceptExplainedFaStatus?.running) return;
-    setPollingEnabled(true);
     setIsRunning(true);
     setPreview(null);
 
@@ -709,7 +706,6 @@ export default function SyncAnkiWordsClient() {
 
   async function startSyncMeaningFa() {
     if (isRunning || meaningFaStatus?.running) return;
-    setPollingEnabled(true);
     setIsRunning(true);
     setPreview(null);
 
@@ -733,7 +729,6 @@ export default function SyncAnkiWordsClient() {
 
   async function startSyncAllMedia(mode: "missing" | "changed" = "missing") {
     if (isRunning || mediaSyncStatus?.running) return;
-    setPollingEnabled(true);
     setIsRunning(true);
     setPreview(null);
 
@@ -765,7 +760,6 @@ export default function SyncAnkiWordsClient() {
 
   async function startFullSyncAll() {
     if (isRunning || fullSyncStatus?.running) return;
-    setPollingEnabled(true);
     setIsRunning(true);
     setPreview(null);
 
@@ -798,7 +792,6 @@ export default function SyncAnkiWordsClient() {
 
   async function deduplicateAnkiLinkIdKeepOldest() {
     if (isRunning || dedupStatus?.running) return;
-    setPollingEnabled(true);
     setIsRunning(true);
     setPreview(null);
 
@@ -902,105 +895,17 @@ export default function SyncAnkiWordsClient() {
   }
 
   useEffect(() => {
-    if (!pollingEnabled) return;
-    let timer: number | null = null;
-    let stopped = false;
-
-    async function tick() {
-      try {
-        const [
-          jsonHintRes,
-          mediaRes,
-          fullRes,
-          dedupRes,
-          otherRes,
-          conceptRes,
-          meaningRes,
-          sentenceEnRes,
-          sentenceMeaningRes,
-        ] = await Promise.all([
-          fetch("/api/tests/sync-anki-words/json-hint/sync-all/status", { cache: "no-store" }),
-          fetch("/api/tests/sync-anki-words/media/sync-all/status", { cache: "no-store" }),
-          fetch("/api/tests/sync-anki-words/full/sync-all/status", { cache: "no-store" }),
-          fetch("/api/tests/sync-anki-words/anki-link-id/deduplicate/status", { cache: "no-store" }),
-          fetch("/api/tests/sync-anki-words/other-meanings-fa/sync-all/status", { cache: "no-store" }),
-          fetch("/api/tests/sync-anki-words/concept-explained-fa/sync-all/status", { cache: "no-store" }),
-          fetch("/api/tests/sync-anki-words/meaning-fa/sync-all/status", { cache: "no-store" }),
-          fetch("/api/tests/sync-anki-words/sentence-en/sync-all/status", { cache: "no-store" }),
-          fetch("/api/tests/sync-anki-words/sentence-en-meaning-fa/sync-all/status", { cache: "no-store" }),
-        ]);
-
-        const jsonHintJson = (await jsonHintRes.json()) as { ok?: boolean; status?: SyncAllStatus };
-        const mediaJson = (await mediaRes.json()) as { ok?: boolean; status?: SyncAllStatus };
-        const fullJson = (await fullRes.json()) as { ok?: boolean; status?: SyncAllStatus };
-        const dedupJson = (await dedupRes.json()) as { ok?: boolean; status?: SyncAllStatus };
-        const otherJson = (await otherRes.json()) as { ok?: boolean; status?: SyncAllStatus };
-        const conceptJson = (await conceptRes.json()) as { ok?: boolean; status?: SyncAllStatus };
-        const meaningJson = (await meaningRes.json()) as { ok?: boolean; status?: SyncAllStatus };
-        const sentenceEnJson = (await sentenceEnRes.json()) as { ok?: boolean; status?: SyncAllStatus };
-        const sentenceMeaningJson = (await sentenceMeaningRes.json()) as { ok?: boolean; status?: SyncAllStatus };
-
-        const jsonHint = jsonHintJson?.status ?? null;
-        const media = mediaJson?.status ?? null;
-        const full = fullJson?.status ?? null;
-        const dedup = dedupJson?.status ?? null;
-        const other = otherJson?.status ?? null;
-        const concept = conceptJson?.status ?? null;
-        const meaning = meaningJson?.status ?? null;
-        const sentenceEn = sentenceEnJson?.status ?? null;
-        const sentenceMeaning = sentenceMeaningJson?.status ?? null;
-        setJsonHintStatus(jsonHint);
-        setMediaSyncStatus(media);
-        setFullSyncStatus(full);
-        setDedupStatus(dedup);
-        setOtherMeaningsFaStatus(other);
-        setConceptExplainedFaStatus(concept);
-        setMeaningFaStatus(meaning);
-        setSentenceEnStatus(sentenceEn);
-        setSentenceEnMeaningFaStatus(sentenceMeaning);
-
-        const jsonHintDone = Boolean(jsonHint?.done);
-        const mediaDone = Boolean(media?.done);
-        const fullDone = Boolean(full?.done);
-        const dedupDone = Boolean(dedup?.done);
-        const otherDone = Boolean(other?.done);
-        const conceptDone = Boolean(concept?.done);
-        const meaningDone = Boolean(meaning?.done);
-        const sentenceEnDone = Boolean(sentenceEn?.done);
-        const sentenceMeaningDone = Boolean(sentenceMeaning?.done);
-        const anyRunning = Boolean(
-          jsonHint?.running ||
-            media?.running ||
-            full?.running ||
-            dedup?.running ||
-            other?.running ||
-            concept?.running ||
-            meaning?.running ||
-            sentenceEn?.running ||
-            sentenceMeaning?.running,
-        );
-
-        if (!anyRunning && jsonHintDone && mediaDone && fullDone && dedupDone && otherDone && conceptDone && meaningDone && sentenceEnDone && sentenceMeaningDone) {
-          if (timer != null) window.clearInterval(timer);
-          timer = null;
-          if (!stopped) setPollingEnabled(false);
-        }
-      } catch {
-        // ignore transient errors while polling
-      }
-    }
-
-    void tick();
-    timer = window.setInterval(() => {
-      if (stopped) return;
-      void tick();
-    }, 1000);
-
-    return () => {
-      stopped = true;
-      if (timer != null) window.clearInterval(timer);
-    };
-  }, [pollingEnabled]);
+    const statuses = progress.statuses;
+    setJsonHintStatus((statuses[JOB_PROGRESS_TOPICS.ankiJsonHint] as SyncAllStatus) ?? null);
+    setMediaSyncStatus((statuses[JOB_PROGRESS_TOPICS.ankiMedia] as SyncAllStatus) ?? null);
+    setFullSyncStatus((statuses[JOB_PROGRESS_TOPICS.ankiFull] as SyncAllStatus) ?? null);
+    setDedupStatus((statuses[JOB_PROGRESS_TOPICS.ankiLinkIdDedup] as SyncAllStatus) ?? null);
+    setOtherMeaningsFaStatus((statuses[JOB_PROGRESS_TOPICS.ankiOtherMeaningsFa] as SyncAllStatus) ?? null);
+    setConceptExplainedFaStatus((statuses[JOB_PROGRESS_TOPICS.ankiConceptExplainedFa] as SyncAllStatus) ?? null);
+    setMeaningFaStatus((statuses[JOB_PROGRESS_TOPICS.ankiMeaningFa] as SyncAllStatus) ?? null);
+    setSentenceEnStatus((statuses[JOB_PROGRESS_TOPICS.ankiSentenceEn] as SyncAllStatus) ?? null);
+    setSentenceEnMeaningFaStatus((statuses[JOB_PROGRESS_TOPICS.ankiSentenceEnMeaningFa] as SyncAllStatus) ?? null);
+  }, [progress.statuses]);
 
   const sentenceEnSkippedTotal =
     (sentenceEnStatus?.skippedSame ?? 0) +

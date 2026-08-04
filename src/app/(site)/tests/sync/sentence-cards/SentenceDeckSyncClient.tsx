@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 
 import { PageHeader } from "@/components/page-header";
 import { AnkiNoteTypes, SentenceAnkiConstants } from "@/lib/anki";
+import { JOB_PROGRESS_TOPICS } from "@/lib/progress/topics";
+import { useJobProgress } from "@/lib/progress/useJobProgress";
 
 type EnsureResponse =
   | {
@@ -76,6 +78,8 @@ type SelectedSyncResponse =
       logs?: string[];
     };
 
+type SentenceDeckStatus = Extract<SyncResponse, { ok: true }>["status"];
+
 const SELECTED_SYNC_EXAMPLE = `[
   {
     "sentence_en": "The man waited quietly at the bus stop."
@@ -86,6 +90,9 @@ const SELECTED_SYNC_EXAMPLE = `[
 ]`;
 
 export default function SentenceDeckSyncClient() {
+  const { status: streamedStatus } = useJobProgress<SentenceDeckStatus>(
+    JOB_PROGRESS_TOPICS.sentenceDeck,
+  );
   const [isRunning, setIsRunning] = useState(false);
   const [addLimit, setAddLimit] = useState<string>("10");
   const [result, setResult] = useState<EnsureResponse | null>(null);
@@ -158,24 +165,6 @@ export default function SentenceDeckSyncClient() {
       });
     } finally {
       setIsRunning(false);
-    }
-  }
-
-  async function fetchSyncStatus() {
-    try {
-      const res = await fetch("/api/tests/sentence-deck-sync/sync-all/status", {
-        method: "GET",
-        cache: "no-store",
-      });
-      const data = (await res.json()) as SyncResponse;
-      setSyncResult(data);
-      if (data.ok) {
-        setLogs(data.status.logs ?? []);
-      }
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      setSyncResult({ ok: false, error: message });
-      setLogs([`Error: ${message}`]);
     }
   }
 
@@ -272,16 +261,10 @@ export default function SentenceDeckSyncClient() {
   }
 
   useEffect(() => {
-    void fetchSyncStatus();
-  }, []);
-
-  useEffect(() => {
-    if (!isSyncing) return;
-    const id = setInterval(() => {
-      void fetchSyncStatus();
-    }, 1000);
-    return () => clearInterval(id);
-  }, [isSyncing]);
+    if (!streamedStatus) return;
+    setSyncResult({ ok: true, status: streamedStatus });
+    setLogs(streamedStatus.logs ?? []);
+  }, [streamedStatus]);
 
   return (
     <main className="mx-auto w-full max-w-4xl p-4">

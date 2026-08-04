@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 type FaEn = { fa?: string; en?: string };
 type MatchSymbols = {
@@ -97,6 +97,9 @@ function matchHasPersianImageNull(match: MatchSymbols | null | undefined): boole
 }
 
 export function WordListClient() {
+  const activeStreamRef = useRef<EventSource | null>(null);
+  const closeActiveStreamRef = useRef<(() => void) | null>(null);
+  const streamGenerationRef = useRef(0);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(50);
   const [loadAll, setLoadAll] = useState(false);
@@ -205,12 +208,14 @@ export function WordListClient() {
   ]);
 
   const load = useCallback(async () => {
+    const generation = ++streamGenerationRef.current;
     try {
       if (!appliedFilters) return;
       setLoading(true);
       setError(null);
       setProgress(null);
-      const res = await fetch(
+      closeActiveStreamRef.current?.();
+      const streamUrl =
         `/api/ipa/phrase-building/words?page=${clampedPage}&pageSize=${pageSize}&includeMatch=1&includeMatchStats=1&sortBy=${sortBy}&sortDir=${sortDir}&stream=1${
           appliedFilters.loadAll
             ? ""
@@ -225,56 +230,66 @@ export function WordListClient() {
                     : appliedFilters.onlyOver6CharPhonetic
                       ? "&phoneticLenGt=6"
                       : ""
-        }${!appliedFilters.loadAll && appliedFilters.onlySpaced ? "&onlySpaced=1" : ""}${!appliedFilters.loadAll && appliedFilters.onlyEmptyMatch ? "&onlyEmptyMatch=1" : ""}${!appliedFilters.loadAll && appliedFilters.onlyNoJob ? "&onlyNoJob=1" : ""}${appliedFilters.onlyDifferentMatch ? "&onlyDifferentMatch=1" : ""}`,
-        { cache: "no-store" },
-      );
-      if (!res.ok) {
-        const msg = await res.text();
-        throw new Error(msg || `Request failed (${res.status})`);
-      }
+        }${!appliedFilters.loadAll && appliedFilters.onlySpaced ? "&onlySpaced=1" : ""}${!appliedFilters.loadAll && appliedFilters.onlyEmptyMatch ? "&onlyEmptyMatch=1" : ""}${!appliedFilters.loadAll && appliedFilters.onlyNoJob ? "&onlyNoJob=1" : ""}${appliedFilters.onlyDifferentMatch ? "&onlyDifferentMatch=1" : ""}`;
 
-      const reader = res.body?.getReader();
-      if (!reader) throw new Error("No response body");
-      const decoder = new TextDecoder();
-      let buffer = "";
-
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        let idx: number;
-        while ((idx = buffer.indexOf("\n")) !== -1) {
-          const line = buffer.slice(0, idx).trim();
-          buffer = buffer.slice(idx + 1);
-          if (!line) continue;
-          const evt = JSON.parse(line) as
-            | { type: "start"; total: number }
-            | { type: "progress"; done: number; total: number }
-            | {
-                type: "done";
-                payload: { total: number; rows: WordRow[]; matchStats: null };
-              }
-            | { type: "error"; error: string };
-
-          if (evt.type === "start") setProgress({ done: 0, total: evt.total });
-          if (evt.type === "progress")
-            setProgress({ done: evt.done, total: evt.total });
-          if (evt.type === "error") throw new Error(evt.error);
-          if (evt.type === "done") {
-            setData({
-              total: evt.payload.total ?? 0,
-              rows: evt.payload.rows ?? [],
-              matchStats: null,
-            });
-            setProgress(null);
+      const eventSource = new EventSource(streamUrl);
+      activeStreamRef.current = eventSource;
+      await new Promise<void>((resolve, reject) => {
+        let settled = false;
+        const finish = (error?: Error) => {
+          if (settled) return;
+          settled = true;
+          eventSource.close();
+          if (activeStreamRef.current === eventSource) {
+            activeStreamRef.current = null;
+            closeActiveStreamRef.current = null;
           }
-        }
-      }
+          if (error) reject(error);
+          else resolve();
+        };
+        closeActiveStreamRef.current = () => finish();
+
+        eventSource.addEventListener("start", (event) => {
+          const value = JSON.parse((event as MessageEvent<string>).data) as {
+            total: number;
+          };
+          setProgress({ done: 0, total: value.total });
+        });
+        eventSource.addEventListener("progress", (event) => {
+          const value = JSON.parse((event as MessageEvent<string>).data) as {
+            done: number;
+            total: number;
+          };
+          setProgress({ done: value.done, total: value.total });
+        });
+        eventSource.addEventListener("done", (event) => {
+          const value = JSON.parse((event as MessageEvent<string>).data) as {
+            payload: { total: number; rows: WordRow[]; matchStats: null };
+          };
+          setData({
+            total: value.payload.total ?? 0,
+            rows: value.payload.rows ?? [],
+            matchStats: null,
+          });
+          setProgress(null);
+          finish();
+        });
+        eventSource.addEventListener("job-error", (event) => {
+          const value = JSON.parse((event as MessageEvent<string>).data) as {
+            error: string;
+          };
+          finish(new Error(value.error));
+        });
+        eventSource.onerror = () => {
+          finish(new Error("Progress stream disconnected."));
+        };
+      });
     } catch (e) {
+      if (generation !== streamGenerationRef.current) return;
       setData(null);
       setError(e instanceof Error ? e.message : "Unknown error");
     } finally {
-      setLoading(false);
+      if (generation === streamGenerationRef.current) setLoading(false);
     }
   }, [
     appliedFilters,
@@ -288,6 +303,10 @@ export function WordListClient() {
     if (!appliedFilters) return;
     void load();
   }, [appliedFilters, load]);
+
+  useEffect(() => {
+    return () => closeActiveStreamRef.current?.();
+  }, []);
 
   useEffect(() => {
     if (page !== clampedPage) setPage(clampedPage);

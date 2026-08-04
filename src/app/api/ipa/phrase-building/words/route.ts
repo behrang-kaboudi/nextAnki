@@ -135,8 +135,10 @@ async function loadWordsById(ids: number[]): Promise<Map<number, Word>> {
   return new Map(words.map((w) => [w.id, w]));
 }
 
-function ndjsonLine(value: unknown): Uint8Array {
-  return new TextEncoder().encode(`${JSON.stringify(value)}\n`);
+function sseEvent(event: string, value: unknown): Uint8Array {
+  return new TextEncoder().encode(
+    `event: ${event}\ndata: ${JSON.stringify(value)}\n\n`,
+  );
 }
 
 export async function GET(req: Request) {
@@ -387,7 +389,7 @@ export async function GET(req: Request) {
             const totalToProcess = idsToProcess.length;
             let done = 0;
 
-            controller.enqueue(ndjsonLine({ type: "start", total: totalToProcess }));
+            controller.enqueue(sseEvent("start", { total: totalToProcess }));
 
             const rowById = new Map(rowsToCompute.map((r) => [r.id, r] as const));
             const computed: Array<
@@ -403,7 +405,7 @@ export async function GET(req: Request) {
               const baseRow = rowById.get(id);
               const match = word ? await pickPictureSymbolsForWord(word) : null;
               done += 1;
-              controller.enqueue(ndjsonLine({ type: "progress", done, total: totalToProcess }));
+              controller.enqueue(sseEvent("progress", { done, total: totalToProcess }));
               if (baseRow) {
                 computed.push({
                   ...baseRow,
@@ -456,8 +458,7 @@ export async function GET(req: Request) {
             const sliced = needsComputedFilter ? finalRows.slice(skip, skip + pageSize) : finalRows;
 
             controller.enqueue(
-              ndjsonLine({
-                type: "done",
+              sseEvent("done", {
                 payload: {
                   page,
                   pageSize,
@@ -469,8 +470,7 @@ export async function GET(req: Request) {
             );
           } catch (e) {
             controller.enqueue(
-              ndjsonLine({
-                type: "error",
+              sseEvent("job-error", {
                 error: e instanceof Error ? e.message : String(e),
               })
             );
@@ -481,7 +481,12 @@ export async function GET(req: Request) {
       });
 
       return new NextResponse(responseStream, {
-        headers: { "content-type": "application/x-ndjson; charset=utf-8" },
+        headers: {
+          "Content-Type": "text/event-stream; charset=utf-8",
+          "Cache-Control": "no-cache, no-transform",
+          Connection: "keep-alive",
+          "X-Accel-Buffering": "no",
+        },
       });
     }
 

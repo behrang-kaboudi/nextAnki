@@ -1,10 +1,31 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
+import { JOB_PROGRESS_TOPICS } from "@/lib/progress/topics";
+import { useJobProgress } from "@/lib/progress/useJobProgress";
 
 type Row = { id: number; text: string | null };
 
+type VoiceJobStatus = {
+  jobId: string;
+  running: boolean;
+  done: boolean;
+  error: string | null;
+  totalCandidates: number;
+  processedCandidates: number;
+  generated: number;
+  skippedExists: number;
+  skippedNoText: number;
+  zeroByteFound: number;
+  regeneratedZeroByte: number;
+  currentId: number | null;
+};
+
 export default function BatchVoiceGenerate({ rows }: { rows: Row[] }) {
+  const { status: streamedStatus } = useJobProgress<VoiceJobStatus>(
+    JOB_PROGRESS_TOPICS.wordVoice,
+  );
   const items = useMemo(
     () =>
       rows
@@ -17,43 +38,8 @@ export default function BatchVoiceGenerate({ rows }: { rows: Row[] }) {
   const [error, setError] = useState<string | null>(null);
   const [statusText, setStatusText] = useState<string | null>(null);
   const [jobId, setJobId] = useState<string | null>(null);
-
-  const poll = useCallback(async () => {
-    const res = await fetch("/api/words/voice-generate-all", { method: "GET" });
-    const data = (await res.json().catch(() => null)) as
-      | {
-          ok?: boolean;
-          status?: {
-            jobId: string;
-            running: boolean;
-            done: boolean;
-            error: string | null;
-            totalCandidates: number;
-            processedCandidates: number;
-            generated: number;
-            skippedExists: number;
-            skippedNoText: number;
-            zeroByteFound: number;
-            regeneratedZeroByte: number;
-            currentId: number | null;
-          };
-        }
-      | null;
-
-    if (!res.ok || !data?.ok || !data.status) throw new Error("Failed to fetch status");
-
-    setJobId(data.status.jobId);
-    setRunning(Boolean(data.status.running));
-    setError(data.status.error);
-
-    const remaining = Math.max(
-      0,
-      (data.status.totalCandidates ?? 0) - (data.status.processedCandidates ?? 0)
-    );
-    setStatusText(
-      `done=${data.status.processedCandidates}/${data.status.totalCandidates} remaining=${remaining} currentId=${data.status.currentId ?? "—"} generated=${data.status.generated} skippedExists=${data.status.skippedExists} zeroByte=${data.status.zeroByteFound} regeneratedZeroByte=${data.status.regeneratedZeroByte}`
-    );
-  }, []);
+  const lastAudioRefreshAtRef = useRef(0);
+  const lastProcessedRef = useRef(-1);
 
   const run = useCallback(async () => {
     if (running) return;
@@ -69,25 +55,38 @@ export default function BatchVoiceGenerate({ rows }: { rows: Row[] }) {
 
       if (!res.ok || !data?.ok) throw new Error(data?.error || `Request failed (${res.status})`);
       setJobId(data.status?.jobId ?? null);
-      await poll();
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
-    } finally {
-      // keep running state from poll
     }
-  }, [poll, running]);
+  }, [running]);
 
   useEffect(() => {
-    if (!running) return;
-    const t = setInterval(() => {
-      void poll().then(() => {
-        for (const r of items) {
-          window.dispatchEvent(new CustomEvent("voice:updated", { detail: { id: r.id } }));
-        }
-      });
-    }, 1000);
-    return () => clearInterval(t);
-  }, [items, poll, running]);
+    if (!streamedStatus) return;
+    setJobId(streamedStatus.jobId);
+    setRunning(Boolean(streamedStatus.running));
+    setError(streamedStatus.error);
+    const remaining = Math.max(
+      0,
+      streamedStatus.totalCandidates - streamedStatus.processedCandidates,
+    );
+    setStatusText(
+      `done=${streamedStatus.processedCandidates}/${streamedStatus.totalCandidates} remaining=${remaining} currentId=${streamedStatus.currentId ?? "—"} generated=${streamedStatus.generated} skippedExists=${streamedStatus.skippedExists} zeroByte=${streamedStatus.zeroByteFound} regeneratedZeroByte=${streamedStatus.regeneratedZeroByte}`,
+    );
+
+    const now = Date.now();
+    const processedChanged =
+      streamedStatus.processedCandidates !== lastProcessedRef.current;
+    const refreshDue = now - lastAudioRefreshAtRef.current >= 1_000;
+    if (processedChanged && (refreshDue || !streamedStatus.running)) {
+      lastProcessedRef.current = streamedStatus.processedCandidates;
+      lastAudioRefreshAtRef.current = now;
+      for (const item of items) {
+        window.dispatchEvent(
+          new CustomEvent("voice:updated", { detail: { id: item.id } }),
+        );
+      }
+    }
+  }, [items, streamedStatus]);
 
   return (
     <div className="flex flex-col gap-2">
