@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
 
 import { prisma } from "@/lib/prisma";
+import { normalizePersianForComparison, normalizePersianForStorage } from "@/lib/persian/normalize";
 import { upsertPrimarySentenceByAnkiLinkId } from "@/lib/sentences/sentenceRepo";
 
 export const runtime = "nodejs";
@@ -17,28 +18,6 @@ type PayloadItem = {
 
 const allowedKeys = ["base_form", "meaning_fa", "sentence_en", "sentence_en_meaning_fa"] as const;
 const allowedKeySet = new Set<string>(allowedKeys);
-
-function normalizeMeaningFaForCompare(value: string): string {
-  // Compare version: remove spaces and Persian ZWNJ/ZWJ variants.
-  // This helps treat "اسباب‌بازی" and "اسباب بازی" as the same.
-  return value
-    .replaceAll("\u200c", "") // ZWNJ
-    .replaceAll("\u200d", "") // ZWJ
-    .replaceAll("\u00a0", "") // NBSP
-    .replace(/\s+/g, "")
-    .trim();
-}
-
-function normalizeMeaningFaForStore(value: string): string {
-  // Store version: convert ZWNJ/ZWJ to a normal space and collapse whitespace.
-  // This avoids persisting half-spaces in DB.
-  return value
-    .replaceAll("\u200c", " ") // ZWNJ
-    .replaceAll("\u200d", " ") // ZWJ
-    .replaceAll("\u00a0", " ") // NBSP
-    .replace(/\s+/g, " ")
-    .trim();
-}
 
 function asNonEmptyString(value: unknown): string | null {
   if (typeof value !== "string") return null;
@@ -82,7 +61,7 @@ function validateItem(value: unknown): { ok: true; item: PayloadItem } | { ok: f
     return { ok: false, issues: ["Invalid input"] };
   }
 
-  const meaning_fa = normalizeMeaningFaForStore(meaning_fa_raw);
+  const meaning_fa = normalizePersianForStorage(meaning_fa_raw);
   if (!meaning_fa) return { ok: false, issues: ["meaning_fa is empty after normalization"] };
   return { ok: true, item: { base_form, meaning_fa, sentence_en, sentence_en_meaning_fa } };
 }
@@ -155,9 +134,9 @@ export async function POST(req: Request) {
           select: { id: true, anki_link_id: true, meaning_fa: true },
         });
 
-        const targetMeaning = normalizeMeaningFaForCompare(item.meaning_fa);
+        const targetMeaning = normalizePersianForComparison(item.meaning_fa);
         const existing = candidates.find(
-          (c) => normalizeMeaningFaForCompare(c.meaning_fa) === targetMeaning
+          (c) => normalizePersianForComparison(c.meaning_fa) === targetMeaning
         );
 
         if (existing) {

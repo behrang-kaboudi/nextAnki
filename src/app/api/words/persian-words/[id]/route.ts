@@ -1,0 +1,64 @@
+import { Prisma } from "@prisma/client";
+import { NextResponse } from "next/server";
+
+import { normalizePersianFull, normalizePersianHalf } from "@/lib/persian/normalize";
+import { prisma } from "@/lib/prisma";
+
+function parseId(value: string) {
+  const id = Number(value);
+  return Number.isSafeInteger(id) && id > 0 ? id : null;
+}
+
+function asNullableString(value: unknown) {
+  const text = typeof value === "string" ? value.trim() : "";
+  return text || null;
+}
+
+export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const id = parseId((await params).id);
+  if (!id) return NextResponse.json({ ok: false, error: "Invalid PersianWord id." }, { status: 400 });
+
+  const item = await prisma.persianWord.findUnique({ where: { id } });
+  if (!item) return NextResponse.json({ ok: false, error: "PersianWord not found." }, { status: 404 });
+  return NextResponse.json({ ok: true, item });
+}
+
+export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const id = parseId((await params).id);
+  if (!id) return NextResponse.json({ ok: false, error: "Invalid PersianWord id." }, { status: 400 });
+
+  try {
+    const body = (await request.json()) as Record<string, unknown>;
+    const canonicalText = normalizePersianHalf(String(body.canonical_text ?? ""));
+    const normalizedText = normalizePersianFull(canonicalText);
+    if (!canonicalText || !normalizedText) {
+      return NextResponse.json({ ok: false, error: "canonical_text must contain Persian letters." }, { status: 400 });
+    }
+    const variants = body.not_normalized_texts;
+    if (!Array.isArray(variants) || variants.some((value) => typeof value !== "string")) {
+      return NextResponse.json({ ok: false, error: "not_normalized_texts must be an array of strings." }, { status: 400 });
+    }
+
+    const item = await prisma.persianWord.update({
+      where: { id },
+      data: {
+        canonical_text: canonicalText,
+        normalized_text: normalizedText,
+        not_normalized_texts: variants as Prisma.InputJsonValue,
+        meaning_fa_IPA: asNullableString(body.meaning_fa_IPA),
+      },
+    });
+    return NextResponse.json({ ok: true, item });
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
+      return NextResponse.json({ ok: false, error: "PersianWord not found." }, { status: 404 });
+    }
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      return NextResponse.json({ ok: false, error: "This value must be unique." }, { status: 409 });
+    }
+    return NextResponse.json(
+      { ok: false, error: error instanceof Error ? error.message : "Could not update PersianWord." },
+      { status: 500 },
+    );
+  }
+}

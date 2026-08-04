@@ -120,6 +120,22 @@ model IpaKeyword {
   @@index([faPlain])
 }
 
+model PersianWord {
+  id                       Int      @id @default(autoincrement())
+  canonical_text           String
+  normalized_text          String
+  not_normalized_texts     Json
+  meaning_fa_IPA           String?
+  meaning_fa_IPA_normalize String?
+  audio_file_name          String?
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+
+  @@index([canonical_text], map: "PersianWord_canonical_text_idx")
+  @@index([normalized_text], map: "PersianWord_normalized_text_idx")
+  @@map("persian_word")
+}
+
 model PictureWord {
   id                Int              @id @default(autoincrement())
   fa                String

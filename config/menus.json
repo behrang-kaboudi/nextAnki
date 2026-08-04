@@ -15,6 +15,7 @@
         "icon": "database",
         "items": [
           { "type": "link", "label": "Word Editor", "href": "/words/editor", "icon": "database", "description": "Search and edit vocabulary records." },
+          { "type": "link", "label": "Word Tables", "href": "/words/tables/persian-words", "icon": "database", "description": "Browse and edit Persian word table records and their audio." },
           { "type": "link", "label": "Word Extraction", "href": "/words/extraction", "icon": "sparkles", "description": "Extract and enrich vocabulary through staged prompts." },
           {
             "type": "group",

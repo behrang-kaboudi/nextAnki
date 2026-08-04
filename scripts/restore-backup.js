@@ -108,6 +108,7 @@ async function main() {
     prisma.sentence.deleteMany(),
     prisma.word.deleteMany(),
     prisma.ipaKeyword.deleteMany(),
+    prisma.persianWord.deleteMany(),
     prisma.pictureWord.deleteMany(),
     prisma.ankiStructureSettings.deleteMany(),
     prisma.role.deleteMany(),
@@ -118,6 +119,10 @@ async function main() {
   console.log("Restoring from backup…");
   await createMany("IpaKeyword", withDates(data.ipaKeyword ?? []), (rows) =>
     prisma.ipaKeyword.createMany({ data: rows, skipDuplicates: true })
+  );
+
+  await createMany("PersianWord", withDates(data.persianWord ?? []), (rows) =>
+    prisma.persianWord.createMany({ data: rows, skipDuplicates: true })
   );
 
   await createMany("Permission", withDates(data.permission ?? []), (rows) =>

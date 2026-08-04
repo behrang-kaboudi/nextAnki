@@ -105,6 +105,7 @@ export function getMediaSyncAllStatus(): MediaSyncAllStatus {
 function listMediaFiles(): Array<{ filename: string; absPath: string; size: number; mtimeMs: number }> {
   const dirs = [
     path.join(process.cwd(), "public", "audio", "pictureWord"),
+    path.join(process.cwd(), "public", "audio", "persian-words"),
     path.join(process.cwd(), "public", "audio", "words"),
   ];
 
