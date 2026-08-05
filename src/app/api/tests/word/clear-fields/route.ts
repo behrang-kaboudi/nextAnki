@@ -9,9 +9,6 @@ export const runtime = "nodejs";
 const CLEARABLE_FIELD_VALUES = {
   phonetic_us: "",
   phonetic_us_normalized: "",
-  meaning_fa: "",
-  meaning_fa_IPA: "",
-  meaning_fa_IPA_normalized: "",
   pos: "",
   concept_explained: "",
   concept_explained_fa: "",
@@ -19,7 +16,6 @@ const CLEARABLE_FIELD_VALUES = {
   explanation_for_sentence_meaning: "",
   learning_depth: 0,
   mixed_sentence: "",
-  other_meanings_fa: "",
   other_meanings_en: "",
   category: "",
   typeOfWordInDb: "",

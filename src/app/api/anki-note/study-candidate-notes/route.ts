@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
+import { hydrateWordsWithPersianMeanings } from "@/lib/words/persianMeanings.server";
 
 function asTrimmedString(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
@@ -22,7 +23,7 @@ export async function GET(req: Request) {
             ? {
                 OR: [
                   { base_form: { contains: q } },
-                  { meaning_fa: { contains: q } },
+                  { meaning: { is: { canonical_text: { contains: q } } } },
                   {
                     sentenceLinks: {
                       some: { isPrimary: true, sentence: { sentence_en: { contains: q } } },
@@ -42,7 +43,8 @@ export async function GET(req: Request) {
       select: {
         anki_link_id: true,
         base_form: true,
-        meaning_fa: true,
+        meaningId: true,
+        otherMeaningIds: true,
         learning_depth: true,
         sentenceLinks: {
           where: { isPrimary: true },
@@ -66,7 +68,7 @@ export async function GET(req: Request) {
 
     return NextResponse.json({
       ok: true,
-      items: rows.map((row) => ({
+      items: (await hydrateWordsWithPersianMeanings(rows)).map((row) => ({
         anki_link_id: row.anki_link_id,
         base_form: row.base_form,
         meaning_fa: row.meaning_fa,

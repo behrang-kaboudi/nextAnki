@@ -177,9 +177,8 @@ export async function POST(req: Request) {
                   id: true,
                   anki_link_id: true,
                   base_form: true,
-                  meaning_fa: true,
+                  meaning: { select: { canonical_text: true } },
                   pos: true,
-                  other_meanings_fa: true,
                 },
               },
             },
@@ -212,10 +211,9 @@ export async function POST(req: Request) {
         {
           id: word.id,
           base_form: word.base_form,
-          meaning_fa: word.meaning_fa,
+          meaning_fa: word.meaning?.canonical_text ?? "",
           pos: word.pos ?? null,
           sentence_en_meaning_fa: item.sentence_en_meaning_fa ?? null,
-          other_meanings_fa: word.other_meanings_fa ?? null,
         },
       ]);
 
@@ -259,7 +257,6 @@ export async function POST(req: Request) {
 
         const nextSentenceEn = toTrimmedString(first.sentence_en);
         const nextSentenceEnMeaningFa = toTrimmedString(first.sentence_en_meaning_fa);
-        const nextOtherMeaningsFa = toTrimmedString(first.other_meanings_fa);
 
         const sentenceData: {
           sentence_en?: string;
@@ -272,13 +269,6 @@ export async function POST(req: Request) {
             nextSentenceEnMeaningFa === "" ? null : nextSentenceEnMeaningFa;
         }
         const updated = await prisma.$transaction(async (tx) => {
-          if (nextOtherMeaningsFa !== null) {
-            await tx.word.update({
-              where: { id: word.id },
-              data: { other_meanings_fa: nextOtherMeaningsFa === "" ? null : nextOtherMeaningsFa },
-            });
-          }
-
           const savedSentence = Object.keys(sentenceData).length
             ? await tx.sentence.update({
                 where: { id: item.id },
@@ -302,18 +292,16 @@ export async function POST(req: Request) {
             select: {
               id: true,
               base_form: true,
-              meaning_fa: true,
-              other_meanings_fa: true,
+              meaning: { select: { canonical_text: true } },
             },
           });
 
           return {
             id: savedWord?.id ?? word.id,
             base_form: savedWord?.base_form ?? word.base_form,
-            meaning_fa: savedWord?.meaning_fa ?? word.meaning_fa,
+            meaning_fa: savedWord?.meaning?.canonical_text ?? word.meaning?.canonical_text ?? "",
             sentence_en: savedSentence.sentence_en,
             sentence_en_meaning_fa: savedSentence.sentence_en_meaning_fa,
-            other_meanings_fa: savedWord?.other_meanings_fa ?? word.other_meanings_fa,
           };
         });
 

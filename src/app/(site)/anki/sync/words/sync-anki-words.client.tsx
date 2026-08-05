@@ -444,8 +444,7 @@ export default function SyncAnkiWordsClient() {
                   سیستم آخرین فایل صوتی محلی برای این field را پیدا می‌کند (جدیدترین timestamp در{" "}
                   <Code>public/audio/words</Code>).
                 </li>
-                <li>اگر فایل پیدا نشود یا size=0 باشد → هیچ <Code>[sound:...]</Code> اضافه نمی‌شود.</li>
-                <li>اگر tag همان فایل از قبل داخل متن DB باشد → دوباره اضافه نمی‌شود.</li>
+                <li>صوتِ معنی در فیلد مستقل <Code>meaning_fa_audio</Code> سینک می‌شود، نه داخل متن معنی.</li>
               </ul>
             </section>
 
@@ -488,8 +487,8 @@ export default function SyncAnkiWordsClient() {
             <section className="rounded border p-3">
               <div className="text-xs font-semibold">صوت + Media</div>
               <div className="mt-2 text-sm">
-                اگر صوت محلی برای <Code>other_meanings_fa</Code> موجود و size&gt;0 باشد، <Code>[sound:...]</Code> اضافه و فایل
-                آپلود/به‌روزرسانی فایل در Anki media توسط این دکمه انجام نمی‌شود و باید با <Code>Copy all media</Code> انجام شود.
+                صوت‌ها در فیلد مستقل <Code>other_meanings_fa_audio</Code> و به ترتیب <Code>otherMeaningIds</Code> قرار می‌گیرند.
+                این دکمه فایل مدیا را کپی نمی‌کند؛ برای آن از <Code>Copy all media</Code> استفاده کنید.
               </div>
             </section>
 

@@ -33,7 +33,6 @@ export async function POST(req: Request) {
       select: {
         id: true,
         phonetic_us_normalized: true,
-        meaning_fa_IPA_normalized: true,
         imageability: true,
         json_hint: true,
       },

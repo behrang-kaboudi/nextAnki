@@ -50,18 +50,19 @@ export async function findPictureWordsByIpaPrefix(
     }>
   >`
     SELECT
-      meaning_fa AS fa,
-      base_form AS en,
-      anki_link_id,
-      \`meaning_fa_IPA_normalized\` AS target_ipa,
-      pos AS \`usage\`,
-      imageability
-    FROM Word
-    WHERE \`meaning_fa_IPA_normalized\` LIKE ${likePattern}
-      AND \`meaning_fa_IPA_normalized\` <> ''
-      AND imageability > ${imageabilityBaseThreshold}
-      AND (pos = 'noun' OR pos = 'adjective' OR pos = 'verb')
-    ORDER BY meaning_fa ASC, base_form ASC
+      pw.canonical_text AS fa,
+      w.base_form AS en,
+      w.anki_link_id,
+      pw.meaning_fa_IPA_normalize AS target_ipa,
+      w.pos AS \`usage\`,
+      w.imageability
+    FROM word w
+    INNER JOIN persian_word pw ON pw.id = w.meaningId
+    WHERE pw.meaning_fa_IPA_normalize LIKE ${likePattern}
+      AND pw.meaning_fa_IPA_normalize <> ''
+      AND w.imageability > ${imageabilityBaseThreshold}
+      AND (w.pos = 'noun' OR w.pos = 'adjective' OR w.pos = 'verb')
+    ORDER BY pw.canonical_text ASC, w.base_form ASC
   `;
   const wordRowsEn = await prisma.$queryRaw<
     Array<{
@@ -75,18 +76,19 @@ export async function findPictureWordsByIpaPrefix(
   >`
     SELECT
     
-      meaning_fa AS fa,
-      base_form AS en,
-      anki_link_id,
-      \`phonetic_us_normalized\` AS target_ipa,
-      pos AS \`usage\`,
-      imageability
-    FROM Word
-    WHERE \`phonetic_us_normalized\` LIKE ${likePattern}
-      AND \`phonetic_us_normalized\` <> ''
-      AND imageability > ${imageabilityBaseThreshold}
-       AND (pos = 'noun' OR pos = 'adjective' OR pos = 'verb')
-    ORDER BY meaning_fa ASC, base_form ASC
+      pw.canonical_text AS fa,
+      w.base_form AS en,
+      w.anki_link_id,
+      w.phonetic_us_normalized AS target_ipa,
+      w.pos AS \`usage\`,
+      w.imageability
+    FROM word w
+    INNER JOIN persian_word pw ON pw.id = w.meaningId
+    WHERE w.phonetic_us_normalized LIKE ${likePattern}
+      AND w.phonetic_us_normalized <> ''
+      AND w.imageability > ${imageabilityBaseThreshold}
+       AND (w.pos = 'noun' OR w.pos = 'adjective' OR w.pos = 'verb')
+    ORDER BY pw.canonical_text ASC, w.base_form ASC
   `;
 
   const out: IpaCandidate[] = [];

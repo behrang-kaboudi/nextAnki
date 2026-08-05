@@ -166,7 +166,7 @@ function tempFilterAverage(
       : value;
   });
   if (values.some((value) => value === null)) return null;
-  return values.reduce((sum, value) => sum + value, 0) / values.length;
+  return (values as number[]).reduce((sum, value) => sum + value, 0) / values.length;
 }
 
 function formatTempFilterAverage(value: number | null) {

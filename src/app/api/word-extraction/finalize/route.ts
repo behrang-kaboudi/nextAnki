@@ -18,9 +18,10 @@ export async function POST() {
       where: {
         OR: [
           { base_form: { equals: "" } },
-          { meaning_fa: { equals: "" } },
-          { meaning_fa_IPA: { equals: "" } },
-          { meaning_fa_IPA_normalized: { equals: "" } },
+          { meaning: null },
+          { meaning: { is: { canonical_text: { equals: "" } } } },
+          { meaning: { is: { meaning_fa_IPA: { equals: "" } } } },
+          { meaning: { is: { meaning_fa_IPA_normalize: { equals: "" } } } },
           { sentenceLinks: { none: { isPrimary: true } } },
           { sentenceLinks: { none: { isPrimary: true, sentence: { sentence_en: { not: "" } } } } },
 
@@ -47,9 +48,7 @@ export async function POST() {
         base_form: true,
         phonetic_us: true,
         phonetic_us_normalized: true,
-        meaning_fa: true,
-        meaning_fa_IPA: true,
-        meaning_fa_IPA_normalized: true,
+        meaning: { select: { canonical_text: true, meaning_fa_IPA: true, meaning_fa_IPA_normalize: true } },
         pos: true,
         sentenceLinks: {
           where: { isPrimary: true },
@@ -72,9 +71,10 @@ export async function POST() {
       where: {
         OR: [
           { base_form: { equals: "" } },
-          { meaning_fa: { equals: "" } },
-          { meaning_fa_IPA: { equals: "" } },
-          { meaning_fa_IPA_normalized: { equals: "" } },
+          { meaning: null },
+          { meaning: { is: { canonical_text: { equals: "" } } } },
+          { meaning: { is: { meaning_fa_IPA: { equals: "" } } } },
+          { meaning: { is: { meaning_fa_IPA_normalize: { equals: "" } } } },
           { sentenceLinks: { none: { isPrimary: true } } },
           { sentenceLinks: { none: { isPrimary: true, sentence: { sentence_en: { not: "" } } } } },
 
@@ -105,9 +105,9 @@ export async function POST() {
         if (isBlank(r.base_form)) missing.push("base_form");
         if (isBlank(r.phonetic_us)) missing.push("phonetic_us");
         if (isBlank(r.phonetic_us_normalized)) missing.push("phonetic_us_normalized");
-        if (isBlank(r.meaning_fa)) missing.push("meaning_fa");
-        if (isBlank(r.meaning_fa_IPA)) missing.push("meaning_fa_IPA");
-        if (isBlank(r.meaning_fa_IPA_normalized)) missing.push("meaning_fa_IPA_normalized");
+        if (isBlank(r.meaning?.canonical_text)) missing.push("meaningId/canonical_text");
+        if (isBlank(r.meaning?.meaning_fa_IPA)) missing.push("meaning_fa_IPA");
+        if (isBlank(r.meaning?.meaning_fa_IPA_normalize)) missing.push("meaning_fa_IPA_normalize");
         if (isBlank(r.pos)) missing.push("pos");
         if (isBlank(sentence?.sentence_en)) missing.push("sentence_en");
         if (isBlank(sentence?.sentence_en_meaning_fa)) missing.push("sentence_en_meaning_fa");

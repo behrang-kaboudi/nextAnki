@@ -28,8 +28,6 @@ type WordFieldVoiceStatus = {
 
 const FIELD_LABEL: Record<WordAudioFieldKey, string> = {
   base_form: "base_form",
-  meaning_fa: "meaning_fa",
-  other_meanings_fa: "other_meanings_fa",
   other_meanings_en: "other_meanings_en",
   concept_explained_fa: "concept_explained_fa",
   sentence_en: "sentence_en",

@@ -7,7 +7,6 @@ import { TableColumnSelector } from "@/components/table-column-selector";
 import { prisma } from "@/lib/prisma";
 
 import OpenWordEditorModal from "../../editor/OpenWordEditorModal.client";
-import ImportUnlinkedPersianMeanings from "./ImportUnlinkedPersianMeanings.client";
 
 export const metadata = { title: "Words — Word Table" };
 export const runtime = "nodejs";
@@ -17,7 +16,7 @@ function parsePositiveInt(value: string | undefined, fallback: number) {
   return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : fallback;
 }
 
-const SORT_FIELDS = ["id", "base_form", "meaning_fa", "other_meanings_fa", "meaningId", "otherMeaningIds", "pos", "typeOfWordInDb", "anki_link_id", "updatedAt"] as const;
+const SORT_FIELDS = ["id", "base_form", "meaningId", "otherMeaningIds", "pos", "typeOfWordInDb", "anki_link_id", "updatedAt"] as const;
 type SortField = (typeof SORT_FIELDS)[number];
 
 const TABLE_COLUMNS = [
@@ -25,10 +24,6 @@ const TABLE_COLUMNS = [
   { key: "base_form", label: "base_form" },
   { key: "phonetic_us", label: "phonetic_us" },
   { key: "phonetic_us_normalized", label: "phonetic_us_normalized" },
-  { key: "meaning_fa", label: "meaning_fa" },
-  { key: "meaning_fa_IPA", label: "meaning_fa_IPA" },
-  { key: "meaning_fa_IPA_normalized", label: "meaning_fa_IPA_normalized" },
-  { key: "other_meanings_fa", label: "other_meanings_fa" },
   { key: "meaningId", label: "meaningId" },
   { key: "otherMeaningIds", label: "otherMeaningIds" },
   { key: "pos", label: "pos" },
@@ -57,7 +52,7 @@ const TABLE_COLUMNS = [
 ] as const;
 
 type TableColumnKey = (typeof TABLE_COLUMNS)[number]["key"];
-const DEFAULT_TABLE_COLUMNS: TableColumnKey[] = ["id", "base_form", "meaning_fa", "other_meanings_fa", "meaningId", "otherMeaningIds", "pos", "typeOfWordInDb", "anki_link_id", "updatedAt", "actions"];
+const DEFAULT_TABLE_COLUMNS: TableColumnKey[] = ["id", "base_form", "meaningId", "otherMeaningIds", "pos", "typeOfWordInDb", "anki_link_id", "updatedAt", "actions"];
 
 const COLUMN_INDICATORS: Partial<Record<TableColumnKey, readonly TableColumnIndicator[]>> = {
   id: [
@@ -92,12 +87,13 @@ function meaningIds(value: Prisma.JsonValue | null) {
   });
 }
 
-function persianWordLabel(word: { id: number; canonical_text: string; normalized_text: string; meaning_fa_IPA: string | null }) {
+function persianWordLabel(word: { id: number; canonical_text: string; normalized_text: string; meaning_fa_IPA: string | null; meaning_fa_IPA_normalize: string | null }) {
   return [
     `id: ${word.id}`,
     `canonical_text: ${word.canonical_text}`,
     `normalized_text: ${word.normalized_text}`,
     `meaning_fa_IPA: ${word.meaning_fa_IPA ?? "—"}`,
+    `meaning_fa_IPA_normalize: ${word.meaning_fa_IPA_normalize ?? "—"}`,
   ].join("\n");
 }
 
@@ -131,14 +127,20 @@ export default async function WordsTablePage({
   const dir = params.dir === "asc" ? "asc" : "desc";
   const columns = parseColumns(params.columns);
   const hasColumn = (column: TableColumnKey) => columns.includes(column);
+  const matchingPersianIds = q
+    ? (await prisma.persianWord.findMany({ where: { OR: [{ canonical_text: { contains: q } }, { meaning_fa_IPA: { contains: q } }, { meaning_fa_IPA_normalize: { contains: q } }] }, select: { id: true } })).map((row) => row.id)
+    : [];
   const where: Prisma.WordWhereInput | undefined = q
-    ? { OR: [{ base_form: { contains: q } }, { meaning_fa: { contains: q } }, { other_meanings_fa: { contains: q } }, { anki_link_id: { contains: q } }] }
+    ? { OR: [
+      { base_form: { contains: q } },
+      { anki_link_id: { contains: q } },
+      { meaning: { is: { id: { in: matchingPersianIds } } } },
+      ...matchingPersianIds.map((id) => ({ otherMeaningIds: { array_contains: id } })),
+    ] }
     : undefined;
   const primaryOrderBy: Record<SortField, Prisma.WordOrderByWithRelationInput> = {
     id: { id: dir },
     base_form: { base_form: dir },
-    meaning_fa: { meaning_fa: dir },
-    other_meanings_fa: { other_meanings_fa: dir },
     meaningId: { meaningId: dir },
     otherMeaningIds: { otherMeaningIds: dir },
     pos: { pos: dir },
@@ -155,7 +157,6 @@ export default async function WordsTablePage({
       take: showAll ? undefined : pageSize,
       select: {
         id: true, anki_link_id: true, base_form: true, phonetic_us: true, phonetic_us_normalized: true,
-        meaning_fa: true, meaning_fa_IPA: true, meaning_fa_IPA_normalized: true, other_meanings_fa: true,
         meaningId: true, otherMeaningIds: true, pos: true, concept_explained: true, concept_explained_fa: true,
         word_hint_story: true, explanation_for_sentence_meaning: true, learning_depth: true, mixed_sentence: true,
         other_meanings_en: true, category: true, typeOfWordInDb: true, hint_sentence: true, first_letter_en_hint: true,
@@ -168,7 +169,7 @@ export default async function WordsTablePage({
   const referencedMeanings = referencedMeaningIds.length
     ? await prisma.persianWord.findMany({
         where: { id: { in: referencedMeaningIds } },
-        select: { id: true, canonical_text: true, normalized_text: true, meaning_fa_IPA: true },
+        select: { id: true, canonical_text: true, normalized_text: true, meaning_fa_IPA: true, meaning_fa_IPA_normalize: true },
       })
     : [];
   const meaningsById = new Map(referencedMeanings.map((meaning) => [meaning.id, meaning]));
@@ -194,8 +195,6 @@ export default async function WordsTablePage({
   return (
     <main className="mx-auto w-full max-w-7xl p-4">
       <PageHeader title="Word Table" subtitle="Browse Word records and open any row in the detailed editor." />
-
-      <ImportUnlinkedPersianMeanings />
 
       <section className="mt-4 overflow-hidden rounded border">
         <form className="flex flex-wrap items-center gap-2 p-3">
@@ -232,10 +231,6 @@ export default async function WordsTablePage({
           {hasColumn("base_form") ? <SortHeader href={sortHref("base_form")} label="base_form" active={sort === "base_form"} direction={dir} indicators={COLUMN_INDICATORS.base_form} /> : null}
           {hasColumn("phonetic_us") ? <th className="px-3 py-2">phonetic_us</th> : null}
           {hasColumn("phonetic_us_normalized") ? <th className="px-3 py-2">phonetic_us_normalized</th> : null}
-          {hasColumn("meaning_fa") ? <SortHeader href={sortHref("meaning_fa")} label="meaning_fa" active={sort === "meaning_fa"} direction={dir} /> : null}
-          {hasColumn("meaning_fa_IPA") ? <th className="px-3 py-2">meaning_fa_IPA</th> : null}
-          {hasColumn("meaning_fa_IPA_normalized") ? <th className="px-3 py-2">meaning_fa_IPA_normalized</th> : null}
-          {hasColumn("other_meanings_fa") ? <SortHeader href={sortHref("other_meanings_fa")} label="other_meanings_fa" active={sort === "other_meanings_fa"} direction={dir} /> : null}
           {hasColumn("meaningId") ? <SortHeader href={sortHref("meaningId")} label="meaningId" active={sort === "meaningId"} direction={dir} indicators={COLUMN_INDICATORS.meaningId} /> : null}
           {hasColumn("otherMeaningIds") ? <SortHeader href={sortHref("otherMeaningIds")} label="otherMeaningIds" active={sort === "otherMeaningIds"} direction={dir} /> : null}
           {hasColumn("pos") ? <SortHeader href={sortHref("pos")} label="pos" active={sort === "pos"} direction={dir} /> : null}
@@ -268,10 +263,6 @@ export default async function WordsTablePage({
             {hasColumn("base_form") ? <td className="max-w-52 px-3 py-2"><span className="block truncate" title={row.base_form}>{row.base_form}</span></td> : null}
             {hasColumn("phonetic_us") ? <ValueCell value={row.phonetic_us} /> : null}
             {hasColumn("phonetic_us_normalized") ? <ValueCell value={row.phonetic_us_normalized} /> : null}
-            {hasColumn("meaning_fa") ? <td className="max-w-80 px-3 py-2" dir="rtl"><span className="block truncate" title={row.meaning_fa}>{row.meaning_fa}</span></td> : null}
-            {hasColumn("meaning_fa_IPA") ? <ValueCell value={row.meaning_fa_IPA} /> : null}
-            {hasColumn("meaning_fa_IPA_normalized") ? <ValueCell value={row.meaning_fa_IPA_normalized} /> : null}
-            {hasColumn("other_meanings_fa") ? <td className="max-w-80 px-3 py-2" dir="rtl"><span className="block truncate" title={row.other_meanings_fa ?? ""}>{row.other_meanings_fa ?? "—"}</span></td> : null}
             {hasColumn("meaningId") ? <td className="max-w-52 px-3 py-2 font-mono">{row.meaningId ? <span className="block truncate underline decoration-dotted underline-offset-4" title={meaningsById.get(row.meaningId) ? persianWordLabel(meaningsById.get(row.meaningId)!) : "Referenced PersianWord was not found."}>{row.meaningId} — {meaningsById.get(row.meaningId)?.canonical_text ?? "missing"}</span> : "—"}</td> : null}
             {hasColumn("otherMeaningIds") ? <td className="max-w-64 px-3 py-2 font-mono">{meaningIds(row.otherMeaningIds).length ? <span className="block truncate underline decoration-dotted underline-offset-4" title={meaningIds(row.otherMeaningIds).map((id) => { const meaning = meaningsById.get(id); return meaning ? persianWordLabel(meaning) : `id: ${id}\nReferenced PersianWord was not found.`; }).join("\n\n")}>{meaningIds(row.otherMeaningIds).map((id) => `${id} — ${meaningsById.get(id)?.canonical_text ?? "missing"}`).join("; ")}</span> : "—"}</td> : null}
             {hasColumn("pos") ? <td className="max-w-32 px-3 py-2"><span className="block truncate" title={row.pos ?? ""}>{row.pos ?? "—"}</span></td> : null}

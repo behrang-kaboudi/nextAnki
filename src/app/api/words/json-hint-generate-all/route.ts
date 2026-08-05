@@ -78,7 +78,7 @@ export async function POST(req: Request) {
       whereParts.push({
         OR: [
           { base_form: { contains: q } },
-          { meaning_fa: { contains: q } },
+          { meaning: { is: { canonical_text: { contains: q } } } },
           { anki_link_id: { contains: q } },
         ],
       });
@@ -104,10 +104,8 @@ export async function POST(req: Request) {
         id: true,
         anki_link_id: true,
         base_form: true,
-        meaning_fa: true,
         hint_sentence: true,
         phonetic_us_normalized: true,
-        meaning_fa_IPA_normalized: true,
         imageability: true,
         json_hint: true,
       },

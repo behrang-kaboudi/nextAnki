@@ -27,10 +27,11 @@ export async function GET(req: Request) {
         meaning_fa: string;
       }>
     >(Prisma.sql`
-      SELECT id, base_form, meaning_fa
-      FROM Word
-      WHERE meaning_fa_IPA IS NULL OR meaning_fa_IPA = ''
-      ORDER BY id DESC
+      SELECT w.id, w.base_form, COALESCE(pw.canonical_text, '') AS meaning_fa
+      FROM word w
+      LEFT JOIN persian_word pw ON pw.id = w.meaningId
+      WHERE pw.meaning_fa_IPA IS NULL OR pw.meaning_fa_IPA = ''
+      ORDER BY w.id DESC
       LIMIT ${limit}
     `)) ?? [];
 

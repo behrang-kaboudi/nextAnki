@@ -5,6 +5,7 @@ import { randomUUID } from "node:crypto";
 
 import { prisma } from "@/lib/prisma";
 import { upsertPrimarySentenceByAnkiLinkId } from "@/lib/sentences/sentenceRepo";
+import { addPersianWord } from "@/lib/tables/persianWord";
 
 export const runtime = "nodejs";
 
@@ -202,12 +203,12 @@ export async function POST(req: Request) {
         try {
           const candidates = await prisma.word.findMany({
             where: { base_form: item.base_form },
-            select: { id: true, anki_link_id: true, meaning_fa: true },
+            select: { id: true, anki_link_id: true, meaning: { select: { normalized_text: true } } },
           });
 
           const targetMeaning = normalizeMeaningFaForCompare(item.meaning_fa);
           const existing = candidates.find(
-            (candidate) => normalizeMeaningFaForCompare(candidate.meaning_fa) === targetMeaning,
+            (candidate) => candidate.meaning?.normalized_text === targetMeaning,
           );
 
           if (existing) {
@@ -224,13 +225,13 @@ export async function POST(req: Request) {
             continue;
           }
 
+          const persianMeaning = await addPersianWord(item.meaning_fa);
           const created = await prisma.$transaction(async (tx) => {
             const pending = await tx.word.create({
               data: {
                 anki_link_id: `pending_${randomUUID()}`,
                 base_form: item.base_form,
-                meaning_fa: item.meaning_fa,
-                meaning_fa_IPA: "",
+                meaningId: persianMeaning.item.id,
               },
               select: { id: true },
             });

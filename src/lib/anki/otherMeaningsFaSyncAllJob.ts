@@ -8,6 +8,7 @@ import { sanitizeWordAudioFilenamePart, WORD_AUDIO_FILENAME_SEPARATOR } from "@/
 import { getWordFieldAudioAbsoluteDir, getWordFieldAudioAbsolutePath } from "@/lib/audio/wordFieldAudioPaths.server";
 import { getAnkiLinkIdFromNoteFields } from "@/lib/anki/wordAnkiMapping";
 import { prisma } from "@/lib/prisma";
+import { hydrateWordsWithPersianMeanings } from "@/lib/words/persianMeanings.server";
 
 export type OtherMeaningsFaSyncAllStatus = {
   jobId: string;
@@ -137,17 +138,10 @@ function indexLatestAudioForOtherMeaningsFa(): Map<string, ExistingFileInfo> {
 
 function generateOtherMeaningsFaValue(
   dbValue: string,
-  ankiLinkId: string,
-  audioIndex: Map<string, ExistingFileInfo>
+  _ankiLinkId: string,
+  _audioIndex: Map<string, ExistingFileInfo>
 ): string {
-  const text = String(dbValue ?? "");
-  const key = sanitizeWordAudioFilenamePart(ankiLinkId);
-  const audio = audioIndex.get(key);
-  if (!audio || audio.size <= 0) return text;
-  const tag = `[sound:${audio.filename}]`;
-  if (text.includes(tag)) return text;
-  const base = text.trim();
-  return base ? `${base} ${tag}` : tag;
+  return String(dbValue ?? "");
 }
 
 async function updateNoteField(noteId: number, value: string, anki: ReturnType<typeof createAnkiConnectClient>) {
@@ -186,7 +180,7 @@ async function runJob(state: State) {
   const ids = idsRes.result ?? [];
   state.total = ids.length;
 
-  const audioIndex = indexLatestAudioForOtherMeaningsFa();
+  const audioIndex = new Map<string, ExistingFileInfo>();
 
   const beforeByNoteId = new Map<number, { ankiLinkId: string | null; value: string }>();
   for (const batch of chunk(ids, 250)) {
@@ -211,9 +205,11 @@ async function runJob(state: State) {
   for (const group of chunk(allIds, 1000)) {
     const rows = await prisma.word.findMany({
       where: { anki_link_id: { in: group } },
-      select: { anki_link_id: true, other_meanings_fa: true },
+      select: { anki_link_id: true, meaningId: true, otherMeaningIds: true },
     });
-    for (const r of rows) dbValueByAnkiLinkId.set(r.anki_link_id, r.other_meanings_fa ?? "");
+    for (const r of await hydrateWordsWithPersianMeanings(rows)) {
+      dbValueByAnkiLinkId.set(r.anki_link_id, r.other_meanings_fa ?? "");
+    }
   }
 
   const concurrency = 20;

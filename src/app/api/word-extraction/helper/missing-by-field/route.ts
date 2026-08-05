@@ -14,7 +14,6 @@ const allowedFields = [
   "productive_target",
   "sentence_en_meaning_fa",
   "pos",
-  "other_meanings_fa",
   "concept_explained_fa",
 ] as const;
 type AllowedField = (typeof allowedFields)[number];
@@ -56,9 +55,7 @@ export async function GET(req: Request) {
                 ? Prisma.sql`s.sentence_en_meaning_fa IS NULL OR s.sentence_en_meaning_fa = ''`
                 : field === "pos"
                   ? Prisma.sql`w.pos IS NULL OR w.pos = ''`
-                  : field === "other_meanings_fa"
-                    ? Prisma.sql`w.other_meanings_fa IS NULL OR w.other_meanings_fa = ''`
-                    : Prisma.sql`w.concept_explained_fa IS NULL OR w.concept_explained_fa = ''`;
+                  : Prisma.sql`w.concept_explained_fa IS NULL OR w.concept_explained_fa = ''`;
 
     const totalRows = await prisma.$queryRaw<Array<{ count: bigint }>>`
       SELECT COUNT(*) AS count
@@ -74,8 +71,9 @@ export async function GET(req: Request) {
         ? (await prisma.$queryRaw<
             Array<{ id: number; base_form: string; meaning_fa: string; sentence_en: string }>
           >`
-            SELECT w.id, w.base_form, w.meaning_fa, COALESCE(s.sentence_en, '') AS sentence_en
+            SELECT w.id, w.base_form, COALESCE(pw.canonical_text, '') AS meaning_fa, COALESCE(s.sentence_en, '') AS sentence_en
             FROM word w
+            LEFT JOIN persian_word pw ON pw.id = w.meaningId
             LEFT JOIN SentenceWordLink sw ON sw.wordId = w.id AND sw.isPrimary = true
             LEFT JOIN Sentence s ON s.id = sw.sentenceId
             WHERE w.phonetic_us IS NULL OR w.phonetic_us = ''
@@ -86,8 +84,9 @@ export async function GET(req: Request) {
           ? (await prisma.$queryRaw<
               Array<{ id: number; base_form: string; meaning_fa: string; sentence_en: string }>
             >`
-              SELECT w.id, w.base_form, w.meaning_fa, COALESCE(s.sentence_en, '') AS sentence_en
+              SELECT w.id, w.base_form, COALESCE(pw.canonical_text, '') AS meaning_fa, COALESCE(s.sentence_en, '') AS sentence_en
               FROM word w
+              LEFT JOIN persian_word pw ON pw.id = w.meaningId
               LEFT JOIN SentenceWordLink sw ON sw.wordId = w.id AND sw.isPrimary = true
               LEFT JOIN Sentence s ON s.id = sw.sentenceId
               WHERE w.imageability IS NULL OR w.imageability <= 0
@@ -98,8 +97,9 @@ export async function GET(req: Request) {
             ? (await prisma.$queryRaw<
                 Array<{ id: number; base_form: string; meaning_fa: string; sentence_en: string }>
               >`
-                SELECT w.id, w.base_form, w.meaning_fa, COALESCE(s.sentence_en, '') AS sentence_en
+                SELECT w.id, w.base_form, COALESCE(pw.canonical_text, '') AS meaning_fa, COALESCE(s.sentence_en, '') AS sentence_en
                 FROM word w
+                LEFT JOIN persian_word pw ON pw.id = w.meaningId
                 LEFT JOIN SentenceWordLink sw ON sw.wordId = w.id AND sw.isPrimary = true
                 LEFT JOIN Sentence s ON s.id = sw.sentenceId
                 WHERE w.learning_depth IS NULL OR w.learning_depth = 0
@@ -110,8 +110,9 @@ export async function GET(req: Request) {
               ? (await prisma.$queryRaw<
                   Array<{ id: number; base_form: string; meaning_fa: string; sentence_en: string }>
                 >`
-                  SELECT w.id, w.base_form, w.meaning_fa, COALESCE(s.sentence_en, '') AS sentence_en
+                  SELECT w.id, w.base_form, COALESCE(pw.canonical_text, '') AS meaning_fa, COALESCE(s.sentence_en, '') AS sentence_en
                   FROM word w
+                  LEFT JOIN persian_word pw ON pw.id = w.meaningId
                   LEFT JOIN SentenceWordLink sw ON sw.wordId = w.id AND sw.isPrimary = true
                   LEFT JOIN Sentence s ON s.id = sw.sentenceId
                   WHERE w.productive_target IS NULL OR w.productive_target = 0
@@ -122,8 +123,9 @@ export async function GET(req: Request) {
               ? (await prisma.$queryRaw<
                   Array<{ id: number; base_form: string; meaning_fa: string; sentence_en: string }>
                 >`
-                  SELECT w.id, w.base_form, w.meaning_fa, COALESCE(s.sentence_en, '') AS sentence_en
+                  SELECT w.id, w.base_form, COALESCE(pw.canonical_text, '') AS meaning_fa, COALESCE(s.sentence_en, '') AS sentence_en
                   FROM word w
+                  LEFT JOIN persian_word pw ON pw.id = w.meaningId
                   LEFT JOIN SentenceWordLink sw ON sw.wordId = w.id AND sw.isPrimary = true
                   LEFT JOIN Sentence s ON s.id = sw.sentenceId
                   WHERE s.sentence_en_meaning_fa IS NULL OR s.sentence_en_meaning_fa = ''
@@ -134,31 +136,21 @@ export async function GET(req: Request) {
                 ? (await prisma.$queryRaw<
                     Array<{ id: number; base_form: string; meaning_fa: string; sentence_en: string }>
                   >`
-                    SELECT w.id, w.base_form, w.meaning_fa, COALESCE(s.sentence_en, '') AS sentence_en
+                    SELECT w.id, w.base_form, COALESCE(pw.canonical_text, '') AS meaning_fa, COALESCE(s.sentence_en, '') AS sentence_en
                     FROM word w
+                    LEFT JOIN persian_word pw ON pw.id = w.meaningId
                     LEFT JOIN SentenceWordLink sw ON sw.wordId = w.id AND sw.isPrimary = true
                     LEFT JOIN Sentence s ON s.id = sw.sentenceId
                     WHERE w.pos IS NULL OR w.pos = ''
                     ORDER BY w.id DESC
                     LIMIT ${limit}
                   `) ?? []
-                : field === "other_meanings_fa"
-                  ? (await prisma.$queryRaw<
+                : (await prisma.$queryRaw<
                       Array<{ id: number; base_form: string; meaning_fa: string; sentence_en: string }>
                     >`
-                      SELECT w.id, w.base_form, w.meaning_fa, COALESCE(s.sentence_en, '') AS sentence_en
+                      SELECT w.id, w.base_form, COALESCE(pw.canonical_text, '') AS meaning_fa, COALESCE(s.sentence_en, '') AS sentence_en
                       FROM word w
-                      LEFT JOIN SentenceWordLink sw ON sw.wordId = w.id AND sw.isPrimary = true
-                      LEFT JOIN Sentence s ON s.id = sw.sentenceId
-                      WHERE w.other_meanings_fa IS NULL OR w.other_meanings_fa = ''
-                      ORDER BY w.id DESC
-                      LIMIT ${limit}
-                    `) ?? []
-                  : (await prisma.$queryRaw<
-                      Array<{ id: number; base_form: string; meaning_fa: string; sentence_en: string }>
-                    >`
-                      SELECT w.id, w.base_form, w.meaning_fa, COALESCE(s.sentence_en, '') AS sentence_en
-                      FROM word w
+                      LEFT JOIN persian_word pw ON pw.id = w.meaningId
                       LEFT JOIN SentenceWordLink sw ON sw.wordId = w.id AND sw.isPrimary = true
                       LEFT JOIN Sentence s ON s.id = sw.sentenceId
                       WHERE w.concept_explained_fa IS NULL OR w.concept_explained_fa = ''

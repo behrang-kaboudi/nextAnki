@@ -41,7 +41,7 @@ export default async function SentencesEditorPage({
                 word: {
                   OR: [
                     { base_form: { contains: q } },
-                    { meaning_fa: { contains: q } },
+                    { meaning: { is: { canonical_text: { contains: q } } } },
                     { anki_link_id: { contains: q } },
                   ],
                 },
@@ -68,7 +68,7 @@ export default async function SentencesEditorPage({
                 id: true,
                 anki_link_id: true,
                 base_form: true,
-                meaning_fa: true,
+                meaning: { select: { canonical_text: true } },
               },
             },
           },
@@ -95,7 +95,7 @@ export default async function SentencesEditorPage({
       id: link.word.id,
       anki_link_id: link.word.anki_link_id,
       base_form: link.word.base_form,
-      meaning_fa: link.word.meaning_fa,
+      meaning_fa: link.word.meaning?.canonical_text ?? "",
       isPrimary: link.isPrimary,
     })),
     createdAt: row.createdAt.toISOString(),

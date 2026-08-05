@@ -3,7 +3,8 @@ import "server-only";
 import { NextResponse } from "next/server";
 
 import { normalizeIpaForDb } from "@/lib/ipa/normalize";
-import { updateWord } from "@/lib/words/wordRepo";
+import { prisma } from "@/lib/prisma";
+import { touchWordsReferencingPersianWord } from "@/lib/words/persianMeanings.server";
 
 export const runtime = "nodejs";
 
@@ -30,13 +31,12 @@ export async function POST(req: Request) {
 
     const meaning_fa_IPA_normalized = normalizeIpaForDb(meaning_fa_IPA, 2000);
 
-    const updated = await updateWord({
-      where: { id },
-      data: { meaning_fa_IPA, meaning_fa_IPA_normalized },
-      select: { id: true, meaning_fa_IPA: true, meaning_fa_IPA_normalized: true },
-    });
+    const word = await prisma.word.findUnique({ where: { id }, select: { meaningId: true } });
+    if (!word?.meaningId) return NextResponse.json({ ok: false, error: "Word has no primary PersianWord." }, { status: 409 });
+    const updated = await prisma.persianWord.update({ where: { id: word.meaningId }, data: { meaning_fa_IPA, meaning_fa_IPA_normalize: meaning_fa_IPA_normalized }, select: { id: true, meaning_fa_IPA: true, meaning_fa_IPA_normalize: true } });
+    await touchWordsReferencingPersianWord(updated.id);
 
-    return NextResponse.json({ ok: true, item: updated });
+    return NextResponse.json({ ok: true, item: { id, meaning_fa_IPA: updated.meaning_fa_IPA, meaning_fa_IPA_normalized: updated.meaning_fa_IPA_normalize } });
   } catch (e) {
     return NextResponse.json(
       { ok: false, error: e instanceof Error ? e.message : String(e) },
@@ -44,4 +44,3 @@ export async function POST(req: Request) {
     );
   }
 }
-

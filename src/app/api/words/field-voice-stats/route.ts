@@ -34,16 +34,6 @@ export async function GET(req: Request) {
           const rows = await prisma.word.findMany({ select: { anki_link_id: true, base_form: true } });
           return rows.map((r) => ({ anki_link_id: r.anki_link_id, text: r.base_form }));
         }
-        case "meaning_fa": {
-          const rows = await prisma.word.findMany({ select: { anki_link_id: true, meaning_fa: true } });
-          return rows.map((r) => ({ anki_link_id: r.anki_link_id, text: r.meaning_fa }));
-        }
-        case "other_meanings_fa": {
-          const rows = await prisma.word.findMany({
-            select: { anki_link_id: true, other_meanings_fa: true },
-          });
-          return rows.map((r) => ({ anki_link_id: r.anki_link_id, text: r.other_meanings_fa }));
-        }
         case "other_meanings_en": {
           const rows = await prisma.word.findMany({
             select: { anki_link_id: true, other_meanings_en: true },

@@ -10,6 +10,7 @@ import {
   getWordAnkiManagedFieldNames,
 } from "@/lib/anki/wordAnkiMapping";
 import { prisma } from "@/lib/prisma";
+import { hydrateWordsWithPersianMeanings } from "@/lib/words/persianMeanings.server";
 
 export type FullSyncAllStatus = {
   jobId: string;
@@ -236,7 +237,8 @@ async function runJob(state: State) {
     if (!rows.length) break;
     lastId = rows[rows.length - 1]!.id;
 
-    await runWithConcurrency(rows, concurrency, async (word) => {
+    const rowsWithMeanings = await hydrateWordsWithPersianMeanings(rows);
+    await runWithConcurrency(rowsWithMeanings, concurrency, async (word) => {
       if (state.stopRequested) return;
 
       const existing = noteByAnkiLinkId.get(word.anki_link_id) ?? null;

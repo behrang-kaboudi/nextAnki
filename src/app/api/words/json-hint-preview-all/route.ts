@@ -6,6 +6,7 @@ import type { Word } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { pickPictureSymbolsForWord } from "@/lib/ipa/setPictures/setForAny";
 import { normalizeJsonHintForCompare } from "@/lib/words/jsonHint";
+import { hydrateWordsWithPersianMeanings } from "@/lib/words/persianMeanings.server";
 
 export const runtime = "nodejs";
 
@@ -47,10 +48,10 @@ export async function GET(req: Request) {
         id: true,
         anki_link_id: true,
         base_form: true,
-        meaning_fa: true,
+        meaningId: true,
+        otherMeaningIds: true,
         hint_sentence: true,
         phonetic_us_normalized: true,
-        meaning_fa_IPA_normalized: true,
         imageability: true,
         json_hint: true,
       },
@@ -68,8 +69,9 @@ export async function GET(req: Request) {
       });
     }
 
+    const hydratedRows = await hydrateWordsWithPersianMeanings(rows);
     let nextCursorId = cursorId;
-    for (const row of rows) {
+    for (const row of hydratedRows) {
       nextCursorId = row.id;
 
       const match =

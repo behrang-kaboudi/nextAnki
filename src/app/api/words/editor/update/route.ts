@@ -4,7 +4,6 @@ import type { Word } from "@prisma/client";
 import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
-import { normalizeIpaForDb } from "@/lib/ipa/normalize";
 import { pickPictureSymbolsForWord } from "@/lib/ipa/setPictures/setForAny";
 import { upsertPrimarySentenceByAnkiLinkId } from "@/lib/sentences/sentenceRepo";
 import { stringifyJsonHintWithTimestamp } from "@/lib/words/jsonHint";
@@ -70,8 +69,6 @@ export async function POST(req: Request) {
     const d = data as Record<string, unknown>;
 
     const base_form = normalizeRequiredString(d.base_form);
-    const meaning_fa = normalizeRequiredString(d.meaning_fa);
-    const meaning_fa_IPA = normalizeRequiredString(d.meaning_fa_IPA);
     const sentence_en = normalizeRequiredString(d.sentence_en);
     const typeOfWordInDb = normalizeRequiredString(d.typeOfWordInDb);
     const productive_target = normalizeProductiveTarget(d.productive_target);
@@ -85,8 +82,6 @@ export async function POST(req: Request) {
 
     if (
       base_form == null ||
-      meaning_fa == null ||
-      meaning_fa_IPA == null ||
       sentence_en == null ||
       typeOfWordInDb == null
     ) {
@@ -97,8 +92,7 @@ export async function POST(req: Request) {
     }
 
     const phonetic_us = normalizeNullableString(d.phonetic_us) ?? null;
-    const phonetic_us_normalized = phonetic_us ? normalizeIpaForDb(phonetic_us, 2000) : null;
-    const meaning_fa_IPA_normalized = normalizeIpaForDb(meaning_fa_IPA, 2000);
+    const phonetic_us_normalized = phonetic_us ? (await import("@/lib/ipa/normalize")).normalizeIpaForDb(phonetic_us, 2000) : null;
     const existing = await prisma.word.findUnique({
       where: { id },
     });
@@ -108,7 +102,7 @@ export async function POST(req: Request) {
     }
 
     const shouldRefreshJsonHint =
-      existing.phonetic_us !== phonetic_us || existing.meaning_fa_IPA !== meaning_fa_IPA;
+      existing.phonetic_us !== phonetic_us;
 
     const json_hint = shouldRefreshJsonHint
       ? (() => {
@@ -117,9 +111,6 @@ export async function POST(req: Request) {
             base_form,
             phonetic_us,
             phonetic_us_normalized,
-            meaning_fa,
-            meaning_fa_IPA,
-            meaning_fa_IPA_normalized,
           } satisfies Word;
           return nextWord.phonetic_us_normalized?.trim()
             ? pickPictureSymbolsForWord(nextWord).then((match) =>
@@ -135,9 +126,6 @@ export async function POST(req: Request) {
         base_form,
         phonetic_us,
         phonetic_us_normalized,
-        meaning_fa,
-        meaning_fa_IPA,
-        meaning_fa_IPA_normalized,
         pos: normalizeNullableString(d.pos),
         concept_explained: normalizeNullableString(d.concept_explained),
         concept_explained_fa: normalizeNullableString(d.concept_explained_fa),
@@ -145,7 +133,6 @@ export async function POST(req: Request) {
         explanation_for_sentence_meaning: normalizeNullableString(d.explanation_for_sentence_meaning),
         learning_depth: normalizeNullableNumber(d.learning_depth),
         mixed_sentence: normalizeNullableString(d.mixed_sentence),
-        other_meanings_fa: normalizeNullableString(d.other_meanings_fa),
         other_meanings_en: normalizeNullableString(d.other_meanings_en),
         category: normalizeNullableString(d.category),
         typeOfWordInDb,
@@ -163,7 +150,6 @@ export async function POST(req: Request) {
         id: true,
         updatedAt: true,
         phonetic_us_normalized: true,
-        meaning_fa_IPA_normalized: true,
         json_hint: true,
       },
     });
@@ -182,7 +168,6 @@ export async function POST(req: Request) {
         sentenceRecordId: sentence.id,
         updatedAt: updated.updatedAt.toISOString(),
         phonetic_us_normalized: updated.phonetic_us_normalized,
-        meaning_fa_IPA_normalized: updated.meaning_fa_IPA_normalized,
         json_hint: updated.json_hint,
       },
     });

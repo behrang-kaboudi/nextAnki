@@ -885,7 +885,7 @@ export default function WordExtractionPage() {
       const parsed = JSON.parse(promptText) as unknown;
       if (!Array.isArray(parsed)) {
         throw new Error(
-          "Input must be a JSON array: [{ id, phonetic_us?, imageability?, learning_depth?, productive_target?, pos?, other_meanings_fa?, concept_explained_fa? }]",
+          "Input must be a JSON array: [{ id, phonetic_us?, imageability?, learning_depth?, productive_target?, pos?, concept_explained_fa? }]",
         );
       }
 
@@ -924,7 +924,7 @@ export default function WordExtractionPage() {
       const parsed = JSON.parse(promptText) as unknown;
       if (!Array.isArray(parsed)) {
         throw new Error(
-          "Input must be a JSON array: [{ id, phonetic_us?, imageability?, learning_depth?, productive_target?, pos?, other_meanings_fa?, concept_explained_fa? }]",
+          "Input must be a JSON array: [{ id, phonetic_us?, imageability?, learning_depth?, productive_target?, pos?, concept_explained_fa? }]",
         );
       }
 

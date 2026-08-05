@@ -14,10 +14,9 @@ type PayloadItem = {
   id: number;
   sentence_en_meaning_fa: string;
   pos: string;
-  other_meanings_fa: string | null;
 };
 
-const allowedKeys = ["id", "sentence_en_meaning_fa", "pos", "other_meanings_fa"] as const;
+const allowedKeys = ["id", "sentence_en_meaning_fa", "pos"] as const;
 const allowedKeySet = new Set<string>(allowedKeys);
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
@@ -36,12 +35,6 @@ function asNonEmptyString(value: unknown): string | null {
   if (typeof value !== "string") return null;
   const trimmed = value.trim();
   return trimmed.length ? trimmed : null;
-}
-
-function asNullableTrimmedStringAllowEmpty(value: unknown): string | null {
-  if (value === null) return null;
-  if (typeof value !== "string") return null;
-  return value.trim();
 }
 
 function validateItem(
@@ -65,14 +58,10 @@ function validateItem(
   const id = asPositiveInt(value.id);
   const sentence_en_meaning_fa = asNonEmptyString(value.sentence_en_meaning_fa);
   const pos = asNonEmptyString(value.pos);
-  const other_meanings_fa = asNullableTrimmedStringAllowEmpty(value.other_meanings_fa);
 
   if (!id) issues.push("id must be a positive number");
   if (!sentence_en_meaning_fa) issues.push("sentence_en_meaning_fa must be a non-empty string");
   if (!pos) issues.push("pos must be a non-empty string");
-  if (other_meanings_fa === null && value.other_meanings_fa !== null) {
-    issues.push("other_meanings_fa must be a string (can be empty) or null");
-  }
 
   if (issues.length) return { ok: false, issues };
   if (!id || !sentence_en_meaning_fa || !pos) return { ok: false, issues: ["Invalid input"] };
@@ -83,7 +72,6 @@ function validateItem(
       id,
       sentence_en_meaning_fa,
       pos,
-      other_meanings_fa,
     },
   };
 }
@@ -118,7 +106,7 @@ export async function POST(req: Request) {
         {
           ok: false,
           error:
-            "Invalid input items (must be exactly { id, sentence_en_meaning_fa, pos, other_meanings_fa })",
+            "Invalid input items (must be exactly { id, sentence_en_meaning_fa, pos })",
           errors,
         },
         { status: 400 },
@@ -137,7 +125,6 @@ export async function POST(req: Request) {
           where: { id: item.id },
           data: {
             pos: item.pos,
-            other_meanings_fa: item.other_meanings_fa,
           },
           select: { id: true, anki_link_id: true },
         });

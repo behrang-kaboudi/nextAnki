@@ -3,6 +3,7 @@ import "server-only";
 import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
+import { hydrateWordsWithPersianMeanings } from "@/lib/words/persianMeanings.server";
 
 function parsePositiveInt(value: string | null, fallback: number) {
   const n = value ? Number(value) : Number.NaN;
@@ -51,7 +52,7 @@ export async function GET(req: Request) {
       ? {
           OR: [
             { base_form: { contains: q } },
-            { meaning_fa: { contains: q } },
+            { meaning: { is: { canonical_text: { contains: q } } } },
             { anki_link_id: { contains: q } },
           ],
         }
@@ -63,13 +64,15 @@ export async function GET(req: Request) {
       take,
       select: {
         id: true,
-        meaning_fa: true,
+        meaningId: true,
+        otherMeaningIds: true,
         json_hint: true,
         hint_sentence: true,
       },
     });
 
-    const items = rows
+    const hydratedRows = await hydrateWordsWithPersianMeanings(rows);
+    const items = hydratedRows
       .filter((r) => !asNonEmptyString(r.hint_sentence))
       .map((r) => {
       const words: string[] = [];

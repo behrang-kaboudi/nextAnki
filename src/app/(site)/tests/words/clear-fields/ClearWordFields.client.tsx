@@ -11,9 +11,6 @@ type FieldOption = {
 const FIELD_OPTIONS: FieldOption[] = [
   { field: "phonetic_us", label: "phonetic_us" },
   { field: "phonetic_us_normalized", label: "phonetic_us_normalized" },
-  { field: "meaning_fa", label: "meaning_fa" },
-  { field: "meaning_fa_IPA", label: "meaning_fa_IPA" },
-  { field: "meaning_fa_IPA_normalized", label: "meaning_fa_IPA_normalized" },
   { field: "pos", label: "pos" },
   { field: "concept_explained", label: "concept_explained" },
   { field: "concept_explained_fa", label: "concept_explained_fa" },
@@ -24,7 +21,6 @@ const FIELD_OPTIONS: FieldOption[] = [
   },
   { field: "learning_depth", label: "learning_depth", note: "set 0" },
   { field: "mixed_sentence", label: "mixed_sentence" },
-  { field: "other_meanings_fa", label: "other_meanings_fa" },
   { field: "other_meanings_en", label: "other_meanings_en" },
   { field: "category", label: "category" },
   { field: "typeOfWordInDb", label: "typeOfWordInDb" },

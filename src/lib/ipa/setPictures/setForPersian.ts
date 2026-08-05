@@ -29,7 +29,7 @@ async function findByPattern(pattern: string): Promise<IpaCandidate[]> {
 
 async function findByPatternCandidates(
   phoneticNormalized: string,
-  word: Word,
+  word: Word & { meaning_fa_IPA_normalized?: string },
 ): Promise<IpaCandidate[]> {
   const a = phoneticNormalized[0] ?? "";
   const b = phoneticNormalized[1] ?? "";
@@ -91,7 +91,7 @@ async function findByPatternCandidates(
   for (const pattern of patterns) {
     let matches = await findByPattern(pattern);
     matches = matches.filter((match) => {
-      return match.target_ipa !== word.meaning_fa_IPA_normalized;
+      return match.target_ipa !== (word.meaning_fa_IPA_normalized ?? "");
     });
     matches = matches.filter((match) => {
       if (match.target_lang && match.target_lang === "en") return false;
@@ -109,7 +109,7 @@ async function findByPatternCandidates(
   return [];
 }
 
-export async function setForPersian(word: Word): Promise<IpaCandidate | null> {
+export async function setForPersian(word: Word & { meaning_fa_IPA_normalized?: string }): Promise<IpaCandidate | null> {
   const phoneticNormalized = word.meaning_fa_IPA_normalized ?? "";
   const matches = await findByPatternCandidates(phoneticNormalized, word);
 

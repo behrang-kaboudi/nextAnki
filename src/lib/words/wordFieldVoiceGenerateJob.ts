@@ -215,13 +215,6 @@ async function runJob(state: JobState) {
 }
 
 async function countCandidates(field: WordAudioFieldKey): Promise<number> {
-  if (field === "other_meanings_fa") {
-    return prisma.word.count({
-      where: {
-        AND: [{ other_meanings_fa: { not: null } }, { other_meanings_fa: { not: "" } }],
-      },
-    });
-  }
   if (field === "other_meanings_en") {
     return prisma.word.count({
       where: {
@@ -247,7 +240,6 @@ async function countCandidates(field: WordAudioFieldKey): Promise<number> {
     });
   }
   if (field === "base_form") return prisma.word.count({ where: { base_form: { notIn: [""] } } });
-  if (field === "meaning_fa") return prisma.word.count({ where: { meaning_fa: { notIn: [""] } } });
   return prisma.word.count({
     where:
       field === "sentence_en"
@@ -283,17 +275,6 @@ async function fetchBatch(
   if (field === "base_form") {
     const rows = await prisma.word.findMany({ ...base, select: { id: true, anki_link_id: true, base_form: true } });
     return rows.map((r) => ({ id: r.id, anki_link_id: r.anki_link_id, audioKey: r.anki_link_id, value: r.base_form }));
-  }
-  if (field === "meaning_fa") {
-    const rows = await prisma.word.findMany({ ...base, select: { id: true, anki_link_id: true, meaning_fa: true } });
-    return rows.map((r) => ({ id: r.id, anki_link_id: r.anki_link_id, audioKey: r.anki_link_id, value: r.meaning_fa }));
-  }
-  if (field === "other_meanings_fa") {
-    const rows = await prisma.word.findMany({
-      ...base,
-      select: { id: true, anki_link_id: true, other_meanings_fa: true },
-    });
-    return rows.map((r) => ({ id: r.id, anki_link_id: r.anki_link_id, audioKey: r.anki_link_id, value: r.other_meanings_fa ?? null }));
   }
   if (field === "other_meanings_en") {
     const rows = await prisma.word.findMany({

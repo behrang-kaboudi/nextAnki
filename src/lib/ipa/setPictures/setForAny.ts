@@ -14,7 +14,7 @@ export async function pickPictureSymbolsForWord(
   word: Word,
 ): Promise<WordPictures | null> {
   const normalized = (word.phonetic_us_normalized ?? "").trim();
-  let persianImage: IpaCandidate | null;
+  let persianImage: IpaCandidate | null = null;
   if ((word.imageability ?? 0) < imageabilityBaseThreshold) {
     //Todo: add a better way to find the persian image for the word, maybe by using the meaning_fa_IPA_normalized field or by using the base_form field
     // persianImage = await setForPersian(word);

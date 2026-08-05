@@ -57,10 +57,11 @@ export async function GET(req: Request) {
       SELECT
         w.id,
         w.base_form,
-        w.meaning_fa,
+        COALESCE(pw.canonical_text, '') AS meaning_fa,
         COALESCE(s.sentence_en, '') AS sentence_en,
         COALESCE(s.sentence_en_meaning_fa, '') AS sentence_en_meaning_fa
       FROM word w
+      LEFT JOIN persian_word pw ON pw.id = w.meaningId
       LEFT JOIN SentenceWordLink sw ON sw.wordId = w.id AND sw.isPrimary = true
       LEFT JOIN Sentence s ON s.id = sw.sentenceId
       WHERE ${missingWhere}

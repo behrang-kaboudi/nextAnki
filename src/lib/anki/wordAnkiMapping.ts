@@ -12,9 +12,11 @@ import {
 } from "@/lib/audio/pictureWordAudioNaming";
 import type { WordAudioFieldKey } from "@/lib/audio/wordFieldAudioNaming";
 import { getWordFieldAudioAbsolutePath } from "@/lib/audio/wordFieldAudioPaths.server";
+import { getPersianWordAudioAbsolutePath } from "@/lib/audio/persianWordAudioPaths.server";
 import { getLatestWordFieldAudioFile } from "@/lib/words/wordFieldVoice";
 import { prisma } from "@/lib/prisma";
 import { findPrimarySentenceByAnkiLinkId } from "@/lib/sentences/sentenceRepo";
+import { hydrateWordWithPersianMeanings, type WordWithPersianMeanings } from "@/lib/words/persianMeanings.server";
 
 import { IpaCandidate, WordPictures } from "../ipa/setPictures/types";
 
@@ -113,21 +115,27 @@ export async function selectFile(
   }
 
   const targetLang = IpaCandidate.target_lang ?? "fa";
-  const field: WordAudioFieldKey =
-    targetLang === "en" ? "base_form" : "meaning_fa";
-
   const fa = String(IpaCandidate.fa ?? "").trim();
   const en = String(IpaCandidate.en ?? "").trim();
+
+  if (targetLang !== "en") {
+    if (!fa) return null;
+    const persianWord = await prisma.persianWord.findFirst({
+      where: { canonical_text: fa },
+      select: { audio_file_name: true },
+    });
+    return persianWord?.audio_file_name ? getPersianWordAudioAbsolutePath(persianWord.audio_file_name) : null;
+  }
 
   const whereCandidates: Prisma.WordWhereInput[] = [];
 
   // Prefer strict match when we have both sides.
-  if (en && fa) whereCandidates.push({ base_form: en, meaning_fa: fa });
+  if (en && fa) whereCandidates.push({ base_form: en, meaning: { is: { canonical_text: fa } } });
 
   // Fallback to whichever side is present. This is important because `target_lang`
   // controls which audio field we *want*, but the DB row can still be found via the other side.
   if (en) whereCandidates.push({ base_form: en });
-  if (fa) whereCandidates.push({ meaning_fa: fa });
+  if (fa) whereCandidates.push({ meaning: { is: { canonical_text: fa } } });
 
   let row: Pick<Word, "anki_link_id" | "base_form"> | null = null;
   for (const where of whereCandidates) {
@@ -141,7 +149,7 @@ export async function selectFile(
   const ankiLinkId = row?.anki_link_id ?? null;
   if (!ankiLinkId) return null;
 
-  const latest = getLatestWordFieldAudioFile({ ankiLinkId, field });
+  const latest = getLatestWordFieldAudioFile({ ankiLinkId, field: "base_form" });
 
   if (!latest || latest.size <= 0) return null;
   return getWordFieldAudioAbsolutePath(latest.filename);
@@ -198,7 +206,8 @@ export function getAnkiLinkIdFromNoteFields(
   return null;
 }
 
-export type WordAnkiFieldGenerator = (word: Word) => string | Promise<string>;
+type WordForAnki = Word & Partial<Pick<WordWithPersianMeanings<Word>, "primaryPersianWord" | "otherPersianWords" | "meaning_fa" | "other_meanings_fa">>;
+export type WordAnkiFieldGenerator = (word: WordForAnki) => string | Promise<string>;
 
 async function getSentenceFields(ankiLinkId: string) {
   const sentence = await findPrimarySentenceByAnkiLinkId(ankiLinkId);
@@ -213,6 +222,10 @@ function latestAudioTag(audioKey: string, field: WordAudioFieldKey): string {
   const latest = getLatestWordFieldAudioFile({ audioKey, ankiLinkId: audioKey, field });
   if (!latest || latest.size <= 0) return "";
   return `[sound:${latest.filename}]`;
+}
+
+function persianWordAudioTag(filename: string | null | undefined): string {
+  return filename ? `[sound:${filename}]` : "";
 }
 
 function getFirstPartSpell(word: string): string {
@@ -238,10 +251,10 @@ export const WORD_ANKI_FIELD_GENERATORS = {
   "first-part-spell-audio": (w) => getFirstPartSpellAudio(w.base_form),
   phonetic_us: (w) => w.phonetic_us ?? "",
   pos: (w) => w.pos ?? "",
-  meaning_fa: (w) => w.meaning_fa,
-  meaning_fa_audio: (w) => latestAudioTag(w.anki_link_id, "meaning_fa"),
+  meaning_fa: (w) => w.meaning_fa ?? "",
+  meaning_fa_audio: (w) => persianWordAudioTag(w.primaryPersianWord?.audio_file_name),
   other_meanings_fa: (w) => w.other_meanings_fa ?? "",
-  other_meanings_fa_audio: (w) => latestAudioTag(w.anki_link_id, "other_meanings_fa"),
+  other_meanings_fa_audio: (w) => (w.otherPersianWords ?? []).map((meaning) => persianWordAudioTag(meaning.audio_file_name)).filter(Boolean).join(" "),
   other_meanings_en: (w) => w.other_meanings_en ?? "",
   other_meanings_en_audio: (w) => latestAudioTag(w.anki_link_id, "other_meanings_en"),
   concept_explained_fa: (w) => w.concept_explained_fa ?? "",
@@ -306,14 +319,17 @@ export function getWordAnkiManagedFieldNames(
   );
 }
 
-export function generateWordAnkiFieldsForMetaLexVr9(
-  word: Word,
+export async function generateWordAnkiFieldsForMetaLexVr9(
+  word: Word | WordForAnki,
   configuredFields: readonly string[],
 ): Promise<Record<string, string>> {
+  const withMeanings = "primaryPersianWord" in word
+    ? word as WordForAnki
+    : await hydrateWordWithPersianMeanings(word);
   const fields = getWordAnkiManagedFieldNames(configuredFields);
   return Promise.all(
     fields.map(
-      async (f) => [f, await WORD_ANKI_FIELD_GENERATORS[f](word)] as const,
+      async (f) => [f, await WORD_ANKI_FIELD_GENERATORS[f](withMeanings)] as const,
     ),
   ).then(
     (entries) =>

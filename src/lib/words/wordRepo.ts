@@ -41,6 +41,13 @@ export async function touchWordsLinkedToSentenceId(sentenceId: number) {
   });
 }
 
+/** Touch dependent Words when their relation-owned Persian meaning changes. */
+export async function touchWordsByIds(ids: readonly number[]) {
+  const uniqueIds = [...new Set(ids.filter((id) => Number.isSafeInteger(id) && id > 0))];
+  if (!uniqueIds.length) return { count: 0 };
+  return prisma.word.updateMany({ where: { id: { in: uniqueIds } }, data: { updatedAt: new Date() } });
+}
+
 export async function deleteWord(args: Prisma.WordDeleteArgs) {
   return prisma.word.delete(args);
 }

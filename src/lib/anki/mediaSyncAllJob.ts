@@ -109,7 +109,7 @@ function listMediaFiles(): Array<{ filename: string; absPath: string; size: numb
     path.join(process.cwd(), "public", "audio", "words"),
   ];
 
-  const byFilename = new Map<string, { absPath: string; size: number }>();
+  const byFilename = new Map<string, { absPath: string; size: number; mtimeMs: number }>();
 
   for (const dir of dirs) {
     let entries: string[] = [];

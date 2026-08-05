@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { prisma } from "@/lib/prisma";
+import { hydrateWordsWithPersianMeanings } from "@/lib/words/persianMeanings.server";
 import BatchWordFieldVoiceGenerate from "../BatchWordFieldVoiceGenerate.client";
 import BatchWordFieldVoiceGenerateAllFields from "../BatchWordFieldVoiceGenerateAllFields.client";
 import AudioHelpModal from "../AudioHelpModal.client";
@@ -36,7 +37,7 @@ export default async function WordHintsAudioPage({
     ? {
         OR: [
           { base_form: { contains: q } },
-          { meaning_fa: { contains: q } },
+          { meaning: { is: { canonical_text: { contains: q } } } },
           { anki_link_id: { contains: q } },
         ],
       }
@@ -53,8 +54,8 @@ export default async function WordHintsAudioPage({
         id: true,
         anki_link_id: true,
         base_form: true,
-        meaning_fa: true,
-        other_meanings_fa: true,
+        meaningId: true,
+        otherMeaningIds: true,
         other_meanings_en: true,
         concept_explained_fa: true,
         sentenceLinks: {
@@ -73,7 +74,8 @@ export default async function WordHintsAudioPage({
       },
     }),
   ]);
-  const mappedRows = rows.map((r) => ({
+  const rowsWithMeanings = await hydrateWordsWithPersianMeanings(rows);
+  const mappedRows = rowsWithMeanings.map((r) => ({
     ...r,
     sentenceRecord: r.sentenceLinks[0]?.sentence ?? null,
   }));
@@ -102,8 +104,6 @@ export default async function WordHintsAudioPage({
           </div>
           <p className="mt-1 text-sm opacity-80">
             UI for generating audio for <span className="font-mono">base_form</span>,{" "}
-            <span className="font-mono">meaning_fa</span>,{" "}
-            <span className="font-mono">other_meanings_fa</span>,{" "}
             <span className="font-mono">other_meanings_en</span>,{" "}
             <span className="font-mono">concept_explained_fa</span>,{" "}
             <span className="font-mono">sentence_en</span>,{" "}
@@ -115,12 +115,6 @@ export default async function WordHintsAudioPage({
           <div className="grid w-full gap-2 sm:w-auto sm:grid-cols-2">
             <BatchWordFieldVoiceGenerate
               field="base_form"
-            />
-            <BatchWordFieldVoiceGenerate
-              field="meaning_fa"
-            />
-            <BatchWordFieldVoiceGenerate
-              field="other_meanings_fa"
             />
             <BatchWordFieldVoiceGenerate
               field="other_meanings_en"
@@ -220,11 +214,6 @@ export default async function WordHintsAudioPage({
                       <span className="truncate" title={r.meaning_fa}>
                         {r.meaning_fa}
                       </span>
-                      <WordFieldVoiceCell
-                        field="meaning_fa"
-                        audioKey={r.anki_link_id}
-                        text={r.meaning_fa}
-                      />
                     </div>
                   </td>
                   <td className="max-w-[360px] px-3 py-2">
@@ -232,11 +221,6 @@ export default async function WordHintsAudioPage({
                       <span className="truncate" title={String(r.other_meanings_fa ?? "")}>
                         {r.other_meanings_fa ?? "—"}
                       </span>
-                      <WordFieldVoiceCell
-                        field="other_meanings_fa"
-                        audioKey={r.anki_link_id}
-                        text={r.other_meanings_fa}
-                      />
                     </div>
                   </td>
                   <td className="max-w-[360px] px-3 py-2">

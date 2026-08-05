@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { PageHeader } from "@/components/page-header";
 import { prisma } from "@/lib/prisma";
+import { hydrateWordsWithPersianMeanings } from "@/lib/words/persianMeanings.server";
 
 import DeleteWordButton from "./DeleteWordButton.client";
 import OpenWordEditorModal from "./OpenWordEditorModal.client";
@@ -35,7 +36,7 @@ export default async function WordsEditorIndexPage({
     ? {
         OR: [
           { base_form: { contains: q } },
-          { meaning_fa: { contains: q } },
+          { meaning: { is: { canonical_text: { contains: q } } } },
           { anki_link_id: { contains: q } },
         ],
       }
@@ -48,10 +49,11 @@ export default async function WordsEditorIndexPage({
       orderBy: [{ updatedAt: "desc" }, { id: "desc" }],
       skip,
       take: pageSize,
-      select: { id: true, anki_link_id: true, base_form: true, meaning_fa: true, updatedAt: true },
+      select: { id: true, anki_link_id: true, base_form: true, meaningId: true, otherMeaningIds: true, updatedAt: true },
     }),
   ]);
 
+  const rowsWithMeanings = await hydrateWordsWithPersianMeanings(rows);
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const prevPage = Math.max(1, page - 1);
   const nextPage = Math.min(totalPages, page + 1);
@@ -131,7 +133,7 @@ export default async function WordsEditorIndexPage({
               </tr>
             </thead>
             <tbody>
-              {rows.map((r) => (
+              {rowsWithMeanings.map((r) => (
                 <tr key={r.id} className="border-b">
                   <td className="whitespace-nowrap px-3 py-2 font-mono">{r.id}</td>
                   <td className="max-w-[240px] px-3 py-2">

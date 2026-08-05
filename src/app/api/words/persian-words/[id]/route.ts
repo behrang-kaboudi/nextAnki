@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { normalizeIpaForDb } from "@/lib/ipa/normalize";
 import { normalizePersianFull, normalizePersianHalf } from "@/lib/persian/normalize";
 import { prisma } from "@/lib/prisma";
+import { getPersianWordReferences, touchWordsReferencingPersianWord } from "@/lib/words/persianMeanings.server";
 
 function parseId(value: string) {
   const id = Number(value);
@@ -21,7 +22,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
 
   const item = await prisma.persianWord.findUnique({ where: { id } });
   if (!item) return NextResponse.json({ ok: false, error: "PersianWord not found." }, { status: 404 });
-  return NextResponse.json({ ok: true, item });
+  return NextResponse.json({ ok: true, item, references: await getPersianWordReferences(id) });
 }
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -51,6 +52,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         meaning_fa_IPA_normalize: meaningFaIpa ? normalizeIpaForDb(meaningFaIpa, 2000) : null,
       },
     });
+    await touchWordsReferencingPersianWord(id);
     return NextResponse.json({ ok: true, item });
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {

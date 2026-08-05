@@ -1,11 +1,16 @@
 import "server-only";
 
 import { prisma } from "@/lib/prisma";
+import { hydrateWordWithPersianMeanings, meaningIds, type PersianWordMeaning } from "@/lib/words/persianMeanings.server";
 
 export type WordEditorInitial = {
   id: number;
   anki_link_id: string;
   sentenceRecordId: number | null;
+  meaningId: number | null;
+  otherMeaningIds: number[];
+  primaryMeaning: PersianWordMeaning | null;
+  otherMeanings: PersianWordMeaning[];
 
   base_form: string;
   phonetic_us: string | null;
@@ -54,6 +59,7 @@ export async function getWordEditorInitial(id: number): Promise<WordEditorInitia
   if (!word) return null;
 
   const primarySentence = word.sentenceLinks[0]?.sentence ?? null;
+  const withMeanings = await hydrateWordWithPersianMeanings(word);
 
   return {
     id: word.id,
@@ -61,9 +67,13 @@ export async function getWordEditorInitial(id: number): Promise<WordEditorInitia
     base_form: word.base_form,
     phonetic_us: word.phonetic_us,
     phonetic_us_normalized: word.phonetic_us_normalized,
-    meaning_fa: word.meaning_fa,
-    meaning_fa_IPA: word.meaning_fa_IPA,
-    meaning_fa_IPA_normalized: word.meaning_fa_IPA_normalized,
+    meaningId: word.meaningId,
+    otherMeaningIds: meaningIds(word.otherMeaningIds),
+    primaryMeaning: withMeanings.primaryPersianWord,
+    otherMeanings: withMeanings.otherPersianWords,
+    meaning_fa: withMeanings.meaning_fa,
+    meaning_fa_IPA: withMeanings.meaning_fa_IPA,
+    meaning_fa_IPA_normalized: withMeanings.meaning_fa_IPA_normalized,
     pos: word.pos,
     concept_explained: word.concept_explained,
     concept_explained_fa: word.concept_explained_fa,
@@ -74,7 +84,7 @@ export async function getWordEditorInitial(id: number): Promise<WordEditorInitia
     explanation_for_sentence_meaning: word.explanation_for_sentence_meaning,
     learning_depth: word.learning_depth,
     mixed_sentence: word.mixed_sentence,
-    other_meanings_fa: word.other_meanings_fa,
+    other_meanings_fa: withMeanings.other_meanings_fa,
     other_meanings_en: word.other_meanings_en,
     category: word.category,
     typeOfWordInDb: word.typeOfWordInDb,

@@ -47,12 +47,6 @@ export const WORD_EXTRACTION_PROMPTS_PHASE3: WordExtractionPromptSpec[] = [
     path: "src/prompts/word-extraction/pos/rulseV1.md",
   },
   {
-    id: "other_meanings_fa",
-    label: "OTHER_MEANINGS_FA",
-    fieldKey: "other_meanings_fa",
-    path: "src/prompts/word-extraction/other_meanings_fa/rulseV1.md",
-  },
-  {
     id: "concept_explained_fa",
     label: "CONCEPT_EXPLAINED_FA",
     fieldKey: "concept_explained_fa",

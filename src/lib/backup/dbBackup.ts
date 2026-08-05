@@ -70,6 +70,8 @@ export async function getDbFingerprint(prisma: PrismaClient) {
     sentenceWordLinkMax,
     ipaKeywordCount,
     ipaKeywordMax,
+    persianWordCount,
+    persianWordMax,
     pictureWordCount,
     pictureWordMax,
     ankiStructureSettingsCount,
@@ -99,6 +101,10 @@ export async function getDbFingerprint(prisma: PrismaClient) {
     ),
     countOrNull(() => prisma.ipaKeyword.count()),
     maxDateOrNull(async () => (await prisma.ipaKeyword.aggregate({ _max: { updatedAt: true } }))._max.updatedAt ?? null),
+    countOrNull(() => prisma.persianWord.count()),
+    maxDateOrNull(
+      async () => (await prisma.persianWord.aggregate({ _max: { updatedAt: true } }))._max.updatedAt ?? null
+    ),
     countOrNull(() => prisma.pictureWord.count()),
     maxDateOrNull(
       async () => (await prisma.pictureWord.aggregate({ _max: { updatedAt: true } }))._max.updatedAt ?? null
@@ -133,6 +139,7 @@ export async function getDbFingerprint(prisma: PrismaClient) {
     sentence: { count: sentenceCount, max: sentenceMax?.toISOString() ?? null },
     sentenceWordLink: { count: sentenceWordLinkCount, max: sentenceWordLinkMax?.toISOString() ?? null },
     ipaKeyword: { count: ipaKeywordCount, max: ipaKeywordMax?.toISOString() ?? null },
+    persianWord: { count: persianWordCount, max: persianWordMax?.toISOString() ?? null },
     pictureWord: { count: pictureWordCount, max: pictureWordMax?.toISOString() ?? null },
     ankiStructureSettings: {
       count: ankiStructureSettingsCount,
@@ -217,6 +224,7 @@ async function writeJsonBackup(prisma: PrismaClient, outputFile: string) {
       sentence: await prisma.sentence.findMany(),
       sentenceWordLink: await prisma.sentenceWordLink.findMany(),
       ipaKeyword: await prisma.ipaKeyword.findMany(),
+      persianWord: await prisma.persianWord.findMany(),
       pictureWord: await prisma.pictureWord.findMany(),
       ankiStructureSettings: await prisma.ankiStructureSettings.findMany(),
       user: await prisma.user.findMany(),

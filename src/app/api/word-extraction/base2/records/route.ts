@@ -3,6 +3,7 @@ import "server-only";
 import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
+import { hydrateWordsWithPersianMeanings } from "@/lib/words/persianMeanings.server";
 
 export const runtime = "nodejs";
 
@@ -33,14 +34,15 @@ export async function POST(req: Request) {
       select: {
         id: true,
         base_form: true,
-        meaning_fa: true,
+        meaningId: true,
+        otherMeaningIds: true,
         phonetic_us: true,
         phonetic_us_normalized: true,
         imageability: true,
       },
     });
 
-    return NextResponse.json({ ok: true, items: rows });
+    return NextResponse.json({ ok: true, items: await hydrateWordsWithPersianMeanings(rows) });
   } catch (e) {
     return NextResponse.json(
       { ok: false, error: e instanceof Error ? e.message : String(e) },
@@ -48,4 +50,3 @@ export async function POST(req: Request) {
     );
   }
 }
-

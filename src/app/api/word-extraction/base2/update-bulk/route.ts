@@ -14,7 +14,6 @@ type PayloadItem = {
   learning_depth?: number;
   productive_target?: number;
   pos?: string;
-  other_meanings_fa?: string | null;
   concept_explained_fa?: string;
 };
 
@@ -25,7 +24,6 @@ const optionalKeys = [
   "learning_depth",
   "productive_target",
   "pos",
-  "other_meanings_fa",
   "concept_explained_fa",
 ] as const;
 const allowedKeySet = new Set<string>([...requiredKeys, ...optionalKeys]);
@@ -66,12 +64,6 @@ function asProductiveTarget(value: unknown): number | null {
   if (typeof value !== "number" || !Number.isInteger(value)) return null;
   if (value < 0 || value > 101) return null;
   return value;
-}
-
-function asNullableTrimmedStringAllowEmpty(value: unknown): string | null {
-  if (value === null) return null;
-  if (typeof value !== "string") return null;
-  return value.trim();
 }
 
 function validateItem(value: unknown): { ok: true; item: PayloadItem } | { ok: false; issues: string[] } {
@@ -119,14 +111,6 @@ function validateItem(value: unknown): { ok: true; item: PayloadItem } | { ok: f
   const pos = hasPos ? asNonEmptyString((value as Record<string, unknown>).pos) : undefined;
   if (hasPos && !pos) issues.push("pos must be a non-empty string");
 
-  const hasOtherMeanings = "other_meanings_fa" in value;
-  const other_meanings_fa = hasOtherMeanings
-    ? asNullableTrimmedStringAllowEmpty((value as Record<string, unknown>).other_meanings_fa)
-    : undefined;
-  if (hasOtherMeanings && other_meanings_fa === null && (value as Record<string, unknown>).other_meanings_fa !== null) {
-    issues.push("other_meanings_fa must be a string (can be empty) or null");
-  }
-
   const hasConceptExplainedFa = "concept_explained_fa" in value;
   const concept_explained_fa = hasConceptExplainedFa
     ? asNonEmptyString((value as Record<string, unknown>).concept_explained_fa)
@@ -147,7 +131,6 @@ function validateItem(value: unknown): { ok: true; item: PayloadItem } | { ok: f
       ...(learning_depth == null ? {} : { learning_depth }),
       ...(productive_target == null ? {} : { productive_target }),
       ...(pos == null ? {} : { pos }),
-      ...(other_meanings_fa === undefined ? {} : { other_meanings_fa }),
       ...(concept_explained_fa == null ? {} : { concept_explained_fa }),
     },
   };
@@ -183,7 +166,7 @@ export async function POST(req: Request) {
         {
           ok: false,
           error:
-            "Invalid input items (must be { id } plus one or more of: phonetic_us, imageability, learning_depth, productive_target, pos, other_meanings_fa, concept_explained_fa)",
+            "Invalid input items (must be { id } plus one or more of: phonetic_us, imageability, learning_depth, productive_target, pos, concept_explained_fa)",
           errors,
         },
         { status: 400 }
@@ -200,7 +183,6 @@ export async function POST(req: Request) {
           learning_depth?: number;
           productive_target?: number;
           pos?: string;
-          other_meanings_fa?: string | null;
           concept_explained_fa?: string;
         }
       | { ok: false; id: number; error: string }
@@ -220,7 +202,6 @@ export async function POST(req: Request) {
         if (item.learning_depth !== undefined) patch.learning_depth = item.learning_depth;
         if (item.productive_target !== undefined) patch.productive_target = item.productive_target;
         if (item.pos !== undefined) patch.pos = item.pos;
-        if (item.other_meanings_fa !== undefined) patch.other_meanings_fa = item.other_meanings_fa;
         if (item.concept_explained_fa !== undefined) patch.concept_explained_fa = item.concept_explained_fa;
 
         const row = await updateWord({
@@ -239,7 +220,6 @@ export async function POST(req: Request) {
           ...(item.learning_depth === undefined ? {} : { learning_depth: item.learning_depth }),
           ...(item.productive_target === undefined ? {} : { productive_target: item.productive_target }),
           ...(item.pos === undefined ? {} : { pos: item.pos }),
-          ...(item.other_meanings_fa === undefined ? {} : { other_meanings_fa: item.other_meanings_fa }),
           ...(item.concept_explained_fa === undefined ? {} : { concept_explained_fa: item.concept_explained_fa }),
         });
       } catch (e) {

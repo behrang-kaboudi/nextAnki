@@ -6,6 +6,7 @@ import JsonHintGenerateAllButton from "../JsonHintGenerateAllButton.client";
 import JsonHintHelpModal from "../JsonHintHelpModal.client";
 import WordHintsTable from "../WordHintsTable.client";
 import { getJsonHintGeneratedAtMs } from "@/lib/words/jsonHint";
+import { hydrateWordsWithPersianMeanings } from "@/lib/words/persianMeanings.server";
 
 export const metadata = {
   title: "Word Hints — JSON",
@@ -37,7 +38,7 @@ export default async function WordHintsJsonPage({
     ? {
         OR: [
           { base_form: { contains: q } },
-          { meaning_fa: { contains: q } },
+          { meaning: { is: { canonical_text: { contains: q } } } },
           { anki_link_id: { contains: q } },
         ],
       }
@@ -65,14 +66,15 @@ export default async function WordHintsJsonPage({
         id: true,
         anki_link_id: true,
         base_form: true,
-        meaning_fa: true,
+        meaningId: true,
+        otherMeaningIds: true,
         hint_sentence: true,
         json_hint: true,
       },
     }),
   ]);
 
-  const rowsWithMeta = rows.map((r) => ({
+  const rowsWithMeta = (await hydrateWordsWithPersianMeanings(rows)).map((r) => ({
     ...r,
     json_hint_generated_at_ms: getJsonHintGeneratedAtMs(r.json_hint ?? null),
   }));

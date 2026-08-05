@@ -5,11 +5,10 @@ import { useCallback, useEffect, useMemo, useRef, useState, type FocusEvent } fr
 import WordFieldVoiceCell from "@/app/(site)/words/hints/WordFieldVoiceCell.client";
 import { SpecialCharactersBar } from "@/components/ipa/SpecialCharactersBar";
 import JsonHintPreviewModal from "./JsonHintPreviewModal.client";
+import OpenPersianWordEditorModal from "../../tables/persian-words/OpenPersianWordEditorModal.client";
 
 const WORD_AUDIO_FIELDS = [
   "base_form",
-  "meaning_fa",
-  "other_meanings_fa",
   "other_meanings_en",
   "concept_explained_fa",
   "sentence_en",
@@ -40,6 +39,10 @@ export type WordEditorState = {
   id: number;
   anki_link_id: string;
   sentenceRecordId: number | null;
+  meaningId: number | null;
+  otherMeaningIds: number[];
+  primaryMeaning: { id: number; canonical_text: string; meaning_fa_IPA: string | null; meaning_fa_IPA_normalize: string | null } | null;
+  otherMeanings: Array<{ id: number; canonical_text: string; meaning_fa_IPA: string | null; meaning_fa_IPA_normalize: string | null }>;
 
   base_form: string;
   phonetic_us: string | null;
@@ -77,16 +80,12 @@ export type WordEditorState = {
 type EditableFieldKey =
   | "base_form"
   | "phonetic_us"
-  | "meaning_fa"
-  | "meaning_fa_IPA"
   | "pos"
   | "sentence_en"
   | "sentence_en_meaning_fa"
-  | "other_meanings_fa"
   | "other_meanings_en"
   | "concept_explained_fa"
   | "phonetic_us_normalized"
-  | "meaning_fa_IPA_normalized"
   | "phonetic_us_normalized"
   | "learning_depth"
   | "imageability"
@@ -172,12 +171,10 @@ export default function WordEditorClient({
   const missingRequiredFields = useMemo(() => {
     const missing: string[] = [];
     if (!word.base_form.trim()) missing.push("base_form");
-    if (!word.meaning_fa.trim()) missing.push("meaning_fa");
-    if (!word.meaning_fa_IPA.trim()) missing.push("meaning_fa_IPA");
     if (!word.sentence_en.trim()) missing.push("sentence_en");
     if (!word.typeOfWordInDb.trim()) missing.push("typeOfWordInDb");
     return missing;
-  }, [word.base_form, word.meaning_fa, word.meaning_fa_IPA, word.sentence_en, word.typeOfWordInDb]);
+  }, [word.base_form, word.sentence_en, word.typeOfWordInDb]);
 
   const requiredOk = missingRequiredFields.length === 0;
 
@@ -257,8 +254,6 @@ export default function WordEditorClient({
           data: {
             base_form: word.base_form,
             phonetic_us: word.phonetic_us,
-            meaning_fa: word.meaning_fa,
-            meaning_fa_IPA: word.meaning_fa_IPA,
             pos: word.pos,
             concept_explained: word.concept_explained,
             concept_explained_fa: word.concept_explained_fa,
@@ -268,7 +263,6 @@ export default function WordEditorClient({
             explanation_for_sentence_meaning: word.explanation_for_sentence_meaning,
             learning_depth: word.learning_depth,
             mixed_sentence: word.mixed_sentence,
-            other_meanings_fa: word.other_meanings_fa,
             other_meanings_en: word.other_meanings_en,
             category: word.category,
             typeOfWordInDb: word.typeOfWordInDb,
@@ -291,7 +285,6 @@ export default function WordEditorClient({
                   sentenceRecordId?: number | null;
                   updatedAt?: string;
                   phonetic_us_normalized?: string | null;
-                  meaning_fa_IPA_normalized?: string;
                   json_hint?: string | null;
                 }
               | null;
@@ -302,10 +295,6 @@ export default function WordEditorClient({
       const updatedAt = String(json?.item?.updatedAt ?? "");
       const phonetic_us_normalized =
         json?.item && "phonetic_us_normalized" in json.item ? (json.item.phonetic_us_normalized ?? null) : null;
-      const meaning_fa_IPA_normalized =
-        json?.item && "meaning_fa_IPA_normalized" in json.item
-          ? String(json.item.meaning_fa_IPA_normalized ?? "")
-          : "";
       const json_hint = json?.item && "json_hint" in json.item ? (json.item.json_hint ?? null) : null;
       const sentenceRecordId =
         json?.item && "sentenceRecordId" in json.item ? (json.item.sentenceRecordId ?? null) : word.sentenceRecordId;
@@ -316,7 +305,6 @@ export default function WordEditorClient({
           sentenceRecordId,
           updatedAt,
           phonetic_us_normalized,
-          meaning_fa_IPA_normalized,
           json_hint,
         }));
         setBaseline({
@@ -324,11 +312,10 @@ export default function WordEditorClient({
           sentenceRecordId,
           updatedAt,
           phonetic_us_normalized,
-          meaning_fa_IPA_normalized,
           json_hint,
         });
       } else {
-        setBaseline({ ...word, sentenceRecordId, phonetic_us_normalized, meaning_fa_IPA_normalized, json_hint });
+        setBaseline({ ...word, sentenceRecordId, phonetic_us_normalized, json_hint });
       }
 
       const getAudioKeyForField = (field: (typeof WORD_AUDIO_FIELDS)[number]) =>
@@ -509,7 +496,7 @@ export default function WordEditorClient({
               phonetic_us_normalized: {word.phonetic_us_normalized ?? "—"}
             </div>
             <div className="font-mono text-xs opacity-80">
-              meaning_fa_IPA_normalized: {word.meaning_fa_IPA_normalized}
+              primary PersianWord IPA: {word.primaryMeaning?.meaning_fa_IPA_normalize ?? "—"}
             </div>
           </div>
 
@@ -621,14 +608,8 @@ export default function WordEditorClient({
           </InputRow>
 
           <InputRow label="meaning_fa">
-            <div className="flex items-center gap-2">
-              <input
-                value={word.meaning_fa}
-                onChange={(e) => setWord((p) => ({ ...p, meaning_fa: e.target.value }))}
-                onFocus={registerFieldFocus("meaning_fa")}
-                className="w-full rounded border px-3 py-2 text-sm"
-              />
-              <WordFieldVoiceCell field="meaning_fa" audioKey={word.anki_link_id} text={word.meaning_fa} />
+            <div className="rounded border bg-black/5 p-3 text-sm dark:bg-white/10" dir="rtl">
+              {word.primaryMeaning ? <div className="flex flex-wrap items-center gap-2"><span>{word.primaryMeaning.canonical_text}</span><span className="font-mono text-xs opacity-70">#{word.primaryMeaning.id} • {word.primaryMeaning.meaning_fa_IPA ?? "—"}</span><OpenPersianWordEditorModal id={word.primaryMeaning.id} label={word.primaryMeaning.canonical_text} /></div> : <span className="text-red-600">No primary PersianWord linked.</span>}
             </div>
           </InputRow>
 
@@ -639,25 +620,6 @@ export default function WordEditorClient({
               onFocus={registerFieldFocus("pos")}
               className="w-full rounded border px-3 py-2 text-sm"
               placeholder="(nullable)"
-            />
-          </InputRow>
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-2">
-          <InputRow label="meaning_fa_IPA">
-            <textarea
-              value={word.meaning_fa_IPA}
-              onChange={(e) => setWord((p) => ({ ...p, meaning_fa_IPA: e.target.value }))}
-              onFocus={registerFieldFocus("meaning_fa_IPA")}
-              className="min-h-[84px] w-full rounded border px-3 py-2 text-sm"
-            />
-          </InputRow>
-
-          <InputRow label="meaning_fa_IPA_normalized (auto)">
-            <textarea
-              value={word.meaning_fa_IPA_normalized}
-              readOnly
-              className="min-h-[84px] w-full rounded border bg-black/5 px-3 py-2 text-sm dark:bg-white/10"
             />
           </InputRow>
         </div>
@@ -699,19 +661,8 @@ export default function WordEditorClient({
 
         <div className="grid gap-4 md:grid-cols-2">
           <InputRow label="other_meanings_fa">
-            <div className="flex items-center gap-2">
-              <textarea
-                value={word.other_meanings_fa ?? ""}
-                onChange={(e) => setWord((p) => ({ ...p, other_meanings_fa: asNullableString(e.target.value, { trim: false }) }))}
-                onFocus={registerFieldFocus("other_meanings_fa")}
-                className="min-h-[84px] w-full rounded border px-3 py-2 text-sm"
-                placeholder="(nullable)"
-              />
-              <WordFieldVoiceCell
-                field="other_meanings_fa"
-                audioKey={word.anki_link_id}
-                text={word.other_meanings_fa}
-              />
+            <div className="rounded border bg-black/5 p-3 text-sm dark:bg-white/10" dir="rtl">
+              {word.otherMeanings.length ? <div className="grid gap-2">{word.otherMeanings.map((meaning) => <div key={meaning.id} className="flex flex-wrap items-center gap-2"><span>{meaning.canonical_text}</span><span className="font-mono text-xs opacity-70">#{meaning.id} • {meaning.meaning_fa_IPA ?? "—"}</span><OpenPersianWordEditorModal id={meaning.id} label={meaning.canonical_text} /></div>)}</div> : <span className="opacity-70">—</span>}
             </div>
           </InputRow>
 

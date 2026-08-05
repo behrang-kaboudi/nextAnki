@@ -26,8 +26,6 @@ export async function POST(req: Request) {
       id: true,
       phonetic_us: true,
       phonetic_us_normalized: true,
-      meaning_fa_IPA: true,
-      meaning_fa_IPA_normalized: true,
     },
   });
 
@@ -37,10 +35,7 @@ export async function POST(req: Request) {
   for (const r of rows) {
     lastId = r.id;
     const phonNorm = r.phonetic_us ? computeNormalized(r.phonetic_us) : null;
-    const meaningNorm = computeNormalized(r.meaning_fa_IPA);
-
-    const needsUpdate =
-      (r.phonetic_us_normalized ?? null) !== (phonNorm ?? null) || r.meaning_fa_IPA_normalized !== meaningNorm;
+    const needsUpdate = (r.phonetic_us_normalized ?? null) !== (phonNorm ?? null);
 
     if (!needsUpdate) continue;
 
@@ -48,7 +43,6 @@ export async function POST(req: Request) {
       where: { id: r.id },
       data: {
         phonetic_us_normalized: phonNorm,
-        meaning_fa_IPA_normalized: meaningNorm,
       },
     });
     updated++;

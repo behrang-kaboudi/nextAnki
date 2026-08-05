@@ -1,7 +1,5 @@
 export type WordAudioFieldKey =
   | "base_form"
-  | "meaning_fa"
-  | "other_meanings_fa"
   | "other_meanings_en"
   | "concept_explained_fa"
   | "sentence_en"
@@ -9,8 +7,6 @@ export type WordAudioFieldKey =
 
 export const WORD_AUDIO_FIELDS = [
   "base_form",
-  "meaning_fa",
-  "other_meanings_fa",
   "other_meanings_en",
   "concept_explained_fa",
   "sentence_en",

@@ -14,6 +14,7 @@ import {
 } from "@/lib/audio/persianWordAudioNaming";
 import { getPersianWordAudioAbsoluteDir, getPersianWordAudioAbsolutePath } from "@/lib/audio/persianWordAudioPaths.server";
 import { prisma } from "@/lib/prisma";
+import { touchWordsReferencingPersianWord } from "@/lib/words/persianMeanings.server";
 
 export const runtime = "nodejs";
 
@@ -63,6 +64,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     await fsp.mkdir(getPersianWordAudioAbsoluteDir(), { recursive: true });
     await fsp.copyFile(tmpOutput, getPersianWordAudioAbsolutePath(filename));
     await prisma.persianWord.update({ where: { id }, data: { audio_file_name: filename } });
+    await touchWordsReferencingPersianWord(id);
 
     if (row.audio_file_name && path.basename(row.audio_file_name) === row.audio_file_name) {
       await fsp.rm(getPersianWordAudioAbsolutePath(row.audio_file_name), { force: true });
