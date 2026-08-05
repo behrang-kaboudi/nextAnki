@@ -47,21 +47,11 @@ model Word {
   meaningId                        Int?
   otherMeaningIds                  Json?
   pos                              String?
-  concept_explained                String?
   concept_explained_fa             String?
-  word_hint_story                  String?
-  explanation_for_sentence_meaning String?
   learning_depth                   Float?
-  mixed_sentence                   String?
   other_meanings_en                String?
   category                         String?
-  typeOfWordInDb                   String             @default("temp")
-  hint_sentence                    String?
-  first_letter_en_hint             String?
-  first_letter_fa_hint             String?
   hint_to_select                   String?
-  word_note                        String?
-  common_error                     String?
   /// Score 0-100: how imageable/visual the word is (NULL means unset).
   imageability                     Int?
   /// Productive target score 0-101 (NULL means unset).
@@ -73,9 +63,26 @@ model Word {
   meaning                          PersianWord?       @relation("WordPrimaryPersianMeaning", fields: [meaningId], references: [id], onDelete: SetNull)
 
   @@index([englishId], map: "Word_englishId_idx")
-  @@index([typeOfWordInDb], map: "Word_typeOfWordInDb_idx")
   @@index([meaningId], map: "Word_meaningId_idx")
   @@map("word")
+}
+
+/// Preserves values removed from Word during the 20260805 schema cleanup.
+model WordRemovedFieldArchive {
+  wordId                          Int      @id
+  concept_explained               String?
+  word_hint_story                 String?
+  explanation_for_sentence_meaning String?
+  mixed_sentence                  String?
+  typeOfWordInDb                  String
+  hint_sentence                   String?
+  first_letter_en_hint            String?
+  first_letter_fa_hint            String?
+  word_note                       String?
+  common_error                    String?
+  archivedAt                      DateTime @default(now())
+
+  @@map("word_removed_field_archive")
 }
 
 model EnglishWord {

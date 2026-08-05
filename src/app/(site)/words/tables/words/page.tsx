@@ -29,7 +29,6 @@ const SORT_FIELDS = [
   "meaningId",
   "otherMeaningIds",
   "pos",
-  "typeOfWordInDb",
   "anki_link_id",
   "updatedAt",
 ] as const;
@@ -41,24 +40,11 @@ const TABLE_COLUMNS = [
   { key: "meaningId", label: "meaningId" },
   { key: "otherMeaningIds", label: "otherMeaningIds" },
   { key: "pos", label: "pos" },
-  { key: "concept_explained", label: "concept_explained" },
   { key: "concept_explained_fa", label: "concept_explained_fa" },
-  { key: "word_hint_story", label: "word_hint_story" },
-  {
-    key: "explanation_for_sentence_meaning",
-    label: "explanation_for_sentence_meaning",
-  },
   { key: "learning_depth", label: "learning_depth" },
-  { key: "mixed_sentence", label: "mixed_sentence" },
   { key: "other_meanings_en", label: "other_meanings_en" },
   { key: "category", label: "category" },
-  { key: "typeOfWordInDb", label: "type" },
-  { key: "hint_sentence", label: "hint_sentence" },
-  { key: "first_letter_en_hint", label: "first_letter_en_hint" },
-  { key: "first_letter_fa_hint", label: "first_letter_fa_hint" },
   { key: "hint_to_select", label: "hint_to_select" },
-  { key: "word_note", label: "word_note" },
-  { key: "common_error", label: "common_error" },
   { key: "imageability", label: "imageability" },
   { key: "productive_target", label: "productive_target" },
   { key: "anki_link_id", label: "anki_link_id" },
@@ -74,7 +60,6 @@ const DEFAULT_TABLE_COLUMNS: TableColumnKey[] = [
   "meaningId",
   "otherMeaningIds",
   "pos",
-  "typeOfWordInDb",
   "anki_link_id",
   "updatedAt",
   "actions",
@@ -101,7 +86,6 @@ const COLUMN_INDICATORS: Partial<
     },
     { kind: "index", text: "Index: Word_meaningId_idx" },
   ],
-  typeOfWordInDb: [{ kind: "index", text: "Index: Word_typeOfWordInDb_idx" }],
   anki_link_id: [
     { kind: "unique", text: "Unique index: Word_anki_link_id_key" },
   ],
@@ -295,7 +279,6 @@ export default async function WordsTablePage({
       meaningId: { meaningId: dir },
       otherMeaningIds: { otherMeaningIds: dir },
       pos: { pos: dir },
-      typeOfWordInDb: { typeOfWordInDb: dir },
       anki_link_id: { anki_link_id: dir },
       updatedAt: { updatedAt: dir },
     };
@@ -317,21 +300,11 @@ export default async function WordsTablePage({
         meaningId: true,
         otherMeaningIds: true,
         pos: true,
-        concept_explained: true,
         concept_explained_fa: true,
-        word_hint_story: true,
-        explanation_for_sentence_meaning: true,
         learning_depth: true,
-        mixed_sentence: true,
         other_meanings_en: true,
         category: true,
-        typeOfWordInDb: true,
-        hint_sentence: true,
-        first_letter_en_hint: true,
-        first_letter_fa_hint: true,
         hint_to_select: true,
-        word_note: true,
-        common_error: true,
         imageability: true,
         productive_target: true,
         createdAt: true,
@@ -527,25 +500,11 @@ export default async function WordsTablePage({
                     direction={dir}
                   />
                 ) : null}
-                {hasColumn("concept_explained") ? (
-                  <th className="px-3 py-2">concept_explained</th>
-                ) : null}
                 {hasColumn("concept_explained_fa") ? (
                   <th className="px-3 py-2">concept_explained_fa</th>
                 ) : null}
-                {hasColumn("word_hint_story") ? (
-                  <th className="px-3 py-2">word_hint_story</th>
-                ) : null}
-                {hasColumn("explanation_for_sentence_meaning") ? (
-                  <th className="px-3 py-2">
-                    explanation_for_sentence_meaning
-                  </th>
-                ) : null}
                 {hasColumn("learning_depth") ? (
                   <th className="px-3 py-2">learning_depth</th>
-                ) : null}
-                {hasColumn("mixed_sentence") ? (
-                  <th className="px-3 py-2">mixed_sentence</th>
                 ) : null}
                 {hasColumn("other_meanings_en") ? (
                   <th className="px-3 py-2">other_meanings_en</th>
@@ -553,32 +512,8 @@ export default async function WordsTablePage({
                 {hasColumn("category") ? (
                   <th className="px-3 py-2">category</th>
                 ) : null}
-                {hasColumn("typeOfWordInDb") ? (
-                  <SortHeader
-                    href={sortHref("typeOfWordInDb")}
-                    label="type"
-                    active={sort === "typeOfWordInDb"}
-                    direction={dir}
-                    indicators={COLUMN_INDICATORS.typeOfWordInDb}
-                  />
-                ) : null}
-                {hasColumn("hint_sentence") ? (
-                  <th className="px-3 py-2">hint_sentence</th>
-                ) : null}
-                {hasColumn("first_letter_en_hint") ? (
-                  <th className="px-3 py-2">first_letter_en_hint</th>
-                ) : null}
-                {hasColumn("first_letter_fa_hint") ? (
-                  <th className="px-3 py-2">first_letter_fa_hint</th>
-                ) : null}
                 {hasColumn("hint_to_select") ? (
                   <th className="px-3 py-2">hint_to_select</th>
-                ) : null}
-                {hasColumn("word_note") ? (
-                  <th className="px-3 py-2">word_note</th>
-                ) : null}
-                {hasColumn("common_error") ? (
-                  <th className="px-3 py-2">common_error</th>
                 ) : null}
                 {hasColumn("imageability") ? (
                   <th className="px-3 py-2">imageability</th>
@@ -681,23 +616,11 @@ export default async function WordsTablePage({
                       </span>
                     </td>
                   ) : null}
-                  {hasColumn("concept_explained") ? (
-                    <ValueCell value={row.concept_explained} />
-                  ) : null}
                   {hasColumn("concept_explained_fa") ? (
                     <ValueCell value={row.concept_explained_fa} dir="rtl" />
                   ) : null}
-                  {hasColumn("word_hint_story") ? (
-                    <ValueCell value={row.word_hint_story} />
-                  ) : null}
-                  {hasColumn("explanation_for_sentence_meaning") ? (
-                    <ValueCell value={row.explanation_for_sentence_meaning} />
-                  ) : null}
                   {hasColumn("learning_depth") ? (
                     <ValueCell value={row.learning_depth} />
-                  ) : null}
-                  {hasColumn("mixed_sentence") ? (
-                    <ValueCell value={row.mixed_sentence} />
                   ) : null}
                   {hasColumn("other_meanings_en") ? (
                     <ValueCell value={row.other_meanings_en} />
@@ -705,26 +628,8 @@ export default async function WordsTablePage({
                   {hasColumn("category") ? (
                     <ValueCell value={row.category} />
                   ) : null}
-                  {hasColumn("typeOfWordInDb") ? (
-                    <td className="px-3 py-2">{row.typeOfWordInDb}</td>
-                  ) : null}
-                  {hasColumn("hint_sentence") ? (
-                    <ValueCell value={row.hint_sentence} />
-                  ) : null}
-                  {hasColumn("first_letter_en_hint") ? (
-                    <ValueCell value={row.first_letter_en_hint} />
-                  ) : null}
-                  {hasColumn("first_letter_fa_hint") ? (
-                    <ValueCell value={row.first_letter_fa_hint} dir="rtl" />
-                  ) : null}
                   {hasColumn("hint_to_select") ? (
                     <ValueCell value={row.hint_to_select} />
-                  ) : null}
-                  {hasColumn("word_note") ? (
-                    <ValueCell value={row.word_note} />
-                  ) : null}
-                  {hasColumn("common_error") ? (
-                    <ValueCell value={row.common_error} />
                   ) : null}
                   {hasColumn("imageability") ? (
                     <ValueCell value={row.imageability} />

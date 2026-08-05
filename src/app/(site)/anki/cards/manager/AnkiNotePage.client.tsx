@@ -221,9 +221,6 @@ const DEFAULT_BASE_FORM_LOOKUP_JSON = `[
 ]`;
 
 export default function AnkiNotePage() {
-  const { status: streamedSyncAllStatus } = useJobProgress<SyncAllStatus>(
-    JOB_PROGRESS_TOPICS.ankiHintSentence,
-  );
   const [ankiLinkId, setAnkiLinkId] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [notesInfo, setNotesInfo] = useState<AnkiNotesInfo | null>(null);
@@ -262,21 +259,10 @@ export default function AnkiNotePage() {
   const [browseLimit, setBrowseLimit] = useState(50);
   const [browseQueryExtra, setBrowseQueryExtra] = useState("");
   const [openNoteIds, setOpenNoteIds] = useState<Record<number, boolean>>({});
-  const [updatingNoteIds, setUpdatingNoteIds] = useState<
-    Record<number, boolean>
-  >({});
-  const [updateErrors, setUpdateErrors] = useState<
-    Record<number, string | null>
-  >({});
   const [fieldsModalOpen, setFieldsModalOpen] = useState(false);
   const [modelFields, setModelFields] = useState<string[] | null>(null);
   const [modelError, setModelError] = useState<string | null>(null);
   const [modelBusy, setModelBusy] = useState(false);
-  const [syncAllStatusText, setSyncAllStatusText] = useState<string | null>(
-    null,
-  );
-  const [syncAllRunning, setSyncAllRunning] = useState(false);
-  const [syncAllError, setSyncAllError] = useState<string | null>(null);
   const [baseFormLookupModalOpen, setBaseFormLookupModalOpen] = useState(false);
   const [baseFormLookupJson, setBaseFormLookupJson] = useState(
     DEFAULT_BASE_FORM_LOOKUP_JSON,
@@ -1755,8 +1741,6 @@ export default function AnkiNotePage() {
     setError(null);
     setNotesInfo(null);
     setOpenNoteIds({});
-    setUpdatingNoteIds({});
-    setUpdateErrors({});
 
     try {
       const modelName = AnkiNoteTypes.META_LEX_VR9;
@@ -1797,90 +1781,6 @@ export default function AnkiNotePage() {
       setIsLoading(false);
     }
   }
-
-  async function updateHintSentence(noteId: number) {
-    if (updatingNoteIds[noteId]) return;
-
-    setUpdatingNoteIds((p) => ({ ...p, [noteId]: true }));
-    setUpdateErrors((p) => ({ ...p, [noteId]: null }));
-
-    try {
-      const res = await fetch("/api/anki/hint-sentence/sync", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ noteId }),
-      });
-      const data = (await res.json().catch(() => null)) as {
-        ok?: boolean;
-        note?: AnkiNotesInfo[number];
-        error?: string;
-      } | null;
-      if (!res.ok || !data?.ok || !data.note) {
-        setUpdateErrors((p) => ({
-          ...p,
-          [noteId]: data?.error || `Request failed (${res.status})`,
-        }));
-        return;
-      }
-      const updated = data.note;
-
-      setNotesInfo((prev) => {
-        if (!prev) return prev;
-        return prev.map((n) => (n.noteId === noteId ? updated : n));
-      });
-    } finally {
-      setUpdatingNoteIds((p) => ({ ...p, [noteId]: false }));
-    }
-  }
-
-  async function startSyncAll() {
-    setSyncAllError(null);
-    setSyncAllStatusText(null);
-    setSyncAllRunning(true);
-    try {
-      const res = await fetch("/api/anki/hint-sentence/sync-all", {
-        method: "POST",
-      });
-      const data = (await res.json().catch(() => null)) as {
-        ok?: boolean;
-        error?: string;
-      } | null;
-      if (!res.ok || !data?.ok)
-        throw new Error(data?.error || `Request failed (${res.status})`);
-    } catch (e) {
-      setSyncAllError(e instanceof Error ? e.message : String(e));
-      setSyncAllRunning(false);
-    }
-  }
-
-  async function requestStopSyncAll() {
-    try {
-      const res = await fetch("/api/anki/hint-sentence/sync-all", {
-        method: "DELETE",
-      });
-      const data = (await res.json().catch(() => null)) as {
-        ok?: boolean;
-        error?: string;
-      } | null;
-      if (!res.ok || !data?.ok)
-        throw new Error(data?.error || `Request failed (${res.status})`);
-    } catch (e) {
-      setSyncAllError(e instanceof Error ? e.message : String(e));
-    }
-  }
-
-  useEffect(() => {
-    if (!streamedSyncAllStatus) return;
-    setSyncAllRunning(Boolean(streamedSyncAllStatus.running));
-    setSyncAllError(streamedSyncAllStatus.error);
-    const remaining = Math.max(
-      0,
-      streamedSyncAllStatus.total - streamedSyncAllStatus.processed,
-    );
-    setSyncAllStatusText(
-      `done=${streamedSyncAllStatus.processed}/${streamedSyncAllStatus.total} remaining=${remaining} currentNoteId=${streamedSyncAllStatus.currentNoteId ?? "—"} updated=${streamedSyncAllStatus.updated} skipped=${streamedSyncAllStatus.skipped} failed=${streamedSyncAllStatus.failed} stopRequested=${streamedSyncAllStatus.stopRequested ? "yes" : "no"}`,
-    );
-  }, [streamedSyncAllStatus]);
 
   useEffect(() => {
     if (phase0StatusText) appendPhaseLog(`فاز ۰: ${phase0StatusText}`);
@@ -1966,49 +1866,6 @@ export default function AnkiNotePage() {
         return;
       }
       setModelFields(fieldsRes.result);
-    } finally {
-      setModelBusy(false);
-    }
-  }
-
-  async function ensureHintSentenceField() {
-    setModelError(null);
-    setModelBusy(true);
-    try {
-      const fieldsRes = await ankiOperations.modelFieldNames({
-        modelName: AnkiNoteTypes.META_LEX_VR9,
-      });
-      if (!fieldsRes.ok) {
-        setModelError(fieldsRes.error);
-        return;
-      }
-      const fields = fieldsRes.result;
-      if (!fields) {
-        setModelError("Empty result from AnkiConnect (modelFieldNames).");
-        return;
-      }
-
-      if (fields.includes("hint_sentence")) {
-        setModelFields(fields);
-        return;
-      }
-
-      const addRes = await ankiOperations.modelFieldAdd({
-        modelName: AnkiNoteTypes.META_LEX_VR9,
-        fieldName: "hint_sentence",
-      });
-      if (!addRes.ok) {
-        setModelError(addRes.error);
-        return;
-      }
-      if (addRes.result === null) {
-        setModelError(
-          "modelFieldAdd returned null (check AnkiConnect permissions and model state).",
-        );
-        return;
-      }
-
-      await fetchModelFields();
     } finally {
       setModelBusy(false);
     }
@@ -3194,40 +3051,6 @@ export default function AnkiNotePage() {
             </button>
           </div>
 
-          <div className="mt-3 flex flex-col gap-2">
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => void startSyncAll()}
-                disabled={syncAllRunning}
-                className="h-10 rounded-xl border border-card bg-card px-3 text-sm font-semibold text-foreground hover:bg-black/5 disabled:opacity-60 dark:hover:bg-white/5"
-              >
-                {syncAllRunning
-                  ? "Syncing hint_sentence (ALL)..."
-                  : "Sync hint_sentence (ALL)"}
-              </button>
-              {syncAllRunning ? (
-                <button
-                  type="button"
-                  onClick={() => void requestStopSyncAll()}
-                  className="h-10 rounded-xl border border-card bg-card px-3 text-sm font-semibold text-foreground hover:bg-black/5 dark:hover:bg-white/5"
-                >
-                  Stop (after current)
-                </button>
-              ) : null}
-              {syncAllError ? (
-                <span
-                  className="max-w-[420px] truncate text-xs text-red-700"
-                  title={syncAllError}
-                >
-                  {syncAllError}
-                </span>
-              ) : null}
-            </div>
-            {syncAllStatusText ? (
-              <div className="text-xs text-muted">{syncAllStatusText}</div>
-            ) : null}
-          </div>
         </div>
       </div>
 
@@ -3257,15 +3080,6 @@ export default function AnkiNotePage() {
                 Model:{" "}
                 <span className="font-mono">{AnkiNoteTypes.META_LEX_VR9}</span>
               </div>
-
-              <button
-                type="button"
-                onClick={() => void ensureHintSentenceField()}
-                disabled={modelBusy}
-                className="h-11 rounded-xl bg-[var(--primary)] px-4 text-sm font-semibold text-[var(--primary-foreground)] shadow-elevated transition hover:opacity-95 disabled:opacity-60"
-              >
-                {modelBusy ? "Working..." : "Ensure hint_sentence field"}
-              </button>
 
               {modelError ? (
                 <div className="w-full text-sm text-red-700">{modelError}</div>
@@ -3602,9 +3416,6 @@ export default function AnkiNotePage() {
                     <span className="font-mono text-xs">meaning_fa</span>
                   </th>
                   <th className="px-3 py-2 text-left font-semibold text-foreground">
-                    <span className="font-mono text-xs">hint_sentence</span>
-                  </th>
-                  <th className="px-3 py-2 text-left font-semibold text-foreground">
                     Fields
                   </th>
                 </tr>
@@ -3615,13 +3426,8 @@ export default function AnkiNotePage() {
                   const fieldCount = Object.keys(note.fields ?? {}).length;
                   const baseFormRaw = note.fields?.base_form?.value ?? "";
                   const meaningFaRaw = note.fields?.meaning_fa?.value ?? "";
-                  const hintSentenceRaw =
-                    note.fields?.hint_sentence?.value ?? "";
                   const baseForm = stripSoundTags(baseFormRaw);
                   const meaningFa = stripSoundTags(meaningFaRaw);
-                  const hintSentence = stripSoundTags(hintSentenceRaw);
-                  const updating = Boolean(updatingNoteIds[note.noteId]);
-                  const updateError = updateErrors[note.noteId] ?? null;
                   return (
                     <Fragment key={note.noteId}>
                       <tr className="border-b border-card">
@@ -3649,42 +3455,6 @@ export default function AnkiNotePage() {
                           ) : (
                             <span className="opacity-60">—</span>
                           )}
-                        </td>
-                        <td className="px-3 py-2 text-foreground">
-                          <div className="flex flex-col gap-1">
-                            <div className="text-foreground">
-                              {hintSentence ? (
-                                <span
-                                  className="whitespace-pre-wrap"
-                                  title={hintSentenceRaw || undefined}
-                                >
-                                  {hintSentence}
-                                </span>
-                              ) : (
-                                <span className="opacity-60">—</span>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <button
-                                type="button"
-                                disabled={updating}
-                                onClick={() =>
-                                  void updateHintSentence(note.noteId)
-                                }
-                                className="rounded border px-2 py-1 text-[11px] hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5"
-                              >
-                                {updating ? "Updating..." : "Update"}
-                              </button>
-                              {updateError ? (
-                                <span
-                                  className="max-w-[260px] truncate text-[11px] text-red-700"
-                                  title={updateError}
-                                >
-                                  {updateError}
-                                </span>
-                              ) : null}
-                            </div>
-                          </div>
                         </td>
                         <td className="px-3 py-2">
                           <button

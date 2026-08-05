@@ -32,7 +32,6 @@ export async function GET(req: Request) {
       anki_link_id: string;
       base_form: string;
       meaning_fa: string;
-      hint_sentence: string | null;
       json_hint: string | null;
       prevJson: string | null;
       nextJson: string | null;
@@ -51,7 +50,6 @@ export async function GET(req: Request) {
         english: { select: WORD_ENGLISH_FIELDS_SELECT },
         meaningId: true,
         otherMeaningIds: true,
-        hint_sentence: true,
       },
     });
 
@@ -87,7 +85,6 @@ export async function GET(req: Request) {
         anki_link_id: row.anki_link_id,
         base_form: row.base_form,
         meaning_fa: row.meaning_fa,
-        hint_sentence: row.hint_sentence,
         json_hint: row.json_hint ?? null,
         prevJson: prevComparable,
         nextJson: nextComparable,

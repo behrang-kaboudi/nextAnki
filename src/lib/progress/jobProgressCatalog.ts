@@ -3,7 +3,6 @@ import "server-only";
 import { getAnkiLinkIdDedupStatus } from "@/lib/anki/ankiLinkIdDedupJob";
 import { getConceptExplainedFaSyncAllStatus } from "@/lib/anki/conceptExplainedFaSyncAllJob";
 import { getFullSyncAllStatus } from "@/lib/anki/fullSyncAllJob";
-import { getHintSentenceSyncAllStatus } from "@/lib/anki/hintSentenceSyncAllJob";
 import { getJsonHintSyncAllStatus } from "@/lib/anki/jsonHintSyncAllJob";
 import { getMeaningFaSyncAllStatus } from "@/lib/anki/meaningFaSyncAllJob";
 import { getMediaSyncAllStatus } from "@/lib/anki/mediaSyncAllJob";
@@ -12,7 +11,6 @@ import { getSentenceDeckSyncAllStatus } from "@/lib/anki/sentenceDeckSyncAllJob"
 import { getSentenceEnMeaningFaSyncAllStatus } from "@/lib/anki/sentenceEnMeaningFaSyncAllJob";
 import { getSentenceEnSyncAllStatus } from "@/lib/anki/sentenceEnSyncAllJob";
 import { WORD_AUDIO_FIELDS } from "@/lib/audio/wordFieldAudioNaming";
-import { getVoiceJobStatus } from "@/lib/words/voiceGenerateJob";
 import { getWordFieldVoiceJobStatus } from "@/lib/words/wordFieldVoiceGenerateJob";
 import { getPersianWordAudioJobStatus } from "@/lib/persian/persianWordAudioGenerateJob";
 import { getEnglishWordAudioJobStatus } from "@/lib/english/englishWordAudioGenerateJob";
@@ -32,9 +30,7 @@ const statusGetters = new Map<string, StatusGetter>([
   [JOB_PROGRESS_TOPICS.ankiMeaningFa, getMeaningFaSyncAllStatus],
   [JOB_PROGRESS_TOPICS.ankiSentenceEn, getSentenceEnSyncAllStatus],
   [JOB_PROGRESS_TOPICS.ankiSentenceEnMeaningFa, getSentenceEnMeaningFaSyncAllStatus],
-  [JOB_PROGRESS_TOPICS.ankiHintSentence, getHintSentenceSyncAllStatus],
   [JOB_PROGRESS_TOPICS.sentenceDeck, getSentenceDeckSyncAllStatus],
-  [JOB_PROGRESS_TOPICS.wordVoice, getVoiceJobStatus],
   [JOB_PROGRESS_TOPICS.persianWordAudio, getPersianWordAudioJobStatus],
   [JOB_PROGRESS_TOPICS.englishWordAudio, getEnglishWordAudioJobStatus],
   [JOB_PROGRESS_TOPICS.englishWordJsonHint, getEnglishWordJsonHintJobStatus],

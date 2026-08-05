@@ -51,25 +51,15 @@ export type WordEditorState = {
   meaning_fa_IPA: string;
   meaning_fa_IPA_normalized: string;
   pos: string | null;
-  concept_explained: string | null;
   concept_explained_fa: string | null;
-  word_hint_story: string | null;
   sentence_en: string;
   sentence_en_meaning_fa: string | null;
-  explanation_for_sentence_meaning: string | null;
   learning_depth: number | null;
-  mixed_sentence: string | null;
   other_meanings_fa: string | null;
   other_meanings_en: string | null;
   category: string | null;
-  typeOfWordInDb: string;
-  hint_sentence: string | null;
-  first_letter_en_hint: string | null;
-  first_letter_fa_hint: string | null;
   hint_to_select: string | null;
   json_hint: string | null;
-  word_note: string | null;
-  common_error: string | null;
   imageability: number | null;
   productive_target: number | null;
 
@@ -90,18 +80,9 @@ type EditableFieldKey =
   | "learning_depth"
   | "imageability"
   | "productive_target"
-  | "typeOfWordInDb"
   | "category"
-  | "mixed_sentence"
-  | "hint_sentence"
-  | "word_hint_story"
-  | "concept_explained"
-  | "explanation_for_sentence_meaning"
-  | "first_letter_en_hint"
-  | "first_letter_fa_hint"
   | "hint_to_select"
-  | "common_error"
-  | "word_note";
+  ;
 
 function InputRow({
   label,
@@ -172,9 +153,8 @@ export default function WordEditorClient({
     const missing: string[] = [];
     if (!word.base_form.trim()) missing.push("base_form");
     if (!word.sentence_en.trim()) missing.push("sentence_en");
-    if (!word.typeOfWordInDb.trim()) missing.push("typeOfWordInDb");
     return missing;
-  }, [word.base_form, word.sentence_en, word.typeOfWordInDb]);
+  }, [word.base_form, word.sentence_en]);
 
   const requiredOk = missingRequiredFields.length === 0;
 
@@ -255,23 +235,13 @@ export default function WordEditorClient({
             base_form: word.base_form,
             phonetic_us: word.phonetic_us,
             pos: word.pos,
-            concept_explained: word.concept_explained,
             concept_explained_fa: word.concept_explained_fa,
-            word_hint_story: word.word_hint_story,
             sentence_en: word.sentence_en,
             sentence_en_meaning_fa: word.sentence_en_meaning_fa,
-            explanation_for_sentence_meaning: word.explanation_for_sentence_meaning,
             learning_depth: word.learning_depth,
-            mixed_sentence: word.mixed_sentence,
             other_meanings_en: word.other_meanings_en,
             category: word.category,
-            typeOfWordInDb: word.typeOfWordInDb,
-            hint_sentence: word.hint_sentence,
-            first_letter_en_hint: word.first_letter_en_hint,
-            first_letter_fa_hint: word.first_letter_fa_hint,
             hint_to_select: word.hint_to_select,
-            word_note: word.word_note,
-            common_error: word.common_error,
             imageability: word.imageability,
             productive_target: word.productive_target,
           },
@@ -774,14 +744,6 @@ export default function WordEditorClient({
               />
             </InputRow>
 
-            <InputRow label="typeOfWordInDb">
-              <input
-                value={word.typeOfWordInDb}
-                onChange={(e) => setWord((p) => ({ ...p, typeOfWordInDb: e.target.value }))}
-                onFocus={registerFieldFocus("typeOfWordInDb")}
-                className="w-full rounded border px-3 py-2 text-sm"
-              />
-            </InputRow>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
@@ -795,87 +757,8 @@ export default function WordEditorClient({
               />
             </InputRow>
 
-            <InputRow label="mixed_sentence">
-              <input
-                value={word.mixed_sentence ?? ""}
-                onChange={(e) => setWord((p) => ({ ...p, mixed_sentence: asNullableString(e.target.value, { trim: false }) }))}
-                onFocus={registerFieldFocus("mixed_sentence")}
-                className="w-full rounded border px-3 py-2 text-sm"
-                placeholder="(nullable)"
-              />
-            </InputRow>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <InputRow label="hint_sentence">
-              <textarea
-                value={word.hint_sentence ?? ""}
-                onChange={(e) => setWord((p) => ({ ...p, hint_sentence: asNullableString(e.target.value, { trim: false }) }))}
-                onFocus={registerFieldFocus("hint_sentence")}
-                className="min-h-[84px] w-full rounded border px-3 py-2 text-sm"
-                placeholder="(nullable)"
-              />
-            </InputRow>
-
-            <InputRow label="word_hint_story">
-              <textarea
-                value={word.word_hint_story ?? ""}
-                onChange={(e) => setWord((p) => ({ ...p, word_hint_story: asNullableString(e.target.value, { trim: false }) }))}
-                onFocus={registerFieldFocus("word_hint_story")}
-                className="min-h-[84px] w-full rounded border px-3 py-2 text-sm"
-                placeholder="(nullable)"
-              />
-            </InputRow>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <InputRow label="concept_explained">
-              <textarea
-                value={word.concept_explained ?? ""}
-                onChange={(e) => setWord((p) => ({ ...p, concept_explained: asNullableString(e.target.value, { trim: false }) }))}
-                onFocus={registerFieldFocus("concept_explained")}
-                className="min-h-[84px] w-full rounded border px-3 py-2 text-sm"
-                placeholder="(nullable)"
-              />
-            </InputRow>
-
-            <InputRow label="explanation_for_sentence_meaning">
-              <textarea
-                value={word.explanation_for_sentence_meaning ?? ""}
-                onChange={(e) =>
-                  setWord((p) => ({
-                    ...p,
-                    explanation_for_sentence_meaning: asNullableString(e.target.value, { trim: false }),
-                  }))
-                }
-                onFocus={registerFieldFocus("explanation_for_sentence_meaning")}
-                className="min-h-[84px] w-full rounded border px-3 py-2 text-sm"
-                placeholder="(nullable)"
-              />
-            </InputRow>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <InputRow label="first_letter_en_hint">
-              <textarea
-                value={word.first_letter_en_hint ?? ""}
-                onChange={(e) => setWord((p) => ({ ...p, first_letter_en_hint: asNullableString(e.target.value, { trim: false }) }))}
-                onFocus={registerFieldFocus("first_letter_en_hint")}
-                className="min-h-[84px] w-full rounded border px-3 py-2 text-sm"
-                placeholder="(nullable)"
-              />
-            </InputRow>
-
-            <InputRow label="first_letter_fa_hint">
-              <textarea
-                value={word.first_letter_fa_hint ?? ""}
-                onChange={(e) => setWord((p) => ({ ...p, first_letter_fa_hint: asNullableString(e.target.value, { trim: false }) }))}
-                onFocus={registerFieldFocus("first_letter_fa_hint")}
-                className="min-h-[84px] w-full rounded border px-3 py-2 text-sm"
-                placeholder="(nullable)"
-              />
-            </InputRow>
-          </div>
 
           <div className="grid gap-4 md:grid-cols-2">
             <InputRow label="hint_to_select">
@@ -888,27 +771,6 @@ export default function WordEditorClient({
               />
             </InputRow>
 
-            <InputRow label="common_error">
-              <input
-                value={word.common_error ?? ""}
-                onChange={(e) => setWord((p) => ({ ...p, common_error: asNullableString(e.target.value, { trim: false }) }))}
-                onFocus={registerFieldFocus("common_error")}
-                className="w-full rounded border px-3 py-2 text-sm"
-                placeholder="(nullable)"
-              />
-            </InputRow>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <InputRow label="word_note">
-              <textarea
-                value={word.word_note ?? ""}
-                onChange={(e) => setWord((p) => ({ ...p, word_note: asNullableString(e.target.value, { trim: false }) }))}
-                onFocus={registerFieldFocus("word_note")}
-                className="min-h-[84px] w-full rounded border px-3 py-2 text-sm"
-                placeholder="(nullable)"
-              />
-            </InputRow>
           </div>
         </div>
       </details>

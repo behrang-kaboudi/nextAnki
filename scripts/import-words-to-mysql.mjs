@@ -11,21 +11,11 @@ const inputPath = process.env.WORDS_JSON_PATH || path.join(process.cwd(), "Engli
 
 const WORD_FIELDS = [
   "pos",
-  "concept_explained",
   "concept_explained_fa",
-  "word_hint_story",
-  "explanation_for_sentence_meaning",
   "learning_depth",
-  "mixed_sentence",
   "other_meanings_en",
   "category",
-  "typeOfWordInDb",
-  "hint_sentence",
-  "first_letter_en_hint",
-  "first_letter_fa_hint",
   "hint_to_select",
-  "word_note",
-  "common_error",
   "imageability",
   "productive_target",
 ];

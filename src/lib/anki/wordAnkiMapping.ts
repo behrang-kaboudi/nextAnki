@@ -19,7 +19,7 @@ import { findPrimarySentenceByAnkiLinkId } from "@/lib/sentences/sentenceRepo";
 import { hydrateWordWithPersianMeanings, type WordWithPersianMeanings } from "@/lib/words/persianMeanings.server";
 import { hydrateWordWithEnglishFields, type WordEnglishFields } from "@/lib/english/wordEnglishFields.server";
 
-import { IpaCandidate, WordPictures } from "../ipa/setPictures/types";
+import { IpaCandidate } from "../ipa/setPictures/types";
 
 export const WORD_ANKI_LINK_ID_FIELD = "anki_link_id" as const;
 
@@ -169,28 +169,6 @@ function formatFaEnText(candidate: Pick<IpaCandidate, "fa" | "en">): string {
   return fa || en || "";
 }
 
-async function buildHintLines(
-  candidates: Array<IpaCandidate | null | undefined>,
-): Promise<string> {
-  const out: string[] = [];
-  const seen = new Set<string>();
-
-  for (const cand of candidates) {
-    if (!cand) continue;
-    const key = `${cand.source}|${cand.fa}|${cand.en}|${cand.target_ipa}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
-
-    const text = formatFaEnText(cand);
-    if (!text) continue;
-
-    const file = await selectFile(cand);
-    out.push(`${text}${toSoundTagFromAbsPath(file)}`.trim());
-  }
-
-  return out.join("\n").trim();
-}
-
 function asNonEmptyString(value: unknown): string | null {
   if (typeof value !== "string") return null;
   const trimmed = value.trim();
@@ -280,27 +258,12 @@ export const WORD_ANKI_FIELD_GENERATORS = {
   // TODO: define the source-of-truth for this field (not currently present in DB schema).
   best_translate: () => "",
 
-  mixed_sentence: (w) => w.mixed_sentence ?? "",
-  first_letter_fa_hint: async (w) => {
-    const obj = JSON.parse(w.json_hint ?? "{}") as WordPictures;
-    const cand = obj.persianImage ?? null;
-    if (!cand) return "";
-    const text = formatFaEnText(cand);
-    const file = await selectFile(cand);
-    return `${text}${toSoundTagFromAbsPath(file)}`.trim();
-  },
-  first_letter_en_hint: async (w) => {
-    const obj = JSON.parse(w.json_hint ?? "{}") as WordPictures;
-    return buildHintLines([obj.person, obj.adj, obj.job]);
-  },
-
   // User-managed in Anki (personal notes); intentionally not sourced from DB.
   selfGuide: () => "",
 
   // Anki field name is `hint_to_select_letters`, but DB field is `hint_to_select`.
   hint_to_select_letters: (w) => String(w.base_form.length ?? ""),
 
-  hint_sentence: (w) => w.hint_sentence ?? "",
   phonetic_us_normalized: (w) => w.phonetic_us_normalized ?? "",
   learning_depth: (w) =>
     w.learning_depth == null ? "" : String(w.learning_depth),

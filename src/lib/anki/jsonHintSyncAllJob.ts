@@ -99,17 +99,13 @@ export function getJsonHintSyncAllStatus(): JsonHintSyncAllStatus {
   return pub;
 }
 
-async function updateNoteJsonHintAndFirstLetterHints(
+async function updateNoteJsonHint(
   noteId: number,
-  fields: {
-    json_hint: string;
-    first_letter_fa_hint: string;
-    first_letter_en_hint: string;
-  },
+  jsonHint: string,
   anki: ReturnType<typeof createAnkiConnectClient>,
 ) {
   const res = await anki.requestDetailed("updateNoteFields", {
-    note: { id: noteId, fields },
+    note: { id: noteId, fields: { json_hint: jsonHint } },
   });
   if (!res.ok) return { ok: false as const, error: res.error };
   return { ok: true as const };
@@ -149,8 +145,6 @@ async function runJob(state: State) {
     {
       ankiLinkId: string | null;
       jsonHint: string;
-      firstLetterFaHint: string;
-      firstLetterEnHint: string;
     }
   >();
   for (const batch of chunk(ids, 250)) {
@@ -161,8 +155,6 @@ async function runJob(state: State) {
       beforeByNoteId.set(n.noteId, {
         ankiLinkId,
         jsonHint: String(n.fields?.json_hint?.value ?? ""),
-        firstLetterFaHint: String(n.fields?.first_letter_fa_hint?.value ?? ""),
-        firstLetterEnHint: String(n.fields?.first_letter_en_hint?.value ?? ""),
       });
     }
   }
@@ -208,16 +200,10 @@ async function runJob(state: State) {
       return;
     }
 
-    const [jsonHint, firstLetterFaHint, firstLetterEnHint] = await Promise.all([
-      WORD_ANKI_FIELD_GENERATORS.json_hint(word),
-      WORD_ANKI_FIELD_GENERATORS.first_letter_fa_hint(word),
-      WORD_ANKI_FIELD_GENERATORS.first_letter_en_hint(word),
-    ]);
+    const jsonHint = await WORD_ANKI_FIELD_GENERATORS.json_hint(word);
 
     const same =
-      jsonHint === (before?.jsonHint ?? "") &&
-      firstLetterFaHint === (before?.firstLetterFaHint ?? "") &&
-      firstLetterEnHint === (before?.firstLetterEnHint ?? "");
+      jsonHint === (before?.jsonHint ?? "");
 
     if (same) {
       state.skippedSame += 1;
@@ -226,15 +212,7 @@ async function runJob(state: State) {
     }
 
     const anki = clients[Math.abs(noteId) % clients.length]!;
-    const updated = await updateNoteJsonHintAndFirstLetterHints(
-      noteId,
-      {
-        json_hint: jsonHint,
-        first_letter_fa_hint: firstLetterFaHint,
-        first_letter_en_hint: firstLetterEnHint,
-      },
-      anki,
-    );
+    const updated = await updateNoteJsonHint(noteId, jsonHint, anki);
     if (!updated.ok) state.failed += 1;
     else state.updated += 1;
 

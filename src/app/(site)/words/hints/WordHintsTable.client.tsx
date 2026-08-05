@@ -7,7 +7,6 @@ type Row = {
   anki_link_id: string;
   base_form: string;
   meaning_fa: string;
-  hint_sentence: string | null;
   json_hint: string | null;
   json_hint_generated_at_ms: number | null;
 };
@@ -294,9 +293,6 @@ export default function WordHintsTable({ rows }: { rows: Row[] }) {
                   meaning_fa
                 </th>
                 <th className="whitespace-nowrap px-3 py-2 font-semibold">
-                  hint_sentence
-                </th>
-                <th className="whitespace-nowrap px-3 py-2 font-semibold">
                   json_hint
                 </th>
                 <th className="whitespace-nowrap px-3 py-2 font-semibold">
@@ -330,9 +326,6 @@ export default function WordHintsTable({ rows }: { rows: Row[] }) {
                       title={r.meaning_fa}
                     >
                       {r.meaning_fa}
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-2">
-                      {r.hint_sentence ?? "—"}
                     </td>
                     <td className="w-[520px] px-3 py-2 align-top">
                       {jsonPretty ? (

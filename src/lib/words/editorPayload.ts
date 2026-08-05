@@ -20,25 +20,15 @@ export type WordEditorInitial = {
   meaning_fa_IPA: string;
   meaning_fa_IPA_normalized: string;
   pos: string | null;
-  concept_explained: string | null;
   concept_explained_fa: string | null;
-  word_hint_story: string | null;
   sentence_en: string;
   sentence_en_meaning_fa: string | null;
-  explanation_for_sentence_meaning: string | null;
   learning_depth: number | null;
-  mixed_sentence: string | null;
   other_meanings_fa: string | null;
   other_meanings_en: string | null;
   category: string | null;
-  typeOfWordInDb: string;
-  hint_sentence: string | null;
-  first_letter_en_hint: string | null;
-  first_letter_fa_hint: string | null;
   hint_to_select: string | null;
   json_hint: string | null;
-  word_note: string | null;
-  common_error: string | null;
   imageability: number | null;
   productive_target: number | null;
 
@@ -78,26 +68,16 @@ export async function getWordEditorInitial(id: number): Promise<WordEditorInitia
     meaning_fa_IPA: withMeanings.meaning_fa_IPA,
     meaning_fa_IPA_normalized: withMeanings.meaning_fa_IPA_normalized,
     pos: word.pos,
-    concept_explained: word.concept_explained,
     concept_explained_fa: word.concept_explained_fa,
-    word_hint_story: word.word_hint_story,
     sentenceRecordId: primarySentence?.id ?? null,
     sentence_en: primarySentence?.sentence_en ?? "",
     sentence_en_meaning_fa: primarySentence?.sentence_en_meaning_fa ?? null,
-    explanation_for_sentence_meaning: word.explanation_for_sentence_meaning,
     learning_depth: word.learning_depth,
-    mixed_sentence: word.mixed_sentence,
     other_meanings_fa: withMeanings.other_meanings_fa,
     other_meanings_en: word.other_meanings_en,
     category: word.category,
-    typeOfWordInDb: word.typeOfWordInDb,
-    hint_sentence: word.hint_sentence,
-    first_letter_en_hint: word.first_letter_en_hint,
-    first_letter_fa_hint: word.first_letter_fa_hint,
     hint_to_select: word.hint_to_select,
     json_hint: withEnglish.json_hint,
-    word_note: word.word_note,
-    common_error: word.common_error,
     imageability: word.imageability,
     productive_target: word.productive_target,
     createdAt: word.createdAt.toISOString(),

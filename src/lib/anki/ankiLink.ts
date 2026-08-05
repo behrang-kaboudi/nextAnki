@@ -20,7 +20,7 @@ export async function getAnkiNoteAndDbWordByAnkiLinkId(noteId: number) {
 
   const word = await prisma.word.findUnique({
     where: { anki_link_id: ankiLinkId },
-    select: { id: true, anki_link_id: true, hint_sentence: true },
+    select: { id: true, anki_link_id: true },
   });
   if (!word) return { ok: false as const, error: `DB word not found for anki_link_id=${ankiLinkId}` };
 

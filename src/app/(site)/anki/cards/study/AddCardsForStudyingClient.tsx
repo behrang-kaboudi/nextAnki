@@ -1131,7 +1131,7 @@ const AddCardsForStudyingClient = () => {
                       </div>
                       <div className="mt-3 text-xs leading-6 text-muted">
                         پس اگر دنبال توضیح دقیق فیلدها باشیم: این بخش به
-                        <code>hint_sentence</code>، <code>selfGuide</code> یا متن آزاد
+                        <code>selfGuide</code> یا متن آزاد
                         راهنما کاری ندارد. فیلد تعیین‌کننده برای گسترش،
                         <code>json_hint</code> است و داخل آن هم مشخصاً
                         <code>person.anki_link_id</code> و <code>job.anki_link_id</code>

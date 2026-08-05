@@ -101,7 +101,6 @@ export const siteMapGroups: SiteMapGroup[] = [
     summary: "Maintain pronunciation keywords, phrase matching, and picture-word media.",
     pages: [
       { title: "IPA Keywords", path: "/ipa/keywords", summary: "Manages IPA keyword mappings and their Persian-friendly forms.", menu: true },
-      { title: "Phrase Builder", path: "/ipa/phrase-builder", summary: "Explores word-to-character phrase matches used to build pronunciation hints.", menu: true },
       { title: "Picture Words", path: "/ipa/picture-words", summary: "Maintains visual keyword associations used in pronunciation learning.", menu: true },
       { title: "Picture Word Audio", path: "/ipa/picture-words/audio", summary: "Records, uploads, lists, and removes audio for picture words.", menu: true },
     ],

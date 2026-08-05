@@ -90,7 +90,6 @@
         "icon": "ipa",
         "items": [
           { "type": "link", "label": "IPA Keywords", "href": "/ipa/keywords", "icon": "ipa", "description": "Manage IPA keyword mappings." },
-          { "type": "link", "label": "Phrase Builder", "href": "/ipa/phrase-builder", "icon": "brain", "description": "Explore word-to-character pronunciation matches." },
           { "type": "link", "label": "Picture Words", "href": "/ipa/picture-words", "icon": "image", "description": "Maintain visual pronunciation associations." },
           { "type": "link", "label": "Picture Word Audio", "href": "/ipa/picture-words/audio", "icon": "audio", "description": "Manage audio for picture words." }
         ]

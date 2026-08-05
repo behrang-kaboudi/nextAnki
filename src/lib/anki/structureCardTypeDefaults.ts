@@ -258,13 +258,13 @@ export const defaultStructureCardTypeTemplates = {
     Back: `{{FrontSide}}
 
 
-{{#selfGuide}}<div style='font-family: "Arial"; font-size: 20px;'>{{selfGuide}}</div>{{/selfGuide}}{{^selfGuide}}<div style='font-family: "Arial"; font-size: 20px;'>{{first_letter_en_hint}}</div>{{/selfGuide}}
+<div style='font-family: "Arial"; font-size: 20px;'>{{selfGuide}}</div>
 
 `,
   },
   "Rahnama2": {
     Front: `<div style="display:none;">[sound:anki_question_gentle_chime.mp3]</div>
-{{#selfGuide}}<div style='font-family: "Arial"; font-size: 20px;'>{{selfGuide}}</div>{{/selfGuide}}{{^selfGuide}}<div style='font-family: "Arial"; font-size: 20px;'>{{first_letter_en_hint}}</div>{{/selfGuide}}
+<div style='font-family: "Arial"; font-size: 20px;'>{{selfGuide}}</div>
 
 `,
     Back: `{{FrontSide}}

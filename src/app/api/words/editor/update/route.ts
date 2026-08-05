@@ -70,7 +70,6 @@ export async function POST(req: Request) {
 
     const base_form = normalizeEnglishWordText(normalizeRequiredString(d.base_form) ?? "");
     const sentence_en = normalizeRequiredString(d.sentence_en);
-    const typeOfWordInDb = normalizeRequiredString(d.typeOfWordInDb);
     const productive_target = normalizeProductiveTarget(d.productive_target);
 
     if (d.productive_target !== undefined && productive_target === undefined) {
@@ -82,8 +81,7 @@ export async function POST(req: Request) {
 
     if (
       !base_form ||
-      sentence_en == null ||
-      typeOfWordInDb == null
+      sentence_en == null
     ) {
       return NextResponse.json(
         { ok: false, error: "Missing required string fields." },
@@ -132,21 +130,11 @@ export async function POST(req: Request) {
       data: {
         englishId: englishWord.id,
         pos: normalizeNullableString(d.pos),
-        concept_explained: normalizeNullableString(d.concept_explained),
         concept_explained_fa: normalizeNullableString(d.concept_explained_fa),
-        word_hint_story: normalizeNullableString(d.word_hint_story),
-        explanation_for_sentence_meaning: normalizeNullableString(d.explanation_for_sentence_meaning),
         learning_depth: normalizeNullableNumber(d.learning_depth),
-        mixed_sentence: normalizeNullableString(d.mixed_sentence),
         other_meanings_en: normalizeNullableString(d.other_meanings_en),
         category: normalizeNullableString(d.category),
-        typeOfWordInDb,
-        hint_sentence: normalizeNullableString(d.hint_sentence),
-        first_letter_en_hint: normalizeNullableString(d.first_letter_en_hint),
-        first_letter_fa_hint: normalizeNullableString(d.first_letter_fa_hint),
         hint_to_select: normalizeNullableString(d.hint_to_select),
-        word_note: normalizeNullableString(d.word_note),
-        common_error: normalizeNullableString(d.common_error),
         imageability: normalizeNullableNumber(d.imageability),
         productive_target,
       },

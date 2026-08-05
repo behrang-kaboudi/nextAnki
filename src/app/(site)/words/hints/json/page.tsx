@@ -1,7 +1,6 @@
 import Link from "next/link";
 
 import { prisma } from "@/lib/prisma";
-import HintExportModal from "../HintExportModal.client";
 import JsonHintGenerateAllButton from "../JsonHintGenerateAllButton.client";
 import JsonHintHelpModal from "../JsonHintHelpModal.client";
 import WordHintsTable from "../WordHintsTable.client";
@@ -71,7 +70,6 @@ export default async function WordHintsJsonPage({
         english: { select: WORD_ENGLISH_FIELDS_SELECT },
         meaningId: true,
         otherMeaningIds: true,
-        hint_sentence: true,
       },
     }),
   ]);
@@ -104,7 +102,6 @@ export default async function WordHintsJsonPage({
         </div>
 
         <div className="flex w-full flex-wrap items-center justify-end gap-2 sm:w-auto">
-          <HintExportModal q={q} />
           <JsonHintGenerateAllButton q={q} />
           <JsonHintHelpModal />
         </div>
