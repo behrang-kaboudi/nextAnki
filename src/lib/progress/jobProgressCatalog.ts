@@ -15,6 +15,8 @@ import { WORD_AUDIO_FIELDS } from "@/lib/audio/wordFieldAudioNaming";
 import { getVoiceJobStatus } from "@/lib/words/voiceGenerateJob";
 import { getWordFieldVoiceJobStatus } from "@/lib/words/wordFieldVoiceGenerateJob";
 import { getPersianWordAudioJobStatus } from "@/lib/persian/persianWordAudioGenerateJob";
+import { getEnglishWordAudioJobStatus } from "@/lib/english/englishWordAudioGenerateJob";
+import { getEnglishWordJsonHintJobStatus } from "@/lib/english/englishWordJsonHintGenerateJob";
 
 import { JOB_PROGRESS_TOPICS, wordFieldVoiceProgressTopic } from "./topics";
 
@@ -34,6 +36,8 @@ const statusGetters = new Map<string, StatusGetter>([
   [JOB_PROGRESS_TOPICS.sentenceDeck, getSentenceDeckSyncAllStatus],
   [JOB_PROGRESS_TOPICS.wordVoice, getVoiceJobStatus],
   [JOB_PROGRESS_TOPICS.persianWordAudio, getPersianWordAudioJobStatus],
+  [JOB_PROGRESS_TOPICS.englishWordAudio, getEnglishWordAudioJobStatus],
+  [JOB_PROGRESS_TOPICS.englishWordJsonHint, getEnglishWordJsonHintJobStatus],
 ]);
 
 for (const field of WORD_AUDIO_FIELDS) {

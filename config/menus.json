@@ -21,7 +21,8 @@
             "icon": "database",
             "items": [
               { "type": "link", "label": "Word Table", "href": "/words/tables/words", "icon": "database", "description": "Browse Word records with search, sorting, and direct editing." },
-              { "type": "link", "label": "Persian Word Table", "href": "/words/tables/persian-words", "icon": "database", "description": "Browse and edit Persian word table records and their audio." }
+              { "type": "link", "label": "Persian Word Table", "href": "/words/tables/persian-words", "icon": "database", "description": "Browse and edit Persian word table records and their audio." },
+              { "type": "link", "label": "English Word Table", "href": "/words/tables/english-words", "icon": "database", "description": "Browse canonical English words, US IPA, JSON hints, audio, and Word links." }
             ]
           },
           { "type": "link", "label": "Word Extraction", "href": "/words/extraction", "icon": "sparkles", "description": "Extract and enrich vocabulary through staged prompts." },

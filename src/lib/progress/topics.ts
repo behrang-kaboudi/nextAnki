@@ -12,6 +12,8 @@ export const JOB_PROGRESS_TOPICS = {
   sentenceDeck: "anki.sync.sentence-deck",
   wordVoice: "words.voice",
   persianWordAudio: "words.persian-word-audio",
+  englishWordAudio: "words.english-word-audio",
+  englishWordJsonHint: "words.english-word-json-hint",
 } as const;
 
 export function wordFieldVoiceProgressTopic(field: string) {

@@ -21,6 +21,7 @@ async function main() {
       createdAt: new Date().toISOString(),
       data: {
         word: await prisma.word.findMany(),
+        englishWord: await prisma.englishWord.findMany(),
         sentence: await prisma.sentence.findMany(),
         sentenceWordLink: await prisma.sentenceWordLink.findMany(),
         ipaKeyword: await prisma.ipaKeyword.findMany(),

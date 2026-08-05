@@ -64,6 +64,8 @@ export async function getDbFingerprint(prisma: PrismaClient) {
   const [
     wordCount,
     wordMax,
+    englishWordCount,
+    englishWordMax,
     sentenceCount,
     sentenceMax,
     sentenceWordLinkCount,
@@ -92,6 +94,10 @@ export async function getDbFingerprint(prisma: PrismaClient) {
   ] = await Promise.all([
     countOrNull(() => prisma.word.count()),
     maxDateOrNull(async () => (await prisma.word.aggregate({ _max: { updatedAt: true } }))._max.updatedAt ?? null),
+    countOrNull(() => prisma.englishWord.count()),
+    maxDateOrNull(
+      async () => (await prisma.englishWord.aggregate({ _max: { updatedAt: true } }))._max.updatedAt ?? null
+    ),
     countOrNull(() => prisma.sentence.count()),
     maxDateOrNull(async () => (await prisma.sentence.aggregate({ _max: { updatedAt: true } }))._max.updatedAt ?? null),
     countOrNull(() => prisma.sentenceWordLink.count()),
@@ -136,6 +142,7 @@ export async function getDbFingerprint(prisma: PrismaClient) {
 
   const fingerprint = {
     word: { count: wordCount, max: wordMax?.toISOString() ?? null },
+    englishWord: { count: englishWordCount, max: englishWordMax?.toISOString() ?? null },
     sentence: { count: sentenceCount, max: sentenceMax?.toISOString() ?? null },
     sentenceWordLink: { count: sentenceWordLinkCount, max: sentenceWordLinkMax?.toISOString() ?? null },
     ipaKeyword: { count: ipaKeywordCount, max: ipaKeywordMax?.toISOString() ?? null },
@@ -221,6 +228,7 @@ async function writeJsonBackup(prisma: PrismaClient, outputFile: string) {
     createdAt: new Date().toISOString(),
     data: {
       word: await prisma.word.findMany(),
+      englishWord: await prisma.englishWord.findMany(),
       sentence: await prisma.sentence.findMany(),
       sentenceWordLink: await prisma.sentenceWordLink.findMany(),
       ipaKeyword: await prisma.ipaKeyword.findMany(),

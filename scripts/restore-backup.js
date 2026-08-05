@@ -107,6 +107,7 @@ async function main() {
     prisma.verificationToken.deleteMany(),
     prisma.sentence.deleteMany(),
     prisma.word.deleteMany(),
+    prisma.englishWord.deleteMany(),
     prisma.ipaKeyword.deleteMany(),
     prisma.persianWord.deleteMany(),
     prisma.pictureWord.deleteMany(),
@@ -153,6 +154,10 @@ async function main() {
 
   await createMany("Word", withDates(data.word ?? []), (rows) =>
     prisma.word.createMany({ data: rows, skipDuplicates: true })
+  );
+
+  await createMany("EnglishWord", withDates(data.englishWord ?? []), (rows) =>
+    prisma.englishWord.createMany({ data: rows, skipDuplicates: true })
   );
 
   await createMany(

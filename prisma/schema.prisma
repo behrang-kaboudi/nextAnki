@@ -80,6 +80,20 @@ model Word {
   @@map("word")
 }
 
+model EnglishWord {
+  id                      Int      @id @default(autoincrement())
+  normalized_text         String   @unique(map: "EnglishWord_normalized_text_key")
+  phonetic_us             String?
+  phonetic_us_normalized  String?
+  json_hint               String?  @db.LongText
+  audio_file_name         String?
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  @@index([phonetic_us_normalized], map: "EnglishWord_phonetic_us_normalized_idx")
+  @@map("english_word")
+}
+
 model Sentence {
   id                     Int      @id @default(autoincrement())
   sentence_en            String   @unique
