@@ -74,6 +74,59 @@ export function DatabaseBackupClient() {
   const isRunning = running !== null;
   return (
     <div className="grid gap-6">
+      <section className="grid gap-4 rounded-2xl border border-card bg-card p-5 shadow-elevated lg:grid-cols-2">
+        <div className="grid content-start gap-4">
+          <div>
+            <div className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700 dark:text-emerald-300">Save current state</div>
+            <h2 className="mt-1 text-xl font-semibold text-foreground">Create and push backup</h2>
+          </div>
+          <label className="grid gap-1.5 text-sm font-medium text-foreground">
+            Commit description <span className="font-normal text-muted">(optional)</span>
+            <textarea
+              value={commitMessage}
+              onChange={(event) => setCommitMessage(event.target.value)}
+              rows={4}
+              disabled={isRunning}
+              placeholder="chore: back up local database"
+              className="min-h-28 resize-y rounded border border-card bg-card px-3 py-2 text-sm font-normal text-foreground outline-none placeholder:text-muted focus:border-foreground/40 disabled:opacity-50"
+            />
+          </label>
+          <button
+            type="button"
+            className="w-fit rounded border border-emerald-600 bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+            disabled={isRunning}
+            onClick={() => execute("backup")}
+          >
+            {running === "backup" ? "Creating backup…" : "Create backup and push"}
+          </button>
+        </div>
+
+        <aside className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-4">
+          <h3 className="font-semibold text-foreground">What this does</h3>
+          <p className="mt-2 text-sm leading-6 text-muted">
+            Creates a verified full archive from every Prisma model, stages all project changes, commits them, and pushes the current branch.
+          </p>
+        </aside>
+      </section>
+
+      <section className="grid content-start gap-4 rounded-2xl border border-red-500/30 bg-red-500/5 p-5 shadow-elevated">
+        <div>
+          <div className="text-xs font-semibold uppercase tracking-[0.16em] text-red-700 dark:text-red-300">Replace local data</div>
+          <h2 className="mt-1 text-xl font-semibold text-foreground">Get backup from GitHub</h2>
+          <p className="mt-1 text-sm leading-6 text-muted">
+            Fast-forwards from GitHub, installs changed dependencies and migrations when needed, then replaces the local database with the archive. No commit or push is made.
+          </p>
+        </div>
+        <button
+          type="button"
+          className="w-fit rounded border border-red-500/40 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-50 dark:text-red-300"
+          disabled={isRunning}
+          onClick={() => execute("restore")}
+        >
+          {running === "restore" ? "Restoring…" : "Restore local database"}
+        </button>
+      </section>
+
       <section className="overflow-hidden rounded-2xl border border-card bg-card shadow-elevated">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="p-5">
@@ -100,55 +153,6 @@ export function DatabaseBackupClient() {
             </div>
           </div>
         ) : !reportLoading ? <p className="mt-3 text-sm text-muted">Git report is unavailable.</p> : null}
-      </section>
-
-      <section className="grid gap-4 lg:grid-cols-2">
-        <div className="grid content-start gap-4 rounded-2xl border border-card bg-card p-5 shadow-elevated">
-          <div>
-            <div className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700 dark:text-emerald-300">Save current state</div>
-            <h2 className="mt-1 text-xl font-semibold text-foreground">Create and push backup</h2>
-            <p className="mt-1 text-sm leading-6 text-muted">
-              Creates a verified full archive from every Prisma model, stages all project changes, commits them, and pushes the current branch.
-            </p>
-          </div>
-          <label className="grid gap-1.5 text-sm font-medium text-foreground">
-            Commit description <span className="font-normal text-muted">(optional)</span>
-            <textarea
-              value={commitMessage}
-              onChange={(event) => setCommitMessage(event.target.value)}
-              rows={4}
-              disabled={isRunning}
-              placeholder="chore: back up local database"
-              className="min-h-28 resize-y rounded border border-card bg-card px-3 py-2 text-sm font-normal text-foreground outline-none placeholder:text-muted focus:border-foreground/40 disabled:opacity-50"
-            />
-          </label>
-          <button
-            type="button"
-            className="w-fit rounded border border-emerald-600 bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
-            disabled={isRunning}
-            onClick={() => execute("backup")}
-          >
-            {running === "backup" ? "Creating backup…" : "Create backup and push"}
-          </button>
-        </div>
-
-        <div className="grid content-start gap-4 rounded-2xl border border-red-500/30 bg-red-500/5 p-5 shadow-elevated">
-          <div>
-            <div className="text-xs font-semibold uppercase tracking-[0.16em] text-red-700 dark:text-red-300">Replace local data</div>
-            <h2 className="mt-1 text-xl font-semibold text-foreground">Get backup from GitHub</h2>
-            <p className="mt-1 text-sm leading-6 text-muted">
-              Fast-forwards from GitHub, installs changed dependencies and migrations when needed, then replaces the local database with the archive. No commit or push is made.
-            </p>
-          </div>
-          <button
-            type="button"
-            className="w-fit rounded border border-red-500/40 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-50 dark:text-red-300"
-            disabled={isRunning}
-            onClick={() => execute("restore")}
-          >
-            {running === "restore" ? "Restoring…" : "Restore local database"}
-          </button>
-        </div>
       </section>
 
       {result ? (

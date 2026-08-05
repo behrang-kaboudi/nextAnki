@@ -1,6 +1,7 @@
 import "server-only";
 
 import { prisma } from "@/lib/prisma";
+import { updateWord } from "@/lib/words/wordRepo";
 
 type PrimarySentenceRecord = {
   id: number;
@@ -74,6 +75,10 @@ export async function upsertPrimarySentenceByAnkiLinkId(args: {
         where: { wordId, sentenceId: { not: existingPrimary.sentence.id }, isPrimary: true },
         data: { isPrimary: false },
       });
+      await updateWord(
+        { where: { id: wordId }, data: { sentenceId: existingPrimary.sentence.id } },
+        tx,
+      );
 
       return {
         id: existingPrimary.sentence.id,
@@ -102,6 +107,10 @@ export async function upsertPrimarySentenceByAnkiLinkId(args: {
           isPrimary: true,
         },
       });
+      await updateWord(
+        { where: { id: wordId }, data: { sentenceId: matchedSentence.id } },
+        tx,
+      );
 
       if (
         sentence_en_meaning_fa !== null &&
@@ -142,6 +151,10 @@ export async function upsertPrimarySentenceByAnkiLinkId(args: {
         where: { wordId, sentenceId: { not: existingPrimary.sentence.id }, isPrimary: true },
         data: { isPrimary: false },
       });
+      await updateWord(
+        { where: { id: wordId }, data: { sentenceId: existingPrimary.sentence.id } },
+        tx,
+      );
 
       return {
         id: existingPrimary.sentence.id,
@@ -171,6 +184,10 @@ export async function upsertPrimarySentenceByAnkiLinkId(args: {
         isPrimary: true,
       },
     });
+    await updateWord(
+      { where: { id: wordId }, data: { sentenceId: createdSentence.id } },
+      tx,
+    );
 
     return createdSentence;
   });

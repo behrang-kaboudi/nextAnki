@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import WordFieldVoiceCell from "@/app/(site)/words/hints/WordFieldVoiceCell.client";
+import { ActionIcon } from "@/components/icons/ActionIcon";
 
 export type SentenceEditorItem = {
   id: number;
@@ -24,7 +25,7 @@ function nullableText(value: string) {
   return value.trim().length ? value : null;
 }
 
-export default function SentenceEditorModal({ item }: { item: SentenceEditorItem }) {
+export default function SentenceEditorModal({ item, compact = false }: { item: SentenceEditorItem; compact?: boolean }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [sentenceEn, setSentenceEn] = useState(item.sentence_en);
@@ -136,9 +137,13 @@ export default function SentenceEditorModal({ item }: { item: SentenceEditorItem
           setSavedAt(null);
           setOpen(true);
         }}
-        className="rounded border px-2 py-1 text-[11px] hover:bg-black/5 dark:hover:bg-white/5"
+        aria-label={`Edit sentence ${item.id}`}
+        title={`Edit sentence ${item.id}`}
+        className={compact
+          ? "rounded border p-1.5 transition active:scale-90 hover:bg-black/5 dark:hover:bg-white/5"
+          : "rounded border px-2 py-1 text-[11px] hover:bg-black/5 dark:hover:bg-white/5"}
       >
-        Open
+        {compact ? <ActionIcon name="edit" /> : "Open"}
       </button>
 
       {open ? (

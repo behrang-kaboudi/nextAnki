@@ -11,6 +11,7 @@ import { prisma } from "@/lib/prisma";
 import { WORD_ENGLISH_FIELDS_SELECT } from "@/lib/english/wordEnglishFields.server";
 
 import OpenWordEditorModal from "../../editor/OpenWordEditorModal.client";
+import BackfillWordSentenceIds from "./BackfillWordSentenceIds.client";
 import WordRelationPopover, {
   type RelationPopoverField,
 } from "./WordRelationPopover.client";
@@ -27,6 +28,7 @@ const SORT_FIELDS = [
   "id",
   "englishId",
   "meaningId",
+  "sentenceId",
   "otherMeaningIds",
   "pos",
   "anki_link_id",
@@ -38,6 +40,7 @@ const TABLE_COLUMNS = [
   { key: "id", label: "id", required: true },
   { key: "englishId", label: "englishId" },
   { key: "meaningId", label: "meaningId" },
+  { key: "sentenceId", label: "sentenceId" },
   { key: "otherMeaningIds", label: "otherMeaningIds" },
   { key: "pos", label: "pos" },
   { key: "concept_explained_fa", label: "concept_explained_fa" },
@@ -58,6 +61,7 @@ const DEFAULT_TABLE_COLUMNS: TableColumnKey[] = [
   "id",
   "englishId",
   "meaningId",
+  "sentenceId",
   "otherMeaningIds",
   "pos",
   "anki_link_id",
@@ -85,6 +89,13 @@ const COLUMN_INDICATORS: Partial<
       text: "Foreign key: Word.meaningId → PersianWord.id",
     },
     { kind: "index", text: "Index: Word_meaningId_idx" },
+  ],
+  sentenceId: [
+    {
+      kind: "foreign-key",
+      text: "Foreign key: Word.sentenceId → Sentence.id",
+    },
+    { kind: "index", text: "Index: Word_sentenceId_idx" },
   ],
   anki_link_id: [
     { kind: "unique", text: "Unique index: Word_anki_link_id_key" },
@@ -169,6 +180,38 @@ function persianWordDetails(word: {
       label: "meaning_fa_IPA_normalize",
       value: word.meaning_fa_IPA_normalize ?? "—",
       dir: "rtl",
+    },
+  ];
+}
+
+function sentenceDetails(sentence: {
+  id: number;
+  sentence_en: string;
+  sentence_en_meaning_fa: string | null;
+  mentionedWordsJson: Prisma.JsonValue | null;
+  items: Prisma.JsonValue | null;
+}): RelationPopoverField[] {
+  return [
+    { label: "id", value: String(sentence.id), code: true },
+    { label: "sentence_en", value: sentence.sentence_en, dir: "ltr" },
+    {
+      label: "sentence_en_meaning_fa",
+      value: sentence.sentence_en_meaning_fa ?? "—",
+      dir: "rtl",
+    },
+    {
+      label: "mentionedWordsJson",
+      value: sentence.mentionedWordsJson
+        ? JSON.stringify(sentence.mentionedWordsJson, null, 2)
+        : "—",
+      code: true,
+      multiline: true,
+    },
+    {
+      label: "items",
+      value: sentence.items ? JSON.stringify(sentence.items, null, 2) : "—",
+      code: true,
+      multiline: true,
     },
   ];
 }
@@ -277,6 +320,7 @@ export default async function WordsTablePage({
       id: { id: dir },
       englishId: { englishId: dir },
       meaningId: { meaningId: dir },
+      sentenceId: { sentenceId: dir },
       otherMeaningIds: { otherMeaningIds: dir },
       pos: { pos: dir },
       anki_link_id: { anki_link_id: dir },
@@ -298,6 +342,16 @@ export default async function WordsTablePage({
         englishId: true,
         english: { select: { id: true, ...WORD_ENGLISH_FIELDS_SELECT } },
         meaningId: true,
+        sentenceId: true,
+        sentence: {
+          select: {
+            id: true,
+            sentence_en: true,
+            sentence_en_meaning_fa: true,
+            mentionedWordsJson: true,
+            items: true,
+          },
+        },
         otherMeaningIds: true,
         pos: true,
         concept_explained_fa: true,
@@ -420,6 +474,10 @@ export default async function WordsTablePage({
       </section>
 
       <section className="mt-4 rounded border p-3">
+        <BackfillWordSentenceIds />
+      </section>
+
+      <section className="mt-4 rounded border p-3">
         <TableColumnSelector
           key={columns.join(",")}
           columns={TABLE_COLUMNS}
@@ -482,6 +540,15 @@ export default async function WordsTablePage({
                     active={sort === "meaningId"}
                     direction={dir}
                     indicators={COLUMN_INDICATORS.meaningId}
+                  />
+                ) : null}
+                {hasColumn("sentenceId") ? (
+                  <SortHeader
+                    href={sortHref("sentenceId")}
+                    label="sentenceId"
+                    active={sort === "sentenceId"}
+                    direction={dir}
+                    indicators={COLUMN_INDICATORS.sentenceId}
                   />
                 ) : null}
                 {hasColumn("otherMeaningIds") ? (
@@ -583,6 +650,26 @@ export default async function WordsTablePage({
                             );
                           })()
                         : "—"}
+                    </td>
+                  ) : null}
+                  {hasColumn("sentenceId") ? (
+                    <td className="max-w-64 px-3 py-2 font-mono">
+                      {row.sentenceId ? (
+                        row.sentence ? (
+                          <WordRelationPopover
+                            label={`Sentence ${row.sentence.id}`}
+                            details={sentenceDetails(row.sentence)}
+                          >
+                            {row.sentence.id} — {row.sentence.sentence_en}
+                          </WordRelationPopover>
+                        ) : (
+                          <span className="block truncate">
+                            {row.sentenceId} — missing
+                          </span>
+                        )
+                      ) : (
+                        "—"
+                      )}
                     </td>
                   ) : null}
                   {hasColumn("otherMeaningIds") ? (

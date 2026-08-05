@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { Prisma } from "@prisma/client";
+import type { Prisma, PrismaClient } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
 
@@ -12,9 +12,14 @@ function stripManualUpdatedAt<T extends { data?: unknown }>(args: T): T {
   return args;
 }
 
-export async function updateWord(args: Prisma.WordUpdateArgs) {
+type WordWriteClient = Pick<PrismaClient, "word"> | Pick<Prisma.TransactionClient, "word">;
+
+export async function updateWord(
+  args: Prisma.WordUpdateArgs,
+  client: WordWriteClient = prisma,
+) {
   stripManualUpdatedAt(args);
-  return prisma.word.update(args);
+  return client.word.update(args);
 }
 
 export async function updateManyWords(args: Prisma.WordUpdateManyArgs) {

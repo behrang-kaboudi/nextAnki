@@ -21,7 +21,7 @@ function Icon({
   );
 }
 
-export type ActionIconName = "play" | "pause" | "sparkles" | "mic" | "stop" | "trash";
+export type ActionIconName = "play" | "pause" | "sparkles" | "mic" | "stop" | "trash" | "edit";
 
 export function ActionIcon({
   name,
@@ -77,8 +77,14 @@ export function ActionIcon({
           <path d="M9 7V4h6v3" />
         </Icon>
       );
+    case "edit":
+      return (
+        <Icon className={className}>
+          <path d="m14.5 5.5 4 4" />
+          <path d="M4 20h4l10.5-10.5a2.8 2.8 0 0 0-4-4L4 16v4Z" />
+        </Icon>
+      );
     default:
       return null;
   }
 }
-
