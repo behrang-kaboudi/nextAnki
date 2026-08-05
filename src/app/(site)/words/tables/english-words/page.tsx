@@ -9,6 +9,7 @@ import { prisma } from "@/lib/prisma";
 import AddEnglishWordModal from "./AddEnglishWordModal.client";
 import BatchEnglishWordAudioGenerate from "./BatchEnglishWordAudioGenerate.client";
 import BatchEnglishWordJsonHintGenerate from "./BatchEnglishWordJsonHintGenerate.client";
+import CompareEnglishWordJsonHintWithWords from "./CompareEnglishWordJsonHintWithWords.client";
 import DictionaryApiUsImport from "./DictionaryApiUsImport.client";
 import EnglishWordAudioControls from "./EnglishWordAudioControls.client";
 import EnglishWordJsonHintControls from "./EnglishWordJsonHintControls.client";
@@ -89,7 +90,7 @@ export default async function EnglishWordsTablePage({ searchParams }: { searchPa
       <div className="p-3">
       <form className="flex flex-wrap items-center gap-2"><input name="q" defaultValue={q} placeholder="Search text or IPA…" className="w-full rounded border px-3 py-2 text-sm sm:w-80" /><input type="hidden" name="sort" value={sort} /><input type="hidden" name="dir" value={dir} /><label className="flex items-center gap-1 text-sm"><input name="missingAudio" value="1" type="checkbox" defaultChecked={missingAudio} /> Only without audio</label>{columns.map((column) => <input key={column} type="hidden" name="columns" value={column} />)}<button type="submit" className="rounded border px-3 py-2 text-sm">Search</button>{q || missingAudio ? <Link href={`/words/tables/english-words?${clearQuery}`} className="rounded border px-3 py-2 text-sm">Clear</Link> : null}</form>
         <div className="mt-3 grid gap-3 border-t pt-3 lg:grid-cols-2">
-          <div className="flex flex-wrap items-center gap-2"><AddEnglishWordModal /></div>
+          <div className="flex flex-wrap items-center gap-2"><AddEnglishWordModal /><CompareEnglishWordJsonHintWithWords /></div>
           <div className="space-y-3 border-t pt-3 lg:border-l lg:border-t-0 lg:pl-3 lg:pt-0"><BatchEnglishWordAudioGenerate /><div className="border-t pt-3"><BatchEnglishWordJsonHintGenerate /></div></div>
         </div>
       </div>

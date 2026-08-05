@@ -1,5 +1,16 @@
 export const JSON_HINT_GENERATED_AT_FIELD = "generatedAtMs" as const;
 
+function sortJsonValue(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(sortJsonValue);
+  if (!value || typeof value !== "object") return value;
+
+  return Object.fromEntries(
+    Object.entries(value as Record<string, unknown>)
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(([key, nestedValue]) => [key, sortJsonValue(nestedValue)]),
+  );
+}
+
 function asTrimmedNonEmptyString(value: unknown): string | null {
   if (typeof value !== "string") return null;
   const trimmed = value.trim();
@@ -18,7 +29,7 @@ export function normalizeJsonHintForCompare(
 
     const record = obj as Record<string, unknown>;
     delete record[JSON_HINT_GENERATED_AT_FIELD];
-    return JSON.stringify(record);
+    return JSON.stringify(sortJsonValue(record));
   } catch {
     return null;
   }
