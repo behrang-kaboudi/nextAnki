@@ -48,6 +48,17 @@ export async function touchWordsByIds(ids: readonly number[]) {
   return prisma.word.updateMany({ where: { id: { in: uniqueIds } }, data: { updatedAt: new Date() } });
 }
 
+/** Touch dependent Words when their relation-owned English fields change. */
+export async function touchWordsByEnglishId(englishId: number) {
+  return prisma.word.updateMany({ where: { englishId }, data: { updatedAt: new Date() } });
+}
+
+export async function touchWordsByEnglishIds(englishIds: readonly number[]) {
+  const uniqueIds = [...new Set(englishIds.filter((id) => Number.isSafeInteger(id) && id > 0))];
+  if (!uniqueIds.length) return { count: 0 };
+  return prisma.word.updateMany({ where: { englishId: { in: uniqueIds } }, data: { updatedAt: new Date() } });
+}
+
 export async function deleteWord(args: Prisma.WordDeleteArgs) {
   return prisma.word.delete(args);
 }

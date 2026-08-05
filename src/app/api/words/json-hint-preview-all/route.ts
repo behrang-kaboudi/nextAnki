@@ -2,11 +2,11 @@ import "server-only";
 
 import { NextResponse } from "next/server";
 
-import type { Word } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { pickPictureSymbolsForWord } from "@/lib/ipa/setPictures/setForAny";
 import { normalizeJsonHintForCompare } from "@/lib/words/jsonHint";
 import { hydrateWordsWithPersianMeanings } from "@/lib/words/persianMeanings.server";
+import { flattenWordEnglishRelation, WORD_ENGLISH_FIELDS_SELECT } from "@/lib/english/wordEnglishFields.server";
 
 export const runtime = "nodejs";
 
@@ -47,13 +47,11 @@ export async function GET(req: Request) {
       select: {
         id: true,
         anki_link_id: true,
-        base_form: true,
+        englishId: true,
+        english: { select: WORD_ENGLISH_FIELDS_SELECT },
         meaningId: true,
         otherMeaningIds: true,
         hint_sentence: true,
-        phonetic_us_normalized: true,
-        imageability: true,
-        json_hint: true,
       },
     });
 
@@ -69,14 +67,14 @@ export async function GET(req: Request) {
       });
     }
 
-    const hydratedRows = await hydrateWordsWithPersianMeanings(rows);
+    const hydratedRows = await hydrateWordsWithPersianMeanings(rows.map(flattenWordEnglishRelation));
     let nextCursorId = cursorId;
     for (const row of hydratedRows) {
       nextCursorId = row.id;
 
       const match =
         (row.phonetic_us_normalized ?? "").trim() !== ""
-          ? await pickPictureSymbolsForWord(row as unknown as Word)
+          ? await pickPictureSymbolsForWord({ phonetic_us_normalized: row.phonetic_us_normalized, imageability: 64 }, { includePersianImage: false })
           : null;
 
       const nextComparable = match ? JSON.stringify(match) : null;

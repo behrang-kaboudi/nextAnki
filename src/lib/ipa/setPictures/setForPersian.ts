@@ -1,7 +1,5 @@
 import "server-only";
 
-import type { Word } from "@prisma/client";
-
 import { prisma } from "@/lib/prisma";
 import { meaningIds } from "@/lib/words/persianMeanings.server";
 
@@ -9,7 +7,7 @@ import {
   addReplaceMentsForEach,
   filterByUsage,
 } from "./shared";
-import type { IpaCandidate } from "./types";
+import type { IpaCandidate, WordPictureInput } from "./types";
 import {
   findPictureWordsByIpaPrefix,
   get5CharPatterns,
@@ -154,11 +152,11 @@ function pickBestPersianCandidate(candidates: PersianCandidate[]): IpaCandidate 
   return best?.candidate ?? null;
 }
 
-export async function setForPersian(word: Word): Promise<IpaCandidate | null> {
+export async function setForPersian(word: WordPictureInput): Promise<IpaCandidate | null> {
   const primaryMeaningId = word.meaningId;
   const meaningIdsToSearch = [
     ...(primaryMeaningId == null ? [] : [primaryMeaningId]),
-    ...meaningIds(word.otherMeaningIds).filter((id) => id !== primaryMeaningId),
+    ...meaningIds(word.otherMeaningIds ?? null).filter((id) => id !== primaryMeaningId),
   ];
   if (!meaningIdsToSearch.length) return null;
 

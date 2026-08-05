@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
 import { hydrateWordsWithPersianMeanings } from "@/lib/words/persianMeanings.server";
+import { flattenWordEnglishRelation, WORD_ENGLISH_FIELDS_SELECT } from "@/lib/english/wordEnglishFields.server";
 
 function asTrimmedString(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
@@ -20,14 +21,13 @@ export async function GET(req: Request) {
 
     const rows = await prisma.word.findMany({
       where: {
-        base_form: {
-          contains: q,
-        },
+        english: { is: { base_form: { contains: q } } },
       },
       select: {
         id: true,
         anki_link_id: true,
-        base_form: true,
+        englishId: true,
+        english: { select: WORD_ENGLISH_FIELDS_SELECT },
         meaningId: true,
         otherMeaningIds: true,
         sentenceLinks: {
@@ -43,13 +43,13 @@ export async function GET(req: Request) {
           take: 1,
         },
       },
-      orderBy: [{ base_form: "asc" }, { id: "asc" }],
+      orderBy: [{ english: { base_form: "asc" } }, { id: "asc" }],
       take: limit,
     });
 
     return NextResponse.json({
       ok: true,
-      items: (await hydrateWordsWithPersianMeanings(rows)).map((row) => ({
+      items: (await hydrateWordsWithPersianMeanings(rows.map(flattenWordEnglishRelation))).map((row) => ({
         anki_link_id: row.anki_link_id,
         base_form: row.base_form,
         meaning_fa: row.meaning_fa,

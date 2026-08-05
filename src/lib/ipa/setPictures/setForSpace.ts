@@ -1,8 +1,6 @@
 import "server-only";
 
-import type { Word } from "@prisma/client";
-
-import type { WordPictures } from "./types";
+import type { WordPictureInput, WordPictures } from "./types";
 // import { for3Char } from "./forChars";
 import { pickBestFaEn } from "./pickBestFaEn";
 import { placeholderJobPictureWord } from "./placeholders";
@@ -11,7 +9,7 @@ import {
   type PictureCandidateLookup,
 } from "./forChars";
 export async function setForSpace(
-  word: Word,
+  word: WordPictureInput,
   lookup?: PictureCandidateLookup,
 ): Promise<WordPictures> {
   const parts = (word.phonetic_us_normalized ?? "").split(" ");

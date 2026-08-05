@@ -44,7 +44,7 @@ export async function GET(req: Request) {
 
     const missingCondition =
       field === "phonetic_us"
-        ? Prisma.sql`w.phonetic_us IS NULL OR w.phonetic_us = ''`
+        ? Prisma.sql`ew.phonetic_us IS NULL OR ew.phonetic_us = ''`
         : field === "imageability"
           ? Prisma.sql`w.imageability IS NULL OR w.imageability <= 0`
           : field === "learning_depth"
@@ -60,6 +60,7 @@ export async function GET(req: Request) {
     const totalRows = await prisma.$queryRaw<Array<{ count: bigint }>>`
       SELECT COUNT(*) AS count
       FROM word w
+      INNER JOIN english_word ew ON ew.id = w.englishId
       LEFT JOIN SentenceWordLink sw ON sw.wordId = w.id AND sw.isPrimary = true
       LEFT JOIN Sentence s ON s.id = sw.sentenceId
       WHERE ${missingCondition}
@@ -71,12 +72,13 @@ export async function GET(req: Request) {
         ? (await prisma.$queryRaw<
             Array<{ id: number; base_form: string; meaning_fa: string; sentence_en: string }>
           >`
-            SELECT w.id, w.base_form, COALESCE(pw.canonical_text, '') AS meaning_fa, COALESCE(s.sentence_en, '') AS sentence_en
+            SELECT w.id, ew.base_form, COALESCE(pw.canonical_text, '') AS meaning_fa, COALESCE(s.sentence_en, '') AS sentence_en
             FROM word w
+      INNER JOIN english_word ew ON ew.id = w.englishId
             LEFT JOIN persian_word pw ON pw.id = w.meaningId
             LEFT JOIN SentenceWordLink sw ON sw.wordId = w.id AND sw.isPrimary = true
             LEFT JOIN Sentence s ON s.id = sw.sentenceId
-            WHERE w.phonetic_us IS NULL OR w.phonetic_us = ''
+            WHERE ew.phonetic_us IS NULL OR ew.phonetic_us = ''
             ORDER BY w.id DESC
             LIMIT ${limit}
           `) ?? []
@@ -84,8 +86,9 @@ export async function GET(req: Request) {
           ? (await prisma.$queryRaw<
               Array<{ id: number; base_form: string; meaning_fa: string; sentence_en: string }>
             >`
-              SELECT w.id, w.base_form, COALESCE(pw.canonical_text, '') AS meaning_fa, COALESCE(s.sentence_en, '') AS sentence_en
+              SELECT w.id, ew.base_form, COALESCE(pw.canonical_text, '') AS meaning_fa, COALESCE(s.sentence_en, '') AS sentence_en
               FROM word w
+      INNER JOIN english_word ew ON ew.id = w.englishId
               LEFT JOIN persian_word pw ON pw.id = w.meaningId
               LEFT JOIN SentenceWordLink sw ON sw.wordId = w.id AND sw.isPrimary = true
               LEFT JOIN Sentence s ON s.id = sw.sentenceId
@@ -97,8 +100,9 @@ export async function GET(req: Request) {
             ? (await prisma.$queryRaw<
                 Array<{ id: number; base_form: string; meaning_fa: string; sentence_en: string }>
               >`
-                SELECT w.id, w.base_form, COALESCE(pw.canonical_text, '') AS meaning_fa, COALESCE(s.sentence_en, '') AS sentence_en
+                SELECT w.id, ew.base_form, COALESCE(pw.canonical_text, '') AS meaning_fa, COALESCE(s.sentence_en, '') AS sentence_en
                 FROM word w
+      INNER JOIN english_word ew ON ew.id = w.englishId
                 LEFT JOIN persian_word pw ON pw.id = w.meaningId
                 LEFT JOIN SentenceWordLink sw ON sw.wordId = w.id AND sw.isPrimary = true
                 LEFT JOIN Sentence s ON s.id = sw.sentenceId
@@ -110,8 +114,9 @@ export async function GET(req: Request) {
               ? (await prisma.$queryRaw<
                   Array<{ id: number; base_form: string; meaning_fa: string; sentence_en: string }>
                 >`
-                  SELECT w.id, w.base_form, COALESCE(pw.canonical_text, '') AS meaning_fa, COALESCE(s.sentence_en, '') AS sentence_en
+                  SELECT w.id, ew.base_form, COALESCE(pw.canonical_text, '') AS meaning_fa, COALESCE(s.sentence_en, '') AS sentence_en
                   FROM word w
+      INNER JOIN english_word ew ON ew.id = w.englishId
                   LEFT JOIN persian_word pw ON pw.id = w.meaningId
                   LEFT JOIN SentenceWordLink sw ON sw.wordId = w.id AND sw.isPrimary = true
                   LEFT JOIN Sentence s ON s.id = sw.sentenceId
@@ -123,8 +128,9 @@ export async function GET(req: Request) {
               ? (await prisma.$queryRaw<
                   Array<{ id: number; base_form: string; meaning_fa: string; sentence_en: string }>
                 >`
-                  SELECT w.id, w.base_form, COALESCE(pw.canonical_text, '') AS meaning_fa, COALESCE(s.sentence_en, '') AS sentence_en
+                  SELECT w.id, ew.base_form, COALESCE(pw.canonical_text, '') AS meaning_fa, COALESCE(s.sentence_en, '') AS sentence_en
                   FROM word w
+      INNER JOIN english_word ew ON ew.id = w.englishId
                   LEFT JOIN persian_word pw ON pw.id = w.meaningId
                   LEFT JOIN SentenceWordLink sw ON sw.wordId = w.id AND sw.isPrimary = true
                   LEFT JOIN Sentence s ON s.id = sw.sentenceId
@@ -136,8 +142,9 @@ export async function GET(req: Request) {
                 ? (await prisma.$queryRaw<
                     Array<{ id: number; base_form: string; meaning_fa: string; sentence_en: string }>
                   >`
-                    SELECT w.id, w.base_form, COALESCE(pw.canonical_text, '') AS meaning_fa, COALESCE(s.sentence_en, '') AS sentence_en
+                    SELECT w.id, ew.base_form, COALESCE(pw.canonical_text, '') AS meaning_fa, COALESCE(s.sentence_en, '') AS sentence_en
                     FROM word w
+      INNER JOIN english_word ew ON ew.id = w.englishId
                     LEFT JOIN persian_word pw ON pw.id = w.meaningId
                     LEFT JOIN SentenceWordLink sw ON sw.wordId = w.id AND sw.isPrimary = true
                     LEFT JOIN Sentence s ON s.id = sw.sentenceId
@@ -148,8 +155,9 @@ export async function GET(req: Request) {
                 : (await prisma.$queryRaw<
                       Array<{ id: number; base_form: string; meaning_fa: string; sentence_en: string }>
                     >`
-                      SELECT w.id, w.base_form, COALESCE(pw.canonical_text, '') AS meaning_fa, COALESCE(s.sentence_en, '') AS sentence_en
+                      SELECT w.id, ew.base_form, COALESCE(pw.canonical_text, '') AS meaning_fa, COALESCE(s.sentence_en, '') AS sentence_en
                       FROM word w
+      INNER JOIN english_word ew ON ew.id = w.englishId
                       LEFT JOIN persian_word pw ON pw.id = w.meaningId
                       LEFT JOIN SentenceWordLink sw ON sw.wordId = w.id AND sw.isPrimary = true
                       LEFT JOIN Sentence s ON s.id = sw.sentenceId

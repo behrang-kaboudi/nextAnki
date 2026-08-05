@@ -239,7 +239,7 @@ async function countCandidates(field: WordAudioFieldKey): Promise<number> {
       },
     });
   }
-  if (field === "base_form") return prisma.word.count({ where: { base_form: { notIn: [""] } } });
+  if (field === "base_form") return prisma.word.count({ where: { english: { is: { base_form: { notIn: [""] } } } } });
   return prisma.word.count({
     where:
       field === "sentence_en"
@@ -273,8 +273,8 @@ async function fetchBatch(
   };
 
   if (field === "base_form") {
-    const rows = await prisma.word.findMany({ ...base, select: { id: true, anki_link_id: true, base_form: true } });
-    return rows.map((r) => ({ id: r.id, anki_link_id: r.anki_link_id, audioKey: r.anki_link_id, value: r.base_form }));
+    const rows = await prisma.word.findMany({ ...base, select: { id: true, anki_link_id: true, english: { select: { base_form: true } } } });
+    return rows.map((r) => ({ id: r.id, anki_link_id: r.anki_link_id, audioKey: r.anki_link_id, value: r.english.base_form }));
   }
   if (field === "other_meanings_en") {
     const rows = await prisma.word.findMany({

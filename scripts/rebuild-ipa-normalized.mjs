@@ -74,6 +74,10 @@ async function writeJsonBackup(outputFile) {
     createdAt: new Date().toISOString(),
     data: {
       word: await prisma.word.findMany(),
+      englishWord: await prisma.englishWord.findMany(),
+      persianWord: await prisma.persianWord.findMany(),
+      sentence: await prisma.sentence.findMany(),
+      sentenceWordLink: await prisma.sentenceWordLink.findMany(),
       ipaKeyword: await prisma.ipaKeyword.findMany(),
       pictureWord: await prisma.pictureWord.findMany(),
       user: await prisma.user.findMany(),

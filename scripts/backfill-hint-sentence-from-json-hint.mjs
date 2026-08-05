@@ -63,13 +63,13 @@ async function main() {
       orderBy: { id: "asc" },
       take,
       ...(cursorId ? { cursor: { id: cursorId }, skip: 1 } : {}),
-      select: { id: true, json_hint: true },
+      select: { id: true, english: { select: { json_hint: true } } },
     });
     if (rows.length === 0) break;
 
     for (const r of rows) {
       scanned += 1;
-      const hint_sentence = formatHintSentenceFromJsonHint(r.json_hint);
+      const hint_sentence = formatHintSentenceFromJsonHint(r.english.json_hint);
       await prisma.word.update({
         where: { id: r.id },
         data: { hint_sentence },
@@ -93,4 +93,3 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
-

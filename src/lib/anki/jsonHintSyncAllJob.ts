@@ -4,6 +4,9 @@ import { createAnkiConnectClient } from "@/lib/anki";
 import { AnkiNoteTypes } from "@/lib/anki";
 import { WORD_ANKI_FIELD_GENERATORS, getAnkiLinkIdFromNoteFields } from "@/lib/anki/wordAnkiMapping";
 import { prisma } from "@/lib/prisma";
+import { hydrateWordsWithEnglishFields } from "@/lib/english/wordEnglishFields.server";
+import type { WordEnglishFields } from "@/lib/english/wordEnglishFields.server";
+import type { Word } from "@prisma/client";
 
 export type JsonHintSyncAllStatus = {
   jobId: string;
@@ -173,11 +176,11 @@ async function runJob(state: State) {
     ),
   );
 
-  const wordByAnkiLinkId = new Map<string, Awaited<ReturnType<typeof prisma.word.findFirst>>>();
+  const wordByAnkiLinkId = new Map<string, Word & WordEnglishFields>();
   for (const group of chunk(allIds, 1000)) {
-    const rows = await prisma.word.findMany({
+    const rows = await hydrateWordsWithEnglishFields(await prisma.word.findMany({
       where: { anki_link_id: { in: group } },
-    });
+    }));
     for (const r of rows) wordByAnkiLinkId.set(r.anki_link_id, r);
   }
 

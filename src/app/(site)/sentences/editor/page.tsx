@@ -67,7 +67,7 @@ export default async function SentencesEditorPage({
               select: {
                 id: true,
                 anki_link_id: true,
-                base_form: true,
+                english: { select: { base_form: true } },
                 meaning: { select: { canonical_text: true } },
               },
             },
@@ -94,7 +94,7 @@ export default async function SentencesEditorPage({
     words: row.wordLinks.map((link) => ({
       id: link.word.id,
       anki_link_id: link.word.anki_link_id,
-      base_form: link.word.base_form,
+      base_form: link.word.english.base_form,
       meaning_fa: link.word.meaning?.canonical_text ?? "",
       isPrimary: link.isPrimary,
     })),

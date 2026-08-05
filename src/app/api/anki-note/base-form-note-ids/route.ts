@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
+import { normalizeEnglishWordText } from "@/lib/english/normalize";
 
 type LookupInputItem = {
   base_form?: unknown;
@@ -73,7 +74,7 @@ export async function POST(req: Request) {
 
     const items = body as LookupInputItem[];
     const baseForms = items
-      .map((item) => asTrimmedString(item?.base_form))
+      .map((item) => normalizeEnglishWordText(asTrimmedString(item?.base_form)))
       .filter(Boolean);
     const directAnkiLinkIds = items
       .map((item) => asTrimmedString(item?.anki_link_id))
@@ -84,16 +85,16 @@ export async function POST(req: Request) {
     }
 
     const rows = await prisma.word.findMany({
-      where: { base_form: { in: Array.from(new Set(baseForms)) } },
-      select: { id: true, base_form: true, anki_link_id: true },
+      where: { english: { is: { base_form: { in: Array.from(new Set(baseForms)) } } } },
+      select: { id: true, anki_link_id: true, english: { select: { base_form: true } } },
       orderBy: [{ id: "asc" }],
     });
 
     const noteIdsByBaseForm = new Map<string, string[]>();
     for (const row of rows) {
-      const current = noteIdsByBaseForm.get(row.base_form);
+      const current = noteIdsByBaseForm.get(row.english.base_form);
       if (current) current.push(row.anki_link_id);
-      else noteIdsByBaseForm.set(row.base_form, [row.anki_link_id]);
+      else noteIdsByBaseForm.set(row.english.base_form, [row.anki_link_id]);
     }
 
     const noteIds: string[] = [];
@@ -111,7 +112,7 @@ export async function POST(req: Request) {
     }
 
     for (const item of items) {
-      const baseForm = asTrimmedString(item?.base_form);
+      const baseForm = normalizeEnglishWordText(asTrimmedString(item?.base_form));
       if (!baseForm) continue;
       for (const noteId of noteIdsByBaseForm.get(baseForm) ?? []) {
         if (seenNoteIds.has(noteId)) continue;
@@ -129,13 +130,13 @@ export async function POST(req: Request) {
       for (const group of chunkArray(currentBatch, 200)) {
         const groupRows = await prisma.word.findMany({
           where: { anki_link_id: { in: group } },
-          select: { anki_link_id: true, json_hint: true },
+          select: { anki_link_id: true, english: { select: { json_hint: true } } },
         });
         batchRows.push(...groupRows);
       }
 
       for (const row of batchRows) {
-        for (const nestedNoteId of collectNestedEnAnkiLinkIds(row.json_hint)) {
+        for (const nestedNoteId of collectNestedEnAnkiLinkIds(row.english.json_hint)) {
           if (!seenNoteIds.has(nestedNoteId)) {
             seenNoteIds.add(nestedNoteId);
             noteIds.push(nestedNoteId);

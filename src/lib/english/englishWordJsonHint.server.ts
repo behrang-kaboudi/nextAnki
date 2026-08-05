@@ -1,12 +1,11 @@
 import "server-only";
 
-import type { Word } from "@prisma/client";
-
 import type { PictureCandidateLookup } from "@/lib/ipa/setPictures/forChars";
 import { pickPictureSymbolsForWord } from "@/lib/ipa/setPictures/setForAny";
 import { createPreloadedPictureCandidateLookup } from "@/lib/ipa/setPictures/preloadedLookup";
 import { prisma } from "@/lib/prisma";
 import { stringifyJsonHintWithTimestamp } from "@/lib/words/jsonHint";
+import { touchWordsByEnglishIds } from "@/lib/words/wordRepo";
 
 export type EnglishWordJsonHintInput = {
   id: number;
@@ -55,7 +54,7 @@ export async function generateEnglishWordJsonHints(
         {
           phonetic_us_normalized: row.phonetic_us_normalized,
           imageability: 64,
-        } as Word,
+        },
         { lookup: batchLookup, includePersianImage: false },
       );
       return {
@@ -78,6 +77,7 @@ export async function generateEnglishWordJsonHints(
       data: { json_hint: result.jsonHint },
     });
   });
+  await touchWordsByEnglishIds(updates.map((result) => result.id));
   return results;
 }
 

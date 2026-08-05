@@ -20,15 +20,16 @@ export async function GET(req: Request) {
     specialChars.map((ch) => `${col} LIKE '%${ch.replaceAll("'", "''")}%'`).join(" OR ");
 
   const whereSpecial = special
-    ? `WHERE (w.phonetic_us IS NOT NULL AND (${likeAny("w.phonetic_us")})) OR (${likeAny("pw.meaning_fa_IPA")})`
+    ? `WHERE (ew.phonetic_us IS NOT NULL AND (${likeAny("ew.phonetic_us")})) OR (${likeAny("pw.meaning_fa_IPA")})`
     : "";
 
   const rows = (await prisma.$queryRawUnsafe(
     `
-      SELECT w.id, w.base_form, w.phonetic_us, COALESCE(pw.canonical_text, '') AS meaning_fa,
-        COALESCE(pw.meaning_fa_IPA, '') AS meaning_fa_IPA, w.phonetic_us_normalized,
+      SELECT w.id, ew.base_form, ew.phonetic_us, COALESCE(pw.canonical_text, '') AS meaning_fa,
+        COALESCE(pw.meaning_fa_IPA, '') AS meaning_fa_IPA, ew.phonetic_us_normalized,
         COALESCE(pw.meaning_fa_IPA_normalize, '') AS meaning_fa_IPA_normalized
       FROM word w
+      INNER JOIN english_word ew ON ew.id = w.englishId
       LEFT JOIN persian_word pw ON pw.id = w.meaningId
       ${whereSpecial}
       ORDER BY RAND()

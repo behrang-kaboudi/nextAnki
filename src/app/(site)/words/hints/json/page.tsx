@@ -7,6 +7,8 @@ import JsonHintHelpModal from "../JsonHintHelpModal.client";
 import WordHintsTable from "../WordHintsTable.client";
 import { getJsonHintGeneratedAtMs } from "@/lib/words/jsonHint";
 import { hydrateWordsWithPersianMeanings } from "@/lib/words/persianMeanings.server";
+import { flattenWordEnglishRelation, WORD_ENGLISH_FIELDS_SELECT } from "@/lib/english/wordEnglishFields.server";
+import type { Prisma } from "@prisma/client";
 
 export const metadata = {
   title: "Word Hints — JSON",
@@ -34,21 +36,21 @@ export default async function WordHintsJsonPage({
   const pageSize = Math.min(Math.max(pageSizeRaw, 10), 200);
   const skip = (page - 1) * pageSize;
 
-  const qWhere = q
+  const qWhere: Prisma.WordWhereInput | undefined = q
     ? {
         OR: [
-          { base_form: { contains: q } },
+          { english: { is: { base_form: { contains: q } } } },
           { meaning: { is: { canonical_text: { contains: q } } } },
           { anki_link_id: { contains: q } },
         ],
       }
     : undefined;
 
-  const noEnWhere = noEnOnly
+  const noEnWhere: Prisma.WordWhereInput | undefined = noEnOnly
     ? {
         OR: [
-          { json_hint: { contains: `"en": "noEn"` } },
-          { json_hint: { contains: `"en":"noEn"` } },
+          { english: { is: { json_hint: { contains: `"en": "noEn"` } } } },
+          { english: { is: { json_hint: { contains: `"en":"noEn"` } } } },
         ],
       }
     : undefined;
@@ -65,16 +67,16 @@ export default async function WordHintsJsonPage({
       select: {
         id: true,
         anki_link_id: true,
-        base_form: true,
+        englishId: true,
+        english: { select: WORD_ENGLISH_FIELDS_SELECT },
         meaningId: true,
         otherMeaningIds: true,
         hint_sentence: true,
-        json_hint: true,
       },
     }),
   ]);
 
-  const rowsWithMeta = (await hydrateWordsWithPersianMeanings(rows)).map((r) => ({
+  const rowsWithMeta = (await hydrateWordsWithPersianMeanings(rows.map(flattenWordEnglishRelation))).map((r) => ({
     ...r,
     json_hint_generated_at_ms: getJsonHintGeneratedAtMs(r.json_hint ?? null),
   }));
@@ -116,7 +118,7 @@ export default async function WordHintsJsonPage({
           />
           <label className="flex items-center gap-2 rounded border px-3 py-2 text-sm">
             <input name="noEn" type="checkbox" value="1" defaultChecked={noEnOnly} />
-            <span className="whitespace-nowrap font-mono">"en":"noEn"</span>
+            <span className="whitespace-nowrap font-mono">&quot;en&quot;:&quot;noEn&quot;</span>
           </label>
           <input type="hidden" name="pageSize" value={String(pageSize)} />
           <button

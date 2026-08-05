@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
 import { formatPersonAdjJobFa, parseJsonHint } from "@/lib/words/formatJsonHintFa";
+import { updateWord } from "@/lib/words/wordRepo";
 
 type PayloadItem = { id: number; hint_sentence: string };
 
@@ -57,15 +58,15 @@ export async function POST(req: Request) {
       try {
         const word = await prisma.word.findUnique({
           where: { id: item.id },
-          select: { json_hint: true },
+          select: { english: { select: { json_hint: true } } },
         });
 
-        const personPhrase = formatPersonAdjJobFa(parseJsonHint(word?.json_hint ?? null));
+        const personPhrase = formatPersonAdjJobFa(parseJsonHint(word?.english.json_hint ?? null));
         const finalSentence = personPhrase
           ? replaceAliWith(item.hint_sentence, personPhrase)
           : item.hint_sentence;
 
-        await prisma.word.update({
+        await updateWord({
           where: { id: item.id },
           data: { hint_sentence: finalSentence },
         });

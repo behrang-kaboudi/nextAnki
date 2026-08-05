@@ -2,7 +2,6 @@ import "server-only";
 
 import { NextResponse } from "next/server";
 
-import type { Word } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { pickPictureSymbolsForWord } from "@/lib/ipa/setPictures/setForAny";
 import { normalizeJsonHintForCompare } from "@/lib/words/jsonHint";
@@ -32,9 +31,7 @@ export async function POST(req: Request) {
       where: { id: { in: ids } },
       select: {
         id: true,
-        phonetic_us_normalized: true,
-        imageability: true,
-        json_hint: true,
+        english: { select: { phonetic_us_normalized: true, json_hint: true } },
       },
     });
 
@@ -47,12 +44,12 @@ export async function POST(req: Request) {
 
     for (const row of rows) {
       const match =
-        (row.phonetic_us_normalized ?? "").trim() !== ""
-          ? await pickPictureSymbolsForWord(row as unknown as Word)
+        (row.english.phonetic_us_normalized ?? "").trim() !== ""
+          ? await pickPictureSymbolsForWord({ phonetic_us_normalized: row.english.phonetic_us_normalized, imageability: 64 }, { includePersianImage: false })
           : null;
 
       const nextComparable = match ? JSON.stringify(match) : null;
-      const prevComparable = normalizeJsonHintForCompare(row.json_hint ?? null);
+      const prevComparable = normalizeJsonHintForCompare(row.english.json_hint ?? null);
       items.push({
         id: row.id,
         prevJson: prevComparable,

@@ -3,12 +3,12 @@ import "server-only";
 import { NextResponse } from "next/server";
 import type { Prisma } from "@prisma/client";
 import { updateManyWords } from "@/lib/words/wordRepo";
+import { prisma } from "@/lib/prisma";
+import { touchWordsByEnglishIds } from "@/lib/words/wordRepo";
 
 export const runtime = "nodejs";
 
 const CLEARABLE_FIELD_VALUES = {
-  phonetic_us: "",
-  phonetic_us_normalized: "",
   pos: "",
   concept_explained: "",
   concept_explained_fa: "",
@@ -23,7 +23,6 @@ const CLEARABLE_FIELD_VALUES = {
   first_letter_en_hint: "",
   first_letter_fa_hint: "",
   hint_to_select: "",
-  json_hint: "",
   word_note: "",
   common_error: "",
   imageability: 0,
@@ -32,10 +31,16 @@ const CLEARABLE_FIELD_VALUES = {
   updatedAt: new Date(0),
 } satisfies Prisma.WordUpdateManyMutationInput;
 
-type ClearableField = keyof typeof CLEARABLE_FIELD_VALUES;
+const CLEARABLE_ENGLISH_FIELD_VALUES = {
+  phonetic_us: "",
+  phonetic_us_normalized: "",
+  json_hint: "",
+} satisfies Prisma.EnglishWordUpdateManyMutationInput;
+
+type ClearableField = keyof typeof CLEARABLE_FIELD_VALUES | keyof typeof CLEARABLE_ENGLISH_FIELD_VALUES;
 
 const CLEARABLE_FIELDS = Object.keys(
-  CLEARABLE_FIELD_VALUES,
+  { ...CLEARABLE_FIELD_VALUES, ...CLEARABLE_ENGLISH_FIELD_VALUES },
 ) as ClearableField[];
 
 const clearableSet = new Set<string>(CLEARABLE_FIELDS);
@@ -81,18 +86,32 @@ export async function POST(req: Request) {
     );
   }
 
+  const wordFields = fields.filter((field) => field in CLEARABLE_FIELD_VALUES);
+  const englishFields = fields.filter((field) => field in CLEARABLE_ENGLISH_FIELD_VALUES);
   const data = Object.fromEntries(
-    fields.map((field) => [
+    wordFields.map((field) => [
       field,
-      CLEARABLE_FIELD_VALUES[field as ClearableField],
+      CLEARABLE_FIELD_VALUES[field as keyof typeof CLEARABLE_FIELD_VALUES],
     ]),
   ) as Prisma.WordUpdateManyMutationInput;
 
-  const res = await updateManyWords({ data });
+  const res = wordFields.length ? await updateManyWords({ data }) : { count: 0 };
+  let englishUpdatedCount = 0;
+  if (englishFields.length) {
+    const englishData = Object.fromEntries(
+      englishFields.map((field) => [field, CLEARABLE_ENGLISH_FIELD_VALUES[field as keyof typeof CLEARABLE_ENGLISH_FIELD_VALUES]]),
+    ) as Prisma.EnglishWordUpdateManyMutationInput;
+    const englishIds = (await prisma.englishWord.findMany({ select: { id: true } })).map((row) => row.id);
+    const englishResult = await prisma.englishWord.updateMany({ data: englishData });
+    englishUpdatedCount = englishResult.count;
+    await touchWordsByEnglishIds(englishIds);
+  }
 
   return NextResponse.json({
     ok: true,
     clearedFields: fields,
-    updatedCount: res.count,
+    updatedCount: Math.max(res.count, englishUpdatedCount),
+    wordUpdatedCount: res.count,
+    englishWordUpdatedCount: englishUpdatedCount,
   });
 }

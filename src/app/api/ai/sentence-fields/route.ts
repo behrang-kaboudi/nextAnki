@@ -176,7 +176,7 @@ export async function POST(req: Request) {
                 select: {
                   id: true,
                   anki_link_id: true,
-                  base_form: true,
+                  english: { select: { base_form: true } },
                   meaning: { select: { canonical_text: true } },
                   pos: true,
                 },
@@ -210,7 +210,7 @@ export async function POST(req: Request) {
       const modelInput = JSON.stringify([
         {
           id: word.id,
-          base_form: word.base_form,
+            base_form: word.english.base_form,
           meaning_fa: word.meaning?.canonical_text ?? "",
           pos: word.pos ?? null,
           sentence_en_meaning_fa: item.sentence_en_meaning_fa ?? null,
@@ -291,14 +291,14 @@ export async function POST(req: Request) {
             where: { id: word.id },
             select: {
               id: true,
-              base_form: true,
+              english: { select: { base_form: true } },
               meaning: { select: { canonical_text: true } },
             },
           });
 
           return {
             id: savedWord?.id ?? word.id,
-            base_form: savedWord?.base_form ?? word.base_form,
+            base_form: savedWord?.english.base_form ?? word.english.base_form,
             meaning_fa: savedWord?.meaning?.canonical_text ?? word.meaning?.canonical_text ?? "",
             sentence_en: savedSentence.sentence_en,
             sentence_en_meaning_fa: savedSentence.sentence_en_meaning_fa,

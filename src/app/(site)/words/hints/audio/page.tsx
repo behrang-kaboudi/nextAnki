@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { prisma } from "@/lib/prisma";
+import { flattenWordEnglishRelation, WORD_ENGLISH_FIELDS_SELECT } from "@/lib/english/wordEnglishFields.server";
 import { hydrateWordsWithPersianMeanings } from "@/lib/words/persianMeanings.server";
 import BatchWordFieldVoiceGenerate from "../BatchWordFieldVoiceGenerate.client";
 import BatchWordFieldVoiceGenerateAllFields from "../BatchWordFieldVoiceGenerateAllFields.client";
@@ -36,7 +37,7 @@ export default async function WordHintsAudioPage({
   const where = q
     ? {
         OR: [
-          { base_form: { contains: q } },
+          { english: { is: { base_form: { contains: q } } } },
           { meaning: { is: { canonical_text: { contains: q } } } },
           { anki_link_id: { contains: q } },
         ],
@@ -53,7 +54,8 @@ export default async function WordHintsAudioPage({
       select: {
         id: true,
         anki_link_id: true,
-        base_form: true,
+        englishId: true,
+        english: { select: WORD_ENGLISH_FIELDS_SELECT },
         meaningId: true,
         otherMeaningIds: true,
         other_meanings_en: true,
@@ -74,7 +76,7 @@ export default async function WordHintsAudioPage({
       },
     }),
   ]);
-  const rowsWithMeanings = await hydrateWordsWithPersianMeanings(rows);
+  const rowsWithMeanings = await hydrateWordsWithPersianMeanings(rows.map(flattenWordEnglishRelation));
   const mappedRows = rowsWithMeanings.map((r) => ({
     ...r,
     sentenceRecord: r.sentenceLinks[0]?.sentence ?? null,

@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
 import { hydrateWordsWithPersianMeanings } from "@/lib/words/persianMeanings.server";
+import { flattenWordEnglishRelation, WORD_ENGLISH_FIELDS_SELECT } from "@/lib/english/wordEnglishFields.server";
 
 function parsePositiveInt(value: string | null, fallback: number) {
   const n = value ? Number(value) : Number.NaN;
@@ -51,7 +52,7 @@ export async function GET(req: Request) {
     const where = q
       ? {
           OR: [
-            { base_form: { contains: q } },
+            { english: { is: { base_form: { contains: q } } } },
             { meaning: { is: { canonical_text: { contains: q } } } },
             { anki_link_id: { contains: q } },
           ],
@@ -66,12 +67,13 @@ export async function GET(req: Request) {
         id: true,
         meaningId: true,
         otherMeaningIds: true,
-        json_hint: true,
+        englishId: true,
+        english: { select: WORD_ENGLISH_FIELDS_SELECT },
         hint_sentence: true,
       },
     });
 
-    const hydratedRows = await hydrateWordsWithPersianMeanings(rows);
+    const hydratedRows = await hydrateWordsWithPersianMeanings(rows.map(flattenWordEnglishRelation));
     const items = hydratedRows
       .filter((r) => !asNonEmptyString(r.hint_sentence))
       .map((r) => {

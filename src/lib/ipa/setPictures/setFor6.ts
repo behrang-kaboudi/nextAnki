@@ -1,8 +1,6 @@
 import "server-only";
 
-import type { Word } from "@prisma/client";
-
-import type { WordPictures } from "./types";
+import type { WordPictureInput, WordPictures } from "./types";
 import { FA_KEYWORDS_VOWELS_NORMALIZED } from "@/lib/ipa/ipaSets";
 
 import { pickBestFaEn } from "./pickBestFaEn";
@@ -13,7 +11,7 @@ import {
 } from "./forChars";
 
 export async function setFor6(
-  word: Word,
+  word: WordPictureInput,
   lookup?: PictureCandidateLookup,
 ): Promise<WordPictures> {
   const phoneticNormalized = (word.phonetic_us_normalized ?? "").trim();

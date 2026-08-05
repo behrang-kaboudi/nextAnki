@@ -1,5 +1,5 @@
 /**
- * Backfills Word.json_hint by calling:
+ * Backfills relation-owned EnglishWord.json_hint by calling:
  * POST /api/ipa-test/backfill-word-json-hint
  *
  * Requirements:
@@ -55,4 +55,3 @@ main().catch((e) => {
   console.error(e);
   process.exitCode = 1;
 });
-

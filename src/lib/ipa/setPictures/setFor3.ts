@@ -1,9 +1,9 @@
 import "server-only";
 
-import type { PictureWordUsage, Word } from "@prisma/client";
+import type { PictureWordUsage } from "@prisma/client";
 
 import { charsMissingFromBestIpa, filterByUsage } from "./shared";
-import type { WordPictures, IpaCandidate } from "./types";
+import type { WordPictures, IpaCandidate, WordPictureInput } from "./types";
 import {
   for1CharAdj,
   findCandidatesByPartWithS,
@@ -11,7 +11,7 @@ import {
 } from "./forChars";
 
 export async function setFor3(
-  word: Word,
+  word: WordPictureInput,
   lookup?: PictureCandidateLookup,
 ): Promise<WordPictures> {
   const phoneticNormalized = (word.phonetic_us_normalized ?? "").trim();

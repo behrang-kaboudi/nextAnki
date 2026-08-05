@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { PageHeader } from "@/components/page-header";
 import { prisma } from "@/lib/prisma";
+import { flattenWordEnglishRelation, WORD_ENGLISH_FIELDS_SELECT } from "@/lib/english/wordEnglishFields.server";
 import { hydrateWordsWithPersianMeanings } from "@/lib/words/persianMeanings.server";
 
 import DeleteWordButton from "./DeleteWordButton.client";
@@ -35,7 +36,7 @@ export default async function WordsEditorIndexPage({
   const where = q
     ? {
         OR: [
-          { base_form: { contains: q } },
+          { english: { is: { base_form: { contains: q } } } },
           { meaning: { is: { canonical_text: { contains: q } } } },
           { anki_link_id: { contains: q } },
         ],
@@ -49,11 +50,11 @@ export default async function WordsEditorIndexPage({
       orderBy: [{ updatedAt: "desc" }, { id: "desc" }],
       skip,
       take: pageSize,
-      select: { id: true, anki_link_id: true, base_form: true, meaningId: true, otherMeaningIds: true, updatedAt: true },
+      select: { id: true, anki_link_id: true, englishId: true, english: { select: WORD_ENGLISH_FIELDS_SELECT }, meaningId: true, otherMeaningIds: true, updatedAt: true },
     }),
   ]);
 
-  const rowsWithMeanings = await hydrateWordsWithPersianMeanings(rows);
+  const rowsWithMeanings = await hydrateWordsWithPersianMeanings(rows.map(flattenWordEnglishRelation));
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const prevPage = Math.max(1, page - 1);
   const nextPage = Math.min(totalPages, page + 1);

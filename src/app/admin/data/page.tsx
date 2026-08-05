@@ -2300,7 +2300,7 @@ export default function Page() {
                       <textarea
                         value={draftSqlWhere}
                         onChange={(e) => setDraftSqlWhere(e.target.value)}
-                        placeholder={`Example (subquery supported):\nbase_form IN (\n  SELECT base_form FROM Word GROUP BY base_form HAVING COUNT(*) > 1\n)`}
+                        placeholder={`Example (subquery supported):\nenglishId IN (\n  SELECT englishId FROM Word GROUP BY englishId HAVING COUNT(*) > 1\n)`}
                         className="w-full resize-y rounded-md border border-neutral-200 bg-white p-2 font-mono text-xs text-neutral-900"
                         rows={5}
                       />

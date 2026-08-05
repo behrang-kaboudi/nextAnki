@@ -96,7 +96,7 @@ export async function touchWordsReferencingPersianWord(persianWordId: number) {
 
 export async function getPersianWordReferences(persianWordId: number) {
   const [primary, secondary] = await Promise.all([
-    prisma.word.findMany({ where: { meaningId: persianWordId }, select: { id: true, base_form: true } }),
+    prisma.word.findMany({ where: { meaningId: persianWordId }, select: { id: true, english: { select: { base_form: true } } } }),
     prisma.word.findMany({
       where: {
         OR: [
@@ -104,15 +104,15 @@ export async function getPersianWordReferences(persianWordId: number) {
           { otherMeaningIds: { array_contains: String(persianWordId) } },
         ],
       },
-      select: { id: true, base_form: true },
+      select: { id: true, english: { select: { base_form: true } } },
     }),
   ]);
   const byId = new Map<number, { id: number; base_form: string; roles: Array<"primary" | "secondary"> }>();
-  for (const word of primary) byId.set(word.id, { ...word, roles: ["primary"] });
+  for (const word of primary) byId.set(word.id, { id: word.id, base_form: word.english.base_form, roles: ["primary"] });
   for (const word of secondary) {
     const existing = byId.get(word.id);
     if (existing) existing.roles.push("secondary");
-    else byId.set(word.id, { ...word, roles: ["secondary"] });
+    else byId.set(word.id, { id: word.id, base_form: word.english.base_form, roles: ["secondary"] });
   }
   return [...byId.values()].sort((left, right) => left.base_form.localeCompare(right.base_form) || left.id - right.id);
 }

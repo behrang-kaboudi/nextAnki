@@ -9,13 +9,10 @@ import { prisma } from "@/lib/prisma";
 import AddEnglishWordModal from "./AddEnglishWordModal.client";
 import BatchEnglishWordAudioGenerate from "./BatchEnglishWordAudioGenerate.client";
 import BatchEnglishWordJsonHintGenerate from "./BatchEnglishWordJsonHintGenerate.client";
-import CompareEnglishWordJsonHintWithWords from "./CompareEnglishWordJsonHintWithWords.client";
 import DictionaryApiUsImport from "./DictionaryApiUsImport.client";
 import EnglishWordAudioControls from "./EnglishWordAudioControls.client";
 import EnglishWordJsonHintControls from "./EnglishWordJsonHintControls.client";
 import EnglishWordRowActions from "./EnglishWordRowActions.client";
-import TemporaryEnglishWordScripts from "./TemporaryEnglishWordScripts.client";
-import TemporaryWordImport from "./TemporaryWordImport.client";
 
 export const metadata = { title: "Words — EnglishWord Table" };
 export const runtime = "nodejs";
@@ -90,14 +87,12 @@ export default async function EnglishWordsTablePage({ searchParams }: { searchPa
       <div className="p-3">
       <form className="flex flex-wrap items-center gap-2"><input name="q" defaultValue={q} placeholder="Search text or IPA…" className="w-full rounded border px-3 py-2 text-sm sm:w-80" /><input type="hidden" name="sort" value={sort} /><input type="hidden" name="dir" value={dir} /><label className="flex items-center gap-1 text-sm"><input name="missingAudio" value="1" type="checkbox" defaultChecked={missingAudio} /> Only without audio</label>{columns.map((column) => <input key={column} type="hidden" name="columns" value={column} />)}<button type="submit" className="rounded border px-3 py-2 text-sm">Search</button>{q || missingAudio ? <Link href={`/words/tables/english-words?${clearQuery}`} className="rounded border px-3 py-2 text-sm">Clear</Link> : null}</form>
         <div className="mt-3 grid gap-3 border-t pt-3 lg:grid-cols-2">
-          <div className="flex flex-wrap items-center gap-2"><AddEnglishWordModal /><CompareEnglishWordJsonHintWithWords /></div>
+          <div className="flex flex-wrap items-center gap-2"><AddEnglishWordModal /></div>
           <div className="space-y-3 border-t pt-3 lg:border-l lg:border-t-0 lg:pl-3 lg:pt-0"><BatchEnglishWordAudioGenerate /><div className="border-t pt-3"><BatchEnglishWordJsonHintGenerate /></div></div>
         </div>
       </div>
     </section>
     <DictionaryApiUsImport />
-    <TemporaryWordImport />
-    <TemporaryEnglishWordScripts />
     <section className="mt-4 rounded border p-3"><TableColumnSelector key={columns.join(",")} columns={TABLE_COLUMNS} selectedColumns={columns} /></section>
     <div className="mt-4 flex items-center justify-between text-sm"><span>Total: <strong>{total}</strong> · Page <strong>{page}/{totalPages}</strong></span><div className="flex gap-2"><Link href={href(Math.max(1, page - 1))} aria-disabled={page <= 1} className="rounded border px-3 py-2 aria-disabled:pointer-events-none aria-disabled:opacity-50">Prev</Link><Link href={href(Math.min(totalPages, page + 1))} aria-disabled={page >= totalPages} className="rounded border px-3 py-2 aria-disabled:pointer-events-none aria-disabled:opacity-50">Next</Link></div></div>
     <div className="mt-4 overflow-auto rounded border"><table className="w-full text-left text-xs"><thead className="bg-background"><tr className="border-b">

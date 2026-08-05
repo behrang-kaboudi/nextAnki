@@ -7,23 +7,27 @@ import { pickFields } from "@/lib/db/pickFields";
 import { sortPictureWordsByOverlap } from "@/lib/ipa/overlap";
 import { mergeKeysAndPictureWords } from "./mergKeys";
 import { normalizeIPA } from "./ipaSets";
+import type { WordEnglishFields } from "@/lib/english/wordEnglishFields.server";
+import { updateWord } from "@/lib/words/wordRepo";
 //(first_letter_en_hint IS NULL OR first_letter_en_hint = '')  AND
-async function get4CharWords(): Promise<Word[]> {
+type WordWithEnglish = Word & WordEnglishFields;
+async function get4CharWords(): Promise<WordWithEnglish[]> {
   const rows = (await prisma.$queryRawUnsafe(
     `
-SELECT *
-FROM Word
-WHERE (first_letter_en_hint IS NULL OR first_letter_en_hint = '')
+SELECT w.*, ew.base_form, ew.phonetic_us, ew.phonetic_us_normalized, ew.json_hint
+FROM Word w
+INNER JOIN english_word ew ON ew.id = w.englishId
+WHERE (w.first_letter_en_hint IS NULL OR w.first_letter_en_hint = '')
   AND (
-    CHAR_LENGTH(phonetic_us_normalized) = 4
+    CHAR_LENGTH(ew.phonetic_us_normalized) = 4
     OR (
-      CHAR_LENGTH(phonetic_us_normalized) = 5
-      AND phonetic_us_normalized LIKE '% %'
+      CHAR_LENGTH(ew.phonetic_us_normalized) = 5
+      AND ew.phonetic_us_normalized LIKE '% %'
     )
   );
 
     `
-  )) as Word[];
+  )) as WordWithEnglish[];
   return rows;
 }
 const GROUP_MATCH_TYPES: ReadonlySet<PictureWordType> = new Set([
@@ -40,7 +44,7 @@ const GROUP_MATCH_TYPES: ReadonlySet<PictureWordType> = new Set([
   "adj",
   "personAdj_adj",
 ]);
-function getBestMatch(matches: Array<PictureWord>, word: Word) {
+function getBestMatch(matches: Array<PictureWord>, word: WordWithEnglish) {
   if (!matches.length) return null;
   const filtered = matches.filter((m) => {
     return GROUP_MATCH_TYPES.has(m.type);
@@ -58,7 +62,7 @@ async function setKeys() {
   words.map(async (w) => {
     const pre = await checkIfExists(w);
     if (pre) {
-      prisma.word.update({
+      updateWord({
         where: { id: w.id },
         data: { first_letter_en_hint: pre.first_letter_en_hint },
       });
@@ -69,7 +73,7 @@ async function setKeys() {
       const bestMatch = getBestMatch(matches, w);
       if (bestMatch) {
         const hint = bestMatch.fa + "_" + bestMatch.en;
-        await prisma.word.update({
+        await updateWord({
           where: { id: w.id },
           data: { first_letter_en_hint: hint },
         });
@@ -77,10 +81,10 @@ async function setKeys() {
     }
   });
 }
-async function checkIfExists(word: Word) {
+async function checkIfExists(word: WordWithEnglish) {
   const matching = await prisma.word.findFirst({
     where: {
-      base_form: word.base_form,
+      englishId: word.englishId,
       first_letter_en_hint: { not: "" },
       NOT: { first_letter_en_hint: null },
     },

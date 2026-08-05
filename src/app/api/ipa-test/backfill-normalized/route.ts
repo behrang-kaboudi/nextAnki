@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 
 import { normalizeIpaForDb } from "@/lib/ipa/normalize";
 import { prisma } from "@/lib/prisma";
+import { touchWordsByEnglishId } from "@/lib/words/wordRepo";
 
 const clampInt = (value: string | null, def: number, min: number, max: number) => {
   const n = value ? Number.parseInt(value, 10) : Number.NaN;
@@ -18,7 +19,7 @@ export async function POST(req: Request) {
   const batch = clampInt(url.searchParams.get("batch"), 500, 1, 2000);
   const startId = clampInt(url.searchParams.get("startId"), 0, 0, Number.MAX_SAFE_INTEGER);
 
-  const rows = await prisma.word.findMany({
+  const rows = await prisma.englishWord.findMany({
     where: { id: { gt: startId } },
     orderBy: { id: "asc" },
     take: batch,
@@ -39,12 +40,13 @@ export async function POST(req: Request) {
 
     if (!needsUpdate) continue;
 
-    await prisma.word.update({
+    await prisma.englishWord.update({
       where: { id: r.id },
       data: {
         phonetic_us_normalized: phonNorm,
       },
     });
+    await touchWordsByEnglishId(r.id);
     updated++;
   }
 

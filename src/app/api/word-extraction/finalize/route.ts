@@ -17,7 +17,7 @@ export async function POST() {
     const invalidRows = await prisma.word.findMany({
       where: {
         OR: [
-          { base_form: { equals: "" } },
+          { english: { is: { base_form: { equals: "" } } } },
           { meaning: null },
           { meaning: { is: { canonical_text: { equals: "" } } } },
           { meaning: { is: { meaning_fa_IPA: { equals: "" } } } },
@@ -25,10 +25,10 @@ export async function POST() {
           { sentenceLinks: { none: { isPrimary: true } } },
           { sentenceLinks: { none: { isPrimary: true, sentence: { sentence_en: { not: "" } } } } },
 
-          { phonetic_us: null },
-          { phonetic_us: { equals: "" } },
-          { phonetic_us_normalized: null },
-          { phonetic_us_normalized: { equals: "" } },
+          { english: { is: { phonetic_us: null } } },
+          { english: { is: { phonetic_us: { equals: "" } } } },
+          { english: { is: { phonetic_us_normalized: null } } },
+          { english: { is: { phonetic_us_normalized: { equals: "" } } } },
           { pos: null },
           { pos: { equals: "" } },
           {
@@ -45,9 +45,7 @@ export async function POST() {
       },
       select: {
         id: true,
-        base_form: true,
-        phonetic_us: true,
-        phonetic_us_normalized: true,
+        english: { select: { base_form: true, phonetic_us: true, phonetic_us_normalized: true } },
         meaning: { select: { canonical_text: true, meaning_fa_IPA: true, meaning_fa_IPA_normalize: true } },
         pos: true,
         sentenceLinks: {
@@ -70,7 +68,7 @@ export async function POST() {
     const totalInvalid = await prisma.word.count({
       where: {
         OR: [
-          { base_form: { equals: "" } },
+          { english: { is: { base_form: { equals: "" } } } },
           { meaning: null },
           { meaning: { is: { canonical_text: { equals: "" } } } },
           { meaning: { is: { meaning_fa_IPA: { equals: "" } } } },
@@ -78,10 +76,10 @@ export async function POST() {
           { sentenceLinks: { none: { isPrimary: true } } },
           { sentenceLinks: { none: { isPrimary: true, sentence: { sentence_en: { not: "" } } } } },
 
-          { phonetic_us: null },
-          { phonetic_us: { equals: "" } },
-          { phonetic_us_normalized: null },
-          { phonetic_us_normalized: { equals: "" } },
+          { english: { is: { phonetic_us: null } } },
+          { english: { is: { phonetic_us: { equals: "" } } } },
+          { english: { is: { phonetic_us_normalized: null } } },
+          { english: { is: { phonetic_us_normalized: { equals: "" } } } },
           { pos: null },
           { pos: { equals: "" } },
           {
@@ -102,9 +100,9 @@ export async function POST() {
       const sample = invalidRows.map((r) => {
         const sentence = r.sentenceLinks[0]?.sentence ?? null;
         const missing: string[] = [];
-        if (isBlank(r.base_form)) missing.push("base_form");
-        if (isBlank(r.phonetic_us)) missing.push("phonetic_us");
-        if (isBlank(r.phonetic_us_normalized)) missing.push("phonetic_us_normalized");
+        if (isBlank(r.english.base_form)) missing.push("base_form");
+        if (isBlank(r.english.phonetic_us)) missing.push("phonetic_us");
+        if (isBlank(r.english.phonetic_us_normalized)) missing.push("phonetic_us_normalized");
         if (isBlank(r.meaning?.canonical_text)) missing.push("meaningId/canonical_text");
         if (isBlank(r.meaning?.meaning_fa_IPA)) missing.push("meaning_fa_IPA");
         if (isBlank(r.meaning?.meaning_fa_IPA_normalize)) missing.push("meaning_fa_IPA_normalize");
@@ -127,23 +125,16 @@ export async function POST() {
     }
 
     // 2) Validate anki_link_id is in the `${id}_${now}` format and matches the row id.
-    const invalidAnkiSample = await prisma.$queryRaw<Array<{ id: number; anki_link_id: string }>>`
-      SELECT id, anki_link_id
-      FROM Word
-      WHERE anki_link_id = ''
-         OR anki_link_id NOT REGEXP '^[0-9]+_[0-9]+$'
-         OR SUBSTRING_INDEX(anki_link_id, '_', 1) <> CAST(id AS CHAR)
-      ORDER BY id ASC
-      LIMIT 200
-    `;
-    const invalidAnkiCountRow = await prisma.$queryRaw<Array<{ c: bigint }>>`
-      SELECT COUNT(*) as c
-      FROM Word
-      WHERE anki_link_id = ''
-         OR anki_link_id NOT REGEXP '^[0-9]+_[0-9]+$'
-         OR SUBSTRING_INDEX(anki_link_id, '_', 1) <> CAST(id AS CHAR)
-    `;
-    const invalidAnkiCount = Number(invalidAnkiCountRow?.[0]?.c ?? 0);
+    const ankiRows = await prisma.word.findMany({
+      orderBy: { id: "asc" },
+      select: { id: true, anki_link_id: true },
+    });
+    const invalidAnkiRows = ankiRows.filter((row) => {
+      const match = /^(\d+)_(\d+)$/u.exec(row.anki_link_id);
+      return !match || Number(match[1]) !== row.id;
+    });
+    const invalidAnkiCount = invalidAnkiRows.length;
+    const invalidAnkiSample = invalidAnkiRows.slice(0, 200);
     if (invalidAnkiCount > 0) {
       return NextResponse.json(
         {

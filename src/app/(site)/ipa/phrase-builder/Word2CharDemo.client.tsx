@@ -132,7 +132,7 @@ export function Word2CharDemoClient() {
             Finds all{" "}
             {mode === "4char" ? "4" : mode === "3char" ? "3" : "2"}-char values
             from{" "}
-            <code className="font-mono">Word.phonetic_us_normalized</code> and
+            <code className="font-mono">EnglishWord.phonetic_us_normalized</code> and
             shows matching{" "}
             <code className="font-mono">PictureWord</code> rows where <code className="font-mono">ipa_fa_normalized</code> starts with them.
           </p>

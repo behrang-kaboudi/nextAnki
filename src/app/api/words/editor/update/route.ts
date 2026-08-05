@@ -1,13 +1,13 @@
 import "server-only";
 
-import type { Word } from "@prisma/client";
 import { NextResponse } from "next/server";
 
+import { generateEnglishWordJsonHint } from "@/lib/english/englishWordJsonHint.server";
+import { normalizeEnglishWordText } from "@/lib/english/normalize";
+import { normalizeIpaForDb } from "@/lib/ipa/normalize";
 import { prisma } from "@/lib/prisma";
-import { pickPictureSymbolsForWord } from "@/lib/ipa/setPictures/setForAny";
 import { upsertPrimarySentenceByAnkiLinkId } from "@/lib/sentences/sentenceRepo";
-import { stringifyJsonHintWithTimestamp } from "@/lib/words/jsonHint";
-import { touchWordsLinkedToSentenceId, updateWord } from "@/lib/words/wordRepo";
+import { touchWordsByEnglishId, touchWordsLinkedToSentenceId, updateWord } from "@/lib/words/wordRepo";
 
 export const runtime = "nodejs";
 
@@ -68,7 +68,7 @@ export async function POST(req: Request) {
 
     const d = data as Record<string, unknown>;
 
-    const base_form = normalizeRequiredString(d.base_form);
+    const base_form = normalizeEnglishWordText(normalizeRequiredString(d.base_form) ?? "");
     const sentence_en = normalizeRequiredString(d.sentence_en);
     const typeOfWordInDb = normalizeRequiredString(d.typeOfWordInDb);
     const productive_target = normalizeProductiveTarget(d.productive_target);
@@ -81,7 +81,7 @@ export async function POST(req: Request) {
     }
 
     if (
-      base_form == null ||
+      !base_form ||
       sentence_en == null ||
       typeOfWordInDb == null
     ) {
@@ -92,40 +92,45 @@ export async function POST(req: Request) {
     }
 
     const phonetic_us = normalizeNullableString(d.phonetic_us) ?? null;
-    const phonetic_us_normalized = phonetic_us ? (await import("@/lib/ipa/normalize")).normalizeIpaForDb(phonetic_us, 2000) : null;
+    const phonetic_us_normalized = phonetic_us ? normalizeIpaForDb(phonetic_us, 2000) || null : null;
     const existing = await prisma.word.findUnique({
       where: { id },
+      include: { english: true },
     });
 
     if (!existing) {
       return NextResponse.json({ ok: false, error: `Word ${id} not found.` }, { status: 404 });
     }
 
-    const shouldRefreshJsonHint =
-      existing.phonetic_us !== phonetic_us;
-
-    const json_hint = shouldRefreshJsonHint
-      ? (() => {
-          const nextWord = {
-            ...existing,
-            base_form,
+    const targetBefore = existing.english.base_form === base_form
+      ? existing.english
+      : await prisma.englishWord.findUnique({ where: { base_form } });
+    const englishChanged =
+      !targetBefore ||
+      targetBefore.phonetic_us !== phonetic_us ||
+      targetBefore.phonetic_us_normalized !== phonetic_us_normalized;
+    const englishWord = targetBefore
+      ? await prisma.englishWord.update({
+          where: { id: targetBefore.id },
+          data: {
             phonetic_us,
             phonetic_us_normalized,
-          } satisfies Word;
-          return nextWord.phonetic_us_normalized?.trim()
-            ? pickPictureSymbolsForWord(nextWord).then((match) =>
-                match ? stringifyJsonHintWithTimestamp(match) : null,
-              )
-            : Promise.resolve(null);
-        })()
-      : Promise.resolve(normalizeNullableString(d.json_hint));
+            ...(englishChanged ? { json_hint: null } : {}),
+          },
+        })
+      : await prisma.englishWord.create({
+          data: { base_form, phonetic_us, phonetic_us_normalized },
+        });
+
+    if (englishChanged && phonetic_us_normalized) {
+      await generateEnglishWordJsonHint(englishWord.id);
+    }
+    if (englishChanged) await touchWordsByEnglishId(englishWord.id);
 
     const updated = await updateWord({
       where: { id },
       data: {
-        base_form,
-        phonetic_us,
-        phonetic_us_normalized,
+        englishId: englishWord.id,
         pos: normalizeNullableString(d.pos),
         concept_explained: normalizeNullableString(d.concept_explained),
         concept_explained_fa: normalizeNullableString(d.concept_explained_fa),
@@ -140,7 +145,6 @@ export async function POST(req: Request) {
         first_letter_en_hint: normalizeNullableString(d.first_letter_en_hint),
         first_letter_fa_hint: normalizeNullableString(d.first_letter_fa_hint),
         hint_to_select: normalizeNullableString(d.hint_to_select),
-        json_hint: await json_hint,
         word_note: normalizeNullableString(d.word_note),
         common_error: normalizeNullableString(d.common_error),
         imageability: normalizeNullableNumber(d.imageability),
@@ -149,9 +153,12 @@ export async function POST(req: Request) {
       select: {
         id: true,
         updatedAt: true,
-        phonetic_us_normalized: true,
-        json_hint: true,
       },
+    });
+
+    const englishFields = await prisma.englishWord.findUniqueOrThrow({
+      where: { id: englishWord.id },
+      select: { phonetic_us_normalized: true, json_hint: true },
     });
 
     const sentence = await upsertPrimarySentenceByAnkiLinkId({
@@ -167,8 +174,8 @@ export async function POST(req: Request) {
         id: updated.id,
         sentenceRecordId: sentence.id,
         updatedAt: updated.updatedAt.toISOString(),
-        phonetic_us_normalized: updated.phonetic_us_normalized,
-        json_hint: updated.json_hint,
+        phonetic_us_normalized: englishFields.phonetic_us_normalized,
+        json_hint: englishFields.json_hint,
       },
     });
   } catch (e) {

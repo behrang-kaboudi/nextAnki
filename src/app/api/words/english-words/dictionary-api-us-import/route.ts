@@ -1,4 +1,4 @@
-import { mkdir, rm, writeFile } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 
 import { NextResponse } from "next/server";
 
@@ -7,6 +7,7 @@ import { getEnglishWordAudioAbsoluteDir, getEnglishWordAudioAbsolutePath } from 
 import { DictionaryApiRequestError, getDictionaryApiUsPronunciation } from "@/lib/english/dictionaryApiUs.server";
 import { normalizeIpaForDb } from "@/lib/ipa/normalize";
 import { prisma } from "@/lib/prisma";
+import { touchWordsByEnglishId } from "@/lib/words/wordRepo";
 
 export const runtime = "nodejs";
 const BATCH_SIZE = 100;
@@ -40,9 +41,10 @@ export async function POST(request: Request) {
         }
         const shouldUpdatePhonetic = !row.phonetic_us;
         await prisma.englishWord.update({ where: { id: row.id }, data: {
-          ...(shouldUpdatePhonetic ? { phonetic_us: pronunciation.phonetic_us, phonetic_us_normalized: normalizeIpaForDb(pronunciation.phonetic_us, 2000) || null } : {}),
+          ...(shouldUpdatePhonetic ? { phonetic_us: pronunciation.phonetic_us, phonetic_us_normalized: normalizeIpaForDb(pronunciation.phonetic_us, 2000) || null, json_hint: null } : {}),
           ...(filename ? { audio_file_name: filename } : {}),
         } });
+        if (shouldUpdatePhonetic) await touchWordsByEnglishId(row.id);
         if (shouldUpdatePhonetic) report.updatedPhonetic += 1;
         if (filename) report.downloadedAudio += 1;
       } catch (error) {

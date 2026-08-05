@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
 import { hydrateWordsWithPersianMeanings } from "@/lib/words/persianMeanings.server";
+import { flattenWordEnglishRelation, WORD_ENGLISH_FIELDS_SELECT } from "@/lib/english/wordEnglishFields.server";
 
 export const runtime = "nodejs";
 
@@ -30,13 +31,14 @@ export async function POST(req: Request) {
       where: { id: { in: ids } },
       select: {
         id: true,
-        base_form: true,
+        englishId: true,
+        english: { select: WORD_ENGLISH_FIELDS_SELECT },
         meaningId: true,
         otherMeaningIds: true,
       },
     });
 
-    const items = await hydrateWordsWithPersianMeanings(rows);
+    const items = await hydrateWordsWithPersianMeanings(rows.map(flattenWordEnglishRelation));
     return NextResponse.json({ ok: true, items });
   } catch (e) {
     return NextResponse.json(

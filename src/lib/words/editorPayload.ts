@@ -1,6 +1,7 @@
 import "server-only";
 
 import { prisma } from "@/lib/prisma";
+import { flattenWordEnglishRelation, WORD_ENGLISH_FIELDS_SELECT } from "@/lib/english/wordEnglishFields.server";
 import { hydrateWordWithPersianMeanings, meaningIds, type PersianWordMeaning } from "@/lib/words/persianMeanings.server";
 
 export type WordEditorInitial = {
@@ -49,6 +50,7 @@ export async function getWordEditorInitial(id: number): Promise<WordEditorInitia
   const word = await prisma.word.findUnique({
     where: { id },
     include: {
+      english: { select: WORD_ENGLISH_FIELDS_SELECT },
       sentenceLinks: {
         where: { isPrimary: true },
         take: 1,
@@ -58,15 +60,16 @@ export async function getWordEditorInitial(id: number): Promise<WordEditorInitia
   });
   if (!word) return null;
 
-  const primarySentence = word.sentenceLinks[0]?.sentence ?? null;
-  const withMeanings = await hydrateWordWithPersianMeanings(word);
+  const withEnglish = flattenWordEnglishRelation(word);
+  const primarySentence = withEnglish.sentenceLinks[0]?.sentence ?? null;
+  const withMeanings = await hydrateWordWithPersianMeanings(withEnglish);
 
   return {
     id: word.id,
     anki_link_id: word.anki_link_id,
-    base_form: word.base_form,
-    phonetic_us: word.phonetic_us,
-    phonetic_us_normalized: word.phonetic_us_normalized,
+    base_form: withEnglish.base_form,
+    phonetic_us: withEnglish.phonetic_us,
+    phonetic_us_normalized: withEnglish.phonetic_us_normalized,
     meaningId: word.meaningId,
     otherMeaningIds: meaningIds(word.otherMeaningIds),
     primaryMeaning: withMeanings.primaryPersianWord,
@@ -92,7 +95,7 @@ export async function getWordEditorInitial(id: number): Promise<WordEditorInitia
     first_letter_en_hint: word.first_letter_en_hint,
     first_letter_fa_hint: word.first_letter_fa_hint,
     hint_to_select: word.hint_to_select,
-    json_hint: word.json_hint,
+    json_hint: withEnglish.json_hint,
     word_note: word.word_note,
     common_error: word.common_error,
     imageability: word.imageability,

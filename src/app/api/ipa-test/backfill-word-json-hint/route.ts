@@ -2,10 +2,10 @@ import "server-only";
 
 import { NextResponse } from "next/server";
 
-import type { Word } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { pickPictureSymbolsForWord } from "@/lib/ipa/setPictures/setForAny";
 import { normalizeJsonHintForCompare, stringifyJsonHintWithTimestamp } from "@/lib/words/jsonHint";
+import { touchWordsByEnglishId } from "@/lib/words/wordRepo";
 
 const clampInt = (value: string | null, def: number, min: number, max: number) => {
   const n = value ? Number.parseInt(value, 10) : Number.NaN;
@@ -37,7 +37,7 @@ export async function POST(req: Request) {
       ? { OR: [{ json_hint: null }, { json_hint: "" }] }
       : undefined;
 
-    const rows = await prisma.word.findMany({
+    const rows = await prisma.englishWord.findMany({
       where: {
         id: { gt: startId },
         ...(where ? where : {}),
@@ -47,7 +47,6 @@ export async function POST(req: Request) {
       select: {
         id: true,
         phonetic_us_normalized: true,
-        imageability: true,
         json_hint: true,
       },
     });
@@ -60,7 +59,7 @@ export async function POST(req: Request) {
 
       const match =
         (row.phonetic_us_normalized ?? "").trim() !== ""
-          ? await pickPictureSymbolsForWord(row as unknown as Word)
+          ? await pickPictureSymbolsForWord({ phonetic_us_normalized: row.phonetic_us_normalized, imageability: 64 }, { includePersianImage: false })
           : null;
 
       const nextComparable = match ? JSON.stringify(match) : null;
@@ -69,10 +68,11 @@ export async function POST(req: Request) {
       if (!needsUpdate) continue;
 
       if (!dryRun) {
-        await prisma.word.update({
+        await prisma.englishWord.update({
           where: { id: row.id },
           data: { json_hint: match ? stringifyJsonHintWithTimestamp(match) : null },
         });
+        await touchWordsByEnglishId(row.id);
       }
       updated += 1;
     }

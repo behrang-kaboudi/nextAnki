@@ -5,9 +5,9 @@ import { PageHeader } from "@/components/page-header";
 import { TableColumnIndicators, type TableColumnIndicator } from "@/components/table-column-indicators";
 import { TableColumnSelector } from "@/components/table-column-selector";
 import { prisma } from "@/lib/prisma";
+import { flattenWordEnglishRelation, WORD_ENGLISH_FIELDS_SELECT } from "@/lib/english/wordEnglishFields.server";
 
 import OpenWordEditorModal from "../../editor/OpenWordEditorModal.client";
-import TemporaryEnglishIdLinker from "./TemporaryEnglishIdLinker.client";
 
 export const metadata = { title: "Words — Word Table" };
 export const runtime = "nodejs";
@@ -61,7 +61,7 @@ const COLUMN_INDICATORS: Partial<Record<TableColumnKey, readonly TableColumnIndi
     { kind: "primary-key", text: "Primary key: Word.id" },
     { kind: "unique", text: "Unique: Word.id (enforced by the primary key)" },
   ],
-  base_form: [{ kind: "index", text: "Index: Word_base_form_idx" }],
+  base_form: [{ kind: "foreign-key", text: "Read from EnglishWord.base_form through Word.englishId" }],
   englishId: [
     { kind: "foreign-key", text: "Foreign key: Word.englishId → EnglishWord.id" },
     { kind: "index", text: "Index: Word_englishId_idx" },
@@ -138,7 +138,7 @@ export default async function WordsTablePage({
     : [];
   const where: Prisma.WordWhereInput | undefined = q
     ? { OR: [
-      { base_form: { contains: q } },
+      { english: { is: { base_form: { contains: q } } } },
       { anki_link_id: { contains: q } },
       { meaning: { is: { id: { in: matchingPersianIds } } } },
       ...matchingPersianIds.map((id) => ({ otherMeaningIds: { array_contains: id } })),
@@ -146,7 +146,7 @@ export default async function WordsTablePage({
     : undefined;
   const primaryOrderBy: Record<SortField, Prisma.WordOrderByWithRelationInput> = {
     id: { id: dir },
-    base_form: { base_form: dir },
+    base_form: { english: { base_form: dir } },
     englishId: { englishId: dir },
     meaningId: { meaningId: dir },
     otherMeaningIds: { otherMeaningIds: dir },
@@ -155,7 +155,7 @@ export default async function WordsTablePage({
     anki_link_id: { anki_link_id: dir },
     updatedAt: { updatedAt: dir },
   };
-  const [total, rows] = await Promise.all([
+  const [total, rawRows] = await Promise.all([
     prisma.word.count({ where }),
     prisma.word.findMany({
       where,
@@ -163,15 +163,16 @@ export default async function WordsTablePage({
       skip: showAll ? 0 : (page - 1) * pageSize,
       take: showAll ? undefined : pageSize,
       select: {
-        id: true, anki_link_id: true, base_form: true, phonetic_us: true, phonetic_us_normalized: true, englishId: true,
+        id: true, anki_link_id: true, englishId: true, english: { select: WORD_ENGLISH_FIELDS_SELECT },
         meaningId: true, otherMeaningIds: true, pos: true, concept_explained: true, concept_explained_fa: true,
         word_hint_story: true, explanation_for_sentence_meaning: true, learning_depth: true, mixed_sentence: true,
         other_meanings_en: true, category: true, typeOfWordInDb: true, hint_sentence: true, first_letter_en_hint: true,
-        first_letter_fa_hint: true, hint_to_select: true, json_hint: true, word_note: true, common_error: true,
+        first_letter_fa_hint: true, hint_to_select: true, word_note: true, common_error: true,
         imageability: true, productive_target: true, createdAt: true, updatedAt: true,
       },
     }),
   ]);
+  const rows = rawRows.map(flattenWordEnglishRelation);
   const referencedMeaningIds = Array.from(new Set(rows.flatMap((row) => [row.meaningId, ...meaningIds(row.otherMeaningIds)].filter((id): id is number => id !== null))));
   const referencedMeanings = referencedMeaningIds.length
     ? await prisma.persianWord.findMany({
@@ -219,8 +220,6 @@ export default async function WordsTablePage({
           {q ? <Link href={clearHref} className="rounded border px-3 py-2 text-sm hover:bg-black/5 dark:hover:bg-white/5">Clear</Link> : null}
         </form>
       </section>
-
-      <TemporaryEnglishIdLinker />
 
       <section className="mt-4 rounded border p-3">
         <TableColumnSelector key={columns.join(",")} columns={TABLE_COLUMNS} selectedColumns={columns} />

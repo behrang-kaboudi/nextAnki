@@ -6,6 +6,7 @@ import { randomUUID } from "node:crypto";
 import { prisma } from "@/lib/prisma";
 import { upsertPrimarySentenceByAnkiLinkId } from "@/lib/sentences/sentenceRepo";
 import { addPersianWord } from "@/lib/tables/persianWord";
+import { normalizeEnglishWordText } from "@/lib/english/normalize";
 
 export const runtime = "nodejs";
 
@@ -71,7 +72,7 @@ function validateMentionedWordItem(
     issues.push(`Each items[] entry must have exactly ${allowedItemKeys.length} fields`);
   }
 
-  const base_form = asNonEmptyString(value.base_form);
+  const base_form = normalizeEnglishWordText(asNonEmptyString(value.base_form) ?? "");
   const meaning_fa_raw = asNonEmptyString(value.meaning_fa);
 
   if (!base_form) issues.push("items[].base_form must be a non-empty string");
@@ -202,7 +203,7 @@ export async function POST(req: Request) {
       for (const item of row.items) {
         try {
           const candidates = await prisma.word.findMany({
-            where: { base_form: item.base_form },
+            where: { english: { is: { base_form: item.base_form } } },
             select: { id: true, anki_link_id: true, meaning: { select: { normalized_text: true } } },
           });
 
@@ -227,10 +228,16 @@ export async function POST(req: Request) {
 
           const persianMeaning = await addPersianWord(item.meaning_fa);
           const created = await prisma.$transaction(async (tx) => {
+            const englishWord = await tx.englishWord.upsert({
+              where: { base_form: item.base_form },
+              update: {},
+              create: { base_form: item.base_form },
+              select: { id: true },
+            });
             const pending = await tx.word.create({
               data: {
                 anki_link_id: `pending_${randomUUID()}`,
-                base_form: item.base_form,
+                englishId: englishWord.id,
                 meaningId: persianMeaning.item.id,
               },
               select: { id: true },

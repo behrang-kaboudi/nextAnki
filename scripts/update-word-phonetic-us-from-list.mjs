@@ -223,24 +223,27 @@ async function updateWords() {
   let skippedMissing = 0;
 
   for (const item of UPDATES) {
-    const res = await prisma.$executeRawUnsafe(
-      "UPDATE Word SET phonetic_us = ? WHERE id = ? AND base_form = ?",
-      item.phonetic_us,
-      item.id,
-      item.base_form
-    );
-    const count = Number(res ?? 0);
-    if (count === 1) {
-      updated += 1;
+    const word = await prisma.word.findUnique({
+      where: { id: item.id },
+      select: { english: { select: { id: true, base_form: true } } },
+    });
+    if (!word) {
+      skippedMissing += 1;
       continue;
     }
-
-    const exists = await prisma.$queryRawUnsafe(
-      "SELECT id, base_form FROM Word WHERE id = ? LIMIT 1",
-      item.id
-    );
-    if (!exists.length) skippedMissing += 1;
-    else skippedMismatch += 1;
+    if (word.english.base_form !== item.base_form) {
+      skippedMismatch += 1;
+      continue;
+    }
+    await prisma.englishWord.update({
+      where: { id: word.english.id },
+      data: { phonetic_us: item.phonetic_us, json_hint: null },
+    });
+    await prisma.word.updateMany({
+      where: { englishId: word.english.id },
+      data: { updatedAt: new Date() },
+    });
+    updated += 1;
   }
 
   return { updated, skippedMismatch, skippedMissing };
@@ -269,12 +272,11 @@ async function backfillNormalizedFrom(minId) {
 }
 
 async function main() {
-  const minId = Math.min(...UPDATES.map((u) => u.id));
   const result = await updateWords();
   process.stdout.write(
     `Word phonetic_us update: updated=${result.updated} skippedMissing=${result.skippedMissing} skippedMismatch=${result.skippedMismatch}\n`
   );
-  await backfillNormalizedFrom(minId);
+  await backfillNormalizedFrom(0);
   process.stdout.write("Backfill normalized: done\n");
 }
 

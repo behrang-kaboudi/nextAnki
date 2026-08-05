@@ -16,8 +16,9 @@ export async function GET() {
         sentence_en: string;
       }>
     >`
-      SELECT w.id, w.base_form, COALESCE(pw.canonical_text, '') AS meaning_fa, COALESCE(s.sentence_en, '') AS sentence_en
+      SELECT w.id, ew.base_form, COALESCE(pw.canonical_text, '') AS meaning_fa, COALESCE(s.sentence_en, '') AS sentence_en
       FROM word w
+      INNER JOIN english_word ew ON ew.id = w.englishId
       LEFT JOIN persian_word pw ON pw.id = w.meaningId
       LEFT JOIN SentenceWordLink sw ON sw.wordId = w.id AND sw.isPrimary = true
       LEFT JOIN Sentence s ON s.id = sw.sentenceId

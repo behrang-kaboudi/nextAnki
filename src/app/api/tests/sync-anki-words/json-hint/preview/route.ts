@@ -4,6 +4,7 @@ import { createAnkiOperations } from "@/lib/anki";
 import { AnkiNoteTypes } from "@/lib/anki";
 import { WORD_ANKI_FIELD_GENERATORS, getAnkiLinkIdFromNoteFields } from "@/lib/anki/wordAnkiMapping";
 import { prisma } from "@/lib/prisma";
+import { hydrateWordWithEnglishFields } from "@/lib/english/wordEnglishFields.server";
 
 export const runtime = "nodejs";
 
@@ -15,13 +16,14 @@ export async function POST(req: Request) {
       : "";
 
   if (ankiLinkIdOverride) {
-    const word = await prisma.word.findUnique({ where: { anki_link_id: ankiLinkIdOverride } });
-    if (!word) {
+    const rawWord = await prisma.word.findUnique({ where: { anki_link_id: ankiLinkIdOverride } });
+    if (!rawWord) {
       return NextResponse.json(
         { ok: false as const, error: `DB word not found for anki_link_id=${ankiLinkIdOverride}` },
         { status: 404 },
       );
     }
+    const word = await hydrateWordWithEnglishFields(rawWord);
 
     const generatedJsonHint = await WORD_ANKI_FIELD_GENERATORS.json_hint(word);
     const generatedFirstLetterFaHint = await WORD_ANKI_FIELD_GENERATORS.first_letter_fa_hint(word);
@@ -87,13 +89,14 @@ export async function POST(req: Request) {
     );
   }
 
-  const word = await prisma.word.findUnique({ where: { anki_link_id: ankiLinkId } });
-  if (!word) {
+  const rawWord = await prisma.word.findUnique({ where: { anki_link_id: ankiLinkId } });
+  if (!rawWord) {
     return NextResponse.json(
       { ok: false as const, error: `DB word not found for anki_link_id=${ankiLinkId}` },
       { status: 404 },
     );
   }
+  const word = await hydrateWordWithEnglishFields(rawWord);
 
   const ankiJsonHint = note.fields?.json_hint?.value ?? "";
   const generatedJsonHint = await WORD_ANKI_FIELD_GENERATORS.json_hint(word);

@@ -3,7 +3,9 @@ import "server-only";
 import { NextResponse } from "next/server";
 
 import { normalizeIpaForDb } from "@/lib/ipa/normalize";
+import { prisma } from "@/lib/prisma";
 import { updateWord } from "@/lib/words/wordRepo";
+import { touchWordsByEnglishId } from "@/lib/words/wordRepo";
 
 export const runtime = "nodejs";
 
@@ -195,8 +197,6 @@ export async function POST(req: Request) {
 
         if (item.phonetic_us !== undefined) {
           phonetic_us_normalized = normalizeIpaForDb(item.phonetic_us, 2000);
-          patch.phonetic_us = item.phonetic_us;
-          patch.phonetic_us_normalized = phonetic_us_normalized;
         }
         if (item.imageability !== undefined) patch.imageability = item.imageability;
         if (item.learning_depth !== undefined) patch.learning_depth = item.learning_depth;
@@ -204,17 +204,22 @@ export async function POST(req: Request) {
         if (item.pos !== undefined) patch.pos = item.pos;
         if (item.concept_explained_fa !== undefined) patch.concept_explained_fa = item.concept_explained_fa;
 
-        const row = await updateWord({
-          where: { id: item.id },
-          data: {
-            ...patch,
-          },
-          select: { id: true },
-        });
+        const word = await prisma.word.findUnique({ where: { id: item.id }, select: { id: true, englishId: true } });
+        if (!word) throw new Error(`Word ${item.id} not found.`);
+        if (item.phonetic_us !== undefined && phonetic_us_normalized !== undefined) {
+          await prisma.englishWord.update({
+            where: { id: word.englishId },
+            data: { phonetic_us: item.phonetic_us, phonetic_us_normalized, json_hint: null },
+          });
+          await touchWordsByEnglishId(word.englishId);
+        }
+        if (Object.keys(patch).length) {
+          await updateWord({ where: { id: item.id }, data: patch, select: { id: true } });
+        }
         updated += 1;
         results.push({
           ok: true,
-          id: row.id,
+          id: word.id,
           ...(phonetic_us_normalized === undefined ? {} : { phonetic_us_normalized }),
           ...(item.imageability === undefined ? {} : { imageability: item.imageability }),
           ...(item.learning_depth === undefined ? {} : { learning_depth: item.learning_depth }),

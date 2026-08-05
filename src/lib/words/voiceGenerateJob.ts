@@ -93,12 +93,12 @@ async function runJob(state: VoiceJobState) {
   let cursorId: number | null = null;
 
   for (;;) {
-    const rows: Array<{ id: number; hint_sentence: string | null; json_hint: string | null }> =
+    const rows: Array<{ id: number; hint_sentence: string | null; english: { json_hint: string | null } }> =
       await prisma.word.findMany({
       orderBy: { id: "asc" },
       take,
       ...(cursorId ? { cursor: { id: cursorId }, skip: 1 } : {}),
-      select: { id: true, hint_sentence: true, json_hint: true },
+      select: { id: true, hint_sentence: true, english: { select: { json_hint: true } } },
     });
     if (rows.length === 0) break;
 
@@ -111,7 +111,7 @@ async function runJob(state: VoiceJobState) {
         continue;
       }
 
-      const generatedAtMs = getJsonHintGeneratedAtMs(r.json_hint ?? null);
+      const generatedAtMs = getJsonHintGeneratedAtMs(r.english.json_hint ?? null);
       const res = await ensureHintSentenceVoice({
         id: r.id,
         hintSentence: hintPhrase,

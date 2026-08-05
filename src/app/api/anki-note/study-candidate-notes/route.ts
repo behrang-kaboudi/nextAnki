@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
 import { hydrateWordsWithPersianMeanings } from "@/lib/words/persianMeanings.server";
+import { flattenWordEnglishRelation, WORD_ENGLISH_FIELDS_SELECT } from "@/lib/english/wordEnglishFields.server";
 
 function asTrimmedString(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
@@ -22,7 +23,7 @@ export async function GET(req: Request) {
           : q
             ? {
                 OR: [
-                  { base_form: { contains: q } },
+                  { english: { is: { base_form: { contains: q } } } },
                   { meaning: { is: { canonical_text: { contains: q } } } },
                   {
                     sentenceLinks: {
@@ -42,7 +43,8 @@ export async function GET(req: Request) {
             : undefined,
       select: {
         anki_link_id: true,
-        base_form: true,
+        englishId: true,
+        english: { select: WORD_ENGLISH_FIELDS_SELECT },
         meaningId: true,
         otherMeaningIds: true,
         learning_depth: true,
@@ -62,13 +64,13 @@ export async function GET(req: Request) {
       orderBy:
         mode === "top-learning-depth"
           ? [{ learning_depth: "desc" }, { id: "asc" }]
-          : [{ base_form: "asc" }, { id: "asc" }],
+          : [{ english: { base_form: "asc" } }, { id: "asc" }],
       take: mode === "top-learning-depth" ? undefined : limit,
     });
 
     return NextResponse.json({
       ok: true,
-      items: (await hydrateWordsWithPersianMeanings(rows)).map((row) => ({
+      items: (await hydrateWordsWithPersianMeanings(rows.map(flattenWordEnglishRelation))).map((row) => ({
         anki_link_id: row.anki_link_id,
         base_form: row.base_form,
         meaning_fa: row.meaning_fa,

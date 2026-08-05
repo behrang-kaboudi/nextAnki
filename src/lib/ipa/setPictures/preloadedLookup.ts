@@ -43,11 +43,10 @@ export async function createPreloadedPictureCandidateLookup(): Promise<PictureCa
         pos: { in: ["noun", "adjective", "verb"] },
         meaning: { isNot: null },
       },
-      orderBy: [{ meaning: { canonical_text: "asc" } }, { base_form: "asc" }],
+      orderBy: [{ meaning: { canonical_text: "asc" } }, { english: { base_form: "asc" } }],
       select: {
-        base_form: true,
+        english: { select: { base_form: true, phonetic_us_normalized: true } },
         anki_link_id: true,
-        phonetic_us_normalized: true,
         pos: true,
         imageability: true,
         meaning: {
@@ -77,12 +76,12 @@ export async function createPreloadedPictureCandidateLookup(): Promise<PictureCa
     const fa = meaning?.canonical_text ?? "";
     const usage = row.pos?.trim() || "word";
     const faIpa = meaning?.meaning_fa_IPA_normalize?.trim() ?? "";
-    const enIpa = row.phonetic_us_normalized?.trim() ?? "";
+    const enIpa = row.english.phonetic_us_normalized?.trim() ?? "";
 
     if (faIpa) {
       wordFaCandidates.push({
         fa,
-        en: row.base_form,
+        en: row.english.base_form,
         anki_link_id: row.anki_link_id,
         target_ipa: faIpa,
         target_lang: "fa",
@@ -93,7 +92,7 @@ export async function createPreloadedPictureCandidateLookup(): Promise<PictureCa
     if (enIpa) {
       wordEnCandidates.push({
         fa,
-        en: row.base_form,
+        en: row.english.base_form,
         anki_link_id: row.anki_link_id,
         target_ipa: enIpa,
         target_lang: "en",

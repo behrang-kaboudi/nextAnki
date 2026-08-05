@@ -1,6 +1,6 @@
 import "server-only";
 
-import { PictureWordUsage, Word } from "@prisma/client";
+import { PictureWordUsage } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
 
@@ -9,7 +9,7 @@ import {
   filterByUsage,
   startsWithSAndNextIsConsonant,
 } from "./shared";
-import type { IpaCandidate } from "./types";
+import type { IpaCandidate, WordPictureInput } from "./types";
 import { imageabilityBaseThreshold } from "./types";
 
 export async function findPictureWordsByIpaPrefix(
@@ -51,18 +51,19 @@ export async function findPictureWordsByIpaPrefix(
   >`
     SELECT
       pw.canonical_text AS fa,
-      w.base_form AS en,
+      ew.base_form AS en,
       w.anki_link_id,
       pw.meaning_fa_IPA_normalize AS target_ipa,
       w.pos AS \`usage\`,
       w.imageability
     FROM word w
+    INNER JOIN english_word ew ON ew.id = w.englishId
     INNER JOIN persian_word pw ON pw.id = w.meaningId
     WHERE pw.meaning_fa_IPA_normalize LIKE ${likePattern}
       AND pw.meaning_fa_IPA_normalize <> ''
       AND w.imageability > ${imageabilityBaseThreshold}
       AND (w.pos = 'noun' OR w.pos = 'adjective' OR w.pos = 'verb')
-    ORDER BY pw.canonical_text ASC, w.base_form ASC
+    ORDER BY pw.canonical_text ASC, ew.base_form ASC
   `;
   const wordRowsEn = await prisma.$queryRaw<
     Array<{
@@ -77,18 +78,19 @@ export async function findPictureWordsByIpaPrefix(
     SELECT
     
       pw.canonical_text AS fa,
-      w.base_form AS en,
+      ew.base_form AS en,
       w.anki_link_id,
-      w.phonetic_us_normalized AS target_ipa,
+      ew.phonetic_us_normalized AS target_ipa,
       w.pos AS \`usage\`,
       w.imageability
     FROM word w
+    INNER JOIN english_word ew ON ew.id = w.englishId
     INNER JOIN persian_word pw ON pw.id = w.meaningId
-    WHERE w.phonetic_us_normalized LIKE ${likePattern}
-      AND w.phonetic_us_normalized <> ''
+    WHERE ew.phonetic_us_normalized LIKE ${likePattern}
+      AND ew.phonetic_us_normalized <> ''
       AND w.imageability > ${imageabilityBaseThreshold}
        AND (w.pos = 'noun' OR w.pos = 'adjective' OR w.pos = 'verb')
-    ORDER BY pw.canonical_text ASC, w.base_form ASC
+    ORDER BY pw.canonical_text ASC, ew.base_form ASC
   `;
 
   const out: IpaCandidate[] = [];
@@ -323,7 +325,7 @@ function getPatternsForPart(phoneticNormalized: string): string[] {
 // اگر برای پترن بالایی پیدا شود سایرین جستجو نمیشوند
 async function findCandidatesByPatterns(
   patterns: string[],
-  word: Word,
+  word: WordPictureInput,
   lookup: PictureCandidateLookup = findPictureWordsByIpaPrefix,
 ): Promise<IpaCandidate[]> {
   const length = word.phonetic_us_normalized?.replace(" ", "").length || 0;
@@ -346,7 +348,7 @@ async function findCandidatesByPatterns(
 }
 export async function findCandidatesByPart(
   phoneticNormalizedForPart: string,
-  word: Word,
+  word: WordPictureInput,
   lookup: PictureCandidateLookup = findPictureWordsByIpaPrefix,
 ): Promise<IpaCandidate[]> {
   const patterns = getPatternsForPart(phoneticNormalizedForPart);
@@ -357,7 +359,7 @@ export async function findCandidatesByPart(
 }
 export async function findCandidatesByPartWithS(
   phoneticNormalized: string,
-  word: Word,
+  word: WordPictureInput,
   lookup: PictureCandidateLookup = findPictureWordsByIpaPrefix,
 ): Promise<IpaCandidate[]> {
   let matches = await findCandidatesByPart(phoneticNormalized, word, lookup);

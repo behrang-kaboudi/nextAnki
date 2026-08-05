@@ -1,7 +1,5 @@
 import Link from "next/link";
 
-import type { Word } from "@prisma/client";
-
 import { WORD_ANKI_FIELD_GENERATORS } from "@/lib/anki/wordAnkiMapping";
 
 export const metadata = {
@@ -46,7 +44,7 @@ const MOCK_WORD_FOR_JSON_HINT = {
   meaning_fa: "",
   imageability: 0,
   json_hint: JSON.stringify(SAMPLE_JSON_HINT),
-} as unknown as Word;
+} as unknown as Parameters<typeof WORD_ANKI_FIELD_GENERATORS.json_hint>[0];
 
 export default async function TestFunctionsSamplePage() {
   const generatedFirstLetterFaHint =

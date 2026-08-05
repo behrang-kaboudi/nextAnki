@@ -2,14 +2,9 @@ import "server-only";
 
 import { NextResponse } from "next/server";
 
-import type { Word } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { pickPictureSymbolsForWord } from "@/lib/ipa/setPictures/setForAny";
-import {
-  normalizeJsonHintForCompare,
-  stringifyJsonHintWithTimestamp,
-} from "@/lib/words/jsonHint";
-import { updateWord } from "@/lib/words/wordRepo";
+import { generateEnglishWordJsonHints } from "@/lib/english/englishWordJsonHint.server";
 
 export const runtime = "nodejs";
 
@@ -23,31 +18,6 @@ const clampInt = (
   if (!Number.isFinite(n)) return def;
   return Math.max(min, Math.min(max, n));
 };
-
-async function mapWithConcurrency<T, R>(
-  items: T[],
-  concurrency: number,
-  fn: (item: T, index: number) => Promise<R>,
-): Promise<R[]> {
-  const limit = Math.max(1, Math.floor(concurrency));
-  const results: R[] = new Array(items.length);
-  let nextIndex = 0;
-
-  const workers = Array.from(
-    { length: Math.min(limit, items.length) },
-    async () => {
-      while (true) {
-        const current = nextIndex;
-        nextIndex += 1;
-        if (current >= items.length) return;
-        results[current] = await fn(items[current]!, current);
-      }
-    },
-  );
-
-  await Promise.all(workers);
-  return results;
-}
 
 export async function POST(req: Request) {
   try {
@@ -73,13 +43,17 @@ export async function POST(req: Request) {
       return raw === "1" || raw === "true" || raw === "yes";
     })();
 
-    const whereParts = [];
+    const whereParts: Prisma.EnglishWordWhereInput[] = [];
     if (q) {
       whereParts.push({
         OR: [
           { base_form: { contains: q } },
-          { meaning: { is: { canonical_text: { contains: q } } } },
-          { anki_link_id: { contains: q } },
+          {
+            words: {
+              some: { meaning: { is: { canonical_text: { contains: q } } } },
+            },
+          },
+          { words: { some: { anki_link_id: { contains: q } } } },
         ],
       });
     }
@@ -92,9 +66,9 @@ export async function POST(req: Request) {
     const whereFilter = whereParts.length > 0 ? { AND: whereParts } : undefined;
 
     const total = includeTotal
-      ? await prisma.word.count({ where: whereFilter })
+      ? await prisma.englishWord.count({ where: whereFilter })
       : null;
-    const rows = await prisma.word.findMany({
+    const rows = await prisma.englishWord.findMany({
       where: {
         AND: [{ id: { gt: cursorId } }, ...(whereFilter ? [whereFilter] : [])],
       },
@@ -102,12 +76,7 @@ export async function POST(req: Request) {
       take: scanBatch,
       select: {
         id: true,
-        anki_link_id: true,
-        base_form: true,
-        hint_sentence: true,
         phonetic_us_normalized: true,
-        imageability: true,
-        json_hint: true,
       },
     });
 
@@ -130,51 +99,17 @@ export async function POST(req: Request) {
     let nextCursorId = cursorId;
     const batchFirstId = rows[0]?.id ?? null;
     const processed = rows.length;
-    const concurrency = 20;
-
-    const computed = await mapWithConcurrency(
-      rows,
-      concurrency,
-      async (row): Promise<{ id: number; json_hint: string | null } | null> => {
-        const match =
-          (row.phonetic_us_normalized ?? "").trim() !== ""
-            ? await pickPictureSymbolsForWord(row as unknown as Word)
-            : null;
-
-        const nextComparable = match ? JSON.stringify(match) : null;
-        const prevComparable = normalizeJsonHintForCompare(
-          row.json_hint ?? null,
-        );
-        const changed = prevComparable !== nextComparable;
-        if (!changed) return null;
-
-        const nextJson = match ? stringifyJsonHintWithTimestamp(match) : null;
-        return { id: row.id, json_hint: nextJson };
-      },
-    );
-
-    const updates = computed.filter(
-      (u): u is { id: number; json_hint: string | null } => u !== null,
-    );
+    const results = await generateEnglishWordJsonHints(rows);
 
     nextCursorId = rows[rows.length - 1]?.id ?? nextCursorId;
 
-    let updated = 0;
-    if (updates.length) {
-      await mapWithConcurrency(updates, concurrency, async (item) => {
-        await updateWord({
-          where: { id: item.id },
-          data: { json_hint: item.json_hint },
-        });
-      });
-      updated = updates.length;
-    }
+    const updated = results.filter((result) => result.jsonHint !== null).length;
 
     return NextResponse.json({
       ok: true,
       q,
       processed,
-      updated: Number.isFinite(updated) ? updated : updates.length,
+      updated,
       batchFirstId,
       batchLastId: nextCursorId,
       nextCursorId,

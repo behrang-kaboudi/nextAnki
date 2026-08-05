@@ -1,6 +1,5 @@
 import "server-only";
 
-import type { Word } from "@prisma/client";
 import { setFor2 } from "./setFor2";
 import { setFor3 } from "./setFor3";
 import { setFor4 } from "./setFor4";
@@ -8,7 +7,7 @@ import { setFor5 } from "./setFor5";
 import { setFor6 } from "./setFor6";
 import { setForSpace } from "./setForSpace";
 import { setForPersian } from "./setForPersian";
-import type { WordPictures, IpaCandidate } from "./types";
+import type { WordPictures, IpaCandidate, WordPictureInput } from "./types";
 import { imageabilityBaseThreshold } from "./types";
 import type { PictureCandidateLookup } from "./forChars";
 
@@ -17,7 +16,7 @@ type PickPictureSymbolsOptions = {
   includePersianImage?: boolean;
 };
 export async function pickPictureSymbolsForWord(
-  word: Word,
+  word: WordPictureInput,
   options: PickPictureSymbolsOptions = {},
 ): Promise<WordPictures | null> {
   const normalized = (word.phonetic_us_normalized ?? "").trim();

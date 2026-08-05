@@ -8,6 +8,7 @@ import { getEnglishWordAudioAbsolutePath } from "@/lib/audio/englishWordAudioPat
 import { normalizeEnglishWordText } from "@/lib/english/normalize";
 import { normalizeIpaForDb } from "@/lib/ipa/normalize";
 import { prisma } from "@/lib/prisma";
+import { touchWordsByEnglishId } from "@/lib/words/wordRepo";
 
 function parseId(value: string) {
   const id = Number(value);
@@ -49,6 +50,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         json_hint: nullableString(body.json_hint),
       },
     });
+    await touchWordsByEnglishId(id);
     return NextResponse.json({ ok: true, item });
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
@@ -73,6 +75,9 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
     }
     return NextResponse.json({ ok: true, deletedId: id });
   } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2003") {
+      return NextResponse.json({ ok: false, error: "This EnglishWord is still referenced by Word rows." }, { status: 409 });
+    }
     return NextResponse.json({ ok: false, error: error instanceof Error ? error.message : "Could not delete EnglishWord." }, { status: 500 });
   }
 }

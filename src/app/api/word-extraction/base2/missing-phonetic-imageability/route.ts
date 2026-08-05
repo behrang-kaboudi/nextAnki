@@ -33,12 +33,13 @@ export async function GET(req: Request) {
     // Extraction basis for this modal:
     // only rows with missing phonetic_us should be selected.
     const missingWhere = Prisma.sql`
-      (w.phonetic_us IS NULL OR w.phonetic_us = '')
+      (ew.phonetic_us IS NULL OR ew.phonetic_us = '')
     `;
 
     const totalRows = (await prisma.$queryRaw<Array<{ count: unknown }>>(Prisma.sql`
       SELECT COUNT(*) AS count
       FROM word w
+      INNER JOIN english_word ew ON ew.id = w.englishId
       LEFT JOIN SentenceWordLink sw ON sw.wordId = w.id AND sw.isPrimary = true
       LEFT JOIN Sentence s ON s.id = sw.sentenceId
       WHERE ${missingWhere}
@@ -56,11 +57,12 @@ export async function GET(req: Request) {
     >(Prisma.sql`
       SELECT
         w.id,
-        w.base_form,
+        ew.base_form,
         COALESCE(pw.canonical_text, '') AS meaning_fa,
         COALESCE(s.sentence_en, '') AS sentence_en,
         COALESCE(s.sentence_en_meaning_fa, '') AS sentence_en_meaning_fa
       FROM word w
+      INNER JOIN english_word ew ON ew.id = w.englishId
       LEFT JOIN persian_word pw ON pw.id = w.meaningId
       LEFT JOIN SentenceWordLink sw ON sw.wordId = w.id AND sw.isPrimary = true
       LEFT JOIN Sentence s ON s.id = sw.sentenceId

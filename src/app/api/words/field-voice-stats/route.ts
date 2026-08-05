@@ -31,8 +31,8 @@ export async function GET(req: Request) {
     (async () => {
       switch (field) {
         case "base_form": {
-          const rows = await prisma.word.findMany({ select: { anki_link_id: true, base_form: true } });
-          return rows.map((r) => ({ anki_link_id: r.anki_link_id, text: r.base_form }));
+          const rows = await prisma.word.findMany({ select: { anki_link_id: true, english: { select: { base_form: true } } } });
+          return rows.map((r) => ({ anki_link_id: r.anki_link_id, text: r.english.base_form }));
         }
         case "other_meanings_en": {
           const rows = await prisma.word.findMany({

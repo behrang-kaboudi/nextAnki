@@ -11,6 +11,7 @@ import {
 } from "@/lib/anki/wordAnkiMapping";
 import { prisma } from "@/lib/prisma";
 import { hydrateWordsWithPersianMeanings } from "@/lib/words/persianMeanings.server";
+import { hydrateWordsWithEnglishFields } from "@/lib/english/wordEnglishFields.server";
 
 export type FullSyncAllStatus = {
   jobId: string;
@@ -237,7 +238,7 @@ async function runJob(state: State) {
     if (!rows.length) break;
     lastId = rows[rows.length - 1]!.id;
 
-    const rowsWithMeanings = await hydrateWordsWithPersianMeanings(rows);
+    const rowsWithMeanings = await hydrateWordsWithPersianMeanings(await hydrateWordsWithEnglishFields(rows));
     await runWithConcurrency(rowsWithMeanings, concurrency, async (word) => {
       if (state.stopRequested) return;
 

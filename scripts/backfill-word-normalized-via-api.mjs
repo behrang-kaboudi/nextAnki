@@ -1,5 +1,5 @@
 /**
- * Backfills Word.phonetic_us_normalized and Word.meaning_fa_IPA_normalized
+ * Backfills EnglishWord.phonetic_us_normalized and PersianWord meaning IPA normalization
  * by calling the Next.js API endpoint that computes:
  * segmentsWithSpacesToDedupedString(getIpaSegmentsWithSpaces(...)).
  *
@@ -45,4 +45,3 @@ main().catch((e) => {
   console.error(e);
   process.exitCode = 1;
 });
-

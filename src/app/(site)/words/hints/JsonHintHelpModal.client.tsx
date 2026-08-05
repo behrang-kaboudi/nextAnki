@@ -58,7 +58,7 @@ export default function JsonHintHelpModal() {
                 <div className="text-xs font-semibold">این دکمه دقیقاً چه کار می‌کند؟</div>
                 <div className="mt-2 text-sm">
                   برای هر رکورد جدول <Code>Word</Code> (یا فقط رکوردهای مطابق Search)، مقدار{" "}
-                  <Code>Word.json_hint</Code> را محاسبه می‌کند و اگر نتیجه با مقدار فعلی متفاوت باشد در دیتابیس ذخیره
+                  <Code>EnglishWord.json_hint</Code> را محاسبه می‌کند و اگر نتیجه با مقدار فعلی متفاوت باشد در دیتابیس ذخیره
                   می‌کند.
                 </div>
                 <div className="mt-2 text-xs opacity-80">

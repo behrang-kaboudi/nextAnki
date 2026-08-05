@@ -1,3 +1,12 @@
+import type { Prisma } from "@prisma/client";
+
+export type WordPictureInput = {
+  phonetic_us_normalized: string | null;
+  imageability: number | null;
+  meaningId?: number | null;
+  otherMeaningIds?: Prisma.JsonValue | null;
+};
+
 export const imageabilityBaseThreshold = 64;
 export type IpaCandidate = {
   fa: string;

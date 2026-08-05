@@ -1,13 +1,13 @@
 import "server-only";
 
-import type { PictureWordUsage, Word } from "@prisma/client";
+import type { PictureWordUsage } from "@prisma/client";
 
 import { filterByUsage } from "./shared";
 import {
   findCandidatesByPart,
   type PictureCandidateLookup,
 } from "./forChars";
-import type { IpaCandidate, WordPictures } from "./types";
+import type { IpaCandidate, WordPictureInput, WordPictures } from "./types";
 
 function bestOfUsage(
   matches: IpaCandidate[],
@@ -23,7 +23,7 @@ function bestOfUsage(
 }
 
 export async function setFor2(
-  word: Word,
+  word: WordPictureInput,
   lookup?: PictureCandidateLookup,
 ): Promise<WordPictures> {
   const phoneticNormalized = (word.phonetic_us_normalized ?? "").trim();

@@ -17,6 +17,7 @@ import { getLatestWordFieldAudioFile } from "@/lib/words/wordFieldVoice";
 import { prisma } from "@/lib/prisma";
 import { findPrimarySentenceByAnkiLinkId } from "@/lib/sentences/sentenceRepo";
 import { hydrateWordWithPersianMeanings, type WordWithPersianMeanings } from "@/lib/words/persianMeanings.server";
+import { hydrateWordWithEnglishFields, type WordEnglishFields } from "@/lib/english/wordEnglishFields.server";
 
 import { IpaCandidate, WordPictures } from "../ipa/setPictures/types";
 
@@ -130,18 +131,18 @@ export async function selectFile(
   const whereCandidates: Prisma.WordWhereInput[] = [];
 
   // Prefer strict match when we have both sides.
-  if (en && fa) whereCandidates.push({ base_form: en, meaning: { is: { canonical_text: fa } } });
+  if (en && fa) whereCandidates.push({ english: { is: { base_form: en } }, meaning: { is: { canonical_text: fa } } });
 
   // Fallback to whichever side is present. This is important because `target_lang`
   // controls which audio field we *want*, but the DB row can still be found via the other side.
-  if (en) whereCandidates.push({ base_form: en });
+  if (en) whereCandidates.push({ english: { is: { base_form: en } } });
   if (fa) whereCandidates.push({ meaning: { is: { canonical_text: fa } } });
 
-  let row: Pick<Word, "anki_link_id" | "base_form"> | null = null;
+  let row: Pick<Word, "anki_link_id"> | null = null;
   for (const where of whereCandidates) {
     row = await prisma.word.findFirst({
       where,
-      select: { anki_link_id: true, base_form: true },
+      select: { anki_link_id: true },
     });
     if (row) break;
   }
@@ -206,7 +207,7 @@ export function getAnkiLinkIdFromNoteFields(
   return null;
 }
 
-type WordForAnki = Word & Partial<Pick<WordWithPersianMeanings<Word>, "primaryPersianWord" | "otherPersianWords" | "meaning_fa" | "other_meanings_fa">>;
+type WordForAnki = Word & WordEnglishFields & Partial<Pick<WordWithPersianMeanings<Word>, "primaryPersianWord" | "otherPersianWords" | "meaning_fa" | "other_meanings_fa">>;
 export type WordAnkiFieldGenerator = (word: WordForAnki) => string | Promise<string>;
 
 async function getSentenceFields(ankiLinkId: string) {
@@ -323,9 +324,10 @@ export async function generateWordAnkiFieldsForMetaLexVr9(
   word: Word | WordForAnki,
   configuredFields: readonly string[],
 ): Promise<Record<string, string>> {
-  const withMeanings = "primaryPersianWord" in word
-    ? word as WordForAnki
-    : await hydrateWordWithPersianMeanings(word);
+  const withEnglish = "base_form" in word ? word as WordForAnki : await hydrateWordWithEnglishFields(word);
+  const withMeanings = "primaryPersianWord" in withEnglish
+    ? withEnglish as WordForAnki
+    : await hydrateWordWithPersianMeanings(withEnglish);
   const fields = getWordAnkiManagedFieldNames(configuredFields);
   return Promise.all(
     fields.map(

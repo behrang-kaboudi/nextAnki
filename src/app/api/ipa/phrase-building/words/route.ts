@@ -4,6 +4,7 @@ import { Prisma, type PictureWord, type Word } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { pickPictureSymbolsForWord } from "@/lib/ipa/setPictures/setForAny";
 import { JSON_HINT_GENERATED_AT_FIELD } from "@/lib/words/jsonHint";
+import { hydrateWordsWithEnglishFields, type WordEnglishFields } from "@/lib/english/wordEnglishFields.server";
 
 export const runtime = "nodejs";
 
@@ -126,12 +127,12 @@ async function mapWithConcurrency<T, R>(
   return results;
 }
 
-async function loadWordsById(ids: number[]): Promise<Map<number, Word>> {
+async function loadWordsById(ids: number[]): Promise<Map<number, Word & WordEnglishFields>> {
   if (ids.length === 0) return new Map();
   const uniqueIds = Array.from(new Set(ids));
-  const words = await prisma.word.findMany({
+  const words = await hydrateWordsWithEnglishFields(await prisma.word.findMany({
     where: { id: { in: uniqueIds } },
-  });
+  }));
   return new Map(words.map((w) => [w.id, w]));
 }
 
@@ -186,25 +187,25 @@ export async function GET(req: Request) {
       phoneticLenGt === null && phoneticLen === 5 && includeSpacedSixForFive;
     const phoneticLenWhere =
       phoneticLenGt !== null
-        ? Prisma.sql`CHAR_LENGTH(phonetic_us_normalized) > ${phoneticLenGt}`
+        ? Prisma.sql`CHAR_LENGTH(ew.phonetic_us_normalized) > ${phoneticLenGt}`
         : useFourOrSpacedFive
-          ? Prisma.sql`(CHAR_LENGTH(phonetic_us_normalized) = 4 OR (CHAR_LENGTH(phonetic_us_normalized) = 5 AND phonetic_us_normalized LIKE '% %'))`
+          ? Prisma.sql`(CHAR_LENGTH(ew.phonetic_us_normalized) = 4 OR (CHAR_LENGTH(ew.phonetic_us_normalized) = 5 AND ew.phonetic_us_normalized LIKE '% %'))`
           : useFiveOrSpacedSix
-            ? Prisma.sql`(CHAR_LENGTH(phonetic_us_normalized) = 5 OR (CHAR_LENGTH(phonetic_us_normalized) = 6 AND phonetic_us_normalized LIKE '% %'))`
-            : Prisma.sql`CHAR_LENGTH(phonetic_us_normalized) = ${phoneticLen}`;
+            ? Prisma.sql`(CHAR_LENGTH(ew.phonetic_us_normalized) = 5 OR (CHAR_LENGTH(ew.phonetic_us_normalized) = 6 AND ew.phonetic_us_normalized LIKE '% %'))`
+            : Prisma.sql`CHAR_LENGTH(ew.phonetic_us_normalized) = ${phoneticLen}`;
     const spacedWhere = onlySpaced
-      ? Prisma.sql`phonetic_us_normalized LIKE '% %'`
+      ? Prisma.sql`ew.phonetic_us_normalized LIKE '% %'`
       : Prisma.sql`TRUE`;
 
     const orderByColumnSql = (() => {
       switch (sortBy) {
         case "phonetic_us_normalized":
-          return Prisma.raw("w.phonetic_us_normalized");
+          return Prisma.raw("ew.phonetic_us_normalized");
         case "meaning_fa":
           return Prisma.raw("pw.canonical_text");
         case "base_form":
         default:
-          return Prisma.raw("w.base_form");
+          return Prisma.raw("ew.base_form");
       }
     })();
     const orderByDirSql = sortDir === "desc" ? Prisma.raw("DESC") : Prisma.raw("ASC");
@@ -215,8 +216,9 @@ export async function GET(req: Request) {
             .$queryRaw<Array<{ count: bigint | number }>>`
               SELECT COUNT(*) as count
               FROM word w
-              WHERE phonetic_us_normalized IS NOT NULL
-                AND phonetic_us_normalized <> ''
+              INNER JOIN english_word ew ON ew.id = w.englishId
+              WHERE ew.phonetic_us_normalized IS NOT NULL
+                AND ew.phonetic_us_normalized <> ''
                 AND ${phoneticLenWhere}
                 AND ${spacedWhere};
             `,
@@ -230,10 +232,10 @@ export async function GET(req: Request) {
               json_hint: string | null;
             }>
           >`
-            SELECT w.id, w.base_form, w.phonetic_us_normalized, COALESCE(pw.canonical_text, '') AS meaning_fa, COALESCE(pw.meaning_fa_IPA_normalize, '') AS meaning_fa_IPA_normalized, w.json_hint
-            FROM word w LEFT JOIN persian_word pw ON pw.id = w.meaningId
-            WHERE phonetic_us_normalized IS NOT NULL
-              AND phonetic_us_normalized <> ''
+            SELECT w.id, ew.base_form, ew.phonetic_us_normalized, COALESCE(pw.canonical_text, '') AS meaning_fa, COALESCE(pw.meaning_fa_IPA_normalize, '') AS meaning_fa_IPA_normalized, ew.json_hint
+            FROM word w INNER JOIN english_word ew ON ew.id = w.englishId LEFT JOIN persian_word pw ON pw.id = w.meaningId
+            WHERE ew.phonetic_us_normalized IS NOT NULL
+              AND ew.phonetic_us_normalized <> ''
               AND ${phoneticLenWhere}
               AND ${spacedWhere}
             ORDER BY ${orderByColumnSql} ${orderByDirSql}, w.id DESC
@@ -251,8 +253,9 @@ export async function GET(req: Request) {
             .$queryRaw<Array<{ count: bigint | number }>>`
               SELECT COUNT(*) as count
               FROM word w
-              WHERE phonetic_us_normalized IS NOT NULL
-                AND phonetic_us_normalized <> ''
+              INNER JOIN english_word ew ON ew.id = w.englishId
+              WHERE ew.phonetic_us_normalized IS NOT NULL
+                AND ew.phonetic_us_normalized <> ''
                 AND ${phoneticLenWhere}
                 AND ${spacedWhere};
             `,
@@ -266,10 +269,10 @@ export async function GET(req: Request) {
               json_hint: string | null;
             }>
           >`
-            SELECT w.id, w.base_form, w.phonetic_us_normalized, COALESCE(pw.canonical_text, '') AS meaning_fa, COALESCE(pw.meaning_fa_IPA_normalize, '') AS meaning_fa_IPA_normalized, w.json_hint
-            FROM word w LEFT JOIN persian_word pw ON pw.id = w.meaningId
-            WHERE phonetic_us_normalized IS NOT NULL
-              AND phonetic_us_normalized <> ''
+            SELECT w.id, ew.base_form, ew.phonetic_us_normalized, COALESCE(pw.canonical_text, '') AS meaning_fa, COALESCE(pw.meaning_fa_IPA_normalize, '') AS meaning_fa_IPA_normalized, ew.json_hint
+            FROM word w INNER JOIN english_word ew ON ew.id = w.englishId LEFT JOIN persian_word pw ON pw.id = w.meaningId
+            WHERE ew.phonetic_us_normalized IS NOT NULL
+              AND ew.phonetic_us_normalized <> ''
               AND ${phoneticLenWhere}
               AND ${spacedWhere}
             ORDER BY ${orderByColumnSql} ${orderByDirSql}, w.id DESC
@@ -284,11 +287,12 @@ export async function GET(req: Request) {
       : await Promise.all([
           prisma.$queryRaw<Array<{ count: bigint | number }>>`
             SELECT COUNT(*) AS count FROM word w
+              INNER JOIN english_word ew ON ew.id = w.englishId
             WHERE ${spacedWhere};
           `,
           prisma.$queryRaw<Array<{ id: number; base_form: string; phonetic_us_normalized: string | null; meaning_fa: string; meaning_fa_IPA_normalized: string; json_hint: string | null }>>`
-            SELECT w.id, w.base_form, w.phonetic_us_normalized, COALESCE(pw.canonical_text, '') AS meaning_fa, COALESCE(pw.meaning_fa_IPA_normalize, '') AS meaning_fa_IPA_normalized, w.json_hint
-            FROM word w LEFT JOIN persian_word pw ON pw.id = w.meaningId
+            SELECT w.id, ew.base_form, ew.phonetic_us_normalized, COALESCE(pw.canonical_text, '') AS meaning_fa, COALESCE(pw.meaning_fa_IPA_normalize, '') AS meaning_fa_IPA_normalized, ew.json_hint
+            FROM word w INNER JOIN english_word ew ON ew.id = w.englishId LEFT JOIN persian_word pw ON pw.id = w.meaningId
             WHERE ${spacedWhere}
             ORDER BY ${orderByColumnSql} ${orderByDirSql}, w.id DESC
             LIMIT ${pageSize} OFFSET ${skip};
@@ -326,10 +330,10 @@ export async function GET(req: Request) {
                     json_hint: string | null;
                   }>
                 >`
-                  SELECT w.id, w.base_form, w.phonetic_us_normalized, COALESCE(pw.canonical_text, '') AS meaning_fa, COALESCE(pw.meaning_fa_IPA_normalize, '') AS meaning_fa_IPA_normalized, w.json_hint
-                  FROM word w LEFT JOIN persian_word pw ON pw.id = w.meaningId
-                  WHERE phonetic_us_normalized IS NOT NULL
-                    AND phonetic_us_normalized <> ''
+                  SELECT w.id, ew.base_form, ew.phonetic_us_normalized, COALESCE(pw.canonical_text, '') AS meaning_fa, COALESCE(pw.meaning_fa_IPA_normalize, '') AS meaning_fa_IPA_normalized, ew.json_hint
+                  FROM word w INNER JOIN english_word ew ON ew.id = w.englishId LEFT JOIN persian_word pw ON pw.id = w.meaningId
+                  WHERE ew.phonetic_us_normalized IS NOT NULL
+                    AND ew.phonetic_us_normalized <> ''
                     AND ${phoneticLenWhere}
                     AND ${spacedWhere}
                   ORDER BY ${orderByColumnSql} ${orderByDirSql}, w.id DESC
@@ -347,10 +351,10 @@ export async function GET(req: Request) {
                     json_hint: string | null;
                   }>
                 >`
-                  SELECT w.id, w.base_form, w.phonetic_us_normalized, COALESCE(pw.canonical_text, '') AS meaning_fa, COALESCE(pw.meaning_fa_IPA_normalize, '') AS meaning_fa_IPA_normalized, w.json_hint
-                  FROM word w LEFT JOIN persian_word pw ON pw.id = w.meaningId
-                  WHERE phonetic_us_normalized IS NOT NULL
-                    AND phonetic_us_normalized <> ''
+                  SELECT w.id, ew.base_form, ew.phonetic_us_normalized, COALESCE(pw.canonical_text, '') AS meaning_fa, COALESCE(pw.meaning_fa_IPA_normalize, '') AS meaning_fa_IPA_normalized, ew.json_hint
+                  FROM word w INNER JOIN english_word ew ON ew.id = w.englishId LEFT JOIN persian_word pw ON pw.id = w.meaningId
+                  WHERE ew.phonetic_us_normalized IS NOT NULL
+                    AND ew.phonetic_us_normalized <> ''
                     AND ${phoneticLenWhere}
                     AND ${spacedWhere}
                   ORDER BY ${orderByColumnSql} ${orderByDirSql}, w.id DESC
@@ -359,8 +363,8 @@ export async function GET(req: Request) {
               }
 
               return prisma.$queryRaw<Array<{ id: number; base_form: string; phonetic_us_normalized: string | null; meaning_fa: string; meaning_fa_IPA_normalized: string; json_hint: string | null }>>`
-                SELECT w.id, w.base_form, w.phonetic_us_normalized, COALESCE(pw.canonical_text, '') AS meaning_fa, COALESCE(pw.meaning_fa_IPA_normalize, '') AS meaning_fa_IPA_normalized, w.json_hint
-                FROM word w LEFT JOIN persian_word pw ON pw.id = w.meaningId
+                SELECT w.id, ew.base_form, ew.phonetic_us_normalized, COALESCE(pw.canonical_text, '') AS meaning_fa, COALESCE(pw.meaning_fa_IPA_normalize, '') AS meaning_fa_IPA_normalized, ew.json_hint
+                FROM word w INNER JOIN english_word ew ON ew.id = w.englishId LEFT JOIN persian_word pw ON pw.id = w.meaningId
                 WHERE ${spacedWhere}
                 ORDER BY ${orderByColumnSql} ${orderByDirSql}, w.id DESC
                 LIMIT ${MAX_FILTER_ROWS};
@@ -512,10 +516,10 @@ export async function GET(req: Request) {
               json_hint: string | null;
             }>
           >`
-            SELECT w.id, w.base_form, w.phonetic_us_normalized, COALESCE(pw.canonical_text, '') AS meaning_fa, COALESCE(pw.meaning_fa_IPA_normalize, '') AS meaning_fa_IPA_normalized, w.json_hint
-            FROM word w LEFT JOIN persian_word pw ON pw.id = w.meaningId
-            WHERE phonetic_us_normalized IS NOT NULL
-              AND phonetic_us_normalized <> ''
+            SELECT w.id, ew.base_form, ew.phonetic_us_normalized, COALESCE(pw.canonical_text, '') AS meaning_fa, COALESCE(pw.meaning_fa_IPA_normalize, '') AS meaning_fa_IPA_normalized, ew.json_hint
+            FROM word w INNER JOIN english_word ew ON ew.id = w.englishId LEFT JOIN persian_word pw ON pw.id = w.meaningId
+            WHERE ew.phonetic_us_normalized IS NOT NULL
+              AND ew.phonetic_us_normalized <> ''
               AND ${phoneticLenWhere}
               AND ${spacedWhere}
             ORDER BY ${orderByColumnSql} ${orderByDirSql}, w.id DESC
@@ -532,18 +536,18 @@ export async function GET(req: Request) {
                 json_hint: string | null;
               }>
             >`
-              SELECT w.id, w.base_form, w.phonetic_us_normalized, COALESCE(pw.canonical_text, '') AS meaning_fa, COALESCE(pw.meaning_fa_IPA_normalize, '') AS meaning_fa_IPA_normalized, w.json_hint
-              FROM word w LEFT JOIN persian_word pw ON pw.id = w.meaningId
-              WHERE phonetic_us_normalized IS NOT NULL
-                AND phonetic_us_normalized <> ''
+              SELECT w.id, ew.base_form, ew.phonetic_us_normalized, COALESCE(pw.canonical_text, '') AS meaning_fa, COALESCE(pw.meaning_fa_IPA_normalize, '') AS meaning_fa_IPA_normalized, ew.json_hint
+              FROM word w INNER JOIN english_word ew ON ew.id = w.englishId LEFT JOIN persian_word pw ON pw.id = w.meaningId
+              WHERE ew.phonetic_us_normalized IS NOT NULL
+                AND ew.phonetic_us_normalized <> ''
                 AND ${phoneticLenWhere}
                 AND ${spacedWhere}
               ORDER BY ${orderByColumnSql} ${orderByDirSql}, w.id DESC
               LIMIT ${MAX_FILTER_ROWS};
             `
           : await prisma.$queryRaw<Array<{ id: number; base_form: string; phonetic_us_normalized: string | null; meaning_fa: string; meaning_fa_IPA_normalized: string; json_hint: string | null }>>`
-              SELECT w.id, w.base_form, w.phonetic_us_normalized, COALESCE(pw.canonical_text, '') AS meaning_fa, COALESCE(pw.meaning_fa_IPA_normalize, '') AS meaning_fa_IPA_normalized, w.json_hint
-              FROM word w LEFT JOIN persian_word pw ON pw.id = w.meaningId
+              SELECT w.id, ew.base_form, ew.phonetic_us_normalized, COALESCE(pw.canonical_text, '') AS meaning_fa, COALESCE(pw.meaning_fa_IPA_normalize, '') AS meaning_fa_IPA_normalized, ew.json_hint
+              FROM word w INNER JOIN english_word ew ON ew.id = w.englishId LEFT JOIN persian_word pw ON pw.id = w.meaningId
               WHERE ${spacedWhere}
               ORDER BY ${orderByColumnSql} ${orderByDirSql}, w.id DESC
               LIMIT ${MAX_FILTER_ROWS};
@@ -605,10 +609,11 @@ export async function GET(req: Request) {
               ? await prisma.$queryRaw<
                   Array<{ id: number; phonetic_us_normalized: string | null }>
                 >`
-                  SELECT id, phonetic_us_normalized
+                  SELECT w.id, ew.phonetic_us_normalized
                   FROM word w
-                  WHERE phonetic_us_normalized IS NOT NULL
-                    AND phonetic_us_normalized <> ''
+              INNER JOIN english_word ew ON ew.id = w.englishId
+                  WHERE ew.phonetic_us_normalized IS NOT NULL
+                    AND ew.phonetic_us_normalized <> ''
                     AND ${phoneticLenWhere}
                     AND ${spacedWhere};
                 `
@@ -616,19 +621,20 @@ export async function GET(req: Request) {
                 ? await prisma.$queryRaw<
                     Array<{ id: number; phonetic_us_normalized: string | null }>
                   >`
-                    SELECT id, phonetic_us_normalized
+                    SELECT w.id, ew.phonetic_us_normalized
                     FROM word w
-                    WHERE phonetic_us_normalized IS NOT NULL
-                      AND phonetic_us_normalized <> ''
+              INNER JOIN english_word ew ON ew.id = w.englishId
+                    WHERE ew.phonetic_us_normalized IS NOT NULL
+                      AND ew.phonetic_us_normalized <> ''
                       AND ${phoneticLenWhere}
                       AND ${spacedWhere};
                   `
-              : await prisma.word.findMany({
+              : await hydrateWordsWithEnglishFields(await prisma.word.findMany({
                   where: onlySpaced
-                    ? { phonetic_us_normalized: { contains: " " } }
+                    ? { english: { is: { phonetic_us_normalized: { contains: " " } } } }
                     : undefined,
-                  select: { id: true, phonetic_us_normalized: true },
-            });
+                  select: { id: true, englishId: true },
+            }));
 
             const wordsById = await loadWordsById(all.map((r) => r.id));
             const statsFilled = await mapWithConcurrency(all, 20, async (row) => {
