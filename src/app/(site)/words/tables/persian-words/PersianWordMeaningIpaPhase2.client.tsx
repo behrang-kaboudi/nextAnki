@@ -36,11 +36,17 @@ export default function PersianWordMeaningIpaPhase2() {
   const [response, setResponse] = useState("");
   const [rows, setRows] = useState<InputRow[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [copyNotice, setCopyNotice] = useState<string | null>(null);
   const [report, setReport] = useState<Report | null>(null);
   const lastInputRef = useRef<HTMLInputElement | null>(null);
   const lastIdRef = useRef<number | null>(null);
 
-  const copy = (value: string) => void navigator.clipboard.writeText(value);
+  const copy = (value: string) => {
+    const label = value === prompt ? "Prompt" : value === data ? "Data" : "Prompt and data";
+    void navigator.clipboard.writeText(value)
+      .then(() => { setError(null); setCopyNotice(`${label} copied ✓`); })
+      .catch((reason) => setError(reason instanceof Error ? reason.message : String(reason)));
+  };
   const refreshData = useCallback(async () => {
     setLoading(true); setError(null);
     try {
@@ -49,10 +55,11 @@ export default function PersianWordMeaningIpaPhase2() {
       if (!res.ok || !json.ok) throw new Error(json.error || "Could not load missing rows.");
       setData(JSON.stringify(json.items ?? [], null, 2));
       setRemainingCount(typeof json.totalMissing === "number" ? json.totalMissing : null);
+      setCopyNotice("Data refreshed ✓");
     } catch (reason) { setError(reason instanceof Error ? reason.message : String(reason)); } finally { setLoading(false); }
   }, [limit]);
   const openPrompt = useCallback(async () => {
-    setOpen(true); setLoading(true); setError(null); setResponse(""); setRows([]); setReport(null);
+    setOpen(true); setLoading(true); setError(null); setCopyNotice(null); setResponse(""); setRows([]); setReport(null);
     try {
       const paths = ["src/prompts/word-extraction/base/inputOutRulseV1 .md", "src/prompts/word-extraction/meaning_fa_IPA/rulseV1.md"];
       const [files, missing] = await Promise.all([
@@ -97,6 +104,11 @@ export default function PersianWordMeaningIpaPhase2() {
   };
 
   return <>
+    <style jsx>{`
+      button { transition: transform 120ms ease, background-color 120ms ease; }
+      button:active:not(:disabled) { transform: scale(0.95); }
+    `}</style>
+    {open && copyNotice ? <div className="fixed bottom-6 right-6 z-[70] rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-800 shadow-elevated dark:text-emerald-300" role="status">{copyNotice}</div> : null}
     <div><button type="button" onClick={() => void openPrompt()} disabled={loading} className="rounded border px-3 py-2 text-sm hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5">{loading ? "Loading…" : "2.1 PROMPT FOR: EXTRACT MEANING_FA_IPA"}</button></div>
     {open ? <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" role="dialog" aria-modal="true"><div className="flex h-[85vh] w-full max-w-7xl flex-col gap-4 rounded-2xl border border-card bg-background p-6 shadow-elevated"><div className="flex items-start justify-between gap-3"><div><div className="text-base font-semibold">meaning_fa_IPA Prompt — PersianWord</div><div className="mt-1 text-xs opacity-70">Copy prompt + data, paste the AI JSON response on the right, then apply.</div></div><button type="button" onClick={() => setOpen(false)} className="rounded border px-2 py-1 text-sm">Close</button></div>{error ? <div className="rounded border border-red-500/30 bg-red-600/10 p-3 text-sm text-red-700">{error}</div> : null}<div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-2"><section className="flex min-h-0 flex-col gap-2"><div className="flex flex-wrap items-center gap-2"><button type="button" onClick={() => copy(prompt)} className="rounded border px-2 py-1 text-xs">Copy prompt</button><button type="button" onClick={() => copy(data)} className="rounded border px-2 py-1 text-xs">Copy data</button><button type="button" onClick={() => copy(`${prompt}\n\n${data}`)} className="rounded border px-2 py-1 text-xs">Copy all</button><label className="flex items-center gap-1 text-xs">Count <input type="number" min="1" max="500" value={limit} onChange={(event) => setLimit(event.target.value)} className="w-20 rounded border px-2 py-1" /></label><button type="button" onClick={() => void refreshData()} disabled={loading} className="rounded border px-2 py-1 text-xs disabled:opacity-50">{loading ? "Loading…" : "Refresh data"}</button>{remainingCount !== null ? <span className="text-xs font-semibold text-amber-700">Remaining: {remainingCount}</span> : null}</div><textarea readOnly value={`${prompt}${data ? `\n\n${data}` : ""}`} className="min-h-0 flex-1 resize-none rounded border p-3 font-mono text-xs" /></section><section className="flex min-h-0 flex-col gap-2"><div className="text-sm font-semibold">Response</div><textarea value={response} onChange={(event) => setResponse(event.target.value)} placeholder='[{"id": 1, "meaning_fa_IPA": "..."}]' className="min-h-0 flex-1 resize-none rounded border p-3 font-mono text-xs" /><div className="flex gap-2"><button type="button" onClick={() => void navigator.clipboard.readText().then(setResponse).catch((reason) => setError(reason instanceof Error ? reason.message : String(reason)))} className="rounded border px-3 py-2 text-sm hover:bg-black/5">Paste response</button><button type="button" onClick={() => void prepareApply()} disabled={!response.trim()} className="rounded border px-3 py-2 text-sm hover:bg-black/5 disabled:opacity-50">2.2 APPLY MEANING_FA_IPA (per row)</button></div></section></div></div></div> : null}
     {confirmOpen ? <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4" role="dialog" aria-modal="true"><div className="flex h-[85vh] w-full max-w-6xl flex-col gap-4 rounded-2xl border border-card bg-background p-6 shadow-elevated"><div className="flex items-start justify-between gap-3"><div><div className="text-base font-semibold">Apply meaning_fa_IPA (per row)</div>{report ? <div className="mt-1 text-sm text-emerald-700">Report: updated {report.updated}/{report.total} • failed {report.failed}</div> : <div className="mt-1 text-xs opacity-70">Confirm or edit each value before applying.</div>}</div><div className="flex gap-2"><button type="button" onClick={() => void apply(rows)} disabled={!rows.length || rows.some((row) => row.saving)} className="rounded border px-3 py-1 text-sm">Update all</button><button type="button" onClick={() => setConfirmOpen(false)} className="rounded border px-2 py-1 text-sm">Close</button></div></div><SpecialCharactersBar characters={IPA_CHARACTERS} onPick={insertCharacter} title="Special characters" helpText="Click an IPA field, then click a character." /><div className="min-h-0 flex-1 overflow-auto rounded border"><table className="w-full text-left text-xs"><thead className="sticky top-0 bg-background"><tr className="border-b"><th className="px-3 py-2">id</th><th className="px-3 py-2">canonical_text</th><th className="px-3 py-2">IPA (DB)</th><th className="px-3 py-2">IPA input/edit</th><th className="px-3 py-2">action</th></tr></thead><tbody>{rows.map((row) => <tr key={row.id} className="border-b"><td className="px-3 py-2 font-mono">{row.id}</td><td className="px-3 py-2 text-base" dir="rtl">{row.canonical_text}</td><td className="px-3 py-2 font-mono">{row.dbMeaning ?? "—"}</td><td className="px-3 py-2"><input value={row.inputMeaning} onChange={(event) => setRows((current) => current.map((item) => item.id === row.id ? { ...item, inputMeaning: event.target.value, saved: false } : item))} onFocus={(event) => { lastInputRef.current = event.currentTarget; lastIdRef.current = row.id; }} className="w-72 rounded border px-2 py-1 font-mono" />{row.error ? <div className="text-red-600">{row.error}</div> : row.saved ? <div className="text-green-700">Saved</div> : null}</td><td className="px-3 py-2"><button type="button" onClick={() => void apply([row])} className="rounded border px-2 py-1">Update</button></td></tr>)}</tbody></table></div></div></div> : null}

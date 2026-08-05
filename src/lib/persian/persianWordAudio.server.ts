@@ -1,5 +1,6 @@
 import "server-only";
 
+import { rm } from "node:fs/promises";
 import path from "node:path";
 
 import { buildPersianWordCanonicalTextAudioFilename } from "@/lib/audio/persianWordAudioNaming";
@@ -14,7 +15,7 @@ import { generateSpeechFromMixedText } from "@/lib/tts/cloudTts";
 export async function generatePersianWordCanonicalTextAudio(persianWordId: number) {
   const row = await prisma.persianWord.findUnique({
     where: { id: persianWordId },
-    select: { id: true, canonical_text: true },
+    select: { id: true, canonical_text: true, audio_file_name: true },
   });
   if (!row) throw new Error(`PersianWord ${persianWordId} was not found`);
   if (!row.canonical_text.trim()) throw new Error(`PersianWord ${persianWordId} has no canonical_text`);
@@ -26,6 +27,10 @@ export async function generatePersianWordCanonicalTextAudio(persianWordId: numbe
     where: { id: row.id },
     data: { audio_file_name: filename },
   });
+
+  if (row.audio_file_name && row.audio_file_name !== filename && path.basename(row.audio_file_name) === row.audio_file_name) {
+    await rm(getPersianWordAudioAbsolutePath(row.audio_file_name), { force: true });
+  }
 
   return { filename, absPath: getPersianWordAudioAbsolutePath(filename) };
 }

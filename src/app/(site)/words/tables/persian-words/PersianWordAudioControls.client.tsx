@@ -20,6 +20,7 @@ export default function PersianWordAudioControls({
   const [recording, setRecording] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [playing, setPlaying] = useState(false);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -42,6 +43,7 @@ export default function PersianWordAudioControls({
   const uploadRecording = useCallback(async (blob: Blob) => {
     setBusy(true);
     setError(null);
+    setNotice(null);
     try {
       const form = new FormData();
       form.set("audio", blob, "recording.webm");
@@ -49,6 +51,7 @@ export default function PersianWordAudioControls({
       const payload = (await response.json().catch(() => null)) as { ok?: boolean; filename?: string; error?: string } | null;
       if (!response.ok || !payload?.ok || !payload.filename) throw new Error(payload?.error || "Could not save recording.");
       updateFilename(payload.filename);
+      setNotice("Recording saved ✓");
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : String(reason));
     } finally {
@@ -59,6 +62,7 @@ export default function PersianWordAudioControls({
   const startRecording = useCallback(async () => {
     if (recording || busy) return;
     setError(null);
+    setNotice(null);
     if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
       setError("Recording is not supported in this browser.");
       return;
@@ -97,11 +101,13 @@ export default function PersianWordAudioControls({
     if (busy || recording) return;
     setBusy(true);
     setError(null);
+    setNotice(null);
     try {
       const response = await fetch(`/api/words/persian-words/${id}/audio/generate`, { method: "POST" });
       const payload = (await response.json().catch(() => null)) as { ok?: boolean; filename?: string; error?: string } | null;
       if (!response.ok || !payload?.ok || !payload.filename) throw new Error(payload?.error || "Could not generate audio.");
       updateFilename(payload.filename);
+      setNotice("Audio generated ✓");
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : String(reason));
     } finally {
@@ -113,11 +119,13 @@ export default function PersianWordAudioControls({
     if (!filename || busy || recording || !window.confirm("Delete this audio file?")) return;
     setBusy(true);
     setError(null);
+    setNotice(null);
     try {
       const response = await fetch(`/api/words/persian-words/${id}/audio/delete`, { method: "POST" });
       const payload = (await response.json().catch(() => null)) as { ok?: boolean; error?: string } | null;
       if (!response.ok || !payload?.ok) throw new Error(payload?.error || "Could not delete audio.");
       updateFilename(null);
+      setNotice("Audio deleted ✓");
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : String(reason));
     } finally {
@@ -129,11 +137,12 @@ export default function PersianWordAudioControls({
 
   return <div className="flex flex-wrap items-center gap-1">
     {filename ? <audio ref={audioRef} preload="none" src={getPersianWordAudioPublicPath(filename)} onPlay={() => setPlaying(true)} onPause={() => setPlaying(false)} onEnded={() => setPlaying(false)} /> : null}
-    <button type="button" onClick={() => { const audio = audioRef.current; if (!audio || !filename) return; if (audio.paused) void audio.play(); else audio.pause(); }} disabled={!filename || busy || recording} aria-label={playing ? "Pause audio" : "Play audio"} title={playing ? "Pause" : "Play"} className="inline-flex rounded border p-1.5 hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5"><ActionIcon name={playing ? "pause" : "play"} /></button>
-    <button type="button" onClick={() => void generate()} disabled={busy || recording} aria-label="Generate audio" title="Generate audio" className="inline-flex rounded border p-1.5 hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5"><ActionIcon name="sparkles" /></button>
-    <button type="button" onClick={() => (recording ? stopRecording() : void startRecording())} disabled={busy} aria-label={recording ? "Stop recording" : "Record audio"} title={recording ? "Stop recording" : "Record from microphone"} className="inline-flex rounded border p-1.5 hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5"><ActionIcon name={recording ? "stop" : "mic"} /></button>
-    <button type="button" onClick={() => void deleteAudio()} disabled={!filename || busy || recording} aria-label="Delete audio" title="Delete audio" className="inline-flex rounded border p-1.5 hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5"><ActionIcon name="trash" /></button>
+    <button type="button" onClick={() => { const audio = audioRef.current; if (!audio || !filename) return; if (audio.paused) void audio.play(); else audio.pause(); }} disabled={!filename || busy || recording} aria-label={playing ? "Pause audio" : "Play audio"} title={playing ? "Pause" : "Play"} className="inline-flex rounded border p-1.5 transition active:scale-90 hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5"><ActionIcon name={playing ? "pause" : "play"} /></button>
+    <button type="button" onClick={() => void generate()} disabled={busy || recording} aria-label="Generate audio" title="Generate audio and replace the previous file" className="inline-flex rounded border p-1.5 transition active:scale-90 hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5"><ActionIcon name="sparkles" /></button>
+    <button type="button" onClick={() => (recording ? stopRecording() : void startRecording())} disabled={busy} aria-label={recording ? "Stop recording" : "Record audio"} title={recording ? "Stop recording" : "Record from microphone"} className="inline-flex rounded border p-1.5 transition active:scale-90 hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5"><ActionIcon name={recording ? "stop" : "mic"} /></button>
+    <button type="button" onClick={() => void deleteAudio()} disabled={!filename || busy || recording} aria-label="Delete audio" title="Delete audio" className="inline-flex rounded border p-1.5 transition active:scale-90 hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5"><ActionIcon name="trash" /></button>
     {recording ? <span className="text-[11px] text-red-600">Recording…</span> : null}
+    {notice ? <span className="text-[11px] text-emerald-700 dark:text-emerald-400">{notice}</span> : null}
     {error ? <span className="max-w-48 truncate text-[11px] text-red-600" title={error}>{error}</span> : null}
   </div>;
 }

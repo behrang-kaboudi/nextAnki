@@ -24,6 +24,7 @@ export default function OpenPersianWordEditorModal({ id, label }: { id: number; 
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [dirty, setDirty] = useState(false);
+  const [saved, setSaved] = useState(false);
   const [references, setReferences] = useState<WordReference[]>([]);
   const lastFocusedInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -33,7 +34,7 @@ export default function OpenPersianWordEditorModal({ id, label }: { id: number; 
   }, [dirty]);
 
   const openEditor = useCallback(() => {
-    setOpen(true); setBusy(true); setError(null); setDirty(false); setItem(null);
+    setOpen(true); setBusy(true); setError(null); setDirty(false); setSaved(false); setItem(null);
   }, []);
 
   useEffect(() => {
@@ -62,6 +63,7 @@ export default function OpenPersianWordEditorModal({ id, label }: { id: number; 
   const update = <K extends keyof PersianWord>(key: K, value: PersianWord[K]) => {
     setItem((current) => current ? { ...current, [key]: value } : current);
     setDirty(true);
+    setSaved(false);
   };
   const registerIpaFocus = (event: FocusEvent<HTMLInputElement>) => { lastFocusedInputRef.current = event.currentTarget; };
   const insertSpecialChar = (character: string) => {
@@ -86,16 +88,16 @@ export default function OpenPersianWordEditorModal({ id, label }: { id: number; 
       const response = await fetch(`/api/words/persian-words/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...item, not_normalized_texts: parsedVariants }) });
       const payload = (await response.json().catch(() => null)) as { ok?: boolean; item?: PersianWord; error?: string } | null;
       if (!response.ok || !payload?.ok || !payload.item) throw new Error(payload?.error || "Could not save record.");
-      setItem(payload.item); setVariants(JSON.stringify(stringArray(payload.item.not_normalized_texts), null, 2)); setDirty(false); router.refresh();
+      setItem(payload.item); setVariants(JSON.stringify(stringArray(payload.item.not_normalized_texts), null, 2)); setDirty(false); setSaved(true); router.refresh();
       if (closeAfterSave) setOpen(false);
     } catch (reason) { setError(reason instanceof Error ? reason.message : String(reason)); } finally { setBusy(false); }
   };
 
   return <>
-    <button type="button" onClick={openEditor} className="rounded border px-2 py-1 text-[11px] hover:bg-black/5 dark:hover:bg-white/5">Open</button>
+    <button type="button" onClick={openEditor} className="rounded border px-2 py-1 text-[11px] transition active:scale-95 hover:bg-black/5 dark:hover:bg-white/5">Open</button>
     {open ? <div className="fixed inset-0 z-50 bg-black/45 p-3 backdrop-blur-sm sm:p-6" role="dialog" aria-modal="true" aria-label={`Edit Persian word ${label}`} onMouseDown={(event) => event.target === event.currentTarget && close()}>
       <div className="mx-auto flex h-full w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-card bg-background shadow-elevated">
-        <div className="flex items-center justify-between gap-3 border-b border-card px-4 py-3"><div className="min-w-0"><div className="truncate text-sm font-semibold">Edit PersianWord #{id} — {label}</div><div className="text-xs opacity-70">The normalized value is recalculated from canonical text when saved.</div></div><button type="button" onClick={close} className="rounded border px-3 py-2 text-sm hover:bg-black/5 dark:hover:bg-white/5">Close</button></div>
+        <div className="flex items-center justify-between gap-3 border-b border-card px-4 py-3"><div className="min-w-0"><div className="truncate text-sm font-semibold">Edit PersianWord #{id} — {label}</div><div className="text-xs opacity-70">The normalized value is recalculated from canonical text when saved.</div></div><button type="button" onClick={close} className="rounded border px-3 py-2 text-sm transition active:scale-95 hover:bg-black/5 dark:hover:bg-white/5">Close</button></div>
         <div className="flex-1 overflow-auto p-4">
           {busy && !item ? <div className="rounded border p-4 text-sm opacity-75">Loading…</div> : null}
           {error ? <div className="mb-4 rounded border border-red-500/30 bg-red-600/10 p-3 text-sm text-red-700">{error}</div> : null}
@@ -112,7 +114,7 @@ export default function OpenPersianWordEditorModal({ id, label }: { id: number; 
             </section>
             <div className="flex flex-wrap items-end gap-2"><label className="grid flex-1 gap-1 text-sm">Audio file name <span className="rounded border bg-black/5 px-3 py-2 font-mono text-xs opacity-70">{item.audio_file_name ?? "—"}</span></label><PersianWordAudioControls id={id} filename={item.audio_file_name} onFilenameChange={(filename) => setItem((current) => current ? { ...current, audio_file_name: filename } : current)} /></div>
             <label className="grid gap-1 text-sm">Original variants (JSON array)<textarea value={variants} onChange={(event) => { setVariants(event.target.value); setDirty(true); }} rows={6} className="rounded border px-3 py-2 font-mono text-xs" /></label>
-            <div className="flex justify-end gap-2"><button type="button" disabled={busy || !dirty} onClick={() => void save()} className="rounded border px-4 py-2 text-sm hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5">{busy ? "Saving…" : "Save"}</button><button type="button" disabled={busy || !dirty} onClick={() => void save(true)} className="rounded border px-4 py-2 text-sm hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5">{busy ? "Saving…" : "Save & Close"}</button></div>
+            <div className="flex items-center justify-end gap-2">{saved ? <span className="text-xs text-emerald-700 dark:text-emerald-400">Saved ✓</span> : null}<button type="button" disabled={busy || !dirty} onClick={() => void save()} className="rounded border px-4 py-2 text-sm transition active:scale-95 hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5">{busy ? "Saving…" : saved ? "Saved ✓" : "Save"}</button><button type="button" disabled={busy || !dirty} onClick={() => void save(true)} className="rounded border px-4 py-2 text-sm transition active:scale-95 hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5">{busy ? "Saving…" : "Save & Close"}</button></div>
           </div> : null}
         </div>
       </div>
