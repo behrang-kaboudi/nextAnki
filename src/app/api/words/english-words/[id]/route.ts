@@ -35,15 +35,15 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   if (!id) return NextResponse.json({ ok: false, error: "Invalid EnglishWord id." }, { status: 400 });
   try {
     const body = (await request.json()) as Record<string, unknown>;
-    const normalized_text = normalizeEnglishWordText(typeof body.normalized_text === "string" ? body.normalized_text : "");
+    const base_form = normalizeEnglishWordText(typeof body.base_form === "string" ? body.base_form : "");
     const phonetic_us = nullableString(body.phonetic_us);
-    if (!normalized_text) {
-      return NextResponse.json({ ok: false, error: "normalized_text must contain at least one English letter." }, { status: 400 });
+    if (!base_form) {
+      return NextResponse.json({ ok: false, error: "base_form must contain at least one English letter." }, { status: 400 });
     }
     const item = await prisma.englishWord.update({
       where: { id },
       data: {
-        normalized_text,
+        base_form,
         phonetic_us,
         phonetic_us_normalized: phonetic_us ? normalizeIpaForDb(phonetic_us, 2000) || null : null,
         json_hint: nullableString(body.json_hint),
@@ -55,7 +55,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       return NextResponse.json({ ok: false, error: "EnglishWord not found." }, { status: 404 });
     }
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
-      return NextResponse.json({ ok: false, error: "This normalized English word already exists." }, { status: 409 });
+      return NextResponse.json({ ok: false, error: "This English base form already exists." }, { status: 409 });
     }
     return NextResponse.json({ ok: false, error: error instanceof Error ? error.message : "Could not update EnglishWord." }, { status: 500 });
   }

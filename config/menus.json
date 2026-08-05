@@ -110,6 +110,7 @@
         "items": [
           { "type": "link", "label": "Data Manager", "href": "/admin/data", "icon": "database", "description": "Manage records across application models." },
           { "type": "link", "label": "Database Compare", "href": "/admin/database-compare", "icon": "database", "description": "Compare local and GitHub database fingerprints." },
+          { "type": "link", "label": "Database Backup", "href": "/admin/database-backup", "icon": "database", "description": "Create or restore the complete local database backup." },
           { "type": "link", "label": "Navigation Manager", "href": "/admin/navigation", "icon": "settings", "description": "Edit site and dashboard navigation." }
         ]
       },
@@ -192,6 +193,7 @@
     "primary": [
       { "type": "link", "label": "Data Manager", "href": "/admin/data", "icon": "database" },
       { "type": "link", "label": "Database Compare", "href": "/admin/database-compare", "icon": "database" },
+      { "type": "link", "label": "Database Backup", "href": "/admin/database-backup", "icon": "database" },
       { "type": "link", "label": "Navigation Manager", "href": "/admin/navigation", "icon": "settings" },
       { "type": "link", "label": "Site Map", "href": "/site-map", "icon": "search" }
     ]

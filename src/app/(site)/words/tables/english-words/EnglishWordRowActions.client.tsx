@@ -7,7 +7,7 @@ import { getEnglishWordAudioPublicPath } from "@/lib/audio/englishWordAudioNamin
 
 type EnglishWord = {
   id: number;
-  normalized_text: string;
+  base_form: string;
   phonetic_us: string | null;
   phonetic_us_normalized: string | null;
   json_hint: string | null;
@@ -47,7 +47,7 @@ export default function EnglishWordRowActions({ item: initialItem, showAudio = t
     catch (reason) { setError(reason instanceof Error ? reason.message : String(reason)); } finally { setBusy(false); }
   };
   const remove = async () => {
-    if (!window.confirm(`Delete ${item.normalized_text}?`)) return;
+    if (!window.confirm(`Delete ${item.base_form}?`)) return;
     setBusy(true); setError(null);
     try { await request(`/api/words/english-words/${item.id}`, { method: "DELETE" }); router.refresh(); }
     catch (reason) { setError(reason instanceof Error ? reason.message : String(reason)); } finally { setBusy(false); }
@@ -61,7 +61,7 @@ export default function EnglishWordRowActions({ item: initialItem, showAudio = t
       <div className="mx-auto mt-[6vh] w-full max-w-2xl rounded-2xl border border-card bg-background p-4 shadow-elevated">
         <h2 className="text-base font-semibold">Edit EnglishWord #{item.id}</h2>
         <div className="mt-4 grid gap-3">
-          <label className="grid gap-1 text-sm">English word or phrase<input value={item.normalized_text} onChange={(event) => setItem((current) => ({ ...current, normalized_text: event.target.value }))} className="rounded border px-3 py-2" /></label>
+          <label className="grid gap-1 text-sm">base_form<input value={item.base_form} onChange={(event) => setItem((current) => ({ ...current, base_form: event.target.value }))} className="rounded border px-3 py-2" /></label>
           <label className="grid gap-1 text-sm">phonetic_us<input value={item.phonetic_us ?? ""} onChange={(event) => setItem((current) => ({ ...current, phonetic_us: event.target.value || null }))} className="rounded border px-3 py-2" /></label>
           <label className="grid gap-1 text-sm">phonetic_us_normalized <span className="rounded border bg-black/5 px-3 py-2 font-mono text-xs opacity-70">Recalculated when saved: {item.phonetic_us_normalized ?? "—"}</span></label>
           <label className="grid gap-1 text-sm">json_hint<textarea value={item.json_hint ?? ""} onChange={(event) => setItem((current) => ({ ...current, json_hint: event.target.value || null }))} rows={10} className="rounded border px-3 py-2 font-mono text-xs" /></label>

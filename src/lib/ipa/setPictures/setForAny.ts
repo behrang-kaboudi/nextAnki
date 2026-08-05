@@ -10,12 +10,22 @@ import { setForSpace } from "./setForSpace";
 import { setForPersian } from "./setForPersian";
 import type { WordPictures, IpaCandidate } from "./types";
 import { imageabilityBaseThreshold } from "./types";
+import type { PictureCandidateLookup } from "./forChars";
+
+type PickPictureSymbolsOptions = {
+  lookup?: PictureCandidateLookup;
+  includePersianImage?: boolean;
+};
 export async function pickPictureSymbolsForWord(
   word: Word,
+  options: PickPictureSymbolsOptions = {},
 ): Promise<WordPictures | null> {
   const normalized = (word.phonetic_us_normalized ?? "").trim();
   let persianImage: IpaCandidate | null = null;
-  if ((word.imageability ?? 0) < imageabilityBaseThreshold) {
+  if (
+    options.includePersianImage !== false &&
+    (word.imageability ?? 0) < imageabilityBaseThreshold
+  ) {
     persianImage = await setForPersian(word);
     // if (!persianImage)
     //   console.log(
@@ -37,14 +47,19 @@ export async function pickPictureSymbolsForWord(
     };
   };
 
-  if (normalized.length < 3) return withPersianImage(await setFor2(word));
-  if (normalized.length === 3) return withPersianImage(await setFor3(word));
+  if (normalized.length < 3)
+    return withPersianImage(await setFor2(word, options.lookup));
+  if (normalized.length === 3)
+    return withPersianImage(await setFor3(word, options.lookup));
   if (normalized.includes(" "))
-    return withPersianImage(await setForSpace(word));
+    return withPersianImage(await setForSpace(word, options.lookup));
 
-  if (normalized.length === 4) return withPersianImage(await setFor4(word));
-  if (normalized.length === 5) return withPersianImage(await setFor5(word));
-  if (normalized.length > 5) return withPersianImage(await setFor6(word));
+  if (normalized.length === 4)
+    return withPersianImage(await setFor4(word, options.lookup));
+  if (normalized.length === 5)
+    return withPersianImage(await setFor5(word, options.lookup));
+  if (normalized.length > 5)
+    return withPersianImage(await setFor6(word, options.lookup));
 
   return null;
 }

@@ -46,6 +46,7 @@ model Word {
   base_form                        String
   phonetic_us                      String?
   phonetic_us_normalized           String?
+  englishId                        Int?
   meaningId                        Int?
   otherMeaningIds                  Json?
   pos                              String?
@@ -72,23 +73,26 @@ model Word {
   createdAt                        DateTime           @default(now())
   updatedAt                        DateTime           @updatedAt
   sentenceLinks                    SentenceWordLink[]
+  english                          EnglishWord?       @relation("WordEnglish", fields: [englishId], references: [id], onDelete: SetNull)
   meaning                          PersianWord?       @relation("WordPrimaryPersianMeaning", fields: [meaningId], references: [id], onDelete: SetNull)
 
   @@index([base_form], map: "Word_base_form_idx")
+  @@index([englishId], map: "Word_englishId_idx")
   @@index([typeOfWordInDb], map: "Word_typeOfWordInDb_idx")
   @@index([meaningId], map: "Word_meaningId_idx")
   @@map("word")
 }
 
 model EnglishWord {
-  id                      Int      @id @default(autoincrement())
-  normalized_text         String   @unique(map: "EnglishWord_normalized_text_key")
-  phonetic_us             String?
-  phonetic_us_normalized  String?
-  json_hint               String?  @db.LongText
-  audio_file_name         String?
-  createdAt               DateTime @default(now())
-  updatedAt               DateTime @updatedAt
+  id                     Int      @id @default(autoincrement())
+  base_form              String   @unique(map: "EnglishWord_base_form_key")
+  phonetic_us            String?
+  phonetic_us_normalized String?
+  json_hint              String?  @db.LongText
+  audio_file_name        String?
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+  words                  Word[]   @relation("WordEnglish")
 
   @@index([phonetic_us_normalized], map: "EnglishWord_phonetic_us_normalized_idx")
   @@map("english_word")

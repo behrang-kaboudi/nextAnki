@@ -12,22 +12,22 @@ export const runtime = "nodejs";
 const BATCH_SIZE = 100;
 
 export async function POST(request: Request) {
-  const report = { checked: 0, foundUsPronunciation: 0, updatedPhonetic: 0, downloadedAudio: 0, notFound: 0, noUsPronunciation: 0, rateLimited: 0, failed: 0, details: [] as Array<{ id: number; normalized_text: string; outcome: string; detail: string }> };
+  const report = { checked: 0, foundUsPronunciation: 0, updatedPhonetic: 0, downloadedAudio: 0, notFound: 0, noUsPronunciation: 0, rateLimited: 0, failed: 0, details: [] as Array<{ id: number; base_form: string; outcome: string; detail: string }> };
   try {
     const body = (await request.json().catch(() => null)) as { afterId?: unknown } | null;
     const afterId = typeof body?.afterId === "number" && Number.isSafeInteger(body.afterId) && body.afterId > 0 ? body.afterId : 0;
     const rows = await prisma.englishWord.findMany({
       where: { id: { gt: afterId }, OR: [{ phonetic_us: null }, { phonetic_us: "" }, { audio_file_name: null }, { audio_file_name: "" }] },
       orderBy: { id: "asc" }, take: BATCH_SIZE,
-      select: { id: true, normalized_text: true, phonetic_us: true, audio_file_name: true },
+      select: { id: true, base_form: true, phonetic_us: true, audio_file_name: true },
     });
     await mkdir(getEnglishWordAudioAbsoluteDir(), { recursive: true });
     for (const row of rows) {
       report.checked += 1;
       try {
-        const pronunciation = await getDictionaryApiUsPronunciation(row.normalized_text);
-        if (pronunciation.kind === "not_found") { report.notFound += 1; if (report.details.length < 30) report.details.push({ id: row.id, normalized_text: row.normalized_text, outcome: "not_found", detail: "Dictionary API returned 404." }); continue; }
-        if (pronunciation.kind === "no_us_pronunciation") { report.noUsPronunciation += 1; if (report.details.length < 30) report.details.push({ id: row.id, normalized_text: row.normalized_text, outcome: "no_us_pronunciation", detail: "No paired US IPA and audio were returned." }); continue; }
+        const pronunciation = await getDictionaryApiUsPronunciation(row.base_form);
+        if (pronunciation.kind === "not_found") { report.notFound += 1; if (report.details.length < 30) report.details.push({ id: row.id, base_form: row.base_form, outcome: "not_found", detail: "Dictionary API returned 404." }); continue; }
+        if (pronunciation.kind === "no_us_pronunciation") { report.noUsPronunciation += 1; if (report.details.length < 30) report.details.push({ id: row.id, base_form: row.base_form, outcome: "no_us_pronunciation", detail: "No paired US IPA and audio were returned." }); continue; }
         report.foundUsPronunciation += 1;
         let filename: string | null = null;
         if (!row.audio_file_name) {
@@ -48,7 +48,7 @@ export async function POST(request: Request) {
       } catch (error) {
         const isRateLimited = error instanceof DictionaryApiRequestError && error.status === 429;
         if (isRateLimited) report.rateLimited += 1; else report.failed += 1;
-        if (report.details.length < 30) report.details.push({ id: row.id, normalized_text: row.normalized_text, outcome: isRateLimited ? "rate_limited" : "failed", detail: error instanceof Error ? error.message : String(error) });
+        if (report.details.length < 30) report.details.push({ id: row.id, base_form: row.base_form, outcome: isRateLimited ? "rate_limited" : "failed", detail: error instanceof Error ? error.message : String(error) });
       }
     }
     return NextResponse.json({ ok: true, report, nextAfterId: rows.at(-1)?.id ?? afterId, remainingInNextRun: rows.length === BATCH_SIZE });

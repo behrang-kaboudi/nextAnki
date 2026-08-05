@@ -42,11 +42,11 @@ async function runJob(state: JobState) {
   state.totalCandidates = await prisma.englishWord.count({ where: missingAudioWhere });
   let cursorId: number | undefined;
   for (;;) {
-    const rows = await prisma.englishWord.findMany({ where: missingAudioWhere, orderBy: { id: "asc" }, take: 100, ...(cursorId === undefined ? {} : { cursor: { id: cursorId }, skip: 1 }), select: { id: true, normalized_text: true } });
+    const rows = await prisma.englishWord.findMany({ where: missingAudioWhere, orderBy: { id: "asc" }, take: 100, ...(cursorId === undefined ? {} : { cursor: { id: cursorId }, skip: 1 }), select: { id: true, base_form: true } });
     if (!rows.length) break;
     for (const row of rows) {
-      state.currentId = row.id; state.currentText = row.normalized_text;
-      if (!row.normalized_text.trim()) { state.skippedNoText += 1; state.processedCandidates += 1; continue; }
+      state.currentId = row.id; state.currentText = row.base_form;
+      if (!row.base_form.trim()) { state.skippedNoText += 1; state.processedCandidates += 1; continue; }
       const result = await generateEnglishWordAudio(row.id);
       state.currentFilename = result.filename; state.generated += 1; state.processedCandidates += 1;
     }

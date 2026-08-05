@@ -15,7 +15,7 @@ import { getWordFieldAudioAbsolutePath } from "@/lib/audio/wordFieldAudioPaths.s
 export const runtime = "nodejs";
 const BATCH_SIZE = 100;
 
-type Detail = { id: number; normalized_text: string; outcome: string; detail: string };
+type Detail = { id: number; base_form: string; outcome: string; detail: string };
 
 export async function POST(request: Request) {
   const report = { checked: 0, phoneticCopied: 0, audioCopied: 0, noMatchingWord: 0, noWordPhonetic: 0, noWordAudio: 0, uniqueConflict: 0, failed: 0, details: [] as Detail[] };
@@ -25,7 +25,7 @@ export async function POST(request: Request) {
     const targets = await prisma.englishWord.findMany({
       where: { id: { gt: afterId }, OR: [{ phonetic_us: null }, { phonetic_us: "" }] },
       orderBy: { id: "asc" }, take: BATCH_SIZE,
-      select: { id: true, normalized_text: true, audio_file_name: true },
+      select: { id: true, base_form: true, audio_file_name: true },
     });
     const words = await prisma.word.findMany({
       where: { base_form: { not: "" } },
@@ -42,16 +42,16 @@ export async function POST(request: Request) {
 
     for (const target of targets) {
       report.checked += 1;
-      const candidates = wordsByNormalizedText.get(target.normalized_text) ?? [];
+      const candidates = wordsByNormalizedText.get(target.base_form) ?? [];
       if (!candidates.length) {
         report.noMatchingWord += 1;
-        if (report.details.length < 30) report.details.push({ id: target.id, normalized_text: target.normalized_text, outcome: "no_matching_word", detail: "No matching Word was found." });
+        if (report.details.length < 30) report.details.push({ id: target.id, base_form: target.base_form, outcome: "no_matching_word", detail: "No matching Word was found." });
         continue;
       }
       const source = candidates.find((candidate) => candidate.phonetic_us?.trim());
       if (!source?.phonetic_us?.trim()) {
         report.noWordPhonetic += 1;
-        if (report.details.length < 30) report.details.push({ id: target.id, normalized_text: target.normalized_text, outcome: "no_word_phonetic", detail: "Matching Word records have no phonetic_us." });
+        if (report.details.length < 30) report.details.push({ id: target.id, base_form: target.base_form, outcome: "no_word_phonetic", detail: "Matching Word records have no phonetic_us." });
         continue;
       }
       const sourcePhonetic = source.phonetic_us.trim();
@@ -80,10 +80,10 @@ export async function POST(request: Request) {
         if (isUnique) report.uniqueConflict += 1; else report.failed += 1;
         if (report.details.length < 30) {
           if (isUnique && normalizedPhonetic) {
-            const existing = await prisma.englishWord.findFirst({ where: { phonetic_us_normalized: normalizedPhonetic }, select: { id: true, normalized_text: true, phonetic_us: true, phonetic_us_normalized: true } });
-            report.details.push({ id: target.id, normalized_text: target.normalized_text, outcome: "unique_conflict", detail: `Source Word #${source.id} (${source.base_form}) → phonetic_us: ${sourcePhonetic}; normalized: ${normalizedPhonetic}. Already used by EnglishWord #${existing?.id ?? "unknown"} (${existing?.normalized_text ?? "unknown"}) → phonetic_us: ${existing?.phonetic_us ?? "unknown"}; normalized: ${existing?.phonetic_us_normalized ?? "unknown"}.` });
+            const existing = await prisma.englishWord.findFirst({ where: { phonetic_us_normalized: normalizedPhonetic }, select: { id: true, base_form: true, phonetic_us: true, phonetic_us_normalized: true } });
+            report.details.push({ id: target.id, base_form: target.base_form, outcome: "unique_conflict", detail: `Source Word #${source.id} (${source.base_form}) → phonetic_us: ${sourcePhonetic}; normalized: ${normalizedPhonetic}. Already used by EnglishWord #${existing?.id ?? "unknown"} (${existing?.base_form ?? "unknown"}) → phonetic_us: ${existing?.phonetic_us ?? "unknown"}; normalized: ${existing?.phonetic_us_normalized ?? "unknown"}.` });
           } else {
-            report.details.push({ id: target.id, normalized_text: target.normalized_text, outcome: "failed", detail: error instanceof Error ? error.message : String(error) });
+            report.details.push({ id: target.id, base_form: target.base_form, outcome: "failed", detail: error instanceof Error ? error.message : String(error) });
           }
         }
       }

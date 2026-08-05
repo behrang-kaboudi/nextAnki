@@ -1,8 +1,9 @@
 import "server-only";
 
 import { prisma } from "@/lib/prisma";
+import { createPreloadedPictureCandidateLookup } from "@/lib/ipa/setPictures/preloadedLookup";
 
-import { generateEnglishWordJsonHint } from "./englishWordJsonHint.server";
+import { generateEnglishWordJsonHints } from "./englishWordJsonHint.server";
 
 export type EnglishWordJsonHintJobStatus = { jobId: string; running: boolean; done: boolean; startedAt: string | null; finishedAt: string | null; error: string | null; totalCandidates: number; processedCandidates: number; generated: number; skippedNoPhonetic: number; currentId: number | null; currentText: string | null; };
 type State = EnglishWordJsonHintJobStatus & { _started: boolean };
@@ -15,18 +16,36 @@ function getState(): State {
   return globalState.__englishWordJsonHintJob;
 }
 
-export function getEnglishWordJsonHintJobStatus(): EnglishWordJsonHintJobStatus { const { _started: _ignored, ...status } = getState(); return status; }
+export function getEnglishWordJsonHintJobStatus(): EnglishWordJsonHintJobStatus {
+  const state = getState();
+  return {
+    jobId: state.jobId,
+    running: state.running,
+    done: state.done,
+    startedAt: state.startedAt,
+    finishedAt: state.finishedAt,
+    error: state.error,
+    totalCandidates: state.totalCandidates,
+    processedCandidates: state.processedCandidates,
+    generated: state.generated,
+    skippedNoPhonetic: state.skippedNoPhonetic,
+    currentId: state.currentId,
+    currentText: state.currentText,
+  };
+}
 
 async function runJob(state: State) {
   Object.assign(state, { running: true, done: false, error: null, startedAt: nowIso(), finishedAt: null, processedCandidates: 0, generated: 0, skippedNoPhonetic: 0, currentId: null, currentText: null });
   state.totalCandidates = await prisma.englishWord.count({ where: missingJsonHintWhere });
+  const lookup = await createPreloadedPictureCandidateLookup();
   let cursorId: number | undefined;
   for (;;) {
-    const rows = await prisma.englishWord.findMany({ where: missingJsonHintWhere, orderBy: { id: "asc" }, take: 100, ...(cursorId === undefined ? {} : { cursor: { id: cursorId }, skip: 1 }), select: { id: true, normalized_text: true } });
+    const rows = await prisma.englishWord.findMany({ where: missingJsonHintWhere, orderBy: { id: "asc" }, take: 100, ...(cursorId === undefined ? {} : { cursor: { id: cursorId }, skip: 1 }), select: { id: true, base_form: true, phonetic_us_normalized: true } });
     if (!rows.length) break;
-    for (const row of rows) {
-      state.currentId = row.id; state.currentText = row.normalized_text;
-      const result = await generateEnglishWordJsonHint(row.id);
+    const current = rows.at(-1)!;
+    state.currentId = current.id; state.currentText = current.base_form;
+    const results = await generateEnglishWordJsonHints(rows, lookup);
+    for (const result of results) {
       if (result.jsonHint) state.generated += 1;
       if (result.skippedNoPhonetic) state.skippedNoPhonetic += 1;
       state.processedCandidates += 1;

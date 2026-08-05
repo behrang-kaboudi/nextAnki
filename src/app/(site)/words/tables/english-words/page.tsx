@@ -19,11 +19,11 @@ import TemporaryWordImport from "./TemporaryWordImport.client";
 export const metadata = { title: "Words — EnglishWord Table" };
 export const runtime = "nodejs";
 
-const SORT_FIELDS = ["id", "normalized_text", "phonetic_us", "phonetic_us_normalized", "audio_file_name", "createdAt", "updatedAt"] as const;
+const SORT_FIELDS = ["id", "base_form", "phonetic_us", "phonetic_us_normalized", "audio_file_name", "createdAt", "updatedAt"] as const;
 type SortField = (typeof SORT_FIELDS)[number];
 const TABLE_COLUMNS = [
   { key: "id", label: "id", required: true },
-  { key: "normalized_text", label: "normalized_text" },
+  { key: "base_form", label: "base_form" },
   { key: "phonetic_us", label: "phonetic_us" },
   { key: "phonetic_us_normalized", label: "phonetic_us_normalized" },
   { key: "json_hint", label: "json_hint" },
@@ -33,10 +33,10 @@ const TABLE_COLUMNS = [
   { key: "actions", label: "actions" },
 ] as const;
 type TableColumnKey = (typeof TABLE_COLUMNS)[number]["key"];
-const DEFAULT_COLUMNS: TableColumnKey[] = ["id", "normalized_text", "phonetic_us", "phonetic_us_normalized", "audio", "updatedAt", "actions"];
+const DEFAULT_COLUMNS: TableColumnKey[] = ["id", "base_form", "phonetic_us", "phonetic_us_normalized", "audio", "updatedAt", "actions"];
 const COLUMN_INDICATORS: Partial<Record<TableColumnKey, readonly TableColumnIndicator[]>> = {
   id: [{ kind: "primary-key", text: "Primary key: EnglishWord.id" }],
-  normalized_text: [{ kind: "unique", text: "Unique normalized English text" }],
+  base_form: [{ kind: "unique", text: "Unique English base form" }],
   phonetic_us_normalized: [{ kind: "index", text: "Index: EnglishWord_phonetic_us_normalized_idx; duplicate values are allowed" }],
 };
 
@@ -64,7 +64,7 @@ export default async function EnglishWordsTablePage({ searchParams }: { searchPa
   const columns = parseColumns(params.columns);
   const hasColumn = (key: TableColumnKey) => columns.includes(key);
   const where: Prisma.EnglishWordWhereInput | undefined = q || missingAudio ? { AND: [
-    ...(q ? [{ OR: [{ normalized_text: { contains: q } }, { phonetic_us: { contains: q } }, { phonetic_us_normalized: { contains: q } }] }] : []),
+    ...(q ? [{ OR: [{ base_form: { contains: q } }, { phonetic_us: { contains: q } }, { phonetic_us_normalized: { contains: q } }] }] : []),
     ...(missingAudio ? [{ OR: [{ audio_file_name: null }, { audio_file_name: "" }] }] : []),
   ] } : undefined;
   const orderBy: Prisma.EnglishWordOrderByWithRelationInput[] = [{ [sort]: dir } as Prisma.EnglishWordOrderByWithRelationInput, ...(sort === "id" ? [] : [{ id: "desc" as const }])];
@@ -101,14 +101,14 @@ export default async function EnglishWordsTablePage({ searchParams }: { searchPa
     <div className="mt-4 flex items-center justify-between text-sm"><span>Total: <strong>{total}</strong> · Page <strong>{page}/{totalPages}</strong></span><div className="flex gap-2"><Link href={href(Math.max(1, page - 1))} aria-disabled={page <= 1} className="rounded border px-3 py-2 aria-disabled:pointer-events-none aria-disabled:opacity-50">Prev</Link><Link href={href(Math.min(totalPages, page + 1))} aria-disabled={page >= totalPages} className="rounded border px-3 py-2 aria-disabled:pointer-events-none aria-disabled:opacity-50">Next</Link></div></div>
     <div className="mt-4 overflow-auto rounded border"><table className="w-full text-left text-xs"><thead className="bg-background"><tr className="border-b">
       {hasColumn("id") ? <SortHeader href={href(1, "id", sort === "id" && dir === "asc" ? "desc" : "asc")} label="id" active={sort === "id"} direction={dir} indicators={COLUMN_INDICATORS.id} /> : null}
-      {hasColumn("normalized_text") ? <SortHeader href={href(1, "normalized_text", sort === "normalized_text" && dir === "asc" ? "desc" : "asc")} label="normalized_text" active={sort === "normalized_text"} direction={dir} indicators={COLUMN_INDICATORS.normalized_text} /> : null}
+      {hasColumn("base_form") ? <SortHeader href={href(1, "base_form", sort === "base_form" && dir === "asc" ? "desc" : "asc")} label="base_form" active={sort === "base_form"} direction={dir} indicators={COLUMN_INDICATORS.base_form} /> : null}
       {hasColumn("phonetic_us") ? <SortHeader href={href(1, "phonetic_us", sort === "phonetic_us" && dir === "asc" ? "desc" : "asc")} label="phonetic_us" active={sort === "phonetic_us"} direction={dir} /> : null}
       {hasColumn("phonetic_us_normalized") ? <SortHeader href={href(1, "phonetic_us_normalized", sort === "phonetic_us_normalized" && dir === "asc" ? "desc" : "asc")} label="phonetic_us_normalized" active={sort === "phonetic_us_normalized"} direction={dir} indicators={COLUMN_INDICATORS.phonetic_us_normalized} /> : null}
       {hasColumn("json_hint") ? <th className="px-3 py-2">json_hint</th> : null}
       {hasColumn("audio") ? <SortHeader href={href(1, "audio_file_name", sort === "audio_file_name" && dir === "asc" ? "desc" : "asc")} label="audio" active={sort === "audio_file_name"} direction={dir} /> : null}
       {hasColumn("createdAt") ? <SortHeader href={href(1, "createdAt", sort === "createdAt" && dir === "asc" ? "desc" : "asc")} label="createdAt" active={sort === "createdAt"} direction={dir} /> : null}{hasColumn("updatedAt") ? <SortHeader href={href(1, "updatedAt", sort === "updatedAt" && dir === "asc" ? "desc" : "asc")} label="updatedAt" active={sort === "updatedAt"} direction={dir} /> : null}{hasColumn("actions") ? <th className="px-3 py-2">actions</th> : null}
     </tr></thead><tbody>{rows.map((item) => <tr key={item.id} className="border-b align-top">
-      {hasColumn("id") ? <td className="px-3 py-2 font-mono">{item.id}</td> : null}{hasColumn("normalized_text") ? <td className="max-w-60 px-3 py-2 text-sm">{item.normalized_text}</td> : null}{hasColumn("phonetic_us") ? <td className="max-w-60 px-3 py-2 font-mono">{item.phonetic_us ?? "—"}</td> : null}{hasColumn("phonetic_us_normalized") ? <td className="max-w-60 px-3 py-2 font-mono">{item.phonetic_us_normalized ?? "—"}</td> : null}{hasColumn("json_hint") ? <td className="max-w-48 px-3 py-2 font-mono"><EnglishWordJsonHintControls id={item.id} jsonHint={item.json_hint} /></td> : null}{hasColumn("audio") ? <td className="min-w-48 px-3 py-2"><EnglishWordAudioControls id={item.id} filename={item.audio_file_name} /></td> : null}{hasColumn("createdAt") ? <td className="whitespace-nowrap px-3 py-2 font-mono">{item.createdAt.toISOString()}</td> : null}{hasColumn("updatedAt") ? <td className="whitespace-nowrap px-3 py-2 font-mono">{item.updatedAt.toISOString()}</td> : null}{hasColumn("actions") ? <td className="px-3 py-2"><EnglishWordRowActions item={item} showAudio={false} /></td> : null}
+      {hasColumn("id") ? <td className="px-3 py-2 font-mono">{item.id}</td> : null}{hasColumn("base_form") ? <td className="max-w-60 px-3 py-2 text-sm">{item.base_form}</td> : null}{hasColumn("phonetic_us") ? <td className="max-w-60 px-3 py-2 font-mono">{item.phonetic_us ?? "—"}</td> : null}{hasColumn("phonetic_us_normalized") ? <td className="max-w-60 px-3 py-2 font-mono">{item.phonetic_us_normalized ?? "—"}</td> : null}{hasColumn("json_hint") ? <td className="max-w-48 px-3 py-2 font-mono"><EnglishWordJsonHintControls id={item.id} jsonHint={item.json_hint} /></td> : null}{hasColumn("audio") ? <td className="min-w-48 px-3 py-2"><EnglishWordAudioControls id={item.id} filename={item.audio_file_name} /></td> : null}{hasColumn("createdAt") ? <td className="whitespace-nowrap px-3 py-2 font-mono">{item.createdAt.toISOString()}</td> : null}{hasColumn("updatedAt") ? <td className="whitespace-nowrap px-3 py-2 font-mono">{item.updatedAt.toISOString()}</td> : null}{hasColumn("actions") ? <td className="px-3 py-2"><EnglishWordRowActions item={item} showAudio={false} /></td> : null}
     </tr>)}{!rows.length ? <tr><td colSpan={columns.length} className="px-3 py-8 text-center text-sm opacity-70">No rows.</td></tr> : null}</tbody></table></div>
   </main>;
 }

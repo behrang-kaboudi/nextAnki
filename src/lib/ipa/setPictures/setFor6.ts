@@ -7,9 +7,15 @@ import { FA_KEYWORDS_VOWELS_NORMALIZED } from "@/lib/ipa/ipaSets";
 
 import { pickBestFaEn } from "./pickBestFaEn";
 import { placeholderJobPictureWord } from "./placeholders";
-import { findCandidatesByPartWithS } from "./forChars";
+import {
+  findCandidatesByPartWithS,
+  type PictureCandidateLookup,
+} from "./forChars";
 
-export async function setFor6(word: Word): Promise<WordPictures> {
+export async function setFor6(
+  word: Word,
+  lookup?: PictureCandidateLookup,
+): Promise<WordPictures> {
   const phoneticNormalized = (word.phonetic_us_normalized ?? "").trim();
   const symbols: WordPictures = {};
 
@@ -39,11 +45,11 @@ export async function setFor6(word: Word): Promise<WordPictures> {
     part1 = part1.slice(0, part1.length - 1);
     i--;
   }
-  let persons = await findCandidatesByPartWithS(part1, word);
+  let persons = await findCandidatesByPartWithS(part1, word, lookup);
   let i2 = i;
   while (persons.length === 0 && part1.length > 1) {
     part1 = part1.slice(0, --i2);
-    persons = await findCandidatesByPartWithS(part1, word);
+    persons = await findCandidatesByPartWithS(part1, word, lookup);
   }
   // console.log(`[setFor6.ts:41]`, i);
   symbols.person = pickBestFaEn(persons, part1);
@@ -65,9 +71,9 @@ export async function setFor6(word: Word): Promise<WordPictures> {
   //   part2 = `${part1LastChar}${part2}`;
   // }
   // console.log(`[setFor6.ts:53]`, part2);
-  let jobs = await findCandidatesByPartWithS(part2, word);
+  let jobs = await findCandidatesByPartWithS(part2, word, lookup);
   while (jobs.length === 0 && j > 0) {
-    jobs = await findCandidatesByPartWithS(part2.slice(0, --j), word);
+    jobs = await findCandidatesByPartWithS(part2.slice(0, --j), word, lookup);
   }
   // if (word.phonetic_us_normalized === "æbstrækt") {
   // console.log(`[setFor6.ts:65]`, part1, part2, jobs.length);

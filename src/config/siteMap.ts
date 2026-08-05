@@ -119,10 +119,11 @@ export const siteMapGroups: SiteMapGroup[] = [
     id: "administration",
     category: "Administration",
     title: "Administration",
-    summary: "Manage application data, navigation, and database comparisons.",
+    summary: "Manage application data, database backups, navigation, and comparisons.",
     pages: [
       { title: "Data Manager", path: "/admin/data", summary: "Browses Prisma models and performs controlled record management operations.", menu: true },
       { title: "Database Compare", path: "/admin/database-compare", summary: "Compares local database fingerprints with the version stored in GitHub.", menu: true },
+      { title: "Database Backup", path: "/admin/database-backup", summary: "Creates and restores complete local database archives through the current GitHub branch.", menu: true },
       { title: "Navigation Manager", path: "/admin/navigation", summary: "Edits the nested site and dashboard menus from one interface.", menu: true },
     ],
   },

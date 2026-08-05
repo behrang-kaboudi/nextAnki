@@ -24,13 +24,13 @@ export async function POST() {
 
     const normalizedTextValues = [...normalizedTexts];
     const existing = await prisma.englishWord.findMany({
-      where: { normalized_text: { in: normalizedTextValues } },
-      select: { id: true, normalized_text: true },
+      where: { base_form: { in: normalizedTextValues } },
+      select: { id: true, base_form: true },
     });
-    const existingByText = new Map(existing.map((item) => [item.normalized_text, item.id]));
+    const existingByText = new Map(existing.map((item) => [item.base_form, item.id]));
     const missingTexts = normalizedTextValues.filter((text) => !existingByText.has(text));
     if (missingTexts.length) {
-      await prisma.englishWord.createMany({ data: missingTexts.map((normalized_text) => ({ normalized_text })), skipDuplicates: true });
+      await prisma.englishWord.createMany({ data: missingTexts.map((base_form) => ({ base_form })), skipDuplicates: true });
     }
     return NextResponse.json({
       ok: true,

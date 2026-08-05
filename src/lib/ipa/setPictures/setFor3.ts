@@ -4,16 +4,24 @@ import type { PictureWordUsage, Word } from "@prisma/client";
 
 import { charsMissingFromBestIpa, filterByUsage } from "./shared";
 import type { WordPictures, IpaCandidate } from "./types";
-import { for1CharAdj, findCandidatesByPartWithS } from "./forChars";
+import {
+  for1CharAdj,
+  findCandidatesByPartWithS,
+  type PictureCandidateLookup,
+} from "./forChars";
 
-export async function setFor3(word: Word): Promise<WordPictures> {
+export async function setFor3(
+  word: Word,
+  lookup?: PictureCandidateLookup,
+): Promise<WordPictures> {
   const phoneticNormalized = (word.phonetic_us_normalized ?? "").trim();
   // first find for the whole 3 chars, then for 2 chars and for 1 char  adj
-  let matches = await findCandidatesByPartWithS(phoneticNormalized, word);
+  let matches = await findCandidatesByPartWithS(phoneticNormalized, word, lookup);
   if (matches.length === 0) {
     matches = await findCandidatesByPartWithS(
       phoneticNormalized.slice(0, 2),
       word,
+      lookup,
     );
   }
   const symbols: WordPictures = {
@@ -24,7 +32,7 @@ export async function setFor3(word: Word): Promise<WordPictures> {
     symbols.person,
   );
   if (missedChars.length > 0) {
-    const adjMatches = await for1CharAdj(missedChars[0]);
+    const adjMatches = await for1CharAdj(missedChars[0], lookup);
     const adjCandidate = pickBestPictureWord(adjMatches, "adj");
     symbols.adj = adjCandidate;
 

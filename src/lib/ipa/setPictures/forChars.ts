@@ -143,6 +143,10 @@ export async function findPictureWordsByIpaPrefix(
   return out;
 }
 
+export type PictureCandidateLookup = (
+  ipaPrefix: string,
+) => Promise<IpaCandidate[]>;
+
 export function get2CharPatterns(phoneticNormalized: string): string[] {
   const a = phoneticNormalized[0] ?? "";
   const b = phoneticNormalized[1] ?? "";
@@ -320,10 +324,11 @@ function getPatternsForPart(phoneticNormalized: string): string[] {
 async function findCandidatesByPatterns(
   patterns: string[],
   word: Word,
+  lookup: PictureCandidateLookup = findPictureWordsByIpaPrefix,
 ): Promise<IpaCandidate[]> {
   const length = word.phonetic_us_normalized?.replace(" ", "").length || 0;
   for (const pattern of patterns) {
-    const matches = await findPictureWordsByIpaPrefix(pattern);
+    const matches = await lookup(pattern);
     const filtered1 = matches.filter(
       (m) => m.target_ipa != word.phonetic_us_normalized,
     );
@@ -342,36 +347,39 @@ async function findCandidatesByPatterns(
 export async function findCandidatesByPart(
   phoneticNormalizedForPart: string,
   word: Word,
+  lookup: PictureCandidateLookup = findPictureWordsByIpaPrefix,
 ): Promise<IpaCandidate[]> {
   const patterns = getPatternsForPart(phoneticNormalizedForPart);
 
-  const candidates = await findCandidatesByPatterns(patterns, word);
+  const candidates = await findCandidatesByPatterns(patterns, word, lookup);
   const filtered = filterByUsage(candidates);
   return filtered;
 }
 export async function findCandidatesByPartWithS(
   phoneticNormalized: string,
   word: Word,
+  lookup: PictureCandidateLookup = findPictureWordsByIpaPrefix,
 ): Promise<IpaCandidate[]> {
-  let matches = await findCandidatesByPart(phoneticNormalized, word);
+  let matches = await findCandidatesByPart(phoneticNormalized, word, lookup);
   if (
     matches.length === 0 &&
     startsWithSAndNextIsConsonant(phoneticNormalized)
   ) {
-    matches = await findCandidatesByPart(`e${phoneticNormalized}`, word);
+    matches = await findCandidatesByPart(`e${phoneticNormalized}`, word, lookup);
   }
   return matches;
 }
 
 export async function for1CharAdj(
   phoneticNormalized: string,
+  lookup: PictureCandidateLookup = findPictureWordsByIpaPrefix,
 ): Promise<IpaCandidate[]> {
   const preferredUsage: PictureWordUsage | null = PictureWordUsage.adj;
   const a = phoneticNormalized[0] ?? "";
 
   const patterns = [`${a}`];
   for (const pattern of patterns) {
-    const matches = await findPictureWordsByIpaPrefix(pattern);
+    const matches = await lookup(pattern);
     const filtered = filterByUsage(matches, preferredUsage);
     if (filtered.length > 0) return filtered;
   }

@@ -6,6 +6,7 @@ export const dashboardMenu: Menu = {
   primary: [
     { type: "link", href: "/admin/data", label: "Data", icon: "admin" },
     { type: "link", href: "/admin/database-compare", label: "Database Compare", icon: "admin" },
+    { type: "link", href: "/admin/database-backup", label: "Database Backup", icon: "admin" },
     { type: "link", href: "/admin/navigation", label: "Navigation Manager", icon: "settings" },
   ],
 };

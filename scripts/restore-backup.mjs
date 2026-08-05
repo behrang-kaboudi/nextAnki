@@ -3,7 +3,7 @@ import path from "node:path";
 
 import dotenv from "dotenv";
 import { PrismaClient } from "@prisma/client";
-import { DEFAULT_ARCHIVE_PATH, writeFullArchive } from "./database-archive.mjs";
+import { DEFAULT_ARCHIVE_PATH, restoreFullArchive } from "./database-archive.mjs";
 
 function loadEnv() {
   const cwd = process.cwd();
@@ -15,19 +15,17 @@ function loadEnv() {
 
 async function main() {
   loadEnv();
-
   const prisma = new PrismaClient();
   try {
-    const snapshot = await writeFullArchive(prisma, DEFAULT_ARCHIVE_PATH);
-    const outPath = DEFAULT_ARCHIVE_PATH;
-    process.stdout.write(`Verified ${snapshot.manifest.length} Prisma models.\n`);
-    process.stdout.write(`OK: wrote ${path.relative(process.cwd(), outPath)}\n`);
+    const archivePath = process.argv[2] ? path.resolve(process.argv[2]) : DEFAULT_ARCHIVE_PATH;
+    const archive = await restoreFullArchive(prisma, archivePath);
+    process.stdout.write(`Restore complete: ${archive.manifest?.length ?? 0} Prisma models.\n`);
   } finally {
     await prisma.$disconnect();
   }
 }
 
-main().catch((err) => {
-  process.stderr.write(`${err?.stack || err}\n`);
+main().catch((error) => {
+  process.stderr.write(`${error?.stack || error}\n`);
   process.exitCode = 1;
 });
