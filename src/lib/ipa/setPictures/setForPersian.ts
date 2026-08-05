@@ -1,16 +1,15 @@
 import "server-only";
 
-import { PictureWord, PictureWordUsage, Word } from "@prisma/client";
+import type { Word } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
+import { meaningIds } from "@/lib/words/persianMeanings.server";
 
 import {
   addReplaceMentsForEach,
-  charsMissingFromBestIpa,
   filterByUsage,
 } from "./shared";
 import type { IpaCandidate } from "./types";
-import { pickBestFaEn } from "./pickBestFaEn";
 import {
   findPictureWordsByIpaPrefix,
   get5CharPatterns,
@@ -29,7 +28,7 @@ async function findByPattern(pattern: string): Promise<IpaCandidate[]> {
 
 async function findByPatternCandidates(
   phoneticNormalized: string,
-  word: Word & { meaning_fa_IPA_normalized?: string },
+  excludedIpa: string,
 ): Promise<IpaCandidate[]> {
   const a = phoneticNormalized[0] ?? "";
   const b = phoneticNormalized[1] ?? "";
@@ -91,7 +90,7 @@ async function findByPatternCandidates(
   for (const pattern of patterns) {
     let matches = await findByPattern(pattern);
     matches = matches.filter((match) => {
-      return match.target_ipa !== (word.meaning_fa_IPA_normalized ?? "");
+      return match.target_ipa !== excludedIpa;
     });
     matches = matches.filter((match) => {
       if (match.target_lang && match.target_lang === "en") return false;
@@ -109,15 +108,92 @@ async function findByPatternCandidates(
   return [];
 }
 
-export async function setForPersian(word: Word & { meaning_fa_IPA_normalized?: string }): Promise<IpaCandidate | null> {
-  const phoneticNormalized = word.meaning_fa_IPA_normalized ?? "";
-  const matches = await findByPatternCandidates(phoneticNormalized, word);
+function overlapScore(candidate: string, target: string): number {
+  const candidateCounts = new Map<string, number>();
+  for (const char of Array.from(candidate)
+    .filter((char) => char.trim())
+    .slice(0, 5)) {
+    candidateCounts.set(char, (candidateCounts.get(char) ?? 0) + 1);
+  }
 
-  // if (word.base_form === "goad") {
-  //   console.log(`[setForPersian.ts:104]`, matches, phoneticNormalized);
-  // }
-  const best = pickBestFaEn(matches, phoneticNormalized);
-  return best ? best : null;
+  let score = 0;
+  const targetCounts = new Map<string, number>();
+  for (const char of Array.from(target)
+    .filter((char) => char.trim())
+    .slice(0, 5)) {
+    targetCounts.set(char, (targetCounts.get(char) ?? 0) + 1);
+  }
+  for (const [char, count] of targetCounts) {
+    score += Math.min(candidateCounts.get(char) ?? 0, count);
+  }
+  return score;
 }
 
-// Note: shared `pickBestFaEn` lives in `pickBestFaEn.ts`.
+type PersianCandidate = {
+  candidate: IpaCandidate;
+  targetIpa: string;
+  isPrimaryMeaning: boolean;
+};
+
+function pickBestPersianCandidate(candidates: PersianCandidate[]): IpaCandidate | null {
+  const best = [...candidates].sort((left, right) => {
+    const leftScore = overlapScore(left.candidate.target_ipa, left.targetIpa);
+    const rightScore = overlapScore(right.candidate.target_ipa, right.targetIpa);
+    if (leftScore !== rightScore) return rightScore - leftScore;
+
+    const leftLength = Array.from(left.candidate.target_ipa).length;
+    const rightLength = Array.from(right.candidate.target_ipa).length;
+    if (leftLength !== rightLength) return leftLength - rightLength;
+
+    // The primary meaning breaks only otherwise equal choices.
+    if (left.isPrimaryMeaning !== right.isPrimaryMeaning)
+      return left.isPrimaryMeaning ? -1 : 1;
+
+    return left.candidate.fa.localeCompare(right.candidate.fa, "fa");
+  })[0];
+  return best?.candidate ?? null;
+}
+
+export async function setForPersian(word: Word): Promise<IpaCandidate | null> {
+  const primaryMeaningId = word.meaningId;
+  const meaningIdsToSearch = [
+    ...(primaryMeaningId == null ? [] : [primaryMeaningId]),
+    ...meaningIds(word.otherMeaningIds).filter((id) => id !== primaryMeaningId),
+  ];
+  if (!meaningIdsToSearch.length) return null;
+
+  const meanings = await prisma.persianWord.findMany({
+    where: { id: { in: meaningIdsToSearch } },
+    select: { id: true, meaning_fa_IPA_normalize: true },
+  });
+  const meaningsById = new Map(
+    meanings.map((meaning) => [meaning.id, meaning]),
+  );
+  const candidates: PersianCandidate[] = [];
+  const seen = new Set<string>();
+
+  // Search every linked meaning. Each meaning returns every candidate for its best
+  // matching pattern; selection happens only after the combined candidate set exists.
+  for (const meaningId of meaningIdsToSearch) {
+    const phoneticNormalized =
+      meaningsById.get(meaningId)?.meaning_fa_IPA_normalize?.trim() ?? "";
+    if (!phoneticNormalized) continue;
+
+    const matches = await findByPatternCandidates(
+      phoneticNormalized,
+      phoneticNormalized,
+    );
+    for (const candidate of matches) {
+      const key = `${candidate.source}|${candidate.target_lang}|${candidate.fa}|${candidate.en}|${candidate.target_ipa}|${candidate.usage}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      candidates.push({
+        candidate,
+        targetIpa: phoneticNormalized,
+        isPrimaryMeaning: meaningId === primaryMeaningId,
+      });
+    }
+  }
+
+  return pickBestPersianCandidate(candidates);
+}
