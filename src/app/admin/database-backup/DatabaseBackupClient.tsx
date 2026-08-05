@@ -1,14 +1,50 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type Step = { command: string; output: string };
 type Result = { ok: boolean; action?: string; error?: string; steps?: Step[] };
+type GitReport = {
+  branch: string | null;
+  localHead: string | null;
+  localCommittedAt: string | null;
+  localCommitSubject: string | null;
+  upstream: string | null;
+  githubHead: string | null;
+  githubCommittedAt: string | null;
+  githubCommitSubject: string | null;
+  ahead: number | null;
+  behind: number | null;
+  dirtyFiles: number;
+  relation: "same" | "different" | "unknown";
+  error: string | null;
+};
+
+function formatDate(value: string | null) {
+  return value ? new Date(value).toLocaleString() : "—";
+}
 
 export function DatabaseBackupClient() {
   const [running, setRunning] = useState<"backup" | "restore" | null>(null);
   const [result, setResult] = useState<Result | null>(null);
   const [commitMessage, setCommitMessage] = useState("");
+  const [gitReport, setGitReport] = useState<GitReport | null>(null);
+  const [reportLoading, setReportLoading] = useState(true);
+
+  async function refreshGitReport() {
+    setReportLoading(true);
+    try {
+      const response = await fetch("/api/admin/database-backup", { cache: "no-store" });
+      const payload = (await response.json()) as { ok: boolean; report?: GitReport };
+      setGitReport(payload.ok ? payload.report ?? null : null);
+    } finally {
+      setReportLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    void refreshGitReport();
+  }, []);
 
   async function execute(action: "backup" | "restore") {
     if (action === "restore" && !window.confirm("Restore will replace all local database data with the committed backup. Continue?")) return;
@@ -25,12 +61,36 @@ export function DatabaseBackupClient() {
       setResult({ ok: false, error: error instanceof Error ? error.message : String(error) });
     } finally {
       setRunning(null);
+      void refreshGitReport();
     }
   }
 
   const isRunning = running !== null;
   return (
     <div className="grid gap-6">
+      <section className="rounded-2xl border border-card bg-card p-5 shadow-elevated">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 className="font-semibold text-foreground">Local and GitHub status</h2>
+            <p className="mt-1 text-sm text-muted">Current branch, latest commits, sync state, and uncommitted local files.</p>
+          </div>
+          <button type="button" className="rounded border px-3 py-2 text-sm hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5" disabled={reportLoading || isRunning} onClick={() => void refreshGitReport()}>
+            {reportLoading ? "Refreshing…" : "Refresh report"}
+          </button>
+        </div>
+        {gitReport?.error ? <p className="mt-3 text-sm text-red-700 dark:text-red-300">{gitReport.error}</p> : null}
+        {gitReport ? (
+          <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+            <ReportItem label="Branch / upstream" value={[gitReport.branch, gitReport.upstream].filter(Boolean).join(" / ") || "—"} />
+            <ReportItem label="Sync" value={gitReport.relation === "same" ? "Same commit as GitHub" : gitReport.relation === "different" ? "Different from GitHub" : "Unknown"} />
+            <ReportItem label="Ahead / behind" value={`${gitReport.ahead ?? "—"} / ${gitReport.behind ?? "—"}`} />
+            <ReportItem label="Uncommitted files" value={String(gitReport.dirtyFiles)} />
+            <ReportItem label={`Local ${gitReport.localHead ?? "commit"}`} value={gitReport.localCommitSubject ?? "—"} detail={formatDate(gitReport.localCommittedAt)} />
+            <ReportItem label={`GitHub ${gitReport.githubHead ?? "commit"}`} value={gitReport.githubCommitSubject ?? "—"} detail={formatDate(gitReport.githubCommittedAt)} />
+          </div>
+        ) : !reportLoading ? <p className="mt-3 text-sm text-muted">Git report is unavailable.</p> : null}
+      </section>
+
       <section className="grid gap-4 rounded-2xl border border-card bg-card p-5 shadow-elevated lg:grid-cols-2">
         <div className="grid content-start gap-3 rounded-xl border border-card bg-background p-4">
           <div>
@@ -96,4 +156,8 @@ export function DatabaseBackupClient() {
       ) : null}
     </div>
   );
+}
+
+function ReportItem({ label, value, detail }: { label: string; value: string; detail?: string }) {
+  return <div className="rounded-xl border border-card bg-background p-3"><div className="text-xs text-muted">{label}</div><div className="mt-1 break-words text-sm font-medium text-foreground">{value}</div>{detail ? <div className="mt-1 text-xs text-muted">{detail}</div> : null}</div>;
 }

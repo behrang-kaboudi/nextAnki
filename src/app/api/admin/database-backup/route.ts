@@ -4,6 +4,7 @@ import { promisify } from "node:util";
 import { NextResponse } from "next/server";
 
 import { requireApiRole } from "@/lib/auth/apiAuth";
+import { getGitComparison } from "@/lib/dbCompare/gitCompare";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -32,6 +33,12 @@ async function changedSince(beforeHead: string, paths: string[]) {
 async function ensureCleanWorktree() {
   const { output } = await run("git", ["status", "--porcelain"]);
   if (output) throw new Error("Git pull was not run because this working tree has uncommitted changes.");
+}
+
+export async function GET() {
+  const auth = await requireApiRole("admin");
+  if (!auth.ok) return NextResponse.json({ ok: false, error: "Forbidden" }, { status: auth.status });
+  return NextResponse.json({ ok: true, report: await getGitComparison() });
 }
 
 export async function POST(request: Request) {

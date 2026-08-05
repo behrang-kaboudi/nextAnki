@@ -7,10 +7,12 @@ export type GitComparison = {
   branch: string | null;
   localHead: string | null;
   localCommittedAt: string | null;
+  localCommitSubject: string | null;
   upstream: string | null;
   upstreamHead: string | null;
   githubHead: string | null;
   githubCommittedAt: string | null;
+  githubCommitSubject: string | null;
   ahead: number | null;
   behind: number | null;
   dirtyFiles: number;
@@ -65,7 +67,7 @@ function parseGitHubRepo(remoteUrl: string | null) {
 
 async function getGitHubCommitInfo(remoteUrl: string | null, branch: string | null) {
   const repo = parseGitHubRepo(remoteUrl);
-  if (!repo || !branch) return { head: null, committedAt: null };
+  if (!repo || !branch) return { head: null, committedAt: null, subject: null };
 
   try {
     const url = `https://api.github.com/repos/${repo.owner}/${repo.repo}/commits/${encodeURIComponent(branch)}`;
@@ -73,19 +75,20 @@ async function getGitHubCommitInfo(remoteUrl: string | null, branch: string | nu
       headers: { Accept: "application/vnd.github+json" },
       signal: AbortSignal.timeout(8000),
     });
-    if (!response.ok) return { head: null, committedAt: null };
+    if (!response.ok) return { head: null, committedAt: null, subject: null };
 
     const data = (await response.json()) as {
       sha?: string;
-      commit?: { committer?: { date?: string }; author?: { date?: string } };
+      commit?: { message?: string; committer?: { date?: string }; author?: { date?: string } };
     };
 
     return {
       head: data.sha?.slice(0, 12) ?? null,
       committedAt: data.commit?.committer?.date ?? data.commit?.author?.date ?? null,
+      subject: data.commit?.message?.split("\n")[0] ?? null,
     };
   } catch {
-    return { head: null, committedAt: null };
+    return { head: null, committedAt: null, subject: null };
   }
 }
 
@@ -94,6 +97,7 @@ export async function getGitComparison(): Promise<GitComparison> {
     const branch = await optionalGit(["branch", "--show-current"]);
     const localHead = await optionalGit(["rev-parse", "--short=12", "HEAD"]);
     const localCommittedAt = await optionalGit(["log", "-1", "--format=%cI", "HEAD"]);
+    const localCommitSubject = await optionalGit(["log", "-1", "--format=%s", "HEAD"]);
     const upstream = await optionalGit(["rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}"]);
     const upstreamHead = upstream ? await optionalGit(["rev-parse", "--short=12", upstream]) : null;
     const remoteUrl = await optionalGit(["remote", "get-url", "origin"]);
@@ -109,10 +113,12 @@ export async function getGitComparison(): Promise<GitComparison> {
       branch: branch || null,
       localHead,
       localCommittedAt,
+      localCommitSubject,
       upstream,
       upstreamHead,
       githubHead,
       githubCommittedAt: githubInfo.committedAt,
+      githubCommitSubject: githubInfo.subject,
       ahead: counts.ahead,
       behind: counts.behind,
       dirtyFiles,
@@ -124,10 +130,12 @@ export async function getGitComparison(): Promise<GitComparison> {
       branch: null,
       localHead: null,
       localCommittedAt: null,
+      localCommitSubject: null,
       upstream: null,
       upstreamHead: null,
       githubHead: null,
       githubCommittedAt: null,
+      githubCommitSubject: null,
       ahead: null,
       behind: null,
       dirtyFiles: 0,
