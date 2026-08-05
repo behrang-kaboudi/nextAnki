@@ -136,13 +136,15 @@ export default function WordEditorClient({
   floatingActions = true,
   onDirtyChange,
   onSaved,
+  onSaveAndClose,
 }: {
   initial: WordEditorState;
   floatingActions?: boolean;
   onDirtyChange?: (dirty: boolean) => void;
   onSaved?: (id: number) => void;
+  onSaveAndClose?: () => void;
 }) {
-  type SaveOptions = { force?: boolean; audioUpdatedField?: (typeof WORD_AUDIO_FIELDS)[number] };
+  type SaveOptions = { force?: boolean; audioUpdatedField?: (typeof WORD_AUDIO_FIELDS)[number]; closeAfterSave?: boolean };
 
   const [baseline, setBaseline] = useState<WordEditorState>(initial);
   const [word, setWord] = useState<WordEditorState>(initial);
@@ -365,6 +367,7 @@ export default function WordEditorClient({
 
       setSavedAt(new Date().toISOString());
       onSaved?.(word.id);
+      if (opts?.closeAfterSave) onSaveAndClose?.();
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -527,6 +530,14 @@ export default function WordEditorClient({
             >
               {saving ? "Saving…" : "Save"}
             </button>
+            {onSaveAndClose ? <button
+              type="button"
+              onClick={() => void save({ closeAfterSave: true })}
+              disabled={saving || !dirty || !requiredOk}
+              className="rounded bg-foreground px-4 py-2 text-sm font-semibold text-background disabled:opacity-50"
+            >
+              {saving ? "Saving…" : "Save & Close"}
+            </button> : null}
           </div>
         </div>
 
@@ -565,6 +576,14 @@ export default function WordEditorClient({
           >
             {saving ? "Saving…" : "Save"}
           </button>
+          {onSaveAndClose ? <button
+            type="button"
+            onClick={() => void save({ closeAfterSave: true })}
+            disabled={saving || !dirty || !requiredOk}
+            className="rounded-xl bg-foreground px-4 py-2 text-sm font-semibold text-background disabled:opacity-50"
+          >
+            {saving ? "Saving…" : "Save & Close"}
+          </button> : null}
         </div>
       ) : null}
 

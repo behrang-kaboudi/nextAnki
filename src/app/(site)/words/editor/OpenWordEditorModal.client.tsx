@@ -119,6 +119,7 @@ export default function OpenWordEditorModal({
                   floatingActions={false}
                   onDirtyChange={setDirty}
                   onSaved={() => router.refresh()}
+                  onSaveAndClose={() => setOpen(false)}
                 />
               ) : null}
             </div>

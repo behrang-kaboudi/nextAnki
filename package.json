@@ -13,6 +13,8 @@
     "db:restore": "node scripts/restore-backup.js",
     "import:words": "node scripts/import-words-to-mysql.mjs",
     "import:persian-words": "node --experimental-strip-types scripts/import-persian-words-from-word.ts",
+    "link:words-to-persian-words": "node --experimental-strip-types scripts/link-words-to-persian-words.ts",
+    "update:persian-words-other-meanings": "node --experimental-strip-types scripts/update-persian-words-from-other-meanings.ts",
     "copy:persian-word-audio": "node --experimental-strip-types scripts/copy-word-meaning-audio-to-persian-words.ts",
     "import:ipaMap2": "node scripts/import-ipa-map2-to-mysql.mjs",
     "backfill:ipaKeywordFaPlain": "node scripts/backfill-ipa-keyword-fa-plain.mjs",

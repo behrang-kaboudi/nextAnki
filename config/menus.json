@@ -15,7 +15,15 @@
         "icon": "database",
         "items": [
           { "type": "link", "label": "Word Editor", "href": "/words/editor", "icon": "database", "description": "Search and edit vocabulary records." },
-          { "type": "link", "label": "Word Tables", "href": "/words/tables/persian-words", "icon": "database", "description": "Browse and edit Persian word table records and their audio." },
+          {
+            "type": "group",
+            "label": "Word Tables",
+            "icon": "database",
+            "items": [
+              { "type": "link", "label": "Word Table", "href": "/words/tables/words", "icon": "database", "description": "Browse Word records with search, sorting, and direct editing." },
+              { "type": "link", "label": "Persian Word Table", "href": "/words/tables/persian-words", "icon": "database", "description": "Browse and edit Persian word table records and their audio." }
+            ]
+          },
           { "type": "link", "label": "Word Extraction", "href": "/words/extraction", "icon": "sparkles", "description": "Extract and enrich vocabulary through staged prompts." },
           {
             "type": "group",

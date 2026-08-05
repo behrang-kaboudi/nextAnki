@@ -14,6 +14,7 @@ import { getSentenceEnSyncAllStatus } from "@/lib/anki/sentenceEnSyncAllJob";
 import { WORD_AUDIO_FIELDS } from "@/lib/audio/wordFieldAudioNaming";
 import { getVoiceJobStatus } from "@/lib/words/voiceGenerateJob";
 import { getWordFieldVoiceJobStatus } from "@/lib/words/wordFieldVoiceGenerateJob";
+import { getPersianWordAudioJobStatus } from "@/lib/persian/persianWordAudioGenerateJob";
 
 import { JOB_PROGRESS_TOPICS, wordFieldVoiceProgressTopic } from "./topics";
 
@@ -32,6 +33,7 @@ const statusGetters = new Map<string, StatusGetter>([
   [JOB_PROGRESS_TOPICS.ankiHintSentence, getHintSentenceSyncAllStatus],
   [JOB_PROGRESS_TOPICS.sentenceDeck, getSentenceDeckSyncAllStatus],
   [JOB_PROGRESS_TOPICS.wordVoice, getVoiceJobStatus],
+  [JOB_PROGRESS_TOPICS.persianWordAudio, getPersianWordAudioJobStatus],
 ]);
 
 for (const field of WORD_AUDIO_FIELDS) {
@@ -45,4 +47,3 @@ export function getJobProgressSnapshot(): Record<string, unknown> {
     Array.from(statusGetters, ([topic, getStatus]) => [topic, getStatus()]),
   );
 }
-

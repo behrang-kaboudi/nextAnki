@@ -49,6 +49,8 @@ model Word {
   meaning_fa                       String
   meaning_fa_IPA                   String
   meaning_fa_IPA_normalized        String             @default("")
+  meaningId                        Int?
+  otherMeaningIds                  Json?
   pos                              String?
   concept_explained                String?
   concept_explained_fa             String?
@@ -74,9 +76,11 @@ model Word {
   createdAt                        DateTime           @default(now())
   updatedAt                        DateTime           @updatedAt
   sentenceLinks                    SentenceWordLink[]
+  meaning                          PersianWord?       @relation("WordPrimaryPersianMeaning", fields: [meaningId], references: [id], onDelete: SetNull)
 
   @@index([base_form], map: "Word_base_form_idx")
   @@index([typeOfWordInDb], map: "Word_typeOfWordInDb_idx")
+  @@index([meaningId], map: "Word_meaningId_idx")
   @@map("word")
 }
 
@@ -130,6 +134,7 @@ model PersianWord {
   audio_file_name          String?
   createdAt                DateTime @default(now())
   updatedAt                DateTime @updatedAt
+  primaryMeaningWords      Word[]   @relation("WordPrimaryPersianMeaning")
 
   @@index([canonical_text], map: "PersianWord_canonical_text_idx")
   @@index([normalized_text], map: "PersianWord_normalized_text_idx")
