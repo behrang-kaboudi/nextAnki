@@ -47,6 +47,8 @@ model Word {
   meaningId            Int?
   sentenceId           Int?
   otherMeaningIds      Json?
+  /// Unique Sentence.id values where this word is used with its primary meaning.
+  sentenceIds          Json?
   meanings_confirmed   Boolean      @default(false)
   pos                  String?
   concept_explained_fa String?
