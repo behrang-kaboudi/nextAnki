@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 
 import { normalizeIpaForDb } from "@/lib/ipa/normalize";
 import { prisma } from "@/lib/prisma";
@@ -6,6 +7,15 @@ import { prisma } from "@/lib/prisma";
 export const runtime = "nodejs";
 
 type Item = { id: number; meaning_fa_IPA: string };
+type DuplicateConflict = {
+  attempted: { id: number; canonical_text: string };
+  meaning_fa_IPA: string;
+  existing: { id: number; canonical_text: string };
+};
+
+type UpdateResult =
+  | { ok: true; id: number; meaning_fa_IPA: string | null; meaning_fa_IPA_normalize: string | null }
+  | { ok: false; id: number; error: string; duplicateConflict?: DuplicateConflict };
 
 function parseItems(value: unknown): Item[] | null {
   if (!Array.isArray(value)) return null;
@@ -26,13 +36,35 @@ function parseItems(value: unknown): Item[] | null {
 export async function POST(request: Request) {
   const items = parseItems(await request.json().catch(() => null));
   if (!items) return NextResponse.json({ ok: false, error: "Body must be an array of exact { id, meaning_fa_IPA } items." }, { status: 400 });
-  const results: Array<{ ok: boolean; id: number; meaning_fa_IPA?: string | null; meaning_fa_IPA_normalize?: string | null; error?: string }> = [];
+  const results: UpdateResult[] = [];
   for (const item of items) {
     try {
       const normalized = normalizeIpaForDb(item.meaning_fa_IPA, 2000);
       const row = await prisma.persianWord.update({ where: { id: item.id }, data: { meaning_fa_IPA: item.meaning_fa_IPA, meaning_fa_IPA_normalize: normalized }, select: { id: true, meaning_fa_IPA: true, meaning_fa_IPA_normalize: true } });
       results.push({ ok: true, ...row });
-    } catch (error) { results.push({ ok: false, id: item.id, error: error instanceof Error ? error.message : String(error) }); }
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+        const [attempted, existing] = await Promise.all([
+          prisma.persianWord.findUnique({ where: { id: item.id }, select: { id: true, canonical_text: true } }),
+          prisma.persianWord.findFirst({
+            where: { id: { not: item.id }, meaning_fa_IPA: item.meaning_fa_IPA },
+            select: { id: true, canonical_text: true },
+          }),
+        ]);
+
+        if (attempted && existing) {
+          results.push({
+            ok: false,
+            id: item.id,
+            error: `IPA «${item.meaning_fa_IPA}» قبلاً برای رکورد ${existing.id} — ${existing.canonical_text} ثبت شده است.`,
+            duplicateConflict: { attempted, meaning_fa_IPA: item.meaning_fa_IPA, existing },
+          });
+          continue;
+        }
+      }
+
+      results.push({ ok: false, id: item.id, error: error instanceof Error ? error.message : String(error) });
+    }
   }
   return NextResponse.json({ ok: true, total: items.length, updated: results.filter((result) => result.ok).length, results });
 }

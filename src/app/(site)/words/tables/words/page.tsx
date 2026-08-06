@@ -30,6 +30,7 @@ const SORT_FIELDS = [
   "englishId",
   "meaningId",
   "sentenceId",
+  "sentenceIds",
   "otherMeaningIds",
   "meanings_confirmed",
   "pos",
@@ -43,6 +44,7 @@ const TABLE_COLUMNS = [
   { key: "englishId", label: "englishId" },
   { key: "meaningId", label: "meaningId" },
   { key: "sentenceId", label: "sentenceId" },
+  { key: "sentenceIds", label: "sentenceIds" },
   { key: "otherMeaningIds", label: "otherMeaningIds" },
   { key: "meanings_confirmed", label: "meanings_confirmed" },
   { key: "pos", label: "pos" },
@@ -309,6 +311,7 @@ export default async function WordsTablePage({
       englishId: { englishId: dir },
       meaningId: { meaningId: dir },
       sentenceId: { sentenceId: dir },
+      sentenceIds: { sentenceIds: dir },
       otherMeaningIds: { otherMeaningIds: dir },
       meanings_confirmed: { meanings_confirmed: dir },
       pos: { pos: dir },
@@ -332,6 +335,7 @@ export default async function WordsTablePage({
         english: { select: { id: true, ...WORD_ENGLISH_FIELDS_SELECT } },
         meaningId: true,
         sentenceId: true,
+        sentenceIds: true,
         sentence: {
           select: {
             id: true,
@@ -541,6 +545,14 @@ export default async function WordsTablePage({
                     indicators={COLUMN_INDICATORS.sentenceId}
                   />
                 ) : null}
+                {hasColumn("sentenceIds") ? (
+                  <SortHeader
+                    href={sortHref("sentenceIds")}
+                    label="sentenceIds"
+                    active={sort === "sentenceIds"}
+                    direction={dir}
+                  />
+                ) : null}
                 {hasColumn("otherMeaningIds") ? (
                   <SortHeader
                     href={sortHref("otherMeaningIds")}
@@ -662,6 +674,9 @@ export default async function WordsTablePage({
                         "—"
                       )}
                     </td>
+                  ) : null}
+                  {hasColumn("sentenceIds") ? (
+                    <ValueCell value={row.sentenceIds} />
                   ) : null}
                   {hasColumn("otherMeaningIds") ? (
                     <td className="max-w-64 px-3 py-2 font-mono">

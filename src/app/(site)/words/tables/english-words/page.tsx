@@ -28,7 +28,7 @@ const TABLE_COLUMNS = [
   { key: "phonetic_us_confirmed", label: "phonetic_us_confirmed" },
   { key: "phonetic_us_normalized", label: "phonetic_us_normalized" },
   { key: "json_hint", label: "json_hint" },
-  { key: "audio", label: "audio" },
+  { key: "audio", label: "audio_file_name" },
   { key: "createdAt", label: "createdAt" },
   { key: "updatedAt", label: "updatedAt" },
   { key: "actions", label: "actions" },

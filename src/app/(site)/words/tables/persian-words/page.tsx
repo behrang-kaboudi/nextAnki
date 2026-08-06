@@ -31,7 +31,7 @@ const TABLE_COLUMNS = [
   { key: "not_normalized_texts", label: "not_normalized_texts" },
   { key: "meaning_fa_IPA", label: "meaning_fa_IPA" },
   { key: "meaning_fa_IPA_normalize", label: "meaning_fa_IPA_normalize" },
-  { key: "audio_file_name", label: "audio" },
+  { key: "audio_file_name", label: "audio_file_name" },
   { key: "createdAt", label: "createdAt" },
   { key: "updatedAt", label: "updatedAt" },
   { key: "actions", label: "actions" },
