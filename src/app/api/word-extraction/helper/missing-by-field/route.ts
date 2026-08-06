@@ -61,8 +61,7 @@ export async function GET(req: Request) {
       SELECT COUNT(*) AS count
       FROM word w
       INNER JOIN english_word ew ON ew.id = w.englishId
-      LEFT JOIN SentenceWordLink sw ON sw.wordId = w.id AND sw.isPrimary = true
-      LEFT JOIN Sentence s ON s.id = sw.sentenceId
+      LEFT JOIN Sentence s ON s.id = w.sentenceId
       WHERE ${missingCondition}
     `;
     const total = Number(totalRows[0]?.count ?? BigInt(0));
@@ -76,8 +75,7 @@ export async function GET(req: Request) {
             FROM word w
       INNER JOIN english_word ew ON ew.id = w.englishId
             LEFT JOIN persian_word pw ON pw.id = w.meaningId
-            LEFT JOIN SentenceWordLink sw ON sw.wordId = w.id AND sw.isPrimary = true
-            LEFT JOIN Sentence s ON s.id = sw.sentenceId
+            LEFT JOIN Sentence s ON s.id = w.sentenceId
             WHERE ew.phonetic_us IS NULL OR ew.phonetic_us = ''
             ORDER BY w.id DESC
             LIMIT ${limit}
@@ -90,8 +88,7 @@ export async function GET(req: Request) {
               FROM word w
       INNER JOIN english_word ew ON ew.id = w.englishId
               LEFT JOIN persian_word pw ON pw.id = w.meaningId
-              LEFT JOIN SentenceWordLink sw ON sw.wordId = w.id AND sw.isPrimary = true
-              LEFT JOIN Sentence s ON s.id = sw.sentenceId
+              LEFT JOIN Sentence s ON s.id = w.sentenceId
               WHERE w.imageability IS NULL OR w.imageability <= 0
               ORDER BY w.id DESC
               LIMIT ${limit}
@@ -104,8 +101,7 @@ export async function GET(req: Request) {
                 FROM word w
       INNER JOIN english_word ew ON ew.id = w.englishId
                 LEFT JOIN persian_word pw ON pw.id = w.meaningId
-                LEFT JOIN SentenceWordLink sw ON sw.wordId = w.id AND sw.isPrimary = true
-                LEFT JOIN Sentence s ON s.id = sw.sentenceId
+                LEFT JOIN Sentence s ON s.id = w.sentenceId
                 WHERE w.learning_depth IS NULL OR w.learning_depth = 0
                 ORDER BY w.id DESC
                 LIMIT ${limit}
@@ -118,8 +114,7 @@ export async function GET(req: Request) {
                   FROM word w
       INNER JOIN english_word ew ON ew.id = w.englishId
                   LEFT JOIN persian_word pw ON pw.id = w.meaningId
-                  LEFT JOIN SentenceWordLink sw ON sw.wordId = w.id AND sw.isPrimary = true
-                  LEFT JOIN Sentence s ON s.id = sw.sentenceId
+                  LEFT JOIN Sentence s ON s.id = w.sentenceId
                   WHERE w.productive_target IS NULL OR w.productive_target = 0
                   ORDER BY w.id DESC
                   LIMIT ${limit}
@@ -132,8 +127,7 @@ export async function GET(req: Request) {
                   FROM word w
       INNER JOIN english_word ew ON ew.id = w.englishId
                   LEFT JOIN persian_word pw ON pw.id = w.meaningId
-                  LEFT JOIN SentenceWordLink sw ON sw.wordId = w.id AND sw.isPrimary = true
-                  LEFT JOIN Sentence s ON s.id = sw.sentenceId
+                  LEFT JOIN Sentence s ON s.id = w.sentenceId
                   WHERE s.sentence_en_meaning_fa IS NULL OR s.sentence_en_meaning_fa = ''
                   ORDER BY w.id DESC
                   LIMIT ${limit}
@@ -146,8 +140,7 @@ export async function GET(req: Request) {
                     FROM word w
       INNER JOIN english_word ew ON ew.id = w.englishId
                     LEFT JOIN persian_word pw ON pw.id = w.meaningId
-                    LEFT JOIN SentenceWordLink sw ON sw.wordId = w.id AND sw.isPrimary = true
-                    LEFT JOIN Sentence s ON s.id = sw.sentenceId
+                    LEFT JOIN Sentence s ON s.id = w.sentenceId
                     WHERE w.pos IS NULL OR w.pos = ''
                     ORDER BY w.id DESC
                     LIMIT ${limit}
@@ -159,8 +152,7 @@ export async function GET(req: Request) {
                       FROM word w
       INNER JOIN english_word ew ON ew.id = w.englishId
                       LEFT JOIN persian_word pw ON pw.id = w.meaningId
-                      LEFT JOIN SentenceWordLink sw ON sw.wordId = w.id AND sw.isPrimary = true
-                      LEFT JOIN Sentence s ON s.id = sw.sentenceId
+                      LEFT JOIN Sentence s ON s.id = w.sentenceId
                       WHERE w.concept_explained_fa IS NULL OR w.concept_explained_fa = ''
                       ORDER BY w.id DESC
                       LIMIT ${limit}

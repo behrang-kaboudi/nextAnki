@@ -12,17 +12,20 @@ import BatchEnglishWordJsonHintGenerate from "./BatchEnglishWordJsonHintGenerate
 import DictionaryApiUsImport from "./DictionaryApiUsImport.client";
 import EnglishWordAudioControls from "./EnglishWordAudioControls.client";
 import EnglishWordJsonHintControls from "./EnglishWordJsonHintControls.client";
+import EnglishWordPhoneticUsPrompt from "./EnglishWordPhoneticUsPrompt.client";
+import PhoneticUsConfirmedCell from "./PhoneticUsConfirmedCell.client";
 import EnglishWordRowActions from "./EnglishWordRowActions.client";
 
 export const metadata = { title: "Words — EnglishWord Table" };
 export const runtime = "nodejs";
 
-const SORT_FIELDS = ["id", "base_form", "phonetic_us", "phonetic_us_normalized", "audio_file_name", "createdAt", "updatedAt"] as const;
+const SORT_FIELDS = ["id", "base_form", "phonetic_us", "phonetic_us_confirmed", "phonetic_us_normalized", "audio_file_name", "createdAt", "updatedAt"] as const;
 type SortField = (typeof SORT_FIELDS)[number];
 const TABLE_COLUMNS = [
   { key: "id", label: "id", required: true },
   { key: "base_form", label: "base_form" },
   { key: "phonetic_us", label: "phonetic_us" },
+  { key: "phonetic_us_confirmed", label: "phonetic_us_confirmed" },
   { key: "phonetic_us_normalized", label: "phonetic_us_normalized" },
   { key: "json_hint", label: "json_hint" },
   { key: "audio", label: "audio" },
@@ -31,7 +34,7 @@ const TABLE_COLUMNS = [
   { key: "actions", label: "actions" },
 ] as const;
 type TableColumnKey = (typeof TABLE_COLUMNS)[number]["key"];
-const DEFAULT_COLUMNS: TableColumnKey[] = ["id", "base_form", "phonetic_us", "phonetic_us_normalized", "audio", "updatedAt", "actions"];
+const DEFAULT_COLUMNS: TableColumnKey[] = ["id", "base_form", "phonetic_us", "phonetic_us_confirmed", "phonetic_us_normalized", "audio", "updatedAt", "actions"];
 const COLUMN_INDICATORS: Partial<Record<TableColumnKey, readonly TableColumnIndicator[]>> = {
   id: [{ kind: "primary-key", text: "Primary key: EnglishWord.id" }],
   base_form: [{ kind: "unique", text: "Unique English base form" }],
@@ -87,7 +90,7 @@ export default async function EnglishWordsTablePage({ searchParams }: { searchPa
       <div className="p-3">
       <form className="flex flex-wrap items-center gap-2"><input name="q" defaultValue={q} placeholder="Search text or IPA…" className="w-full rounded border px-3 py-2 text-sm sm:w-80" /><input type="hidden" name="sort" value={sort} /><input type="hidden" name="dir" value={dir} /><label className="flex items-center gap-1 text-sm"><input name="missingAudio" value="1" type="checkbox" defaultChecked={missingAudio} /> Only without audio</label>{columns.map((column) => <input key={column} type="hidden" name="columns" value={column} />)}<button type="submit" className="rounded border px-3 py-2 text-sm">Search</button>{q || missingAudio ? <Link href={`/words/tables/english-words?${clearQuery}`} className="rounded border px-3 py-2 text-sm">Clear</Link> : null}</form>
         <div className="mt-3 grid gap-3 border-t pt-3 lg:grid-cols-2">
-          <div className="flex flex-wrap items-center gap-2"><AddEnglishWordModal /></div>
+          <div className="flex flex-wrap items-center gap-2"><AddEnglishWordModal /><EnglishWordPhoneticUsPrompt /><EnglishWordPhoneticUsPrompt mode="review" /></div>
           <div className="space-y-3 border-t pt-3 lg:border-l lg:border-t-0 lg:pl-3 lg:pt-0"><BatchEnglishWordAudioGenerate /><div className="border-t pt-3"><BatchEnglishWordJsonHintGenerate /></div></div>
         </div>
       </div>
@@ -99,12 +102,13 @@ export default async function EnglishWordsTablePage({ searchParams }: { searchPa
       {hasColumn("id") ? <SortHeader href={href(1, "id", sort === "id" && dir === "asc" ? "desc" : "asc")} label="id" active={sort === "id"} direction={dir} indicators={COLUMN_INDICATORS.id} /> : null}
       {hasColumn("base_form") ? <SortHeader href={href(1, "base_form", sort === "base_form" && dir === "asc" ? "desc" : "asc")} label="base_form" active={sort === "base_form"} direction={dir} indicators={COLUMN_INDICATORS.base_form} /> : null}
       {hasColumn("phonetic_us") ? <SortHeader href={href(1, "phonetic_us", sort === "phonetic_us" && dir === "asc" ? "desc" : "asc")} label="phonetic_us" active={sort === "phonetic_us"} direction={dir} /> : null}
+      {hasColumn("phonetic_us_confirmed") ? <SortHeader href={href(1, "phonetic_us_confirmed", sort === "phonetic_us_confirmed" && dir === "asc" ? "desc" : "asc")} label="phonetic_us_confirmed" active={sort === "phonetic_us_confirmed"} direction={dir} /> : null}
       {hasColumn("phonetic_us_normalized") ? <SortHeader href={href(1, "phonetic_us_normalized", sort === "phonetic_us_normalized" && dir === "asc" ? "desc" : "asc")} label="phonetic_us_normalized" active={sort === "phonetic_us_normalized"} direction={dir} indicators={COLUMN_INDICATORS.phonetic_us_normalized} /> : null}
       {hasColumn("json_hint") ? <th className="px-3 py-2">json_hint</th> : null}
       {hasColumn("audio") ? <SortHeader href={href(1, "audio_file_name", sort === "audio_file_name" && dir === "asc" ? "desc" : "asc")} label="audio" active={sort === "audio_file_name"} direction={dir} /> : null}
       {hasColumn("createdAt") ? <SortHeader href={href(1, "createdAt", sort === "createdAt" && dir === "asc" ? "desc" : "asc")} label="createdAt" active={sort === "createdAt"} direction={dir} /> : null}{hasColumn("updatedAt") ? <SortHeader href={href(1, "updatedAt", sort === "updatedAt" && dir === "asc" ? "desc" : "asc")} label="updatedAt" active={sort === "updatedAt"} direction={dir} /> : null}{hasColumn("actions") ? <th className="px-3 py-2">actions</th> : null}
     </tr></thead><tbody>{rows.map((item) => <tr key={item.id} className="border-b align-top">
-      {hasColumn("id") ? <td className="px-3 py-2 font-mono">{item.id}</td> : null}{hasColumn("base_form") ? <td className="max-w-60 px-3 py-2 text-sm">{item.base_form}</td> : null}{hasColumn("phonetic_us") ? <td className="max-w-60 px-3 py-2 font-mono">{item.phonetic_us ?? "—"}</td> : null}{hasColumn("phonetic_us_normalized") ? <td className="max-w-60 px-3 py-2 font-mono">{item.phonetic_us_normalized ?? "—"}</td> : null}{hasColumn("json_hint") ? <td className="max-w-48 px-3 py-2 font-mono"><EnglishWordJsonHintControls id={item.id} jsonHint={item.json_hint} /></td> : null}{hasColumn("audio") ? <td className="min-w-48 px-3 py-2"><EnglishWordAudioControls id={item.id} filename={item.audio_file_name} /></td> : null}{hasColumn("createdAt") ? <td className="whitespace-nowrap px-3 py-2 font-mono">{item.createdAt.toISOString()}</td> : null}{hasColumn("updatedAt") ? <td className="whitespace-nowrap px-3 py-2 font-mono">{item.updatedAt.toISOString()}</td> : null}{hasColumn("actions") ? <td className="px-3 py-2"><EnglishWordRowActions item={item} showAudio={false} /></td> : null}
+      {hasColumn("id") ? <td className="px-3 py-2 font-mono">{item.id}</td> : null}{hasColumn("base_form") ? <td className="max-w-60 px-3 py-2 text-sm">{item.base_form}</td> : null}{hasColumn("phonetic_us") ? <td className="max-w-60 px-3 py-2 font-mono">{item.phonetic_us ?? "—"}</td> : null}{hasColumn("phonetic_us_confirmed") ? <td className="px-3 py-2"><PhoneticUsConfirmedCell id={item.id} confirmed={item.phonetic_us_confirmed} /></td> : null}{hasColumn("phonetic_us_normalized") ? <td className="max-w-60 px-3 py-2 font-mono">{item.phonetic_us_normalized ?? "—"}</td> : null}{hasColumn("json_hint") ? <td className="max-w-48 px-3 py-2 font-mono"><EnglishWordJsonHintControls id={item.id} jsonHint={item.json_hint} /></td> : null}{hasColumn("audio") ? <td className="min-w-48 px-3 py-2"><EnglishWordAudioControls id={item.id} filename={item.audio_file_name} /></td> : null}{hasColumn("createdAt") ? <td className="whitespace-nowrap px-3 py-2 font-mono">{item.createdAt.toISOString()}</td> : null}{hasColumn("updatedAt") ? <td className="whitespace-nowrap px-3 py-2 font-mono">{item.updatedAt.toISOString()}</td> : null}{hasColumn("actions") ? <td className="px-3 py-2"><EnglishWordRowActions item={item} showAudio={false} /></td> : null}
     </tr>)}{!rows.length ? <tr><td colSpan={columns.length} className="px-3 py-8 text-center text-sm opacity-70">No rows.</td></tr> : null}</tbody></table></div>
   </main>;
 }

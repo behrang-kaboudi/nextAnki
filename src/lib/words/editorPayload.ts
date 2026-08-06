@@ -41,17 +41,13 @@ export async function getWordEditorInitial(id: number): Promise<WordEditorInitia
     where: { id },
     include: {
       english: { select: WORD_ENGLISH_FIELDS_SELECT },
-      sentenceLinks: {
-        where: { isPrimary: true },
-        take: 1,
-        include: { sentence: true },
-      },
+      sentence: true,
     },
   });
   if (!word) return null;
 
   const withEnglish = flattenWordEnglishRelation(word);
-  const primarySentence = withEnglish.sentenceLinks[0]?.sentence ?? null;
+  const primarySentence = withEnglish.sentence ?? null;
   const withMeanings = await hydrateWordWithPersianMeanings(withEnglish);
 
   return {

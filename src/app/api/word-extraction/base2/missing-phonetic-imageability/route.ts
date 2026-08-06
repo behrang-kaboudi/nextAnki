@@ -40,8 +40,7 @@ export async function GET(req: Request) {
       SELECT COUNT(*) AS count
       FROM word w
       INNER JOIN english_word ew ON ew.id = w.englishId
-      LEFT JOIN SentenceWordLink sw ON sw.wordId = w.id AND sw.isPrimary = true
-      LEFT JOIN Sentence s ON s.id = sw.sentenceId
+      LEFT JOIN Sentence s ON s.id = w.sentenceId
       WHERE ${missingWhere}
     `)) ?? [];
     const total = numberFromUnknownCount(totalRows[0]?.count);
@@ -64,8 +63,7 @@ export async function GET(req: Request) {
       FROM word w
       INNER JOIN english_word ew ON ew.id = w.englishId
       LEFT JOIN persian_word pw ON pw.id = w.meaningId
-      LEFT JOIN SentenceWordLink sw ON sw.wordId = w.id AND sw.isPrimary = true
-      LEFT JOIN Sentence s ON s.id = sw.sentenceId
+      LEFT JOIN Sentence s ON s.id = w.sentenceId
       WHERE ${missingWhere}
       ORDER BY w.id DESC
       LIMIT ${limit}

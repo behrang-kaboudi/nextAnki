@@ -25,19 +25,8 @@ export async function GET(req: Request) {
                 OR: [
                   { english: { is: { base_form: { contains: q } } } },
                   { meaning: { is: { canonical_text: { contains: q } } } },
-                  {
-                    sentenceLinks: {
-                      some: { isPrimary: true, sentence: { sentence_en: { contains: q } } },
-                    },
-                  },
-                  {
-                    sentenceLinks: {
-                      some: {
-                        isPrimary: true,
-                        sentence: { sentence_en_meaning_fa: { contains: q } },
-                      },
-                    },
-                  },
+                  { sentence: { is: { sentence_en: { contains: q } } } },
+                  { sentence: { is: { sentence_en_meaning_fa: { contains: q } } } },
                 ],
               }
             : undefined,
@@ -48,17 +37,11 @@ export async function GET(req: Request) {
         meaningId: true,
         otherMeaningIds: true,
         learning_depth: true,
-        sentenceLinks: {
-          where: { isPrimary: true },
+        sentence: {
           select: {
-            sentence: {
-              select: {
-                sentence_en: true,
-                sentence_en_meaning_fa: true,
-              },
-            },
+            sentence_en: true,
+            sentence_en_meaning_fa: true,
           },
-          take: 1,
         },
       },
       orderBy:
@@ -75,9 +58,8 @@ export async function GET(req: Request) {
         base_form: row.base_form,
         meaning_fa: row.meaning_fa,
         learning_depth: row.learning_depth,
-        sentence_en: row.sentenceLinks[0]?.sentence.sentence_en ?? "",
-        sentence_en_meaning_fa:
-          row.sentenceLinks[0]?.sentence.sentence_en_meaning_fa ?? "",
+        sentence_en: row.sentence?.sentence_en ?? "",
+        sentence_en_meaning_fa: row.sentence?.sentence_en_meaning_fa ?? "",
       })),
     });
   } catch (error) {

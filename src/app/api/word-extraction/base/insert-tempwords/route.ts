@@ -8,6 +8,7 @@ import { normalizePersianForComparison, normalizePersianForStorage } from "@/lib
 import { upsertPrimarySentenceByAnkiLinkId } from "@/lib/sentences/sentenceRepo";
 import { addPersianWord } from "@/lib/tables/persianWord";
 import { normalizeEnglishWordText } from "@/lib/english/normalize";
+import { updateWord } from "@/lib/words/wordRepo";
 
 export const runtime = "nodejs";
 
@@ -197,13 +198,10 @@ export async function POST(req: Request) {
             select: { id: true },
           });
 
-          await tx.sentenceWordLink.create({
-            data: {
-              sentenceId: sentence.id,
-              wordId: pending.id,
-              isPrimary: true,
-            },
-          });
+          await updateWord(
+            { where: { id: pending.id }, data: { sentenceId: sentence.id } },
+            tx,
+          );
 
           return pending;
         });

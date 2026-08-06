@@ -191,14 +191,10 @@ export async function POST(req: Request) {
     for (const row of rows) {
       await prisma.sentence.upsert({
         where: { sentence_en: row.sentence_en },
-        update: { mentionedWordsJson: row.items },
-        create: {
-          sentence_en: row.sentence_en,
-          mentionedWordsJson: row.items,
-        },
+        update: {},
+        create: { sentence_en: row.sentence_en },
       });
       sentencesUpserted += 1;
-      const linkedAnkiIds: string[] = [];
 
       for (const item of row.items) {
         try {
@@ -214,7 +210,6 @@ export async function POST(req: Request) {
 
           if (existing) {
             skippedExisting += 1;
-            linkedAnkiIds.push(existing.anki_link_id);
             results.push({
               ok: true,
               sentence_en: row.sentence_en,
@@ -259,7 +254,6 @@ export async function POST(req: Request) {
           });
 
           inserted += 1;
-          linkedAnkiIds.push(created.anki_link_id);
           results.push({
             ok: true,
             sentence_en: row.sentence_en,
@@ -280,11 +274,6 @@ export async function POST(req: Request) {
         }
       }
 
-      const uniqueLinkedAnkiIds = Array.from(new Set(linkedAnkiIds));
-      await prisma.sentence.update({
-        where: { sentence_en: row.sentence_en },
-        data: { items: uniqueLinkedAnkiIds },
-      });
     }
 
     return NextResponse.json({

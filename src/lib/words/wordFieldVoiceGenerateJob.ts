@@ -244,19 +244,11 @@ async function countCandidates(field: WordAudioFieldKey): Promise<number> {
     where:
       field === "sentence_en"
         ? {
-            sentenceLinks: {
-              some: {
-                isPrimary: true,
-                sentence: { sentence_en: { notIn: [""] } },
-              },
-            },
+            sentence: { is: { sentence_en: { notIn: [""] } } },
           }
         : {
-            sentenceLinks: {
-              some: {
-                isPrimary: true,
-                sentence: { sentence_en_meaning_fa: { not: null, notIn: [""] } },
-              },
+            sentence: {
+              is: { sentence_en_meaning_fa: { not: null, notIn: [""] } },
             },
           },
   });

@@ -22,8 +22,8 @@ export async function POST() {
           { meaning: { is: { canonical_text: { equals: "" } } } },
           { meaning: { is: { meaning_fa_IPA: { equals: "" } } } },
           { meaning: { is: { meaning_fa_IPA_normalize: { equals: "" } } } },
-          { sentenceLinks: { none: { isPrimary: true } } },
-          { sentenceLinks: { none: { isPrimary: true, sentence: { sentence_en: { not: "" } } } } },
+          { sentence: null },
+          { sentence: { is: { sentence_en: "" } } },
 
           { english: { is: { phonetic_us: null } } },
           { english: { is: { phonetic_us: { equals: "" } } } },
@@ -31,16 +31,8 @@ export async function POST() {
           { english: { is: { phonetic_us_normalized: { equals: "" } } } },
           { pos: null },
           { pos: { equals: "" } },
-          {
-            sentenceLinks: {
-              none: {
-                isPrimary: true,
-                sentence: {
-                  sentence_en_meaning_fa: { not: null, notIn: [""] },
-                },
-              },
-            },
-          },
+          { sentence: { is: { sentence_en_meaning_fa: null } } },
+          { sentence: { is: { sentence_en_meaning_fa: "" } } },
         ],
       },
       select: {
@@ -48,16 +40,10 @@ export async function POST() {
         english: { select: { base_form: true, phonetic_us: true, phonetic_us_normalized: true } },
         meaning: { select: { canonical_text: true, meaning_fa_IPA: true, meaning_fa_IPA_normalize: true } },
         pos: true,
-        sentenceLinks: {
-          where: { isPrimary: true },
-          take: 1,
+        sentence: {
           select: {
-            sentence: {
-              select: {
-                sentence_en: true,
-                sentence_en_meaning_fa: true,
-              },
-            },
+            sentence_en: true,
+            sentence_en_meaning_fa: true,
           },
         },
       },
@@ -73,8 +59,8 @@ export async function POST() {
           { meaning: { is: { canonical_text: { equals: "" } } } },
           { meaning: { is: { meaning_fa_IPA: { equals: "" } } } },
           { meaning: { is: { meaning_fa_IPA_normalize: { equals: "" } } } },
-          { sentenceLinks: { none: { isPrimary: true } } },
-          { sentenceLinks: { none: { isPrimary: true, sentence: { sentence_en: { not: "" } } } } },
+          { sentence: null },
+          { sentence: { is: { sentence_en: "" } } },
 
           { english: { is: { phonetic_us: null } } },
           { english: { is: { phonetic_us: { equals: "" } } } },
@@ -82,23 +68,15 @@ export async function POST() {
           { english: { is: { phonetic_us_normalized: { equals: "" } } } },
           { pos: null },
           { pos: { equals: "" } },
-          {
-            sentenceLinks: {
-              none: {
-                isPrimary: true,
-                sentence: {
-                  sentence_en_meaning_fa: { not: null, notIn: [""] },
-                },
-              },
-            },
-          },
+          { sentence: { is: { sentence_en_meaning_fa: null } } },
+          { sentence: { is: { sentence_en_meaning_fa: "" } } },
         ],
       },
     });
 
     if (totalInvalid > 0) {
       const sample = invalidRows.map((r) => {
-        const sentence = r.sentenceLinks[0]?.sentence ?? null;
+        const sentence = r.sentence;
         const missing: string[] = [];
         if (isBlank(r.english.base_form)) missing.push("base_form");
         if (isBlank(r.english.phonetic_us)) missing.push("phonetic_us");

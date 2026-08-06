@@ -36,8 +36,19 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   if (!id) return NextResponse.json({ ok: false, error: "Invalid EnglishWord id." }, { status: 400 });
   try {
     const body = (await request.json()) as Record<string, unknown>;
-    const base_form = normalizeEnglishWordText(typeof body.base_form === "string" ? body.base_form : "");
-    const phonetic_us = nullableString(body.phonetic_us);
+    const current = await prisma.englishWord.findUnique({ where: { id } });
+    if (!current) return NextResponse.json({ ok: false, error: "EnglishWord not found." }, { status: 404 });
+
+    const base_form = "base_form" in body
+      ? normalizeEnglishWordText(typeof body.base_form === "string" ? body.base_form : "")
+      : current.base_form;
+    const phonetic_us = "phonetic_us" in body ? nullableString(body.phonetic_us) : current.phonetic_us;
+    const phoneticChanged = phonetic_us !== current.phonetic_us;
+    const phonetic_us_confirmed = phoneticChanged
+      ? false
+      : typeof body.phonetic_us_confirmed === "boolean"
+        ? body.phonetic_us_confirmed
+        : current.phonetic_us_confirmed;
     if (!base_form) {
       return NextResponse.json({ ok: false, error: "base_form must contain at least one English letter." }, { status: 400 });
     }
@@ -46,8 +57,9 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       data: {
         base_form,
         phonetic_us,
+        phonetic_us_confirmed,
         phonetic_us_normalized: phonetic_us ? normalizeIpaForDb(phonetic_us, 2000) || null : null,
-        json_hint: nullableString(body.json_hint),
+        json_hint: "json_hint" in body ? nullableString(body.json_hint) : current.json_hint,
       },
     });
     await touchWordsByEnglishId(id);

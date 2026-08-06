@@ -41,12 +41,13 @@ enum PictureWordUsage {
 }
 
 model Word {
-  id                   Int                @id @default(autoincrement())
-  anki_link_id         String             @unique(map: "Word_anki_link_id_key")
+  id                   Int          @id @default(autoincrement())
+  anki_link_id         String       @unique(map: "Word_anki_link_id_key")
   englishId            Int
   meaningId            Int?
   sentenceId           Int?
   otherMeaningIds      Json?
+  meanings_confirmed   Boolean      @default(false)
   pos                  String?
   concept_explained_fa String?
   learning_depth       Float?
@@ -57,12 +58,11 @@ model Word {
   imageability         Int?
   /// Productive target score 0-101 (NULL means unset).
   productive_target    Int?
-  createdAt            DateTime           @default(now())
-  updatedAt            DateTime           @updatedAt
-  sentenceLinks        SentenceWordLink[]
-  english              EnglishWord        @relation("WordEnglish", fields: [englishId], references: [id], onDelete: Restrict)
-  meaning              PersianWord?       @relation("WordPrimaryPersianMeaning", fields: [meaningId], references: [id], onDelete: SetNull)
-  sentence             Sentence?          @relation("WordPrimarySentence", fields: [sentenceId], references: [id], onDelete: SetNull)
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @updatedAt
+  english              EnglishWord  @relation("WordEnglish", fields: [englishId], references: [id], onDelete: Restrict)
+  meaning              PersianWord? @relation("WordPrimaryPersianMeaning", fields: [meaningId], references: [id], onDelete: SetNull)
+  sentence             Sentence?    @relation("WordPrimarySentence", fields: [sentenceId], references: [id], onDelete: SetNull)
 
   @@index([englishId], map: "Word_englishId_idx")
   @@index([meaningId], map: "Word_meaningId_idx")
@@ -92,6 +92,7 @@ model EnglishWord {
   id                     Int      @id @default(autoincrement())
   base_form              String   @unique(map: "EnglishWord_base_form_key")
   phonetic_us            String?
+  phonetic_us_confirmed  Boolean  @default(false)
   phonetic_us_normalized String?
   json_hint              String?  @db.LongText
   audio_file_name        String?
@@ -107,28 +108,10 @@ model Sentence {
   id                     Int      @id @default(autoincrement())
   sentence_en            String   @unique
   sentence_en_meaning_fa String?
-  mentionedWordsJson     Json?
-  items                  Json?
   createdAt              DateTime @default(now())
   updatedAt              DateTime @updatedAt
 
-  wordLinks    SentenceWordLink[]
-  primaryWords Word[]             @relation("WordPrimarySentence")
-}
-
-model SentenceWordLink {
-  sentenceId Int
-  wordId     Int
-  isPrimary  Boolean  @default(false)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  sentence Sentence @relation(fields: [sentenceId], references: [id], onDelete: Cascade)
-  word     Word     @relation(fields: [wordId], references: [id], onDelete: Cascade)
-
-  @@id([sentenceId, wordId])
-  @@index([wordId, isPrimary])
-  @@index([sentenceId, isPrimary])
+  words Word[] @relation("WordPrimarySentence")
 }
 
 model IpaKeyword {

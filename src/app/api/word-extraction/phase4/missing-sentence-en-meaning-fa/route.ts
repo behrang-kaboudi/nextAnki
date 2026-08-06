@@ -20,8 +20,7 @@ export async function GET() {
       FROM word w
       INNER JOIN english_word ew ON ew.id = w.englishId
       LEFT JOIN persian_word pw ON pw.id = w.meaningId
-      LEFT JOIN SentenceWordLink sw ON sw.wordId = w.id AND sw.isPrimary = true
-      LEFT JOIN Sentence s ON s.id = sw.sentenceId
+      LEFT JOIN Sentence s ON s.id = w.sentenceId
       WHERE s.sentence_en_meaning_fa IS NULL OR s.sentence_en_meaning_fa = ''
       ORDER BY w.id DESC
       LIMIT 20

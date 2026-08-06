@@ -13,16 +13,11 @@ function isBlank(value: string | null | undefined) {
   return typeof value !== "string" || value.trim() === "";
 }
 
-async function getWordIdByAnkiLinkId(ankiLinkId: string) {
-  const word = await prisma.word.findUnique({
-    where: { anki_link_id: ankiLinkId },
-    select: { id: true },
-  });
-  if (!word) {
-    throw new Error(`Word not found for anki_link_id=${ankiLinkId}`);
-  }
-  return word.id;
-}
+const sentenceSelect = {
+  id: true,
+  sentence_en: true,
+  sentence_en_meaning_fa: true,
+} as const;
 
 export async function upsertPrimarySentenceByAnkiLinkId(args: {
   ankiLinkId: string;
@@ -30,7 +25,6 @@ export async function upsertPrimarySentenceByAnkiLinkId(args: {
   sentence_en_meaning_fa?: string | null;
 }) {
   const { ankiLinkId, sentence_en, sentence_en_meaning_fa = null } = args;
-  const wordId = await getWordIdByAnkiLinkId(ankiLinkId);
   const nextSentenceEn = sentence_en.trim();
 
   if (!nextSentenceEn) {
@@ -38,157 +32,83 @@ export async function upsertPrimarySentenceByAnkiLinkId(args: {
   }
 
   return prisma.$transaction(async (tx) => {
-    const existingPrimary = await tx.sentenceWordLink.findFirst({
-      where: { wordId, isPrimary: true },
-      select: {
-        sentenceId: true,
-        sentence: {
-          select: {
-            id: true,
-            sentence_en: true,
-            sentence_en_meaning_fa: true,
-          },
-        },
-      },
+    const word = await tx.word.findUnique({
+      where: { anki_link_id: ankiLinkId },
+      select: { id: true, sentence: { select: sentenceSelect } },
     });
+    if (!word) {
+      throw new Error(`Word not found for anki_link_id=${ankiLinkId}`);
+    }
 
+    const existingSentence = word.sentence;
     const matchedSentence = await tx.sentence.findUnique({
       where: { sentence_en: nextSentenceEn },
-      select: {
-        id: true,
-        sentence_en: true,
-        sentence_en_meaning_fa: true,
-      },
+      select: sentenceSelect,
     });
 
-    if (existingPrimary?.sentence && existingPrimary.sentence.sentence_en === nextSentenceEn) {
-      const nextMeaning =
-        sentence_en_meaning_fa !== null && isBlank(existingPrimary.sentence.sentence_en_meaning_fa)
-          ? sentence_en_meaning_fa
-          : sentence_en_meaning_fa;
-      await tx.sentence.update({
-        where: { id: existingPrimary.sentence.id },
-        data: { sentence_en: nextSentenceEn, sentence_en_meaning_fa: nextMeaning },
-      });
-
-      await tx.sentenceWordLink.updateMany({
-        where: { wordId, sentenceId: { not: existingPrimary.sentence.id }, isPrimary: true },
-        data: { isPrimary: false },
+    if (existingSentence?.sentence_en === nextSentenceEn) {
+      const updated = await tx.sentence.update({
+        where: { id: existingSentence.id },
+        data: { sentence_en: nextSentenceEn, sentence_en_meaning_fa },
+        select: sentenceSelect,
       });
       await updateWord(
-        { where: { id: wordId }, data: { sentenceId: existingPrimary.sentence.id } },
+        { where: { id: word.id }, data: { sentenceId: existingSentence.id } },
         tx,
       );
-
-      return {
-        id: existingPrimary.sentence.id,
-        sentence_en: nextSentenceEn,
-        sentence_en_meaning_fa: nextMeaning,
-      };
+      return updated;
     }
 
     if (matchedSentence) {
-      await tx.sentenceWordLink.updateMany({
-        where: { wordId, isPrimary: true },
-        data: { isPrimary: false },
-      });
-
-      await tx.sentenceWordLink.upsert({
-        where: {
-          sentenceId_wordId: {
-            sentenceId: matchedSentence.id,
-            wordId,
-          },
-        },
-        update: { isPrimary: true },
-        create: {
-          sentenceId: matchedSentence.id,
-          wordId,
-          isPrimary: true,
-        },
-      });
       await updateWord(
-        { where: { id: wordId }, data: { sentenceId: matchedSentence.id } },
+        { where: { id: word.id }, data: { sentenceId: matchedSentence.id } },
         tx,
       );
 
-      if (
-        sentence_en_meaning_fa !== null &&
-        isBlank(matchedSentence.sentence_en_meaning_fa)
-      ) {
-        await tx.sentence.update({
+      let nextMeaning = matchedSentence.sentence_en_meaning_fa;
+      if (sentence_en_meaning_fa !== null && isBlank(nextMeaning)) {
+        const updated = await tx.sentence.update({
           where: { id: matchedSentence.id },
           data: { sentence_en_meaning_fa },
+          select: sentenceSelect,
         });
+        nextMeaning = updated.sentence_en_meaning_fa;
       }
 
-      if (existingPrimary?.sentence && existingPrimary.sentence.id !== matchedSentence.id) {
+      if (existingSentence && existingSentence.id !== matchedSentence.id) {
         await tx.sentence.deleteMany({
-          where: {
-            id: existingPrimary.sentence.id,
-            wordLinks: { none: {} },
-          },
+          where: { id: existingSentence.id, words: { none: {} } },
         });
       }
 
       return {
         id: matchedSentence.id,
         sentence_en: matchedSentence.sentence_en,
-        sentence_en_meaning_fa:
-          !isBlank(matchedSentence.sentence_en_meaning_fa) || sentence_en_meaning_fa == null
-            ? matchedSentence.sentence_en_meaning_fa
-            : sentence_en_meaning_fa,
+        sentence_en_meaning_fa: nextMeaning,
       };
     }
 
-    if (existingPrimary?.sentence) {
-      await tx.sentence.update({
-        where: { id: existingPrimary.sentence.id },
+    if (existingSentence) {
+      const updated = await tx.sentence.update({
+        where: { id: existingSentence.id },
         data: { sentence_en: nextSentenceEn, sentence_en_meaning_fa },
-      });
-
-      await tx.sentenceWordLink.updateMany({
-        where: { wordId, sentenceId: { not: existingPrimary.sentence.id }, isPrimary: true },
-        data: { isPrimary: false },
+        select: sentenceSelect,
       });
       await updateWord(
-        { where: { id: wordId }, data: { sentenceId: existingPrimary.sentence.id } },
+        { where: { id: word.id }, data: { sentenceId: existingSentence.id } },
         tx,
       );
-
-      return {
-        id: existingPrimary.sentence.id,
-        sentence_en: nextSentenceEn,
-        sentence_en_meaning_fa,
-      };
+      return updated;
     }
 
     const createdSentence = await tx.sentence.create({
       data: { sentence_en: nextSentenceEn, sentence_en_meaning_fa },
-      select: {
-        id: true,
-        sentence_en: true,
-        sentence_en_meaning_fa: true,
-      },
-    });
-
-    await tx.sentenceWordLink.updateMany({
-      where: { wordId, isPrimary: true },
-      data: { isPrimary: false },
-    });
-
-    await tx.sentenceWordLink.create({
-      data: {
-        sentenceId: createdSentence.id,
-        wordId,
-        isPrimary: true,
-      },
+      select: sentenceSelect,
     });
     await updateWord(
-      { where: { id: wordId }, data: { sentenceId: createdSentence.id } },
+      { where: { id: word.id }, data: { sentenceId: createdSentence.id } },
       tx,
     );
-
     return createdSentence;
   });
 }
@@ -207,75 +127,44 @@ export async function updatePrimarySentenceByAnkiLinkId(
 export async function findPrimarySentenceByAnkiLinkId(
   ankiLinkId: string,
 ): Promise<PrimarySentenceRecord | null> {
-  return prisma.sentenceWordLink.findFirst({
-    where: {
-      isPrimary: true,
-      word: { anki_link_id: ankiLinkId },
-    },
-    select: {
-      sentence: {
-        select: {
-          id: true,
-          sentence_en: true,
-          sentence_en_meaning_fa: true,
-        },
-      },
-    },
-  }).then((row) => row?.sentence ?? null);
+  const word = await prisma.word.findUnique({
+    where: { anki_link_id: ankiLinkId },
+    select: { sentence: { select: sentenceSelect } },
+  });
+  return word?.sentence ?? null;
 }
 
 export async function findPrimarySentenceByWordId(
   wordId: number,
 ): Promise<PrimarySentenceRecord | null> {
-  return prisma.sentenceWordLink.findFirst({
-    where: { wordId, isPrimary: true },
-    select: {
-      sentence: {
-        select: {
-          id: true,
-          sentence_en: true,
-          sentence_en_meaning_fa: true,
-        },
-      },
-    },
-  }).then((row) => row?.sentence ?? null);
+  const word = await prisma.word.findUnique({
+    where: { id: wordId },
+    select: { sentence: { select: sentenceSelect } },
+  });
+  return word?.sentence ?? null;
 }
 
 export async function listPrimarySentencesByAnkiLinkIds(ankiLinkIds: string[]) {
   if (!ankiLinkIds.length) return new Map<string, PrimarySentenceRecord>();
 
-  const rows = await prisma.sentenceWordLink.findMany({
-    where: {
-      isPrimary: true,
-      word: {
-        anki_link_id: { in: ankiLinkIds },
-      },
-    },
+  const rows = await prisma.word.findMany({
+    where: { anki_link_id: { in: ankiLinkIds }, sentenceId: { not: null } },
     select: {
-      word: { select: { anki_link_id: true } },
-      sentence: {
-        select: {
-          id: true,
-          sentence_en: true,
-          sentence_en_meaning_fa: true,
-        },
-      },
+      anki_link_id: true,
+      sentence: { select: sentenceSelect },
     },
   });
 
   return new Map(
-    rows.map((row) => [
-      row.word.anki_link_id,
-      {
-        id: row.sentence.id,
-        sentence_en: row.sentence.sentence_en,
-        sentence_en_meaning_fa: row.sentence.sentence_en_meaning_fa,
-      },
-    ]),
+    rows.flatMap((row) =>
+      row.sentence ? [[row.anki_link_id, row.sentence] as const] : [],
+    ),
   );
 }
 
-export function getSentenceAudioKey(sentenceId: number | string | null | undefined): string | null {
+export function getSentenceAudioKey(
+  sentenceId: number | string | null | undefined,
+): string | null {
   if (sentenceId == null) return null;
   const value = String(sentenceId).trim();
   return value.length ? value : null;

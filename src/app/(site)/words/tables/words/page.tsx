@@ -11,10 +11,10 @@ import { prisma } from "@/lib/prisma";
 import { WORD_ENGLISH_FIELDS_SELECT } from "@/lib/english/wordEnglishFields.server";
 
 import OpenWordEditorModal from "../../editor/OpenWordEditorModal.client";
-import BackfillWordSentenceIds from "./BackfillWordSentenceIds.client";
 import WordRelationPopover, {
   type RelationPopoverField,
 } from "./WordRelationPopover.client";
+import WordMeaningsReview from "./WordMeaningsReview.client";
 
 export const metadata = { title: "Words — Word Table" };
 export const runtime = "nodejs";
@@ -30,6 +30,7 @@ const SORT_FIELDS = [
   "meaningId",
   "sentenceId",
   "otherMeaningIds",
+  "meanings_confirmed",
   "pos",
   "anki_link_id",
   "updatedAt",
@@ -42,6 +43,7 @@ const TABLE_COLUMNS = [
   { key: "meaningId", label: "meaningId" },
   { key: "sentenceId", label: "sentenceId" },
   { key: "otherMeaningIds", label: "otherMeaningIds" },
+  { key: "meanings_confirmed", label: "meanings_confirmed" },
   { key: "pos", label: "pos" },
   { key: "concept_explained_fa", label: "concept_explained_fa" },
   { key: "learning_depth", label: "learning_depth" },
@@ -63,6 +65,7 @@ const DEFAULT_TABLE_COLUMNS: TableColumnKey[] = [
   "meaningId",
   "sentenceId",
   "otherMeaningIds",
+  "meanings_confirmed",
   "pos",
   "anki_link_id",
   "updatedAt",
@@ -188,8 +191,6 @@ function sentenceDetails(sentence: {
   id: number;
   sentence_en: string;
   sentence_en_meaning_fa: string | null;
-  mentionedWordsJson: Prisma.JsonValue | null;
-  items: Prisma.JsonValue | null;
 }): RelationPopoverField[] {
   return [
     { label: "id", value: String(sentence.id), code: true },
@@ -198,20 +199,6 @@ function sentenceDetails(sentence: {
       label: "sentence_en_meaning_fa",
       value: sentence.sentence_en_meaning_fa ?? "—",
       dir: "rtl",
-    },
-    {
-      label: "mentionedWordsJson",
-      value: sentence.mentionedWordsJson
-        ? JSON.stringify(sentence.mentionedWordsJson, null, 2)
-        : "—",
-      code: true,
-      multiline: true,
-    },
-    {
-      label: "items",
-      value: sentence.items ? JSON.stringify(sentence.items, null, 2) : "—",
-      code: true,
-      multiline: true,
     },
   ];
 }
@@ -322,6 +309,7 @@ export default async function WordsTablePage({
       meaningId: { meaningId: dir },
       sentenceId: { sentenceId: dir },
       otherMeaningIds: { otherMeaningIds: dir },
+      meanings_confirmed: { meanings_confirmed: dir },
       pos: { pos: dir },
       anki_link_id: { anki_link_id: dir },
       updatedAt: { updatedAt: dir },
@@ -348,11 +336,10 @@ export default async function WordsTablePage({
             id: true,
             sentence_en: true,
             sentence_en_meaning_fa: true,
-            mentionedWordsJson: true,
-            items: true,
           },
         },
         otherMeaningIds: true,
+        meanings_confirmed: true,
         pos: true,
         concept_explained_fa: true,
         learning_depth: true,
@@ -474,9 +461,8 @@ export default async function WordsTablePage({
       </section>
 
       <section className="mt-4 rounded border p-3">
-        <BackfillWordSentenceIds />
+        <WordMeaningsReview />
       </section>
-
       <section className="mt-4 rounded border p-3">
         <TableColumnSelector
           key={columns.join(",")}
@@ -559,6 +545,7 @@ export default async function WordsTablePage({
                     direction={dir}
                   />
                 ) : null}
+                {hasColumn("meanings_confirmed") ? <th className="px-3 py-2">meanings_confirmed</th> : null}
                 {hasColumn("pos") ? (
                   <SortHeader
                     href={sortHref("pos")}
@@ -696,6 +683,7 @@ export default async function WordsTablePage({
                       )}
                     </td>
                   ) : null}
+                  {hasColumn("meanings_confirmed") ? <td className="px-3 py-2">{row.meanings_confirmed ? "true" : "false"}</td> : null}
                   {hasColumn("pos") ? (
                     <td className="max-w-32 px-3 py-2">
                       <span className="block truncate" title={row.pos ?? ""}>

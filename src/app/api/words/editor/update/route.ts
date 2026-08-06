@@ -112,6 +112,7 @@ export async function POST(req: Request) {
           where: { id: targetBefore.id },
           data: {
             phonetic_us,
+            ...(englishChanged ? { phonetic_us_confirmed: false } : {}),
             phonetic_us_normalized,
             ...(englishChanged ? { json_hint: null } : {}),
           },

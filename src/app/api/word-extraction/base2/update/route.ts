@@ -47,7 +47,7 @@ export async function POST(req: Request) {
     if (!word) return NextResponse.json({ ok: false, error: `Word ${id} not found.` }, { status: 404 });
     const english = await prisma.englishWord.update({
       where: { id: word.englishId },
-      data: { phonetic_us, phonetic_us_normalized, json_hint: null },
+      data: { phonetic_us, phonetic_us_confirmed: false, phonetic_us_normalized, json_hint: null },
       select: { phonetic_us: true, phonetic_us_normalized: true },
     });
     const updated = await updateWord({

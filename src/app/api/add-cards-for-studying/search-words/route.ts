@@ -30,17 +30,11 @@ export async function GET(req: Request) {
         english: { select: WORD_ENGLISH_FIELDS_SELECT },
         meaningId: true,
         otherMeaningIds: true,
-        sentenceLinks: {
-          where: { isPrimary: true },
+        sentence: {
           select: {
-            sentence: {
-              select: {
-                sentence_en: true,
-                sentence_en_meaning_fa: true,
-              },
-            },
+            sentence_en: true,
+            sentence_en_meaning_fa: true,
           },
-          take: 1,
         },
       },
       orderBy: [{ english: { base_form: "asc" } }, { id: "asc" }],
@@ -53,9 +47,8 @@ export async function GET(req: Request) {
         anki_link_id: row.anki_link_id,
         base_form: row.base_form,
         meaning_fa: row.meaning_fa,
-        sentence_en: row.sentenceLinks[0]?.sentence.sentence_en ?? "",
-        sentence_en_meaning_fa:
-          row.sentenceLinks[0]?.sentence.sentence_en_meaning_fa ?? "",
+        sentence_en: row.sentence?.sentence_en ?? "",
+        sentence_en_meaning_fa: row.sentence?.sentence_en_meaning_fa ?? "",
       })),
     });
   } catch (error) {

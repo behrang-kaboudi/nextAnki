@@ -76,13 +76,13 @@ export async function GET() {
       prisma.$queryRaw<Array<{ c: bigint }>>`
         SELECT COUNT(*) as c
         FROM Sentence s
-        INNER JOIN SentenceWordLink sw ON sw.sentenceId = s.id AND sw.isPrimary = true
+        INNER JOIN word w ON w.sentenceId = s.id
         WHERE s.sentence_en IS NULL OR TRIM(s.sentence_en) = ''
       `,
       prisma.$queryRaw<Array<{ c: bigint }>>`
         SELECT COUNT(*) as c
         FROM Sentence s
-        INNER JOIN SentenceWordLink sw ON sw.sentenceId = s.id AND sw.isPrimary = true
+        INNER JOIN word w ON w.sentenceId = s.id
         WHERE s.sentence_en LIKE ${`${PROCESSING_PREFIX}%`}
       `,
     ]);
@@ -139,8 +139,7 @@ export async function POST(req: Request) {
       >`
         SELECT s.id as sentenceId, w.id as wordId, w.anki_link_id
         FROM Sentence s
-        INNER JOIN SentenceWordLink sw ON sw.sentenceId = s.id AND sw.isPrimary = true
-        INNER JOIN word w ON w.id = sw.wordId
+        INNER JOIN word w ON w.sentenceId = s.id
         WHERE s.sentence_en IS NULL OR TRIM(s.sentence_en) = ''
         ORDER BY w.anki_link_id ASC
         LIMIT 1
@@ -168,25 +167,20 @@ export async function POST(req: Request) {
         select: {
           id: true,
           sentence_en_meaning_fa: true,
-          wordLinks: {
-            where: { isPrimary: true },
+          words: {
             take: 1,
             select: {
-              word: {
-                select: {
-                  id: true,
-                  anki_link_id: true,
-                  english: { select: { base_form: true } },
-                  meaning: { select: { canonical_text: true } },
-                  pos: true,
-                },
-              },
+              id: true,
+              anki_link_id: true,
+              english: { select: { base_form: true } },
+              meaning: { select: { canonical_text: true } },
+              pos: true,
             },
           },
         },
       });
 
-      const word = item?.wordLinks[0]?.word ?? null;
+      const word = item?.words[0] ?? null;
       if (!item || !word) {
         return NextResponse.json(
           { ok: false, error: "Claimed a row but failed to load it (unexpected)" },

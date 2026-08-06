@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import WordFieldVoiceCell from "@/app/(site)/words/hints/WordFieldVoiceCell.client";
@@ -10,13 +10,6 @@ export type SentenceEditorItem = {
   id: number;
   sentence_en: string;
   sentence_en_meaning_fa: string | null;
-  words: Array<{
-    id: number;
-    anki_link_id: string;
-    base_form: string;
-    meaning_fa: string;
-    isPrimary: boolean;
-  }>;
   createdAt: string;
   updatedAt: string;
 };
@@ -38,13 +31,6 @@ export default function SentenceEditorModal({ item, compact = false }: { item: S
   const dirty = sentenceEn !== item.sentence_en || sentenceMeaning !== (item.sentence_en_meaning_fa ?? "");
   const requiredOk = sentenceEn.trim().length > 0;
   const audioKey = String(item.id);
-
-  const linkedWordsText = useMemo(() => {
-    if (!item.words.length) return "No linked words";
-    return item.words
-      .map((word) => `${word.base_form} (${word.meaning_fa})${word.isPrimary ? " primary" : ""}`)
-      .join(" / ");
-  }, [item.words]);
 
   const close = useCallback(() => {
     if (dirty && !window.confirm("You have unsaved changes. Close without saving?")) return;
@@ -160,9 +146,6 @@ export default function SentenceEditorModal({ item, compact = false }: { item: S
             <div className="flex items-center justify-between gap-3 border-b border-card px-4 py-3">
               <div className="min-w-0">
                 <div className="truncate text-sm font-semibold">Edit Sentence #{item.id}</div>
-                <div className="truncate text-xs opacity-70" title={linkedWordsText}>
-                  {linkedWordsText}
-                </div>
               </div>
               <button
                 type="button"

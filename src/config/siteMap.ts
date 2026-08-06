@@ -45,7 +45,7 @@ export const siteMapGroups: SiteMapGroup[] = [
       { title: "Word Table", path: "/words/tables/words", summary: "Browses Word records with search, sorting, and direct editing.", menu: true },
       { title: "Persian Word Table", path: "/words/tables/persian-words", summary: "Browses and edits PersianWord records, including linked audio playback.", menu: true },
       { title: "English Word Table", path: "/words/tables/english-words", summary: "Browses canonical English words and phrases with US IPA, JSON hints, one audio file, and Word links.", menu: true },
-      { title: "Sentence Table", path: "/words/tables/sentences", summary: "Browses unique Sentence records, linked words, and sentence-level metadata with direct editing.", menu: true },
+      { title: "Sentence Table", path: "/words/tables/sentences", summary: "Browses and directly edits unique English sentences and their Persian meanings.", menu: true },
       { title: "Word Extraction", path: "/words/extraction", summary: "Runs the staged workflow that extracts and enriches words with AI prompts.", menu: true },
       { title: "Audio Hints", path: "/words/hints/audio", summary: "Reviews, generates, uploads, and cleans audio stored on word fields.", menu: true },
       { title: "JSON Hints", path: "/words/hints/json", summary: "Reviews and generates structured JSON hints for vocabulary records.", menu: true },

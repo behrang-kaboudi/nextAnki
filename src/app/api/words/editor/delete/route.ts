@@ -28,18 +28,14 @@ export async function POST(req: Request) {
       select: {
         id: true,
         anki_link_id: true,
-        sentenceLinks: {
-          where: { isPrimary: true },
-          take: 1,
-          select: { sentence: { select: { id: true } } },
-        },
+        sentenceId: true,
       },
     });
     if (!word) {
       return NextResponse.json({ ok: false, error: "Word not found" }, { status: 404 });
     }
 
-    const primarySentenceId = word.sentenceLinks[0]?.sentence.id ?? null;
+    const primarySentenceId = word.sentenceId;
 
     const audio = await Promise.all(
       WORD_AUDIO_FIELDS.map(async (field) => {
@@ -59,7 +55,7 @@ export async function POST(req: Request) {
       await prisma.sentence.deleteMany({
         where: {
           id: primarySentenceId,
-          wordLinks: { none: {} },
+          words: { none: {} },
         },
       });
     }

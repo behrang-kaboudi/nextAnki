@@ -60,17 +60,11 @@ export default async function WordHintsAudioPage({
         otherMeaningIds: true,
         other_meanings_en: true,
         concept_explained_fa: true,
-        sentenceLinks: {
-          where: { isPrimary: true },
-          take: 1,
+        sentence: {
           select: {
-            sentence: {
-              select: {
-                id: true,
-                sentence_en: true,
-                sentence_en_meaning_fa: true,
-              },
-            },
+            id: true,
+            sentence_en: true,
+            sentence_en_meaning_fa: true,
           },
         },
       },
@@ -79,7 +73,7 @@ export default async function WordHintsAudioPage({
   const rowsWithMeanings = await hydrateWordsWithPersianMeanings(rows.map(flattenWordEnglishRelation));
   const mappedRows = rowsWithMeanings.map((r) => ({
     ...r,
-    sentenceRecord: r.sentenceLinks[0]?.sentence ?? null,
+    sentenceRecord: r.sentence ?? null,
   }));
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
