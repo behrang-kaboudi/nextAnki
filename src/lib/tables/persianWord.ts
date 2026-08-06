@@ -72,15 +72,24 @@ export async function addPersianWord(
   rawText: string,
   options: { meaningFaIpa?: string | null; meaningFaIpaNormalized?: string | null } = {}
 ): Promise<AddPersianWordResult> {
+  return prisma.$transaction((tx) =>
+    addPersianWordWithClient(rawText, options, tx),
+  );
+}
+
+export async function addPersianWordWithClient(
+  rawText: string,
+  options: { meaningFaIpa?: string | null; meaningFaIpaNormalized?: string | null },
+  db: Prisma.TransactionClient,
+): Promise<AddPersianWordResult> {
   const canonicalText = normalizePersianHalf(rawText);
   const normalizedText = normalizePersianFull(rawText);
   if (!canonicalText || !normalizedText) throw new Error("The word must contain at least one Persian letter.");
 
-  return prisma.$transaction(async (tx) => {
-    const existing = await findPersianWordByNormalizedText(normalizedText, tx);
+  const existing = await findPersianWordByNormalizedText(normalizedText, db);
 
-    if (!existing) {
-      const item = await tx.persianWord.create({
+  if (!existing) {
+    const item = await db.persianWord.create({
         data: {
           canonical_text: canonicalText,
           normalized_text: normalizedText,
@@ -90,18 +99,17 @@ export async function addPersianWord(
         },
         select: persianWordSelect,
       });
-      return { action: "created", item, canonicalText, normalizedText };
-    }
+    return { action: "created", item, canonicalText, normalizedText };
+  }
 
-    if (rawText === existing.canonical_text || stringVariants(existing.not_normalized_texts).includes(rawText)) {
-      return { action: "unchanged", item: existing, canonicalText, normalizedText };
-    }
+  if (rawText === existing.canonical_text || stringVariants(existing.not_normalized_texts).includes(rawText)) {
+    return { action: "unchanged", item: existing, canonicalText, normalizedText };
+  }
 
-    const item = await tx.persianWord.update({
-      where: { id: existing.id },
-      data: { not_normalized_texts: [...stringVariants(existing.not_normalized_texts), rawText] },
-      select: persianWordSelect,
-    });
-    return { action: "variant_added", item, canonicalText, normalizedText };
+  const item = await db.persianWord.update({
+    where: { id: existing.id },
+    data: { not_normalized_texts: [...stringVariants(existing.not_normalized_texts), rawText] },
+    select: persianWordSelect,
   });
+  return { action: "variant_added", item, canonicalText, normalizedText };
 }

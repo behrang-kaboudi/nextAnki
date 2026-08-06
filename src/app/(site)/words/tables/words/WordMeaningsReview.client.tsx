@@ -6,7 +6,7 @@ type Correction = {
   id: number;
   meaning_fa?: string;
   other_meanings_fa?: string[];
-  sentence_en_valid?: false;
+  invalid_sentence_ids?: number[];
 };
 export default function WordMeaningsReview() {
   const r = useRouter(),
@@ -295,7 +295,7 @@ export default function WordMeaningsReview() {
                   disabled={b}
                   onChange={(x) => setA(x.target.value)}
                   className="min-h-0 flex-1 rounded border p-3 font-mono text-xs"
-                  placeholder='[{"id":1,"meaning_fa":"...","other_meanings_fa":[]}] or [{"id":1,"sentence_en_valid":false}]'
+                  placeholder='[{"id":1,"meaning_fa":"...","other_meanings_fa":[],"invalid_sentence_ids":[12]}]'
                 />
                 <div className="flex gap-2">
                   <button

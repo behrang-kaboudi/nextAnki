@@ -60,6 +60,9 @@ export async function touchWordsByEnglishIds(englishIds: readonly number[]) {
   return prisma.word.updateMany({ where: { englishId: { in: uniqueIds } }, data: { updatedAt: new Date() } });
 }
 
-export async function deleteWord(args: Prisma.WordDeleteArgs) {
-  return prisma.word.delete(args);
+export async function deleteWord(
+  args: Prisma.WordDeleteArgs,
+  client: WordWriteClient = prisma,
+) {
+  return client.word.delete(args);
 }

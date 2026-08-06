@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 
-import { addPersianWord } from "@/lib/tables/persianWord";
+import { prisma } from "@/lib/prisma";
+import { addPersianWordWithClient } from "@/lib/tables/persianWord";
+import { meaningReviewSentenceIds } from "@/lib/words/meaningReviewSentences.server";
 import { updateWord } from "@/lib/words/wordRepo";
 
 export const runtime = "nodejs";
@@ -9,7 +11,7 @@ type Correction = {
   id: number;
   meaning_fa?: string;
   other_meanings_fa?: string[];
-  sentence_en_valid?: boolean;
+  invalid_sentence_ids?: number[];
 };
 
 function parse(
@@ -38,12 +40,12 @@ function parse(
     if (!row || typeof row !== "object") return null;
     const item = row as Record<string, unknown>;
     const hasMeanings = "meaning_fa" in item || "other_meanings_fa" in item;
-    const hasSentenceValidity = "sentence_en_valid" in item;
+    const hasInvalidSentences = "invalid_sentence_ids" in item;
     if (
       typeof item.id !== "number" ||
       !Number.isSafeInteger(item.id) ||
       seen.has(item.id) ||
-      (!hasMeanings && !hasSentenceValidity) ||
+      (!hasMeanings && !hasInvalidSentences) ||
       (hasMeanings &&
         (typeof item.meaning_fa !== "string" ||
           !Array.isArray(item.other_meanings_fa) ||
@@ -51,14 +53,23 @@ function parse(
           item.other_meanings_fa.some(
             (meaning) => typeof meaning !== "string" || !meaning.trim(),
           ))) ||
-      (hasSentenceValidity && typeof item.sentence_en_valid !== "boolean") ||
+      (hasInvalidSentences &&
+        (!Array.isArray(item.invalid_sentence_ids) ||
+          item.invalid_sentence_ids.some(
+            (id) =>
+              typeof id !== "number" ||
+              !Number.isSafeInteger(id) ||
+              id <= 0,
+          ) ||
+          new Set(item.invalid_sentence_ids).size !==
+            item.invalid_sentence_ids.length)) ||
       Object.keys(item).some(
         (key) =>
           ![
             "id",
             "meaning_fa",
             "other_meanings_fa",
-            "sentence_en_valid",
+            "invalid_sentence_ids",
           ].includes(key),
       )
     )
@@ -74,8 +85,8 @@ function parse(
             ),
           }
         : {}),
-      ...(hasSentenceValidity
-        ? { sentence_en_valid: item.sentence_en_valid as boolean }
+      ...(hasInvalidSentences
+        ? { invalid_sentence_ids: item.invalid_sentence_ids as number[] }
         : {}),
     });
   }
@@ -91,7 +102,7 @@ export async function POST(request: Request) {
       {
         ok: false,
         error:
-          "Corrections must include meanings and/or a boolean sentence_en_valid.",
+          "Corrections must include meanings and/or invalid_sentence_ids.",
       },
       { status: 400 },
     );
@@ -100,42 +111,69 @@ export async function POST(request: Request) {
   for (const id of body.ids) {
     try {
       const correction = corrections.get(id);
-      if (correction?.meaning_fa && correction.other_meanings_fa) {
-        const primary = await addPersianWord(correction.meaning_fa);
-        const otherIds = await Promise.all(
-          correction.other_meanings_fa
-            .filter((meaning) => meaning !== correction.meaning_fa)
-            .map(async (meaning) => (await addPersianWord(meaning)).item.id),
-        );
-        await updateWord({
+      await prisma.$transaction(async (tx) => {
+        const word = await tx.word.findUnique({
           where: { id },
-          data: {
+          select: { sentenceId: true, sentenceIds: true },
+        });
+        if (!word) throw new Error(`Word ${id} no longer exists.`);
+        const referencedSentenceIds = meaningReviewSentenceIds(word);
+        const existingSentences = referencedSentenceIds.length
+          ? await tx.sentence.findMany({
+              where: { id: { in: referencedSentenceIds } },
+              select: { id: true },
+            })
+          : [];
+        const existingSentenceIdSet = new Set(
+          existingSentences.map((sentence) => sentence.id),
+        );
+        const currentSentenceIds = referencedSentenceIds.filter((sentenceId) =>
+          existingSentenceIdSet.has(sentenceId),
+        );
+        const invalidSentenceIds = correction?.invalid_sentence_ids ?? [];
+        if (invalidSentenceIds.some((sentenceId) => !currentSentenceIds.includes(sentenceId))) {
+          throw new Error(`Correction for Word ${id} contains an unrelated sentence id.`);
+        }
+        const nextSentenceIds = currentSentenceIds.filter(
+          (sentenceId) => !invalidSentenceIds.includes(sentenceId),
+        );
+        let meaningData: {
+          meaningId?: number;
+          otherMeaningIds?: number[];
+        } = {};
+        if (correction?.meaning_fa && correction.other_meanings_fa) {
+          const primary = await addPersianWordWithClient(
+            correction.meaning_fa,
+            {},
+            tx,
+          );
+          const otherIds = await Promise.all(
+            correction.other_meanings_fa
+              .filter((meaning) => meaning !== correction.meaning_fa)
+              .map(async (meaning) =>
+                (await addPersianWordWithClient(meaning, {}, tx)).item.id,
+              ),
+          );
+          meaningData = {
             meaningId: primary.item.id,
             otherMeaningIds: [
               ...new Set(
                 otherIds.filter((otherId) => otherId !== primary.item.id),
               ),
             ],
-            ...(correction.sentence_en_valid === false
-              ? { sentenceId: null }
-              : {}),
+          };
+        }
+        await updateWord({
+          where: { id },
+          data: {
+            ...meaningData,
+            sentenceId: null,
+            sentenceIds: nextSentenceIds,
             meanings_confirmed: true,
           },
           select: { id: true },
-        });
-      } else if (correction?.sentence_en_valid === false) {
-        await updateWord({
-          where: { id },
-          data: { sentenceId: null, meanings_confirmed: true },
-          select: { id: true },
-        });
-      } else {
-        await updateWord({
-          where: { id },
-          data: { meanings_confirmed: true },
-          select: { id: true },
-        });
-      }
+        }, tx);
+      });
       results.push({ id, ok: true });
     } catch (error) {
       results.push({

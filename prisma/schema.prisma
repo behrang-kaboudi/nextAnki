@@ -51,7 +51,7 @@ model Word {
   sentenceIds          Json?
   meanings_confirmed   Boolean      @default(false)
   pos                  String?
-  concept_explained_fa String?
+  concept_explained_fa String?      @db.Text
   learning_depth       Float?
   other_meanings_en    String?
   category             String?

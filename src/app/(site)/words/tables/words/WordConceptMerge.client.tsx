@@ -1,0 +1,270 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+
+type SourceRow = {
+  id: number;
+  word: string;
+  meaning_fa: string;
+  other_meanings_fa: string[];
+  concept_explained_fa: string;
+  sentenceId: number | null;
+  sentenceIds: number[];
+};
+
+type OutputRow = Record<string, unknown> & { id: number; delete: boolean };
+
+type PrepareResponse = {
+  ok?: boolean;
+  items?: SourceRow[][];
+  sourceGroups?: number[][];
+  totalEligibleGroups?: number;
+  normalizedSingleRecords?: number;
+  error?: string;
+};
+
+const buttonClass =
+  "rounded border px-3 py-2 text-sm transition active:scale-90 hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5";
+
+export default function WordConceptMerge() {
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [limit, setLimit] = useState("0");
+  const [prompt, setPrompt] = useState("");
+  const [groups, setGroups] = useState<SourceRow[][]>([]);
+  const [sourceGroups, setSourceGroups] = useState<number[][]>([]);
+  const [totalGroups, setTotalGroups] = useState(0);
+  const [response, setResponse] = useState("");
+  const [preview, setPreview] = useState<OutputRow[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+
+  const createData = async (showModal: boolean, successNotice?: string) => {
+    const parsedLimit = Number(limit);
+    if (!Number.isSafeInteger(parsedLimit) || parsedLimit < 0) {
+      setError("Count must be a non-negative integer; 0 means all groups.");
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    setNotice(null);
+    try {
+      const [promptResponse, dataResponse] = await Promise.all([
+        fetch(`/api/ai/prompt-file?path=${encodeURIComponent("src/prompts/word-extraction/merge_word_concepts/rulseV1.md")}`),
+        fetch("/api/words/concept-merge/prepare", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ limit: parsedLimit }),
+        }),
+      ]);
+      const promptJson = (await promptResponse.json()) as { text?: string; error?: string };
+      const dataJson = (await dataResponse.json()) as PrepareResponse;
+      if (!promptResponse.ok || typeof promptJson.text !== "string") {
+        throw new Error(promptJson.error || "Could not load the merge prompt.");
+      }
+      if (!dataResponse.ok || !dataJson.ok || !Array.isArray(dataJson.items) || !Array.isArray(dataJson.sourceGroups)) {
+        throw new Error(dataJson.error || "Could not prepare merge candidates.");
+      }
+      setPrompt(promptJson.text);
+      setGroups(dataJson.items);
+      setSourceGroups(dataJson.sourceGroups);
+      setTotalGroups(dataJson.totalEligibleGroups ?? dataJson.items.length);
+      setResponse("");
+      setPreview([]);
+      setNotice(successNotice ??
+        `Created ${dataJson.items.length} group(s); moved sentenceId into sentenceIds for ${dataJson.normalizedSingleRecords ?? 0} single record(s) ✓`);
+      if (showModal) setOpen(true);
+      router.refresh();
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : String(reason));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const parseForPreview = () => {
+    setError(null);
+    try {
+      const value = JSON.parse(response) as unknown;
+      if (!Array.isArray(value) || value.length === 0) throw new Error("Response must be a non-empty JSON array.");
+      const sourceIds = sourceGroups.flat();
+      const rows = value as OutputRow[];
+      if (rows.some((row) => !row || typeof row !== "object" || !Number.isSafeInteger(row.id) || typeof row.delete !== "boolean")) {
+        throw new Error("Every response row needs a valid id and boolean delete value.");
+      }
+      const outputIds = rows.map((row) => row.id);
+      if (new Set(outputIds).size !== outputIds.length || outputIds.length !== sourceIds.length || sourceIds.some((id) => !outputIds.includes(id))) {
+        throw new Error("The response must contain every input id exactly once and no other ids.");
+      }
+      const currentById = new Map(groups.flat().map((row) => [row.id, row]));
+      const normalizedRows = rows.map((row) => {
+        if (row.delete) return row;
+        const mergedRecordIds = Array.isArray(row.mergedRecordIds)
+          ? row.mergedRecordIds.filter((id): id is number => Number.isSafeInteger(id))
+          : [];
+        const clusterIds = [row.id, ...mergedRecordIds];
+        const sentenceIds = [...new Set(clusterIds.flatMap((id) => {
+          const current = currentById.get(id);
+          return current
+            ? [...(current.sentenceId === null ? [] : [current.sentenceId]), ...current.sentenceIds]
+            : [];
+        }))];
+        return { ...row, sentenceId: null, sentenceIds };
+      });
+      setPreview(normalizedRows);
+      setConfirmOpen(true);
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : String(reason));
+    }
+  };
+
+  const applyConfirmed = async () => {
+    setBusy(true);
+    setError(null);
+    try {
+      const applyResponse = await fetch("/api/words/concept-merge/apply", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sourceGroups, output: preview }),
+      });
+      const result = (await applyResponse.json()) as {
+        ok?: boolean;
+        updated?: number;
+        deleted?: number;
+        error?: string;
+      };
+      if (!applyResponse.ok || !result.ok) throw new Error(result.error || "Could not apply concept merges.");
+      setConfirmOpen(false);
+      setResponse("");
+      router.refresh();
+      await createData(
+        false,
+        `Updated ${result.updated ?? 0} and deleted ${result.deleted ?? 0} Word record(s) ✓`,
+      );
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : String(reason));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const sourceById = new Map(groups.flat().map((row) => [row.id, row]));
+  const copyText = `${prompt}\n\n${JSON.stringify(groups, null, 2)}`;
+  return (
+    <>
+      <button type="button" disabled={busy} onClick={() => void createData(true)} className={buttonClass}>
+        {busy && !open ? "PREPARING…" : "MERGE WORD CONCEPTS"}
+      </button>
+
+      {open ? (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          onMouseDown={(event) => event.target === event.currentTarget && !busy && setOpen(false)}
+          role="dialog"
+          aria-modal="true"
+        >
+          <div className="flex h-[85vh] w-full max-w-7xl flex-col gap-4 rounded-2xl border border-card bg-background p-6 shadow-elevated">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <b>Merge word concepts — Word</b>
+                <div className="text-xs opacity-70">
+                  Candidate records are grouped by englishId. Nothing is deleted until the human confirmation step.
+                </div>
+              </div>
+              <button type="button" disabled={busy} onClick={() => setOpen(false)} className={buttonClass}>Close</button>
+            </div>
+            {error ? <div className="rounded border border-red-500/30 bg-red-500/10 p-2 text-sm text-red-700">{error}</div> : null}
+            {notice ? <div className="rounded border border-emerald-500/30 bg-emerald-500/10 p-2 text-sm text-emerald-800">{notice}</div> : null}
+            <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-2">
+              <section className="flex min-h-0 flex-col gap-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <label className="text-xs">
+                    Group count
+                    <input type="number" min="0" value={limit} disabled={busy} onChange={(event) => setLimit(event.target.value)} className="ml-2 w-20 rounded border px-2 py-1" />
+                  </label>
+                  <button type="button" disabled={busy} onClick={() => void createData(false)} className={buttonClass}>
+                    {busy ? "Creating…" : "Create data"}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={busy || groups.length === 0}
+                    onClick={() => void navigator.clipboard.writeText(copyText).then(() => setNotice("Prompt and grouped data copied ✓")).catch((reason) => setError(reason instanceof Error ? reason.message : String(reason)))}
+                    className={buttonClass}
+                  >Copy all</button>
+                  <span className="text-xs font-semibold text-amber-700">Eligible groups: {totalGroups}</span>
+                </div>
+                <textarea readOnly value={copyText} className="min-h-0 flex-1 rounded border p-3 font-mono text-xs" />
+              </section>
+              <section className="flex min-h-0 flex-col gap-2">
+                <b>Response JSON</b>
+                <textarea
+                  value={response}
+                  disabled={busy}
+                  onChange={(event) => setResponse(event.target.value)}
+                  className="min-h-0 flex-1 rounded border p-3 font-mono text-xs"
+                  placeholder='[{"id":1,"word":"...","meaning_fa":"...","other_meanings_fa":[],"concept_explained_fa":"...","sentenceId":null,"sentenceIds":[],"delete":false,"mergedRecordIds":[],"mergedIntoId":null}]'
+                />
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => void navigator.clipboard.readText().then(setResponse).catch((reason) => setError(reason instanceof Error ? reason.message : String(reason)))}
+                    className={buttonClass}
+                  >Paste response</button>
+                  <button type="button" disabled={busy || !response.trim()} onClick={parseForPreview} className={`${buttonClass} flex-1`}>
+                    PREVIEW CHANGES
+                  </button>
+                </div>
+              </section>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {confirmOpen ? (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4" role="dialog" aria-modal="true">
+          <div className="flex h-[85vh] w-full max-w-6xl flex-col gap-4 rounded-2xl border border-card bg-background p-6 shadow-elevated">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <b>Confirm concept merges</b>
+                <div className="text-xs opacity-70">
+                  Review every update and deletion. Final validation and all database changes run in one transaction.
+                </div>
+              </div>
+              <button type="button" disabled={busy} onClick={() => setConfirmOpen(false)} className={buttonClass}>Back without saving</button>
+            </div>
+            {error ? <div className="rounded border border-red-500/30 bg-red-500/10 p-2 text-sm text-red-700">{error}</div> : null}
+            <div className="min-h-0 flex-1 overflow-auto rounded border">
+              <table className="w-full text-left text-xs">
+                <thead className="sticky top-0 bg-background">
+                  <tr className="border-b"><th className="px-3 py-2">id</th><th className="px-3 py-2">Current</th><th className="px-3 py-2">Proposed</th><th className="px-3 py-2">Result</th></tr>
+                </thead>
+                <tbody>
+                  {preview.map((row) => (
+                    <tr key={row.id} className={`border-b align-top ${row.delete ? "bg-red-500/10" : "bg-emerald-500/10"}`}>
+                      <td className="px-3 py-2 font-mono">{row.id}</td>
+                      <td className="px-3 py-2"><pre className="whitespace-pre-wrap font-mono">{JSON.stringify(sourceById.get(row.id) ?? "Not loaded", null, 2)}</pre></td>
+                      <td className="px-3 py-2"><pre className="whitespace-pre-wrap font-mono">{JSON.stringify(row, null, 2)}</pre></td>
+                      <td className={`px-3 py-2 font-semibold ${row.delete ? "text-red-700" : "text-emerald-700"}`}>{row.delete ? "DELETE" : "KEEP / UPDATE"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-sm">
+                Keep {preview.filter((row) => !row.delete).length} • Delete {preview.filter((row) => row.delete).length}
+              </span>
+              <button type="button" disabled={busy} onClick={() => void applyConfirmed()} className={buttonClass}>
+                {busy ? "APPLYING…" : "CONFIRM AND APPLY ALL"}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </>
+  );
+}

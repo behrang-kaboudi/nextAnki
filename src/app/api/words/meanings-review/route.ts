@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
 import { hydrateWordsWithPersianMeanings } from "@/lib/words/persianMeanings.server";
+import { hydrateMeaningReviewSentences } from "@/lib/words/meaningReviewSentences.server";
 
 export const runtime = "nodejs";
 
@@ -18,13 +19,18 @@ export async function GET(request: Request) {
         id: true,
         meaningId: true,
         otherMeaningIds: true,
+        pos: true,
+        concept_explained_fa: true,
+        sentenceId: true,
+        sentenceIds: true,
         english: { select: { base_form: true, phonetic_us: true } },
-        sentence: { select: { sentence_en: true } },
       },
     }),
     prisma.word.count({ where }),
   ]);
-  const words = await hydrateWordsWithPersianMeanings(raw);
+  const words = await hydrateMeaningReviewSentences(
+    await hydrateWordsWithPersianMeanings(raw),
+  );
   return NextResponse.json({
     ok: true,
     totalUnconfirmed,
@@ -35,7 +41,13 @@ export async function GET(request: Request) {
       other_meanings_fa: word.otherPersianWords.map(
         (meaning) => meaning.canonical_text,
       ),
-      sentence_en: word.sentence?.sentence_en ?? "",
+      pos: word.pos ?? "",
+      concept_explained_fa: word.concept_explained_fa ?? "",
+      sentences: word.reviewSentences.map((sentence) => ({
+        id: sentence.id,
+        sentence_en: sentence.sentence_en,
+        sentence_en_meaning_fa: sentence.sentence_en_meaning_fa ?? "",
+      })),
     })),
   });
 }

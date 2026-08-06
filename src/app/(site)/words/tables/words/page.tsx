@@ -15,6 +15,7 @@ import WordRelationPopover, {
   type RelationPopoverField,
 } from "./WordRelationPopover.client";
 import WordMeaningsReview from "./WordMeaningsReview.client";
+import WordConceptMerge from "./WordConceptMerge.client";
 
 export const metadata = { title: "Words — Word Table" };
 export const runtime = "nodejs";
@@ -461,7 +462,10 @@ export default async function WordsTablePage({
       </section>
 
       <section className="mt-4 rounded border p-3">
-        <WordMeaningsReview />
+        <div className="flex flex-wrap gap-2">
+          <WordMeaningsReview />
+          <WordConceptMerge />
+        </div>
       </section>
       <section className="mt-4 rounded border p-3">
         <TableColumnSelector
