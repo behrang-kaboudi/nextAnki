@@ -14,5 +14,5 @@ export async function GET(request: Request) {
     prisma.word.count({ where }),
   ]);
   const words = await hydrateWordsWithPersianMeanings(raw);
-  return NextResponse.json({ ok: true, totalUnconfirmed, items: words.map((word) => ({ id: word.id, base_form: word.english.base_form, phonetic_us: word.english.phonetic_us ?? "", meaning_fa: word.meaning_fa, other_meanings_fa: word.otherPersianWords.map((meaning) => meaning.canonical_text), sentence_en: word.sentence?.sentence_en ?? "" })) });
+  return NextResponse.json({ ok: true, totalUnconfirmed, items: words.map((word) => ({ id: word.id, base_form: word.english.base_form, meaning_fa: word.meaning_fa, other_meanings_fa: word.otherPersianWords.map((meaning) => meaning.canonical_text), sentence_en: word.sentence?.sentence_en ?? "" })) });
 }
