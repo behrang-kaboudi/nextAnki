@@ -247,6 +247,9 @@ export type AnkiConnectActionMap = {
     params: { answers: Array<{ cardId: number; ease: 1 | 2 | 3 | 4 }> };
     result: null;
   };
+  areSuspended: { params: { cards: number[] }; result: boolean[] };
+  suspend: { params: { cards: number[] }; result: null };
+  unsuspend: { params: { cards: number[] }; result: null };
   forgetCards: { params: { cards: number[] }; result: null };
   setSpecificValueOfCard: {
     params: {

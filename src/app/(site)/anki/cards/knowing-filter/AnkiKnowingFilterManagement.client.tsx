@@ -1,12 +1,16 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
+import { AnkiScoreColumnIcon } from "@/components/anki-score-column-icon";
 import { PageHeader } from "@/components/page-header";
+import { TableColumnSelector } from "@/components/table-column-selector";
 import {
   AnkiTag,
   ankiOperations,
   chunkArray,
+  getLastRevlogByCardIds,
   quoteAnkiSearchValue,
   WordAnkiConstants,
   type AnkiNotesInfo,
@@ -22,6 +26,26 @@ const PRONUNCIATION_CARD = "WordsForNewStudy-Pronunciation" as const;
 const PRONUNCIATION_DECK = "WordsForNewStudy::Pronunciation" as const;
 const REVIEW_PRONUNCIATION_CARD = "WordsForNewStudy-ReviewPronunciation" as const;
 const REVIEW_PRONUNCIATION_DECK = "WordsForNewStudy::ReviewPronunciation" as const;
+const FA_TO_EN_WITH_HELP_CARD = "WordsForNewStudy-FaToEnWithHelp" as const;
+const FA_TO_EN_WITH_HELP_DECK = "WordsForNewStudy::FaToEnWithHelp" as const;
+const HARD_CARDS_DECK = "WordsForNewStudy::FaToEn" as const;
+const HARD_CARDS_CARD = "FaToEn" as const;
+
+const TABLE_COLUMNS = [
+  { key: "index", label: "#" },
+  { key: "word", label: "Word" },
+  { key: "meaning", label: "Meaning" },
+  { key: "actions", label: "Actions" },
+  { key: "sentence", label: "Sentence" },
+  { key: "sentenceMeaning", label: "Sentence Meaning" },
+  { key: "learningDepth", label: "🧠" },
+  { key: "imageability", label: "🖼️" },
+  { key: "productiveTarget", label: "🎯" },
+  { key: "productiveLearningAverage", label: "⚖️" },
+  { key: "threeFieldAverage", label: "📊" },
+] as const;
+type TableColumnKey = (typeof TABLE_COLUMNS)[number]["key"];
+const DEFAULT_COLUMNS: TableColumnKey[] = TABLE_COLUMNS.map((column) => column.key);
 
 type DeckName = typeof FILTER_KNOWING_DECK;
 
@@ -31,6 +55,17 @@ type CardRow = {
   fields: AnkiNotesInfo[number]["fields"];
   tags: string[];
 };
+
+type HardCardRow = CardRow & {
+  suspended: boolean;
+};
+
+type ScoreSortKey =
+  | "learningDepth"
+  | "imageability"
+  | "productiveTarget"
+  | "productiveLearningAverage"
+  | "threeFieldAverage";
 
 type KnowledgeAction = "again" | "familiar" | "good" | "easy";
 
@@ -71,6 +106,44 @@ function fieldValue(row: CardRow, fieldName: string) {
   return row.fields[fieldName]?.value.trim() ?? "";
 }
 
+function numericField(row: CardRow, fieldName: string) {
+  const value = Number(fieldValue(row, fieldName));
+  return fieldValue(row, fieldName) && Number.isFinite(value) ? value : null;
+}
+
+function scoreAverage(row: CardRow, fieldNames: string[]) {
+  const values = fieldNames.map((fieldName) => {
+    const value = numericField(row, fieldName);
+    return fieldName === "learning_depth" && value !== null ? value * 100 : value;
+  });
+  if (values.some((value) => value === null)) return null;
+  return (values as number[]).reduce((sum, value) => sum + value, 0) / values.length;
+}
+
+function formatScore(value: number | null) {
+  if (value === null) return "—";
+  return Number.isInteger(value) ? String(value) : value.toFixed(2);
+}
+
+function scoreForSort(row: CardRow, key: ScoreSortKey) {
+  switch (key) {
+    case "learningDepth":
+      return numericField(row, "learning_depth");
+    case "imageability":
+      return numericField(row, "imageability");
+    case "productiveTarget":
+      return numericField(row, "productive_target");
+    case "productiveLearningAverage":
+      return scoreAverage(row, ["productive_target", "learning_depth"]);
+    case "threeFieldAverage":
+      return scoreAverage(row, [
+        "learning_depth",
+        "imageability",
+        "productive_target",
+      ]);
+  }
+}
+
 function actionTargets() {
   return {
     enToFa: {
@@ -93,6 +166,10 @@ function actionTargets() {
       cardType: REVIEW_PRONUNCIATION_CARD,
       deck: REVIEW_PRONUNCIATION_DECK,
     },
+    faToEnWithHelp: {
+      cardType: FA_TO_EN_WITH_HELP_CARD,
+      deck: FA_TO_EN_WITH_HELP_DECK,
+    },
   };
 }
 
@@ -111,6 +188,7 @@ function answerInstructions(action: KnowledgeAction): AnswerInstruction[] {
         { target: "review", ease: 4, repetitions: 1 },
         { target: "pronunciation", ease: 1, repetitions: 1 },
         { target: "reviewPronunciation", ease: 4, repetitions: 1 },
+        { target: "faToEnWithHelp", ease: 1, repetitions: 1 },
       ];
     case "familiar":
       return [
@@ -125,6 +203,7 @@ function answerInstructions(action: KnowledgeAction): AnswerInstruction[] {
         { target: "review", ease: 4, repetitions: 1 },
         { target: "pronunciation", ease: 4, repetitions: 1 },
         { target: "reviewPronunciation", ease: 4, repetitions: 1 },
+        { target: "faToEnWithHelp", ease: 3, repetitions: 1 },
       ];
     case "easy":
       return [
@@ -133,6 +212,11 @@ function answerInstructions(action: KnowledgeAction): AnswerInstruction[] {
         { target: "review", ease: 4, repetitions: 1 },
         { target: "pronunciation", ease: 4, repetitions: 2 },
         { target: "reviewPronunciation", ease: 4, repetitions: 1 },
+        {
+          target: "faToEnWithHelp",
+          ease: 4,
+          repetitions: Math.floor(Math.random() * 3) + 1,
+        },
       ];
   }
 }
@@ -163,6 +247,7 @@ function buildHelpSummaries(): HelpActionSummary[] {
         `${REVIEW_CARD} → ${REVIEW_DECK}: یک بار Easy (ease=4).`,
         `${PRONUNCIATION_CARD} → ${PRONUNCIATION_DECK}: یک بار Again (ease=1).`,
         `${REVIEW_PRONUNCIATION_CARD} → ${REVIEW_PRONUNCIATION_DECK}: یک بار Easy (ease=4).`,
+        `${FA_TO_EN_WITH_HELP_CARD} → ${FA_TO_EN_WITH_HELP_DECK}: یک بار Again (ease=1).`,
       ],
       toneClassName:
         "border-red-500/20 bg-red-500/5 text-red-800 dark:text-red-300",
@@ -175,6 +260,7 @@ function buildHelpSummaries(): HelpActionSummary[] {
         `${REVIEW_CARD} → ${REVIEW_DECK}: یک بار Easy (ease=4).`,
         `${PRONUNCIATION_CARD} → ${PRONUNCIATION_DECK}: فقط انتقال؛ بدون پاسخ یا ریست.`,
         `${REVIEW_PRONUNCIATION_CARD} → ${REVIEW_PRONUNCIATION_DECK}: یک بار Easy (ease=4).`,
+        `${FA_TO_EN_WITH_HELP_CARD} → ${FA_TO_EN_WITH_HELP_DECK}: فقط انتقال؛ بدون پاسخ یا ریست.`,
       ],
       toneClassName:
         "border-amber-500/20 bg-amber-500/5 text-amber-800 dark:text-amber-300",
@@ -187,6 +273,7 @@ function buildHelpSummaries(): HelpActionSummary[] {
         `${REVIEW_CARD} → ${REVIEW_DECK}: یک بار Easy (ease=4).`,
         `${PRONUNCIATION_CARD} → ${PRONUNCIATION_DECK}: یک بار Easy (ease=4).`,
         `${REVIEW_PRONUNCIATION_CARD} → ${REVIEW_PRONUNCIATION_DECK}: یک بار Easy (ease=4).`,
+        `${FA_TO_EN_WITH_HELP_CARD} → ${FA_TO_EN_WITH_HELP_DECK}: یک بار Good (ease=3).`,
       ],
       toneClassName:
         "border-emerald-500/20 bg-emerald-500/5 text-emerald-800 dark:text-emerald-300",
@@ -199,6 +286,7 @@ function buildHelpSummaries(): HelpActionSummary[] {
         `${REVIEW_CARD} → ${REVIEW_DECK}: یک بار Easy (ease=4).`,
         `${PRONUNCIATION_CARD} → ${PRONUNCIATION_DECK}: دو بار Easy (ease=4).`,
         `${REVIEW_PRONUNCIATION_CARD} → ${REVIEW_PRONUNCIATION_DECK}: یک بار Easy (ease=4).`,
+        `${FA_TO_EN_WITH_HELP_CARD} → ${FA_TO_EN_WITH_HELP_DECK}: رندم بین یک تا سه بار Easy (ease=4).`,
       ],
       toneClassName:
         "border-sky-500/20 bg-sky-500/5 text-sky-800 dark:text-sky-300",
@@ -207,6 +295,12 @@ function buildHelpSummaries(): HelpActionSummary[] {
 }
 
 export default function AnkiKnowingFilterManagementClient() {
+  const searchParams = useSearchParams();
+  const requestedColumns = searchParams.getAll("columns");
+  const selectedColumns = requestedColumns.length
+    ? DEFAULT_COLUMNS.filter((column) => requestedColumns.includes(column))
+    : DEFAULT_COLUMNS;
+  const hasColumn = (key: TableColumnKey) => selectedColumns.includes(key);
   const selectedDeck: DeckName = FILTER_KNOWING_DECK;
   const [includeFiltered, setIncludeFiltered] = useState(false);
   const [includeNotFiltered, setIncludeNotFiltered] = useState(true);
@@ -222,12 +316,61 @@ export default function AnkiKnowingFilterManagementClient() {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+  const [scoreSort, setScoreSort] = useState<{
+    key: ScoreSortKey;
+    direction: "asc" | "desc";
+  } | null>(null);
+  const [isHardCardsOpen, setIsHardCardsOpen] = useState(false);
+  const [hardCards, setHardCards] = useState<HardCardRow[]>([]);
+  const [hardCardsLoading, setHardCardsLoading] = useState(false);
+  const [hardCardsError, setHardCardsError] = useState<string | null>(null);
+  const [hardCardsStatus, setHardCardsStatus] = useState<string | null>(null);
+  const [hardCardBusyId, setHardCardBusyId] = useState<number | null>(null);
+  const [bulkSuspendBusy, setBulkSuspendBusy] = useState(false);
+  const [hardThreshold, setHardThreshold] = useState("100");
+  const [appliedHardThreshold, setAppliedHardThreshold] = useState<number | null>(
+    100,
+  );
+  const [hardSortDirection, setHardSortDirection] = useState<"asc" | "desc">(
+    "asc",
+  );
 
   const totalPages = Math.max(1, Math.ceil((rows?.length ?? 0) / pageSize));
+  const sortedRows = useMemo(() => {
+    if (!rows || !scoreSort) return rows;
+    const direction = scoreSort.direction === "asc" ? 1 : -1;
+    return [...rows].sort((left, right) => {
+      const leftValue = scoreForSort(left, scoreSort.key);
+      const rightValue = scoreForSort(right, scoreSort.key);
+      if (leftValue === null && rightValue === null) return 0;
+      if (leftValue === null) return 1;
+      if (rightValue === null) return -1;
+      return (leftValue - rightValue) * direction;
+    });
+  }, [rows, scoreSort]);
   const visibleRows = useMemo(
-    () => rows?.slice((currentPage - 1) * pageSize, currentPage * pageSize) ?? [],
-    [currentPage, pageSize, rows],
+    () =>
+      sortedRows?.slice(
+        (currentPage - 1) * pageSize,
+        currentPage * pageSize,
+      ) ?? [],
+    [currentPage, pageSize, sortedRows],
   );
+  const visibleHardCards = useMemo(() => {
+    const filtered = hardCards.filter((row) => {
+      if (appliedHardThreshold === null) return true;
+      const average = scoreAverage(row, ["productive_target", "learning_depth"]);
+      return average !== null && average <= appliedHardThreshold;
+    });
+    return filtered.sort((left, right) => {
+      const leftValue = scoreAverage(left, ["productive_target", "learning_depth"]);
+      const rightValue = scoreAverage(right, ["productive_target", "learning_depth"]);
+      if (leftValue === null && rightValue === null) return 0;
+      if (leftValue === null) return 1;
+      if (rightValue === null) return -1;
+      return (leftValue - rightValue) * (hardSortDirection === "asc" ? 1 : -1);
+    });
+  }, [appliedHardThreshold, hardCards, hardSortDirection]);
 
   async function loadCards() {
     if (isLoading || busyCardId !== null) return;
@@ -306,6 +449,171 @@ export default function AnkiKnowingFilterManagementClient() {
     }
   }
 
+  async function loadHardCards() {
+    if (hardCardsLoading || hardCardBusyId !== null || bulkSuspendBusy) return;
+
+    setHardCardsLoading(true);
+    setHardCardsError(null);
+    setHardCardsStatus(null);
+    try {
+      const cardsResponse = await ankiOperations.findCards({
+        query: `deck:${quoteAnkiSearchValue(HARD_CARDS_DECK)} card:${quoteAnkiSearchValue(HARD_CARDS_CARD)}`,
+      });
+      if (!cardsResponse.ok) throw new Error(cardsResponse.error);
+      const cardIds = cardsResponse.result ?? [];
+      if (!cardIds.length) {
+        setHardCards([]);
+        return;
+      }
+
+      const cardInfo: Array<{
+        cardId: number;
+        note: number;
+        queue: number;
+        type: number;
+      }> = [];
+      const suspendedByCardId = new Map<number, boolean>();
+      for (const batch of chunkArray(cardIds, BATCH_SIZE)) {
+        const [infoResponse, suspendedResponse] = await Promise.all([
+          ankiOperations.cardsInfo({ cards: batch }),
+          ankiOperations.areSuspended({ cards: batch }),
+        ]);
+        if (!infoResponse.ok) throw new Error(infoResponse.error);
+        if (!suspendedResponse.ok) throw new Error(suspendedResponse.error);
+        cardInfo.push(...(infoResponse.result ?? []));
+        batch.forEach((cardId, index) => {
+          suspendedByCardId.set(
+            cardId,
+            Boolean(suspendedResponse.result?.[index]),
+          );
+        });
+      }
+
+      const lastReviewsResponse = await getLastRevlogByCardIds(
+        cardInfo.map((card) => card.cardId),
+        BATCH_SIZE,
+      );
+      if (!lastReviewsResponse.ok) throw new Error(lastReviewsResponse.error);
+      const eligibleCards = cardInfo.filter(
+        (card) =>
+          card.queue === 0 ||
+          card.type === 0 ||
+          lastReviewsResponse.value.get(card.cardId)?.ease === 1,
+      );
+      const noteIds = [...new Set(eligibleCards.map((card) => card.note))];
+      const notesById = new Map<number, AnkiNotesInfo[number]>();
+      for (const batch of chunkArray(noteIds, BATCH_SIZE)) {
+        const notesResponse = await ankiOperations.notesInfo({ notes: batch });
+        if (!notesResponse.ok) throw new Error(notesResponse.error);
+        for (const note of notesResponse.result ?? []) {
+          notesById.set(note.noteId, note);
+        }
+      }
+
+      setHardCards(
+        eligibleCards.flatMap((card) => {
+          const note = notesById.get(card.note);
+          return note
+            ? [
+                {
+                  cardId: card.cardId,
+                  noteId: note.noteId,
+                  fields: note.fields,
+                  tags: note.tags,
+                  suspended: suspendedByCardId.get(card.cardId) ?? false,
+                },
+              ]
+            : [];
+        }),
+      );
+    } catch (caughtError) {
+      setHardCardsError(
+        caughtError instanceof Error
+          ? caughtError.message
+          : "بارگذاری کارت‌های سخت ناموفق بود.",
+      );
+    } finally {
+      setHardCardsLoading(false);
+    }
+  }
+
+  function applyHardCardsFilter() {
+    const value = Number(hardThreshold);
+    if (!hardThreshold.trim() || !Number.isFinite(value)) {
+      setHardCardsError("یک عدد معتبر برای فیلتر وارد کنید.");
+      return;
+    }
+    setHardCardsError(null);
+    setAppliedHardThreshold(value);
+  }
+
+  async function setHardCardSuspended(row: HardCardRow, suspended: boolean) {
+    if (hardCardBusyId !== null || bulkSuspendBusy) return;
+    setHardCardBusyId(row.cardId);
+    setHardCardsError(null);
+    setHardCardsStatus(null);
+    try {
+      const response = suspended
+        ? await ankiOperations.suspend({ cards: [row.cardId] })
+        : await ankiOperations.unsuspend({ cards: [row.cardId] });
+      if (!response.ok) throw new Error(response.error);
+      setHardCards((current) =>
+        current.map((item) =>
+          item.cardId === row.cardId ? { ...item, suspended } : item,
+        ),
+      );
+      setHardCardsStatus(
+        `${fieldValue(row, "base_form") || row.cardId} ${
+          suspended ? "suspended" : "unsuspended"
+        }.`,
+      );
+    } catch (caughtError) {
+      setHardCardsError(
+        caughtError instanceof Error
+          ? caughtError.message
+          : "تغییر وضعیت کارت ناموفق بود.",
+      );
+    } finally {
+      setHardCardBusyId(null);
+    }
+  }
+
+  async function suspendFilteredHardCards() {
+    if (bulkSuspendBusy || hardCardBusyId !== null) return;
+    const cardIds = visibleHardCards
+      .filter((row) => !row.suspended)
+      .map((row) => row.cardId);
+    if (!cardIds.length) {
+      setHardCardsStatus("همهٔ کارت‌های نتیجهٔ فیلتر از قبل suspended هستند.");
+      return;
+    }
+
+    setBulkSuspendBusy(true);
+    setHardCardsError(null);
+    setHardCardsStatus(null);
+    try {
+      for (const batch of chunkArray(cardIds, BATCH_SIZE)) {
+        const response = await ankiOperations.suspend({ cards: batch });
+        if (!response.ok) throw new Error(response.error);
+      }
+      const changedIds = new Set(cardIds);
+      setHardCards((current) =>
+        current.map((row) =>
+          changedIds.has(row.cardId) ? { ...row, suspended: true } : row,
+        ),
+      );
+      setHardCardsStatus(`${cardIds.length} کارت suspended شد.`);
+    } catch (caughtError) {
+      setHardCardsError(
+        caughtError instanceof Error
+          ? caughtError.message
+          : "Suspend گروهی ناموفق بود.",
+      );
+    } finally {
+      setBulkSuspendBusy(false);
+    }
+  }
+
   useEffect(() => {
     void loadCards();
     // The initial search intentionally runs only once when the page opens.
@@ -365,12 +673,17 @@ export default function AnkiKnowingFilterManagementClient() {
         row.noteId,
         targets.reviewPronunciation.cardType,
       );
+      const faToEnWithHelpCardIds = await findNoteCards(
+        row.noteId,
+        targets.faToEnWithHelp.cardType,
+      );
       const cardIdsByTarget = {
         enToFa: enToFaCardIds,
         faToEn: faToEnCardIds,
         review: reviewCardIds,
         pronunciation: pronunciationCardIds,
         reviewPronunciation: reviewPronunciationCardIds,
+        faToEnWithHelp: faToEnWithHelpCardIds,
       } satisfies Record<
         keyof ReturnType<typeof actionTargets>,
         number[]
@@ -388,6 +701,7 @@ export default function AnkiKnowingFilterManagementClient() {
         [targets.review, reviewCardIds],
         [targets.pronunciation, pronunciationCardIds],
         [targets.reviewPronunciation, reviewPronunciationCardIds],
+        [targets.faToEnWithHelp, faToEnWithHelpCardIds],
       ] as const;
       for (const [target, cardIds] of cardsToMove) {
         const moveResponse = await ankiOperations.changeDeck({
@@ -456,6 +770,31 @@ export default function AnkiKnowingFilterManagementClient() {
     setIncludeNotFiltered(checked);
   }
 
+  function scoreSortButton(key: ScoreSortKey) {
+    const active = scoreSort?.key === key;
+    return (
+      <button
+        type="button"
+        onClick={() => {
+          setScoreSort((current) => ({
+            key,
+            direction:
+              current?.key === key && current.direction === "asc"
+                ? "desc"
+                : "asc",
+          }));
+          setCurrentPage(1);
+        }}
+        className="inline-flex items-center gap-1 hover:text-foreground"
+      >
+        <AnkiScoreColumnIcon metric={key} />
+        <span aria-hidden="true">
+          {active ? (scoreSort.direction === "asc" ? "↑" : "↓") : "↕"}
+        </span>
+      </button>
+    );
+  }
+
   function renderPaginationControls() {
     if (!rows || rows.length === 0) return null;
 
@@ -514,18 +853,38 @@ export default function AnkiKnowingFilterManagementClient() {
         <div className="flex items-start justify-between gap-3">
           <PageHeader
             title="Knowing Filter Card Management"
-            subtitle="مدیریت چهار کارت متناظر هر کلمه در دک فیلتر شناخت"
+            subtitle="مدیریت کارت‌های متناظر هر کلمه در دک فیلتر شناخت"
           />
-          <button
-            type="button"
-            onClick={() => setIsHelpOpen(true)}
-            aria-label="راهنمای اکشن‌ها"
-            title="راهنمای اکشن‌ها"
-            className="grid size-10 shrink-0 place-items-center rounded-full border border-card bg-card text-lg font-bold text-foreground shadow-elevated transition hover:bg-background"
-          >
-            ?
-          </button>
+          <div className="flex shrink-0 items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setIsHardCardsOpen(true);
+                if (!hardCards.length) void loadHardCards();
+              }}
+              className="h-10 rounded-xl border border-card bg-card px-3 text-sm font-semibold text-foreground shadow-elevated transition hover:bg-background"
+            >
+              Manage Difficult Cards
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsHelpOpen(true)}
+              aria-label="راهنمای اکشن‌ها"
+              title="راهنمای اکشن‌ها"
+              className="grid size-10 place-items-center rounded-full border border-card bg-card text-lg font-bold text-foreground shadow-elevated transition hover:bg-background"
+            >
+              ?
+            </button>
+          </div>
         </div>
+
+        <section className="rounded-2xl border border-card bg-background p-4">
+          <TableColumnSelector
+            key={selectedColumns.join(",")}
+            columns={TABLE_COLUMNS}
+            selectedColumns={selectedColumns}
+          />
+        </section>
 
         <section className="rounded-2xl border border-card bg-background p-4">
           <div className="grid gap-4 lg:grid-cols-[minmax(16rem,1fr)_auto_auto] lg:items-end">
@@ -605,26 +964,17 @@ export default function AnkiKnowingFilterManagementClient() {
               <table className="w-full min-w-[1000px] border-collapse text-sm">
                 <thead className="sticky top-0 bg-background">
                   <tr className="border-b border-card">
-                    <th className="px-3 py-2 text-left font-semibold">#</th>
-                    <th className="px-3 py-2 text-left font-semibold">Word</th>
-                    <th
-                      dir="rtl"
-                      className="w-48 px-3 py-2 text-right font-semibold"
-                    >
-                      Meaning
-                    </th>
-                    <th className="px-3 py-2 text-right font-semibold">
-                      Actions
-                    </th>
-                    <th className="px-3 py-2 text-left font-semibold">
-                      Sentence
-                    </th>
-                    <th
-                      dir="rtl"
-                      className="px-3 py-2 text-right font-semibold"
-                    >
-                      Sentence Meaning
-                    </th>
+                    {hasColumn("index") ? <th className="px-3 py-2 text-left font-semibold">#</th> : null}
+                    {hasColumn("word") ? <th className="px-3 py-2 text-left font-semibold">Word</th> : null}
+                    {hasColumn("meaning") ? <th dir="rtl" className="w-48 px-3 py-2 text-right font-semibold">Meaning</th> : null}
+                    {hasColumn("actions") ? <th className="px-3 py-2 text-right font-semibold">Actions</th> : null}
+                    {hasColumn("sentence") ? <th className="px-3 py-2 text-left font-semibold">Sentence</th> : null}
+                    {hasColumn("sentenceMeaning") ? <th dir="rtl" className="px-3 py-2 text-right font-semibold">Sentence Meaning</th> : null}
+                    {hasColumn("learningDepth") ? <th className="px-3 py-2 text-center font-semibold">{scoreSortButton("learningDepth")}</th> : null}
+                    {hasColumn("imageability") ? <th className="px-3 py-2 text-center font-semibold">{scoreSortButton("imageability")}</th> : null}
+                    {hasColumn("productiveTarget") ? <th className="px-3 py-2 text-center font-semibold">{scoreSortButton("productiveTarget")}</th> : null}
+                    {hasColumn("productiveLearningAverage") ? <th className="px-3 py-2 text-center font-semibold">{scoreSortButton("productiveLearningAverage")}</th> : null}
+                    {hasColumn("threeFieldAverage") ? <th className="px-3 py-2 text-center font-semibold">{scoreSortButton("threeFieldAverage")}</th> : null}
                   </tr>
                 </thead>
                 <tbody>
@@ -668,10 +1018,10 @@ export default function AnkiKnowingFilterManagementClient() {
                         key={row.cardId}
                         className="border-b border-card last:border-b-0"
                       >
-                        <td className="px-3 py-3 text-muted">{(currentPage - 1) * pageSize + index + 1}</td>
-                        {renderValue(word)}
-                        {renderMeaning(meaning, "w-48 max-w-48")}
-                        <td className="px-3 py-3 text-right align-top">
+                        {hasColumn("index") ? <td className="px-3 py-3 text-muted">{(currentPage - 1) * pageSize + index + 1}</td> : null}
+                        {hasColumn("word") ? renderValue(word) : null}
+                        {hasColumn("meaning") ? renderMeaning(meaning, "w-48 max-w-48") : null}
+                        {hasColumn("actions") ? <td className="px-3 py-3 text-right align-top">
                           {row.tags.includes(AnkiTag.Filtered) ? (
                             <span className="text-xs font-semibold text-muted">
                               فیلتر شده
@@ -709,9 +1059,14 @@ export default function AnkiKnowingFilterManagementClient() {
                               انجام شد
                             </p>
                           ) : null}
-                        </td>
-                        {renderValue(sentence)}
-                        {renderMeaning(sentenceMeaning)}
+                        </td> : null}
+                        {hasColumn("sentence") ? renderValue(sentence) : null}
+                        {hasColumn("sentenceMeaning") ? renderMeaning(sentenceMeaning) : null}
+                        {hasColumn("learningDepth") ? <td className="px-3 py-3 text-center font-mono text-xs">{formatScore(numericField(row, "learning_depth"))}</td> : null}
+                        {hasColumn("imageability") ? <td className="px-3 py-3 text-center font-mono text-xs">{formatScore(numericField(row, "imageability"))}</td> : null}
+                        {hasColumn("productiveTarget") ? <td className="px-3 py-3 text-center font-mono text-xs">{formatScore(numericField(row, "productive_target"))}</td> : null}
+                        {hasColumn("productiveLearningAverage") ? <td className="px-3 py-3 text-center font-mono text-xs">{formatScore(scoreAverage(row, ["productive_target", "learning_depth"]))}</td> : null}
+                        {hasColumn("threeFieldAverage") ? <td className="px-3 py-3 text-center font-mono text-xs">{formatScore(scoreAverage(row, ["learning_depth", "imageability", "productive_target"]))}</td> : null}
                       </tr>
                     );
                   })}
@@ -725,6 +1080,85 @@ export default function AnkiKnowingFilterManagementClient() {
               ) : null}
             </div>
           </section>
+        ) : null}
+
+        {isHardCardsOpen ? (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
+            role="dialog"
+            aria-modal="true"
+          >
+            <div className="flex max-h-[90vh] w-full max-w-6xl flex-col overflow-hidden rounded-3xl border border-card bg-card shadow-2xl">
+              <div className="flex flex-wrap items-start justify-between gap-4 border-b border-card p-5">
+                <div>
+                  <h2 className="text-lg font-bold text-foreground">Manage Difficult Cards</h2>
+                  <p className="mt-1 text-xs text-muted">
+                    New cards or cards whose latest answer was Again in {HARD_CARDS_DECK}
+                  </p>
+                </div>
+                <button type="button" onClick={() => setIsHardCardsOpen(false)} aria-label="Close" className="grid size-10 place-items-center rounded-full border border-card bg-background text-xl text-muted hover:text-foreground">×</button>
+              </div>
+
+              <div className="flex flex-wrap items-end gap-2 border-b border-card p-4">
+                <label className="grid gap-1">
+                  <span className="text-xs font-semibold text-muted">⚖️ maximum</span>
+                  <input
+                    type="number"
+                    value={hardThreshold}
+                    onChange={(event) => setHardThreshold(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") applyHardCardsFilter();
+                    }}
+                    className="h-10 w-32 rounded-xl border border-card bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-[var(--ring)]"
+                  />
+                </label>
+                <button type="button" onClick={applyHardCardsFilter} className="h-10 rounded-xl border border-card bg-background px-4 text-sm font-semibold hover:bg-accent">Filter</button>
+                <button type="button" onClick={() => void loadHardCards()} disabled={hardCardsLoading || bulkSuspendBusy || hardCardBusyId !== null} className="h-10 rounded-xl border border-card bg-background px-4 text-sm font-semibold hover:bg-accent disabled:opacity-50">
+                  {hardCardsLoading ? "Loading…" : "Reload"}
+                </button>
+                <button type="button" onClick={() => void suspendFilteredHardCards()} disabled={hardCardsLoading || bulkSuspendBusy || hardCardBusyId !== null || visibleHardCards.length === 0} className="h-10 rounded-xl bg-[var(--primary)] px-4 text-sm font-semibold text-[var(--primary-foreground)] disabled:opacity-50">
+                  {bulkSuspendBusy ? "Suspending…" : "Suspend"}
+                </button>
+                <span className="text-xs text-muted">{visibleHardCards.length} of {hardCards.length} cards</span>
+              </div>
+
+              {hardCardsError ? <div className="m-4 mb-0 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-700 dark:text-red-400">{hardCardsError}</div> : null}
+              {hardCardsStatus ? <div className="mx-4 mt-4 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3 text-sm text-emerald-700 dark:text-emerald-400">{hardCardsStatus}</div> : null}
+
+              <div className="min-h-0 flex-1 overflow-auto p-4">
+                <table className="w-full min-w-[760px] border-collapse text-sm">
+                  <thead className="sticky top-0 bg-card">
+                    <tr className="border-b border-card">
+                      <th className="px-3 py-2 text-left">Word</th>
+                      <th className="px-3 py-2 text-right">Meaning</th>
+                      <th className="px-3 py-2 text-right">Actions</th>
+                      <th className="px-3 py-2 text-center">
+                        <button type="button" onClick={() => setHardSortDirection((current) => current === "asc" ? "desc" : "asc")} className="inline-flex items-center gap-1">
+                          <AnkiScoreColumnIcon metric="productiveLearningAverage" />
+                          <span aria-hidden="true">{hardSortDirection === "asc" ? "↑" : "↓"}</span>
+                        </button>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {visibleHardCards.map((row) => (
+                      <tr key={row.cardId} className="border-b border-card/70">
+                        <td className="px-3 py-3 text-left">{fieldValue(row, "base_form") || "—"}</td>
+                        <td dir="rtl" className="px-3 py-3 text-right">{fieldValue(row, "meaning_fa") || "—"}</td>
+                        <td className="px-3 py-3 text-right">
+                          <button type="button" onClick={() => void setHardCardSuspended(row, !row.suspended)} disabled={hardCardBusyId !== null || bulkSuspendBusy} className="rounded-lg border border-card bg-background px-3 py-1.5 text-xs font-semibold hover:bg-accent disabled:opacity-50">
+                            {hardCardBusyId === row.cardId ? "Working…" : row.suspended ? "Unsuspend" : "Suspend"}
+                          </button>
+                        </td>
+                        <td className="px-3 py-3 text-center font-mono text-xs">{formatScore(scoreAverage(row, ["productive_target", "learning_depth"]))}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {!hardCardsLoading && visibleHardCards.length === 0 ? <div className="p-8 text-center text-sm text-muted">No matching difficult cards.</div> : null}
+              </div>
+            </div>
+          </div>
         ) : null}
 
         {isHelpOpen ? (
@@ -780,15 +1214,16 @@ export default function AnkiKnowingFilterManagementClient() {
                     <p className="mt-3 text-muted">
                       هر ردیف یک کارت است، اما دکمه روی نوت همان ردیف اجرا می‌شود
                       و کارت‌های متناظر همان نوت را هم پیدا می‌کند. بنابراین ممکن
-                      است یک کلیک روی هر پنج کارتِ یک کلمه اثر بگذارد.
+                      است یک کلیک روی هر شش کارتِ یک کلمه اثر بگذارد.
                     </p>
                     <p className="mt-2 text-muted">
-                      پنج کارت متناظر هر Note عبارت‌اند از{" "}
+                      شش کارت متناظر هر Note عبارت‌اند از{" "}
                       <span dir="ltr">EnToFa</span>،{" "}
                       <span dir="ltr">FaToEn</span> و{" "}
                       <span dir="ltr">{REVIEW_CARD}</span> و{" "}
                       <span dir="ltr">{PRONUNCIATION_CARD}</span> و{" "}
-                      <span dir="ltr">{REVIEW_PRONUNCIATION_CARD}</span>. اپ این کارت‌ها را
+                      <span dir="ltr">{REVIEW_PRONUNCIATION_CARD}</span> و{" "}
+                      <span dir="ltr">{FA_TO_EN_WITH_HELP_CARD}</span>. اپ این کارت‌ها را
                       برای همان Note پیدا می‌کند و به دک اصلی خودشان منتقل
                       می‌کند؛ سپس بسته به دکمه، پاسخ متفاوتی برای هر کارت اجرا
                       می‌شود.
@@ -798,7 +1233,8 @@ export default function AnkiKnowingFilterManagementClient() {
                       نیست؛ منظور کارت همان Note با نوع EnToFa، FaToEn،{" "}
                       <span dir="ltr">{REVIEW_CARD}</span> یا{" "}
                       <span dir="ltr">{PRONUNCIATION_CARD}</span> یا{" "}
-                      <span dir="ltr">{REVIEW_PRONUNCIATION_CARD}</span> است. ردیف فعلی فقط
+                      <span dir="ltr">{REVIEW_PRONUNCIATION_CARD}</span> یا{" "}
+                      <span dir="ltr">{FA_TO_EN_WITH_HELP_CARD}</span> است. ردیف فعلی فقط
                       Note و کلمه را مشخص می‌کند؛ عملیات روی کارت‌های متناظر
                       انجام می‌شود، نه صرفاً روی کارت فیلتر نمایش‌داده‌شده.
                     </p>
@@ -873,7 +1309,7 @@ export default function AnkiKnowingFilterManagementClient() {
                   <section className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4 text-sm leading-7 text-amber-800 dark:text-amber-300">
                     <h3 className="font-bold">نکات مهم</h3>
                     <ul className="mt-2 list-inside list-disc">
-                      <li>در هر چهار دکمه، پنج کارت متناظر همان Note به دک‌های اصلی منتقل می‌شوند.</li>
+                      <li>در هر چهار دکمه، شش کارت متناظر همان Note به دک‌های اصلی منتقل می‌شوند.</li>
                       <li>{REVIEW_PRONUNCIATION_CARD} در هر چهار دکمه، پس از انتقال به {REVIEW_PRONUNCIATION_DECK} یک بار Easy با <span dir="ltr">ease=4</span> می‌گیرد.</li>
                       <li>اگر عملیات موفق شود، همان ردیف تا زمان بارگذاری دوباره «فیلتر شده» نشان داده می‌شود و دکمه‌ها دوباره فعال نمی‌شوند.</li>
                       <li>اگر خطا دیدی، ابتدا وضعیت Deck و اتصال AnkiConnect را بررسی کن و سپس فهرست را دوباره بارگذاری کن.</li>

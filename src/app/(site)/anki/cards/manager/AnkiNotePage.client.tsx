@@ -1,7 +1,10 @@
 "use client";
 
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
+import { AnkiScoreColumnIcon } from "@/components/anki-score-column-icon";
+import { TableColumnSelector } from "@/components/table-column-selector";
 import {
   ankiOperations,
   createAnkiOperations,
@@ -151,6 +154,22 @@ type TempFilterSortKey =
   | "productiveLearningAverage"
   | "threeFieldAverage";
 
+const TEMP_FILTER_COLUMNS = [
+  { key: "cardId", label: "Card" },
+  { key: "noteId", label: "Note" },
+  { key: "baseForm", label: "Base form" },
+  { key: "meaningFa", label: "Meaning (FA)" },
+  { key: "learningDepth", label: "🧠" },
+  { key: "imageability", label: "🖼️" },
+  { key: "productiveTarget", label: "🎯" },
+  { key: "productiveLearningAverage", label: "⚖️" },
+  { key: "threeFieldAverage", label: "📊" },
+  { key: "actions", label: "Actions" },
+] as const;
+type TempFilterColumnKey = (typeof TEMP_FILTER_COLUMNS)[number]["key"];
+const DEFAULT_TEMP_FILTER_COLUMNS: TempFilterColumnKey[] =
+  TEMP_FILTER_COLUMNS.map((column) => column.key);
+
 function tempFilterNumericField(row: TempFilterCardRow, name: string) {
   return asFiniteNumber(row.fields[name]?.value.trim() ?? "");
 }
@@ -221,6 +240,15 @@ const DEFAULT_BASE_FORM_LOOKUP_JSON = `[
 ]`;
 
 export default function AnkiNotePage() {
+  const searchParams = useSearchParams();
+  const requestedColumns = searchParams.getAll("columns");
+  const selectedTempFilterColumns = requestedColumns.length
+    ? DEFAULT_TEMP_FILTER_COLUMNS.filter((column) =>
+        requestedColumns.includes(column),
+      )
+    : DEFAULT_TEMP_FILTER_COLUMNS;
+  const hasTempFilterColumn = (key: TempFilterColumnKey) =>
+    selectedTempFilterColumns.includes(key);
   const [ankiLinkId, setAnkiLinkId] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [notesInfo, setNotesInfo] = useState<AnkiNotesInfo | null>(null);
@@ -2270,18 +2298,26 @@ export default function AnkiNotePage() {
     );
   }
 
-  function tempFilterAbbreviatedSortButton(
-    key: TempFilterSortKey,
-    abbreviation: string,
-    description: string,
+  function tempFilterIconSortButton(
+    key:
+      | "learningDepth"
+      | "imageability"
+      | "productiveTarget"
+      | "productiveLearningAverage"
+      | "threeFieldAverage",
   ) {
+    const active = tempFilterSort.key === key;
     return (
-      <div className="flex flex-col items-start">
-        {tempFilterSortButton(key, abbreviation)}
-        <span className="mt-0.5 text-[9px] font-normal leading-tight text-muted">
-          {description}
+      <button
+        type="button"
+        onClick={() => toggleTempFilterSort(key)}
+        className="inline-flex items-center gap-1 font-semibold hover:text-foreground"
+      >
+        <AnkiScoreColumnIcon metric={key} />
+        <span aria-hidden="true">
+          {active ? (tempFilterSort.direction === "asc" ? "↑" : "↓") : "↕"}
         </span>
-      </div>
+      </button>
     );
   }
 
@@ -2324,6 +2360,14 @@ export default function AnkiNotePage() {
         title="Anki Card Manager"
         subtitle="AnkiConnect must be running (port 8765). Searches by `anki_link_id` (or `AnkiLinkId`)."
       />
+
+      <section className="rounded-2xl border border-card bg-background p-4">
+        <TableColumnSelector
+          key={selectedTempFilterColumns.join(",")}
+          columns={TEMP_FILTER_COLUMNS}
+          selectedColumns={selectedTempFilterColumns}
+        />
+      </section>
 
       <div className="flex flex-wrap gap-3">
         <button
@@ -2420,59 +2464,47 @@ export default function AnkiNotePage() {
           <table className="w-full min-w-[1320px] text-sm">
             <thead className="bg-background text-muted">
               <tr>
-                <th className="px-3 py-2 text-right">{tempFilterSortButton("cardId", "Card")}</th>
-                <th className="px-3 py-2 text-right">{tempFilterSortButton("noteId", "Note")}</th>
-                <th className="px-3 py-2 text-right">{tempFilterSortButton("baseForm", "Base form")}</th>
-                <th className="px-3 py-2 text-right">{tempFilterSortButton("meaningFa", "Meaning (FA)")}</th>
-                <th className="px-3 py-2 text-right">{tempFilterSortButton("learningDepth", "learning_depth")}</th>
-                <th className="px-3 py-2 text-right">{tempFilterSortButton("imageability", "imageability")}</th>
-                <th className="px-3 py-2 text-right">{tempFilterSortButton("productiveTarget", "productive_target")}</th>
-                <th className="px-3 py-2 text-right">
-                  {tempFilterAbbreviatedSortButton(
-                    "productiveLearningAverage",
-                    "PT+LD Avg",
-                    "productive_target + (learning_depth × 100)",
-                  )}
-                </th>
-                <th className="px-3 py-2 text-right">
-                  {tempFilterAbbreviatedSortButton(
-                    "threeFieldAverage",
-                    "LD+IM+PT Avg",
-                    "(learning_depth × 100) + imageability + productive_target",
-                  )}
-                </th>
-                <th className="px-3 py-2 text-right font-semibold">Actions</th>
+                {hasTempFilterColumn("cardId") ? <th className="px-3 py-2 text-right">{tempFilterSortButton("cardId", "Card")}</th> : null}
+                {hasTempFilterColumn("noteId") ? <th className="px-3 py-2 text-right">{tempFilterSortButton("noteId", "Note")}</th> : null}
+                {hasTempFilterColumn("baseForm") ? <th className="px-3 py-2 text-right">{tempFilterSortButton("baseForm", "Base form")}</th> : null}
+                {hasTempFilterColumn("meaningFa") ? <th className="px-3 py-2 text-right">{tempFilterSortButton("meaningFa", "Meaning (FA)")}</th> : null}
+                {hasTempFilterColumn("learningDepth") ? <th className="px-3 py-2 text-center">{tempFilterIconSortButton("learningDepth")}</th> : null}
+                {hasTempFilterColumn("imageability") ? <th className="px-3 py-2 text-center">{tempFilterIconSortButton("imageability")}</th> : null}
+                {hasTempFilterColumn("productiveTarget") ? <th className="px-3 py-2 text-center">{tempFilterIconSortButton("productiveTarget")}</th> : null}
+                {hasTempFilterColumn("productiveLearningAverage") ? <th className="px-3 py-2 text-center">{tempFilterIconSortButton("productiveLearningAverage")}</th> : null}
+                {hasTempFilterColumn("threeFieldAverage") ? <th className="px-3 py-2 text-center">{tempFilterIconSortButton("threeFieldAverage")}</th> : null}
+                {hasTempFilterColumn("actions") ? <th className="px-3 py-2 text-right font-semibold">Actions</th> : null}
               </tr>
             </thead>
             <tbody>
               {visibleTempFilterRows.map((row) => (
                 <tr key={row.cardId} className="border-t border-card">
-                  <td className="px-3 py-2 font-mono text-xs">{row.cardId}</td>
-                  <td className="px-3 py-2 font-mono text-xs">{row.noteId}</td>
-                  <td className="px-3 py-2">
+                  {hasTempFilterColumn("cardId") ? <td className="px-3 py-2 font-mono text-xs">{row.cardId}</td> : null}
+                  {hasTempFilterColumn("noteId") ? <td className="px-3 py-2 font-mono text-xs">{row.noteId}</td> : null}
+                  {hasTempFilterColumn("baseForm") ? <td className="px-3 py-2">
                     {row.fields.base_form?.value || "—"}
-                  </td>
-                  <td className="px-3 py-2">
+                  </td> : null}
+                  {hasTempFilterColumn("meaningFa") ? <td className="px-3 py-2">
                     {row.fields.meaning_fa?.value || "—"}
-                  </td>
-                  <td className="px-3 py-2 font-mono text-xs">
+                  </td> : null}
+                  {hasTempFilterColumn("learningDepth") ? <td className="px-3 py-2 text-center font-mono text-xs">
                     {row.fields.learning_depth?.value || "—"}
-                  </td>
-                  <td className="px-3 py-2 font-mono text-xs">
+                  </td> : null}
+                  {hasTempFilterColumn("imageability") ? <td className="px-3 py-2 text-center font-mono text-xs">
                     {row.fields.imageability?.value || "—"}
-                  </td>
-                  <td className="px-3 py-2 font-mono text-xs">
+                  </td> : null}
+                  {hasTempFilterColumn("productiveTarget") ? <td className="px-3 py-2 text-center font-mono text-xs">
                     {row.fields.productive_target?.value || "—"}
-                  </td>
-                  <td className="px-3 py-2 font-mono text-xs">
+                  </td> : null}
+                  {hasTempFilterColumn("productiveLearningAverage") ? <td className="px-3 py-2 text-center font-mono text-xs">
                     {formatTempFilterAverage(
                       tempFilterAverage(row, [
                         "productive_target",
                         "learning_depth",
                       ]),
                     )}
-                  </td>
-                  <td className="px-3 py-2 font-mono text-xs">
+                  </td> : null}
+                  {hasTempFilterColumn("threeFieldAverage") ? <td className="px-3 py-2 text-center font-mono text-xs">
                     {formatTempFilterAverage(
                       tempFilterAverage(row, [
                         "learning_depth",
@@ -2480,8 +2512,8 @@ export default function AnkiNotePage() {
                         "productive_target",
                       ]),
                     )}
-                  </td>
-                  <td className="px-3 py-2">
+                  </td> : null}
+                  {hasTempFilterColumn("actions") ? <td className="px-3 py-2">
                     <button
                       type="button"
                       onClick={() => void moveTempFilterCard(row)}
@@ -2492,12 +2524,12 @@ export default function AnkiNotePage() {
                         ? "در حال انتقال..."
                         : "انتقال ساختار درختی به صف مطالعه"}
                     </button>
-                  </td>
+                  </td> : null}
                 </tr>
               ))}
               {!tempFilterLoading && visibleTempFilterRows.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="px-3 py-8 text-center text-muted">
+                  <td colSpan={Math.max(1, selectedTempFilterColumns.length)} className="px-3 py-8 text-center text-muted">
                     کارتی در دک موقت پیدا نشد.
                   </td>
                 </tr>

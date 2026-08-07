@@ -16,6 +16,8 @@ import WordRelationPopover, {
 } from "./WordRelationPopover.client";
 import WordMeaningsReview from "./WordMeaningsReview.client";
 import WordConceptMerge from "./WordConceptMerge.client";
+import WordMeaningComparison from "./WordMeaningComparison.client";
+import DeleteWordModalButton from "./DeleteWordModalButton.client";
 
 export const metadata = { title: "Words — Word Table" };
 export const runtime = "nodejs";
@@ -46,6 +48,8 @@ const TABLE_COLUMNS = [
   { key: "sentenceId", label: "sentenceId" },
   { key: "sentenceIds", label: "sentenceIds" },
   { key: "otherMeaningIds", label: "otherMeaningIds" },
+  { key: "comparedMeaningWordIds", label: "comparedMeaningWordIds" },
+  { key: "synonymIds", label: "synonymIds" },
   { key: "meanings_confirmed", label: "meanings_confirmed" },
   { key: "pos", label: "pos" },
   { key: "concept_explained_fa", label: "concept_explained_fa" },
@@ -68,6 +72,8 @@ const DEFAULT_TABLE_COLUMNS: TableColumnKey[] = [
   "meaningId",
   "sentenceId",
   "otherMeaningIds",
+  "comparedMeaningWordIds",
+  "synonymIds",
   "meanings_confirmed",
   "pos",
   "anki_link_id",
@@ -344,6 +350,8 @@ export default async function WordsTablePage({
           },
         },
         otherMeaningIds: true,
+        comparedMeaningWordIds: true,
+        synonymIds: true,
         meanings_confirmed: true,
         pos: true,
         concept_explained_fa: true,
@@ -469,6 +477,7 @@ export default async function WordsTablePage({
         <div className="flex flex-wrap gap-2">
           <WordMeaningsReview />
           <WordConceptMerge />
+          <WordMeaningComparison />
         </div>
       </section>
       <section className="mt-4 rounded border p-3">
@@ -561,6 +570,8 @@ export default async function WordsTablePage({
                     direction={dir}
                   />
                 ) : null}
+                {hasColumn("comparedMeaningWordIds") ? <th className="px-3 py-2">comparedMeaningWordIds</th> : null}
+                {hasColumn("synonymIds") ? <th className="px-3 py-2">synonymIds</th> : null}
                 {hasColumn("meanings_confirmed") ? <th className="px-3 py-2">meanings_confirmed</th> : null}
                 {hasColumn("pos") ? (
                   <SortHeader
@@ -702,6 +713,12 @@ export default async function WordsTablePage({
                       )}
                     </td>
                   ) : null}
+                  {hasColumn("comparedMeaningWordIds") ? (
+                    <ValueCell value={row.comparedMeaningWordIds ?? []} />
+                  ) : null}
+                  {hasColumn("synonymIds") ? (
+                    <ValueCell value={row.synonymIds ?? []} />
+                  ) : null}
                   {hasColumn("meanings_confirmed") ? <td className="px-3 py-2">{row.meanings_confirmed ? "true" : "false"}</td> : null}
                   {hasColumn("pos") ? (
                     <td className="max-w-32 px-3 py-2">
@@ -748,10 +765,16 @@ export default async function WordsTablePage({
                   ) : null}
                   {hasColumn("actions") ? (
                     <td className="px-3 py-2">
-                      <OpenWordEditorModal
-                        id={row.id}
-                        label={row.english.base_form}
-                      />
+                      <div className="flex items-center gap-1">
+                        <OpenWordEditorModal
+                          id={row.id}
+                          label={row.english.base_form}
+                        />
+                        <DeleteWordModalButton
+                          id={row.id}
+                          label={row.english.base_form}
+                        />
+                      </div>
                     </td>
                   ) : null}
                 </tr>

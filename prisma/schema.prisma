@@ -41,30 +41,34 @@ enum PictureWordUsage {
 }
 
 model Word {
-  id                   Int          @id @default(autoincrement())
-  anki_link_id         String       @unique(map: "Word_anki_link_id_key")
-  englishId            Int
-  meaningId            Int?
-  sentenceId           Int?
-  otherMeaningIds      Json?
+  id                     Int          @id @default(autoincrement())
+  anki_link_id           String       @unique(map: "Word_anki_link_id_key")
+  englishId              Int
+  meaningId              Int?
+  sentenceId             Int?
+  otherMeaningIds        Json?
+  /// Unique Word.id values already compared with this record for semantic similarity.
+  comparedMeaningWordIds Json?
+  /// Unique Word.id values confirmed to have a semantic relationship with this record.
+  synonymIds             Json?
   /// Unique Sentence.id values where this word is used with its primary meaning.
-  sentenceIds          Json?
-  meanings_confirmed   Boolean      @default(false)
-  pos                  String?
-  concept_explained_fa String?      @db.Text
-  learning_depth       Float?
-  other_meanings_en    String?
-  category             String?
-  hint_to_select       String?
+  sentenceIds            Json?
+  meanings_confirmed     Boolean      @default(false)
+  pos                    String?
+  concept_explained_fa   String?      @db.Text
+  learning_depth         Float?
+  other_meanings_en      String?
+  category               String?
+  hint_to_select         String?
   /// Score 0-100: how imageable/visual the word is (NULL means unset).
-  imageability         Int?
+  imageability           Int?
   /// Productive target score 0-101 (NULL means unset).
-  productive_target    Int?
-  createdAt            DateTime     @default(now())
-  updatedAt            DateTime     @updatedAt
-  english              EnglishWord  @relation("WordEnglish", fields: [englishId], references: [id], onDelete: Restrict)
-  meaning              PersianWord? @relation("WordPrimaryPersianMeaning", fields: [meaningId], references: [id], onDelete: SetNull)
-  sentence             Sentence?    @relation("WordPrimarySentence", fields: [sentenceId], references: [id], onDelete: SetNull)
+  productive_target      Int?
+  createdAt              DateTime     @default(now())
+  updatedAt              DateTime     @updatedAt
+  english                EnglishWord  @relation("WordEnglish", fields: [englishId], references: [id], onDelete: Restrict)
+  meaning                PersianWord? @relation("WordPrimaryPersianMeaning", fields: [meaningId], references: [id], onDelete: SetNull)
+  sentence               Sentence?    @relation("WordPrimarySentence", fields: [sentenceId], references: [id], onDelete: SetNull)
 
   @@index([englishId], map: "Word_englishId_idx")
   @@index([meaningId], map: "Word_meaningId_idx")

@@ -62,7 +62,43 @@ export async function touchWordsByEnglishIds(englishIds: readonly number[]) {
 
 export async function deleteWord(
   args: Prisma.WordDeleteArgs,
-  client: WordWriteClient = prisma,
+  client?: WordWriteClient,
 ) {
-  return client.word.delete(args);
+  const deleteWithClient = async (writeClient: WordWriteClient) => {
+    const target = await writeClient.word.findUnique({
+      where: args.where,
+      select: { id: true },
+    });
+    if (!target) return writeClient.word.delete(args);
+
+    const words = await writeClient.word.findMany({
+      where: { id: { not: target.id } },
+      select: { id: true, comparedMeaningWordIds: true, synonymIds: true },
+    });
+    for (const word of words) {
+      const asIds = (value: Prisma.JsonValue | null) => Array.isArray(value)
+        ? [...new Set(value.filter((item): item is number =>
+            typeof item === "number" && Number.isSafeInteger(item) && item > 0 && item !== word.id,
+          ))]
+        : [];
+      const compared = asIds(word.comparedMeaningWordIds);
+      const synonyms = asIds(word.synonymIds);
+      if (!compared.includes(target.id) && !synonyms.includes(target.id)) continue;
+      const nextSynonyms = synonyms.filter((id) => id !== target.id);
+      const nextCompared = [...new Set([
+        ...compared.filter((id) => id !== target.id),
+        ...nextSynonyms,
+      ])];
+      await updateWord({
+        where: { id: word.id },
+        data: { comparedMeaningWordIds: nextCompared, synonymIds: nextSynonyms },
+        select: { id: true },
+      }, writeClient);
+    }
+    return writeClient.word.delete(args);
+  };
+
+  return client
+    ? deleteWithClient(client)
+    : prisma.$transaction((tx) => deleteWithClient(tx));
 }
