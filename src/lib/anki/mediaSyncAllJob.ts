@@ -106,6 +106,7 @@ function listMediaFiles(): Array<{ filename: string; absPath: string; size: numb
   const dirs = [
     path.join(process.cwd(), "public", "audio", "pictureWord"),
     path.join(process.cwd(), "public", "audio", "persian-words"),
+    path.join(process.cwd(), "public", "audio", "sentences"),
     path.join(process.cwd(), "public", "audio", "words"),
   ];
 

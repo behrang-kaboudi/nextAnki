@@ -1,7 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useTransition,
+} from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+
+import type { TableColumnEmptyCounts } from "@/lib/words/tableColumnEmptyCounts.server";
 
 type TableColumn = {
   key: string;
@@ -44,9 +52,11 @@ function clearStoredColumns(storageKey: string) {
 export function TableColumnSelector({
   columns,
   selectedColumns,
+  emptyCounts,
 }: {
   columns: readonly TableColumn[];
   selectedColumns: readonly string[];
+  emptyCounts?: TableColumnEmptyCounts;
 }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -62,6 +72,7 @@ export function TableColumnSelector({
     [columns],
   );
   const [selected, setSelected] = useState(() => [...selectedColumns]);
+  const [isRefreshing, startRefresh] = useTransition();
 
   const normalizeSelection = useCallback(
     (value: readonly string[]) => [
@@ -137,6 +148,14 @@ export function TableColumnSelector({
             }
           />
           {column.label}
+          {emptyCounts?.[column.key] !== undefined ? (
+            <span
+              className="text-xs font-medium text-red-600 dark:text-red-400"
+              title={`${emptyCounts[column.key].toLocaleString()} empty values`}
+            >
+              ∅{emptyCounts[column.key].toLocaleString()}
+            </span>
+          ) : null}
         </label>
       ))}
       <button
@@ -146,6 +165,18 @@ export function TableColumnSelector({
       >
         Reset columns
       </button>
+      {emptyCounts ? (
+        <button
+          type="button"
+          onClick={() => startRefresh(() => router.refresh())}
+          disabled={isRefreshing}
+          aria-label="Refresh empty-field report"
+          title="Refresh empty-field report"
+          className="rounded border px-2 py-1 text-xs transition hover:bg-black/5 active:scale-95 disabled:opacity-50 dark:hover:bg-white/5"
+        >
+          {isRefreshing ? "Refreshing…" : "Refresh report"}
+        </button>
+      ) : null}
     </fieldset>
   );
 }

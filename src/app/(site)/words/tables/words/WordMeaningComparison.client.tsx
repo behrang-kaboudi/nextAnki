@@ -59,6 +59,7 @@ function parseResponse(value: string, sourceGroups: SourceGroup[]): OutputGroup[
 export default function WordMeaningComparison() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [showWorkflowGuide, setShowWorkflowGuide] = useState(false);
   const [reviewOpen, setReviewOpen] = useState(false);
   const [busyGroupId, setBusyGroupId] = useState<number | null>(null);
   const [applyingAll, setApplyingAll] = useState(false);
@@ -236,8 +237,47 @@ export default function WordMeaningComparison() {
                   Groups share a PersianWord meaning. Database fields change only after each group is reviewed and confirmed.
                 </div>
               </div>
-              <button type="button" disabled={loading} onClick={() => setOpen(false)} className={buttonClass}>Close</button>
+              <div className="flex flex-wrap items-center justify-end gap-2">
+                <button
+                  type="button"
+                  aria-expanded={showWorkflowGuide}
+                  aria-controls="word-meaning-comparison-workflow-guide"
+                  onClick={() => setShowWorkflowGuide((current) => !current)}
+                  className={buttonClass}
+                >
+                  راهنمای انتخاب و تغییر داده‌ها
+                </button>
+                <button type="button" disabled={loading} onClick={() => setOpen(false)} className={buttonClass}>Close</button>
+              </div>
             </div>
+            {showWorkflowGuide ? (
+              <div
+                id="word-meaning-comparison-workflow-guide"
+                dir="rtl"
+                className="max-h-64 overflow-auto rounded border border-blue-500/30 bg-blue-500/10 p-3 text-right text-sm leading-6"
+              >
+                <div className="font-semibold">هدف این مرحله</div>
+                <p>
+                  رکوردهایی که حداقل یک معنی فارسی مشترک دارند با هم مقایسه
+                  می‌شوند تا تفاوت مفهومشان روشن و رابطهٔ معنایی نزدیک میان آن‌ها ثبت شود.
+                  این مرحله برای ترکیب یا حذف Wordها نیست.
+                </p>
+                <div className="mt-2 font-semibold">شرایط انتخاب رکوردها</div>
+                <ul className="list-disc pr-5">
+                  <li>هر معنی موجود در <code>meaningId</code> یا <code>otherMeaningIds</code> یک گروه می‌سازد.</li>
+                  <li>فقط گروه‌هایی انتخاب می‌شوند که آن معنی فارسی را دست‌کم دو Word استفاده کرده باشند.</li>
+                  <li>گروهی که تمام اعضایش قبلاً یکدیگر را در <code>comparedMeaningWordIds</code> ثبت کرده‌اند دوباره نمایش داده نمی‌شود.</li>
+                  <li>شناسهٔ PersianWord مشترک باید هنوز در دیتابیس موجود باشد؛ <code>Group count = 0</code> یعنی تمام گروه‌های واجد شرایط.</li>
+                </ul>
+                <div className="mt-2 font-semibold">پس از تأیید چه تغییری می‌کند؟</div>
+                <ul className="list-disc pr-5">
+                  <li><code>concept_explained_fa</code> هر Word با توضیح نهایی و متمایزکننده به‌روزرسانی می‌شود.</li>
+                  <li>Wordهای واقعاً نزدیک و قابل اشتباه به‌صورت دوطرفه در <code>synonymIds</code> ثبت می‌شوند.</li>
+                  <li>تمام اعضای بررسی‌شده در <code>comparedMeaningWordIds</code> یکدیگر ثبت می‌شوند تا همان گروه دوباره پردازش نشود.</li>
+                  <li>هیچ Word، Sentence، PersianWord یا ستونی حذف نمی‌شود و فیلدهای معنی و جمله تغییر نمی‌کنند.</li>
+                </ul>
+              </div>
+            ) : null}
             {error ? <div className="rounded border border-red-500/30 bg-red-500/10 p-2 text-sm text-red-700">{error}</div> : null}
             {notice ? <div className="rounded border border-emerald-500/30 bg-emerald-500/10 p-2 text-sm text-emerald-800">{notice}</div> : null}
             <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-2">

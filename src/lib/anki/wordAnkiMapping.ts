@@ -13,6 +13,7 @@ import {
 import type { WordAudioFieldKey } from "@/lib/audio/wordFieldAudioNaming";
 import { getWordFieldAudioAbsolutePath } from "@/lib/audio/wordFieldAudioPaths.server";
 import { getPersianWordAudioAbsolutePath } from "@/lib/audio/persianWordAudioPaths.server";
+import { getSentenceAudioAbsolutePath } from "@/lib/audio/sentenceAudioPaths.server";
 import { getLatestWordFieldAudioFile } from "@/lib/words/wordFieldVoice";
 import { prisma } from "@/lib/prisma";
 import { findPrimarySentenceByAnkiLinkId } from "@/lib/sentences/sentenceRepo";
@@ -194,6 +195,8 @@ async function getSentenceFields(ankiLinkId: string) {
     id: sentence?.id ?? null,
     sentence_en: sentence?.sentence_en ?? "",
     sentence_en_meaning_fa: sentence?.sentence_en_meaning_fa ?? "",
+    sentence_en_audio_file_name: sentence?.sentence_en_audio_file_name ?? null,
+    sentence_en_meaning_fa_audio_file_name: sentence?.sentence_en_meaning_fa_audio_file_name ?? null,
   };
 }
 
@@ -205,6 +208,16 @@ function latestAudioTag(audioKey: string, field: WordAudioFieldKey): string {
 
 function persianWordAudioTag(filename: string | null | undefined): string {
   return filename ? `[sound:${filename}]` : "";
+}
+
+function sentenceAudioTag(filename: string | null | undefined): string {
+  if (!filename) return "";
+  try {
+    const stat = fs.statSync(getSentenceAudioAbsolutePath(filename));
+    return stat.isFile() && stat.size > 0 ? `[sound:${filename}]` : "";
+  } catch {
+    return "";
+  }
 }
 
 function getFirstPartSpell(word: string): string {
@@ -244,7 +257,7 @@ export const WORD_ANKI_FIELD_GENERATORS = {
   },
   sentence_en_audio: async (w) => {
     const sentence = await getSentenceFields(w.anki_link_id);
-    return sentence.id != null ? latestAudioTag(String(sentence.id), "sentence_en") : "";
+    return sentenceAudioTag(sentence.sentence_en_audio_file_name);
   },
   sentence_en_meaning_fa: async (w) => {
     const sentence = await getSentenceFields(w.anki_link_id);
@@ -252,7 +265,7 @@ export const WORD_ANKI_FIELD_GENERATORS = {
   },
   sentence_en_meaning_fa_audio: async (w) => {
     const sentence = await getSentenceFields(w.anki_link_id);
-    return sentence.id != null ? latestAudioTag(String(sentence.id), "sentence_en_meaning_fa") : "";
+    return sentenceAudioTag(sentence.sentence_en_meaning_fa_audio_file_name);
   },
 
   // TODO: define the source-of-truth for this field (not currently present in DB schema).

@@ -1,20 +1,11 @@
 import "server-only";
 
-import fs from "node:fs";
-
 import { prisma } from "@/lib/prisma";
 import { createAnkiConnectClient } from "@/lib/anki";
 import { AnkiNoteTypes, SentenceAnkiConstants } from "@/lib/anki";
 import { chunkArray } from "@/lib/anki";
 import { quoteAnkiSearchValue } from "@/lib/anki";
-import {
-  sanitizeWordAudioFilenamePart,
-  WORD_AUDIO_FILENAME_SEPARATOR,
-} from "@/lib/audio/wordFieldAudioNaming";
-import {
-  getWordFieldAudioAbsoluteDir,
-  getWordFieldAudioAbsolutePath,
-} from "@/lib/audio/wordFieldAudioPaths.server";
+import { getSentenceAudioFileInfo } from "@/lib/sentences/sentenceAudio.server";
 
 const SENTENCE_DECK_NAME = SentenceAnkiConstants.decks.EnSentences;
 const SENTENCE_MODEL_NAME = AnkiNoteTypes.EN_SENTENCES;
@@ -23,10 +14,10 @@ type SentenceCandidate = {
   id: number;
   sentence_en: string;
   sentence_en_meaning_fa: string | null;
+  sentence_en_audio_file_name: string | null;
+  sentence_en_meaning_fa_audio_file_name: string | null;
   updatedAt: Date;
 };
-
-type ExistingFileInfo = { filename: string; timestampMs: number; size: number };
 
 type ExistingSentenceNote = {
   noteId: number;
@@ -101,59 +92,9 @@ function asNonEmptyString(value: unknown): string | null {
   return trimmed ? trimmed : null;
 }
 
-function escapeRegExp(value: string) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-function indexLatestAudioByField(
-  field: "sentence_en" | "sentence_en_meaning_fa",
-): Map<string, ExistingFileInfo> {
-  const dir = getWordFieldAudioAbsoluteDir();
-  let entries: string[] = [];
-  try {
-    entries = fs.readdirSync(dir);
-  } catch {
-    return new Map();
-  }
-
-  const sep = escapeRegExp(WORD_AUDIO_FILENAME_SEPARATOR);
-  const reNew = new RegExp(
-    `^(?<id>.+?)${sep}${field}${sep}(?<ts>\\d{8,})\\.mp3$`,
-  );
-  const reLegacy = new RegExp(`^(?<id>.+)_${field}_(?<ts>\\d{8,})\\.mp3$`);
-
-  const latestById = new Map<string, ExistingFileInfo>();
-  for (const filename of entries) {
-    const m = reNew.exec(filename) ?? reLegacy.exec(filename);
-    const id = m?.groups?.id;
-    const ts = Number(m?.groups?.ts);
-    if (!id || !Number.isFinite(ts)) continue;
-
-    const normalized = sanitizeWordAudioFilenamePart(id);
-
-    let size = 0;
-    try {
-      size = fs.statSync(getWordFieldAudioAbsolutePath(filename)).size;
-    } catch {
-      continue;
-    }
-
-    const prev = latestById.get(normalized);
-    if (!prev || Math.trunc(ts) > prev.timestampMs) {
-      latestById.set(normalized, {
-        filename,
-        timestampMs: Math.trunc(ts),
-        size,
-      });
-    }
-  }
-
-  return latestById;
-}
-
-function toSoundTag(info: ExistingFileInfo | undefined): string {
-  if (!info || info.size <= 0) return "";
-  return `[sound:${info.filename}]`;
+function toSoundTag(filename: string | null): string {
+  const info = getSentenceAudioFileInfo(filename);
+  return info.filename && info.size > 0 ? `[sound:${info.filename}]` : "";
 }
 
 function normalizeCompare(value: unknown) {
@@ -162,15 +103,12 @@ function normalizeCompare(value: unknown) {
 
 function buildSentenceNoteFields(
   row: SentenceCandidate,
-  sentenceEnAudioById: Map<string, ExistingFileInfo>,
-  sentenceFaAudioById: Map<string, ExistingFileInfo>,
 ) {
-  const sentenceKey = sanitizeWordAudioFilenamePart(String(row.id));
   return {
     sentence_en: row.sentence_en,
-    sentence_en_sound: toSoundTag(sentenceEnAudioById.get(sentenceKey)),
+    sentence_en_sound: toSoundTag(row.sentence_en_audio_file_name),
     sentence_en_meaning_fa: row.sentence_en_meaning_fa ?? "",
-    sentence_en_meaning_fa_sound: toSoundTag(sentenceFaAudioById.get(sentenceKey)),
+    sentence_en_meaning_fa_sound: toSoundTag(row.sentence_en_meaning_fa_audio_file_name),
     updatedAt: row.updatedAt.toISOString(),
   };
 }
@@ -295,6 +233,8 @@ async function runJob(state: State) {
         id: true,
         sentence_en: true,
         sentence_en_meaning_fa: true,
+        sentence_en_audio_file_name: true,
+        sentence_en_meaning_fa_audio_file_name: true,
         updatedAt: true,
       },
       orderBy: { id: "asc" },
@@ -315,12 +255,8 @@ async function runJob(state: State) {
       `Loaded ${existingSentences.size} existing note(s) from deck ${SENTENCE_DECK_NAME}.`,
     );
 
-    const sentenceEnAudioById = indexLatestAudioByField("sentence_en");
-    const sentenceFaAudioById = indexLatestAudioByField(
-      "sentence_en_meaning_fa",
-    );
     log(
-      `Indexed local audio files: sentence_en=${sentenceEnAudioById.size}, sentence_en_meaning_fa=${sentenceFaAudioById.size}.`,
+      `Loaded persisted audio filenames: sentence_en=${rows.filter((row) => row.sentence_en_audio_file_name).length}, sentence_en_meaning_fa=${rows.filter((row) => row.sentence_en_meaning_fa_audio_file_name).length}.`,
     );
 
     for (const row of rows) {
@@ -333,7 +269,7 @@ async function runJob(state: State) {
       state.currentSentenceId = row.id;
 
       try {
-        const nextFields = buildSentenceNoteFields(row, sentenceEnAudioById, sentenceFaAudioById);
+        const nextFields = buildSentenceNoteFields(row);
         const existing = existingSentences.get(row.sentence_en);
 
         if (existing) {
@@ -497,6 +433,8 @@ export async function syncSelectedSentencesToSentenceDeck(
         id: true,
         sentence_en: true,
         sentence_en_meaning_fa: true,
+        sentence_en_audio_file_name: true,
+        sentence_en_meaning_fa_audio_file_name: true,
         updatedAt: true,
       },
     })) as SentenceCandidate[];
@@ -526,12 +464,8 @@ export async function syncSelectedSentencesToSentenceDeck(
       `Loaded ${existingSentences.size} existing note(s) from deck ${SENTENCE_DECK_NAME}.`,
     );
 
-    const sentenceEnAudioById = indexLatestAudioByField("sentence_en");
-    const sentenceFaAudioById = indexLatestAudioByField(
-      "sentence_en_meaning_fa",
-    );
     log(
-      `Indexed local audio files: sentence_en=${sentenceEnAudioById.size}, sentence_en_meaning_fa=${sentenceFaAudioById.size}.`,
+      `Loaded persisted audio filenames: sentence_en=${rows.filter((row) => row.sentence_en_audio_file_name).length}, sentence_en_meaning_fa=${rows.filter((row) => row.sentence_en_meaning_fa_audio_file_name).length}.`,
     );
 
     let eligible = 0;
@@ -548,7 +482,7 @@ export async function syncSelectedSentencesToSentenceDeck(
 
     for (const row of orderedRows) {
       try {
-        const nextFields = buildSentenceNoteFields(row, sentenceEnAudioById, sentenceFaAudioById);
+        const nextFields = buildSentenceNoteFields(row);
         const existing = existingSentences.get(row.sentence_en);
 
         if (existing) {

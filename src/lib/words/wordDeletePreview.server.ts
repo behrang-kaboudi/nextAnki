@@ -2,9 +2,10 @@ import "server-only";
 
 import type { Prisma } from "@prisma/client";
 
-import { WORD_AUDIO_FIELDS } from "@/lib/audio/wordFieldAudioNaming";
+import { WORD_AUDIO_FIELDS, type WordAudioFieldKey } from "@/lib/audio/wordFieldAudioNaming";
 import { prisma } from "@/lib/prisma";
 import { listWordFieldAudioFiles } from "@/lib/words/wordFieldVoice";
+import { getSentenceAudioFileInfo } from "@/lib/sentences/sentenceAudio.server";
 
 function ids(value: Prisma.JsonValue | null) {
   if (!Array.isArray(value)) return [];
@@ -26,6 +27,8 @@ export async function getWordDeletePreview(id: number) {
         select: {
           id: true,
           sentence_en: true,
+          sentence_en_audio_file_name: true,
+          sentence_en_meaning_fa_audio_file_name: true,
           _count: { select: { words: true } },
         },
       },
@@ -57,24 +60,32 @@ export async function getWordDeletePreview(id: number) {
         }]
       : [];
   });
-  const audioFiles = WORD_AUDIO_FIELDS.map((field) => {
-    const audioKey = field === "sentence_en" || field === "sentence_en_meaning_fa"
-      ? word.sentenceId != null ? String(word.sentenceId) : word.anki_link_id
-      : word.anki_link_id;
+  const audioFiles: Array<{ field: WordAudioFieldKey; count: number; bytes: number }> = WORD_AUDIO_FIELDS.filter((field) => field !== "sentence_en" && field !== "sentence_en_meaning_fa").map((field) => {
+    const audioKey = word.anki_link_id;
     const files = listWordFieldAudioFiles({ audioKey, ankiLinkId: audioKey, field });
     return {
       field,
       count: files.length,
       bytes: files.reduce((sum, file) => sum + file.size, 0),
     };
-  }).filter((field) => field.count > 0);
+  });
+  if (word.sentence && word.sentence._count.words <= 1) {
+    for (const field of ["sentence_en", "sentence_en_meaning_fa"] as const) {
+      const filename = field === "sentence_en"
+        ? word.sentence.sentence_en_audio_file_name
+        : word.sentence.sentence_en_meaning_fa_audio_file_name;
+      const info = getSentenceAudioFileInfo(filename);
+      audioFiles.push({ field, count: info.size > 0 ? 1 : 0, bytes: info.size });
+    }
+  }
+  const existingAudioFiles = audioFiles.filter((field) => field.count > 0);
 
   return {
     id: word.id,
     word: word.english.base_form,
     ankiLinkId: word.anki_link_id,
-    audioFiles,
-    totalAudioFiles: audioFiles.reduce((sum, field) => sum + field.count, 0),
+    audioFiles: existingAudioFiles,
+    totalAudioFiles: existingAudioFiles.reduce((sum, field) => sum + field.count, 0),
     affectedWords,
     sentence: word.sentence
       ? {

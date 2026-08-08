@@ -30,6 +30,7 @@ const buttonClass =
 export default function WordConceptMerge() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [showSelectionHelp, setShowSelectionHelp] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [limit, setLimit] = useState("0");
@@ -174,8 +175,52 @@ export default function WordConceptMerge() {
                   Candidate records are grouped by englishId. Nothing is deleted until the human confirmation step.
                 </div>
               </div>
-              <button type="button" disabled={busy} onClick={() => setOpen(false)} className={buttonClass}>Close</button>
+              <div className="flex flex-wrap items-center justify-end gap-2">
+                <button
+                  type="button"
+                  aria-expanded={showSelectionHelp}
+                  aria-controls="word-concept-merge-selection-help"
+                  onClick={() => setShowSelectionHelp((current) => !current)}
+                  className={buttonClass}
+                >
+                  راهنمای انتخاب و تغییر داده‌ها
+                </button>
+                <button type="button" disabled={busy} onClick={() => setOpen(false)} className={buttonClass}>Close</button>
+              </div>
             </div>
+            {showSelectionHelp ? (
+              <div
+                id="word-concept-merge-selection-help"
+                dir="rtl"
+                className="max-h-64 overflow-auto rounded border border-blue-500/30 bg-blue-500/10 p-3 text-right text-sm leading-6"
+              >
+                <div className="font-semibold">هدف این مرحله</div>
+                <p>
+                  رکوردهای مختلف یک کلمهٔ انگلیسی بررسی می‌شوند تا مفهوم‌های
+                  واقعاً یکسان در قدیمی‌ترین رکورد ترکیب و رکوردهای اضافه حذف شوند.
+                </p>
+                <div className="mt-2 font-semibold">شرایط انتخاب رکوردها</div>
+                <ul className="list-disc pr-5">
+                  <li>رکوردها بر اساس <code>englishId</code> یکسان گروه‌بندی می‌شوند.</li>
+                  <li>گروه باید حداقل دو رکورد <code>Word</code> داشته باشد.</li>
+                  <li>حداقل یک رکورد گروه باید <code>sentenceId</code> غیرخالی داشته باشد؛ این مقدار نشانهٔ وجود رکورد جدید و هنوز بررسی‌نشده است.</li>
+                  <li>گروهی که <code>sentenceId</code> تمام رکوردهایش <code>null</code> باشد به پرامپت ارسال نمی‌شود.</li>
+                  <li><code>Group count = 0</code> یعنی تمام گروه‌های واجد شرایط.</li>
+                </ul>
+                <div className="mt-2 font-semibold">پس از تأیید چه تغییری می‌کند؟</div>
+                <ul className="list-disc pr-5">
+                  <li>در هر مفهوم ادغام‌شده، قدیمی‌ترین Word باقی می‌ماند و <code>meaningId</code>، <code>otherMeaningIds</code> و <code>concept_explained_fa</code> آن با نتیجهٔ نهایی به‌روزرسانی می‌شوند.</li>
+                  <li>تمام جمله‌های معتبر گروه بدون تکرار در <code>sentenceIds</code> رکورد باقی‌مانده جمع می‌شوند و <code>sentenceId</code> آن خالی می‌شود؛ این یعنی رکورد جدید توسط Merge پردازش شده است.</li>
+                  <li>Wordهای جدیدترِ ادغام‌شده حذف می‌شوند، اما رکوردهای Sentence و PersianWord حذف نمی‌شوند.</li>
+                  <li>ارجاع به Wordهای حذف‌شده از <code>synonymIds</code> و <code>comparedMeaningWordIds</code> سایر رکوردها پاک می‌شود.</li>
+                  <li>گروه تک‌رکوردی به مدل فرستاده نمی‌شود؛ فقط <code>sentenceId</code> آن به <code>sentenceIds</code> منتقل و سپس خالی می‌شود.</li>
+                  <li>هیچ ستون دیتابیس حذف نمی‌شود؛ فقط مقدارهای بالا تغییر می‌کنند و ردیف‌های Word اضافه حذف می‌شوند.</li>
+                </ul>
+                <p className="mt-2 font-medium text-amber-800 dark:text-amber-300">
+                  رکوردهای قدیمی که پیش‌تر <code>sentenceId</code> آن‌ها خالی شده است، با این دکمه خودکار دوباره علامت‌گذاری نمی‌شوند.
+                </p>
+              </div>
+            ) : null}
             {error ? <div className="rounded border border-red-500/30 bg-red-500/10 p-2 text-sm text-red-700">{error}</div> : null}
             {notice ? <div className="rounded border border-emerald-500/30 bg-emerald-500/10 p-2 text-sm text-emerald-800">{notice}</div> : null}
             <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-2">

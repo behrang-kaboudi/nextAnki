@@ -134,8 +134,17 @@ export async function POST(request: Request) {
         if (invalidSentenceIds.some((sentenceId) => !currentSentenceIds.includes(sentenceId))) {
           throw new Error(`Correction for Word ${id} contains an unrelated sentence id.`);
         }
-        const nextSentenceIds = currentSentenceIds.filter(
+        const remainingSentenceIds = currentSentenceIds.filter(
           (sentenceId) => !invalidSentenceIds.includes(sentenceId),
+        );
+        // Keep the primary sentence as the pending-merge marker. Moving it into
+        // sentenceIds here would make MERGE WORD CONCEPTS miss this new record.
+        const nextSentenceId =
+          word.sentenceId !== null && remainingSentenceIds.includes(word.sentenceId)
+            ? word.sentenceId
+            : null;
+        const nextSentenceIds = remainingSentenceIds.filter(
+          (sentenceId) => sentenceId !== nextSentenceId,
         );
         let meaningData: {
           meaningId?: number;
@@ -167,7 +176,7 @@ export async function POST(request: Request) {
           where: { id },
           data: {
             ...meaningData,
-            sentenceId: null,
+            sentenceId: nextSentenceId,
             sentenceIds: nextSentenceIds,
             meanings_confirmed: true,
           },

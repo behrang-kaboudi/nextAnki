@@ -45,9 +45,9 @@ export const siteMapGroups: SiteMapGroup[] = [
       { title: "Word Table", path: "/words/tables/words", summary: "Browses Word records with search, sorting, and direct editing.", menu: true },
       { title: "Persian Word Table", path: "/words/tables/persian-words", summary: "Browses and edits PersianWord records, including linked audio playback.", menu: true },
       { title: "English Word Table", path: "/words/tables/english-words", summary: "Browses canonical English words and phrases with US IPA, JSON hints, one audio file, and Word links.", menu: true },
-      { title: "Sentence Table", path: "/words/tables/sentences", summary: "Browses and directly edits unique English sentences and their Persian meanings.", menu: true },
+      { title: "Sentence Table", path: "/words/tables/sentences", summary: "Browses and edits unique sentences, Persian meanings, and both persisted sentence-owned audio files.", menu: true },
       { title: "Word Extraction", path: "/words/extraction", summary: "Runs the staged workflow that extracts and enriches words with AI prompts.", menu: true },
-      { title: "Audio Hints", path: "/words/hints/audio", summary: "Reviews, generates, uploads, and cleans audio stored on word fields.", menu: true },
+      { title: "Audio Hints", path: "/words/hints/audio", summary: "Reviews and manages Word-owned audio plus Sentence-owned audio stored by filename on Sentence records.", menu: true },
       { title: "JSON Hints", path: "/words/hints/json", summary: "Reviews and generates structured JSON hints for vocabulary records.", menu: true },
       { title: "Word Cleanup", path: "/words/cleanup", summary: "Finds and removes local words that no longer exist in Anki.", menu: true },
     ],
@@ -101,9 +101,10 @@ export const siteMapGroups: SiteMapGroup[] = [
     id: "ai",
     category: "Workspace",
     title: "AI Tools",
-    summary: "Build and inspect reusable prompt files for AI-assisted workflows.",
+    summary: "Build reusable prompts and work with locally served AI models.",
     pages: [
       { title: "Prompt Builder", path: "/ai/prompt-builder", summary: "Combines prompt files and previews the resulting reusable AI prompt.", menu: true },
+      { title: "Local AI Studio", path: "/ai/local-chat", summary: "Manages LM Studio models and their saved generation settings, then tests multi-turn local chat.", menu: true },
     ],
   },
   {
@@ -116,15 +117,6 @@ export const siteMapGroups: SiteMapGroup[] = [
       { title: "Database Compare", path: "/admin/database-compare", summary: "Compares local database fingerprints with the version stored in GitHub.", menu: true },
       { title: "Database Backup", path: "/admin/database-backup", summary: "Creates and restores complete local database archives through the current GitHub branch.", menu: true },
       { title: "Navigation Manager", path: "/admin/navigation", summary: "Edits the nested site and dashboard menus from one interface.", menu: true },
-    ],
-  },
-  {
-    id: "tests-ai",
-    category: "Tests",
-    title: "AI Tests",
-    summary: "Small pages for checking AI integrations in isolation.",
-    pages: [
-      { title: "AI Chat Test", path: "/tests/ai/chat", summary: "Sends test conversations through the configured AI chat endpoint.", menu: true },
     ],
   },
   {

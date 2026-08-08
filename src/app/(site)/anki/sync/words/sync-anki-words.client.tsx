@@ -821,7 +821,7 @@ export default function SyncAnkiWordsClient() {
       const res = await fetch("/api/word/anki-missing", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ limit: 5000 }),
+        body: JSON.stringify({ limit: 50_000 }),
       });
       const data = (await res.json().catch(() => ({}))) as MissingAnkiNotesResponse;
       if (!res.ok) throw new Error(data.error ?? `Request failed (${res.status})`);
@@ -883,7 +883,14 @@ export default function SyncAnkiWordsClient() {
         message: `Deleted ${data.deleted ?? 0} Anki note(s) missing in DB.`,
         data,
       });
-      await loadMissingAnkiNotes();
+      const deleted = data.deleted ?? missingDeleteItems.length;
+      setMissingDeleteItems([]);
+      setMissingDeleteTotalNotes((current) =>
+        current === null ? null : Math.max(0, current - deleted),
+      );
+      setMissingDeleteCheckedNotes((current) =>
+        current === null ? null : Math.max(0, current - deleted),
+      );
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       setMissingDeleteError(message);

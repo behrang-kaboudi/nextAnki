@@ -4,7 +4,6 @@ import fs from "node:fs";
 import path from "node:path";
 
 import { prisma } from "@/lib/prisma";
-import { listPrimarySentencesByAnkiLinkIds } from "@/lib/sentences/sentenceRepo";
 import { generateSpeechFromMixedText } from "@/lib/tts/cloudTts";
 import { touchWordByAnkiLinkId } from "@/lib/words/wordRepo";
 import {
@@ -15,6 +14,8 @@ import {
   sanitizeWordAudioFilenamePart,
 } from "@/lib/audio/wordFieldAudioNaming";
 import { getWordFieldAudioAbsoluteDir, getWordFieldAudioAbsolutePath } from "@/lib/audio/wordFieldAudioPaths.server";
+import { isSentenceAudioField, type SentenceAudioField } from "@/lib/audio/sentenceAudioNaming";
+import { generateSentenceAudio } from "@/lib/sentences/sentenceAudio.server";
 
 export type WordFieldVoiceJobStatus = {
   jobId: string;
@@ -159,10 +160,19 @@ async function runJob(state: JobState) {
   state.regeneratedZeroByte = 0;
   state.currentId = null;
 
-  const existingIndex = indexExistingFiles();
-
   const field = state.field;
   state.totalCandidates = await countCandidates(field);
+
+  if (isSentenceAudioField(field)) {
+    await runSentenceAudioJob(state, field);
+    state.running = false;
+    state.done = true;
+    state.finishedAt = nowIso();
+    state.currentId = null;
+    return;
+  }
+
+  const existingIndex = indexExistingFiles();
 
   const take = 200;
   let cursorId: number | null = null;
@@ -214,6 +224,38 @@ async function runJob(state: JobState) {
   state.currentId = null;
 }
 
+async function runSentenceAudioJob(state: JobState, field: SentenceAudioField) {
+  const missingWhere = field === "sentence_en"
+    ? { OR: [{ sentence_en_audio_file_name: null }, { sentence_en_audio_file_name: "" }] }
+    : { OR: [{ sentence_en_meaning_fa_audio_file_name: null }, { sentence_en_meaning_fa_audio_file_name: "" }] };
+  let cursorId: number | undefined;
+
+  for (;;) {
+    const rows = await prisma.sentence.findMany({
+      where: missingWhere,
+      orderBy: { id: "asc" },
+      take: 100,
+      ...(cursorId === undefined ? {} : { cursor: { id: cursorId }, skip: 1 }),
+      select: { id: true, sentence_en: true, sentence_en_meaning_fa: true },
+    });
+    if (!rows.length) break;
+
+    for (const row of rows) {
+      state.currentId = row.id;
+      const text = field === "sentence_en" ? row.sentence_en : row.sentence_en_meaning_fa;
+      if (!text?.trim()) {
+        state.skippedNoText += 1;
+        state.processedCandidates += 1;
+        continue;
+      }
+      await generateSentenceAudio(row.id, field);
+      state.generated += 1;
+      state.processedCandidates += 1;
+    }
+    cursorId = rows.at(-1)?.id;
+  }
+}
+
 async function countCandidates(field: WordAudioFieldKey): Promise<number> {
   if (field === "other_meanings_en") {
     return prisma.word.count({
@@ -231,27 +273,16 @@ async function countCandidates(field: WordAudioFieldKey): Promise<number> {
   }
   if (field === "sentence_en_meaning_fa") {
     return prisma.sentence.count({
-      where: {
-        AND: [
-          { sentence_en_meaning_fa: { not: null } },
-          { sentence_en_meaning_fa: { not: "" } },
-        ],
-      },
+      where: { OR: [{ sentence_en_meaning_fa_audio_file_name: null }, { sentence_en_meaning_fa_audio_file_name: "" }] },
+    });
+  }
+  if (field === "sentence_en") {
+    return prisma.sentence.count({
+      where: { OR: [{ sentence_en_audio_file_name: null }, { sentence_en_audio_file_name: "" }] },
     });
   }
   if (field === "base_form") return prisma.word.count({ where: { english: { is: { base_form: { notIn: [""] } } } } });
-  return prisma.word.count({
-    where:
-      field === "sentence_en"
-        ? {
-            sentence: { is: { sentence_en: { notIn: [""] } } },
-          }
-        : {
-            sentence: {
-              is: { sentence_en_meaning_fa: { not: null, notIn: [""] } },
-            },
-          },
-  });
+  return 0;
 }
 
 async function fetchBatch(
@@ -286,33 +317,6 @@ async function fetchBatch(
       select: { id: true, anki_link_id: true, concept_explained_fa: true },
     });
     return rows.map((r) => ({ id: r.id, anki_link_id: r.anki_link_id, audioKey: r.anki_link_id, value: r.concept_explained_fa ?? null }));
-  }
-  if (field === "sentence_en") {
-    const rows = await prisma.word.findMany({
-      ...base,
-      select: { id: true, anki_link_id: true },
-    });
-    const sentenceMap = await listPrimarySentencesByAnkiLinkIds(rows.map((r) => r.anki_link_id));
-    return rows.map((r) => ({
-      id: r.id,
-      anki_link_id: r.anki_link_id,
-      audioKey: sentenceMap.get(r.anki_link_id)?.id != null ? String(sentenceMap.get(r.anki_link_id)?.id) : null,
-      value: sentenceMap.get(r.anki_link_id)?.sentence_en ?? null,
-    }));
-  }
-
-  if (field === "sentence_en_meaning_fa") {
-    const rows = await prisma.word.findMany({
-      ...base,
-      select: { id: true, anki_link_id: true },
-    });
-    const sentenceMap = await listPrimarySentencesByAnkiLinkIds(rows.map((r) => r.anki_link_id));
-    return rows.map((r) => ({
-      id: r.id,
-      anki_link_id: r.anki_link_id,
-      audioKey: sentenceMap.get(r.anki_link_id)?.id != null ? String(sentenceMap.get(r.anki_link_id)?.id) : null,
-      value: sentenceMap.get(r.anki_link_id)?.sentence_en_meaning_fa ?? null,
-    }));
   }
   return [];
 }

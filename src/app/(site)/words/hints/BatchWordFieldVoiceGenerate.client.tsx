@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import type { WordAudioFieldKey } from "@/lib/audio/wordFieldAudioNaming";
 import {
@@ -10,6 +11,7 @@ import {
 import { ActionIcon } from "@/components/icons";
 import { wordFieldVoiceProgressTopic } from "@/lib/progress/topics";
 import { useJobProgress } from "@/lib/progress/useJobProgress";
+import { isSentenceAudioField, SENTENCE_AUDIO_FILENAME_SEPARATOR, SENTENCE_AUDIO_PUBLIC_DIR_RELATIVE } from "@/lib/audio/sentenceAudioNaming";
 
 type WordFieldVoiceStatus = {
   jobId: string;
@@ -39,6 +41,10 @@ export default function BatchWordFieldVoiceGenerate({
 }: {
   field: WordAudioFieldKey;
 }) {
+  const router = useRouter();
+  const sentenceOwned = isSentenceAudioField(field);
+  const audioFolder = sentenceOwned ? SENTENCE_AUDIO_PUBLIC_DIR_RELATIVE : WORD_AUDIO_PUBLIC_DIR_RELATIVE;
+  const separator = sentenceOwned ? SENTENCE_AUDIO_FILENAME_SEPARATOR : WORD_AUDIO_FILENAME_SEPARATOR;
   const { status: streamedStatus } = useJobProgress<WordFieldVoiceStatus>(
     wordFieldVoiceProgressTopic(field),
   );
@@ -143,7 +149,8 @@ export default function BatchWordFieldVoiceGenerate({
     if (notifiedDoneJobId === jobId) return;
     window.dispatchEvent(new CustomEvent("wordFieldVoice:updated", { detail: { field, all: true } }));
     setNotifiedDoneJobId(jobId);
-  }, [field, jobId, notifiedDoneJobId, running]);
+    router.refresh();
+  }, [field, jobId, notifiedDoneJobId, router, running]);
 
   return (
     <div className="flex flex-col gap-2">
@@ -186,10 +193,10 @@ export default function BatchWordFieldVoiceGenerate({
       {statusText ? <div className="text-xs opacity-80">{statusText}</div> : null}
       {statsText ? <div className="text-xs opacity-80">{statsText}</div> : null}
       <div className="text-xs opacity-80">
-        Folder: <span className="font-mono">public/{WORD_AUDIO_PUBLIC_DIR_RELATIVE}</span> •
+        Folder: <span className="font-mono">public/{audioFolder}</span> •
         name:{" "}
         <span className="font-mono">
-          audioKey{WORD_AUDIO_FILENAME_SEPARATOR}field{WORD_AUDIO_FILENAME_SEPARATOR}Date.now().mp3
+          {sentenceOwned ? "s" : "audioKey"}{separator}{sentenceOwned ? "Sentence.id" : "field"}{separator}{sentenceOwned ? "field" : "Date.now()"}{sentenceOwned ? <>{separator}Date.now().mp3</> : ".mp3"}
         </span>
       </div>
     </div>

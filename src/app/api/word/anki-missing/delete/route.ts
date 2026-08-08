@@ -5,6 +5,8 @@ import { NextResponse } from "next/server";
 import { requireApiAuth } from "@/lib/auth/apiAuth";
 import { createAnkiOperations } from "@/lib/anki";
 
+const DELETE_BATCH_SIZE = 1000;
+
 function chunk<T>(arr: T[], size: number) {
   const out: T[][] = [];
   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
@@ -63,7 +65,7 @@ export async function POST(req: Request) {
     }
 
     let deleted = 0;
-    for (const group of chunk(noteIds, 200)) {
+    for (const group of chunk(noteIds, DELETE_BATCH_SIZE)) {
       const res = await client.deleteNotes({ notes: group });
       if (!res.ok) {
         return NextResponse.json(

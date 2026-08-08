@@ -1,13 +1,10 @@
 import "server-only";
 
-import fs from "node:fs";
-
 import { createAnkiConnectClient } from "@/lib/anki";
 import { AnkiNoteTypes } from "@/lib/anki";
-import { sanitizeWordAudioFilenamePart, WORD_AUDIO_FILENAME_SEPARATOR } from "@/lib/audio/wordFieldAudioNaming";
-import { getWordFieldAudioAbsoluteDir, getWordFieldAudioAbsolutePath } from "@/lib/audio/wordFieldAudioPaths.server";
 import { getAnkiLinkIdFromNoteFields } from "@/lib/anki/wordAnkiMapping";
 import { listPrimarySentencesByAnkiLinkIds } from "@/lib/sentences/sentenceRepo";
+import { getSentenceAudioFileInfo } from "@/lib/sentences/sentenceAudio.server";
 
 export type SentenceEnSyncAllStatus = {
   jobId: string;
@@ -97,49 +94,10 @@ export function getSentenceEnSyncAllStatus(): SentenceEnSyncAllStatus {
   return pub;
 }
 
-type ExistingFileInfo = { filename: string; timestampMs: number; size: number };
-
-function indexLatestAudioForSentenceEn(): Map<string, ExistingFileInfo> {
-  const dir = getWordFieldAudioAbsoluteDir();
-  let entries: string[] = [];
-  try {
-    entries = fs.readdirSync(dir);
-  } catch {
-    return new Map();
-  }
-
-  const sep = WORD_AUDIO_FILENAME_SEPARATOR.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const reNew = new RegExp(`^(?<anki>.+?)${sep}sentence_en${sep}(?<ts>\\d{8,})\\.mp3$`);
-  const reLegacy = new RegExp(`^(?<anki>.+)_sentence_en_(?<ts>\\d{8,})\\.mp3$`);
-
-  const latestById = new Map<string, ExistingFileInfo>();
-  for (const filename of entries) {
-    const m = reNew.exec(filename) ?? reLegacy.exec(filename);
-    const anki = m?.groups?.anki;
-    const ts = Number(m?.groups?.ts);
-    if (!anki || !Number.isFinite(ts)) continue;
-
-    let size = 0;
-    try {
-      size = fs.statSync(getWordFieldAudioAbsolutePath(filename)).size;
-    } catch {
-      continue;
-    }
-
-    const prev = latestById.get(anki);
-    if (!prev || Math.trunc(ts) > prev.timestampMs) {
-      latestById.set(anki, { filename, timestampMs: Math.trunc(ts), size });
-    }
-  }
-
-  return latestById;
-}
-
-function generateSentenceEnValue(dbSentenceEn: string, audioKey: string, audioIndex: Map<string, ExistingFileInfo>): string {
+function generateSentenceEnValue(dbSentenceEn: string, audioFilename: string | null): string {
   const text = String(dbSentenceEn ?? "");
-  const key = sanitizeWordAudioFilenamePart(audioKey);
-  const audio = audioIndex.get(key);
-  if (!audio || audio.size <= 0) return text;
+  const audio = getSentenceAudioFileInfo(audioFilename);
+  if (!audio.filename || audio.size <= 0) return text;
   const tag = `[sound:${audio.filename}]`;
   if (text.includes(tag)) return text;
   const base = text.trim();
@@ -180,8 +138,6 @@ async function runJob(state: State) {
   const ids = idsRes.result ?? [];
   state.total = ids.length;
 
-  const audioIndex = indexLatestAudioForSentenceEn();
-
   // Preload current sentence_en + anki_link_id to avoid extra notesInfo per note.
   const beforeByNoteId = new Map<number, { ankiLinkId: string | null; sentenceEn: string }>();
   for (const batch of chunk(ids, 250)) {
@@ -203,13 +159,13 @@ async function runJob(state: State) {
     ),
   );
 
-  const dbSentenceByAnkiLinkId = new Map<string, { sentenceEn: string; audioKey: string }>();
+  const dbSentenceByAnkiLinkId = new Map<string, { sentenceEn: string; audioFilename: string | null }>();
   for (const group of chunk(allIds, 1000)) {
     const rows = await listPrimarySentencesByAnkiLinkIds(group);
     for (const [ankiLinkId, sentence] of rows.entries()) {
       dbSentenceByAnkiLinkId.set(ankiLinkId, {
         sentenceEn: sentence.sentence_en,
-        audioKey: String(sentence.id),
+        audioFilename: sentence.sentence_en_audio_file_name,
       });
     }
   }
@@ -243,7 +199,7 @@ async function runJob(state: State) {
         return;
       }
 
-      const newValue = generateSentenceEnValue(dbSentence.sentenceEn, dbSentence.audioKey, audioIndex);
+      const newValue = generateSentenceEnValue(dbSentence.sentenceEn, dbSentence.audioFilename);
       if (newValue === oldValue) {
         state.skippedSame += 1;
         state.processed += 1;

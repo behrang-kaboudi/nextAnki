@@ -8,6 +8,7 @@ import { createAnkiOperations } from "@/lib/anki";
 import { AnkiNoteTypes } from "@/lib/anki";
 
 const DEFAULT_QUERY = `note:"${AnkiNoteTypes.META_LEX_VR9}"`;
+const NOTES_INFO_BATCH_SIZE = 1000;
 
 function chunk<T>(arr: T[], size: number) {
   const out: T[][] = [];
@@ -55,8 +56,11 @@ export async function POST(req: Request) {
     const limitRaw = Number((body as { limit?: unknown })?.limit ?? 5000);
     const limit = Number.isFinite(limitRaw) ? Math.max(1, Math.min(50_000, Math.trunc(limitRaw))) : 5000;
 
-    const client = createAnkiOperations({ timeoutMs: 15_000 });
-    const noteIdsRes = await client.findNotes({ query });
+    const client = createAnkiOperations({ timeoutMs: 30_000 });
+    const [noteIdsRes, wordRows] = await Promise.all([
+      client.findNotes({ query }),
+      prisma.word.findMany({ select: { anki_link_id: true } }),
+    ]);
     if (!noteIdsRes.ok) {
       return NextResponse.json({ ok: false, error: noteIdsRes.error }, { status: 502 });
     }
@@ -72,7 +76,7 @@ export async function POST(req: Request) {
       fields: Record<string, { value: string; order: number }>;
     }> = [];
 
-    for (const group of chunk(allNoteIds, 200)) {
+    for (const group of chunk(allNoteIds, NOTES_INFO_BATCH_SIZE)) {
       const res = await client.notesInfo({ notes: group });
       if (!res.ok || !res.result) {
         return NextResponse.json({ ok: false, error: res.ok ? "Failed to read notesInfo from AnkiConnect." : res.error }, { status: 502 });
@@ -89,15 +93,7 @@ export async function POST(req: Request) {
       })
       .filter((r) => r.anki_link_id);
 
-    const ids = Array.from(new Set(records.map((r) => r.anki_link_id!)));
-    const existing = new Set<string>();
-    for (const group of chunk(ids, 500)) {
-      const rows = await prisma.word.findMany({
-        where: { anki_link_id: { in: group } },
-        select: { anki_link_id: true },
-      });
-      for (const r of rows) existing.add(r.anki_link_id);
-    }
+    const existing = new Set(wordRows.map((row) => row.anki_link_id));
 
     const missing = records
       .filter((r) => r.anki_link_id && !existing.has(r.anki_link_id))

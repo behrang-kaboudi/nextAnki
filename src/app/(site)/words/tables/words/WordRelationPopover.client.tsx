@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 
 export type RelationPopoverField = {
@@ -11,7 +11,7 @@ export type RelationPopoverField = {
   multiline?: boolean;
 };
 
-type PopoverPosition = { top: number; left: number };
+type PopoverPosition = { top: number; left: number; maxHeight: number };
 
 export default function WordRelationPopover({
   label,
@@ -27,13 +27,51 @@ export default function WordRelationPopover({
   const [position, setPosition] = useState<PopoverPosition | null>(null);
 
   const close = () => setPosition(null);
+  const updatePosition = useCallback(() => {
+    const button = buttonRef.current;
+    const popover = popoverRef.current;
+    if (!button || !popover) return;
+
+    const margin = 8;
+    const gap = 6;
+    const anchor = button.getBoundingClientRect();
+    const width = Math.min(popover.offsetWidth || 416, window.innerWidth - margin * 2);
+    const desiredHeight = Math.min(popover.scrollHeight, window.innerHeight - margin * 2);
+    const spaceBelow = window.innerHeight - anchor.bottom - gap - margin;
+    const spaceAbove = anchor.top - gap - margin;
+    const placeBelow =
+      spaceBelow >= Math.min(desiredHeight, 240) || spaceBelow >= spaceAbove;
+    const maxHeight = Math.max(96, placeBelow ? spaceBelow : spaceAbove);
+    const renderedHeight = Math.min(desiredHeight, maxHeight);
+    const top = placeBelow
+      ? Math.min(anchor.bottom + gap, window.innerHeight - margin - renderedHeight)
+      : Math.max(margin, anchor.top - gap - renderedHeight);
+    const preferredLeft =
+      anchor.left + width <= window.innerWidth - margin
+        ? anchor.left
+        : anchor.right - width;
+    const left = Math.max(
+      margin,
+      Math.min(preferredLeft, window.innerWidth - margin - width),
+    );
+
+    setPosition((current) =>
+      current &&
+      current.top === top &&
+      current.left === left &&
+      current.maxHeight === maxHeight
+        ? current
+        : { top, left, maxHeight },
+    );
+  }, []);
+
   const open = () => {
-    const rect = buttonRef.current?.getBoundingClientRect();
-    if (!rect) return;
     setPosition({
-      top: Math.min(rect.bottom + 6, window.innerHeight - 24),
-      left: Math.max(8, Math.min(rect.left, window.innerWidth - 440)),
+      top: 8,
+      left: 8,
+      maxHeight: Math.max(96, window.innerHeight - 16),
     });
+    requestAnimationFrame(updatePosition);
   };
 
   useEffect(() => {
@@ -52,15 +90,15 @@ export default function WordRelationPopover({
     };
     window.addEventListener("pointerdown", onPointerDown);
     window.addEventListener("keydown", onKeyDown);
-    window.addEventListener("resize", close);
-    window.addEventListener("scroll", close, true);
+    window.addEventListener("resize", updatePosition);
+    window.addEventListener("scroll", updatePosition, true);
     return () => {
       window.removeEventListener("pointerdown", onPointerDown);
       window.removeEventListener("keydown", onKeyDown);
-      window.removeEventListener("resize", close);
-      window.removeEventListener("scroll", close, true);
+      window.removeEventListener("resize", updatePosition);
+      window.removeEventListener("scroll", updatePosition, true);
     };
-  }, [position]);
+  }, [position, updatePosition]);
 
   return (
     <>
@@ -80,7 +118,7 @@ export default function WordRelationPopover({
               ref={popoverRef}
               role="dialog"
               aria-label={label}
-              className="fixed z-50 max-h-[min(32rem,calc(100vh-2rem))] w-[min(26rem,calc(100vw-1rem))] overflow-auto rounded border bg-background p-3 text-left text-xs shadow-xl"
+              className="fixed z-50 w-[min(26rem,calc(100vw-1rem))] overflow-auto rounded border bg-background p-3 text-left text-xs shadow-xl"
               style={position}
             >
               <div className="mb-2 flex items-center justify-between gap-3 border-b pb-2 font-medium">

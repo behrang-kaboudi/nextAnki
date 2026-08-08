@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import {
   buildWordFieldAudioFilenameTemplate,
@@ -9,6 +10,12 @@ import {
   WORD_AUDIO_PUBLIC_DIR_RELATIVE,
 } from "@/lib/audio/wordFieldAudioNaming";
 import { ActionIcon } from "@/components/icons";
+import {
+  buildSentenceAudioFilenameTemplate,
+  getSentenceAudioPublicPath,
+  isSentenceAudioField,
+  SENTENCE_AUDIO_PUBLIC_DIR_RELATIVE,
+} from "@/lib/audio/sentenceAudioNaming";
 
 export default function WordFieldVoiceCell({
   field,
@@ -19,6 +26,7 @@ export default function WordFieldVoiceCell({
   audioKey: string | null;
   text: string | null;
 }) {
+  const router = useRouter();
   const normalized = useMemo(() => String(text ?? "").trim(), [text]);
   const normalizedAudioKey = useMemo(() => {
     const value = typeof audioKey === "string" ? audioKey.trim() : "";
@@ -39,9 +47,21 @@ export default function WordFieldVoiceCell({
   const chunksRef = useRef<BlobPart[]>([]);
 
   const exampleFilename = useMemo(
-    () => buildWordFieldAudioFilenameTemplate({ audioKey: normalizedAudioKey ?? undefined, field }),
+    () => isSentenceAudioField(field) && normalizedAudioKey && Number.isSafeInteger(Number(normalizedAudioKey))
+      ? buildSentenceAudioFilenameTemplate(Number(normalizedAudioKey), field)
+      : buildWordFieldAudioFilenameTemplate({ audioKey: normalizedAudioKey ?? undefined, field }),
     [normalizedAudioKey, field]
   );
+
+  const publicPathForFilename = useCallback(
+    (filename: string) => isSentenceAudioField(field)
+      ? getSentenceAudioPublicPath(filename)
+      : getWordFieldAudioPublicPath(filename),
+    [field],
+  );
+  const audioFolder = isSentenceAudioField(field)
+    ? SENTENCE_AUDIO_PUBLIC_DIR_RELATIVE
+    : WORD_AUDIO_PUBLIC_DIR_RELATIVE;
 
   const fetchLatest = useCallback(async () => {
     if (!normalizedAudioKey) {
@@ -89,21 +109,22 @@ export default function WordFieldVoiceCell({
         typeof data.publicPath === "string" && data.publicPath.trim()
           ? data.publicPath
           : typeof data.filename === "string" && data.filename.trim()
-            ? getWordFieldAudioPublicPath(data.filename)
+            ? publicPathForFilename(data.filename)
             : null;
       setPublicPath(nextPublicPath);
       const nextSize = typeof data.size === "number" ? data.size : 0;
       setSize(nextSize);
       setExists(Boolean(nextPublicPath) && nextSize > 0);
-        window.dispatchEvent(
+      window.dispatchEvent(
         new CustomEvent("wordFieldVoice:updated", { detail: { audioKey: normalizedAudioKey, field } })
       );
+      router.refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
       setBusy(false);
     }
-  }, [normalizedAudioKey, busy, enabled, field, normalized, recording]);
+  }, [normalizedAudioKey, busy, enabled, field, normalized, publicPathForFilename, recording, router]);
 
   const deleteAll = useCallback(async () => {
     if (!enabled || busy || recording) return;
@@ -116,7 +137,7 @@ export default function WordFieldVoiceCell({
       const res = await fetch("/api/words/field-voice-delete-all", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ audioKey, field }),
+        body: JSON.stringify({ audioKey: normalizedAudioKey, field }),
       });
       const data = (await res.json().catch(() => null)) as
         | { ok?: boolean; error?: string; deleted?: number; failed?: number }
@@ -128,12 +149,13 @@ export default function WordFieldVoiceCell({
       setSize(0);
       window.dispatchEvent(new CustomEvent("wordFieldVoice:updated", { detail: { audioKey: normalizedAudioKey, field } }));
       void fetchLatest();
+      router.refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
       setBusy(false);
     }
-  }, [normalizedAudioKey, busy, enabled, fetchLatest, field, recording]);
+  }, [normalizedAudioKey, busy, enabled, fetchLatest, field, recording, router]);
 
   const stopRecording = useCallback((opts?: { skipRecorderStop?: boolean }) => {
     if (!opts?.skipRecorderStop) {
@@ -179,7 +201,7 @@ export default function WordFieldVoiceCell({
           typeof data.publicPath === "string" && data.publicPath.trim()
             ? data.publicPath
             : typeof data.filename === "string" && data.filename.trim()
-              ? getWordFieldAudioPublicPath(data.filename)
+              ? publicPathForFilename(data.filename)
               : null;
 
         setPublicPath(nextPublicPath);
@@ -188,13 +210,14 @@ export default function WordFieldVoiceCell({
         setExists(Boolean(nextPublicPath) && nextSize > 0);
 
         window.dispatchEvent(new CustomEvent("wordFieldVoice:updated", { detail: { audioKey: normalizedAudioKey, field } }));
+        router.refresh();
       } catch (e) {
         setError(e instanceof Error ? e.message : String(e));
       } finally {
         setBusy(false);
       }
     },
-    [normalizedAudioKey, enabled, field]
+    [normalizedAudioKey, enabled, field, publicPathForFilename, router]
   );
 
   const startRecording = useCallback(async () => {
@@ -311,7 +334,7 @@ export default function WordFieldVoiceCell({
         type="button"
         onClick={() => void generate()}
         disabled={busy || recording}
-        title={`Folder: public/${WORD_AUDIO_PUBLIC_DIR_RELATIVE}\nExample: ${exampleFilename}`}
+        title={`Folder: public/${audioFolder}\nExample: ${exampleFilename}`}
         aria-label="Generate audio"
         className="inline-flex items-center rounded border p-1.5 text-[11px] hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5"
       >

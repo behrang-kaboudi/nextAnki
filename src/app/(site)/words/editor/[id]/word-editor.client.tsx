@@ -1,65 +1,54 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState, type FocusEvent } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import WordFieldVoiceCell from "@/app/(site)/words/hints/WordFieldVoiceCell.client";
-import { SpecialCharactersBar } from "@/components/ipa/SpecialCharactersBar";
-import JsonHintPreviewModal from "./JsonHintPreviewModal.client";
-import OpenPersianWordEditorModal from "../../tables/persian-words/OpenPersianWordEditorModal.client";
+import SentenceEditorModal from "@/app/(site)/sentences/editor/SentenceEditorModal.client";
+import EnglishWordRowActions from "@/app/(site)/words/tables/english-words/EnglishWordRowActions.client";
+import OpenPersianWordEditorModal from "@/app/(site)/words/tables/persian-words/OpenPersianWordEditorModal.client";
+import { ModalPortal } from "@/components/modal-portal";
 
 const WORD_AUDIO_FIELDS = [
-  "base_form",
   "other_meanings_en",
   "concept_explained_fa",
-  "sentence_en",
-  "sentence_en_meaning_fa",
-] as const;
-
-const IPA_SPECIAL_CHARACTERS = [
-  "æ",
-  "ɪ",
-  "ɜ",
-  "ə",
-  "ʊ",
-  "ʌ",
-  "ʔ",
-  "ʧ",
-  "ʤ",
-  "ɑ",
-  "ɔ",
-  "ŋ",
-  "θ",
-  "ð",
-  "ʃ",
-  "ʒ",
-  "ɡ",
 ] as const;
 
 export type WordEditorState = {
   id: number;
   anki_link_id: string;
-  sentenceRecordId: number | null;
+  englishId: number;
+  sentenceId: number | null;
+  sentenceIds: number[];
   meaningId: number | null;
   otherMeaningIds: number[];
-  primaryMeaning: { id: number; canonical_text: string; meaning_fa_IPA: string | null; meaning_fa_IPA_normalize: string | null } | null;
-  otherMeanings: Array<{ id: number; canonical_text: string; meaning_fa_IPA: string | null; meaning_fa_IPA_normalize: string | null }>;
-
-  base_form: string;
-  phonetic_us: string | null;
-  phonetic_us_normalized: string | null;
-  meaning_fa: string;
-  meaning_fa_IPA: string;
-  meaning_fa_IPA_normalized: string;
+  comparedMeaningWordIds: number[];
+  synonymIds: number[];
+  meanings_confirmed: boolean;
+  english: {
+    id: number;
+    base_form: string;
+    phonetic_us: string | null;
+    phonetic_us_confirmed: boolean;
+    phonetic_us_normalized: string | null;
+    json_hint: string | null;
+    audio_file_name: string | null;
+  };
+  meaningLabel: string | null;
+  sentence: {
+    id: number;
+    sentence_en: string;
+    sentence_en_meaning_fa: string | null;
+    sentence_en_audio_file_name: string | null;
+    sentence_en_meaning_fa_audio_file_name: string | null;
+    createdAt: string;
+    updatedAt: string;
+  } | null;
   pos: string | null;
   concept_explained_fa: string | null;
-  sentence_en: string;
-  sentence_en_meaning_fa: string | null;
   learning_depth: number | null;
-  other_meanings_fa: string | null;
   other_meanings_en: string | null;
   category: string | null;
   hint_to_select: string | null;
-  json_hint: string | null;
   imageability: number | null;
   productive_target: number | null;
 
@@ -67,35 +56,53 @@ export type WordEditorState = {
   updatedAt: string;
 };
 
-type EditableFieldKey =
-  | "base_form"
-  | "phonetic_us"
-  | "pos"
-  | "sentence_en"
-  | "sentence_en_meaning_fa"
-  | "other_meanings_en"
-  | "concept_explained_fa"
-  | "phonetic_us_normalized"
-  | "phonetic_us_normalized"
-  | "learning_depth"
-  | "imageability"
-  | "productive_target"
-  | "category"
-  | "hint_to_select"
-  ;
-
 function InputRow({
   label,
   children,
+  className = "",
 }: {
   label: string;
   children: React.ReactNode;
+  className?: string;
 }) {
   return (
-    <div className="grid gap-1">
+    <div className={`min-w-0 grid content-start gap-1 ${className}`}>
       <div className="text-xs font-semibold text-muted">{label}</div>
       {children}
     </div>
+  );
+}
+
+const relationCardClass =
+  "min-w-0 rounded-xl border border-card bg-background px-3 py-2.5 text-left shadow-sm";
+const relationButtonClass = `${relationCardClass} w-full transition hover:border-foreground/30 hover:bg-black/[0.03] active:scale-[0.98] dark:hover:bg-white/[0.04]`;
+
+function RelationCardContent({
+  label,
+  value,
+  detail,
+  editable = false,
+}: {
+  label: string;
+  value: string;
+  detail?: string;
+  editable?: boolean;
+}) {
+  return (
+    <span className="block min-w-0">
+      <span className="flex items-center justify-between gap-2 text-xs font-semibold text-muted">
+        {label}
+        {editable ? <span className="text-[10px] font-medium text-foreground/60">Edit ↗</span> : null}
+      </span>
+      <span className="mt-1 block truncate font-mono text-base font-semibold" title={value}>
+        {value}
+      </span>
+      {detail ? (
+        <span className="mt-0.5 block truncate text-[11px] opacity-60" title={detail}>
+          {detail}
+        </span>
+      ) : null}
+    </span>
   );
 }
 
@@ -109,6 +116,188 @@ function asNullableNumber(raw: string) {
   if (!t) return null;
   const n = Number(t);
   return Number.isFinite(n) ? n : null;
+}
+
+function parseIdList(raw: string): number[] | null {
+  const trimmed = raw.trim();
+  if (!trimmed) return [];
+
+  try {
+    const values = trimmed.startsWith("[")
+      ? (JSON.parse(trimmed) as unknown)
+      : trimmed.split(/[\s,]+/).filter(Boolean).map(Number);
+    if (
+      !Array.isArray(values) ||
+      !values.every(
+        (value) => typeof value === "number" && Number.isInteger(value) && value > 0,
+      ) ||
+      new Set(values).size !== values.length
+    ) {
+      return null;
+    }
+    return values;
+  } catch {
+    return null;
+  }
+}
+
+function IdListInput({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: number[];
+  onChange: (value: number[]) => void;
+}) {
+  const [draft, setDraft] = useState(() => value.join(", "));
+  const parsed = useMemo(() => parseIdList(draft), [draft]);
+
+  useEffect(() => {
+    setDraft(value.join(", "));
+  }, [value]);
+
+  return (
+    <InputRow label={label}>
+      <input
+        value={draft}
+        onChange={(event) => {
+          const nextDraft = event.target.value;
+          setDraft(nextDraft);
+          const nextValue = parseIdList(nextDraft);
+          if (nextValue) onChange(nextValue);
+        }}
+        aria-invalid={parsed === null}
+        className="w-full rounded border px-3 py-2 font-mono text-sm aria-invalid:border-red-500"
+        placeholder="1, 2, 3 (empty array allowed)"
+      />
+      {parsed === null ? (
+        <div className="text-xs text-red-600">
+          Use unique positive integer IDs separated by commas, or a JSON array.
+        </div>
+      ) : null}
+    </InputRow>
+  );
+}
+
+function SentenceIdEditor({
+  value,
+  sentence,
+  onChange,
+}: {
+  value: number | null;
+  sentence: WordEditorState["sentence"];
+  onChange: (value: number | null) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [draft, setDraft] = useState("");
+  const trimmed = draft.trim();
+  const parsed = trimmed ? Number(trimmed) : null;
+  const valid =
+    parsed === null || (Number.isInteger(parsed) && parsed > 0);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [open]);
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => {
+          setDraft(value == null ? "" : String(value));
+          setOpen(true);
+        }}
+        className={relationButtonClass}
+      >
+        <RelationCardContent
+          label="sentenceId"
+          value={value == null ? "—" : String(value)}
+          detail={
+            sentence?.id === value
+              ? sentence.sentence_en
+              : value == null
+                ? "Click to link a Sentence"
+                : "Unsaved Sentence relation"
+          }
+          editable
+        />
+      </button>
+
+      {open ? (
+        <ModalPortal>
+        <div
+          className="fixed inset-0 z-[90] flex items-center justify-center bg-black/55 p-4 backdrop-blur-sm"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Edit sentenceId"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setOpen(false);
+          }}
+        >
+          <div className="w-full max-w-md rounded-2xl border border-card bg-background p-5 shadow-elevated">
+            <div className="text-base font-semibold">Edit Word.sentenceId</div>
+            <p className="mt-1 text-xs opacity-70">
+              Enter an existing Sentence ID. Leave it empty to remove the relation.
+            </p>
+            <label className="mt-4 grid gap-1 text-sm">
+              <span className="text-xs font-semibold text-muted">sentenceId</span>
+              <input
+                type="number"
+                min={1}
+                step={1}
+                autoFocus
+                value={draft}
+                onChange={(event) => setDraft(event.target.value)}
+                aria-invalid={!valid}
+                className="rounded border px-3 py-2 font-mono text-base aria-invalid:border-red-500"
+                placeholder="null"
+              />
+            </label>
+            {!valid ? (
+              <div className="mt-2 text-xs text-red-600">
+                sentenceId must be a positive integer or empty.
+              </div>
+            ) : null}
+            {sentence && sentence.id === value ? (
+              <div className="mt-4 rounded-xl border border-card p-3">
+                <div className="mb-2 truncate text-xs opacity-70" title={sentence.sentence_en}>
+                  Linked Sentence: {sentence.sentence_en}
+                </div>
+                <SentenceEditorModal item={sentence} />
+              </div>
+            ) : null}
+            <div className="mt-5 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                className="rounded border px-3 py-2 text-sm hover:bg-black/5 dark:hover:bg-white/5"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={!valid}
+                onClick={() => {
+                  onChange(parsed);
+                  setOpen(false);
+                }}
+                className="rounded bg-foreground px-4 py-2 text-sm font-semibold text-background disabled:opacity-50"
+              >
+                Apply to form
+              </button>
+            </div>
+          </div>
+        </div>
+        </ModalPortal>
+      ) : null}
+    </>
+  );
 }
 
 export default function WordEditorClient({
@@ -135,8 +324,6 @@ export default function WordEditorClient({
   const [error, setError] = useState<string | null>(null);
   const [warning, setWarning] = useState<string | null>(null);
   const [savedAt, setSavedAt] = useState<string | null>(null);
-  const [activeField, setActiveField] = useState<EditableFieldKey | null>(null);
-  const lastFocusedInputRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
   const lastUrlRef = useRef<string>("");
 
   const dirty = useMemo(() => JSON.stringify(word) !== JSON.stringify(baseline), [word, baseline]);
@@ -149,67 +336,12 @@ export default function WordEditorClient({
     return String(value ?? "").trim();
   }
 
-  const missingRequiredFields = useMemo(() => {
-    const missing: string[] = [];
-    if (!word.base_form.trim()) missing.push("base_form");
-    if (!word.sentence_en.trim()) missing.push("sentence_en");
-    return missing;
-  }, [word.base_form, word.sentence_en]);
-
-  const requiredOk = missingRequiredFields.length === 0;
-
-  const registerFieldFocus = useCallback((field: EditableFieldKey) => {
-    return (e: FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      lastFocusedInputRef.current = e.currentTarget;
-      setActiveField(field);
-    };
-  }, []);
-
-  const insertSpecialChar = useCallback(
-    (character: string) => {
-      const element = lastFocusedInputRef.current;
-      const field = activeField;
-      if (!element || !field) return;
-
-      const start = element.selectionStart ?? element.value.length;
-      const end = element.selectionEnd ?? element.value.length;
-      const nextValue = element.value.slice(0, start) + character + element.value.slice(end);
-      const nextCursor = start + character.length;
-
-      setWord((prev) => {
-        const cur = prev as unknown as Record<string, unknown>;
-        const existing = cur[field];
-        if (typeof existing === "number") {
-          const n = Number(nextValue);
-          return { ...prev, [field]: Number.isFinite(n) ? n : existing } as WordEditorState;
-        }
-        if (existing === null) return { ...prev, [field]: nextValue } as WordEditorState;
-        return { ...prev, [field]: nextValue } as WordEditorState;
-      });
-
-      requestAnimationFrame(() => {
-        try {
-          element.focus();
-          element.setSelectionRange(nextCursor, nextCursor);
-        } catch {
-          // ignore
-        }
-      });
-    },
-    [activeField],
-  );
-
   async function save(opts?: SaveOptions) {
     if (savingRef.current) {
       if (opts?.force) pendingAudioSaveRef.current = { field: opts.audioUpdatedField };
       return;
     }
-    if (!opts?.force && (!dirty || !requiredOk)) {
-      if (dirty && !requiredOk) {
-        setWarning(`Please fill required fields before saving: ${missingRequiredFields.join(", ")}`);
-      }
-      return;
-    }
+    if (!opts?.force && !dirty) return;
 
     savingRef.current = true;
     setSaving(true);
@@ -232,74 +364,44 @@ export default function WordEditorClient({
         body: JSON.stringify({
           id: word.id,
           data: {
-            base_form: word.base_form,
-            phonetic_us: word.phonetic_us,
+            sentenceId: word.sentenceId,
             pos: word.pos,
             concept_explained_fa: word.concept_explained_fa,
-            sentence_en: word.sentence_en,
-            sentence_en_meaning_fa: word.sentence_en_meaning_fa,
             learning_depth: word.learning_depth,
             other_meanings_en: word.other_meanings_en,
             category: word.category,
             hint_to_select: word.hint_to_select,
             imageability: word.imageability,
             productive_target: word.productive_target,
+            sentenceIds: word.sentenceIds,
+            otherMeaningIds: word.otherMeaningIds,
+            comparedMeaningWordIds: word.comparedMeaningWordIds,
+            synonymIds: word.synonymIds,
+            meanings_confirmed: word.meanings_confirmed,
           },
         }),
       });
       const json = (await res.json().catch(() => null)) as
         | {
             ok?: boolean;
-            item?:
-              | {
-                  sentenceRecordId?: number | null;
-                  updatedAt?: string;
-                  phonetic_us_normalized?: string | null;
-                  json_hint?: string | null;
-                }
-              | null;
+            item?: WordEditorState | null;
             error?: string;
           }
         | null;
       if (!res.ok || json?.ok !== true) throw new Error(json?.error || `Request failed (${res.status})`);
-      const updatedAt = String(json?.item?.updatedAt ?? "");
-      const phonetic_us_normalized =
-        json?.item && "phonetic_us_normalized" in json.item ? (json.item.phonetic_us_normalized ?? null) : null;
-      const json_hint = json?.item && "json_hint" in json.item ? (json.item.json_hint ?? null) : null;
-      const sentenceRecordId =
-        json?.item && "sentenceRecordId" in json.item ? (json.item.sentenceRecordId ?? null) : word.sentenceRecordId;
+      const savedWord = json.item;
 
-      if (updatedAt) {
-        setWord((prev) => ({
-          ...prev,
-          sentenceRecordId,
-          updatedAt,
-          phonetic_us_normalized,
-          json_hint,
-        }));
-        setBaseline({
-          ...word,
-          sentenceRecordId,
-          updatedAt,
-          phonetic_us_normalized,
-          json_hint,
-        });
+      if (savedWord) {
+        setWord(savedWord);
+        setBaseline(savedWord);
       } else {
-        setBaseline({ ...word, sentenceRecordId, phonetic_us_normalized, json_hint });
+        setBaseline(word);
       }
-
-      const getAudioKeyForField = (field: (typeof WORD_AUDIO_FIELDS)[number]) =>
-        field === "sentence_en" || field === "sentence_en_meaning_fa"
-          ? sentenceRecordId != null
-            ? String(sentenceRecordId)
-            : null
-          : word.anki_link_id;
 
       if (audioFieldsToDelete.length) {
         const results = await Promise.allSettled(
           audioFieldsToDelete.map(async (field) => {
-            const audioKey = getAudioKeyForField(field);
-            if (!audioKey) return;
+            const audioKey = word.anki_link_id;
             const delRes = await fetch("/api/words/field-voice-delete-all", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -424,53 +526,74 @@ export default function WordEditorClient({
       const fieldRaw = detail.field;
       const field = typeof fieldRaw === "string" && (WORD_AUDIO_FIELDS as readonly string[]).includes(fieldRaw) ? fieldRaw : null;
       if (!field) return;
-      const expectedAudioKey =
-        field === "sentence_en" || field === "sentence_en_meaning_fa"
-          ? word.sentenceRecordId != null
-            ? String(word.sentenceRecordId)
-            : null
-          : word.anki_link_id;
+      const expectedAudioKey = word.anki_link_id;
       if (!expectedAudioKey || detail.audioKey !== expectedAudioKey) return;
       void saveRef.current?.({ force: true, audioUpdatedField: field as SaveOptions["audioUpdatedField"] });
     };
 
     window.addEventListener("wordFieldVoice:updated", onAudioUpdated);
     return () => window.removeEventListener("wordFieldVoice:updated", onAudioUpdated);
-  }, [word.anki_link_id, word.sentenceRecordId]);
+  }, [word.anki_link_id]);
 
   const statusText = saving
     ? "Saving…"
     : dirty
-      ? requiredOk
-        ? "Unsaved changes"
-        : "Unsaved (required fields missing)"
+      ? "Unsaved changes"
       : "Saved";
 
   const statusMetaText = saving
     ? null
     : dirty
-      ? requiredOk
-        ? null
-        : `missing: ${missingRequiredFields.join(", ")}`
+      ? null
       : `updatedAt: ${word.updatedAt}`;
 
   return (
-    <div className="grid gap-4 pb-24">
-      <div className="rounded-2xl border border-card bg-background p-4">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="text-sm">
-            <div className="font-mono text-xs opacity-80">anki_link_id: {word.anki_link_id}</div>
-            <div className="font-mono text-xs opacity-80">createdAt: {word.createdAt}</div>
-            <div className="font-mono text-xs opacity-80">updatedAt: {word.updatedAt}</div>
-            <div className="font-mono text-xs opacity-80">
-              phonetic_us_normalized: {word.phonetic_us_normalized ?? "—"}
+    <div className={`grid gap-3 ${floatingActions ? "pb-24" : "pb-2"}`}>
+      <div className="sticky top-0 z-10 rounded-2xl border border-card bg-background/95 p-3 shadow-sm backdrop-blur sm:p-4">
+        <div className="grid gap-3">
+          <div className="grid grid-cols-2 gap-2 md:grid-cols-3 xl:grid-cols-5">
+            <div className={relationCardClass}>
+              <RelationCardContent label="Word id" value={String(word.id)} detail="Current Word record" />
             </div>
-            <div className="font-mono text-xs opacity-80">
-              primary PersianWord IPA: {word.primaryMeaning?.meaning_fa_IPA_normalize ?? "—"}
+            <div className={relationCardClass}>
+              <RelationCardContent label="anki_link_id" value={word.anki_link_id} detail="External Anki identity" />
             </div>
+            <EnglishWordRowActions
+              item={word.english}
+              showAudio={false}
+              showDelete={false}
+              editTriggerClassName={relationButtonClass}
+              editTrigger={<RelationCardContent label="englishId" value={String(word.englishId)} detail={word.english.base_form} editable />}
+            />
+            {word.meaningId ? (
+              <OpenPersianWordEditorModal
+                id={word.meaningId}
+                label={word.meaningLabel ?? `PersianWord ${word.meaningId}`}
+                triggerClassName={relationButtonClass}
+                trigger={<RelationCardContent label="meaningId" value={String(word.meaningId)} detail={word.meaningLabel ?? "PersianWord"} editable />}
+              />
+            ) : (
+              <div className={`${relationCardClass} opacity-60`}>
+                <RelationCardContent label="meaningId" value="—" detail="No linked PersianWord" />
+              </div>
+            )}
+            <SentenceIdEditor
+              value={word.sentenceId}
+              sentence={word.sentence}
+              onChange={(sentenceId) =>
+                setWord((current) => ({ ...current, sentenceId }))
+              }
+            />
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-card pt-3">
+            <div className="min-w-0 truncate font-mono text-[10px] opacity-60" title={`createdAt: ${word.createdAt} • updatedAt: ${word.updatedAt}`}>
+              updatedAt: {word.updatedAt}
+            </div>
+            <div className="flex flex-wrap items-center justify-end gap-2">
+            <span className={`text-xs ${dirty ? "text-amber-700 dark:text-amber-300" : "text-emerald-700 dark:text-emerald-300"}`}>
+              {statusText}
+            </span>
             <button
               type="button"
               onClick={() => setWord(baseline)}
@@ -482,7 +605,7 @@ export default function WordEditorClient({
             <button
               type="button"
               onClick={() => void save()}
-              disabled={saving || !dirty || !requiredOk}
+              disabled={saving || !dirty}
               className="rounded bg-foreground px-4 py-2 text-sm font-semibold text-background disabled:opacity-50"
             >
               {saving ? "Saving…" : "Save"}
@@ -490,11 +613,12 @@ export default function WordEditorClient({
             {onSaveAndClose ? <button
               type="button"
               onClick={() => void save({ closeAfterSave: true })}
-              disabled={saving || !dirty || !requiredOk}
+              disabled={saving || !dirty}
               className="rounded bg-foreground px-4 py-2 text-sm font-semibold text-background disabled:opacity-50"
             >
               {saving ? "Saving…" : "Save & Close"}
             </button> : null}
+            </div>
           </div>
         </div>
 
@@ -528,7 +652,7 @@ export default function WordEditorClient({
           <button
             type="button"
             onClick={() => void save()}
-            disabled={saving || !dirty || !requiredOk}
+            disabled={saving || !dirty}
             className="rounded-xl bg-foreground px-4 py-2 text-sm font-semibold text-background disabled:opacity-50"
           >
             {saving ? "Saving…" : "Save"}
@@ -536,7 +660,7 @@ export default function WordEditorClient({
           {onSaveAndClose ? <button
             type="button"
             onClick={() => void save({ closeAfterSave: true })}
-            disabled={saving || !dirty || !requiredOk}
+            disabled={saving || !dirty}
             className="rounded-xl bg-foreground px-4 py-2 text-sm font-semibold text-background disabled:opacity-50"
           >
             {saving ? "Saving…" : "Save & Close"}
@@ -544,236 +668,73 @@ export default function WordEditorClient({
         </div>
       ) : null}
 
-      <div className="grid gap-4 rounded-2xl border border-card bg-background p-4">
-        <div className="text-sm font-semibold">Main fields</div>
+      <section className="grid gap-4 rounded-2xl border border-card bg-background p-3 sm:p-4">
+        <div>
+          <h2 className="text-sm font-semibold">Short fields</h2>
+          <p className="mt-1 text-xs text-muted">Compact values share one row when space allows.</p>
+        </div>
 
-        <SpecialCharactersBar
-          characters={IPA_SPECIAL_CHARACTERS}
-          onPick={insertSpecialChar}
-          title="Special characters"
-          helpText="Click a field, then click a character."
-        />
-
-        <div className="grid gap-4 md:grid-cols-2">
-          <InputRow label="base_form">
-            <div className="flex items-center gap-2">
-              <input
-                value={word.base_form}
-                onChange={(e) => setWord((p) => ({ ...p, base_form: e.target.value }))}
-                onFocus={registerFieldFocus("base_form")}
-                className="w-full rounded border px-3 py-2 text-sm"
-              />
-              <WordFieldVoiceCell field="base_form" audioKey={word.anki_link_id} text={word.base_form} />
-            </div>
-          </InputRow>
-
-          <InputRow label="phonetic_us">
-            <input
-              value={word.phonetic_us ?? ""}
-              onChange={(e) => setWord((p) => ({ ...p, phonetic_us: asNullableString(e.target.value) }))}
-              onFocus={registerFieldFocus("phonetic_us")}
-              className="w-full rounded border px-3 py-2 text-sm"
-              placeholder="(nullable)"
-            />
-          </InputRow>
-
-          <InputRow label="meaning_fa">
-            <div className="rounded border bg-black/5 p-3 text-sm dark:bg-white/10" dir="rtl">
-              {word.primaryMeaning ? <div className="flex flex-wrap items-center gap-2"><span>{word.primaryMeaning.canonical_text}</span><span className="font-mono text-xs opacity-70">#{word.primaryMeaning.id} • {word.primaryMeaning.meaning_fa_IPA ?? "—"}</span><OpenPersianWordEditorModal id={word.primaryMeaning.id} label={word.primaryMeaning.canonical_text} /></div> : <span className="text-red-600">No primary PersianWord linked.</span>}
-            </div>
-          </InputRow>
-
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6">
           <InputRow label="pos">
-            <input
-              value={word.pos ?? ""}
-              onChange={(e) => setWord((p) => ({ ...p, pos: asNullableString(e.target.value) }))}
-              onFocus={registerFieldFocus("pos")}
-              className="w-full rounded border px-3 py-2 text-sm"
-              placeholder="(nullable)"
-            />
+            <input value={word.pos ?? ""} onChange={(e) => setWord((p) => ({ ...p, pos: asNullableString(e.target.value) }))} className="w-full rounded border px-2.5 py-2 text-sm" placeholder="nullable" />
+          </InputRow>
+          <InputRow label="category">
+            <input value={word.category ?? ""} onChange={(e) => setWord((p) => ({ ...p, category: asNullableString(e.target.value) }))} className="w-full rounded border px-2.5 py-2 text-sm" placeholder="nullable" />
+          </InputRow>
+          <InputRow label="learning_depth">
+            <input type="number" step="any" value={word.learning_depth == null ? "" : String(word.learning_depth)} onChange={(e) => setWord((p) => ({ ...p, learning_depth: asNullableNumber(e.target.value) }))} className="w-full rounded border px-2.5 py-2 text-sm" placeholder="number" />
+          </InputRow>
+          <InputRow label="imageability (0–100)">
+            <input type="number" min={0} max={100} step={1} value={word.imageability == null ? "" : String(word.imageability)} onChange={(e) => setWord((p) => ({ ...p, imageability: asNullableNumber(e.target.value) }))} className="w-full rounded border px-2.5 py-2 text-sm" placeholder="number" />
+          </InputRow>
+          <InputRow label="productive_target (0–101)">
+            <input type="number" min={0} max={101} step={1} value={word.productive_target == null ? "" : String(word.productive_target)} onChange={(e) => setWord((p) => ({ ...p, productive_target: asNullableNumber(e.target.value) }))} className="w-full rounded border px-2.5 py-2 text-sm" placeholder="integer" />
+          </InputRow>
+          <InputRow label="meanings_confirmed">
+            <label className="flex h-10 items-center gap-2 rounded border px-2.5 text-xs">
+              <input type="checkbox" checked={word.meanings_confirmed} onChange={(e) => setWord((p) => ({ ...p, meanings_confirmed: e.target.checked }))} />
+              <span>{word.meanings_confirmed ? "Confirmed" : "Not confirmed"}</span>
+            </label>
           </InputRow>
         </div>
+      </section>
 
-        <div className="grid gap-4 md:grid-cols-2">
-          <InputRow label="sentence_en">
-            <div className="flex items-center gap-2">
-              <textarea
-                value={word.sentence_en}
-                onChange={(e) => setWord((p) => ({ ...p, sentence_en: e.target.value }))}
-                onFocus={registerFieldFocus("sentence_en")}
-                className="min-h-[84px] w-full rounded border px-3 py-2 text-sm"
-              />
-              <WordFieldVoiceCell
-                field="sentence_en"
-                audioKey={word.sentenceRecordId != null ? String(word.sentenceRecordId) : null}
-                text={word.sentence_en}
-              />
-            </div>
-          </InputRow>
-
-          <InputRow label="sentence_en_meaning_fa">
-            <div className="flex items-center gap-2">
-              <textarea
-                value={word.sentence_en_meaning_fa ?? ""}
-                onChange={(e) => setWord((p) => ({ ...p, sentence_en_meaning_fa: asNullableString(e.target.value, { trim: false }) }))}
-                onFocus={registerFieldFocus("sentence_en_meaning_fa")}
-                className="min-h-[84px] w-full rounded border px-3 py-2 text-sm"
-                placeholder="(nullable)"
-              />
-              <WordFieldVoiceCell
-                field="sentence_en_meaning_fa"
-                audioKey={word.sentenceRecordId != null ? String(word.sentenceRecordId) : null}
-                text={word.sentence_en_meaning_fa}
-              />
-            </div>
-          </InputRow>
+      <section className="grid gap-4 rounded-2xl border border-card bg-background p-3 sm:p-4">
+        <div>
+          <h2 className="text-sm font-semibold">Text fields</h2>
+          <p className="mt-1 text-xs text-muted">Longer content keeps a wider editing area.</p>
         </div>
-
-        <div className="grid gap-4 md:grid-cols-2">
-          <InputRow label="other_meanings_fa">
-            <div className="rounded border bg-black/5 p-3 text-sm dark:bg-white/10" dir="rtl">
-              {word.otherMeanings.length ? <div className="grid gap-2">{word.otherMeanings.map((meaning) => <div key={meaning.id} className="flex flex-wrap items-center gap-2"><span>{meaning.canonical_text}</span><span className="font-mono text-xs opacity-70">#{meaning.id} • {meaning.meaning_fa_IPA ?? "—"}</span><OpenPersianWordEditorModal id={meaning.id} label={meaning.canonical_text} /></div>)}</div> : <span className="opacity-70">—</span>}
-            </div>
-          </InputRow>
-
+        <div className="grid gap-4 lg:grid-cols-2">
           <InputRow label="other_meanings_en">
-            <div className="grid gap-1">
-              <div className="text-xs text-muted">
-                Separate different English meanings with the <span className="font-mono">-</span> character.
-              </div>
-              <div className="flex items-center gap-2">
-                <textarea
-                  value={word.other_meanings_en ?? ""}
-                  onChange={(e) =>
-                    setWord((p) => ({
-                      ...p,
-                      other_meanings_en: asNullableString(e.target.value, { trim: false }),
-                    }))
-                  }
-                  onFocus={registerFieldFocus("other_meanings_en")}
-                  className="min-h-[84px] w-full rounded border px-3 py-2 text-sm"
-                  placeholder="meaning one-meaning two (nullable)"
-                />
-                <WordFieldVoiceCell
-                  field="other_meanings_en"
-                  audioKey={word.anki_link_id}
-                  text={word.other_meanings_en}
-                />
-              </div>
+            <div className="flex items-start gap-2">
+              <textarea value={word.other_meanings_en ?? ""} onChange={(e) => setWord((p) => ({ ...p, other_meanings_en: asNullableString(e.target.value, { trim: false }) }))} className="min-h-28 w-full resize-y rounded border px-3 py-2 text-sm" placeholder="nullable" />
+              <WordFieldVoiceCell field="other_meanings_en" audioKey={word.anki_link_id} text={word.other_meanings_en} />
             </div>
           </InputRow>
-
           <InputRow label="concept_explained_fa">
-            <div className="flex items-center gap-2">
-              <textarea
-                value={word.concept_explained_fa ?? ""}
-                onChange={(e) => setWord((p) => ({ ...p, concept_explained_fa: asNullableString(e.target.value, { trim: false }) }))}
-                onFocus={registerFieldFocus("concept_explained_fa")}
-                className="min-h-[84px] w-full rounded border px-3 py-2 text-sm"
-                placeholder="(nullable)"
-              />
-              <WordFieldVoiceCell
-                field="concept_explained_fa"
-                audioKey={word.anki_link_id}
-                text={word.concept_explained_fa}
-              />
+            <div className="flex items-start gap-2">
+              <textarea dir="rtl" value={word.concept_explained_fa ?? ""} onChange={(e) => setWord((p) => ({ ...p, concept_explained_fa: asNullableString(e.target.value, { trim: false }) }))} className="min-h-28 w-full resize-y rounded border px-3 py-2 text-sm" placeholder="nullable" />
+              <WordFieldVoiceCell field="concept_explained_fa" audioKey={word.anki_link_id} text={word.concept_explained_fa} />
             </div>
           </InputRow>
+          <InputRow label="hint_to_select" className="lg:col-span-2">
+            <textarea value={word.hint_to_select ?? ""} onChange={(e) => setWord((p) => ({ ...p, hint_to_select: asNullableString(e.target.value, { trim: false }) }))} className="min-h-20 w-full resize-y rounded border px-3 py-2 text-sm" placeholder="nullable" />
+          </InputRow>
         </div>
-      </div>
+      </section>
 
-      <details className="rounded-2xl border border-card bg-background p-4">
-        <summary className="cursor-pointer text-sm font-semibold">More fields</summary>
-        <div className="mt-4 grid gap-4">
-          <div className="grid gap-1">
-            <div className="flex items-center justify-between gap-2">
-              <div className="text-xs font-semibold text-muted">json_hint (LongText) (read-only)</div>
-              <JsonHintPreviewModal wordId={word.id} currentJsonHint={word.json_hint} />
-            </div>
-            <textarea
-              value={word.json_hint ?? ""}
-              readOnly
-              className="min-h-[220px] w-full rounded border bg-black/5 px-3 py-2 font-mono text-xs dark:bg-white/10"
-              placeholder="(nullable JSON)"
-            />
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <InputRow label="phonetic_us_normalized (auto)">
-              <input
-                value={word.phonetic_us_normalized ?? ""}
-                readOnly
-                className="w-full rounded border bg-black/5 px-3 py-2 text-sm dark:bg-white/10"
-                placeholder="(auto)"
-              />
-            </InputRow>
-
-            <InputRow label="learning_depth">
-              <input
-                value={word.learning_depth == null ? "" : String(word.learning_depth)}
-                onChange={(e) => setWord((p) => ({ ...p, learning_depth: asNullableNumber(e.target.value) }))}
-                onFocus={registerFieldFocus("learning_depth")}
-                className="w-full rounded border px-3 py-2 text-sm"
-                placeholder="(nullable number)"
-              />
-            </InputRow>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <InputRow label="imageability (0-100)">
-              <input
-                value={word.imageability == null ? "" : String(word.imageability)}
-                onChange={(e) => setWord((p) => ({ ...p, imageability: asNullableNumber(e.target.value) }))}
-                onFocus={registerFieldFocus("imageability")}
-                className="w-full rounded border px-3 py-2 text-sm"
-                placeholder="(nullable number)"
-              />
-            </InputRow>
-
-            <InputRow label="productive_target (0-101)">
-              <input
-                type="number"
-                min={0}
-                max={101}
-                step={1}
-                value={word.productive_target == null ? "" : String(word.productive_target)}
-                onChange={(e) => setWord((p) => ({ ...p, productive_target: asNullableNumber(e.target.value) }))}
-                onFocus={registerFieldFocus("productive_target")}
-                className="w-full rounded border px-3 py-2 text-sm"
-                placeholder="(nullable integer)"
-              />
-            </InputRow>
-
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <InputRow label="category">
-              <input
-                value={word.category ?? ""}
-                onChange={(e) => setWord((p) => ({ ...p, category: asNullableString(e.target.value) }))}
-                onFocus={registerFieldFocus("category")}
-                className="w-full rounded border px-3 py-2 text-sm"
-                placeholder="(nullable)"
-              />
-            </InputRow>
-
-          </div>
-
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <InputRow label="hint_to_select">
-              <input
-                value={word.hint_to_select ?? ""}
-                onChange={(e) => setWord((p) => ({ ...p, hint_to_select: asNullableString(e.target.value, { trim: false }) }))}
-                onFocus={registerFieldFocus("hint_to_select")}
-                className="w-full rounded border px-3 py-2 text-sm"
-                placeholder="(nullable)"
-              />
-            </InputRow>
-
-          </div>
+      <section className="grid gap-4 rounded-2xl border border-card bg-background p-3 sm:p-4">
+        <div>
+          <h2 className="text-sm font-semibold">ID collections</h2>
+          <p className="mt-1 text-xs text-muted">Enter comma-separated positive IDs or a JSON array.</p>
         </div>
-      </details>
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+          <IdListInput label="otherMeaningIds" value={word.otherMeaningIds} onChange={(otherMeaningIds) => setWord((p) => ({ ...p, otherMeaningIds }))} />
+          <IdListInput label="sentenceIds" value={word.sentenceIds} onChange={(sentenceIds) => setWord((p) => ({ ...p, sentenceIds }))} />
+          <IdListInput label="comparedMeaningWordIds" value={word.comparedMeaningWordIds} onChange={(comparedMeaningWordIds) => setWord((p) => ({ ...p, comparedMeaningWordIds }))} />
+          <IdListInput label="synonymIds" value={word.synonymIds} onChange={(synonymIds) => setWord((p) => ({ ...p, synonymIds }))} />
+        </div>
+      </section>
     </div>
   );
 }

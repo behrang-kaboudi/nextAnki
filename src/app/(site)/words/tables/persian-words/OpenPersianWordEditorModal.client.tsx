@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type FocusEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type FocusEvent, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 
 import { SpecialCharactersBar } from "@/components/ipa/SpecialCharactersBar";
+import { ModalPortal } from "@/components/modal-portal";
 
 import PersianWordAudioControls from "./PersianWordAudioControls.client";
 
@@ -16,7 +17,7 @@ function stringArray(value: unknown): string[] {
   return Array.isArray(value) && value.every((item) => typeof item === "string") ? value : [];
 }
 
-export default function OpenPersianWordEditorModal({ id, label }: { id: number; label: string }) {
+export default function OpenPersianWordEditorModal({ id, label, trigger, triggerClassName }: { id: number; label: string; trigger?: ReactNode; triggerClassName?: string }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [item, setItem] = useState<PersianWord | null>(null);
@@ -94,30 +95,30 @@ export default function OpenPersianWordEditorModal({ id, label }: { id: number; 
   };
 
   return <>
-    <button type="button" onClick={openEditor} className="rounded border px-2 py-1 text-[11px] transition active:scale-95 hover:bg-black/5 dark:hover:bg-white/5">Open</button>
-    {open ? <div className="fixed inset-0 z-50 bg-black/45 p-3 backdrop-blur-sm sm:p-6" role="dialog" aria-modal="true" aria-label={`Edit Persian word ${label}`} onMouseDown={(event) => event.target === event.currentTarget && close()}>
-      <div className="mx-auto flex h-full w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-card bg-background shadow-elevated">
-        <div className="flex items-center justify-between gap-3 border-b border-card px-4 py-3"><div className="min-w-0"><div className="truncate text-sm font-semibold">Edit PersianWord #{id} — {label}</div><div className="text-xs opacity-70">The normalized value is recalculated from canonical text when saved.</div></div><button type="button" onClick={close} className="rounded border px-3 py-2 text-sm transition active:scale-95 hover:bg-black/5 dark:hover:bg-white/5">Close</button></div>
-        <div className="flex-1 overflow-auto p-4">
+    <button type="button" onClick={openEditor} className={triggerClassName ?? "rounded border px-2 py-1 text-[11px] transition active:scale-95 hover:bg-black/5 dark:hover:bg-white/5"}>{trigger ?? "Open"}</button>
+    {open ? <ModalPortal><div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/55 p-3 backdrop-blur-sm sm:p-6" role="dialog" aria-modal="true" aria-label={`Edit Persian word ${label}`} onMouseDown={(event) => event.target === event.currentTarget && close()}>
+      <div className="flex h-[min(92dvh,60rem)] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-card bg-background shadow-elevated">
+        <div className="flex shrink-0 items-center justify-between gap-3 border-b border-card bg-background/95 px-4 py-3 backdrop-blur sm:px-6"><div className="min-w-0"><div className="truncate text-base font-semibold">Edit PersianWord #{id} — {label}</div><div className="text-xs opacity-70">The normalized value is recalculated from canonical text when saved.</div></div><button type="button" onClick={close} className="rounded border px-3 py-2 text-sm transition active:scale-95 hover:bg-black/5 dark:hover:bg-white/5">Close</button></div>
+        <div className="flex-1 overflow-auto p-4 sm:p-6">
           {busy && !item ? <div className="rounded border p-4 text-sm opacity-75">Loading…</div> : null}
           {error ? <div className="mb-4 rounded border border-red-500/30 bg-red-600/10 p-3 text-sm text-red-700">{error}</div> : null}
-          {item ? <div className="grid gap-4">
-            <label className="grid gap-1 text-sm">Canonical text<input value={item.canonical_text} onChange={(event) => update("canonical_text", event.target.value)} dir="rtl" className="rounded border px-3 py-2 text-base" /></label>
+          {item ? <div className="grid gap-4 lg:grid-cols-2">
+            <label className="grid gap-1 text-sm lg:col-span-2">Canonical text<input value={item.canonical_text} onChange={(event) => update("canonical_text", event.target.value)} dir="rtl" className="rounded border px-3 py-2 text-base" /></label>
             <label className="grid gap-1 text-sm">Normalized text <span className="rounded border bg-black/5 px-3 py-2 opacity-70" dir="rtl">{item.normalized_text}</span></label>
-            <SpecialCharactersBar characters={IPA_SPECIAL_CHARACTERS} onPick={insertSpecialChar} title="Special characters" helpText="Click a field, then click a character." />
             <label className="grid gap-1 text-sm">Persian IPA<input value={item.meaning_fa_IPA ?? ""} onChange={(event) => update("meaning_fa_IPA", event.target.value || null)} onFocus={registerIpaFocus} className="rounded border px-3 py-2" /></label>
             <label className="grid gap-1 text-sm">Normalized Persian IPA <span className="rounded border bg-black/5 px-3 py-2 opacity-70">{item.meaning_fa_IPA_normalize ?? "—"}</span></label>
-            <section className="rounded border border-amber-500/30 bg-amber-500/5 p-3 text-sm">
+            <div className="lg:col-span-2"><SpecialCharactersBar characters={IPA_SPECIAL_CHARACTERS} onPick={insertSpecialChar} title="Special characters" helpText="Click a field, then click a character." /></div>
+            <section className="rounded border border-amber-500/30 bg-amber-500/5 p-3 text-sm lg:col-span-2">
               <div className="font-semibold">Affected Word records ({references.length})</div>
               <p className="mt-1 text-xs opacity-80">Saving text, IPA, or audio here updates the sync timestamp of every listed Word.</p>
               {references.length ? <ul className="mt-2 max-h-36 space-y-1 overflow-auto font-mono text-xs">{references.map((reference) => <li key={reference.id}>#{reference.id} — {reference.base_form} <span className="opacity-70">({reference.roles.join(", ")})</span></li>)}</ul> : <p className="mt-2 text-xs opacity-70">No Word is currently linked to this PersianWord.</p>}
             </section>
-            <div className="flex flex-wrap items-end gap-2"><label className="grid flex-1 gap-1 text-sm">Audio file name <span className="rounded border bg-black/5 px-3 py-2 font-mono text-xs opacity-70">{item.audio_file_name ?? "—"}</span></label><PersianWordAudioControls id={id} filename={item.audio_file_name} onFilenameChange={(filename) => setItem((current) => current ? { ...current, audio_file_name: filename } : current)} /></div>
-            <label className="grid gap-1 text-sm">Original variants (JSON array)<textarea value={variants} onChange={(event) => { setVariants(event.target.value); setDirty(true); }} rows={6} className="rounded border px-3 py-2 font-mono text-xs" /></label>
-            <div className="flex items-center justify-end gap-2">{saved ? <span className="text-xs text-emerald-700 dark:text-emerald-400">Saved ✓</span> : null}<button type="button" disabled={busy || !dirty} onClick={() => void save()} className="rounded border px-4 py-2 text-sm transition active:scale-95 hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5">{busy ? "Saving…" : saved ? "Saved ✓" : "Save"}</button><button type="button" disabled={busy || !dirty} onClick={() => void save(true)} className="rounded border px-4 py-2 text-sm transition active:scale-95 hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5">{busy ? "Saving…" : "Save & Close"}</button></div>
+            <div className="flex flex-wrap items-end gap-2 lg:col-span-2"><label className="grid flex-1 gap-1 text-sm">Audio file name <span className="rounded border bg-black/5 px-3 py-2 font-mono text-xs opacity-70">{item.audio_file_name ?? "—"}</span></label><PersianWordAudioControls id={id} filename={item.audio_file_name} onFilenameChange={(filename) => setItem((current) => current ? { ...current, audio_file_name: filename } : current)} /></div>
+            <label className="grid gap-1 text-sm lg:col-span-2">Original variants (JSON array)<textarea value={variants} onChange={(event) => { setVariants(event.target.value); setDirty(true); }} rows={8} className="min-h-40 resize-y rounded border px-3 py-2 font-mono text-xs" /></label>
+            <div className="sticky bottom-0 -mx-2 flex items-center justify-end gap-2 border-t border-card bg-background/95 px-2 py-3 backdrop-blur lg:col-span-2">{saved ? <span className="text-xs text-emerald-700 dark:text-emerald-400">Saved ✓</span> : null}<button type="button" disabled={busy || !dirty} onClick={() => void save()} className="rounded border px-4 py-2 text-sm transition active:scale-95 hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5">{busy ? "Saving…" : saved ? "Saved ✓" : "Save"}</button><button type="button" disabled={busy || !dirty} onClick={() => void save(true)} className="rounded bg-foreground px-4 py-2 text-sm font-semibold text-background transition active:scale-95 disabled:opacity-50">{busy ? "Saving…" : "Save & Close"}</button></div>
           </div> : null}
         </div>
       </div>
-    </div> : null}
+    </div></ModalPortal> : null}
   </>;
 }

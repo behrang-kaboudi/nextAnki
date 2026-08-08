@@ -5,6 +5,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { WORD_AUDIO_FIELDS, sanitizeWordAudioFilenamePart, type WordAudioFieldKey } from "@/lib/audio/wordFieldAudioNaming";
 import { listWordFieldAudioIdsWithAnyNonZeroAudio } from "@/lib/words/wordFieldVoice";
+import { isSentenceAudioField } from "@/lib/audio/sentenceAudioNaming";
+import { getSentenceAudioFileInfo } from "@/lib/sentences/sentenceAudio.server";
 
 export const runtime = "nodejs";
 
@@ -26,6 +28,43 @@ export async function GET(req: Request) {
     );
   }
 
+  if (isSentenceAudioField(field)) {
+    const rows = await prisma.sentence.findMany({
+      select: {
+        sentence_en: true,
+        sentence_en_meaning_fa: true,
+        sentence_en_audio_file_name: true,
+        sentence_en_meaning_fa_audio_file_name: true,
+      },
+    });
+    let eligibleWords = 0;
+    let noTextWords = 0;
+    let withAudioWords = 0;
+    for (const row of rows) {
+      const text = field === "sentence_en" ? row.sentence_en : row.sentence_en_meaning_fa;
+      const filename = field === "sentence_en" ? row.sentence_en_audio_file_name : row.sentence_en_meaning_fa_audio_file_name;
+      if (!text?.trim()) {
+        noTextWords += 1;
+        continue;
+      }
+      eligibleWords += 1;
+      if (getSentenceAudioFileInfo(filename).size > 0) withAudioWords += 1;
+    }
+    const totalWords = rows.length;
+    const missingAudioWords = eligibleWords - withAudioWords;
+    return NextResponse.json({
+      ok: true,
+      field,
+      totalWords,
+      eligibleWords,
+      withAudioWords,
+      missingAudioWords,
+      noTextWords,
+      missingOfTotalRatio: totalWords ? missingAudioWords / totalWords : 0,
+      missingOfEligibleRatio: eligibleWords ? missingAudioWords / eligibleWords : 0,
+    }, { headers: { "Cache-Control": "no-store" } });
+  }
+
   const [totalWords, wordRows] = await Promise.all([
     prisma.word.count(),
     (async () => {
@@ -45,16 +84,6 @@ export async function GET(req: Request) {
             select: { anki_link_id: true, concept_explained_fa: true },
           });
           return rows.map((r) => ({ anki_link_id: r.anki_link_id, text: r.concept_explained_fa }));
-        }
-        case "sentence_en": {
-          const rows = await prisma.sentence.findMany({ select: { id: true, sentence_en: true } });
-          return rows.map((r) => ({ anki_link_id: String(r.id), text: r.sentence_en }));
-        }
-        case "sentence_en_meaning_fa": {
-          const rows = await prisma.sentence.findMany({
-            select: { id: true, sentence_en_meaning_fa: true },
-          });
-          return rows.map((r) => ({ anki_link_id: String(r.id), text: r.sentence_en_meaning_fa }));
         }
         default:
           return [];

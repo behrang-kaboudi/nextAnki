@@ -9,6 +9,7 @@ import {
 import { TableColumnSelector } from "@/components/table-column-selector";
 import { prisma } from "@/lib/prisma";
 import { WORD_ENGLISH_FIELDS_SELECT } from "@/lib/english/wordEnglishFields.server";
+import { getWordColumnEmptyCounts } from "@/lib/words/tableColumnEmptyCounts.server";
 
 import OpenWordEditorModal from "../../editor/OpenWordEditorModal.client";
 import WordRelationPopover, {
@@ -324,7 +325,7 @@ export default async function WordsTablePage({
       anki_link_id: { anki_link_id: dir },
       updatedAt: { updatedAt: dir },
     };
-  const [total, rawRows] = await Promise.all([
+  const [total, rawRows, emptyCounts] = await Promise.all([
     prisma.word.count({ where }),
     prisma.word.findMany({
       where,
@@ -365,6 +366,7 @@ export default async function WordsTablePage({
         updatedAt: true,
       },
     }),
+    getWordColumnEmptyCounts(),
   ]);
   const rows = rawRows;
   const referencedMeaningIds = Array.from(
@@ -426,7 +428,7 @@ export default async function WordsTablePage({
     <main className="mx-auto w-full max-w-7xl p-4">
       <PageHeader
         title="Word Table"
-        subtitle="Browse Word records and open any row in the detailed editor."
+        subtitle={`Browse Word records (${total.toLocaleString()} total) and open any row in the detailed editor.`}
       />
 
       <section className="mt-4 overflow-hidden rounded border">
@@ -485,6 +487,7 @@ export default async function WordsTablePage({
           key={columns.join(",")}
           columns={TABLE_COLUMNS}
           selectedColumns={columns}
+          emptyCounts={emptyCounts}
         />
       </section>
 

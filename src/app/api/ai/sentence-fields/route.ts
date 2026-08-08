@@ -255,12 +255,18 @@ export async function POST(req: Request) {
         const sentenceData: {
           sentence_en?: string;
           sentence_en_meaning_fa?: string | null;
+          sentence_en_audio_file_name?: null;
+          sentence_en_meaning_fa_audio_file_name?: null;
         } = {};
 
-        if (nextSentenceEn !== null) sentenceData.sentence_en = nextSentenceEn;
+        if (nextSentenceEn !== null) {
+          sentenceData.sentence_en = nextSentenceEn;
+          sentenceData.sentence_en_audio_file_name = null;
+        }
         if (nextSentenceEnMeaningFa !== null) {
           sentenceData.sentence_en_meaning_fa =
             nextSentenceEnMeaningFa === "" ? null : nextSentenceEnMeaningFa;
+          sentenceData.sentence_en_meaning_fa_audio_file_name = null;
         }
         const updated = await prisma.$transaction(async (tx) => {
           const savedSentence = Object.keys(sentenceData).length

@@ -1,15 +1,18 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 
 import WordFieldVoiceCell from "@/app/(site)/words/hints/WordFieldVoiceCell.client";
 import { ActionIcon } from "@/components/icons/ActionIcon";
+import { ModalPortal } from "@/components/modal-portal";
 
 export type SentenceEditorItem = {
   id: number;
   sentence_en: string;
   sentence_en_meaning_fa: string | null;
+  sentence_en_audio_file_name: string | null;
+  sentence_en_meaning_fa_audio_file_name: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -18,7 +21,7 @@ function nullableText(value: string) {
   return value.trim().length ? value : null;
 }
 
-export default function SentenceEditorModal({ item, compact = false }: { item: SentenceEditorItem; compact?: boolean }) {
+export default function SentenceEditorModal({ item, compact = false, trigger, triggerClassName }: { item: SentenceEditorItem; compact?: boolean; trigger?: ReactNode; triggerClassName?: string }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [sentenceEn, setSentenceEn] = useState(item.sentence_en);
@@ -70,6 +73,7 @@ export default function SentenceEditorModal({ item, compact = false }: { item: S
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           id: item.id,
+          preserveAudioFields: Array.from(audioUpdatedFieldsRef.current),
           data: {
             sentence_en: sentenceEn,
             sentence_en_meaning_fa: nullableText(sentenceMeaning),
@@ -125,16 +129,17 @@ export default function SentenceEditorModal({ item, compact = false }: { item: S
         }}
         aria-label={`Edit sentence ${item.id}`}
         title={`Edit sentence ${item.id}`}
-        className={compact
+        className={triggerClassName ?? (compact
           ? "rounded border p-1.5 transition active:scale-90 hover:bg-black/5 dark:hover:bg-white/5"
-          : "rounded border px-2 py-1 text-[11px] hover:bg-black/5 dark:hover:bg-white/5"}
+          : "rounded border px-2 py-1 text-[11px] hover:bg-black/5 dark:hover:bg-white/5")}
       >
-        {compact ? <ActionIcon name="edit" /> : "Open"}
+        {trigger ?? (compact ? <ActionIcon name="edit" /> : "Open")}
       </button>
 
       {open ? (
+        <ModalPortal>
         <div
-          className="fixed inset-0 z-50 bg-black/45 p-3 backdrop-blur-sm sm:p-6"
+          className="fixed inset-0 z-[90] flex items-center justify-center bg-black/55 p-3 backdrop-blur-sm sm:p-6"
           role="dialog"
           aria-modal="true"
           aria-label={`Edit sentence ${item.id}`}
@@ -142,7 +147,7 @@ export default function SentenceEditorModal({ item, compact = false }: { item: S
             if (e.target === e.currentTarget) close();
           }}
         >
-          <div className="mx-auto flex h-full w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-card bg-background shadow-elevated">
+          <div className="flex h-[min(92dvh,58rem)] w-full max-w-6xl flex-col overflow-hidden rounded-2xl border border-card bg-background shadow-elevated">
             <div className="flex items-center justify-between gap-3 border-b border-card px-4 py-3">
               <div className="min-w-0">
                 <div className="truncate text-sm font-semibold">Edit Sentence #{item.id}</div>
@@ -171,6 +176,7 @@ export default function SentenceEditorModal({ item, compact = false }: { item: S
                   <div className="grid gap-4 md:grid-cols-2">
                     <label className="grid gap-1">
                       <span className="text-xs font-semibold text-muted">sentence_en</span>
+                      <span className="truncate font-mono text-[10px] opacity-60" title={item.sentence_en_audio_file_name ?? ""}>{item.sentence_en_audio_file_name ?? "No stored audio filename"}</span>
                       <div className="flex items-center gap-2">
                         <textarea
                           value={sentenceEn}
@@ -183,6 +189,7 @@ export default function SentenceEditorModal({ item, compact = false }: { item: S
 
                     <label className="grid gap-1">
                       <span className="text-xs font-semibold text-muted">sentence_en_meaning_fa</span>
+                      <span className="truncate font-mono text-[10px] opacity-60" title={item.sentence_en_meaning_fa_audio_file_name ?? ""}>{item.sentence_en_meaning_fa_audio_file_name ?? "No stored audio filename"}</span>
                       <div className="flex items-center gap-2">
                         <textarea
                           value={sentenceMeaning}
@@ -233,6 +240,7 @@ export default function SentenceEditorModal({ item, compact = false }: { item: S
             </div>
           </div>
         </div>
+        </ModalPortal>
       ) : null}
     </>
   );

@@ -25,6 +25,7 @@ export default function WordMeaningsReview() {
   const [drafts, setDrafts] = useState<Record<number, string>>({});
   const [showCloseHelp, setShowCloseHelp] = useState(false);
   const [showApplyAllHelp, setShowApplyAllHelp] = useState(false);
+  const [showWorkflowGuide, setShowWorkflowGuide] = useState(false);
   const [applyAllConfirmOpen, setApplyAllConfirmOpen] = useState(false);
   const [resetOpen, setResetOpen] = useState(false);
   const [resetBusy, setResetBusy] = useState(false);
@@ -224,22 +225,60 @@ export default function WordMeaningsReview() {
           }
         >
           <div className="flex h-[85vh] w-full max-w-7xl flex-col gap-4 rounded-2xl border border-card bg-background p-6 shadow-elevated">
-            <div className="flex justify-between">
+            <div className="flex items-start justify-between gap-3">
               <div>
                 <b>Persian meanings review — Word</b>
                 <div className="text-xs opacity-70">
                   Only corrections are returned; Apply confirms all loaded rows.
                 </div>
               </div>
-              <button
-                type="button"
-                disabled={b}
-                onClick={() => setO(false)}
-                className="rounded border px-2 py-1 text-sm transition active:scale-90 hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5"
-              >
-                Close
-              </button>
+              <div className="flex flex-wrap items-center justify-end gap-2">
+                <button
+                  type="button"
+                  aria-expanded={showWorkflowGuide}
+                  aria-controls="word-meaning-review-workflow-guide"
+                  onClick={() => setShowWorkflowGuide((current) => !current)}
+                  className="rounded border px-3 py-2 text-sm transition active:scale-90 hover:bg-black/5 dark:hover:bg-white/5"
+                >
+                  راهنمای انتخاب و تغییر داده‌ها
+                </button>
+                <button
+                  type="button"
+                  disabled={b}
+                  onClick={() => setO(false)}
+                  className="rounded border px-2 py-1 text-sm transition active:scale-90 hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5"
+                >
+                  Close
+                </button>
+              </div>
             </div>
+            {showWorkflowGuide ? (
+              <div
+                id="word-meaning-review-workflow-guide"
+                dir="rtl"
+                className="max-h-64 overflow-auto rounded border border-blue-500/30 bg-blue-500/10 p-3 text-right text-sm leading-6"
+              >
+                <div className="font-semibold">هدف این مرحله</div>
+                <p>
+                  معنی فارسی هر رکورد و تعلق جمله‌ها به همان معنی بررسی می‌شود.
+                  این مرحله رکوردهای تکراری را با هم ترکیب یا حذف نمی‌کند.
+                </p>
+                <div className="mt-2 font-semibold">شرایط انتخاب رکوردها</div>
+                <ul className="list-disc pr-5">
+                  <li>فقط رکوردهایی انتخاب می‌شوند که هنوز <code>meanings_confirmed=false</code> دارند.</li>
+                  <li>رکوردها از شناسهٔ قدیمی‌تر به جدیدتر و به تعداد واردشده در Count خوانده می‌شوند؛ در این مرحله Count صفر یعنی هیچ رکوردی.</li>
+                  <li>جمله‌های موجود در هر دو فیلد <code>sentenceId</code> و <code>sentenceIds</code> برای بررسی به مدل نشان داده می‌شوند.</li>
+                </ul>
+                <div className="mt-2 font-semibold">پس از تأیید چه تغییری می‌کند؟</div>
+                <ul className="list-disc pr-5">
+                  <li>در صورت پیشنهاد اصلاح، <code>meaningId</code> و <code>otherMeaningIds</code> با معنی‌های نهایی جایگزین می‌شوند.</li>
+                  <li>ارتباط جمله‌هایی که مدل نامعتبر اعلام کرده از <code>sentenceId</code> یا <code>sentenceIds</code> حذف می‌شود.</li>
+                  <li>رکوردهای تأییدشده <code>meanings_confirmed=true</code> می‌گیرند.</li>
+                  <li><code>sentenceId</code> معتبر عمداً در همین فیلد باقی می‌ماند و به <code>sentenceIds</code> منتقل نمی‌شود؛ چون علامت وجود رکورد جدید برای مرحلهٔ MERGE WORD CONCEPTS است.</li>
+                  <li>هیچ رکورد Word، Sentence یا PersianWord و هیچ ستون دیتابیس در این مرحله حذف نمی‌شود.</li>
+                </ul>
+              </div>
+            ) : null}
             {e ? <div className="text-red-600">{e}</div> : null}
             {notice ? (
               <div className="rounded border border-emerald-500/30 bg-emerald-500/10 p-2 text-sm text-emerald-800">

@@ -2,12 +2,9 @@ import "server-only";
 
 import { NextResponse } from "next/server";
 
-import { generateEnglishWordJsonHint } from "@/lib/english/englishWordJsonHint.server";
-import { normalizeEnglishWordText } from "@/lib/english/normalize";
-import { normalizeIpaForDb } from "@/lib/ipa/normalize";
 import { prisma } from "@/lib/prisma";
-import { upsertPrimarySentenceByAnkiLinkId } from "@/lib/sentences/sentenceRepo";
-import { touchWordsByEnglishId, touchWordsLinkedToSentenceId, updateWord } from "@/lib/words/wordRepo";
+import { getWordEditorInitial } from "@/lib/words/editorPayload";
+import { updateWord } from "@/lib/words/wordRepo";
 
 export const runtime = "nodejs";
 
@@ -31,16 +28,19 @@ function normalizeNullableString(value: unknown): string | null | undefined {
   return trimmed.length ? s : null;
 }
 
-function normalizeRequiredString(value: unknown): string | null {
-  const s = asString(value);
-  if (s === null) return null;
-  return s;
-}
-
 function normalizeNullableNumber(value: unknown): number | null | undefined {
   if (value === undefined) return undefined;
   if (value === null) return null;
   if (typeof value !== "number" || !Number.isFinite(value)) return undefined;
+  return value;
+}
+
+function normalizeNullablePositiveInt(value: unknown): number | null | undefined {
+  if (value === undefined) return undefined;
+  if (value === null) return null;
+  if (typeof value !== "number" || !Number.isInteger(value) || value <= 0) {
+    return undefined;
+  }
   return value;
 }
 
@@ -51,6 +51,19 @@ function normalizeProductiveTarget(value: unknown): number | null | undefined {
     return undefined;
   }
   return value;
+}
+
+function normalizePositiveIdArray(value: unknown): number[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  if (
+    !value.every(
+      (item) => typeof item === "number" && Number.isInteger(item) && item > 0,
+    )
+  ) {
+    return undefined;
+  }
+  const unique = [...new Set(value)];
+  return unique.length === value.length ? unique : undefined;
 }
 
 export async function POST(req: Request) {
@@ -68,9 +81,12 @@ export async function POST(req: Request) {
 
     const d = data as Record<string, unknown>;
 
-    const base_form = normalizeEnglishWordText(normalizeRequiredString(d.base_form) ?? "");
-    const sentence_en = normalizeRequiredString(d.sentence_en);
+    const sentenceId = normalizeNullablePositiveInt(d.sentenceId);
     const productive_target = normalizeProductiveTarget(d.productive_target);
+    const otherMeaningIds = normalizePositiveIdArray(d.otherMeaningIds);
+    const sentenceIds = normalizePositiveIdArray(d.sentenceIds);
+    const comparedMeaningWordIds = normalizePositiveIdArray(d.comparedMeaningWordIds);
+    const synonymIds = normalizePositiveIdArray(d.synonymIds);
 
     if (d.productive_target !== undefined && productive_target === undefined) {
       return NextResponse.json(
@@ -79,57 +95,50 @@ export async function POST(req: Request) {
       );
     }
 
-    if (
-      !base_form ||
-      sentence_en == null
-    ) {
+    if (d.sentenceId !== undefined && sentenceId === undefined) {
       return NextResponse.json(
-        { ok: false, error: "Missing required string fields." },
+        { ok: false, error: "sentenceId must be a positive integer or null." },
         { status: 400 },
       );
     }
 
-    const phonetic_us = normalizeNullableString(d.phonetic_us) ?? null;
-    const phonetic_us_normalized = phonetic_us ? normalizeIpaForDb(phonetic_us, 2000) || null : null;
-    const existing = await prisma.word.findUnique({
-      where: { id },
-      include: { english: true },
-    });
-
-    if (!existing) {
-      return NextResponse.json({ ok: false, error: `Word ${id} not found.` }, { status: 404 });
+    if (
+      sentenceId !== null &&
+      sentenceId !== undefined &&
+      !(await prisma.sentence.findUnique({ where: { id: sentenceId }, select: { id: true } }))
+    ) {
+      return NextResponse.json(
+        { ok: false, error: `Sentence ${sentenceId} does not exist.` },
+        { status: 400 },
+      );
     }
 
-    const targetBefore = existing.english.base_form === base_form
-      ? existing.english
-      : await prisma.englishWord.findUnique({ where: { base_form } });
-    const englishChanged =
-      !targetBefore ||
-      targetBefore.phonetic_us !== phonetic_us ||
-      targetBefore.phonetic_us_normalized !== phonetic_us_normalized;
-    const englishWord = targetBefore
-      ? await prisma.englishWord.update({
-          where: { id: targetBefore.id },
-          data: {
-            phonetic_us,
-            ...(englishChanged ? { phonetic_us_confirmed: false } : {}),
-            phonetic_us_normalized,
-            ...(englishChanged ? { json_hint: null } : {}),
-          },
-        })
-      : await prisma.englishWord.create({
-          data: { base_form, phonetic_us, phonetic_us_normalized },
-        });
 
-    if (englishChanged && phonetic_us_normalized) {
-      await generateEnglishWordJsonHint(englishWord.id);
+    for (const [field, raw, normalized] of [
+      ["otherMeaningIds", d.otherMeaningIds, otherMeaningIds],
+      ["sentenceIds", d.sentenceIds, sentenceIds],
+      ["comparedMeaningWordIds", d.comparedMeaningWordIds, comparedMeaningWordIds],
+      ["synonymIds", d.synonymIds, synonymIds],
+    ] as const) {
+      if (raw !== undefined && normalized === undefined) {
+        return NextResponse.json(
+          { ok: false, error: `${field} must be an array of unique positive integer ids.` },
+          { status: 400 },
+        );
+      }
     }
-    if (englishChanged) await touchWordsByEnglishId(englishWord.id);
+
+    if (d.meanings_confirmed !== undefined && typeof d.meanings_confirmed !== "boolean") {
+      return NextResponse.json(
+        { ok: false, error: "meanings_confirmed must be a boolean." },
+        { status: 400 },
+      );
+    }
 
     const updated = await updateWord({
       where: { id },
       data: {
-        englishId: englishWord.id,
+        sentenceId,
         pos: normalizeNullableString(d.pos),
         concept_explained_fa: normalizeNullableString(d.concept_explained_fa),
         learning_depth: normalizeNullableNumber(d.learning_depth),
@@ -138,34 +147,21 @@ export async function POST(req: Request) {
         hint_to_select: normalizeNullableString(d.hint_to_select),
         imageability: normalizeNullableNumber(d.imageability),
         productive_target,
+        otherMeaningIds,
+        sentenceIds,
+        comparedMeaningWordIds,
+        synonymIds,
+        meanings_confirmed:
+          typeof d.meanings_confirmed === "boolean" ? d.meanings_confirmed : undefined,
       },
-      select: {
-        id: true,
-        updatedAt: true,
-      },
+      select: { id: true },
     });
 
-    const englishFields = await prisma.englishWord.findUniqueOrThrow({
-      where: { id: englishWord.id },
-      select: { phonetic_us_normalized: true, json_hint: true },
-    });
-
-    const sentence = await upsertPrimarySentenceByAnkiLinkId({
-      ankiLinkId: existing.anki_link_id,
-      sentence_en,
-      sentence_en_meaning_fa: normalizeNullableString(d.sentence_en_meaning_fa) ?? null,
-    });
-    await touchWordsLinkedToSentenceId(sentence.id);
+    const item = await getWordEditorInitial(updated.id);
 
     return NextResponse.json({
       ok: true as const,
-      item: {
-        id: updated.id,
-        sentenceRecordId: sentence.id,
-        updatedAt: updated.updatedAt.toISOString(),
-        phonetic_us_normalized: englishFields.phonetic_us_normalized,
-        json_hint: englishFields.json_hint,
-      },
+      item,
     });
   } catch (e) {
     return NextResponse.json(

@@ -7,6 +7,7 @@ import {
   WORD_AUDIO_FILENAME_SEPARATOR,
   WORD_AUDIO_PUBLIC_DIR_RELATIVE,
 } from "@/lib/audio/wordFieldAudioNaming";
+import { SENTENCE_AUDIO_PUBLIC_DIR_RELATIVE } from "@/lib/audio/sentenceAudioNaming";
 
 function Code({ children }: { children: React.ReactNode }) {
   return (
@@ -78,6 +79,7 @@ export default function AudioHelpModal() {
                     /{WORD_AUDIO_PUBLIC_DIR_RELATIVE}
                   </Code>{" "}
                   قابل دسترسی هستند.
+                  صوت‌های <Code>sentence_en</Code> و <Code>sentence_en_meaning_fa</Code> مالکیت مستقل دارند، نامشان در جدول <Code>Sentence</Code> ثبت می‌شود و در <Code>public/{SENTENCE_AUDIO_PUBLIC_DIR_RELATIVE}</Code> قرار می‌گیرند.
                 </div>
               </section>
 
@@ -90,6 +92,9 @@ export default function AudioHelpModal() {
                 <div dir="ltr" className="mt-2 rounded border bg-transparent p-3 text-left font-mono text-xs">
                   {filenameExample}
                 </div>
+                <div dir="ltr" className="mt-2 rounded border bg-transparent p-3 text-left font-mono text-xs">
+                  s__Sentence.id__sentence_field__1700000000000.mp3
+                </div>
                 <div className="mt-2 text-xs opacity-80">
                   قسمت سوم timestamp است (مثل <Code>Date.now()</Code>) و فقط برای یکتایی فایل استفاده می‌شود.
                 </div>
@@ -98,8 +103,7 @@ export default function AudioHelpModal() {
               <section className="rounded border p-3">
                 <div className="text-xs font-semibold">فرمت قدیمی (Legacy)</div>
                 <div className="mt-2 text-sm">
-                  اگر فایل‌های قدیمی با جداکننده‌ی <Code>_</Code> دارید (مثل <Code>anki_field_ts.mp3</Code>) سیستم هنوز
-                  آن‌ها را می‌خواند تا دوباره‌کاری نشود.
+                  فایل‌های قدیمی Sentence با migration به پوشهٔ اختصاصی منتقل شده‌اند و جدیدترین نام معتبر هر فیلد در رکورد Sentence ذخیره شده است.
                 </div>
               </section>
 

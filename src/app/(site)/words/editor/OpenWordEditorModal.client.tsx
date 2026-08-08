@@ -87,8 +87,8 @@ export default function OpenWordEditorModal({
             if (e.target === e.currentTarget) close();
           }}
         >
-          <div className="mx-auto flex h-full w-full max-w-6xl flex-col overflow-hidden rounded-2xl border border-card bg-background shadow-elevated">
-            <div className="flex items-center justify-between gap-3 border-b border-card px-4 py-3">
+          <div className="mx-auto flex h-full w-full max-w-[96rem] flex-col overflow-hidden rounded-2xl border border-card bg-background shadow-elevated">
+            <div className="flex items-center justify-between gap-3 border-b border-card bg-background/95 px-4 py-3 backdrop-blur sm:px-5">
               <div className="min-w-0">
                 <div className="truncate text-sm font-semibold">
                   Edit Word #{id} — {label}
@@ -104,7 +104,7 @@ export default function OpenWordEditorModal({
               </button>
             </div>
 
-            <div className="flex-1 overflow-auto p-4">
+            <div className="flex-1 overflow-auto p-3 sm:p-5">
               {state.status === "loading" ? (
                 <div className="rounded border border-card p-4 text-sm opacity-75">Loading…</div>
               ) : null}

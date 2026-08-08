@@ -14,6 +14,8 @@ import { getWordFieldAudioAbsoluteDir, getWordFieldAudioAbsolutePath } from "@/l
 import { touchSentenceById } from "@/lib/sentences/sentenceRepo";
 import { deleteAllWordFieldAudioFiles } from "@/lib/words/wordFieldVoice";
 import { touchWordByAnkiLinkId, touchWordsLinkedToSentenceId } from "@/lib/words/wordRepo";
+import { getSentenceAudioPublicPath, isSentenceAudioField } from "@/lib/audio/sentenceAudioNaming";
+import { saveSentenceAudioMp3 } from "@/lib/sentences/sentenceAudio.server";
 
 export const runtime = "nodejs";
 
@@ -94,20 +96,6 @@ export async function POST(req: Request) {
     const buf = Buffer.from(await audio.arrayBuffer());
     await fsp.writeFile(tmpInput, buf);
 
-    // Replace behavior: if there's existing audio for this (ankiLinkId + field), remove it before saving the new one.
-    // This avoids multiple versions when recording/uploading repeatedly.
-    await deleteAllWordFieldAudioFiles({ audioKey, ankiLinkId: audioKey, field: field as never });
-
-    const filename = buildWordFieldAudioFilename({
-      audioKey,
-      field: field as never,
-      timestampMs: Date.now(),
-      ext: "mp3",
-    });
-
-    fs.mkdirSync(getWordFieldAudioAbsoluteDir(), { recursive: true });
-    const outAbs = getWordFieldAudioAbsolutePath(filename);
-
     try {
       await runFfmpeg([
         "-y",
@@ -123,6 +111,23 @@ export async function POST(req: Request) {
         tmpOutput,
       ]);
 
+      if (isSentenceAudioField(field)) {
+        const sentenceId = asPositiveIntString(audioKey);
+        if (!sentenceId) throw new Error("Invalid Sentence id");
+        const result = await saveSentenceAudioMp3(sentenceId, field, tmpOutput);
+        return NextResponse.json({
+          ok: true,
+          filename: result.filename,
+          publicPath: getSentenceAudioPublicPath(result.filename),
+          size: result.size,
+        });
+      }
+
+      // Word-owned fields retain the existing audio/words namespace.
+      await deleteAllWordFieldAudioFiles({ audioKey, ankiLinkId: audioKey, field: field as never });
+      const filename = buildWordFieldAudioFilename({ audioKey, field: field as never, timestampMs: Date.now(), ext: "mp3" });
+      fs.mkdirSync(getWordFieldAudioAbsoluteDir(), { recursive: true });
+      const outAbs = getWordFieldAudioAbsolutePath(filename);
       await fsp.copyFile(tmpOutput, outAbs);
 
       let size = 0;

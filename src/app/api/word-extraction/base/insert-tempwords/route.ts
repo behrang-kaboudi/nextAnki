@@ -186,17 +186,28 @@ export async function POST(req: Request) {
             select: { id: true },
           });
 
-          const sentence = await tx.sentence.upsert({
+          const existingSentence = await tx.sentence.findUnique({
             where: { sentence_en: item.sentence_en },
-            update: {
-              sentence_en_meaning_fa: item.sentence_en_meaning_fa,
-            },
-            create: {
-              sentence_en: item.sentence_en,
-              sentence_en_meaning_fa: item.sentence_en_meaning_fa,
-            },
-            select: { id: true },
+            select: { id: true, sentence_en_meaning_fa: true },
           });
+          const sentence = existingSentence
+            ? existingSentence.sentence_en_meaning_fa?.trim()
+              ? existingSentence
+              : await tx.sentence.update({
+                  where: { id: existingSentence.id },
+                  data: {
+                    sentence_en_meaning_fa: item.sentence_en_meaning_fa,
+                    sentence_en_meaning_fa_audio_file_name: null,
+                  },
+                  select: { id: true },
+                })
+            : await tx.sentence.create({
+                data: {
+                  sentence_en: item.sentence_en,
+                  sentence_en_meaning_fa: item.sentence_en_meaning_fa,
+                },
+                select: { id: true },
+              });
 
           await updateWord(
             { where: { id: pending.id }, data: { sentenceId: sentence.id } },

@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/page-header";
 import { TableColumnIndicators, type TableColumnIndicator } from "@/components/table-column-indicators";
 import { TableColumnSelector } from "@/components/table-column-selector";
 import { prisma } from "@/lib/prisma";
+import { getPersianWordColumnEmptyCounts } from "@/lib/words/tableColumnEmptyCounts.server";
 
 import OpenPersianWordEditorModal from "./OpenPersianWordEditorModal.client";
 import BatchPersianWordAudioGenerate from "./BatchPersianWordAudioGenerate.client";
@@ -106,7 +107,7 @@ export default async function PersianWordsTablePage({
   if (q) filters.push({ OR: [{ canonical_text: { contains: q } }, { normalized_text: { contains: q } }, { meaning_fa_IPA: { contains: q } }, { meaning_fa_IPA_normalize: { contains: q } }] });
   if (missingAudioOnly) filters.push({ OR: [{ audio_file_name: null }, { audio_file_name: "" }] });
   const where = filters.length ? { AND: filters } : undefined;
-  const [total, rows] = await Promise.all([
+  const [total, rows, emptyCounts] = await Promise.all([
     prisma.persianWord.count({ where }),
     prisma.persianWord.findMany({
       where,
@@ -125,6 +126,7 @@ export default async function PersianWordsTablePage({
         updatedAt: true,
       },
     }),
+    getPersianWordColumnEmptyCounts(),
   ]);
   const totalPages = showAll ? 1 : Math.max(1, Math.ceil(total / pageSize));
   const pageHref = (nextPage: number) => {
@@ -197,7 +199,7 @@ export default async function PersianWordsTablePage({
       </section>
 
       <section className="mt-4 rounded border p-3">
-        <TableColumnSelector key={columns.join(",")} columns={TABLE_COLUMNS} selectedColumns={columns} />
+        <TableColumnSelector key={columns.join(",")} columns={TABLE_COLUMNS} selectedColumns={columns} emptyCounts={emptyCounts} />
       </section>
 
       <div className="mt-4 flex items-center justify-between gap-3 text-sm">

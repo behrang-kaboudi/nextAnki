@@ -5,6 +5,7 @@ import { createAnkiConnectClient } from "@/lib/anki";
 import { AnkiNoteTypes, SentenceAnkiConstants } from "@/lib/anki";
 import { chunkArray } from "@/lib/anki";
 import { quoteAnkiSearchValue } from "@/lib/anki";
+import { getSentenceAudioFileInfo } from "@/lib/sentences/sentenceAudio.server";
 
 const SENTENCE_DECK_NAME = SentenceAnkiConstants.decks.EnSentences;
 const SENTENCE_MODEL_NAME = AnkiNoteTypes.EN_SENTENCES;
@@ -13,8 +14,15 @@ type SentenceCandidate = {
   id: number;
   sentence_en: string;
   sentence_en_meaning_fa: string | null;
+  sentence_en_audio_file_name: string | null;
+  sentence_en_meaning_fa_audio_file_name: string | null;
   updatedAt: Date;
 };
+
+function soundTag(filename: string | null): string {
+  const info = getSentenceAudioFileInfo(filename);
+  return info.filename && info.size > 0 ? `[sound:${info.filename}]` : "";
+}
 
 function asNonEmptyString(value: unknown): string | null {
   if (typeof value !== "string") return null;
@@ -80,6 +88,8 @@ export async function syncSentencesToSentenceDeck(): Promise<SentenceDeckSyncRes
         id: true,
         sentence_en: true,
         sentence_en_meaning_fa: true,
+        sentence_en_audio_file_name: true,
+        sentence_en_meaning_fa_audio_file_name: true,
         updatedAt: true,
       },
       orderBy: { id: "asc" },
@@ -112,9 +122,9 @@ export async function syncSentencesToSentenceDeck(): Promise<SentenceDeckSyncRes
           modelName: SENTENCE_MODEL_NAME,
           fields: {
             sentence_en: row.sentence_en,
-            sentence_en_sound: "",
+            sentence_en_sound: soundTag(row.sentence_en_audio_file_name),
             sentence_en_meaning_fa: row.sentence_en_meaning_fa ?? "",
-            sentence_en_meaning_fa_sound: "",
+            sentence_en_meaning_fa_sound: soundTag(row.sentence_en_meaning_fa_audio_file_name),
             updatedAt: row.updatedAt.toISOString(),
           },
           options: {

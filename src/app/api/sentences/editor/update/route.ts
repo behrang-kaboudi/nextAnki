@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
 import { touchWordsLinkedToSentenceId } from "@/lib/words/wordRepo";
+import fsp from "node:fs/promises";
+import path from "node:path";
+import { getSentenceAudioAbsolutePath } from "@/lib/audio/sentenceAudioPaths.server";
 
 export const runtime = "nodejs";
 
@@ -29,6 +32,12 @@ export async function POST(req: Request) {
     const body = (await req.json().catch(() => null)) as unknown;
     const id = asPositiveInt((body as { id?: unknown } | null)?.id);
     const data = (body as { data?: unknown } | null)?.data;
+    const preserveAudioFieldsRaw = (body as { preserveAudioFields?: unknown } | null)?.preserveAudioFields;
+    const preserveAudioFields = new Set(
+      Array.isArray(preserveAudioFieldsRaw)
+        ? preserveAudioFieldsRaw.filter((field) => field === "sentence_en" || field === "sentence_en_meaning_fa")
+        : [],
+    );
 
     if (!id || !data || typeof data !== "object") {
       return NextResponse.json(
@@ -47,7 +56,13 @@ export async function POST(req: Request) {
 
     const existing = await prisma.sentence.findUnique({
       where: { id },
-      select: { id: true },
+      select: {
+        id: true,
+        sentence_en: true,
+        sentence_en_meaning_fa: true,
+        sentence_en_audio_file_name: true,
+        sentence_en_meaning_fa_audio_file_name: true,
+      },
     });
 
     if (!existing) {
@@ -66,11 +81,18 @@ export async function POST(req: Request) {
       );
     }
 
+    const sentence_en_meaning_fa = normalizeNullableString(d.sentence_en_meaning_fa) ?? null;
+    const sentenceChanged = sentence_en !== existing.sentence_en;
+    const meaningChanged = sentence_en_meaning_fa !== existing.sentence_en_meaning_fa;
+    const clearSentenceAudio = sentenceChanged && !preserveAudioFields.has("sentence_en");
+    const clearMeaningAudio = meaningChanged && !preserveAudioFields.has("sentence_en_meaning_fa");
     const updated = await prisma.sentence.update({
       where: { id },
       data: {
         sentence_en,
-        sentence_en_meaning_fa: normalizeNullableString(d.sentence_en_meaning_fa) ?? null,
+        sentence_en_meaning_fa,
+        ...(clearSentenceAudio ? { sentence_en_audio_file_name: null } : {}),
+        ...(clearMeaningAudio ? { sentence_en_meaning_fa_audio_file_name: null } : {}),
       },
       select: {
         id: true,
@@ -81,6 +103,11 @@ export async function POST(req: Request) {
     });
 
     const touchedWords = await touchWordsLinkedToSentenceId(id);
+    const staleFiles = [
+      clearSentenceAudio ? existing.sentence_en_audio_file_name : null,
+      clearMeaningAudio ? existing.sentence_en_meaning_fa_audio_file_name : null,
+    ].filter((filename): filename is string => Boolean(filename) && path.basename(filename!) === filename);
+    await Promise.allSettled(staleFiles.map((filename) => fsp.rm(getSentenceAudioAbsolutePath(filename), { force: true })));
 
     return NextResponse.json({
       ok: true as const,

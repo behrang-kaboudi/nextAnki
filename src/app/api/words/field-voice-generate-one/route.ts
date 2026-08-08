@@ -13,6 +13,8 @@ import {
 } from "@/lib/audio/wordFieldAudioNaming";
 import { generateSpeechFromMixedText } from "@/lib/tts/cloudTts";
 import { getWordFieldAudioAbsolutePath } from "@/lib/audio/wordFieldAudioPaths.server";
+import { getSentenceAudioPublicPath, isSentenceAudioField } from "@/lib/audio/sentenceAudioNaming";
+import { generateSentenceAudio } from "@/lib/sentences/sentenceAudio.server";
 import { touchSentenceById } from "@/lib/sentences/sentenceRepo";
 import { touchWordByAnkiLinkId, touchWordsLinkedToSentenceId } from "@/lib/words/wordRepo";
 
@@ -66,6 +68,23 @@ export async function POST(req: Request) {
   }
 
   const field: WordAudioFieldKey = fieldRaw as WordAudioFieldKey;
+
+  if (isSentenceAudioField(field)) {
+    const sentenceId = asPositiveIntString(audioKey);
+    if (!sentenceId) return NextResponse.json({ ok: false, error: "Invalid Sentence id" }, { status: 400 });
+    try {
+      const result = await generateSentenceAudio(sentenceId, field, text);
+      return NextResponse.json({
+        ok: true,
+        filename: result.filename,
+        publicPath: getSentenceAudioPublicPath(result.filename),
+        size: result.size,
+      });
+    } catch (e) {
+      return NextResponse.json({ ok: false, error: e instanceof Error ? e.message : String(e) }, { status: 500 });
+    }
+  }
+
   const filename = buildWordFieldAudioFilename({ audioKey, field, timestampMs: Date.now() });
   const outputFileUnderPublicAudio = path.join("words", filename);
 

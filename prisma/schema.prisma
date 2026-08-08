@@ -111,11 +111,13 @@ model EnglishWord {
 }
 
 model Sentence {
-  id                     Int      @id @default(autoincrement())
-  sentence_en            String   @unique
-  sentence_en_meaning_fa String?
-  createdAt              DateTime @default(now())
-  updatedAt              DateTime @updatedAt
+  id                                     Int      @id @default(autoincrement())
+  sentence_en                            String   @unique
+  sentence_en_meaning_fa                 String?
+  sentence_en_audio_file_name            String?
+  sentence_en_meaning_fa_audio_file_name String?
+  createdAt                              DateTime @default(now())
+  updatedAt                              DateTime @updatedAt
 
   words Word[] @relation("WordPrimarySentence")
 }
@@ -175,6 +177,24 @@ model AnkiStructureSettings {
   version   Int      @default(1)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+/// A locally served chat model and its OpenAI-compatible generation defaults.
+model AiModel {
+  id              Int      @id @default(autoincrement())
+  name            String   @unique
+  provider        String   @default("lm_studio")
+  modelIdentifier String
+  baseUrl         String   @default("http://localhost:1234/v1")
+  systemPrompt    String?  @db.Text
+  settings        Json
+  isEnabled       Boolean  @default(true)
+  isDefault       Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([provider, isEnabled])
+  @@index([modelIdentifier])
 }
 
 model User {

@@ -36,7 +36,7 @@
           { "type": "link", "label": "Word Table", "href": "/words/tables/words", "icon": "database", "description": "Browse Word records with search, sorting, and direct editing." },
           { "type": "link", "label": "Persian Word Table", "href": "/words/tables/persian-words", "icon": "database", "description": "Browse and edit Persian word table records and their audio." },
           { "type": "link", "label": "English Word Table", "href": "/words/tables/english-words", "icon": "database", "description": "Browse canonical English words, US IPA, JSON hints, audio, and Word links." },
-          { "type": "link", "label": "Sentence Table", "href": "/words/tables/sentences", "icon": "database", "description": "Browse Sentence records, their linked words, and sentence-level metadata." }
+          { "type": "link", "label": "Sentence Table", "href": "/words/tables/sentences", "icon": "database", "description": "Browse Sentence records and manage persisted English and Persian audio filenames." }
         ]
       },
       {
@@ -92,7 +92,8 @@
         "label": "AI",
         "icon": "sparkles",
         "items": [
-          { "type": "link", "label": "Prompt Builder", "href": "/ai/prompt-builder", "icon": "sparkles", "description": "Build and preview reusable AI prompts." }
+          { "type": "link", "label": "Prompt Builder", "href": "/ai/prompt-builder", "icon": "sparkles", "description": "Build and preview reusable AI prompts." },
+          { "type": "link", "label": "Local AI Studio", "href": "/ai/local-chat", "icon": "brain", "description": "Manage LM Studio models and chat with them locally." }
         ]
       },
       {
@@ -112,14 +113,6 @@
         "icon": "tools",
         "items": [
           { "type": "link", "label": "Tests Hub", "href": "/tests", "icon": "tools", "description": "Search all internal test pages." },
-          {
-            "type": "group",
-            "label": "AI Tests",
-            "icon": "sparkles",
-            "items": [
-              { "type": "link", "label": "AI Chat Test", "href": "/tests/ai/chat", "icon": "sparkles", "description": "Test the configured AI chat endpoint." }
-            ]
-          },
           {
             "type": "group",
             "label": "Anki Tests",

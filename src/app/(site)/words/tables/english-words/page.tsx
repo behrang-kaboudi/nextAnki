@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/page-header";
 import { TableColumnIndicators, type TableColumnIndicator } from "@/components/table-column-indicators";
 import { TableColumnSelector } from "@/components/table-column-selector";
 import { prisma } from "@/lib/prisma";
+import { getEnglishWordColumnEmptyCounts } from "@/lib/words/tableColumnEmptyCounts.server";
 
 import AddEnglishWordModal from "./AddEnglishWordModal.client";
 import BatchEnglishWordAudioGenerate from "./BatchEnglishWordAudioGenerate.client";
@@ -69,9 +70,10 @@ export default async function EnglishWordsTablePage({ searchParams }: { searchPa
     ...(missingAudio ? [{ OR: [{ audio_file_name: null }, { audio_file_name: "" }] }] : []),
   ] } : undefined;
   const orderBy: Prisma.EnglishWordOrderByWithRelationInput[] = [{ [sort]: dir } as Prisma.EnglishWordOrderByWithRelationInput, ...(sort === "id" ? [] : [{ id: "desc" as const }])];
-  const [total, rows] = await Promise.all([
+  const [total, rows, emptyCounts] = await Promise.all([
     prisma.englishWord.count({ where }),
     prisma.englishWord.findMany({ where, orderBy, skip: (page - 1) * 100, take: 100 }),
+    getEnglishWordColumnEmptyCounts(),
   ]);
   const totalPages = Math.max(1, Math.ceil(total / 100));
   const href = (nextPage: number, nextSort = sort, nextDir = dir) => {
@@ -96,7 +98,7 @@ export default async function EnglishWordsTablePage({ searchParams }: { searchPa
       </div>
     </section>
     <DictionaryApiUsImport />
-    <section className="mt-4 rounded border p-3"><TableColumnSelector key={columns.join(",")} columns={TABLE_COLUMNS} selectedColumns={columns} /></section>
+    <section className="mt-4 rounded border p-3"><TableColumnSelector key={columns.join(",")} columns={TABLE_COLUMNS} selectedColumns={columns} emptyCounts={emptyCounts} /></section>
     <div className="mt-4 flex items-center justify-between text-sm"><span>Total: <strong>{total}</strong> · Page <strong>{page}/{totalPages}</strong></span><div className="flex gap-2"><Link href={href(Math.max(1, page - 1))} aria-disabled={page <= 1} className="rounded border px-3 py-2 aria-disabled:pointer-events-none aria-disabled:opacity-50">Prev</Link><Link href={href(Math.min(totalPages, page + 1))} aria-disabled={page >= totalPages} className="rounded border px-3 py-2 aria-disabled:pointer-events-none aria-disabled:opacity-50">Next</Link></div></div>
     <div className="mt-4 overflow-auto rounded border"><table className="w-full text-left text-xs"><thead className="bg-background"><tr className="border-b">
       {hasColumn("id") ? <SortHeader href={href(1, "id", sort === "id" && dir === "asc" ? "desc" : "asc")} label="id" active={sort === "id"} direction={dir} indicators={COLUMN_INDICATORS.id} /> : null}

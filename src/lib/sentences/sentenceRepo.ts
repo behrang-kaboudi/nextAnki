@@ -1,5 +1,9 @@
 import "server-only";
 
+import fsp from "node:fs/promises";
+import path from "node:path";
+
+import { getSentenceAudioAbsolutePath } from "@/lib/audio/sentenceAudioPaths.server";
 import { prisma } from "@/lib/prisma";
 import { updateWord } from "@/lib/words/wordRepo";
 
@@ -7,6 +11,8 @@ type PrimarySentenceRecord = {
   id: number;
   sentence_en: string;
   sentence_en_meaning_fa: string | null;
+  sentence_en_audio_file_name: string | null;
+  sentence_en_meaning_fa_audio_file_name: string | null;
 };
 
 function isBlank(value: string | null | undefined) {
@@ -17,6 +23,8 @@ const sentenceSelect = {
   id: true,
   sentence_en: true,
   sentence_en_meaning_fa: true,
+  sentence_en_audio_file_name: true,
+  sentence_en_meaning_fa_audio_file_name: true,
 } as const;
 
 export async function upsertPrimarySentenceByAnkiLinkId(args: {
@@ -31,7 +39,8 @@ export async function upsertPrimarySentenceByAnkiLinkId(args: {
     throw new Error("sentence_en must not be empty.");
   }
 
-  return prisma.$transaction(async (tx) => {
+  const filesToDelete: string[] = [];
+  const result = await prisma.$transaction(async (tx) => {
     const word = await tx.word.findUnique({
       where: { anki_link_id: ankiLinkId },
       select: { id: true, sentence: { select: sentenceSelect } },
@@ -47,11 +56,19 @@ export async function upsertPrimarySentenceByAnkiLinkId(args: {
     });
 
     if (existingSentence?.sentence_en === nextSentenceEn) {
+      const meaningChanged = existingSentence.sentence_en_meaning_fa !== sentence_en_meaning_fa;
       const updated = await tx.sentence.update({
         where: { id: existingSentence.id },
-        data: { sentence_en: nextSentenceEn, sentence_en_meaning_fa },
+        data: {
+          sentence_en: nextSentenceEn,
+          sentence_en_meaning_fa,
+          ...(meaningChanged ? { sentence_en_meaning_fa_audio_file_name: null } : {}),
+        },
         select: sentenceSelect,
       });
+      if (meaningChanged && existingSentence.sentence_en_meaning_fa_audio_file_name) {
+        filesToDelete.push(existingSentence.sentence_en_meaning_fa_audio_file_name);
+      }
       await updateWord(
         { where: { id: word.id }, data: { sentenceId: existingSentence.id } },
         tx,
@@ -69,31 +86,51 @@ export async function upsertPrimarySentenceByAnkiLinkId(args: {
       if (sentence_en_meaning_fa !== null && isBlank(nextMeaning)) {
         const updated = await tx.sentence.update({
           where: { id: matchedSentence.id },
-          data: { sentence_en_meaning_fa },
+          data: { sentence_en_meaning_fa, sentence_en_meaning_fa_audio_file_name: null },
           select: sentenceSelect,
         });
+        if (matchedSentence.sentence_en_meaning_fa_audio_file_name) {
+          filesToDelete.push(matchedSentence.sentence_en_meaning_fa_audio_file_name);
+        }
         nextMeaning = updated.sentence_en_meaning_fa;
       }
 
       if (existingSentence && existingSentence.id !== matchedSentence.id) {
-        await tx.sentence.deleteMany({
+        const deleted = await tx.sentence.deleteMany({
           where: { id: existingSentence.id, words: { none: {} } },
         });
+        if (deleted.count) {
+          filesToDelete.push(
+            existingSentence.sentence_en_audio_file_name ?? "",
+            existingSentence.sentence_en_meaning_fa_audio_file_name ?? "",
+          );
+        }
       }
 
       return {
         id: matchedSentence.id,
         sentence_en: matchedSentence.sentence_en,
         sentence_en_meaning_fa: nextMeaning,
+        sentence_en_audio_file_name: matchedSentence.sentence_en_audio_file_name,
+        sentence_en_meaning_fa_audio_file_name: matchedSentence.sentence_en_meaning_fa_audio_file_name,
       };
     }
 
     if (existingSentence) {
+      const sentenceChanged = existingSentence.sentence_en !== nextSentenceEn;
+      const meaningChanged = existingSentence.sentence_en_meaning_fa !== sentence_en_meaning_fa;
       const updated = await tx.sentence.update({
         where: { id: existingSentence.id },
-        data: { sentence_en: nextSentenceEn, sentence_en_meaning_fa },
+        data: {
+          sentence_en: nextSentenceEn,
+          sentence_en_meaning_fa,
+          ...(sentenceChanged ? { sentence_en_audio_file_name: null } : {}),
+          ...(meaningChanged ? { sentence_en_meaning_fa_audio_file_name: null } : {}),
+        },
         select: sentenceSelect,
       });
+      if (sentenceChanged && existingSentence.sentence_en_audio_file_name) filesToDelete.push(existingSentence.sentence_en_audio_file_name);
+      if (meaningChanged && existingSentence.sentence_en_meaning_fa_audio_file_name) filesToDelete.push(existingSentence.sentence_en_meaning_fa_audio_file_name);
       await updateWord(
         { where: { id: word.id }, data: { sentenceId: existingSentence.id } },
         tx,
@@ -111,6 +148,12 @@ export async function upsertPrimarySentenceByAnkiLinkId(args: {
     );
     return createdSentence;
   });
+  await Promise.allSettled(
+    filesToDelete
+      .filter((filename) => filename && path.basename(filename) === filename)
+      .map((filename) => fsp.rm(getSentenceAudioAbsolutePath(filename), { force: true })),
+  );
+  return result;
 }
 
 export async function updatePrimarySentenceByAnkiLinkId(
@@ -121,7 +164,22 @@ export async function updatePrimarySentenceByAnkiLinkId(
   if (!current) {
     throw new Error(`Primary sentence not found for anki_link_id=${ankiLinkId}`);
   }
-  return prisma.sentence.update({ where: { id: current.id }, data });
+  const sentenceChanged = data.sentence_en !== undefined && data.sentence_en.trim() !== current.sentence_en;
+  const meaningChanged = data.sentence_en_meaning_fa !== undefined && data.sentence_en_meaning_fa !== current.sentence_en_meaning_fa;
+  const updated = await prisma.sentence.update({
+    where: { id: current.id },
+    data: {
+      ...data,
+      ...(sentenceChanged ? { sentence_en_audio_file_name: null } : {}),
+      ...(meaningChanged ? { sentence_en_meaning_fa_audio_file_name: null } : {}),
+    },
+  });
+  const staleFiles = [
+    sentenceChanged ? current.sentence_en_audio_file_name : null,
+    meaningChanged ? current.sentence_en_meaning_fa_audio_file_name : null,
+  ].filter((filename): filename is string => Boolean(filename) && path.basename(filename!) === filename);
+  await Promise.allSettled(staleFiles.map((filename) => fsp.rm(getSentenceAudioAbsolutePath(filename), { force: true })));
+  return updated;
 }
 
 export async function findPrimarySentenceByAnkiLinkId(

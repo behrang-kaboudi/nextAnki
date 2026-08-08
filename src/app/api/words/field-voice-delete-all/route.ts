@@ -6,6 +6,8 @@ import { WORD_AUDIO_FIELDS } from "@/lib/audio/wordFieldAudioNaming";
 import { touchSentenceById } from "@/lib/sentences/sentenceRepo";
 import { deleteAllWordFieldAudioFiles } from "@/lib/words/wordFieldVoice";
 import { touchWordByAnkiLinkId, touchWordsLinkedToSentenceId } from "@/lib/words/wordRepo";
+import { isSentenceAudioField } from "@/lib/audio/sentenceAudioNaming";
+import { deleteSentenceAudio } from "@/lib/sentences/sentenceAudio.server";
 
 export const runtime = "nodejs";
 
@@ -50,6 +52,17 @@ export async function POST(req: Request) {
       { ok: false, error: `Invalid field. Allowed: ${WORD_AUDIO_FIELDS.join(", ")}` },
       { status: 400 }
     );
+  }
+
+  if (isSentenceAudioField(field)) {
+    const sentenceId = asPositiveIntString(audioKey);
+    if (!sentenceId) return NextResponse.json({ ok: false, error: "Invalid Sentence id" }, { status: 400 });
+    try {
+      const result = await deleteSentenceAudio(sentenceId, field);
+      return NextResponse.json({ ok: true, ...result, deletedBytes: 0 });
+    } catch (e) {
+      return NextResponse.json({ ok: false, error: e instanceof Error ? e.message : String(e) }, { status: 500 });
+    }
   }
 
   const res = await deleteAllWordFieldAudioFiles({ audioKey, ankiLinkId: audioKey, field: field as never });
