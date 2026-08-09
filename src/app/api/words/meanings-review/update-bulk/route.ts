@@ -114,7 +114,7 @@ export async function POST(request: Request) {
       await prisma.$transaction(async (tx) => {
         const word = await tx.word.findUnique({
           where: { id },
-          select: { sentenceId: true, sentenceIds: true },
+          select: { sentenceIds: true },
         });
         if (!word) throw new Error(`Word ${id} no longer exists.`);
         const referencedSentenceIds = meaningReviewSentenceIds(word);
@@ -136,15 +136,6 @@ export async function POST(request: Request) {
         }
         const remainingSentenceIds = currentSentenceIds.filter(
           (sentenceId) => !invalidSentenceIds.includes(sentenceId),
-        );
-        // Keep the primary sentence as the pending-merge marker. Moving it into
-        // sentenceIds here would make MERGE WORD CONCEPTS miss this new record.
-        const nextSentenceId =
-          word.sentenceId !== null && remainingSentenceIds.includes(word.sentenceId)
-            ? word.sentenceId
-            : null;
-        const nextSentenceIds = remainingSentenceIds.filter(
-          (sentenceId) => sentenceId !== nextSentenceId,
         );
         let meaningData: {
           meaningId?: number;
@@ -176,8 +167,7 @@ export async function POST(request: Request) {
           where: { id },
           data: {
             ...meaningData,
-            sentenceId: nextSentenceId,
-            sentenceIds: nextSentenceIds,
+            sentenceIds: remainingSentenceIds,
             meanings_confirmed: true,
           },
           select: { id: true },

@@ -6,7 +6,6 @@ import WordFieldVoiceCell from "@/app/(site)/words/hints/WordFieldVoiceCell.clie
 import SentenceEditorModal from "@/app/(site)/sentences/editor/SentenceEditorModal.client";
 import EnglishWordRowActions from "@/app/(site)/words/tables/english-words/EnglishWordRowActions.client";
 import OpenPersianWordEditorModal from "@/app/(site)/words/tables/persian-words/OpenPersianWordEditorModal.client";
-import { ModalPortal } from "@/components/modal-portal";
 
 const WORD_AUDIO_FIELDS = [
   "other_meanings_en",
@@ -17,8 +16,8 @@ export type WordEditorState = {
   id: number;
   anki_link_id: string;
   englishId: number;
-  sentenceId: number | null;
   sentenceIds: number[];
+  conceptMergeReviewed: boolean;
   meaningId: number | null;
   otherMeaningIds: number[];
   comparedMeaningWordIds: number[];
@@ -180,126 +179,6 @@ function IdListInput({
   );
 }
 
-function SentenceIdEditor({
-  value,
-  sentence,
-  onChange,
-}: {
-  value: number | null;
-  sentence: WordEditorState["sentence"];
-  onChange: (value: number | null) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  const [draft, setDraft] = useState("");
-  const trimmed = draft.trim();
-  const parsed = trimmed ? Number(trimmed) : null;
-  const valid =
-    parsed === null || (Number.isInteger(parsed) && parsed > 0);
-
-  useEffect(() => {
-    if (!open) return;
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setOpen(false);
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [open]);
-
-  return (
-    <>
-      <button
-        type="button"
-        onClick={() => {
-          setDraft(value == null ? "" : String(value));
-          setOpen(true);
-        }}
-        className={relationButtonClass}
-      >
-        <RelationCardContent
-          label="sentenceId"
-          value={value == null ? "—" : String(value)}
-          detail={
-            sentence?.id === value
-              ? sentence.sentence_en
-              : value == null
-                ? "Click to link a Sentence"
-                : "Unsaved Sentence relation"
-          }
-          editable
-        />
-      </button>
-
-      {open ? (
-        <ModalPortal>
-        <div
-          className="fixed inset-0 z-[90] flex items-center justify-center bg-black/55 p-4 backdrop-blur-sm"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Edit sentenceId"
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget) setOpen(false);
-          }}
-        >
-          <div className="w-full max-w-md rounded-2xl border border-card bg-background p-5 shadow-elevated">
-            <div className="text-base font-semibold">Edit Word.sentenceId</div>
-            <p className="mt-1 text-xs opacity-70">
-              Enter an existing Sentence ID. Leave it empty to remove the relation.
-            </p>
-            <label className="mt-4 grid gap-1 text-sm">
-              <span className="text-xs font-semibold text-muted">sentenceId</span>
-              <input
-                type="number"
-                min={1}
-                step={1}
-                autoFocus
-                value={draft}
-                onChange={(event) => setDraft(event.target.value)}
-                aria-invalid={!valid}
-                className="rounded border px-3 py-2 font-mono text-base aria-invalid:border-red-500"
-                placeholder="null"
-              />
-            </label>
-            {!valid ? (
-              <div className="mt-2 text-xs text-red-600">
-                sentenceId must be a positive integer or empty.
-              </div>
-            ) : null}
-            {sentence && sentence.id === value ? (
-              <div className="mt-4 rounded-xl border border-card p-3">
-                <div className="mb-2 truncate text-xs opacity-70" title={sentence.sentence_en}>
-                  Linked Sentence: {sentence.sentence_en}
-                </div>
-                <SentenceEditorModal item={sentence} />
-              </div>
-            ) : null}
-            <div className="mt-5 flex justify-end gap-2">
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                className="rounded border px-3 py-2 text-sm hover:bg-black/5 dark:hover:bg-white/5"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                disabled={!valid}
-                onClick={() => {
-                  onChange(parsed);
-                  setOpen(false);
-                }}
-                className="rounded bg-foreground px-4 py-2 text-sm font-semibold text-background disabled:opacity-50"
-              >
-                Apply to form
-              </button>
-            </div>
-          </div>
-        </div>
-        </ModalPortal>
-      ) : null}
-    </>
-  );
-}
-
 export default function WordEditorClient({
   initial,
   floatingActions = true,
@@ -364,7 +243,6 @@ export default function WordEditorClient({
         body: JSON.stringify({
           id: word.id,
           data: {
-            sentenceId: word.sentenceId,
             pos: word.pos,
             concept_explained_fa: word.concept_explained_fa,
             learning_depth: word.learning_depth,
@@ -378,6 +256,7 @@ export default function WordEditorClient({
             comparedMeaningWordIds: word.comparedMeaningWordIds,
             synonymIds: word.synonymIds,
             meanings_confirmed: word.meanings_confirmed,
+            conceptMergeReviewed: word.conceptMergeReviewed,
           },
         }),
       });
@@ -577,13 +456,14 @@ export default function WordEditorClient({
                 <RelationCardContent label="meaningId" value="—" detail="No linked PersianWord" />
               </div>
             )}
-            <SentenceIdEditor
-              value={word.sentenceId}
-              sentence={word.sentence}
-              onChange={(sentenceId) =>
-                setWord((current) => ({ ...current, sentenceId }))
-              }
-            />
+            <div className={relationCardClass}>
+              <RelationCardContent
+                label="sentenceIds[0]"
+                value={word.sentenceIds[0] == null ? "—" : String(word.sentenceIds[0])}
+                detail={word.sentence?.sentence_en ?? "No primary sentence"}
+              />
+              {word.sentence ? <div className="mt-2"><SentenceEditorModal item={word.sentence} /></div> : null}
+            </div>
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-2 border-t border-card pt-3">
@@ -696,6 +576,12 @@ export default function WordEditorClient({
               <span>{word.meanings_confirmed ? "Confirmed" : "Not confirmed"}</span>
             </label>
           </InputRow>
+          <InputRow label="conceptMergeReviewed">
+            <label className="flex h-10 items-center gap-2 rounded border px-2.5 text-xs">
+              <input type="checkbox" checked={word.conceptMergeReviewed} onChange={(e) => setWord((p) => ({ ...p, conceptMergeReviewed: e.target.checked }))} />
+              <span>{word.conceptMergeReviewed ? "Reviewed" : "Pending"}</span>
+            </label>
+          </InputRow>
         </div>
       </section>
 
@@ -713,7 +599,7 @@ export default function WordEditorClient({
           </InputRow>
           <InputRow label="concept_explained_fa">
             <div className="flex items-start gap-2">
-              <textarea dir="rtl" value={word.concept_explained_fa ?? ""} onChange={(e) => setWord((p) => ({ ...p, concept_explained_fa: asNullableString(e.target.value, { trim: false }) }))} className="min-h-28 w-full resize-y rounded border px-3 py-2 text-sm" placeholder="nullable" />
+              <textarea dir="rtl" value={word.concept_explained_fa ?? ""} onChange={(e) => setWord((p) => ({ ...p, concept_explained_fa: asNullableString(e.target.value, { trim: false }), conceptMergeReviewed: false }))} className="min-h-28 w-full resize-y rounded border px-3 py-2 text-sm" placeholder="nullable" />
               <WordFieldVoiceCell field="concept_explained_fa" audioKey={word.anki_link_id} text={word.concept_explained_fa} />
             </div>
           </InputRow>
@@ -729,8 +615,8 @@ export default function WordEditorClient({
           <p className="mt-1 text-xs text-muted">Enter comma-separated positive IDs or a JSON array.</p>
         </div>
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-          <IdListInput label="otherMeaningIds" value={word.otherMeaningIds} onChange={(otherMeaningIds) => setWord((p) => ({ ...p, otherMeaningIds }))} />
-          <IdListInput label="sentenceIds" value={word.sentenceIds} onChange={(sentenceIds) => setWord((p) => ({ ...p, sentenceIds }))} />
+          <IdListInput label="otherMeaningIds" value={word.otherMeaningIds} onChange={(otherMeaningIds) => setWord((p) => ({ ...p, otherMeaningIds, meanings_confirmed: false, conceptMergeReviewed: false }))} />
+          <IdListInput label="sentenceIds" value={word.sentenceIds} onChange={(sentenceIds) => setWord((p) => ({ ...p, sentenceIds, meanings_confirmed: false }))} />
           <IdListInput label="comparedMeaningWordIds" value={word.comparedMeaningWordIds} onChange={(comparedMeaningWordIds) => setWord((p) => ({ ...p, comparedMeaningWordIds }))} />
           <IdListInput label="synonymIds" value={word.synonymIds} onChange={(synonymIds) => setWord((p) => ({ ...p, synonymIds }))} />
         </div>

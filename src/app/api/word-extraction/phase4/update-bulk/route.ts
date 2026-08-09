@@ -2,11 +2,11 @@ import "server-only";
 
 import { NextResponse } from "next/server";
 
-import { prisma } from "@/lib/prisma";
 import {
   findPrimarySentenceByAnkiLinkId,
   upsertPrimarySentenceByAnkiLinkId,
 } from "@/lib/sentences/sentenceRepo";
+import { updateWord } from "@/lib/words/wordRepo";
 
 export const runtime = "nodejs";
 
@@ -121,7 +121,7 @@ export async function POST(req: Request) {
 
     for (const item of items) {
       try {
-        const row = await prisma.word.update({
+        const row = await updateWord({
           where: { id: item.id },
           data: {
             pos: item.pos,

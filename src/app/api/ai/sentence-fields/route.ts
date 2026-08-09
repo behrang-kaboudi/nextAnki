@@ -7,6 +7,7 @@ import crypto from "node:crypto";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { geminiGenerateWithExplicitCache } from "@/lib/ai/model_runner/gemini";
+import { primarySentenceId } from "@/lib/words/sentenceIds";
 
 export const runtime = "nodejs";
 
@@ -72,23 +73,21 @@ function toTrimmedString(v: unknown): string | null {
 
 export async function GET() {
   try {
-    const [missingSentenceEnRow, processingRow] = await Promise.all([
-      prisma.$queryRaw<Array<{ c: bigint }>>`
-        SELECT COUNT(*) as c
-        FROM Sentence s
-        INNER JOIN word w ON w.sentenceId = s.id
-        WHERE s.sentence_en IS NULL OR TRIM(s.sentence_en) = ''
-      `,
-      prisma.$queryRaw<Array<{ c: bigint }>>`
-        SELECT COUNT(*) as c
-        FROM Sentence s
-        INNER JOIN word w ON w.sentenceId = s.id
-        WHERE s.sentence_en LIKE ${`${PROCESSING_PREFIX}%`}
-      `,
+    const [sentences, words] = await Promise.all([
+      prisma.sentence.findMany({ select: { id: true, sentence_en: true } }),
+      prisma.word.findMany({ select: { sentenceIds: true } }),
     ]);
-
-    const missingSentenceEn = Number(missingSentenceEnRow?.[0]?.c ?? 0);
-    const processing = Number(processingRow?.[0]?.c ?? 0);
+    const missingIds = new Set(
+      sentences.filter((sentence) => !sentence.sentence_en.trim()).map((sentence) => sentence.id),
+    );
+    const processingIds = new Set(
+      sentences
+        .filter((sentence) => sentence.sentence_en.startsWith(PROCESSING_PREFIX))
+        .map((sentence) => sentence.id),
+    );
+    const primaryIds = words.map((word) => primarySentenceId(word.sentenceIds));
+    const missingSentenceEn = primaryIds.filter((id) => id !== null && missingIds.has(id)).length;
+    const processing = primaryIds.filter((id) => id !== null && processingIds.has(id)).length;
 
     return NextResponse.json({ ok: true, missingSentenceEn, processing });
   } catch (e) {
@@ -133,19 +132,39 @@ export async function POST(req: Request) {
 
     if (mode === "next_missing_sentence_en") {
       const claimToken = `${PROCESSING_PREFIX}${crypto.randomUUID()}`;
-
-      const nextCandidate = await prisma.$queryRaw<
-        Array<{ sentenceId: number; wordId: number; anki_link_id: string }>
-      >`
-        SELECT s.id as sentenceId, w.id as wordId, w.anki_link_id
-        FROM Sentence s
-        INNER JOIN word w ON w.sentenceId = s.id
-        WHERE s.sentence_en IS NULL OR TRIM(s.sentence_en) = ''
-        ORDER BY w.anki_link_id ASC
-        LIMIT 1
-      `;
-
-      const candidate = nextCandidate[0] ?? null;
+      const [missingSentences, candidateWords] = await Promise.all([
+        prisma.sentence.findMany({ select: { id: true, sentence_en: true } }),
+        prisma.word.findMany({
+          orderBy: { anki_link_id: "asc" },
+          select: {
+            id: true,
+            anki_link_id: true,
+            sentenceIds: true,
+            english: { select: { base_form: true } },
+            meaning: { select: { canonical_text: true } },
+            pos: true,
+          },
+        }),
+      ]);
+      const missingById = new Map(
+        missingSentences
+          .filter((sentence) => !sentence.sentence_en.trim())
+          .map((sentence) => [sentence.id, sentence.sentence_en]),
+      );
+      const candidateWord = candidateWords.find((word) => {
+        const id = primarySentenceId(word.sentenceIds);
+        return id !== null && missingById.has(id);
+      });
+      const candidateSentenceId = candidateWord
+        ? primarySentenceId(candidateWord.sentenceIds)
+        : null;
+      const candidate = candidateWord && candidateSentenceId
+        ? {
+            sentenceId: candidateSentenceId,
+            initialSentenceEn: missingById.get(candidateSentenceId) ?? "",
+            word: candidateWord,
+          }
+        : null;
       if (!candidate) {
         return NextResponse.json({ ok: true, done: true });
       }
@@ -153,7 +172,7 @@ export async function POST(req: Request) {
       const claimed = await prisma.sentence.updateMany({
         where: {
           id: candidate.sentenceId,
-          sentence_en: "",
+          sentence_en: candidate.initialSentenceEn,
         },
         data: { sentence_en: claimToken },
       });
@@ -167,20 +186,9 @@ export async function POST(req: Request) {
         select: {
           id: true,
           sentence_en_meaning_fa: true,
-          words: {
-            take: 1,
-            select: {
-              id: true,
-              anki_link_id: true,
-              english: { select: { base_form: true } },
-              meaning: { select: { canonical_text: true } },
-              pos: true,
-            },
-          },
         },
       });
-
-      const word = item?.words[0] ?? null;
+      const word = candidate.word;
       if (!item || !word) {
         return NextResponse.json(
           { ok: false, error: "Claimed a row but failed to load it (unexpected)" },
@@ -237,7 +245,7 @@ export async function POST(req: Request) {
           });
           return NextResponse.json({
             ok: true,
-            item,
+            item: { ...item, words: [word] },
             input: modelInput,
             output,
             usage,
@@ -307,7 +315,7 @@ export async function POST(req: Request) {
 
         return NextResponse.json({
           ok: true,
-          item,
+          item: { ...item, words: [word] },
           input: modelInput,
           output,
           usage,

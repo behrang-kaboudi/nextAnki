@@ -1,9 +1,10 @@
 import "server-only";
 
+import type { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 
-import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { hydrateWordsWithPrimarySentence } from "@/lib/words/primarySentences.server";
 
 export const runtime = "nodejs";
 
@@ -15,59 +16,36 @@ function parseLimit(value: string | null, fallback: number) {
   return Math.min(i, 500);
 }
 
-function numberFromUnknownCount(value: unknown): number {
-  if (typeof value === "number") return value;
-  if (typeof value === "bigint") return Number(value);
-  if (typeof value === "string") {
-    const parsed = Number.parseInt(value, 10);
-    if (Number.isFinite(parsed)) return parsed;
-  }
-  return 0;
-}
-
 export async function GET(req: Request) {
   try {
     const url = new URL(req.url);
     const limit = parseLimit(url.searchParams.get("limit"), 20);
 
-    // Extraction basis for this modal:
-    // only rows with missing phonetic_us should be selected.
-    const missingWhere = Prisma.sql`
-      (ew.phonetic_us IS NULL OR ew.phonetic_us = '')
-    `;
-
-    const totalRows = (await prisma.$queryRaw<Array<{ count: unknown }>>(Prisma.sql`
-      SELECT COUNT(*) AS count
-      FROM word w
-      INNER JOIN english_word ew ON ew.id = w.englishId
-      LEFT JOIN Sentence s ON s.id = w.sentenceId
-      WHERE ${missingWhere}
-    `)) ?? [];
-    const total = numberFromUnknownCount(totalRows[0]?.count);
-
-    const rows = (await prisma.$queryRaw<
-      Array<{
-        id: number;
-        base_form: string;
-        meaning_fa: string;
-        sentence_en: string;
-        sentence_en_meaning_fa: string;
-      }>
-    >(Prisma.sql`
-      SELECT
-        w.id,
-        ew.base_form,
-        COALESCE(pw.canonical_text, '') AS meaning_fa,
-        COALESCE(s.sentence_en, '') AS sentence_en,
-        COALESCE(s.sentence_en_meaning_fa, '') AS sentence_en_meaning_fa
-      FROM word w
-      INNER JOIN english_word ew ON ew.id = w.englishId
-      LEFT JOIN persian_word pw ON pw.id = w.meaningId
-      LEFT JOIN Sentence s ON s.id = w.sentenceId
-      WHERE ${missingWhere}
-      ORDER BY w.id DESC
-      LIMIT ${limit}
-    `)) ?? [];
+    const where: Prisma.WordWhereInput = {
+      english: { OR: [{ phonetic_us: null }, { phonetic_us: "" }] },
+    };
+    const [total, words] = await Promise.all([
+      prisma.word.count({ where }),
+      prisma.word.findMany({
+        where,
+        orderBy: { id: "desc" },
+        take: limit,
+        select: {
+          id: true,
+          sentenceIds: true,
+          english: { select: { base_form: true } },
+          meaning: { select: { canonical_text: true } },
+        },
+      }),
+    ]);
+    const hydrated = await hydrateWordsWithPrimarySentence(words);
+    const rows = hydrated.map((word) => ({
+      id: word.id,
+      base_form: word.english.base_form,
+      meaning_fa: word.meaning?.canonical_text ?? "",
+      sentence_en: word.sentence?.sentence_en ?? "",
+      sentence_en_meaning_fa: word.sentence?.sentence_en_meaning_fa ?? "",
+    }));
 
     return NextResponse.json({
       ok: true,

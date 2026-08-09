@@ -31,6 +31,8 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
   try {
     const body = (await request.json()) as Record<string, unknown>;
+    const current = await prisma.persianWord.findUnique({ where: { id }, select: { canonical_text: true } });
+    if (!current) return NextResponse.json({ ok: false, error: "PersianWord not found." }, { status: 404 });
     const canonicalText = normalizePersianHalf(String(body.canonical_text ?? ""));
     const normalizedText = normalizePersianFull(canonicalText);
     const meaningFaIpa = asNullableString(body.meaning_fa_IPA);
@@ -52,7 +54,10 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         meaning_fa_IPA_normalize: meaningFaIpa ? normalizeIpaForDb(meaningFaIpa, 2000) : null,
       },
     });
-    await touchWordsReferencingPersianWord(id);
+    await touchWordsReferencingPersianWord(id, {
+      resetConceptMergeReviewed: canonicalText !== current.canonical_text,
+      resetMeaningsConfirmed: canonicalText !== current.canonical_text,
+    });
     return NextResponse.json({ ok: true, item });
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {

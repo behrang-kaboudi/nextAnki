@@ -267,14 +267,14 @@ export default function WordMeaningsReview() {
                 <ul className="list-disc pr-5">
                   <li>فقط رکوردهایی انتخاب می‌شوند که هنوز <code>meanings_confirmed=false</code> دارند.</li>
                   <li>رکوردها از شناسهٔ قدیمی‌تر به جدیدتر و به تعداد واردشده در Count خوانده می‌شوند؛ در این مرحله Count صفر یعنی هیچ رکوردی.</li>
-                  <li>جمله‌های موجود در هر دو فیلد <code>sentenceId</code> و <code>sentenceIds</code> برای بررسی به مدل نشان داده می‌شوند.</li>
+                  <li>همهٔ جمله‌های موجود در آرایهٔ <code>sentenceIds</code> برای بررسی به مدل نشان داده می‌شوند.</li>
                 </ul>
                 <div className="mt-2 font-semibold">پس از تأیید چه تغییری می‌کند؟</div>
                 <ul className="list-disc pr-5">
                   <li>در صورت پیشنهاد اصلاح، <code>meaningId</code> و <code>otherMeaningIds</code> با معنی‌های نهایی جایگزین می‌شوند.</li>
-                  <li>ارتباط جمله‌هایی که مدل نامعتبر اعلام کرده از <code>sentenceId</code> یا <code>sentenceIds</code> حذف می‌شود.</li>
+                  <li>شناسهٔ جمله‌هایی که مدل نامعتبر اعلام کرده از آرایهٔ <code>sentenceIds</code> حذف می‌شود.</li>
                   <li>رکوردهای تأییدشده <code>meanings_confirmed=true</code> می‌گیرند.</li>
-                  <li><code>sentenceId</code> معتبر عمداً در همین فیلد باقی می‌ماند و به <code>sentenceIds</code> منتقل نمی‌شود؛ چون علامت وجود رکورد جدید برای مرحلهٔ MERGE WORD CONCEPTS است.</li>
+                  <li>اولین شناسهٔ آرایه، یعنی <code>sentenceIds[0]</code>، جملهٔ اصلی Word برای فیلدها و صدای کارت Anki است.</li>
                   <li>هیچ رکورد Word، Sentence یا PersianWord و هیچ ستون دیتابیس در این مرحله حذف نمی‌شود.</li>
                 </ul>
               </div>

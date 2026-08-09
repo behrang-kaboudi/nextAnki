@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { hydrateWordsWithPersianMeanings } from "@/lib/words/persianMeanings.server";
 import { flattenWordEnglishRelation, WORD_ENGLISH_FIELDS_SELECT } from "@/lib/english/wordEnglishFields.server";
+import { hydrateWordsWithPrimarySentence, wordIdsWhosePrimarySentenceContains } from "@/lib/words/primarySentences.server";
 
 function asTrimmedString(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
@@ -15,6 +16,7 @@ export async function GET(req: Request) {
     const limitValue = Number(url.searchParams.get("limit") ?? "50");
     const limit = Math.max(1, Math.min(100, Math.trunc(limitValue) || 50));
     const mode = asTrimmedString(url.searchParams.get("mode"));
+    const sentenceMatchWordIds = q ? await wordIdsWhosePrimarySentenceContains(q) : [];
 
     const rows = await prisma.word.findMany({
       where:
@@ -25,8 +27,7 @@ export async function GET(req: Request) {
                 OR: [
                   { english: { is: { base_form: { contains: q } } } },
                   { meaning: { is: { canonical_text: { contains: q } } } },
-                  { sentence: { is: { sentence_en: { contains: q } } } },
-                  { sentence: { is: { sentence_en_meaning_fa: { contains: q } } } },
+                  ...(sentenceMatchWordIds.length ? [{ id: { in: sentenceMatchWordIds } }] : []),
                 ],
               }
             : undefined,
@@ -37,12 +38,7 @@ export async function GET(req: Request) {
         meaningId: true,
         otherMeaningIds: true,
         learning_depth: true,
-        sentence: {
-          select: {
-            sentence_en: true,
-            sentence_en_meaning_fa: true,
-          },
-        },
+        sentenceIds: true,
       },
       orderBy:
         mode === "top-learning-depth"
@@ -53,7 +49,9 @@ export async function GET(req: Request) {
 
     return NextResponse.json({
       ok: true,
-      items: (await hydrateWordsWithPersianMeanings(rows.map(flattenWordEnglishRelation))).map((row) => ({
+      items: (await hydrateWordsWithPersianMeanings(
+        await hydrateWordsWithPrimarySentence(rows.map(flattenWordEnglishRelation)),
+      )).map((row) => ({
         anki_link_id: row.anki_link_id,
         base_form: row.base_form,
         meaning_fa: row.meaning_fa,

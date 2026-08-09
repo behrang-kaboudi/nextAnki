@@ -9,7 +9,6 @@ type SourceRow = {
   meaning_fa: string;
   other_meanings_fa: string[];
   concept_explained_fa: string;
-  sentenceId: number | null;
   sentenceIds: number[];
 };
 
@@ -20,7 +19,7 @@ type PrepareResponse = {
   items?: SourceRow[][];
   sourceGroups?: number[][];
   totalEligibleGroups?: number;
-  normalizedSingleRecords?: number;
+  reviewedSingleRecords?: number;
   error?: string;
 };
 
@@ -76,7 +75,7 @@ export default function WordConceptMerge() {
       setResponse("");
       setPreview([]);
       setNotice(successNotice ??
-        `Created ${dataJson.items.length} group(s); moved sentenceId into sentenceIds for ${dataJson.normalizedSingleRecords ?? 0} single record(s) ✓`);
+        `Created ${dataJson.items.length} group(s); marked ${dataJson.reviewedSingleRecords ?? 0} single record(s) as reviewed ✓`);
       if (showModal) setOpen(true);
       router.refresh();
     } catch (reason) {
@@ -110,10 +109,10 @@ export default function WordConceptMerge() {
         const sentenceIds = [...new Set(clusterIds.flatMap((id) => {
           const current = currentById.get(id);
           return current
-            ? [...(current.sentenceId === null ? [] : [current.sentenceId]), ...current.sentenceIds]
+            ? current.sentenceIds
             : [];
         }))];
-        return { ...row, sentenceId: null, sentenceIds };
+        return { ...row, sentenceIds };
       });
       setPreview(normalizedRows);
       setConfirmOpen(true);
@@ -203,21 +202,21 @@ export default function WordConceptMerge() {
                 <ul className="list-disc pr-5">
                   <li>رکوردها بر اساس <code>englishId</code> یکسان گروه‌بندی می‌شوند.</li>
                   <li>گروه باید حداقل دو رکورد <code>Word</code> داشته باشد.</li>
-                  <li>حداقل یک رکورد گروه باید <code>sentenceId</code> غیرخالی داشته باشد؛ این مقدار نشانهٔ وجود رکورد جدید و هنوز بررسی‌نشده است.</li>
-                  <li>گروهی که <code>sentenceId</code> تمام رکوردهایش <code>null</code> باشد به پرامپت ارسال نمی‌شود.</li>
+                  <li>حداقل یک رکورد گروه باید <code>conceptMergeReviewed=false</code> داشته باشد.</li>
+                  <li>گروهی که تمام رکوردهایش بررسی شده‌اند دوباره به پرامپت ارسال نمی‌شود.</li>
                   <li><code>Group count = 0</code> یعنی تمام گروه‌های واجد شرایط.</li>
                 </ul>
                 <div className="mt-2 font-semibold">پس از تأیید چه تغییری می‌کند؟</div>
                 <ul className="list-disc pr-5">
                   <li>در هر مفهوم ادغام‌شده، قدیمی‌ترین Word باقی می‌ماند و <code>meaningId</code>، <code>otherMeaningIds</code> و <code>concept_explained_fa</code> آن با نتیجهٔ نهایی به‌روزرسانی می‌شوند.</li>
-                  <li>تمام جمله‌های معتبر گروه بدون تکرار در <code>sentenceIds</code> رکورد باقی‌مانده جمع می‌شوند و <code>sentenceId</code> آن خالی می‌شود؛ این یعنی رکورد جدید توسط Merge پردازش شده است.</li>
+                  <li>تمام جمله‌های معتبر گروه بدون تکرار در <code>sentenceIds</code> رکورد باقی‌مانده جمع می‌شوند و ترتیب آن‌ها حفظ می‌شود.</li>
                   <li>Wordهای جدیدترِ ادغام‌شده حذف می‌شوند، اما رکوردهای Sentence و PersianWord حذف نمی‌شوند.</li>
                   <li>ارجاع به Wordهای حذف‌شده از <code>synonymIds</code> و <code>comparedMeaningWordIds</code> سایر رکوردها پاک می‌شود.</li>
-                  <li>گروه تک‌رکوردی به مدل فرستاده نمی‌شود؛ فقط <code>sentenceId</code> آن به <code>sentenceIds</code> منتقل و سپس خالی می‌شود.</li>
+                  <li>گروه تک‌رکوردی به مدل فرستاده نمی‌شود و فقط بررسی‌شده علامت می‌خورد.</li>
                   <li>هیچ ستون دیتابیس حذف نمی‌شود؛ فقط مقدارهای بالا تغییر می‌کنند و ردیف‌های Word اضافه حذف می‌شوند.</li>
                 </ul>
                 <p className="mt-2 font-medium text-amber-800 dark:text-amber-300">
-                  رکوردهای قدیمی که پیش‌تر <code>sentenceId</code> آن‌ها خالی شده است، با این دکمه خودکار دوباره علامت‌گذاری نمی‌شوند.
+                  وضعیت انتخاب رکوردها فقط از <code>conceptMergeReviewed</code> خوانده می‌شود و به جمله‌ها وابسته نیست.
                 </p>
               </div>
             ) : null}
@@ -250,7 +249,7 @@ export default function WordConceptMerge() {
                   disabled={busy}
                   onChange={(event) => setResponse(event.target.value)}
                   className="min-h-0 flex-1 rounded border p-3 font-mono text-xs"
-                  placeholder='[{"id":1,"word":"...","meaning_fa":"...","other_meanings_fa":[],"concept_explained_fa":"...","sentenceId":null,"sentenceIds":[],"delete":false,"mergedRecordIds":[],"mergedIntoId":null}]'
+                  placeholder='[{"id":1,"word":"...","meaning_fa":"...","other_meanings_fa":[],"concept_explained_fa":"...","sentenceIds":[],"delete":false,"mergedRecordIds":[],"mergedIntoId":null}]'
                 />
                 <div className="flex gap-2">
                   <button

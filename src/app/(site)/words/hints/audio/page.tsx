@@ -3,6 +3,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { flattenWordEnglishRelation, WORD_ENGLISH_FIELDS_SELECT } from "@/lib/english/wordEnglishFields.server";
 import { hydrateWordsWithPersianMeanings } from "@/lib/words/persianMeanings.server";
+import { hydrateWordsWithPrimarySentence } from "@/lib/words/primarySentences.server";
 import BatchWordFieldVoiceGenerate from "../BatchWordFieldVoiceGenerate.client";
 import BatchWordFieldVoiceGenerateAllFields from "../BatchWordFieldVoiceGenerateAllFields.client";
 import AudioHelpModal from "../AudioHelpModal.client";
@@ -58,19 +59,14 @@ export default async function WordHintsAudioPage({
         english: { select: WORD_ENGLISH_FIELDS_SELECT },
         meaningId: true,
         otherMeaningIds: true,
+        sentenceIds: true,
         other_meanings_en: true,
         concept_explained_fa: true,
-        sentence: {
-          select: {
-            id: true,
-            sentence_en: true,
-            sentence_en_meaning_fa: true,
-          },
-        },
       },
     }),
   ]);
-  const rowsWithMeanings = await hydrateWordsWithPersianMeanings(rows.map(flattenWordEnglishRelation));
+  const rowsWithSentences = await hydrateWordsWithPrimarySentence(rows.map(flattenWordEnglishRelation));
+  const rowsWithMeanings = await hydrateWordsWithPersianMeanings(rowsWithSentences);
   const mappedRows = rowsWithMeanings.map((r) => ({
     ...r,
     sentenceRecord: r.sentence ?? null,

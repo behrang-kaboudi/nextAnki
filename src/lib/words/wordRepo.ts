@@ -3,6 +3,7 @@ import "server-only";
 import type { Prisma, PrismaClient } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
+import { wordSentenceIds } from "@/lib/words/sentenceIds";
 
 function stripManualUpdatedAt<T extends { data?: unknown }>(args: T): T {
   const data = (args as { data?: Record<string, unknown> }).data;
@@ -12,6 +13,42 @@ function stripManualUpdatedAt<T extends { data?: unknown }>(args: T): T {
   return args;
 }
 
+const conceptMergeInputs = new Set([
+  "englishId",
+  "english",
+  "meaningId",
+  "meaning",
+  "otherMeaningIds",
+  "concept_explained_fa",
+]);
+
+function resetConceptMergeReview(data: unknown) {
+  if (!data || typeof data !== "object" || Array.isArray(data)) return;
+  const record = data as Record<string, unknown>;
+  if (record.conceptMergeReviewed !== undefined) return;
+  if (Object.keys(record).some((key) => conceptMergeInputs.has(key))) {
+    record.conceptMergeReviewed = false;
+  }
+}
+
+const meaningReviewInputs = new Set([
+  "englishId",
+  "english",
+  "meaningId",
+  "meaning",
+  "otherMeaningIds",
+  "sentenceIds",
+]);
+
+function resetMeaningReview(data: unknown) {
+  if (!data || typeof data !== "object" || Array.isArray(data)) return;
+  const record = data as Record<string, unknown>;
+  if (record.meanings_confirmed !== undefined) return;
+  if (Object.keys(record).some((key) => meaningReviewInputs.has(key))) {
+    record.meanings_confirmed = false;
+  }
+}
+
 type WordWriteClient = Pick<PrismaClient, "word"> | Pick<Prisma.TransactionClient, "word">;
 
 export async function updateWord(
@@ -19,11 +56,15 @@ export async function updateWord(
   client: WordWriteClient = prisma,
 ) {
   stripManualUpdatedAt(args);
+  resetConceptMergeReview(args.data);
+  resetMeaningReview(args.data);
   return client.word.update(args);
 }
 
 export async function updateManyWords(args: Prisma.WordUpdateManyArgs) {
   stripManualUpdatedAt(args);
+  resetConceptMergeReview(args.data);
+  resetMeaningReview(args.data);
   return prisma.word.updateMany(args);
 }
 
@@ -35,23 +76,54 @@ export async function touchWordByAnkiLinkId(ankiLinkId: string) {
 }
 
 export async function touchWordsLinkedToSentenceId(sentenceId: number) {
+  const words = await prisma.word.findMany({ select: { id: true, sentenceIds: true } });
+  const ids = words
+    .filter((word) => wordSentenceIds(word.sentenceIds).includes(sentenceId))
+    .map((word) => word.id);
+  if (!ids.length) return { count: 0 };
   return prisma.word.updateMany({
-    where: { sentenceId },
+    where: { id: { in: ids } },
     // Audio and Sentence edits are real sync-relevant changes even when no Word column changes.
     data: { updatedAt: new Date() },
   });
 }
 
 /** Touch dependent Words when their relation-owned Persian meaning changes. */
-export async function touchWordsByIds(ids: readonly number[]) {
+export async function touchWordsByIds(
+  ids: readonly number[],
+  options?: {
+    resetConceptMergeReviewed?: boolean;
+    resetMeaningsConfirmed?: boolean;
+  },
+) {
   const uniqueIds = [...new Set(ids.filter((id) => Number.isSafeInteger(id) && id > 0))];
   if (!uniqueIds.length) return { count: 0 };
-  return prisma.word.updateMany({ where: { id: { in: uniqueIds } }, data: { updatedAt: new Date() } });
+  return prisma.word.updateMany({
+    where: { id: { in: uniqueIds } },
+    data: {
+      updatedAt: new Date(),
+      ...(options?.resetConceptMergeReviewed ? { conceptMergeReviewed: false } : {}),
+      ...(options?.resetMeaningsConfirmed ? { meanings_confirmed: false } : {}),
+    },
+  });
 }
 
 /** Touch dependent Words when their relation-owned English fields change. */
-export async function touchWordsByEnglishId(englishId: number) {
-  return prisma.word.updateMany({ where: { englishId }, data: { updatedAt: new Date() } });
+export async function touchWordsByEnglishId(
+  englishId: number,
+  options?: {
+    resetConceptMergeReviewed?: boolean;
+    resetMeaningsConfirmed?: boolean;
+  },
+) {
+  return prisma.word.updateMany({
+    where: { englishId },
+    data: {
+      updatedAt: new Date(),
+      ...(options?.resetConceptMergeReviewed ? { conceptMergeReviewed: false } : {}),
+      ...(options?.resetMeaningsConfirmed ? { meanings_confirmed: false } : {}),
+    },
+  });
 }
 
 export async function touchWordsByEnglishIds(englishIds: readonly number[]) {

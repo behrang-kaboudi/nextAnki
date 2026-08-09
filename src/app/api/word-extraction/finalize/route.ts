@@ -3,6 +3,7 @@ import "server-only";
 import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
+import { hydrateWordsWithPrimarySentence } from "@/lib/words/primarySentences.server";
 
 export const runtime = "nodejs";
 
@@ -14,68 +15,32 @@ export async function POST() {
   try {
     // 1) Validate required fields are present and non-empty.
     // Note: some fields are optional in the schema, but Finalize requires them.
-    const invalidRows = await prisma.word.findMany({
-      where: {
-        OR: [
-          { english: { is: { base_form: { equals: "" } } } },
-          { meaning: null },
-          { meaning: { is: { canonical_text: { equals: "" } } } },
-          { meaning: { is: { meaning_fa_IPA: { equals: "" } } } },
-          { meaning: { is: { meaning_fa_IPA_normalize: { equals: "" } } } },
-          { sentence: null },
-          { sentence: { is: { sentence_en: "" } } },
-
-          { english: { is: { phonetic_us: null } } },
-          { english: { is: { phonetic_us: { equals: "" } } } },
-          { english: { is: { phonetic_us_normalized: null } } },
-          { english: { is: { phonetic_us_normalized: { equals: "" } } } },
-          { pos: null },
-          { pos: { equals: "" } },
-          { sentence: { is: { sentence_en_meaning_fa: null } } },
-          { sentence: { is: { sentence_en_meaning_fa: "" } } },
-        ],
-      },
+    const rows = await prisma.word.findMany({
       select: {
         id: true,
+        sentenceIds: true,
         english: { select: { base_form: true, phonetic_us: true, phonetic_us_normalized: true } },
         meaning: { select: { canonical_text: true, meaning_fa_IPA: true, meaning_fa_IPA_normalize: true } },
         pos: true,
-        sentence: {
-          select: {
-            sentence_en: true,
-            sentence_en_meaning_fa: true,
-          },
-        },
       },
       orderBy: { id: "asc" },
-      take: 200,
     });
-
-    const totalInvalid = await prisma.word.count({
-      where: {
-        OR: [
-          { english: { is: { base_form: { equals: "" } } } },
-          { meaning: null },
-          { meaning: { is: { canonical_text: { equals: "" } } } },
-          { meaning: { is: { meaning_fa_IPA: { equals: "" } } } },
-          { meaning: { is: { meaning_fa_IPA_normalize: { equals: "" } } } },
-          { sentence: null },
-          { sentence: { is: { sentence_en: "" } } },
-
-          { english: { is: { phonetic_us: null } } },
-          { english: { is: { phonetic_us: { equals: "" } } } },
-          { english: { is: { phonetic_us_normalized: null } } },
-          { english: { is: { phonetic_us_normalized: { equals: "" } } } },
-          { pos: null },
-          { pos: { equals: "" } },
-          { sentence: { is: { sentence_en_meaning_fa: null } } },
-          { sentence: { is: { sentence_en_meaning_fa: "" } } },
-        ],
-      },
-    });
+    const hydratedRows = await hydrateWordsWithPrimarySentence(rows);
+    const invalidRows = hydratedRows.filter((row) =>
+      isBlank(row.english.base_form) ||
+      isBlank(row.english.phonetic_us) ||
+      isBlank(row.english.phonetic_us_normalized) ||
+      isBlank(row.meaning?.canonical_text) ||
+      isBlank(row.meaning?.meaning_fa_IPA) ||
+      isBlank(row.meaning?.meaning_fa_IPA_normalize) ||
+      isBlank(row.pos) ||
+      isBlank(row.sentence?.sentence_en) ||
+      isBlank(row.sentence?.sentence_en_meaning_fa)
+    );
+    const totalInvalid = invalidRows.length;
 
     if (totalInvalid > 0) {
-      const sample = invalidRows.map((r) => {
+      const sample = invalidRows.slice(0, 200).map((r) => {
         const sentence = r.sentence;
         const missing: string[] = [];
         if (isBlank(r.english.base_form)) missing.push("base_form");

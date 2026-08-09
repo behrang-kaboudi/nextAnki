@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { upsertPrimarySentenceByAnkiLinkId } from "@/lib/sentences/sentenceRepo";
 import { addPersianWord } from "@/lib/tables/persianWord";
 import { normalizeEnglishWordText } from "@/lib/english/normalize";
+import { updateWord } from "@/lib/words/wordRepo";
 
 export const runtime = "nodejs";
 
@@ -239,11 +240,14 @@ export async function POST(req: Request) {
             });
 
             const code = `${pending.id}_${Date.now()}`;
-            const createdWord = await tx.word.update({
-              where: { id: pending.id },
-              data: { anki_link_id: code },
-              select: { id: true, anki_link_id: true },
-            });
+            const createdWord = await updateWord(
+              {
+                where: { id: pending.id },
+                data: { anki_link_id: code },
+                select: { id: true, anki_link_id: true },
+              },
+              tx,
+            );
 
             return createdWord;
           });

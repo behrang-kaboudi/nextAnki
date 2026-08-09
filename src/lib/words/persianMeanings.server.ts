@@ -79,7 +79,13 @@ export async function hydrateWordWithPersianMeanings<T extends WordMeaningRefere
   return (await hydrateWordsWithPersianMeanings([word]))[0]!;
 }
 
-export async function touchWordsReferencingPersianWord(persianWordId: number) {
+export async function touchWordsReferencingPersianWord(
+  persianWordId: number,
+  options?: {
+    resetConceptMergeReviewed?: boolean;
+    resetMeaningsConfirmed?: boolean;
+  },
+) {
   const references = await prisma.word.findMany({
     where: {
       OR: [
@@ -90,7 +96,7 @@ export async function touchWordsReferencingPersianWord(persianWordId: number) {
     },
     select: { id: true },
   });
-  await touchWordsByIds(references.map((reference) => reference.id));
+  await touchWordsByIds(references.map((reference) => reference.id), options);
   return references.length;
 }
 

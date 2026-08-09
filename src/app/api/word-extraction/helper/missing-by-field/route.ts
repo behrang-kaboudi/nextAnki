@@ -1,9 +1,10 @@
 import "server-only";
 
-import { Prisma } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
+import { hydrateWordsWithPrimarySentence } from "@/lib/words/primarySentences.server";
 
 export const runtime = "nodejs";
 
@@ -18,6 +19,13 @@ const allowedFields = [
 ] as const;
 type AllowedField = (typeof allowedFields)[number];
 
+const wordSelect = {
+  id: true,
+  sentenceIds: true,
+  english: { select: { base_form: true } },
+  meaning: { select: { canonical_text: true } },
+} satisfies Prisma.WordSelect;
+
 function parseLimit(value: string | null) {
   const n = value ? Number(value) : NaN;
   if (!Number.isFinite(n)) return 500;
@@ -28,6 +36,25 @@ function parseLimit(value: string | null) {
 
 function isAllowedField(value: string): value is AllowedField {
   return (allowedFields as readonly string[]).includes(value);
+}
+
+function missingWordWhere(field: Exclude<AllowedField, "sentence_en_meaning_fa">): Prisma.WordWhereInput {
+  if (field === "phonetic_us") {
+    return { english: { OR: [{ phonetic_us: null }, { phonetic_us: "" }] } };
+  }
+  if (field === "imageability") {
+    return { OR: [{ imageability: null }, { imageability: { lte: 0 } }] };
+  }
+  if (field === "learning_depth") {
+    return { OR: [{ learning_depth: null }, { learning_depth: 0 }] };
+  }
+  if (field === "productive_target") {
+    return { OR: [{ productive_target: null }, { productive_target: 0 }] };
+  }
+  if (field === "pos") {
+    return { OR: [{ pos: null }, { pos: "" }] };
+  }
+  return { OR: [{ concept_explained_fa: null }, { concept_explained_fa: "" }] };
 }
 
 export async function GET(req: Request) {
@@ -42,121 +69,35 @@ export async function GET(req: Request) {
       );
     }
 
-    const missingCondition =
-      field === "phonetic_us"
-        ? Prisma.sql`ew.phonetic_us IS NULL OR ew.phonetic_us = ''`
-        : field === "imageability"
-          ? Prisma.sql`w.imageability IS NULL OR w.imageability <= 0`
-          : field === "learning_depth"
-            ? Prisma.sql`w.learning_depth IS NULL OR w.learning_depth = 0`
-            : field === "productive_target"
-              ? Prisma.sql`w.productive_target IS NULL OR w.productive_target = 0`
-              : field === "sentence_en_meaning_fa"
-                ? Prisma.sql`s.sentence_en_meaning_fa IS NULL OR s.sentence_en_meaning_fa = ''`
-                : field === "pos"
-                  ? Prisma.sql`w.pos IS NULL OR w.pos = ''`
-                  : Prisma.sql`w.concept_explained_fa IS NULL OR w.concept_explained_fa = ''`;
+    let total: number;
+    let hydrated;
+    if (field === "sentence_en_meaning_fa") {
+      const allWords = await prisma.word.findMany({
+        orderBy: { id: "desc" },
+        select: wordSelect,
+      });
+      const allHydrated = await hydrateWordsWithPrimarySentence(allWords);
+      const missing = allHydrated.filter(
+        (word) => !word.sentence || !word.sentence.sentence_en_meaning_fa?.trim(),
+      );
+      total = missing.length;
+      hydrated = missing.slice(0, limit);
+    } else {
+      const where = missingWordWhere(field);
+      const [count, words] = await Promise.all([
+        prisma.word.count({ where }),
+        prisma.word.findMany({ where, orderBy: { id: "desc" }, take: limit, select: wordSelect }),
+      ]);
+      total = count;
+      hydrated = await hydrateWordsWithPrimarySentence(words);
+    }
 
-    const totalRows = await prisma.$queryRaw<Array<{ count: bigint }>>`
-      SELECT COUNT(*) AS count
-      FROM word w
-      INNER JOIN english_word ew ON ew.id = w.englishId
-      LEFT JOIN Sentence s ON s.id = w.sentenceId
-      WHERE ${missingCondition}
-    `;
-    const total = Number(totalRows[0]?.count ?? BigInt(0));
-
-    const rows =
-      field === "phonetic_us"
-        ? (await prisma.$queryRaw<
-            Array<{ id: number; base_form: string; meaning_fa: string; sentence_en: string }>
-          >`
-            SELECT w.id, ew.base_form, COALESCE(pw.canonical_text, '') AS meaning_fa, COALESCE(s.sentence_en, '') AS sentence_en
-            FROM word w
-      INNER JOIN english_word ew ON ew.id = w.englishId
-            LEFT JOIN persian_word pw ON pw.id = w.meaningId
-            LEFT JOIN Sentence s ON s.id = w.sentenceId
-            WHERE ew.phonetic_us IS NULL OR ew.phonetic_us = ''
-            ORDER BY w.id DESC
-            LIMIT ${limit}
-          `) ?? []
-        : field === "imageability"
-          ? (await prisma.$queryRaw<
-              Array<{ id: number; base_form: string; meaning_fa: string; sentence_en: string }>
-            >`
-              SELECT w.id, ew.base_form, COALESCE(pw.canonical_text, '') AS meaning_fa, COALESCE(s.sentence_en, '') AS sentence_en
-              FROM word w
-      INNER JOIN english_word ew ON ew.id = w.englishId
-              LEFT JOIN persian_word pw ON pw.id = w.meaningId
-              LEFT JOIN Sentence s ON s.id = w.sentenceId
-              WHERE w.imageability IS NULL OR w.imageability <= 0
-              ORDER BY w.id DESC
-              LIMIT ${limit}
-            `) ?? []
-            : field === "learning_depth"
-            ? (await prisma.$queryRaw<
-                Array<{ id: number; base_form: string; meaning_fa: string; sentence_en: string }>
-              >`
-                SELECT w.id, ew.base_form, COALESCE(pw.canonical_text, '') AS meaning_fa, COALESCE(s.sentence_en, '') AS sentence_en
-                FROM word w
-      INNER JOIN english_word ew ON ew.id = w.englishId
-                LEFT JOIN persian_word pw ON pw.id = w.meaningId
-                LEFT JOIN Sentence s ON s.id = w.sentenceId
-                WHERE w.learning_depth IS NULL OR w.learning_depth = 0
-                ORDER BY w.id DESC
-                LIMIT ${limit}
-              `) ?? []
-            : field === "productive_target"
-              ? (await prisma.$queryRaw<
-                  Array<{ id: number; base_form: string; meaning_fa: string; sentence_en: string }>
-                >`
-                  SELECT w.id, ew.base_form, COALESCE(pw.canonical_text, '') AS meaning_fa, COALESCE(s.sentence_en, '') AS sentence_en
-                  FROM word w
-      INNER JOIN english_word ew ON ew.id = w.englishId
-                  LEFT JOIN persian_word pw ON pw.id = w.meaningId
-                  LEFT JOIN Sentence s ON s.id = w.sentenceId
-                  WHERE w.productive_target IS NULL OR w.productive_target = 0
-                  ORDER BY w.id DESC
-                  LIMIT ${limit}
-                `) ?? []
-              : field === "sentence_en_meaning_fa"
-              ? (await prisma.$queryRaw<
-                  Array<{ id: number; base_form: string; meaning_fa: string; sentence_en: string }>
-                >`
-                  SELECT w.id, ew.base_form, COALESCE(pw.canonical_text, '') AS meaning_fa, COALESCE(s.sentence_en, '') AS sentence_en
-                  FROM word w
-      INNER JOIN english_word ew ON ew.id = w.englishId
-                  LEFT JOIN persian_word pw ON pw.id = w.meaningId
-                  LEFT JOIN Sentence s ON s.id = w.sentenceId
-                  WHERE s.sentence_en_meaning_fa IS NULL OR s.sentence_en_meaning_fa = ''
-                  ORDER BY w.id DESC
-                  LIMIT ${limit}
-                `) ?? []
-              : field === "pos"
-                ? (await prisma.$queryRaw<
-                    Array<{ id: number; base_form: string; meaning_fa: string; sentence_en: string }>
-                  >`
-                    SELECT w.id, ew.base_form, COALESCE(pw.canonical_text, '') AS meaning_fa, COALESCE(s.sentence_en, '') AS sentence_en
-                    FROM word w
-      INNER JOIN english_word ew ON ew.id = w.englishId
-                    LEFT JOIN persian_word pw ON pw.id = w.meaningId
-                    LEFT JOIN Sentence s ON s.id = w.sentenceId
-                    WHERE w.pos IS NULL OR w.pos = ''
-                    ORDER BY w.id DESC
-                    LIMIT ${limit}
-                  `) ?? []
-                : (await prisma.$queryRaw<
-                      Array<{ id: number; base_form: string; meaning_fa: string; sentence_en: string }>
-                    >`
-                      SELECT w.id, ew.base_form, COALESCE(pw.canonical_text, '') AS meaning_fa, COALESCE(s.sentence_en, '') AS sentence_en
-                      FROM word w
-      INNER JOIN english_word ew ON ew.id = w.englishId
-                      LEFT JOIN persian_word pw ON pw.id = w.meaningId
-                      LEFT JOIN Sentence s ON s.id = w.sentenceId
-                      WHERE w.concept_explained_fa IS NULL OR w.concept_explained_fa = ''
-                      ORDER BY w.id DESC
-                      LIMIT ${limit}
-                    `) ?? [];
+    const rows = hydrated.map((word) => ({
+      id: word.id,
+      base_form: word.english.base_form,
+      meaning_fa: word.meaning?.canonical_text ?? "",
+      sentence_en: word.sentence?.sentence_en ?? "",
+    }));
 
     return NextResponse.json({ ok: true, field, total, fetched: rows.length, limit, items: rows });
   } catch (e) {

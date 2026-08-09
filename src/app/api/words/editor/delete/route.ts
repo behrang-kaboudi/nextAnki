@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { deleteAllWordFieldAudioFiles } from "@/lib/words/wordFieldVoice";
 import { deleteWord } from "@/lib/words/wordRepo";
 import { deleteSentenceAudio } from "@/lib/sentences/sentenceAudio.server";
+import { primarySentenceId, wordSentenceIds } from "@/lib/words/sentenceIds";
 
 export const runtime = "nodejs";
 
@@ -29,15 +30,20 @@ export async function POST(req: Request) {
       select: {
         id: true,
         anki_link_id: true,
-        sentenceId: true,
-        sentence: { select: { _count: { select: { words: true } } } },
+        sentenceIds: true,
       },
     });
     if (!word) {
       return NextResponse.json({ ok: false, error: "Word not found" }, { status: 404 });
     }
 
-    const primarySentenceId = word.sentenceId;
+    const primaryId = primarySentenceId(word.sentenceIds);
+    const otherSentenceLinks = primaryId
+      ? await prisma.word.findMany({ where: { id: { not: id } }, select: { sentenceIds: true } })
+      : [];
+    const linkedElsewhere = primaryId !== null && otherSentenceLinks.some((other) =>
+      wordSentenceIds(other.sentenceIds).includes(primaryId),
+    );
 
     const audio = await Promise.all(
       WORD_AUDIO_FIELDS.filter((field) => field !== "sentence_en" && field !== "sentence_en_meaning_fa").map(async (field) => {
@@ -48,17 +54,12 @@ export async function POST(req: Request) {
     );
 
     await deleteWord({ where: { id } });
-    if (primarySentenceId != null && (word.sentence?._count.words ?? 0) <= 1) {
+    if (primaryId != null && !linkedElsewhere) {
       await Promise.all([
-        deleteSentenceAudio(primarySentenceId, "sentence_en"),
-        deleteSentenceAudio(primarySentenceId, "sentence_en_meaning_fa"),
+        deleteSentenceAudio(primaryId, "sentence_en"),
+        deleteSentenceAudio(primaryId, "sentence_en_meaning_fa"),
       ]);
-      await prisma.sentence.deleteMany({
-        where: {
-          id: primarySentenceId,
-          words: { none: {} },
-        },
-      });
+      await prisma.sentence.deleteMany({ where: { id: primaryId } });
     }
 
     return NextResponse.json({ ok: true as const, deletedId: id, deletedAudio: audio });

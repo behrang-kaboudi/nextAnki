@@ -62,7 +62,10 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         json_hint: "json_hint" in body ? nullableString(body.json_hint) : current.json_hint,
       },
     });
-    await touchWordsByEnglishId(id);
+    await touchWordsByEnglishId(id, {
+      resetConceptMergeReviewed: base_form !== current.base_form,
+      resetMeaningsConfirmed: base_form !== current.base_form,
+    });
     return NextResponse.json({ ok: true, item });
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {

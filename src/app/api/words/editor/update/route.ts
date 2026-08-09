@@ -35,15 +35,6 @@ function normalizeNullableNumber(value: unknown): number | null | undefined {
   return value;
 }
 
-function normalizeNullablePositiveInt(value: unknown): number | null | undefined {
-  if (value === undefined) return undefined;
-  if (value === null) return null;
-  if (typeof value !== "number" || !Number.isInteger(value) || value <= 0) {
-    return undefined;
-  }
-  return value;
-}
-
 function normalizeProductiveTarget(value: unknown): number | null | undefined {
   if (value === undefined) return undefined;
   if (value === null) return null;
@@ -81,7 +72,6 @@ export async function POST(req: Request) {
 
     const d = data as Record<string, unknown>;
 
-    const sentenceId = normalizeNullablePositiveInt(d.sentenceId);
     const productive_target = normalizeProductiveTarget(d.productive_target);
     const otherMeaningIds = normalizePositiveIdArray(d.otherMeaningIds);
     const sentenceIds = normalizePositiveIdArray(d.sentenceIds);
@@ -94,25 +84,6 @@ export async function POST(req: Request) {
         { status: 400 },
       );
     }
-
-    if (d.sentenceId !== undefined && sentenceId === undefined) {
-      return NextResponse.json(
-        { ok: false, error: "sentenceId must be a positive integer or null." },
-        { status: 400 },
-      );
-    }
-
-    if (
-      sentenceId !== null &&
-      sentenceId !== undefined &&
-      !(await prisma.sentence.findUnique({ where: { id: sentenceId }, select: { id: true } }))
-    ) {
-      return NextResponse.json(
-        { ok: false, error: `Sentence ${sentenceId} does not exist.` },
-        { status: 400 },
-      );
-    }
-
 
     for (const [field, raw, normalized] of [
       ["otherMeaningIds", d.otherMeaningIds, otherMeaningIds],
@@ -134,11 +105,26 @@ export async function POST(req: Request) {
         { status: 400 },
       );
     }
+    if (d.conceptMergeReviewed !== undefined && typeof d.conceptMergeReviewed !== "boolean") {
+      return NextResponse.json(
+        { ok: false, error: "conceptMergeReviewed must be a boolean." },
+        { status: 400 },
+      );
+    }
+
+    if (sentenceIds) {
+      const existingCount = await prisma.sentence.count({ where: { id: { in: sentenceIds } } });
+      if (existingCount !== sentenceIds.length) {
+        return NextResponse.json(
+          { ok: false, error: "sentenceIds contains a Sentence id that does not exist." },
+          { status: 400 },
+        );
+      }
+    }
 
     const updated = await updateWord({
       where: { id },
       data: {
-        sentenceId,
         pos: normalizeNullableString(d.pos),
         concept_explained_fa: normalizeNullableString(d.concept_explained_fa),
         learning_depth: normalizeNullableNumber(d.learning_depth),
@@ -153,6 +139,8 @@ export async function POST(req: Request) {
         synonymIds,
         meanings_confirmed:
           typeof d.meanings_confirmed === "boolean" ? d.meanings_confirmed : undefined,
+        conceptMergeReviewed:
+          typeof d.conceptMergeReviewed === "boolean" ? d.conceptMergeReviewed : undefined,
       },
       select: { id: true },
     });

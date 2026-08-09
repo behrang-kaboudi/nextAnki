@@ -180,11 +180,14 @@ export async function POST(req: Request) {
           });
 
           const code = `${pending.id}_${Date.now()}`;
-          await tx.word.update({
-            where: { id: pending.id },
-            data: { anki_link_id: code },
-            select: { id: true },
-          });
+          await updateWord(
+            {
+              where: { id: pending.id },
+              data: { anki_link_id: code },
+              select: { id: true },
+            },
+            tx,
+          );
 
           const existingSentence = await tx.sentence.findUnique({
             where: { sentence_en: item.sentence_en },
@@ -210,7 +213,7 @@ export async function POST(req: Request) {
               });
 
           await updateWord(
-            { where: { id: pending.id }, data: { sentenceId: sentence.id } },
+            { where: { id: pending.id }, data: { sentenceIds: [sentence.id] } },
             tx,
           );
 

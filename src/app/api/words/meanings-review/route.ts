@@ -21,7 +21,6 @@ export async function GET(request: Request) {
         otherMeaningIds: true,
         pos: true,
         concept_explained_fa: true,
-        sentenceId: true,
         sentenceIds: true,
         english: { select: { base_form: true, phonetic_us: true } },
       },

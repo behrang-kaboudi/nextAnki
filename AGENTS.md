@@ -9,6 +9,7 @@
 - For any model table or model editor page, follow `src/docs/model-page-ui-standard.md`. Reuse the established page layout, button categories, hover/active behavior, and per-record controls before creating a variant.
 - When adding a new internal/dev page, place it under `/tests` and add it to the most relevant Tests group in `src/config/siteMap.ts`; the central Tests hub is generated from that map.
 - Keep the human-readable route inventory in `src/config/siteMap.ts` synchronized whenever any UI page is added, moved, renamed, or removed. Write or update its plain-English summary, and update `config/menus.json` when the page should be directly navigable. Test pages must live under `/tests`; the Tests hub reads its categories from this site map.
+- Wrap every rendered Persian UI string in an element with `dir="rtl"`. Mixed-language UI copy whose base language is Persian must also use `dir="rtl"`; use right alignment where the text is displayed as a block.
 
 ## Where To Look
 - Prisma + migrations + `schema.prisma`: `prisma/AGENTS.md`

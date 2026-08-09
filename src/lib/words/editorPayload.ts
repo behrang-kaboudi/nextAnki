@@ -2,13 +2,14 @@ import "server-only";
 
 import { prisma } from "@/lib/prisma";
 import { meaningIds } from "@/lib/words/persianMeanings.server";
+import { primarySentenceId } from "@/lib/words/sentenceIds";
 
 export type WordEditorInitial = {
   id: number;
   anki_link_id: string;
   englishId: number;
-  sentenceId: number | null;
   sentenceIds: number[];
+  conceptMergeReviewed: boolean;
   meaningId: number | null;
   otherMeaningIds: number[];
   comparedMeaningWordIds: number[];
@@ -52,10 +53,13 @@ export async function getWordEditorInitial(id: number): Promise<WordEditorInitia
     include: {
       english: true,
       meaning: { select: { canonical_text: true } },
-      sentence: true,
     },
   });
   if (!word) return null;
+  const sentenceId = primarySentenceId(word.sentenceIds);
+  const sentence = sentenceId
+    ? await prisma.sentence.findUnique({ where: { id: sentenceId } })
+    : null;
 
   return {
     id: word.id,
@@ -65,8 +69,8 @@ export async function getWordEditorInitial(id: number): Promise<WordEditorInitia
     otherMeaningIds: meaningIds(word.otherMeaningIds),
     pos: word.pos,
     concept_explained_fa: word.concept_explained_fa,
-    sentenceId: word.sentenceId,
     sentenceIds: meaningIds(word.sentenceIds),
+    conceptMergeReviewed: word.conceptMergeReviewed,
     comparedMeaningWordIds: meaningIds(word.comparedMeaningWordIds),
     synonymIds: meaningIds(word.synonymIds),
     meanings_confirmed: word.meanings_confirmed,
@@ -80,16 +84,16 @@ export async function getWordEditorInitial(id: number): Promise<WordEditorInitia
       audio_file_name: word.english.audio_file_name,
     },
     meaningLabel: word.meaning?.canonical_text ?? null,
-    sentence: word.sentence
+    sentence: sentence
       ? {
-          id: word.sentence.id,
-          sentence_en: word.sentence.sentence_en,
-          sentence_en_meaning_fa: word.sentence.sentence_en_meaning_fa,
-          sentence_en_audio_file_name: word.sentence.sentence_en_audio_file_name,
+          id: sentence.id,
+          sentence_en: sentence.sentence_en,
+          sentence_en_meaning_fa: sentence.sentence_en_meaning_fa,
+          sentence_en_audio_file_name: sentence.sentence_en_audio_file_name,
           sentence_en_meaning_fa_audio_file_name:
-            word.sentence.sentence_en_meaning_fa_audio_file_name,
-          createdAt: word.sentence.createdAt.toISOString(),
-          updatedAt: word.sentence.updatedAt.toISOString(),
+            sentence.sentence_en_meaning_fa_audio_file_name,
+          createdAt: sentence.createdAt.toISOString(),
+          updatedAt: sentence.updatedAt.toISOString(),
         }
       : null,
     learning_depth: word.learning_depth,

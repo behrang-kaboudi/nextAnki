@@ -3,23 +3,14 @@ import "server-only";
 import type { Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
+import { wordSentenceIds } from "@/lib/words/sentenceIds";
 
 export type MeaningReviewSentenceSource = {
-  sentenceId: number | null;
   sentenceIds: Prisma.JsonValue | null;
 };
 
 export function meaningReviewSentenceIds(word: MeaningReviewSentenceSource) {
-  const arrayIds = Array.isArray(word.sentenceIds)
-    ? word.sentenceIds.filter(
-        (id): id is number =>
-          typeof id === "number" && Number.isSafeInteger(id) && id > 0,
-      )
-    : [];
-  return [...new Set([
-    ...(word.sentenceId === null ? [] : [word.sentenceId]),
-    ...arrayIds,
-  ])];
+  return wordSentenceIds(word.sentenceIds);
 }
 
 export async function hydrateMeaningReviewSentences<

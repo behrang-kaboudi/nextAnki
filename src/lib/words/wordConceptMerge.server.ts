@@ -12,10 +12,9 @@ type SourceWord = {
   meaningId: number | null;
   otherMeaningIds: Prisma.JsonValue | null;
   concept_explained_fa: string | null;
-  sentenceId: number | null;
   sentenceIds: Prisma.JsonValue | null;
+  conceptMergeReviewed: boolean;
   english: { base_form: string };
-  sentence: { id: number } | null;
 };
 
 export type MergeOutputRow =
@@ -25,7 +24,6 @@ export type MergeOutputRow =
       meaning_fa: string;
       other_meanings_fa: string[];
       concept_explained_fa: string;
-      sentenceId: null;
       sentenceIds: number[];
       delete: false;
       mergedRecordIds: number[];
@@ -39,10 +37,9 @@ const sourceSelect = {
   meaningId: true,
   otherMeaningIds: true,
   concept_explained_fa: true,
-  sentenceId: true,
   sentenceIds: true,
+  conceptMergeReviewed: true,
   english: { select: { base_form: true } },
-  sentence: { select: { id: true } },
 } satisfies Prisma.WordSelect;
 
 function positiveIds(value: Prisma.JsonValue | null): number[] {
@@ -64,10 +61,7 @@ function groupByEnglish(words: SourceWord[]) {
 }
 
 function sentenceIdsFor(word: SourceWord) {
-  return [...new Set([
-    ...(word.sentence ? [word.sentence.id] : []),
-    ...positiveIds(word.sentenceIds),
-  ])];
+  return positiveIds(word.sentenceIds);
 }
 
 export async function prepareWordConceptMerge(limit: number) {
@@ -77,30 +71,27 @@ export async function prepareWordConceptMerge(limit: number) {
       select: sourceSelect,
     });
     const allGroups = groupByEnglish(words);
-    let normalizedSingleRecords = 0;
+    let reviewedSingleRecords = 0;
 
     for (const group of allGroups) {
-      if (group.length !== 1 || !group[0].sentence) continue;
+      if (group.length !== 1 || group[0].conceptMergeReviewed) continue;
       const word = group[0];
-      const nextSentenceIds = sentenceIdsFor(word);
       await updateWord(
         {
           where: { id: word.id },
-          data: { sentenceId: null, sentenceIds: nextSentenceIds },
+          data: { conceptMergeReviewed: true },
           select: { id: true },
         },
         tx,
       );
-      word.sentenceId = null;
-      word.sentence = null;
-      word.sentenceIds = nextSentenceIds;
-      normalizedSingleRecords += 1;
+      word.conceptMergeReviewed = true;
+      reviewedSingleRecords += 1;
     }
 
     const eligible = allGroups.filter(
       (group) =>
         group.length >= 2 &&
-        group.some((word) => word.sentence !== null),
+        group.some((word) => !word.conceptMergeReviewed),
     );
     const selected = limit > 0 ? eligible.slice(0, limit) : eligible;
     const meaningIds = [...new Set(selected.flatMap((group) =>
@@ -118,7 +109,7 @@ export async function prepareWordConceptMerge(limit: number) {
     const meaningById = new Map(meanings.map((meaning) => [meaning.id, meaning.canonical_text]));
 
     return {
-      normalizedSingleRecords,
+      reviewedSingleRecords,
       totalEligibleGroups: eligible.length,
       sourceGroups: selected.map((group) => group.map((word) => word.id)),
       items: selected.map((group) =>
@@ -133,7 +124,6 @@ export async function prepareWordConceptMerge(limit: number) {
               return meaning ? [meaning] : [];
             }),
           concept_explained_fa: word.concept_explained_fa ?? "",
-          sentenceId: word.sentence?.id ?? null,
           sentenceIds: positiveIds(word.sentenceIds),
         })),
       ),
@@ -167,7 +157,7 @@ export function parseMergeOutput(value: unknown): MergeOutputRow[] {
     }
     const retainedKeys = [
       "id", "word", "meaning_fa", "other_meanings_fa",
-      "concept_explained_fa", "sentenceId", "sentenceIds", "delete",
+      "concept_explained_fa", "sentenceIds", "delete",
       "mergedRecordIds", "mergedIntoId",
     ];
     const primaryMeaning = typeof item.meaning_fa === "string" ? item.meaning_fa.trim() : "";
@@ -182,7 +172,7 @@ export function parseMergeOutput(value: unknown): MergeOutputRow[] {
       new Set(otherMeanings).size !== otherMeanings.length ||
       otherMeanings.includes(primaryMeaning) ||
       (!primaryMeaning && otherMeanings.length > 0) ||
-      typeof item.concept_explained_fa !== "string" || item.sentenceId !== null ||
+      typeof item.concept_explained_fa !== "string" ||
       !uniquePositiveIds(item.sentenceIds) || !uniquePositiveIds(item.mergedRecordIds) ||
       item.mergedIntoId !== null || Object.keys(item).some((key) => !retainedKeys.includes(key))
     ) throw new Error(`Retained record ${item.id} has an invalid shape.`);
@@ -192,7 +182,6 @@ export function parseMergeOutput(value: unknown): MergeOutputRow[] {
       meaning_fa: primaryMeaning,
       other_meanings_fa: otherMeanings as string[],
       concept_explained_fa: item.concept_explained_fa.trim(),
-      sentenceId: null,
       sentenceIds: item.sentenceIds,
       delete: false,
       mergedRecordIds: item.mergedRecordIds,
@@ -234,7 +223,7 @@ export async function applyWordConceptMerge(sourceGroups: number[][], output: Me
       const group = groupIds.map((id) => byId.get(id)!);
       const englishId = group[0].englishId;
       if (group.some((word) => word.englishId !== englishId)) throw new Error("A source group contains different English words.");
-      if (!group.some((word) => word.sentence !== null)) {
+      if (!group.some((word) => !word.conceptMergeReviewed)) {
         throw new Error(`The group for englishId ${englishId} is no longer eligible for concept merging.`);
       }
       const currentIds = (await tx.word.findMany({ where: { englishId }, select: { id: true } })).map((word) => word.id);
@@ -276,8 +265,8 @@ export async function applyWordConceptMerge(sourceGroups: number[][], output: Me
           meaningId: primary?.item.id ?? null,
           otherMeaningIds: [...new Set(otherIds.filter((id) => id !== primary?.item.id))],
           concept_explained_fa: row.concept_explained_fa || null,
-          sentenceId: null,
           sentenceIds: row.sentenceIds,
+          conceptMergeReviewed: true,
         },
         select: { id: true },
       }, tx);

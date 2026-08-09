@@ -29,7 +29,6 @@ export async function POST(request: Request) {
       otherMeaningIds: true,
       pos: true,
       concept_explained_fa: true,
-      sentenceId: true,
       sentenceIds: true,
       english: { select: { base_form: true } },
     },

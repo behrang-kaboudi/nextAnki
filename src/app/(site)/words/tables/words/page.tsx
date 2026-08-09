@@ -10,6 +10,8 @@ import { TableColumnSelector } from "@/components/table-column-selector";
 import { prisma } from "@/lib/prisma";
 import { WORD_ENGLISH_FIELDS_SELECT } from "@/lib/english/wordEnglishFields.server";
 import { getWordColumnEmptyCounts } from "@/lib/words/tableColumnEmptyCounts.server";
+import { hydrateWordsWithPrimarySentence } from "@/lib/words/primarySentences.server";
+import { primarySentenceId } from "@/lib/words/sentenceIds";
 
 import OpenWordEditorModal from "../../editor/OpenWordEditorModal.client";
 import WordRelationPopover, {
@@ -32,8 +34,8 @@ const SORT_FIELDS = [
   "id",
   "englishId",
   "meaningId",
-  "sentenceId",
   "sentenceIds",
+  "conceptMergeReviewed",
   "otherMeaningIds",
   "meanings_confirmed",
   "pos",
@@ -46,12 +48,12 @@ const TABLE_COLUMNS = [
   { key: "id", label: "id", required: true },
   { key: "englishId", label: "englishId" },
   { key: "meaningId", label: "meaningId" },
-  { key: "sentenceId", label: "sentenceId" },
   { key: "sentenceIds", label: "sentenceIds" },
+  { key: "conceptMergeReviewed", label: "conceptMergeReviewed" },
   { key: "otherMeaningIds", label: "otherMeaningIds" },
   { key: "comparedMeaningWordIds", label: "comparedMeaningWordIds" },
   { key: "synonymIds", label: "synonymIds" },
-  { key: "meanings_confirmed", label: "meanings_confirmed" },
+  { key: "meanings_confirmed", label: "AI meaning review" },
   { key: "pos", label: "pos" },
   { key: "concept_explained_fa", label: "concept_explained_fa" },
   { key: "learning_depth", label: "learning_depth" },
@@ -67,11 +69,13 @@ const TABLE_COLUMNS = [
 ] as const;
 
 type TableColumnKey = (typeof TABLE_COLUMNS)[number]["key"];
+type MeaningReviewFilter = "all" | "pending" | "reviewed";
 const DEFAULT_TABLE_COLUMNS: TableColumnKey[] = [
   "id",
   "englishId",
   "meaningId",
-  "sentenceId",
+  "sentenceIds",
+  "conceptMergeReviewed",
   "otherMeaningIds",
   "comparedMeaningWordIds",
   "synonymIds",
@@ -102,13 +106,6 @@ const COLUMN_INDICATORS: Partial<
       text: "Foreign key: Word.meaningId → PersianWord.id",
     },
     { kind: "index", text: "Index: Word_meaningId_idx" },
-  ],
-  sentenceId: [
-    {
-      kind: "foreign-key",
-      text: "Foreign key: Word.sentenceId → Sentence.id",
-    },
-    { kind: "index", text: "Index: Word_sentenceId_idx" },
   ],
   anki_link_id: [
     { kind: "unique", text: "Unique index: Word_anki_link_id_key" },
@@ -272,6 +269,7 @@ export default async function WordsTablePage({
     sort?: string;
     dir?: string;
     columns?: string | string[];
+    review?: string;
   }>;
 }) {
   const params = await searchParams;
@@ -284,6 +282,10 @@ export default async function WordsTablePage({
   );
   const sort = parseSortField(params.sort);
   const dir = params.dir === "asc" ? "asc" : "desc";
+  const review: MeaningReviewFilter =
+    params.review === "pending" || params.review === "reviewed"
+      ? params.review
+      : "all";
   const columns = parseColumns(params.columns);
   const hasColumn = (column: TableColumnKey) => columns.includes(column);
   const matchingPersianIds = q
@@ -300,7 +302,7 @@ export default async function WordsTablePage({
         })
       ).map((row) => row.id)
     : [];
-  const where: Prisma.WordWhereInput | undefined = q
+  const searchWhere: Prisma.WordWhereInput | undefined = q
     ? {
         OR: [
           { english: { is: { base_form: { contains: q } } } },
@@ -312,21 +314,35 @@ export default async function WordsTablePage({
         ],
       }
     : undefined;
+  const reviewWhere: Prisma.WordWhereInput | undefined =
+    review === "pending"
+      ? { meanings_confirmed: false }
+      : review === "reviewed"
+        ? { meanings_confirmed: true }
+        : undefined;
+  const where: Prisma.WordWhereInput | undefined =
+    searchWhere || reviewWhere
+      ? { AND: [searchWhere, reviewWhere].filter(Boolean) as Prisma.WordWhereInput[] }
+      : undefined;
+  const pendingReviewWhere: Prisma.WordWhereInput = searchWhere
+    ? { AND: [searchWhere, { meanings_confirmed: false }] }
+    : { meanings_confirmed: false };
   const primaryOrderBy: Record<SortField, Prisma.WordOrderByWithRelationInput> =
     {
       id: { id: dir },
       englishId: { englishId: dir },
       meaningId: { meaningId: dir },
-      sentenceId: { sentenceId: dir },
       sentenceIds: { sentenceIds: dir },
+      conceptMergeReviewed: { conceptMergeReviewed: dir },
       otherMeaningIds: { otherMeaningIds: dir },
       meanings_confirmed: { meanings_confirmed: dir },
       pos: { pos: dir },
       anki_link_id: { anki_link_id: dir },
       updatedAt: { updatedAt: dir },
     };
-  const [total, rawRows, emptyCounts] = await Promise.all([
+  const [total, pendingReviewCount, rawRows, emptyCounts] = await Promise.all([
     prisma.word.count({ where }),
+    prisma.word.count({ where: pendingReviewWhere }),
     prisma.word.findMany({
       where,
       orderBy: [
@@ -341,15 +357,8 @@ export default async function WordsTablePage({
         englishId: true,
         english: { select: { id: true, ...WORD_ENGLISH_FIELDS_SELECT } },
         meaningId: true,
-        sentenceId: true,
         sentenceIds: true,
-        sentence: {
-          select: {
-            id: true,
-            sentence_en: true,
-            sentence_en_meaning_fa: true,
-          },
-        },
+        conceptMergeReviewed: true,
         otherMeaningIds: true,
         comparedMeaningWordIds: true,
         synonymIds: true,
@@ -368,7 +377,7 @@ export default async function WordsTablePage({
     }),
     getWordColumnEmptyCounts(),
   ]);
-  const rows = rawRows;
+  const rows = await hydrateWordsWithPrimarySentence(rawRows);
   const referencedMeaningIds = Array.from(
     new Set(
       rows.flatMap((row) =>
@@ -404,6 +413,7 @@ export default async function WordsTablePage({
       dir: next.dir ?? dir,
     });
     if (q) query.set("q", q);
+    if (review !== "all") query.set("review", review);
     columns.forEach((column) => query.append("columns", column));
     return `/words/tables/words?${query.toString()}`;
   };
@@ -453,6 +463,18 @@ export default async function WordsTablePage({
               <option value="all">All ({total})</option>
             </select>
           </label>
+          <label className="flex items-center gap-1 text-sm">
+            AI review
+            <select
+              name="review"
+              defaultValue={review}
+              className="rounded border px-2 py-2"
+            >
+              <option value="all">All statuses</option>
+              <option value="pending">Needs AI review</option>
+              <option value="reviewed">AI reviewed</option>
+            </select>
+          </label>
           <input type="hidden" name="sort" value={sort} />
           <input type="hidden" name="dir" value={dir} />
           {columns.map((column) => (
@@ -464,12 +486,12 @@ export default async function WordsTablePage({
           >
             Search
           </button>
-          {q ? (
+          {q || review !== "all" ? (
             <Link
               href={clearHref}
               className="rounded border px-3 py-2 text-sm hover:bg-black/5 dark:hover:bg-white/5"
             >
-              Clear
+              Reset filters
             </Link>
           ) : null}
         </form>
@@ -480,6 +502,14 @@ export default async function WordsTablePage({
           <WordMeaningsReview />
           <WordConceptMerge />
           <WordMeaningComparison />
+        </div>
+        <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
+          <span className="rounded-full bg-amber-500/10 px-3 py-1 font-semibold text-amber-700">
+            {pendingReviewCount.toLocaleString()} need AI review
+          </span>
+          <span className="text-muted">
+            An empty otherMeaningIds value is complete only when its AI review status is reviewed.
+          </span>
         </div>
       </section>
       <section className="mt-4 rounded border p-3">
@@ -548,20 +578,19 @@ export default async function WordsTablePage({
                     indicators={COLUMN_INDICATORS.meaningId}
                   />
                 ) : null}
-                {hasColumn("sentenceId") ? (
-                  <SortHeader
-                    href={sortHref("sentenceId")}
-                    label="sentenceId"
-                    active={sort === "sentenceId"}
-                    direction={dir}
-                    indicators={COLUMN_INDICATORS.sentenceId}
-                  />
-                ) : null}
                 {hasColumn("sentenceIds") ? (
                   <SortHeader
                     href={sortHref("sentenceIds")}
                     label="sentenceIds"
                     active={sort === "sentenceIds"}
+                    direction={dir}
+                  />
+                ) : null}
+                {hasColumn("conceptMergeReviewed") ? (
+                  <SortHeader
+                    href={sortHref("conceptMergeReviewed")}
+                    label="conceptMergeReviewed"
+                    active={sort === "conceptMergeReviewed"}
                     direction={dir}
                   />
                 ) : null}
@@ -575,7 +604,14 @@ export default async function WordsTablePage({
                 ) : null}
                 {hasColumn("comparedMeaningWordIds") ? <th className="px-3 py-2">comparedMeaningWordIds</th> : null}
                 {hasColumn("synonymIds") ? <th className="px-3 py-2">synonymIds</th> : null}
-                {hasColumn("meanings_confirmed") ? <th className="px-3 py-2">meanings_confirmed</th> : null}
+                {hasColumn("meanings_confirmed") ? (
+                  <SortHeader
+                    href={sortHref("meanings_confirmed")}
+                    label="AI meaning review"
+                    active={sort === "meanings_confirmed"}
+                    direction={dir}
+                  />
+                ) : null}
                 {hasColumn("pos") ? (
                   <SortHeader
                     href={sortHref("pos")}
@@ -669,28 +705,22 @@ export default async function WordsTablePage({
                         : "—"}
                     </td>
                   ) : null}
-                  {hasColumn("sentenceId") ? (
-                    <td className="max-w-64 px-3 py-2 font-mono">
-                      {row.sentenceId ? (
-                        row.sentence ? (
-                          <WordRelationPopover
-                            label={`Sentence ${row.sentence.id}`}
-                            details={sentenceDetails(row.sentence)}
-                          >
-                            {row.sentence.id} — {row.sentence.sentence_en}
-                          </WordRelationPopover>
-                        ) : (
-                          <span className="block truncate">
-                            {row.sentenceId} — missing
-                          </span>
-                        )
-                      ) : (
-                        "—"
-                      )}
+                  {hasColumn("sentenceIds") ? (
+                    <td className="max-w-72 px-3 py-2 font-mono">
+                      {row.sentence ? (
+                        <WordRelationPopover
+                          label={`Primary Sentence ${row.sentence.id}`}
+                          details={sentenceDetails(row.sentence)}
+                        >
+                          [{meaningIds(row.sentenceIds).join(", ")}] · {row.sentence.sentence_en}
+                        </WordRelationPopover>
+                      ) : primarySentenceId(row.sentenceIds) ? (
+                        <span>[{meaningIds(row.sentenceIds).join(", ")}] · primary missing</span>
+                      ) : "—"}
                     </td>
                   ) : null}
-                  {hasColumn("sentenceIds") ? (
-                    <ValueCell value={row.sentenceIds} />
+                  {hasColumn("conceptMergeReviewed") ? (
+                    <td className="px-3 py-2">{row.conceptMergeReviewed ? "true" : "false"}</td>
                   ) : null}
                   {hasColumn("otherMeaningIds") ? (
                     <td className="max-w-64 px-3 py-2 font-mono">
@@ -722,7 +752,19 @@ export default async function WordsTablePage({
                   {hasColumn("synonymIds") ? (
                     <ValueCell value={row.synonymIds ?? []} />
                   ) : null}
-                  {hasColumn("meanings_confirmed") ? <td className="px-3 py-2">{row.meanings_confirmed ? "true" : "false"}</td> : null}
+                  {hasColumn("meanings_confirmed") ? (
+                    <td className="whitespace-nowrap px-3 py-2">
+                      <span
+                        className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${
+                          row.meanings_confirmed
+                            ? "bg-emerald-500/10 text-emerald-700"
+                            : "bg-amber-500/10 text-amber-700"
+                        }`}
+                      >
+                        {row.meanings_confirmed ? "AI Reviewed" : "Pending AI Review"}
+                      </span>
+                    </td>
+                  ) : null}
                   {hasColumn("pos") ? (
                     <td className="max-w-32 px-3 py-2">
                       <span className="block truncate" title={row.pos ?? ""}>

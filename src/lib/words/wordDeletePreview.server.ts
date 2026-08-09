@@ -6,6 +6,7 @@ import { WORD_AUDIO_FIELDS, type WordAudioFieldKey } from "@/lib/audio/wordField
 import { prisma } from "@/lib/prisma";
 import { listWordFieldAudioFiles } from "@/lib/words/wordFieldVoice";
 import { getSentenceAudioFileInfo } from "@/lib/sentences/sentenceAudio.server";
+import { primarySentenceId, wordSentenceIds } from "@/lib/words/sentenceIds";
 
 function ids(value: Prisma.JsonValue | null) {
   if (!Array.isArray(value)) return [];
@@ -21,17 +22,8 @@ export async function getWordDeletePreview(id: number) {
     select: {
       id: true,
       anki_link_id: true,
-      sentenceId: true,
+      sentenceIds: true,
       english: { select: { base_form: true } },
-      sentence: {
-        select: {
-          id: true,
-          sentence_en: true,
-          sentence_en_audio_file_name: true,
-          sentence_en_meaning_fa_audio_file_name: true,
-          _count: { select: { words: true } },
-        },
-      },
     },
   });
   if (!word) throw new Error("Word not found.");
@@ -43,6 +35,7 @@ export async function getWordDeletePreview(id: number) {
       id: true,
       comparedMeaningWordIds: true,
       synonymIds: true,
+      sentenceIds: true,
       english: { select: { base_form: true } },
     },
   });
@@ -60,6 +53,21 @@ export async function getWordDeletePreview(id: number) {
         }]
       : [];
   });
+  const primaryId = primarySentenceId(word.sentenceIds);
+  const sentence = primaryId
+    ? await prisma.sentence.findUnique({
+        where: { id: primaryId },
+        select: {
+          id: true,
+          sentence_en: true,
+          sentence_en_audio_file_name: true,
+          sentence_en_meaning_fa_audio_file_name: true,
+        },
+      })
+    : null;
+  const linkedWordCount = primaryId
+    ? 1 + otherWords.filter((other) => wordSentenceIds(other.sentenceIds).includes(primaryId)).length
+    : 0;
   const audioFiles: Array<{ field: WordAudioFieldKey; count: number; bytes: number }> = WORD_AUDIO_FIELDS.filter((field) => field !== "sentence_en" && field !== "sentence_en_meaning_fa").map((field) => {
     const audioKey = word.anki_link_id;
     const files = listWordFieldAudioFiles({ audioKey, ankiLinkId: audioKey, field });
@@ -69,11 +77,11 @@ export async function getWordDeletePreview(id: number) {
       bytes: files.reduce((sum, file) => sum + file.size, 0),
     };
   });
-  if (word.sentence && word.sentence._count.words <= 1) {
+  if (sentence && linkedWordCount <= 1) {
     for (const field of ["sentence_en", "sentence_en_meaning_fa"] as const) {
       const filename = field === "sentence_en"
-        ? word.sentence.sentence_en_audio_file_name
-        : word.sentence.sentence_en_meaning_fa_audio_file_name;
+        ? sentence.sentence_en_audio_file_name
+        : sentence.sentence_en_meaning_fa_audio_file_name;
       const info = getSentenceAudioFileInfo(filename);
       audioFiles.push({ field, count: info.size > 0 ? 1 : 0, bytes: info.size });
     }
@@ -87,12 +95,12 @@ export async function getWordDeletePreview(id: number) {
     audioFiles: existingAudioFiles,
     totalAudioFiles: existingAudioFiles.reduce((sum, field) => sum + field.count, 0),
     affectedWords,
-    sentence: word.sentence
+    sentence: sentence
       ? {
-          id: word.sentence.id,
-          sentence_en: word.sentence.sentence_en,
-          willBeDeleted: word.sentence._count.words <= 1,
-          linkedWordCount: word.sentence._count.words,
+          id: sentence.id,
+          sentence_en: sentence.sentence_en,
+          willBeDeleted: linkedWordCount <= 1,
+          linkedWordCount,
         }
       : null,
   };

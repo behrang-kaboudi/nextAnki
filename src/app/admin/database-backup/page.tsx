@@ -10,7 +10,7 @@ export default function DatabaseBackupPage() {
     <div className="mx-auto grid w-full max-w-5xl gap-8 py-4">
       <PageHeader
         title="Database Backup"
-        subtitle="Create a complete database archive or replace this local database from the committed GitHub backup."
+        subtitle="Preserve an unchanged local archive, explicitly push local backup changes, or restore from GitHub."
       />
       <DatabaseBackupClient />
     </div>

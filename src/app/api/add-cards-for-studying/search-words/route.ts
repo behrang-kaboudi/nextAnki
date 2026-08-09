@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { hydrateWordsWithPersianMeanings } from "@/lib/words/persianMeanings.server";
 import { flattenWordEnglishRelation, WORD_ENGLISH_FIELDS_SELECT } from "@/lib/english/wordEnglishFields.server";
+import { hydrateWordsWithPrimarySentence } from "@/lib/words/primarySentences.server";
 
 function asTrimmedString(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
@@ -30,12 +31,7 @@ export async function GET(req: Request) {
         english: { select: WORD_ENGLISH_FIELDS_SELECT },
         meaningId: true,
         otherMeaningIds: true,
-        sentence: {
-          select: {
-            sentence_en: true,
-            sentence_en_meaning_fa: true,
-          },
-        },
+        sentenceIds: true,
       },
       orderBy: [{ english: { base_form: "asc" } }, { id: "asc" }],
       take: limit,
@@ -43,7 +39,9 @@ export async function GET(req: Request) {
 
     return NextResponse.json({
       ok: true,
-      items: (await hydrateWordsWithPersianMeanings(rows.map(flattenWordEnglishRelation))).map((row) => ({
+      items: (await hydrateWordsWithPersianMeanings(
+        await hydrateWordsWithPrimarySentence(rows.map(flattenWordEnglishRelation)),
+      )).map((row) => ({
         anki_link_id: row.anki_link_id,
         base_form: row.base_form,
         meaning_fa: row.meaning_fa,

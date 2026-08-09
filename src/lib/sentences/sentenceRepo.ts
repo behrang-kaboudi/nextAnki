@@ -2,10 +2,12 @@ import "server-only";
 
 import fsp from "node:fs/promises";
 import path from "node:path";
+import type { Prisma } from "@prisma/client";
 
 import { getSentenceAudioAbsolutePath } from "@/lib/audio/sentenceAudioPaths.server";
 import { prisma } from "@/lib/prisma";
-import { updateWord } from "@/lib/words/wordRepo";
+import { touchWordsLinkedToSentenceId, updateWord } from "@/lib/words/wordRepo";
+import { primarySentenceId, wordSentenceIds } from "@/lib/words/sentenceIds";
 
 type PrimarySentenceRecord = {
   id: number;
@@ -27,6 +29,30 @@ const sentenceSelect = {
   sentence_en_meaning_fa_audio_file_name: true,
 } as const;
 
+async function primarySentenceForIds(
+  client: Prisma.TransactionClient | typeof prisma,
+  sentenceIds: Prisma.JsonValue | null,
+) {
+  const id = primarySentenceId(sentenceIds);
+  return id ? client.sentence.findUnique({ where: { id }, select: sentenceSelect }) : null;
+}
+
+async function deleteSentenceIfUnreferenced(
+  tx: Prisma.TransactionClient,
+  sentence: PrimarySentenceRecord,
+  filesToDelete: string[],
+) {
+  const words = await tx.word.findMany({ select: { sentenceIds: true } });
+  if (words.some((word) => wordSentenceIds(word.sentenceIds).includes(sentence.id))) return;
+  const deleted = await tx.sentence.deleteMany({ where: { id: sentence.id } });
+  if (deleted.count) {
+    filesToDelete.push(
+      sentence.sentence_en_audio_file_name ?? "",
+      sentence.sentence_en_meaning_fa_audio_file_name ?? "",
+    );
+  }
+}
+
 export async function upsertPrimarySentenceByAnkiLinkId(args: {
   ankiLinkId: string;
   sentence_en: string;
@@ -43,13 +69,14 @@ export async function upsertPrimarySentenceByAnkiLinkId(args: {
   const result = await prisma.$transaction(async (tx) => {
     const word = await tx.word.findUnique({
       where: { anki_link_id: ankiLinkId },
-      select: { id: true, sentence: { select: sentenceSelect } },
+      select: { id: true, sentenceIds: true },
     });
     if (!word) {
       throw new Error(`Word not found for anki_link_id=${ankiLinkId}`);
     }
 
-    const existingSentence = word.sentence;
+    const currentIds = wordSentenceIds(word.sentenceIds);
+    const existingSentence = await primarySentenceForIds(tx, word.sentenceIds);
     const matchedSentence = await tx.sentence.findUnique({
       where: { sentence_en: nextSentenceEn },
       select: sentenceSelect,
@@ -69,16 +96,14 @@ export async function upsertPrimarySentenceByAnkiLinkId(args: {
       if (meaningChanged && existingSentence.sentence_en_meaning_fa_audio_file_name) {
         filesToDelete.push(existingSentence.sentence_en_meaning_fa_audio_file_name);
       }
-      await updateWord(
-        { where: { id: word.id }, data: { sentenceId: existingSentence.id } },
-        tx,
-      );
+      await updateWord({ where: { id: word.id }, data: { sentenceIds: currentIds } }, tx);
       return updated;
     }
 
     if (matchedSentence) {
+      const nextIds = [matchedSentence.id, ...currentIds.filter((id) => id !== matchedSentence.id && id !== existingSentence?.id)];
       await updateWord(
-        { where: { id: word.id }, data: { sentenceId: matchedSentence.id } },
+        { where: { id: word.id }, data: { sentenceIds: nextIds } },
         tx,
       );
 
@@ -96,15 +121,7 @@ export async function upsertPrimarySentenceByAnkiLinkId(args: {
       }
 
       if (existingSentence && existingSentence.id !== matchedSentence.id) {
-        const deleted = await tx.sentence.deleteMany({
-          where: { id: existingSentence.id, words: { none: {} } },
-        });
-        if (deleted.count) {
-          filesToDelete.push(
-            existingSentence.sentence_en_audio_file_name ?? "",
-            existingSentence.sentence_en_meaning_fa_audio_file_name ?? "",
-          );
-        }
+        await deleteSentenceIfUnreferenced(tx, existingSentence, filesToDelete);
       }
 
       return {
@@ -131,10 +148,7 @@ export async function upsertPrimarySentenceByAnkiLinkId(args: {
       });
       if (sentenceChanged && existingSentence.sentence_en_audio_file_name) filesToDelete.push(existingSentence.sentence_en_audio_file_name);
       if (meaningChanged && existingSentence.sentence_en_meaning_fa_audio_file_name) filesToDelete.push(existingSentence.sentence_en_meaning_fa_audio_file_name);
-      await updateWord(
-        { where: { id: word.id }, data: { sentenceId: existingSentence.id } },
-        tx,
-      );
+      await updateWord({ where: { id: word.id }, data: { sentenceIds: currentIds } }, tx);
       return updated;
     }
 
@@ -143,7 +157,7 @@ export async function upsertPrimarySentenceByAnkiLinkId(args: {
       select: sentenceSelect,
     });
     await updateWord(
-      { where: { id: word.id }, data: { sentenceId: createdSentence.id } },
+      { where: { id: word.id }, data: { sentenceIds: [createdSentence.id, ...currentIds] } },
       tx,
     );
     return createdSentence;
@@ -174,6 +188,7 @@ export async function updatePrimarySentenceByAnkiLinkId(
       ...(meaningChanged ? { sentence_en_meaning_fa_audio_file_name: null } : {}),
     },
   });
+  await touchWordsLinkedToSentenceId(current.id);
   const staleFiles = [
     sentenceChanged ? current.sentence_en_audio_file_name : null,
     meaningChanged ? current.sentence_en_meaning_fa_audio_file_name : null,
@@ -187,9 +202,9 @@ export async function findPrimarySentenceByAnkiLinkId(
 ): Promise<PrimarySentenceRecord | null> {
   const word = await prisma.word.findUnique({
     where: { anki_link_id: ankiLinkId },
-    select: { sentence: { select: sentenceSelect } },
+    select: { sentenceIds: true },
   });
-  return word?.sentence ?? null;
+  return word ? primarySentenceForIds(prisma, word.sentenceIds) : null;
 }
 
 export async function findPrimarySentenceByWordId(
@@ -197,25 +212,36 @@ export async function findPrimarySentenceByWordId(
 ): Promise<PrimarySentenceRecord | null> {
   const word = await prisma.word.findUnique({
     where: { id: wordId },
-    select: { sentence: { select: sentenceSelect } },
+    select: { sentenceIds: true },
   });
-  return word?.sentence ?? null;
+  return word ? primarySentenceForIds(prisma, word.sentenceIds) : null;
 }
 
 export async function listPrimarySentencesByAnkiLinkIds(ankiLinkIds: string[]) {
   if (!ankiLinkIds.length) return new Map<string, PrimarySentenceRecord>();
 
   const rows = await prisma.word.findMany({
-    where: { anki_link_id: { in: ankiLinkIds }, sentenceId: { not: null } },
+    where: { anki_link_id: { in: ankiLinkIds } },
     select: {
       anki_link_id: true,
-      sentence: { select: sentenceSelect },
+      sentenceIds: true,
     },
   });
 
+  const primaryIds = [...new Set(rows.flatMap((row) => {
+    const id = primarySentenceId(row.sentenceIds);
+    return id ? [id] : [];
+  }))];
+  const sentences = primaryIds.length
+    ? await prisma.sentence.findMany({ where: { id: { in: primaryIds } }, select: sentenceSelect })
+    : [];
+  const byId = new Map(sentences.map((sentence) => [sentence.id, sentence]));
+
   return new Map(
     rows.flatMap((row) =>
-      row.sentence ? [[row.anki_link_id, row.sentence] as const] : [],
+      primarySentenceId(row.sentenceIds) && byId.get(primarySentenceId(row.sentenceIds)!)
+        ? [[row.anki_link_id, byId.get(primarySentenceId(row.sentenceIds)!)!] as const]
+        : [],
     ),
   );
 }

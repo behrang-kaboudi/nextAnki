@@ -47,6 +47,7 @@ export const siteMapGroups: SiteMapGroup[] = [
       { title: "English Word Table", path: "/words/tables/english-words", summary: "Browses canonical English words and phrases with US IPA, JSON hints, one audio file, and Word links.", menu: true },
       { title: "Sentence Table", path: "/words/tables/sentences", summary: "Browses and edits unique sentences, Persian meanings, and both persisted sentence-owned audio files.", menu: true },
       { title: "Word Extraction", path: "/words/extraction", summary: "Runs the staged workflow that extracts and enriches words with AI prompts.", menu: true },
+      { title: "Custom Word Extraction", path: "/words/extraction/custom", summary: "Builds a configurable extraction package from selected input fields, output fields, and their existing prompt files.", menu: true },
       { title: "Audio Hints", path: "/words/hints/audio", summary: "Reviews and manages Word-owned audio plus Sentence-owned audio stored by filename on Sentence records.", menu: true },
       { title: "JSON Hints", path: "/words/hints/json", summary: "Reviews and generates structured JSON hints for vocabulary records.", menu: true },
       { title: "Word Cleanup", path: "/words/cleanup", summary: "Finds and removes local words that no longer exist in Anki.", menu: true },
@@ -115,7 +116,7 @@ export const siteMapGroups: SiteMapGroup[] = [
     pages: [
       { title: "Data Manager", path: "/admin/data", summary: "Browses Prisma models and performs controlled record management operations.", menu: true },
       { title: "Database Compare", path: "/admin/database-compare", summary: "Compares local database fingerprints with the version stored in GitHub.", menu: true },
-      { title: "Database Backup", path: "/admin/database-backup", summary: "Creates and restores complete local database archives through the current GitHub branch.", menu: true },
+      { title: "Database Backup", path: "/admin/database-backup", summary: "Preserves unchanged local database archives, explicitly pushes backup changes, and restores from GitHub.", menu: true },
       { title: "Navigation Manager", path: "/admin/navigation", summary: "Edits the nested site and dashboard menus from one interface.", menu: true },
     ],
   },
