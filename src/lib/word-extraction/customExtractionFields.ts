@@ -47,6 +47,7 @@ export const CUSTOM_EXTRACTION_INPUT_FIELDS: CustomExtractionField[] = [
 export const CUSTOM_EXTRACTION_OUTPUT_FIELDS: CustomExtractionOutputField[] = [
   { key: "base_form", label: "Base form", source: "EnglishWord", description: "Normalize the English word or phrase", promptPath: "base_form/rulseV1.md" },
   { key: "meaning_fa", label: "Persian meaning", source: "PersianWord", description: "Extract the primary Persian meaning", promptPath: "meaning_fa/rulseV1.md" },
+  { key: "other_meanings_fa", label: "Other Persian meanings", source: "Word", description: "Generate and confirm alternative Persian meanings for this exact sense", promptPath: "other_meanings_fa/rulseV1.md" },
   { key: "sentence_en", label: "English sentence", source: "Sentence", description: "Create or extract the example sentence", promptPath: "sentence_en/rulseV1.md" },
   { key: "sentence_en_meaning_fa", label: "Sentence translation", source: "Sentence", description: "Translate the example sentence", promptPath: "sentence_meaning_fa/rulseV1.md" },
   { key: "phonetic_us", label: "US phonetic", source: "EnglishWord", description: "Generate American IPA", promptPath: "phonetic_us/rulseV1.md" },

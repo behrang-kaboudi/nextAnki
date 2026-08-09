@@ -29,7 +29,7 @@ export function customExtractionMissingWhere(field: CustomExtractionFieldKey): P
     case "meaning_fa":
       return { OR: [{ meaning: { is: null } }, { meaning: { is: { canonical_text: "" } } }] };
     case "other_meanings_fa":
-      return { meanings_confirmed: false };
+      return { meanings_confirmed: false, meaning: { isNot: null } };
     case "meaning_fa_IPA":
       return { meaning: { is: { OR: [{ meaning_fa_IPA: null }, { meaning_fa_IPA: "" }] } } };
     case "phonetic_us":

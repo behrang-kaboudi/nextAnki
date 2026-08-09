@@ -14,8 +14,8 @@ export const runtime = "nodejs";
 const PROCESSING_PREFIX = "__PROCESSING__:";
 
 async function readSystemPromptFromFile(): Promise<string> {
-  const abs = path.join(process.cwd(), "src", "prompts", "tempSent.md");
-  return readFile(abs, "utf8");
+  const promptPath = path.join(process.cwd(), "src", "prompts", "tempSent.md");
+  return readFile(promptPath, "utf8");
 }
 
 function extractJsonCandidate(text: string): unknown {

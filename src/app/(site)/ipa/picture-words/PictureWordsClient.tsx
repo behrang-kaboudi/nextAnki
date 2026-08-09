@@ -2,6 +2,9 @@
 
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { SpecialCharactersBar } from "@/components/ipa/SpecialCharactersBar";
+import { PromptSourcesButton } from "@/components/prompts/PromptSourcesButton";
+
+const PICTURE_WORDS_PROMPT_PATH = "src/prompts/others/physical-object-vocabulary.md";
 
 function TrashIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -538,17 +541,20 @@ const ImportSidebar = memo(function ImportSidebar({
                 </div>
                 <div className="text-sm text-muted">
                   <code className="font-mono">
-                    src/prompts/others/physical-object-vocabulary.md
+                    {PICTURE_WORDS_PROMPT_PATH}
                   </code>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={() => setIsPromptOpen(false)}
-                className="rounded-xl border border-card bg-background px-3 py-2 text-sm font-semibold text-foreground transition hover:bg-card"
-              >
-                Close
-              </button>
+              <div className="flex items-center gap-2">
+                <PromptSourcesButton paths={[PICTURE_WORDS_PROMPT_PATH]} />
+                <button
+                  type="button"
+                  onClick={() => setIsPromptOpen(false)}
+                  className="rounded-xl border border-card bg-background px-3 py-2 text-sm font-semibold text-foreground transition hover:bg-card"
+                >
+                  Close
+                </button>
+              </div>
             </div>
 
             <textarea
@@ -1672,7 +1678,16 @@ export function PictureWordsClient() {
                   <th className="w-20 whitespace-nowrap border-b border-r border-card px-3 py-2 text-center">
                     Status
                   </th>
-                  <th className="w-[16%] whitespace-nowrap border-b border-r border-card px-3 py-2">
+                  <th
+                    className="w-[16%] whitespace-nowrap border-b border-r border-card px-3 py-2"
+                    aria-sort={
+                      sort?.key === "fa"
+                        ? sort.dir === "asc"
+                          ? "ascending"
+                          : "descending"
+                        : "none"
+                    }
+                  >
                     <button
                       type="button"
                       onClick={() => toggleSort("fa")}
@@ -1681,13 +1696,6 @@ export function PictureWordsClient() {
                           ? "bg-card text-foreground shadow-elevated"
                           : ""
                       }`}
-                      aria-sort={
-                        sort?.key === "fa"
-                          ? sort.dir === "asc"
-                            ? "ascending"
-                            : "descending"
-                          : "none"
-                      }
                     >
                       <span>fa</span>
                       <span className="text-base font-bold">

@@ -11,7 +11,10 @@ async function readPrompt(relPath: string) {
 }
 
 export default async function SentenceFieldsTempPage() {
-  const fullPrompt = await readPrompt("src/prompts/tempSent.md");
+  const promptPaths = [
+    "src/prompts/tempSent.md",
+  ];
+  const fullPrompt = (await Promise.all(promptPaths.map(readPrompt))).join("\n\n");
 
   return (
     <main className="mx-auto w-full max-w-5xl select-text p-4">
@@ -23,7 +26,7 @@ export default async function SentenceFieldsTempPage() {
         </p>
       </div>
 
-      <SentenceFieldsClient initialPrompt={fullPrompt} promptPath="src/prompts/tempSent.md" />
+      <SentenceFieldsClient initialPrompt={fullPrompt} promptPaths={promptPaths} />
     </main>
   );
 }

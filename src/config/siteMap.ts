@@ -46,11 +46,21 @@ export const siteMapGroups: SiteMapGroup[] = [
       { title: "Persian Word Table", path: "/words/tables/persian-words", summary: "Browses and edits PersianWord records, including linked audio playback.", menu: true },
       { title: "English Word Table", path: "/words/tables/english-words", summary: "Browses canonical English words and phrases with US IPA, JSON hints, one audio file, and Word links.", menu: true },
       { title: "Sentence Table", path: "/words/tables/sentences", summary: "Browses and edits unique sentences, Persian meanings, and both persisted sentence-owned audio files.", menu: true },
-      { title: "Word Extraction", path: "/words/extraction", summary: "Runs the staged workflow that extracts and enriches words with AI prompts.", menu: true },
-      { title: "Custom Word Extraction", path: "/words/extraction/custom", summary: "Builds a configurable extraction package from selected input fields, output fields, and their existing prompt files.", menu: true },
       { title: "Audio Hints", path: "/words/hints/audio", summary: "Reviews and manages Word-owned audio plus Sentence-owned audio stored by filename on Sentence records.", menu: true },
       { title: "JSON Hints", path: "/words/hints/json", summary: "Reviews and generates structured JSON hints for vocabulary records.", menu: true },
       { title: "Word Cleanup", path: "/words/cleanup", summary: "Finds and removes local words that no longer exist in Anki.", menu: true },
+    ],
+  },
+  {
+    id: "word-extraction",
+    category: "Workspace",
+    title: "Word Extraction",
+    summary: "Create new vocabulary records or complete selected fields on existing records with AI-assisted workflows.",
+    pages: [
+      { title: "Overview", path: "/words/extraction", summary: "Explains the two extraction workflows and routes users to the appropriate one.", menu: true },
+      { title: "New Word Intake", path: "/words/extraction/new", summary: "Cleans raw words and meanings, generates example sentences and translations, and creates new vocabulary records.", menu: true },
+      { title: "Legacy Word Extraction", path: "/words/extraction/legacy", summary: "Preserves the previous new-word extraction workflow for comparison while its replacement is being designed.", menu: false },
+      { title: "Custom Word Extraction", path: "/words/extraction/custom", summary: "Completes selected missing fields on existing Word records using configurable input context and AI outputs.", menu: true },
     ],
   },
   {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { PromptSourcesButton } from "@/components/prompts/PromptSourcesButton";
 
 type RunResult =
   | {
@@ -30,10 +31,10 @@ type RunResult =
 
 export function SentenceFieldsClient({
   initialPrompt,
-  promptPath,
+  promptPaths,
 }: {
   initialPrompt: string;
-  promptPath: string;
+  promptPaths: string[];
 }) {
   const [prompt, setPrompt] = useState(initialPrompt);
   const [output, setOutput] = useState("");
@@ -172,13 +173,13 @@ export function SentenceFieldsClient({
 
           if (!res.ok) {
             setBulkFailed((x) => x + 1);
-            appendBulkLog(`w${idx}: HTTP ${res.status} ${String((json as any)?.error ?? "")}`);
+            appendBulkLog(`w${idx}: HTTP ${res.status} ${String("error" in json ? json.error ?? "" : "")}`);
             continue;
           }
 
           if (!json.ok) {
             setBulkFailed((x) => x + 1);
-            appendBulkLog(`w${idx}: ${String((json as any)?.error ?? "unknown error")}`);
+            appendBulkLog(`w${idx}: ${String("error" in json ? json.error ?? "unknown error" : "unknown error")}`);
             continue;
           }
 
@@ -191,9 +192,11 @@ export function SentenceFieldsClient({
           if (json.saved?.id) setBulkSucceeded((x) => x + 1);
           else setBulkFailed((x) => x + 1);
 
-          const usageObj = (json.usage ?? {}) as any;
-          const cached = usageObj?.cachedContentTokenCount;
-          const total = usageObj?.totalTokenCount;
+          const usageObj = json.usage && typeof json.usage === "object"
+            ? json.usage as Record<string, unknown>
+            : {};
+          const cached = usageObj.cachedContentTokenCount;
+          const total = usageObj.totalTokenCount;
           const id = json.item?.id ?? json.saved?.id ?? "?";
           setBulkLast(`Word #${id} cached=${cached ?? "?"} total=${total ?? "?"}`);
           appendBulkLog(
@@ -223,10 +226,11 @@ export function SentenceFieldsClient({
           <div className="grid">
             <h2 className="text-sm font-semibold">Prompt (full)</h2>
             <div className="text-xs opacity-60">
-              {promptChars.toLocaleString()} chars • {promptPath}
+              {promptChars.toLocaleString()} chars • {promptPaths.length} source files
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <PromptSourcesButton paths={promptPaths} />
             <button
               type="button"
               onClick={() => setPrompt(initialPrompt)}

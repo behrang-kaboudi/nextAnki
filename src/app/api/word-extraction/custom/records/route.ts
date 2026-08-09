@@ -70,6 +70,7 @@ export async function GET(request: Request) {
         select: {
           id: true,
           sentenceIds: true,
+          meanings_confirmed: true,
           imageability: true,
           learning_depth: true,
           productive_target: true,
@@ -131,6 +132,7 @@ export async function GET(request: Request) {
         switch (field) {
           case "base_form": return !row.english.base_form.trim();
           case "meaning_fa": return !row.meaning?.canonical_text?.trim();
+          case "other_meanings_fa": return !row.meanings_confirmed && Boolean(row.meaning);
           case "meaning_fa_IPA": return Boolean(row.meaning) && !row.meaning?.meaning_fa_IPA?.trim();
           case "phonetic_us": return !row.english.phonetic_us?.trim();
           case "sentence_en": return associatedSentences.length === 0;
@@ -145,19 +147,32 @@ export async function GET(request: Request) {
           default: return false;
         }
       });
-      const fieldValues = Object.fromEntries(
+      const needsOtherMeaningsReview = requestedOutputs.includes("other_meanings_fa");
+      const selectedFieldValues = Object.fromEntries(
         inputs
           .filter((key) => key !== "sentence_en" && key !== "sentence_en_meaning_fa")
           .map((key) => [key, values[key]]),
       );
+      const fieldValues = needsOtherMeaningsReview
+        ? {
+            ...selectedFieldValues,
+            base_form: values.base_form,
+            meaning_fa: values.meaning_fa,
+            other_meanings_fa: values.other_meanings_fa,
+            pos: values.pos,
+            concept_explained_fa: values.concept_explained_fa,
+          }
+        : selectedFieldValues;
       const includeSentenceContext =
         inputs.includes("sentence_en") ||
         inputs.includes("sentence_en_meaning_fa") ||
-        requestedOutputs.includes("sentence_en_meaning_fa");
+        requestedOutputs.includes("sentence_en_meaning_fa") ||
+        needsOtherMeaningsReview;
       const sentenceValues = includeSentenceContext
         ? associatedSentences.flatMap((sentence) => {
             if (
               requestedOutputs.includes("sentence_en_meaning_fa") &&
+              !needsOtherMeaningsReview &&
               typeof sentence.sentence_en_meaning_fa === "string" &&
               sentence.sentence_en_meaning_fa.trim()
             ) {
@@ -165,10 +180,10 @@ export async function GET(request: Request) {
             }
             return [{
               sentence_id: sentence.id,
-              ...(inputs.includes("sentence_en") || requestedOutputs.includes("sentence_en_meaning_fa")
+              ...(inputs.includes("sentence_en") || requestedOutputs.includes("sentence_en_meaning_fa") || needsOtherMeaningsReview
                 ? { sentence_en: sentence.sentence_en }
                 : {}),
-              ...(inputs.includes("sentence_en_meaning_fa")
+              ...(inputs.includes("sentence_en_meaning_fa") || needsOtherMeaningsReview
                 ? { sentence_en_meaning_fa: sentence.sentence_en_meaning_fa }
                 : {}),
             }];

@@ -2,6 +2,13 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ActionIcon } from "@/components/icons/ActionIcon";
+import { PromptSourcesButton } from "@/components/prompts/PromptSourcesButton";
+
+const PROMPT_PATHS = [
+  "src/prompts/word-extraction/meaning_fa_review/rulseV1.md",
+  "src/prompts/word-extraction/other_meanings_fa/rulseV1.md",
+] as const;
+
 type Correction = {
   id: number;
   meaning_fa?: string;
@@ -57,26 +64,23 @@ export default function WordMeaningsReview() {
     setE(null);
     setNotice(null);
     try {
-      const [promptResponse, x] = await Promise.all([
-          fetch(
-            `/api/ai/prompt-file?path=${encodeURIComponent("src/prompts/word-extraction/meaning_fa_review/rulseV1.md")}`,
-          ),
+      const [promptResponses, x] = await Promise.all([
+          Promise.all(PROMPT_PATHS.map(async (path) => {
+            const response = await fetch(`/api/ai/prompt-file?path=${encodeURIComponent(path)}`);
+            const json = (await response.json()) as { text?: string; error?: string };
+            if (!response.ok || !json.text) throw new Error(json.error || `Could not load ${path}.`);
+            return json.text;
+          })),
           fetch(`/api/words/meanings-review?limit=${encodeURIComponent(l)}`),
         ]),
-        promptJson = (await promptResponse.json()) as {
-          text?: string;
-          error?: string;
-        },
         j = (await x.json()) as {
           ok?: boolean;
           items?: unknown;
           totalUnconfirmed?: number;
           error?: string;
         };
-      if (!promptResponse.ok || !promptJson.text)
-        throw Error(promptJson.error || "Could not load prompt.");
       if (!x.ok || !j.ok) throw Error(j.error || "Could not create data.");
-      setPrompt(promptJson.text);
+      setPrompt(promptResponses.join("\n\n"));
       setD(JSON.stringify(j.items, null, 2));
       setRemaining(
         typeof j.totalUnconfirmed === "number" ? j.totalUnconfirmed : null,
@@ -307,6 +311,7 @@ export default function WordMeaningsReview() {
                   >
                     {b ? "Loading…" : "Create data"}
                   </button>
+                  <PromptSourcesButton paths={PROMPT_PATHS} />
                   <button
                     type="button"
                     onClick={copyAll}

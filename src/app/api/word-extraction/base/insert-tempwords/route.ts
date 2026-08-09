@@ -1,25 +1,49 @@
 import "server-only";
 
-import { NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
 
-import { prisma } from "@/lib/prisma";
-import { normalizePersianForComparison, normalizePersianForStorage } from "@/lib/persian/normalize";
-import { upsertPrimarySentenceByAnkiLinkId } from "@/lib/sentences/sentenceRepo";
-import { addPersianWord } from "@/lib/tables/persianWord";
+import { NextResponse } from "next/server";
+
 import { normalizeEnglishWordText } from "@/lib/english/normalize";
+import {
+  normalizePersianForStorage,
+  normalizePersianFull,
+} from "@/lib/persian/normalize";
+import { prisma } from "@/lib/prisma";
+import { addPersianWord, findPersianWord } from "@/lib/tables/persianWord";
 import { updateWord } from "@/lib/words/wordRepo";
+import { primarySentenceId } from "@/lib/words/sentenceIds";
 
 export const runtime = "nodejs";
 
 type PayloadItem = {
   base_form: string;
   meaning_fa: string;
+  pos: string;
+  concept_explained_fa: string;
   sentence_en: string;
   sentence_en_meaning_fa: string;
 };
 
-const allowedKeys = ["base_form", "meaning_fa", "sentence_en", "sentence_en_meaning_fa"] as const;
+type AuditChange = {
+  entity: "Word" | "EnglishWord" | "PersianWord" | "Sentence";
+  field: string;
+  action: "created" | "reused" | "kept" | "linked";
+  recordId?: number;
+  before?: string | number | number[] | null;
+  after?: string | number | number[] | null;
+  incoming?: string | number | number[] | null;
+  reason: string;
+};
+
+const allowedKeys = [
+  "base_form",
+  "meaning_fa",
+  "pos",
+  "concept_explained_fa",
+  "sentence_en",
+  "sentence_en_meaning_fa",
+] as const;
 const allowedKeySet = new Set<string>(allowedKeys);
 
 function asNonEmptyString(value: unknown): string | null {
@@ -28,126 +52,233 @@ function asNonEmptyString(value: unknown): string | null {
   return trimmed.length ? trimmed : null;
 }
 
+function normalizePos(value: string | null | undefined): string {
+  return value?.trim().toLocaleLowerCase("en-US") ?? "";
+}
+
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   if (!value || typeof value !== "object") return false;
   const proto = Object.getPrototypeOf(value);
   return proto === Object.prototype || proto === null;
 }
 
-function validateItem(value: unknown): { ok: true; item: PayloadItem } | { ok: false; issues: string[] } {
-  if (!isPlainObject(value)) return { ok: false, issues: ["Item must be an object"] };
+function validateItem(
+  value: unknown,
+): { ok: true; item: PayloadItem } | { ok: false; issues: string[] } {
+  if (!isPlainObject(value)) {
+    return { ok: false, issues: ["Item must be an object"] };
+  }
 
   const keys = Object.keys(value);
   const issues: string[] = [];
-
-  const extraKeys = keys.filter((k) => !allowedKeySet.has(k));
+  const extraKeys = keys.filter((key) => !allowedKeySet.has(key));
+  const missingKeys = allowedKeys.filter((key) => !(key in value));
   if (extraKeys.length) issues.push(`Extra field(s): ${extraKeys.join(", ")}`);
-
-  const missingKeys = allowedKeys.filter((k) => !(k in value));
   if (missingKeys.length) issues.push(`Missing field(s): ${missingKeys.join(", ")}`);
-
   if (keys.length !== allowedKeys.length) {
     issues.push(`Item must have exactly ${allowedKeys.length} fields`);
   }
 
   const base_form = normalizeEnglishWordText(asNonEmptyString(value.base_form) ?? "");
-  const meaning_fa_raw = asNonEmptyString(value.meaning_fa);
+  const meaningFaRaw = asNonEmptyString(value.meaning_fa);
+  const pos = normalizePos(asNonEmptyString(value.pos));
+  const concept_explained_fa = asNonEmptyString(value.concept_explained_fa);
   const sentence_en = asNonEmptyString(value.sentence_en);
   const sentence_en_meaning_fa = asNonEmptyString(value.sentence_en_meaning_fa);
+
   if (!base_form) issues.push("base_form must be a non-empty string");
-  if (!meaning_fa_raw) issues.push("meaning_fa must be a non-empty string");
+  if (!meaningFaRaw) issues.push("meaning_fa must be a non-empty string");
+  if (!pos) issues.push("pos must be a non-empty string");
+  if (!concept_explained_fa) issues.push("concept_explained_fa must be a non-empty string");
   if (!sentence_en) issues.push("sentence_en must be a non-empty string");
   if (!sentence_en_meaning_fa) issues.push("sentence_en_meaning_fa must be a non-empty string");
-
   if (issues.length) return { ok: false, issues };
-  if (!base_form || !meaning_fa_raw || !sentence_en || !sentence_en_meaning_fa) {
+  if (!meaningFaRaw || !concept_explained_fa || !sentence_en || !sentence_en_meaning_fa) {
     return { ok: false, issues: ["Invalid input"] };
   }
 
-  const meaning_fa = normalizePersianForStorage(meaning_fa_raw);
-  if (!meaning_fa) return { ok: false, issues: ["meaning_fa is empty after normalization"] };
-  return { ok: true, item: { base_form, meaning_fa, sentence_en, sentence_en_meaning_fa } };
+  const meaning_fa = normalizePersianForStorage(meaningFaRaw);
+  if (!meaning_fa || !normalizePersianFull(meaning_fa)) {
+    return { ok: false, issues: ["meaning_fa must contain Persian letters"] };
+  }
+
+  return {
+    ok: true,
+    item: {
+      base_form,
+      meaning_fa,
+      pos,
+      concept_explained_fa,
+      sentence_en,
+      sentence_en_meaning_fa,
+    },
+  };
 }
 
-export async function POST(req: Request) {
+export async function POST(request: Request) {
   try {
-    const body = (await req.json().catch(() => null)) as unknown;
+    const body = (await request.json().catch(() => null)) as unknown;
     if (!Array.isArray(body)) {
       return NextResponse.json({ ok: false, error: "Body must be an array" }, { status: 400 });
     }
 
     const items: PayloadItem[] = [];
-    const errors: Array<{ index: number; issues: string[] }> = [];
-
-    for (let i = 0; i < body.length; i++) {
-      const row = body[i];
+    const validationErrors: Array<{ index: number; issues: string[] }> = [];
+    body.forEach((row, index) => {
       const validated = validateItem(row);
-      if (!validated.ok) {
-        errors.push({ index: i, issues: validated.issues });
-        continue;
-      }
-      items.push(validated.item);
-    }
-
-    if (errors.length) {
+      if (validated.ok) items.push(validated.item);
+      else validationErrors.push({ index, issues: validated.issues });
+    });
+    if (validationErrors.length) {
       return NextResponse.json(
         {
           ok: false,
-          error:
-            "Invalid input items (must be exactly { base_form, meaning_fa, sentence_en, sentence_en_meaning_fa })",
-          errors,
+          error: "Invalid input items (six exact base-data fields are required)",
+          errors: validationErrors,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
-
-    if (items.length === 0) {
-      return NextResponse.json(
-        { ok: false, error: "No valid items (need {base_form, meaning_fa, sentence_en, sentence_en_meaning_fa})" },
-        { status: 400 }
-      );
+    if (!items.length) {
+      return NextResponse.json({ ok: false, error: "No valid items" }, { status: 400 });
     }
 
     let inserted = 0;
     let skippedExisting = 0;
+    let failed = 0;
     const results: Array<
       | {
           ok: true;
-          action: "inserted";
+          action: "inserted" | "skipped_exists";
           id: number;
           base_form: string;
           meaning_fa: string;
-          sentence_en_meaning_fa: string;
+          changes: AuditChange[];
         }
       | {
-          ok: true;
-          action: "skipped_exists";
-          id: number;
+          ok: false;
+          action: "error";
           base_form: string;
           meaning_fa: string;
-          sentence_en_meaning_fa: string;
+          error: string;
         }
-      | { ok: false; action: "error"; base_form: string; meaning_fa: string; error: string }
     > = [];
 
     for (const item of items) {
       try {
+        const normalizedMeaning = normalizePersianFull(item.meaning_fa);
         const candidates = await prisma.word.findMany({
           where: { english: { is: { base_form: item.base_form } } },
-          select: { id: true, anki_link_id: true, meaning: { select: { normalized_text: true } } },
+          orderBy: { id: "asc" },
+          select: {
+            id: true,
+            englishId: true,
+            meaningId: true,
+            pos: true,
+            concept_explained_fa: true,
+            sentenceIds: true,
+            updatedAt: true,
+            meaning: {
+              select: { canonical_text: true, normalized_text: true },
+            },
+          },
         });
-
-        const targetMeaning = normalizePersianForComparison(item.meaning_fa);
         const existing = candidates.find(
-          (c) => c.meaning?.normalized_text === targetMeaning
+          (candidate) =>
+            candidate.meaning?.normalized_text === normalizedMeaning &&
+            normalizePos(candidate.pos) === item.pos,
         );
 
         if (existing) {
-          await upsertPrimarySentenceByAnkiLinkId({
-            ankiLinkId: existing.anki_link_id,
-            sentence_en: item.sentence_en,
-            sentence_en_meaning_fa: item.sentence_en_meaning_fa,
-          });
+          const existingSentenceId = primarySentenceId(existing.sentenceIds);
+          const existingSentence = existingSentenceId
+            ? await prisma.sentence.findUnique({
+                where: { id: existingSentenceId },
+                select: {
+                  id: true,
+                  sentence_en: true,
+                  sentence_en_meaning_fa: true,
+                },
+              })
+            : null;
+          const changes: AuditChange[] = [
+            {
+              entity: "Word",
+              field: "record",
+              action: "kept",
+              recordId: existing.id,
+              reason: "کلید base_form + meaning_fa + pos یکسان بود؛ هیچ رکوردی Insert یا Update نشد.",
+            },
+            {
+              entity: "EnglishWord",
+              field: "base_form",
+              action: "kept",
+              recordId: existing.englishId,
+              before: item.base_form,
+              after: item.base_form,
+              incoming: item.base_form,
+              reason: "base_form بخشی از کلید تکراری بود و بدون تغییر باقی ماند.",
+            },
+            {
+              entity: "PersianWord",
+              field: "meaning_fa",
+              action: "kept",
+              recordId: existing.meaningId ?? undefined,
+              before: existing.meaning?.canonical_text ?? null,
+              after: existing.meaning?.canonical_text ?? null,
+              incoming: item.meaning_fa,
+              reason: "meaning_fa بخشی از کلید تکراری بود و بدون تغییر باقی ماند.",
+            },
+            {
+              entity: "Word",
+              field: "pos",
+              action: "kept",
+              recordId: existing.id,
+              before: existing.pos,
+              after: existing.pos,
+              incoming: item.pos,
+              reason: "pos بخشی از کلید تکراری بود و بدون تغییر باقی ماند.",
+            },
+            {
+              entity: "Word",
+              field: "concept_explained_fa",
+              action: "kept",
+              recordId: existing.id,
+              before: existing.concept_explained_fa,
+              after: existing.concept_explained_fa,
+              incoming: item.concept_explained_fa,
+              reason: "رکورد تکراری بود؛ مفهوم ورودی نادیده گرفته شد و مقدار قبلی تغییر نکرد.",
+            },
+            {
+              entity: "Sentence",
+              field: "sentence_en",
+              action: "kept",
+              recordId: existingSentence?.id,
+              before: existingSentence?.sentence_en ?? null,
+              after: existingSentence?.sentence_en ?? null,
+              incoming: item.sentence_en,
+              reason: "رکورد تکراری بود؛ جملهٔ ورودی نادیده گرفته شد و هیچ Sentence ساخته یا تغییر داده نشد.",
+            },
+            {
+              entity: "Sentence",
+              field: "sentence_en_meaning_fa",
+              action: "kept",
+              recordId: existingSentence?.id,
+              before: existingSentence?.sentence_en_meaning_fa ?? null,
+              after: existingSentence?.sentence_en_meaning_fa ?? null,
+              incoming: item.sentence_en_meaning_fa,
+              reason: "رکورد تکراری بود؛ ترجمهٔ ورودی نادیده گرفته شد و مقدار قبلی تغییر نکرد.",
+            },
+            {
+              entity: "Word",
+              field: "updatedAt",
+              action: "kept",
+              recordId: existing.id,
+              before: existing.updatedAt.toISOString(),
+              after: existing.updatedAt.toISOString(),
+              reason: "هیچ Write انجام نشد؛ updatedAt نیز تغییر نکرد.",
+            },
+          ];
           skippedExisting += 1;
           results.push({
             ok: true,
@@ -155,87 +286,161 @@ export async function POST(req: Request) {
             id: existing.id,
             base_form: item.base_form,
             meaning_fa: item.meaning_fa,
-            sentence_en_meaning_fa: item.sentence_en_meaning_fa,
+            changes,
           });
           continue;
         }
 
-        const persianMeaning = await addPersianWord(item.meaning_fa);
+        const existingEnglishWord = await prisma.englishWord.findUnique({
+          where: { base_form: item.base_form },
+          select: { id: true },
+        });
+        const foundPersianWord = await findPersianWord(item.meaning_fa);
+        const persianMeaning = foundPersianWord.item
+          ? { action: "unchanged" as const, item: foundPersianWord.item }
+          : await addPersianWord(item.meaning_fa);
+
         const created = await prisma.$transaction(async (tx) => {
-          const englishWord = await tx.englishWord.upsert({
-            where: { base_form: item.base_form },
-            update: {},
-            create: { base_form: item.base_form },
+          const englishWord = existingEnglishWord ?? await tx.englishWord.create({
+            data: { base_form: item.base_form },
             select: { id: true },
+          });
+          const existingSentence = await tx.sentence.findUnique({
+            where: { sentence_en: item.sentence_en },
+            select: {
+              id: true,
+              sentence_en: true,
+              sentence_en_meaning_fa: true,
+            },
+          });
+          const sentence = existingSentence ?? await tx.sentence.create({
+            data: {
+              sentence_en: item.sentence_en,
+              sentence_en_meaning_fa: item.sentence_en_meaning_fa,
+            },
+            select: {
+              id: true,
+              sentence_en: true,
+              sentence_en_meaning_fa: true,
+            },
           });
           const pending = await tx.word.create({
             data: {
-              // anki_link_id is required + unique, but we want final format to be `${id}_${now}`.
-              // So we create with a unique placeholder, then update after the DB assigns `id`.
               anki_link_id: `pending_${randomUUID()}`,
               englishId: englishWord.id,
               meaningId: persianMeaning.item.id,
+              pos: item.pos,
+              concept_explained_fa: item.concept_explained_fa,
+              sentenceIds: [sentence.id],
+              conceptMergeReviewed: false,
             },
             select: { id: true },
           });
-
-          const code = `${pending.id}_${Date.now()}`;
           await updateWord(
             {
               where: { id: pending.id },
-              data: { anki_link_id: code },
+              data: { anki_link_id: `${pending.id}_${Date.now()}` },
               select: { id: true },
             },
             tx,
           );
-
-          const existingSentence = await tx.sentence.findUnique({
-            where: { sentence_en: item.sentence_en },
-            select: { id: true, sentence_en_meaning_fa: true },
-          });
-          const sentence = existingSentence
-            ? existingSentence.sentence_en_meaning_fa?.trim()
-              ? existingSentence
-              : await tx.sentence.update({
-                  where: { id: existingSentence.id },
-                  data: {
-                    sentence_en_meaning_fa: item.sentence_en_meaning_fa,
-                    sentence_en_meaning_fa_audio_file_name: null,
-                  },
-                  select: { id: true },
-                })
-            : await tx.sentence.create({
-                data: {
-                  sentence_en: item.sentence_en,
-                  sentence_en_meaning_fa: item.sentence_en_meaning_fa,
-                },
-                select: { id: true },
-              });
-
-          await updateWord(
-            { where: { id: pending.id }, data: { sentenceIds: [sentence.id] } },
-            tx,
-          );
-
-          return pending;
+          return { pending, englishWord, existingSentence, sentence };
         });
 
+        const changes: AuditChange[] = [
+          {
+            entity: "EnglishWord",
+            field: "base_form",
+            action: existingEnglishWord ? "reused" : "created",
+            recordId: created.englishWord.id,
+            after: item.base_form,
+            reason: existingEnglishWord
+              ? "EnglishWord موجود بدون تغییر استفاده شد."
+              : "EnglishWord جدید Insert شد.",
+          },
+          {
+            entity: "PersianWord",
+            field: "meaning_fa",
+            action: foundPersianWord.item ? "reused" : "created",
+            recordId: persianMeaning.item.id,
+            after: persianMeaning.item.canonical_text,
+            incoming: item.meaning_fa,
+            reason: foundPersianWord.item
+              ? "PersianWord موجود بدون افزودن variant و بدون Update استفاده شد."
+              : "PersianWord جدید Insert شد.",
+          },
+          {
+            entity: "Sentence",
+            field: "record",
+            action: created.existingSentence ? "reused" : "created",
+            recordId: created.sentence.id,
+            after: created.sentence.sentence_en,
+            incoming: item.sentence_en,
+            reason: created.existingSentence
+              ? "Sentence موجود بدون تغییر استفاده شد."
+              : "Sentence جدید Insert شد.",
+          },
+          {
+            entity: "Sentence",
+            field: "sentence_en_meaning_fa",
+            action: created.existingSentence ? "kept" : "created",
+            recordId: created.sentence.id,
+            before: created.existingSentence?.sentence_en_meaning_fa,
+            after: created.sentence.sentence_en_meaning_fa,
+            incoming: item.sentence_en_meaning_fa,
+            reason: created.existingSentence
+              ? "Sentence موجود Update نشد؛ ترجمهٔ موجود حفظ و ترجمهٔ ورودی نادیده گرفته شد."
+              : "ترجمه همراه Sentence جدید Insert شد.",
+          },
+          {
+            entity: "Word",
+            field: "record",
+            action: "created",
+            recordId: created.pending.id,
+            reason: "ترکیب base_form + meaning_fa + pos در دیتابیس وجود نداشت؛ Word Candidate جدید Insert شد.",
+          },
+          {
+            entity: "Word",
+            field: "pos",
+            action: "created",
+            recordId: created.pending.id,
+            after: item.pos,
+            reason: "pos روی Word جدید ذخیره شد.",
+          },
+          {
+            entity: "Word",
+            field: "concept_explained_fa",
+            action: "created",
+            recordId: created.pending.id,
+            after: item.concept_explained_fa,
+            reason: "مفهوم روی Word جدید ذخیره شد.",
+          },
+          {
+            entity: "Word",
+            field: "sentenceIds",
+            action: "linked",
+            recordId: created.pending.id,
+            after: [created.sentence.id],
+            reason: "Sentence فقط به Word جدید متصل شد؛ هیچ Word قبلی تغییر نکرد.",
+          },
+        ];
         inserted += 1;
         results.push({
           ok: true,
           action: "inserted",
-          id: created.id,
+          id: created.pending.id,
           base_form: item.base_form,
           meaning_fa: item.meaning_fa,
-          sentence_en_meaning_fa: item.sentence_en_meaning_fa,
+          changes,
         });
-      } catch (e) {
+      } catch (error) {
+        failed += 1;
         results.push({
           ok: false,
           action: "error",
           base_form: item.base_form,
           meaning_fa: item.meaning_fa,
-          error: e instanceof Error ? e.message : String(e),
+          error: error instanceof Error ? error.message : String(error),
         });
       }
     }
@@ -245,12 +450,13 @@ export async function POST(req: Request) {
       total: items.length,
       inserted,
       skippedExisting,
+      failed,
       results,
     });
-  } catch (e) {
+  } catch (error) {
     return NextResponse.json(
-      { ok: false, error: e instanceof Error ? e.message : String(e) },
-      { status: 500 }
+      { ok: false, error: error instanceof Error ? error.message : String(error) },
+      { status: 500 },
     );
   }
 }

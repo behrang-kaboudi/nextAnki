@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { PromptSourcesButton } from "@/components/prompts/PromptSourcesButton";
+
+const PROMPT_PATH = "src/prompts/word-extraction/merge_word_concepts/rulseV1.md";
 
 type SourceRow = {
   id: number;
@@ -53,7 +56,7 @@ export default function WordConceptMerge() {
     setNotice(null);
     try {
       const [promptResponse, dataResponse] = await Promise.all([
-        fetch(`/api/ai/prompt-file?path=${encodeURIComponent("src/prompts/word-extraction/merge_word_concepts/rulseV1.md")}`),
+        fetch(`/api/ai/prompt-file?path=${encodeURIComponent(PROMPT_PATH)}`),
         fetch("/api/words/concept-merge/prepare", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -184,6 +187,7 @@ export default function WordConceptMerge() {
                 >
                   راهنمای انتخاب و تغییر داده‌ها
                 </button>
+                <PromptSourcesButton paths={[PROMPT_PATH]} />
                 <button type="button" disabled={busy} onClick={() => setOpen(false)} className={buttonClass}>Close</button>
               </div>
             </div>

@@ -182,6 +182,13 @@ function validateItems(value: unknown, requests: Map<number, RequestItem>) {
   return { items, issues };
 }
 
+function validateOtherMeanings(value: unknown): string[] {
+  if (!Array.isArray(value) || value.some((meaning) => typeof meaning !== "string" || !meaning.trim())) {
+    throw new Error("other_meanings_fa must be an array of non-empty strings or an empty array.");
+  }
+  return [...new Set(value.map((meaning) => meaning.trim()))];
+}
+
 function validateFieldValue(field: CustomExtractionFieldKey, value: unknown): string | number {
   if (["base_form", "meaning_fa", "meaning_fa_IPA", "phonetic_us", "pos", "concept_explained_fa"].includes(field)) {
     const text = nonEmptyString(value);
@@ -273,6 +280,22 @@ export async function POST(request: Request) {
             meaningId = meaning.item.id;
             wordPatch.meaning = { connect: { id: meaningId } };
             updatedFields.push("meaning_fa");
+          }
+          if ("other_meanings_fa" in item.fields) {
+            if (!meaningId) {
+              throw new Error("other_meanings_fa cannot be applied because this Word has no primary PersianWord.");
+            }
+            const otherMeanings = validateOtherMeanings(item.fields.other_meanings_fa);
+            const otherIds = await Promise.all(
+              otherMeanings.map(async (meaning) =>
+                (await addPersianWordWithClient(meaning, {}, tx)).item.id,
+              ),
+            );
+            wordPatch.otherMeaningIds = [
+              ...new Set(otherIds.filter((otherId) => otherId !== meaningId)),
+            ];
+            wordPatch.meanings_confirmed = true;
+            updatedFields.push("other_meanings_fa");
           }
           if ("meaning_fa_IPA" in item.fields) {
             const meaningIpa = validateFieldValue("meaning_fa_IPA", item.fields.meaning_fa_IPA) as string;

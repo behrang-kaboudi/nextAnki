@@ -1,10 +1,17 @@
 import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 
 import { requireApiRole } from "@/lib/auth/apiAuth";
 import { createAiModel, listAiModels } from "@/lib/ai/localModelRepo";
 
 export const runtime = "nodejs";
+
+const DEFAULT_SYSTEM_PROMPT_PATH = path.join(
+  process.cwd(),
+  "src/prompts/others/local-ai-default-system.md",
+);
 
 export async function GET() {
   const auth = await requireApiRole("admin");
@@ -28,7 +35,7 @@ export async function POST(request: Request) {
       name: body.name,
       modelIdentifier: body.modelIdentifier,
       baseUrl: body.baseUrl,
-      systemPrompt: body.systemPrompt,
+      systemPrompt: body.systemPrompt ?? await readFile(DEFAULT_SYSTEM_PROMPT_PATH, "utf8"),
       settings: body.settings,
       isEnabled: body.isEnabled,
       isDefault: body.isDefault,

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
 import { PageHeader } from "@/components/page-header";
@@ -10,6 +11,10 @@ import {
   CUSTOM_EXTRACTION_OUTPUT_FIELDS,
   type CustomExtractionFieldKey,
 } from "@/lib/word-extraction/customExtractionFields";
+import { PromptSourcesButton } from "@/components/prompts/PromptSourcesButton";
+
+const REQUESTED_OUTPUTS_PROMPT_PATH = "custom-extraction/requested_outputs_v1.md";
+const INPUT_RECORDS_PROMPT_PATH = "custom-extraction/input_records_v1.md";
 
 type PromptTexts = Record<string, string>;
 type RecordsResponse = {
@@ -40,8 +45,8 @@ const FIELD_POPULATION_GUIDE: Record<
     how: "The meaning prompt asks the AI for the primary Persian meaning. Apply response reuses or creates a PersianWord and connects it through Word.meaningId.",
   },
   other_meanings_fa: {
-    when: "Pending while Word.meanings_confirmed is false, even when otherMeaningIds already contains values.",
-    how: "This page can send the existing linked Persian meanings to the AI as context. The Persian Meanings Review workflow performs the actual review and sets meanings_confirmed to true; an empty list is complete only after that confirmation.",
+    when: "Counted as pending while Word.meanings_confirmed is false, even when otherMeaningIds already contains values. It becomes an AI output once a primary Persian meaning exists.",
+    how: "The field prompt reviews the exact word sense and returns a JSON array of alternative meanings, or an empty array. Apply response reuses or creates the PersianWord records, replaces otherMeaningIds, and sets meanings_confirmed to true.",
   },
   sentence_en: {
     when: "Requested when Word.sentenceIds is null, empty, or contains no sentence IDs.",
@@ -178,16 +183,18 @@ export default function CustomWordExtractionPage() {
   const [applyError, setApplyError] = useState("");
   const [applyReport, setApplyReport] = useState("");
   const [applyDetails, setApplyDetails] = useState("");
+  const [showApplyDetails, setShowApplyDetails] = useState(false);
   const [showPageHelp, setShowPageHelp] = useState(false);
 
   useEffect(() => {
-    if (!showPageHelp) return;
+    if (!showPageHelp && !showApplyDetails) return;
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") setShowPageHelp(false);
+      if (event.key === "Escape") setShowApplyDetails(false);
     };
     window.addEventListener("keydown", closeOnEscape);
     return () => window.removeEventListener("keydown", closeOnEscape);
-  }, [showPageHelp]);
+  }, [showApplyDetails, showPageHelp]);
 
   const selectedOutputSpecs = useMemo(
     () => CUSTOM_EXTRACTION_OUTPUT_FIELDS.filter((field) => outputFields.includes(field.key)),
@@ -216,7 +223,12 @@ export default function CustomWordExtractionPage() {
 
   useEffect(() => {
     let canceled = false;
-    const paths = [CUSTOM_EXTRACTION_BASE_PROMPT_PATH, ...selectedOutputSpecs.map((field) => field.promptPath)];
+    const paths = [
+      CUSTOM_EXTRACTION_BASE_PROMPT_PATH,
+      ...selectedOutputSpecs.map((field) => field.promptPath),
+      REQUESTED_OUTPUTS_PROMPT_PATH,
+      INPUT_RECORDS_PROMPT_PATH,
+    ];
     setLoadingPrompts(true);
     setPromptError("");
     Promise.all(
@@ -246,16 +258,18 @@ export default function CustomWordExtractionPage() {
     const fieldRules = selectedOutputSpecs
       .map((field) => {
         const text = promptTexts[field.promptPath]?.trim();
-        return text ? `## FIELD RULE: ${field.key}\n\n${text}` : "";
+        return text ?? "";
       })
       .filter(Boolean)
       .join("\n\n---\n\n");
-    return [base, fieldRules, `REQUESTED_OUTPUT_FIELDS:\n${JSON.stringify(outputFields, null, 2)}`]
+    const requestedOutputsPrompt = promptTexts[REQUESTED_OUTPUTS_PROMPT_PATH]?.trim() ?? "";
+    return [base, fieldRules, `${requestedOutputsPrompt}\n${JSON.stringify(outputFields, null, 2)}`]
       .filter(Boolean)
       .join("\n\n---\n\n");
   }, [outputFields, promptTexts, selectedOutputSpecs]);
 
-  const combinedPrompt = `${promptOnly}\n\n---\n\nINPUT_RECORDS:\n${recordsJson}`;
+  const inputRecordsPrompt = promptTexts[INPUT_RECORDS_PROMPT_PATH]?.trim() ?? "";
+  const combinedPrompt = `${promptOnly}\n\n---\n\n${inputRecordsPrompt}\n${recordsJson}`;
 
   function toggleField(
     key: CustomExtractionFieldKey,
@@ -270,6 +284,7 @@ export default function CustomWordExtractionPage() {
     setApplyError("");
     setApplyReport("");
     setApplyDetails("");
+    setShowApplyDetails(false);
     setCopied(false);
   }
 
@@ -281,6 +296,7 @@ export default function CustomWordExtractionPage() {
     setApplyError("");
     setApplyReport("");
     setApplyDetails("");
+    setShowApplyDetails(false);
     setCopied(false);
     try {
       const params = new URLSearchParams({
@@ -320,6 +336,7 @@ export default function CustomWordExtractionPage() {
     setApplyError("");
     setApplyReport("");
     setApplyDetails("");
+    setShowApplyDetails(false);
     try {
       const items = JSON.parse(responseText) as unknown;
       if (!Array.isArray(items)) throw new Error("AI response must be a JSON array.");
@@ -366,15 +383,23 @@ export default function CustomWordExtractionPage() {
       <PageHeader
         title="Custom Word Extraction"
         titleAccessory={(
-          <button
-            type="button"
-            aria-haspopup="dialog"
-            aria-expanded={showPageHelp}
-            onClick={() => setShowPageHelp(true)}
-            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-[var(--primary)] bg-[color-mix(in_oklab,var(--primary),transparent_90%)] px-5 py-2 text-sm font-bold text-[var(--primary)] shadow-sm transition hover:brightness-95 active:scale-[0.98]"
-          >
-            Guide to Field Population
-          </button>
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <Link
+              href="/words/extraction/new"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-card bg-background px-4 py-2 text-sm font-semibold text-foreground transition hover:bg-card"
+            >
+              New Word Intake
+            </Link>
+            <button
+              type="button"
+              aria-haspopup="dialog"
+              aria-expanded={showPageHelp}
+              onClick={() => setShowPageHelp(true)}
+              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-[var(--primary)] bg-[color-mix(in_oklab,var(--primary),transparent_90%)] px-5 py-2 text-sm font-bold text-[var(--primary)] shadow-sm transition hover:brightness-95 active:scale-[0.98]"
+            >
+              Guide to Field Population
+            </button>
+          </div>
         )}
       />
 
@@ -411,7 +436,7 @@ export default function CustomWordExtractionPage() {
               <div className="overflow-y-auto p-5 sm:p-6">
                 <div className="grid gap-3 md:grid-cols-4">
                   {[
-                    ["1. Choose context", "Input fields only control which existing values are sent to the AI. Selecting an input never updates that field."],
+                    ["1. Choose context", "Input fields control optional context sent to the AI. Selecting an input never updates it; an output workflow may also include mandatory context required by its field prompt."],
                     ["2. Choose outputs", "Fields to fill are the only fields the AI may return. Each selected output loads its own field-specific prompt file."],
                     ["3. Create and run", "Create input data selects the newest Words missing at least one chosen output. Copy complete prompt combines the orchestrator, field rules, requested outputs, and records."],
                     ["4. Validate and apply", "Paste the AI JSON response. Apply response validates word IDs, requested fields, sentence IDs, value ranges, and response shape before writing."],
@@ -483,6 +508,37 @@ export default function CustomWordExtractionPage() {
         </ModalPortal>
       ) : null}
 
+      {showApplyDetails && applyDetails ? (
+        <ModalPortal>
+          <div
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-3 backdrop-blur-sm sm:p-6"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="apply-details-title"
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget) setShowApplyDetails(false);
+            }}
+          >
+            <section className="flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-3xl border border-card bg-background shadow-elevated">
+              <header className="flex items-center justify-between gap-4 border-b border-card p-5">
+                <div>
+                  <h2 id="apply-details-title" className="text-lg font-bold text-foreground">Apply details</h2>
+                  <p className="mt-1 text-sm text-muted">{applyReport}</p>
+                </div>
+                <button type="button" onClick={() => setShowApplyDetails(false)} className={secondaryButton}>
+                  Close
+                </button>
+              </header>
+              <div className="overflow-y-auto p-5">
+                <pre className="whitespace-pre-wrap break-words rounded-2xl border border-card bg-card p-4 font-mono text-xs leading-6 text-foreground">
+                  {applyDetails}
+                </pre>
+              </div>
+            </section>
+          </div>
+        </ModalPortal>
+      ) : null}
+
       <div className="grid gap-6 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.4fr)]">
         <aside className="grid content-start gap-5">
           <section className="rounded-3xl border border-card bg-card p-5 shadow-elevated">
@@ -546,7 +602,7 @@ export default function CustomWordExtractionPage() {
               <div role="tabpanel" className="grid gap-3">
                 <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
                   <h3 className="text-base font-semibold text-foreground">Input fields</h3>
-                  <p dir="rtl" className="text-xs leading-5 text-muted">فقط اطلاعات انتخاب‌شده برای AI ارسال می‌شود.</p>
+                  <p dir="rtl" className="text-xs leading-5 text-muted">اطلاعات انتخاب‌شده و زمینهٔ ضروریِ خروجی‌ها برای AI ارسال می‌شود.</p>
                 </div>
                 <div className="flex items-center gap-3 rounded-2xl border border-card bg-background p-3">
                   <input type="checkbox" checked disabled className="h-4 w-4 accent-[var(--primary)]" />
@@ -600,6 +656,14 @@ export default function CustomWordExtractionPage() {
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <h2 className="text-lg font-semibold text-foreground">Create extraction package</h2>
               <div className="flex flex-wrap items-center gap-2">
+                <PromptSourcesButton
+                  paths={[
+                    CUSTOM_EXTRACTION_BASE_PROMPT_PATH,
+                    ...selectedOutputSpecs.map((field) => field.promptPath),
+                    REQUESTED_OUTPUTS_PROMPT_PATH,
+                    INPUT_RECORDS_PROMPT_PATH,
+                  ]}
+                />
                 <button type="button" onClick={() => void copyAll()} disabled={loadingPrompts || !promptOnly || !outputFields.length} className="inline-flex h-9 items-center justify-center rounded-lg bg-[var(--primary)] px-3 text-xs font-semibold text-[var(--primary-foreground)] shadow-sm transition hover:brightness-105 disabled:opacity-50">
                   {copied ? "Copied ✓" : "Copy complete prompt"}
                 </button>
@@ -627,7 +691,7 @@ export default function CustomWordExtractionPage() {
                 className={`rounded-xl px-3 py-2.5 text-sm font-semibold transition ${activeWorkspaceTab === "prompts" ? "bg-[var(--primary)] text-[var(--primary-foreground)] shadow-elevated" : "text-muted hover:bg-card hover:text-foreground"}`}
               >
                 Prompts
-                <span className={`ml-2 rounded-full px-2 py-0.5 text-[10px] ${activeWorkspaceTab === "prompts" ? "bg-white/20" : "bg-card"}`}>{selectedOutputSpecs.length + 1}</span>
+                <span className={`ml-2 rounded-full px-2 py-0.5 text-[10px] ${activeWorkspaceTab === "prompts" ? "bg-white/20" : "bg-card"}`}>{selectedOutputSpecs.length + 3}</span>
               </button>
             </div>
 
@@ -692,6 +756,21 @@ export default function CustomWordExtractionPage() {
                         </button>
                       </div>
                     </div>
+                    {applyReport ? (
+                      <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-800">
+                        <span>{applyReport}</span>
+                        {applyDetails ? (
+                          <button
+                            type="button"
+                            aria-haspopup="dialog"
+                            onClick={() => setShowApplyDetails(true)}
+                            className="rounded-lg border border-emerald-700/25 bg-background/70 px-2.5 py-1 text-xs font-semibold text-emerald-800 transition hover:bg-background"
+                          >
+                            Click for more details
+                          </button>
+                        ) : null}
+                      </div>
+                    ) : null}
                     <textarea
                       dir="ltr"
                       value={responseText}
@@ -699,14 +778,7 @@ export default function CustomWordExtractionPage() {
                       placeholder={'[{\n  "word_id": 123,\n  "fields": {},\n  "sentences": [{"sentence_id": 456, "sentence_en_meaning_fa": "..."}]\n}]'}
                       className="min-h-[560px] w-full resize-y rounded-2xl border border-card bg-background p-4 font-mono text-xs leading-6 text-foreground outline-none focus:border-[var(--primary)]"
                     />
-                    {applyReport ? <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-800">{applyReport}</div> : null}
                     {applyError ? <pre className="max-h-48 overflow-auto whitespace-pre-wrap rounded-xl border border-red-500/25 bg-red-500/10 p-3 text-xs text-red-700">{applyError}</pre> : null}
-                    {applyDetails ? (
-                      <details className="rounded-xl border border-card bg-background p-3">
-                        <summary className="cursor-pointer text-xs font-semibold text-foreground">Apply details</summary>
-                        <pre className="mt-2 max-h-64 overflow-auto whitespace-pre-wrap text-xs text-muted">{applyDetails}</pre>
-                      </details>
-                    ) : null}
                   </div>
                 </div>
               </div>

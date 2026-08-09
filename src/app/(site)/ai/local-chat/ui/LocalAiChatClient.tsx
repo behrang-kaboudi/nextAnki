@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { ActionIcon } from "@/components/icons/ActionIcon";
+import { PromptSourcesButton } from "@/components/prompts/PromptSourcesButton";
 
 import { LocalAiHelpModal } from "./LocalAiHelpModal";
 
@@ -40,6 +41,7 @@ type ModelForm = {
 };
 
 const DEFAULT_BASE_URL = "http://localhost:1234/v1";
+const LOCAL_AI_DEFAULT_PROMPT_PATH = "src/prompts/others/local-ai-default-system.md";
 const DEFAULT_SETTINGS: Settings = { temperature: 0.7, top_p: 0.95, max_tokens: 1024 };
 const fieldClass = "w-full rounded-xl border border-card bg-background px-3 py-2.5 text-sm text-foreground outline-none transition focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/15 disabled:opacity-60";
 const textButtonClass = "rounded-xl border border-card bg-background px-3 py-2 text-sm font-medium text-foreground transition hover:bg-black/5 active:scale-[0.98] disabled:opacity-50 dark:hover:bg-white/5";
@@ -178,7 +180,6 @@ export function LocalAiChatClient() {
           name: identifier,
           modelIdentifier: identifier,
           baseUrl,
-          systemPrompt: "You are a helpful assistant.",
           settings: DEFAULT_SETTINGS,
           isEnabled: true,
           isDefault: models.length === 0,
@@ -385,10 +386,13 @@ export function LocalAiChatClient() {
                 <span className="text-xs font-semibold text-muted">Base URL</span>
                 <input className={fieldClass} value={form.baseUrl} onChange={(event) => setForm({ ...form, baseUrl: event.target.value })} spellCheck={false} />
               </label>
-              <label className="grid gap-1.5">
-                <span className="text-xs font-semibold text-muted">System prompt</span>
-                <textarea className={`${fieldClass} min-h-24 resize-y`} value={form.systemPrompt} onChange={(event) => setForm({ ...form, systemPrompt: event.target.value })} />
-              </label>
+              <div className="grid gap-1.5">
+                <div className="flex items-center justify-between gap-2 text-xs font-semibold text-muted">
+                  System prompt
+                  <PromptSourcesButton paths={[LOCAL_AI_DEFAULT_PROMPT_PATH]} inlinePromptParts={[form.systemPrompt]} label="ACTIVE PROMPT SOURCE" />
+                </div>
+                <textarea aria-label="System prompt" className={`${fieldClass} min-h-24 resize-y`} value={form.systemPrompt} onChange={(event) => setForm({ ...form, systemPrompt: event.target.value })} />
+              </div>
 
               <div className="grid gap-4 rounded-xl border border-card bg-background/60 p-4">
                 <RangeSetting label="Temperature" value={Number(parsedSettings?.temperature ?? 0.7)} min={0} max={2} step={0.05} onChange={(value) => updateNumericSetting("temperature", value)} />

@@ -15,8 +15,7 @@
         "icon": "database",
         "items": [
           { "type": "link", "label": "Word Editor", "href": "/words/editor", "icon": "database", "description": "Search and edit vocabulary records." },
-          { "type": "link", "label": "Word Extraction", "href": "/words/extraction", "icon": "sparkles", "description": "Extract and enrich vocabulary through staged prompts." },
-          { "type": "link", "label": "Custom Word Extraction", "href": "/words/extraction/custom", "icon": "sparkles", "description": "Build extraction prompts from selected input and output fields." },
+          { "type": "link", "label": "Word Extraction", "href": "/words/extraction", "icon": "sparkles", "description": "Choose between new-word intake and completion of existing vocabulary records." },
           {
             "type": "group",
             "label": "Word Hints",

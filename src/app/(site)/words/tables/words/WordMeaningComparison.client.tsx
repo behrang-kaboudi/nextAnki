@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { PromptSourcesButton } from "@/components/prompts/PromptSourcesButton";
+
+const PROMPT_PATH = "src/prompts/word-extraction/compare_word_meanings/rulseV1.md";
 
 type SourceRecord = {
   id: number;
@@ -86,7 +89,7 @@ export default function WordMeaningComparison() {
     setNotice(null);
     try {
       const [promptResponse, dataResponse] = await Promise.all([
-        fetch(`/api/ai/prompt-file?path=${encodeURIComponent("src/prompts/word-extraction/compare_word_meanings/rulseV1.md")}`),
+        fetch(`/api/ai/prompt-file?path=${encodeURIComponent(PROMPT_PATH)}`),
         fetch("/api/words/meaning-comparison/prepare", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -247,6 +250,7 @@ export default function WordMeaningComparison() {
                 >
                   راهنمای انتخاب و تغییر داده‌ها
                 </button>
+                <PromptSourcesButton paths={[PROMPT_PATH]} />
                 <button type="button" disabled={loading} onClick={() => setOpen(false)} className={buttonClass}>Close</button>
               </div>
             </div>
