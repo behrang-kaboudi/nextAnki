@@ -57,10 +57,10 @@ export default function BatchPersianWordAudioGenerate() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <div className="text-sm font-semibold">Canonical-text audio</div>
-          <div className="text-xs opacity-70">Creates audio only for PersianWord rows whose audio_file_name is empty.</div>
+          <div className="text-xs opacity-70">Creates or replaces audio when the file is missing or audio_source_text differs from canonical_text.</div>
         </div>
         <button type="button" onClick={() => void start()} disabled={starting || Boolean(status?.running)} className="rounded border px-3 py-2 text-sm hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5">
-          {starting || status?.running ? "Generating audio…" : "Generate missing audio"}
+          {starting || status?.running ? "Generating audio…" : "Generate pending audio"}
         </button>
       </div>
       {status ? <div className="mt-2 text-xs opacity-80">

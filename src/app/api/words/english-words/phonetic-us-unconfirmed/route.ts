@@ -12,7 +12,6 @@ function parseLimit(value: string | null) {
 export async function GET(request: Request) {
   const limit = parseLimit(new URL(request.url).searchParams.get("limit"));
   const where = {
-    phonetic_us_confirmed: false,
     OR: [{ phonetic_us: null }, { phonetic_us: "" }],
   };
   const [items, totalUnconfirmed] = await Promise.all([

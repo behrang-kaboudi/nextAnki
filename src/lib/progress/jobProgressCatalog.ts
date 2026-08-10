@@ -10,7 +10,7 @@ import { getOtherMeaningsFaSyncAllStatus } from "@/lib/anki/otherMeaningsFaSyncA
 import { getSentenceDeckSyncAllStatus } from "@/lib/anki/sentenceDeckSyncAllJob";
 import { getSentenceEnMeaningFaSyncAllStatus } from "@/lib/anki/sentenceEnMeaningFaSyncAllJob";
 import { getSentenceEnSyncAllStatus } from "@/lib/anki/sentenceEnSyncAllJob";
-import { WORD_AUDIO_FIELDS } from "@/lib/audio/wordFieldAudioNaming";
+import { WORD_AUDIO_BATCH_FIELDS } from "@/lib/audio/wordAudioFields";
 import { getWordFieldVoiceJobStatus } from "@/lib/words/wordFieldVoiceGenerateJob";
 import { getPersianWordAudioJobStatus } from "@/lib/persian/persianWordAudioGenerateJob";
 import { getEnglishWordAudioJobStatus } from "@/lib/english/englishWordAudioGenerateJob";
@@ -36,7 +36,7 @@ const statusGetters = new Map<string, StatusGetter>([
   [JOB_PROGRESS_TOPICS.englishWordJsonHint, getEnglishWordJsonHintJobStatus],
 ]);
 
-for (const field of WORD_AUDIO_FIELDS) {
+for (const field of WORD_AUDIO_BATCH_FIELDS) {
   statusGetters.set(wordFieldVoiceProgressTopic(field), () =>
     getWordFieldVoiceJobStatus(field),
   );

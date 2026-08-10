@@ -44,6 +44,7 @@
         "label": "Anki",
         "icon": "anki",
         "items": [
+          { "type": "link", "label": "Audio Studio", "href": "/anki/media/audio", "icon": "audio", "description": "Record, edit, rename, and organize reusable audio files copied to Anki media." },
           {
             "type": "group",
             "label": "Cards",

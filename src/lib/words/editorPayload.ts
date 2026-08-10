@@ -19,10 +19,10 @@ export type WordEditorInitial = {
     id: number;
     base_form: string;
     phonetic_us: string | null;
-    phonetic_us_confirmed: boolean;
     phonetic_us_normalized: string | null;
     json_hint: string | null;
     audio_file_name: string | null;
+    audio_source_text: string | null;
   };
   meaningLabel: string | null;
   sentence: {
@@ -30,12 +30,16 @@ export type WordEditorInitial = {
     sentence_en: string;
     sentence_en_meaning_fa: string | null;
     sentence_en_audio_file_name: string | null;
+    sentence_en_audio_source_text: string | null;
     sentence_en_meaning_fa_audio_file_name: string | null;
+    sentence_en_meaning_fa_audio_source_text: string | null;
     createdAt: string;
     updatedAt: string;
   } | null;
   pos: string | null;
   concept_explained_fa: string | null;
+  concept_explained_fa_audio_file_name: string | null;
+  concept_explained_fa_audio_source_text: string | null;
   learning_depth: number | null;
   other_meanings_en: string | null;
   category: string | null;
@@ -69,6 +73,8 @@ export async function getWordEditorInitial(id: number): Promise<WordEditorInitia
     otherMeaningIds: meaningIds(word.otherMeaningIds),
     pos: word.pos,
     concept_explained_fa: word.concept_explained_fa,
+    concept_explained_fa_audio_file_name: word.concept_explained_fa_audio_file_name,
+    concept_explained_fa_audio_source_text: word.concept_explained_fa_audio_source_text,
     sentenceIds: meaningIds(word.sentenceIds),
     conceptMergeReviewed: word.conceptMergeReviewed,
     comparedMeaningWordIds: meaningIds(word.comparedMeaningWordIds),
@@ -78,10 +84,10 @@ export async function getWordEditorInitial(id: number): Promise<WordEditorInitia
       id: word.english.id,
       base_form: word.english.base_form,
       phonetic_us: word.english.phonetic_us,
-      phonetic_us_confirmed: word.english.phonetic_us_confirmed,
       phonetic_us_normalized: word.english.phonetic_us_normalized,
       json_hint: word.english.json_hint,
       audio_file_name: word.english.audio_file_name,
+      audio_source_text: word.english.audio_source_text,
     },
     meaningLabel: word.meaning?.canonical_text ?? null,
     sentence: sentence
@@ -90,8 +96,11 @@ export async function getWordEditorInitial(id: number): Promise<WordEditorInitia
           sentence_en: sentence.sentence_en,
           sentence_en_meaning_fa: sentence.sentence_en_meaning_fa,
           sentence_en_audio_file_name: sentence.sentence_en_audio_file_name,
+          sentence_en_audio_source_text: sentence.sentence_en_audio_source_text,
           sentence_en_meaning_fa_audio_file_name:
             sentence.sentence_en_meaning_fa_audio_file_name,
+          sentence_en_meaning_fa_audio_source_text:
+            sentence.sentence_en_meaning_fa_audio_source_text,
           createdAt: sentence.createdAt.toISOString(),
           updatedAt: sentence.updatedAt.toISOString(),
         }

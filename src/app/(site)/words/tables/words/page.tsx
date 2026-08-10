@@ -7,20 +7,34 @@ import {
   type TableColumnIndicator,
 } from "@/components/table-column-indicators";
 import { TableColumnSelector } from "@/components/table-column-selector";
+import {
+  getPendingWordAudioTaskCount,
+  getPendingWordConceptAudioIds,
+} from "@/lib/audio/wordAudioPending.server";
 import { prisma } from "@/lib/prisma";
 import { WORD_ENGLISH_FIELDS_SELECT } from "@/lib/english/wordEnglishFields.server";
 import { getWordColumnEmptyCounts } from "@/lib/words/tableColumnEmptyCounts.server";
 import { hydrateWordsWithPrimarySentence } from "@/lib/words/primarySentences.server";
 import { primarySentenceId } from "@/lib/words/sentenceIds";
+import { getPendingWordConceptMergeCount } from "@/lib/words/wordConceptMerge.server";
+import { getPendingWordMeaningComparisonCount } from "@/lib/words/wordMeaningComparison.server";
 
 import OpenWordEditorModal from "../../editor/OpenWordEditorModal.client";
 import WordRelationPopover, {
   type RelationPopoverField,
 } from "./WordRelationPopover.client";
+import WordArrayRelationModal, {
+  type WordArrayRelationEntry,
+} from "./WordArrayRelationModal.client";
 import WordMeaningsReview from "./WordMeaningsReview.client";
 import WordConceptMerge from "./WordConceptMerge.client";
 import WordMeaningComparison from "./WordMeaningComparison.client";
 import DeleteWordModalButton from "./DeleteWordModalButton.client";
+import WordFieldVoiceCell from "../../hints/WordFieldVoiceCell.client";
+import BatchWordFieldVoiceGenerateAllFields from "../../hints/BatchWordFieldVoiceGenerateAllFields.client";
+import BatchEnglishWordJsonHintGenerate from "../../hints/BatchEnglishWordJsonHintGenerate.client";
+import PersianWordMeaningIpaPhase2 from "../persian-words/PersianWordMeaningIpaPhase2.client";
+import EnglishWordPhoneticUsPrompt from "../english-words/EnglishWordPhoneticUsPrompt.client";
 
 export const metadata = { title: "Words — Word Table" };
 export const runtime = "nodejs";
@@ -37,9 +51,21 @@ const SORT_FIELDS = [
   "sentenceIds",
   "conceptMergeReviewed",
   "otherMeaningIds",
+  "comparedMeaningWordIds",
+  "synonymIds",
   "meanings_confirmed",
   "pos",
+  "concept_explained_fa",
+  "concept_explained_fa_audio_file_name",
+  "concept_explained_fa_audio_source_text",
+  "learning_depth",
+  "other_meanings_en",
+  "category",
+  "hint_to_select",
+  "imageability",
+  "productive_target",
   "anki_link_id",
+  "createdAt",
   "updatedAt",
 ] as const;
 type SortField = (typeof SORT_FIELDS)[number];
@@ -56,6 +82,8 @@ const TABLE_COLUMNS = [
   { key: "meanings_confirmed", label: "AI meaning review" },
   { key: "pos", label: "pos" },
   { key: "concept_explained_fa", label: "concept_explained_fa" },
+  { key: "concept_explained_fa_audio_file_name", label: "concept audio" },
+  { key: "concept_explained_fa_audio_source_text", label: "concept audio source text" },
   { key: "learning_depth", label: "learning_depth" },
   { key: "other_meanings_en", label: "other_meanings_en" },
   { key: "category", label: "category" },
@@ -81,6 +109,9 @@ const DEFAULT_TABLE_COLUMNS: TableColumnKey[] = [
   "synonymIds",
   "meanings_confirmed",
   "pos",
+  "concept_explained_fa",
+  "concept_explained_fa_audio_file_name",
+  "concept_explained_fa_audio_source_text",
   "anki_link_id",
   "updatedAt",
   "actions",
@@ -270,6 +301,7 @@ export default async function WordsTablePage({
     dir?: string;
     columns?: string | string[];
     review?: string;
+    missingConceptAudio?: string;
   }>;
 }) {
   const params = await searchParams;
@@ -286,6 +318,7 @@ export default async function WordsTablePage({
     params.review === "pending" || params.review === "reviewed"
       ? params.review
       : "all";
+  const missingConceptAudioOnly = params.missingConceptAudio === "1";
   const columns = parseColumns(params.columns);
   const hasColumn = (column: TableColumnKey) => columns.includes(column);
   const matchingPersianIds = q
@@ -320,9 +353,16 @@ export default async function WordsTablePage({
       : review === "reviewed"
         ? { meanings_confirmed: true }
         : undefined;
+  const audioWhere: Prisma.WordWhereInput | undefined = missingConceptAudioOnly
+    ? { id: { in: await getPendingWordConceptAudioIds() } }
+    : undefined;
   const where: Prisma.WordWhereInput | undefined =
-    searchWhere || reviewWhere
-      ? { AND: [searchWhere, reviewWhere].filter(Boolean) as Prisma.WordWhereInput[] }
+    searchWhere || reviewWhere || audioWhere
+      ? {
+          AND: [searchWhere, reviewWhere, audioWhere].filter(
+            Boolean,
+          ) as Prisma.WordWhereInput[],
+        }
       : undefined;
   const pendingReviewWhere: Prisma.WordWhereInput = searchWhere
     ? { AND: [searchWhere, { meanings_confirmed: false }] }
@@ -335,12 +375,41 @@ export default async function WordsTablePage({
       sentenceIds: { sentenceIds: dir },
       conceptMergeReviewed: { conceptMergeReviewed: dir },
       otherMeaningIds: { otherMeaningIds: dir },
+      comparedMeaningWordIds: { comparedMeaningWordIds: dir },
+      synonymIds: { synonymIds: dir },
       meanings_confirmed: { meanings_confirmed: dir },
       pos: { pos: dir },
+      concept_explained_fa: { concept_explained_fa: dir },
+      concept_explained_fa_audio_file_name: {
+        concept_explained_fa_audio_file_name: dir,
+      },
+      concept_explained_fa_audio_source_text: {
+        concept_explained_fa_audio_source_text: dir,
+      },
+      learning_depth: { learning_depth: dir },
+      other_meanings_en: { other_meanings_en: dir },
+      category: { category: dir },
+      hint_to_select: { hint_to_select: dir },
+      imageability: { imageability: dir },
+      productive_target: { productive_target: dir },
       anki_link_id: { anki_link_id: dir },
+      createdAt: { createdAt: dir },
       updatedAt: { updatedAt: dir },
     };
-  const [total, pendingReviewCount, rawRows, emptyCounts] = await Promise.all([
+  const [
+    total,
+    pendingReviewCount,
+    rawRows,
+    emptyCounts,
+    meaningReviewRemainingCount,
+    conceptMergeRemainingCount,
+    meaningComparisonRemainingCount,
+    audioRemainingCount,
+    jsonHintRemainingCount,
+    jsonHintTotalCount,
+    missingMeaningIpaCount,
+    phoneticCreateRemainingCount,
+  ] = await Promise.all([
     prisma.word.count({ where }),
     prisma.word.count({ where: pendingReviewWhere }),
     prisma.word.findMany({
@@ -365,6 +434,8 @@ export default async function WordsTablePage({
         meanings_confirmed: true,
         pos: true,
         concept_explained_fa: true,
+        concept_explained_fa_audio_file_name: true,
+        concept_explained_fa_audio_source_text: true,
         learning_depth: true,
         other_meanings_en: true,
         category: true,
@@ -376,6 +447,20 @@ export default async function WordsTablePage({
       },
     }),
     getWordColumnEmptyCounts(),
+    prisma.word.count({ where: { meanings_confirmed: false } }),
+    getPendingWordConceptMergeCount(),
+    getPendingWordMeaningComparisonCount(),
+    getPendingWordAudioTaskCount(),
+    prisma.englishWord.count({
+      where: { OR: [{ json_hint: null }, { json_hint: "" }] },
+    }),
+    prisma.englishWord.count(),
+    prisma.persianWord.count({
+      where: { OR: [{ meaning_fa_IPA: null }, { meaning_fa_IPA: "" }] },
+    }),
+    prisma.englishWord.count({
+      where: { OR: [{ phonetic_us: null }, { phonetic_us: "" }] },
+    }),
   ]);
   const rows = await hydrateWordsWithPrimarySentence(rawRows);
   const referencedMeaningIds = Array.from(
@@ -402,6 +487,42 @@ export default async function WordsTablePage({
   const meaningsById = new Map(
     referencedMeanings.map((meaning) => [meaning.id, meaning]),
   );
+  const referencedWordIds = Array.from(
+    new Set(
+      rows.flatMap((row) => [
+        ...meaningIds(row.comparedMeaningWordIds),
+        ...meaningIds(row.synonymIds),
+      ]),
+    ),
+  );
+  const referencedWords = referencedWordIds.length
+    ? await prisma.word.findMany({
+        where: { id: { in: referencedWordIds } },
+        select: {
+          id: true,
+          pos: true,
+          concept_explained_fa: true,
+          english: { select: { base_form: true } },
+          meaning: { select: { canonical_text: true } },
+        },
+      })
+    : [];
+  const referencedWordsById = new Map(
+    referencedWords.map((word) => [word.id, word]),
+  );
+  const wordArrayEntries = (
+    value: Prisma.JsonValue | null,
+  ): WordArrayRelationEntry[] =>
+    meaningIds(value).map((id) => {
+      const word = referencedWordsById.get(id);
+      return {
+        id,
+        baseForm: word?.english.base_form ?? null,
+        meaning: word?.meaning?.canonical_text ?? null,
+        pos: word?.pos ?? null,
+        conceptExplainedFa: word?.concept_explained_fa ?? null,
+      };
+    });
   const totalPages = showAll ? 1 : Math.max(1, Math.ceil(total / pageSize));
   const hrefFor = (
     next: Partial<{ page: number; sort: SortField; dir: "asc" | "desc" }>,
@@ -414,6 +535,7 @@ export default async function WordsTablePage({
     });
     if (q) query.set("q", q);
     if (review !== "all") query.set("review", review);
+    if (missingConceptAudioOnly) query.set("missingConceptAudio", "1");
     columns.forEach((column) => query.append("columns", column));
     return `/words/tables/words?${query.toString()}`;
   };
@@ -464,6 +586,15 @@ export default async function WordsTablePage({
             </select>
           </label>
           <label className="flex items-center gap-1 text-sm">
+            <input
+              name="missingConceptAudio"
+              type="checkbox"
+              value="1"
+              defaultChecked={missingConceptAudioOnly}
+            />
+            Needs concept audio generation
+          </label>
+          <label className="flex items-center gap-1 text-sm">
             AI review
             <select
               name="review"
@@ -486,7 +617,7 @@ export default async function WordsTablePage({
           >
             Search
           </button>
-          {q || review !== "all" ? (
+          {q || review !== "all" || missingConceptAudioOnly ? (
             <Link
               href={clearHref}
               className="rounded border px-3 py-2 text-sm hover:bg-black/5 dark:hover:bg-white/5"
@@ -497,19 +628,52 @@ export default async function WordsTablePage({
         </form>
       </section>
 
-      <section className="mt-4 rounded border p-3">
-        <div className="flex flex-wrap gap-2">
-          <WordMeaningsReview />
-          <WordConceptMerge />
-          <WordMeaningComparison />
-        </div>
-        <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
-          <span className="rounded-full bg-amber-500/10 px-3 py-1 font-semibold text-amber-700">
-            {pendingReviewCount.toLocaleString()} need AI review
-          </span>
-          <span className="text-muted">
-            An empty otherMeaningIds value is complete only when its AI review status is reviewed.
-          </span>
+      <section className="mt-4 overflow-hidden rounded border">
+        <div className="grid gap-3 p-3 lg:grid-cols-2">
+          <div>
+            <div className="flex flex-wrap gap-2">
+              <WordMeaningsReview
+                pendingCount={meaningReviewRemainingCount}
+              />
+              <WordConceptMerge remainingCount={conceptMergeRemainingCount} />
+              <WordMeaningComparison
+                remainingCount={meaningComparisonRemainingCount}
+              />
+              <PersianWordMeaningIpaPhase2
+                initialMissingCount={missingMeaningIpaCount}
+              />
+              <EnglishWordPhoneticUsPrompt
+                initialRemainingCount={phoneticCreateRemainingCount}
+              />
+            </div>
+            <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
+              <span className="rounded-full bg-amber-500/10 px-3 py-1 font-semibold text-amber-700">
+                {pendingReviewCount.toLocaleString()} need AI review
+              </span>
+              <span className="text-muted">
+                An empty otherMeaningIds value is complete only when its AI review status is reviewed.
+              </span>
+            </div>
+          </div>
+          <div className="space-y-3 border-t pt-3 lg:border-l lg:border-t-0 lg:pl-3 lg:pt-0">
+            <section className="flex flex-col gap-2">
+              <div>
+                <div className="text-sm font-semibold">All audio fields</div>
+                <div className="text-xs opacity-70">
+                  Generates only missing audio for base_form, canonical_text, concept_explained_fa, sentence_en, and sentence_en_meaning_fa.
+                </div>
+              </div>
+              <BatchWordFieldVoiceGenerateAllFields
+                remainingCount={audioRemainingCount}
+              />
+            </section>
+            <div className="border-t pt-3">
+              <BatchEnglishWordJsonHintGenerate
+                initialRemainingCount={jsonHintRemainingCount}
+                initialTotalCount={jsonHintTotalCount}
+              />
+            </div>
+          </div>
         </div>
       </section>
       <section className="mt-4 rounded border p-3">
@@ -602,8 +766,22 @@ export default async function WordsTablePage({
                     direction={dir}
                   />
                 ) : null}
-                {hasColumn("comparedMeaningWordIds") ? <th className="px-3 py-2">comparedMeaningWordIds</th> : null}
-                {hasColumn("synonymIds") ? <th className="px-3 py-2">synonymIds</th> : null}
+                {hasColumn("comparedMeaningWordIds") ? (
+                  <SortHeader
+                    href={sortHref("comparedMeaningWordIds")}
+                    label="comparedMeaningWordIds"
+                    active={sort === "comparedMeaningWordIds"}
+                    direction={dir}
+                  />
+                ) : null}
+                {hasColumn("synonymIds") ? (
+                  <SortHeader
+                    href={sortHref("synonymIds")}
+                    label="synonymIds"
+                    active={sort === "synonymIds"}
+                    direction={dir}
+                  />
+                ) : null}
                 {hasColumn("meanings_confirmed") ? (
                   <SortHeader
                     href={sortHref("meanings_confirmed")}
@@ -621,25 +799,76 @@ export default async function WordsTablePage({
                   />
                 ) : null}
                 {hasColumn("concept_explained_fa") ? (
-                  <th className="px-3 py-2">concept_explained_fa</th>
+                  <SortHeader
+                    href={sortHref("concept_explained_fa")}
+                    label="concept_explained_fa"
+                    active={sort === "concept_explained_fa"}
+                    direction={dir}
+                  />
+                ) : null}
+                {hasColumn("concept_explained_fa_audio_file_name") ? (
+                  <SortHeader
+                    href={sortHref("concept_explained_fa_audio_file_name")}
+                    label="concept audio"
+                    active={sort === "concept_explained_fa_audio_file_name"}
+                    direction={dir}
+                  />
+                ) : null}
+                {hasColumn("concept_explained_fa_audio_source_text") ? (
+                  <SortHeader
+                    href={sortHref("concept_explained_fa_audio_source_text")}
+                    label="concept audio source text"
+                    active={sort === "concept_explained_fa_audio_source_text"}
+                    direction={dir}
+                  />
                 ) : null}
                 {hasColumn("learning_depth") ? (
-                  <th className="px-3 py-2">learning_depth</th>
+                  <SortHeader
+                    href={sortHref("learning_depth")}
+                    label="learning_depth"
+                    active={sort === "learning_depth"}
+                    direction={dir}
+                  />
                 ) : null}
                 {hasColumn("other_meanings_en") ? (
-                  <th className="px-3 py-2">other_meanings_en</th>
+                  <SortHeader
+                    href={sortHref("other_meanings_en")}
+                    label="other_meanings_en"
+                    active={sort === "other_meanings_en"}
+                    direction={dir}
+                  />
                 ) : null}
                 {hasColumn("category") ? (
-                  <th className="px-3 py-2">category</th>
+                  <SortHeader
+                    href={sortHref("category")}
+                    label="category"
+                    active={sort === "category"}
+                    direction={dir}
+                  />
                 ) : null}
                 {hasColumn("hint_to_select") ? (
-                  <th className="px-3 py-2">hint_to_select</th>
+                  <SortHeader
+                    href={sortHref("hint_to_select")}
+                    label="hint_to_select"
+                    active={sort === "hint_to_select"}
+                    direction={dir}
+                  />
                 ) : null}
                 {hasColumn("imageability") ? (
-                  <th className="px-3 py-2">imageability</th>
+                  <SortHeader
+                    href={sortHref("imageability")}
+                    label="imageability"
+                    active={sort === "imageability"}
+                    direction={dir}
+                  />
                 ) : null}
                 {hasColumn("productive_target") ? (
-                  <th className="px-3 py-2">productive_target</th>
+                  <SortHeader
+                    href={sortHref("productive_target")}
+                    label="productive_target"
+                    active={sort === "productive_target"}
+                    direction={dir}
+                  />
                 ) : null}
                 {hasColumn("anki_link_id") ? (
                   <SortHeader
@@ -651,7 +880,12 @@ export default async function WordsTablePage({
                   />
                 ) : null}
                 {hasColumn("createdAt") ? (
-                  <th className="px-3 py-2">createdAt</th>
+                  <SortHeader
+                    href={sortHref("createdAt")}
+                    label="createdAt"
+                    active={sort === "createdAt"}
+                    direction={dir}
+                  />
                 ) : null}
                 {hasColumn("updatedAt") ? (
                   <SortHeader
@@ -747,10 +981,32 @@ export default async function WordsTablePage({
                     </td>
                   ) : null}
                   {hasColumn("comparedMeaningWordIds") ? (
-                    <ValueCell value={row.comparedMeaningWordIds ?? []} />
+                    <td className="max-w-64 px-3 py-2 font-mono">
+                      {meaningIds(row.comparedMeaningWordIds).length ? (
+                        <WordArrayRelationModal
+                          label={`comparedMeaningWordIds for Word ${row.id}`}
+                          entries={wordArrayEntries(row.comparedMeaningWordIds)}
+                        >
+                          [{meaningIds(row.comparedMeaningWordIds).join(", ")}]
+                        </WordArrayRelationModal>
+                      ) : (
+                        "—"
+                      )}
+                    </td>
                   ) : null}
                   {hasColumn("synonymIds") ? (
-                    <ValueCell value={row.synonymIds ?? []} />
+                    <td className="max-w-64 px-3 py-2 font-mono">
+                      {meaningIds(row.synonymIds).length ? (
+                        <WordArrayRelationModal
+                          label={`synonymIds for Word ${row.id}`}
+                          entries={wordArrayEntries(row.synonymIds)}
+                        >
+                          [{meaningIds(row.synonymIds).join(", ")}]
+                        </WordArrayRelationModal>
+                      ) : (
+                        "—"
+                      )}
+                    </td>
                   ) : null}
                   {hasColumn("meanings_confirmed") ? (
                     <td className="whitespace-nowrap px-3 py-2">
@@ -774,6 +1030,18 @@ export default async function WordsTablePage({
                   ) : null}
                   {hasColumn("concept_explained_fa") ? (
                     <ValueCell value={row.concept_explained_fa} dir="rtl" />
+                  ) : null}
+                  {hasColumn("concept_explained_fa_audio_file_name") ? (
+                    <td className="px-3 py-2">
+                      <WordFieldVoiceCell
+                        field="concept_explained_fa"
+                        audioKey={String(row.id)}
+                        text={row.concept_explained_fa}
+                      />
+                    </td>
+                  ) : null}
+                  {hasColumn("concept_explained_fa_audio_source_text") ? (
+                    <ValueCell value={row.concept_explained_fa_audio_source_text} dir="rtl" />
                   ) : null}
                   {hasColumn("learning_depth") ? (
                     <ValueCell value={row.learning_depth} />

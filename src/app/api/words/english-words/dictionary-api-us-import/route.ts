@@ -41,10 +41,10 @@ export async function POST(request: Request) {
         }
         const shouldUpdatePhonetic = !row.phonetic_us;
         await prisma.englishWord.update({ where: { id: row.id }, data: {
-          ...(shouldUpdatePhonetic ? { phonetic_us: pronunciation.phonetic_us, phonetic_us_confirmed: false, phonetic_us_normalized: normalizeIpaForDb(pronunciation.phonetic_us, 2000) || null, json_hint: null } : {}),
-          ...(filename ? { audio_file_name: filename } : {}),
+          ...(shouldUpdatePhonetic ? { phonetic_us: pronunciation.phonetic_us, phonetic_us_normalized: normalizeIpaForDb(pronunciation.phonetic_us, 2000) || null, json_hint: null } : {}),
+          ...(filename ? { audio_file_name: filename, audio_source_text: row.base_form.trim() } : {}),
         } });
-        if (shouldUpdatePhonetic) await touchWordsByEnglishId(row.id);
+        if (shouldUpdatePhonetic || filename) await touchWordsByEnglishId(row.id);
         if (shouldUpdatePhonetic) report.updatedPhonetic += 1;
         if (filename) report.downloadedAudio += 1;
       } catch (error) {

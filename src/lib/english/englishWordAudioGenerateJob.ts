@@ -1,8 +1,13 @@
 import "server-only";
 
+import { audioNeedsGeneration } from "@/lib/audio/audioSourceText";
 import { prisma } from "@/lib/prisma";
 
-import { generateEnglishWordAudio } from "./englishWordAudio.server";
+import {
+  deleteEnglishWordAudio,
+  generateEnglishWordAudio,
+  getEnglishWordAudioFileInfo,
+} from "./englishWordAudio.server";
 
 export type EnglishWordAudioJobStatus = {
   jobId: string;
@@ -21,7 +26,6 @@ export type EnglishWordAudioJobStatus = {
 };
 
 type JobState = EnglishWordAudioJobStatus & { _started: boolean };
-const missingAudioWhere = { OR: [{ audio_file_name: null }, { audio_file_name: "" }] };
 const nowIso = () => new Date().toISOString();
 
 function getState(): JobState {
@@ -33,24 +37,30 @@ function getState(): JobState {
 }
 
 export function getEnglishWordAudioJobStatus(): EnglishWordAudioJobStatus {
-  const { _started: _ignored, ...status } = getState();
+  const status = { ...getState() };
+  delete (status as Partial<JobState>)._started;
   return status;
 }
 
 async function runJob(state: JobState) {
   Object.assign(state, { running: true, done: false, error: null, startedAt: nowIso(), finishedAt: null, processedCandidates: 0, generated: 0, skippedNoText: 0, currentId: null, currentText: null, currentFilename: null });
-  state.totalCandidates = await prisma.englishWord.count({ where: missingAudioWhere });
-  let cursorId: number | undefined;
-  for (;;) {
-    const rows = await prisma.englishWord.findMany({ where: missingAudioWhere, orderBy: { id: "asc" }, take: 100, ...(cursorId === undefined ? {} : { cursor: { id: cursorId }, skip: 1 }), select: { id: true, base_form: true } });
-    if (!rows.length) break;
-    for (const row of rows) {
+  const rows = (await prisma.englishWord.findMany({
+    orderBy: { id: "asc" },
+    select: { id: true, base_form: true, audio_file_name: true, audio_source_text: true },
+  })).filter((row) => audioNeedsGeneration({
+    text: row.base_form,
+    sourceText: row.audio_source_text,
+    fileSize: getEnglishWordAudioFileInfo(row.audio_file_name).size,
+  }));
+  state.totalCandidates = rows.length;
+  for (const row of rows) {
       state.currentId = row.id; state.currentText = row.base_form;
       if (!row.base_form.trim()) { state.skippedNoText += 1; state.processedCandidates += 1; continue; }
+      if ((row.audio_file_name || row.audio_source_text) && getEnglishWordAudioFileInfo(row.audio_file_name).size <= 0) {
+        await deleteEnglishWordAudio(row.id);
+      }
       const result = await generateEnglishWordAudio(row.id);
       state.currentFilename = result.filename; state.generated += 1; state.processedCandidates += 1;
-    }
-    cursorId = rows.at(-1)?.id;
   }
   Object.assign(state, { running: false, done: true, finishedAt: nowIso(), currentId: null, currentText: null });
 }

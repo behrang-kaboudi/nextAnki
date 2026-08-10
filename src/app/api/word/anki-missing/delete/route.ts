@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 
 import { requireApiAuth } from "@/lib/auth/apiAuth";
 import { createAnkiOperations } from "@/lib/anki";
+import { acquireWordSyncJobLock } from "@/lib/anki/wordSyncJobLock";
 
 const DELETE_BATCH_SIZE = 1000;
 
@@ -28,8 +29,13 @@ function parseNoteIds(input: unknown): number[] {
 
 export async function POST(req: Request) {
   const authRes = await requireApiAuth();
-  if (!authRes.ok) return NextResponse.json({ error: "Unauthorized" }, { status: authRes.status });
+  if (!authRes.ok)
+    return NextResponse.json(
+      { error: "Unauthorized" },
+      { status: authRes.status },
+    );
 
+  let releaseLock: (() => void) | null = null;
   try {
     let body: unknown;
     try {
@@ -40,6 +46,10 @@ export async function POST(req: Request) {
 
     const noteIds = parseNoteIds((body as { noteIds?: unknown })?.noteIds);
     if (!noteIds.length) return NextResponse.json({ deleted: 0 });
+
+    releaseLock = acquireWordSyncJobLock(
+      "delete Anki word notes missing in DB",
+    );
 
     const client = createAnkiOperations({ timeoutMs: 30_000 });
 
@@ -52,7 +62,10 @@ export async function POST(req: Request) {
     }
     const perm = permRes.result;
     if (!perm) {
-      return NextResponse.json({ error: "AnkiConnect returned null for requestPermission." }, { status: 502 });
+      return NextResponse.json(
+        { error: "AnkiConnect returned null for requestPermission." },
+        { status: 502 },
+      );
     }
     if (perm.permission !== "granted") {
       return NextResponse.json(
@@ -79,6 +92,10 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ deleted });
   } catch (e) {
-    return NextResponse.json({ error: e instanceof Error ? e.message : String(e) }, { status: 500 });
+    const error = e instanceof Error ? e.message : String(e);
+    const status = error.includes("is already running") ? 409 : 500;
+    return NextResponse.json({ error }, { status });
+  } finally {
+    releaseLock?.();
   }
 }

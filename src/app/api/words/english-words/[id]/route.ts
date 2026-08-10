@@ -43,12 +43,6 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       ? normalizeEnglishWordText(typeof body.base_form === "string" ? body.base_form : "")
       : current.base_form;
     const phonetic_us = "phonetic_us" in body ? nullableString(body.phonetic_us) : current.phonetic_us;
-    const phoneticChanged = phonetic_us !== current.phonetic_us;
-    const phonetic_us_confirmed = phoneticChanged
-      ? false
-      : typeof body.phonetic_us_confirmed === "boolean"
-        ? body.phonetic_us_confirmed
-        : current.phonetic_us_confirmed;
     if (!base_form) {
       return NextResponse.json({ ok: false, error: "base_form must contain at least one English letter." }, { status: 400 });
     }
@@ -57,7 +51,6 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       data: {
         base_form,
         phonetic_us,
-        phonetic_us_confirmed,
         phonetic_us_normalized: phonetic_us ? normalizeIpaForDb(phonetic_us, 2000) || null : null,
         json_hint: "json_hint" in body ? nullableString(body.json_hint) : current.json_hint,
       },

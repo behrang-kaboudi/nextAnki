@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { PromptSourcesButton } from "@/components/prompts/PromptSourcesButton";
+import { RemainingCountBadge, RemainingCountButton } from "@/components/remaining-count";
 
 const PROMPT_PATH = "src/prompts/word-extraction/compare_word_meanings/rulseV1.md";
 
@@ -59,7 +60,7 @@ function parseResponse(value: string, sourceGroups: SourceGroup[]): OutputGroup[
   });
 }
 
-export default function WordMeaningComparison() {
+export default function WordMeaningComparison({ remainingCount }: { remainingCount: number }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [showWorkflowGuide, setShowWorkflowGuide] = useState(false);
@@ -81,7 +82,7 @@ export default function WordMeaningComparison() {
   const createData = async (showModal: boolean) => {
     const parsedLimit = Number(limit);
     if (!Number.isSafeInteger(parsedLimit) || parsedLimit < 0) {
-      setError("Group count must be a non-negative integer; 0 means all groups.");
+      setError("Count must be a non-negative integer; 0 means all remaining items.");
       return;
     }
     setLoading(true);
@@ -221,8 +222,22 @@ export default function WordMeaningComparison() {
 
   return (
     <>
-      <button type="button" disabled={loading} onClick={() => void createData(true)} className={buttonClass}>
-        {loading && !open ? "PREPARING…" : "COMPARE WORD MEANINGS"}
+      <button
+        type="button"
+        disabled={loading}
+        aria-busy={loading && !open}
+        onClick={() => void createData(true)}
+        className="relative rounded border px-3 py-2 text-sm hover:bg-black/5 disabled:opacity-100 dark:hover:bg-white/5"
+      >
+        COMPARE WORD MEANINGS <RemainingCountBadge count={remainingCount} />
+        {loading && !open ? (
+          <span className="absolute inset-0 flex items-center justify-center gap-1 rounded bg-background/85" aria-hidden="true">
+            <span className="size-1.5 animate-bounce rounded-full bg-current [animation-delay:-0.3s]" />
+            <span className="size-1.5 animate-bounce rounded-full bg-current [animation-delay:-0.15s]" />
+            <span className="size-1.5 animate-bounce rounded-full bg-current" />
+          </span>
+        ) : null}
+        {loading && !open ? <span className="sr-only">Preparing</span> : null}
       </button>
 
       {open ? (
@@ -271,7 +286,7 @@ export default function WordMeaningComparison() {
                   <li>هر معنی موجود در <code>meaningId</code> یا <code>otherMeaningIds</code> یک گروه می‌سازد.</li>
                   <li>فقط گروه‌هایی انتخاب می‌شوند که آن معنی فارسی را دست‌کم دو Word استفاده کرده باشند.</li>
                   <li>گروهی که تمام اعضایش قبلاً یکدیگر را در <code>comparedMeaningWordIds</code> ثبت کرده‌اند دوباره نمایش داده نمی‌شود.</li>
-                  <li>شناسهٔ PersianWord مشترک باید هنوز در دیتابیس موجود باشد؛ <code>Group count = 0</code> یعنی تمام گروه‌های واجد شرایط.</li>
+                  <li>شناسهٔ PersianWord مشترک باید هنوز در دیتابیس موجود باشد؛ <code>Count = 0</code> یعنی تمام گروه‌های واجد شرایط.</li>
                 </ul>
                 <div className="mt-2 font-semibold">پس از تأیید چه تغییری می‌کند؟</div>
                 <ul className="list-disc pr-5">
@@ -288,7 +303,7 @@ export default function WordMeaningComparison() {
               <section className="flex min-h-0 flex-col gap-2">
                 <div className="flex flex-wrap items-center gap-2">
                   <label className="text-xs">
-                    Group count
+                    Count
                     <input type="number" min="0" value={limit} disabled={loading} onChange={(event) => setLimit(event.target.value)} className="ml-2 w-20 rounded border px-2 py-1" />
                   </label>
                   <button type="button" disabled={loading} onClick={() => void createData(false)} className={buttonClass}>
@@ -300,7 +315,11 @@ export default function WordMeaningComparison() {
                     onClick={() => void navigator.clipboard.writeText(copyText).then(() => setNotice("Prompt and grouped data copied ✓")).catch((reason) => setError(reason instanceof Error ? reason.message : String(reason)))}
                     className={buttonClass}
                   >Copy all</button>
-                  <span className="text-xs font-semibold text-amber-700">Eligible groups: {totalGroups}</span>
+                  <RemainingCountButton
+                    count={totalGroups}
+                    disabled={loading}
+                    onClick={() => setLimit(String(totalGroups))}
+                  />
                 </div>
                 <textarea readOnly value={copyText} className="min-h-0 flex-1 rounded border p-3 font-mono text-xs" />
               </section>

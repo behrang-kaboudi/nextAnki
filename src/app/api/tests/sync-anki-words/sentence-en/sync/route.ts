@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 
 import fs from "node:fs";
+import path from "node:path";
 
 import { createAnkiOperations } from "@/lib/anki";
 import { AnkiNoteTypes } from "@/lib/anki";
 import { WORD_ANKI_FIELD_GENERATORS, getAnkiLinkIdFromNoteFields } from "@/lib/anki/wordAnkiMapping";
 import { prisma } from "@/lib/prisma";
 import { hydrateWordWithEnglishFields } from "@/lib/english/wordEnglishFields.server";
-import { getWordFieldAudioFileInfo } from "@/lib/words/wordFieldVoice";
 
 export const runtime = "nodejs";
 
@@ -18,11 +18,25 @@ function extractFirstSoundFilename(value: string): string | null {
 }
 
 async function uploadWordFieldAudioToAnki(filename: string, anki: ReturnType<typeof createAnkiOperations>) {
-  const info = getWordFieldAudioFileInfo(filename);
-  if (!info.exists) return { ok: false as const, error: `Local audio not found: ${filename}` };
-  if (info.size <= 0) return { ok: false as const, error: `Local audio is zero-byte: ${filename}` };
+  const root = path.join(process.cwd(), "public", "audio");
+  const stack = [root];
+  let absPath: string | null = null;
+  while (stack.length && !absPath) {
+    const dir = stack.pop()!;
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      if (!entry.name || entry.name.startsWith(".")) continue;
+      const candidate = path.join(dir, entry.name);
+      if (entry.isDirectory()) stack.push(candidate);
+      else if (entry.isFile() && entry.name === filename) {
+        absPath = candidate;
+        break;
+      }
+    }
+  }
+  if (!absPath) return { ok: false as const, error: `Local audio not found: ${filename}` };
+  if (fs.statSync(absPath).size <= 0) return { ok: false as const, error: `Local audio is zero-byte: ${filename}` };
 
-  const bytes = fs.readFileSync(info.absPath);
+  const bytes = fs.readFileSync(absPath);
   const data = bytes.toString("base64");
   const res = await anki.storeMediaFile({ filename, data, deleteExisting: true });
   if (!res.ok) return { ok: false as const, error: res.error };

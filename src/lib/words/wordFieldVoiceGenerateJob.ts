@@ -1,31 +1,39 @@
 import "server-only";
 
-import fs from "node:fs";
-import path from "node:path";
-
-import { prisma } from "@/lib/prisma";
-import { generateSpeechFromMixedText } from "@/lib/tts/cloudTts";
-import { touchWordByAnkiLinkId } from "@/lib/words/wordRepo";
-import {
-  WORD_AUDIO_FIELDS,
-  type WordAudioFieldKey,
-  WORD_AUDIO_FILENAME_SEPARATOR,
-  buildWordFieldAudioFilename,
-  sanitizeWordAudioFilenamePart,
-} from "@/lib/audio/wordFieldAudioNaming";
-import { getWordFieldAudioAbsoluteDir, getWordFieldAudioAbsolutePath } from "@/lib/audio/wordFieldAudioPaths.server";
+import { WORD_AUDIO_BATCH_FIELDS, type WordAudioBatchFieldKey } from "@/lib/audio/wordAudioFields";
+import { audioNeedsGeneration } from "@/lib/audio/audioSourceText";
 import { isSentenceAudioField, type SentenceAudioField } from "@/lib/audio/sentenceAudioNaming";
-import { generateSentenceAudio } from "@/lib/sentences/sentenceAudio.server";
+import { isWordConceptAudioField } from "@/lib/audio/wordConceptAudioNaming";
+import {
+  deleteEnglishWordAudio,
+  generateEnglishWordAudio,
+  getEnglishWordAudioFileInfo,
+} from "@/lib/english/englishWordAudio.server";
+import { prisma } from "@/lib/prisma";
+import {
+  deletePersianWordAudio,
+  generatePersianWordCanonicalTextAudio,
+  getPersianWordAudioFileInfo,
+} from "@/lib/persian/persianWordAudio.server";
+import {
+  deleteSentenceAudio,
+  generateSentenceAudio,
+  getSentenceAudioFileInfo,
+} from "@/lib/sentences/sentenceAudio.server";
+import {
+  deleteWordConceptAudio,
+  generateWordConceptAudio,
+  getWordConceptAudioFileInfo,
+} from "@/lib/words/wordConceptAudio.server";
 
 export type WordFieldVoiceJobStatus = {
   jobId: string;
-  field: WordAudioFieldKey;
+  field: WordAudioBatchFieldKey;
   running: boolean;
   done: boolean;
   startedAt: string | null;
   finishedAt: string | null;
   error: string | null;
-
   totalCandidates: number;
   processedCandidates: number;
   generated: number;
@@ -37,13 +45,16 @@ export type WordFieldVoiceJobStatus = {
 };
 
 type JobState = WordFieldVoiceJobStatus & { _started: boolean };
-type CandidateRow = { id: number; anki_link_id: string; audioKey: string | null; value: string | null };
+type Candidate = {
+  id: number;
+  text: string;
+  filename: string | null;
+  sourceText: string | null;
+};
 
-function nowIso() {
-  return new Date().toISOString();
-}
+const nowIso = () => new Date().toISOString();
 
-function createInitialState(field: WordAudioFieldKey): JobState {
+function createInitialState(field: WordAudioBatchFieldKey): JobState {
   return {
     jobId: `word_field_voice_${field}_${Date.now()}`,
     field,
@@ -64,278 +75,177 @@ function createInitialState(field: WordAudioFieldKey): JobState {
   };
 }
 
-function asNonEmptyString(value: unknown): string | null {
-  if (typeof value !== "string") return null;
-  const trimmed = value.trim();
-  return trimmed.length ? trimmed : null;
+function getAllStates(): Record<WordAudioBatchFieldKey, JobState> {
+  const globalState = globalThis as unknown as { __wordFieldVoiceJobs?: Record<WordAudioBatchFieldKey, JobState> };
+  if (!globalState.__wordFieldVoiceJobs) {
+    globalState.__wordFieldVoiceJobs = Object.fromEntries(
+      WORD_AUDIO_BATCH_FIELDS.map((field) => [field, createInitialState(field)]),
+    ) as Record<WordAudioBatchFieldKey, JobState>;
+  }
+  for (const field of WORD_AUDIO_BATCH_FIELDS) {
+    if (!globalState.__wordFieldVoiceJobs[field]) globalState.__wordFieldVoiceJobs[field] = createInitialState(field);
+  }
+  return globalState.__wordFieldVoiceJobs;
 }
 
-function getAllStates(): Record<WordAudioFieldKey, JobState> {
-  const g = globalThis as unknown as { __wordFieldVoiceJobs?: Record<WordAudioFieldKey, JobState> };
-  if (!g.__wordFieldVoiceJobs) {
-    g.__wordFieldVoiceJobs = Object.fromEntries(
-      WORD_AUDIO_FIELDS.map((field) => [field, createInitialState(field)])
-    ) as Record<WordAudioFieldKey, JobState>;
-    return g.__wordFieldVoiceJobs;
-  }
-
-  // Dev/HMR-friendly: keep existing job states, but add any newly introduced fields.
-  for (const field of WORD_AUDIO_FIELDS) {
-    if (!g.__wordFieldVoiceJobs[field]) g.__wordFieldVoiceJobs[field] = createInitialState(field);
-  }
-  return g.__wordFieldVoiceJobs;
+function getState(field: WordAudioBatchFieldKey): JobState {
+  return getAllStates()[field];
 }
 
-function getState(field: WordAudioFieldKey): JobState {
-  const all = getAllStates();
-  const existing = all[field];
-  if (existing) return existing;
-  const created = createInitialState(field);
-  all[field] = created;
-  return created;
+export function getWordFieldVoiceJobStatus(field: WordAudioBatchFieldKey): WordFieldVoiceJobStatus {
+  const status = { ...getState(field) };
+  delete (status as Partial<JobState>)._started;
+  return status;
 }
 
-export function getWordFieldVoiceJobStatus(field: WordAudioFieldKey): WordFieldVoiceJobStatus {
-  const s = getState(field);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { _started: _ignored, ...pub } = s;
-  return pub;
-}
-
-type ExistingFileInfo = { filename: string; timestampMs: number; size: number };
-
-function indexExistingFiles(): Map<string, ExistingFileInfo> {
-  const dir = getWordFieldAudioAbsoluteDir();
-  let entries: string[] = [];
-  try {
-    entries = fs.readdirSync(dir);
-  } catch {
-    return new Map();
-  }
-
-  const fieldAlternation = WORD_AUDIO_FIELDS.join("|");
-  const sep = WORD_AUDIO_FILENAME_SEPARATOR.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const reNew = new RegExp(
-    `^(?<anki>.+?)${sep}(?<field>${fieldAlternation})${sep}(?<ts>\\d{8,})\\.mp3$`
-  );
-  // Legacy: underscore separator (kept for backward-compat so we don't re-generate).
-  const reLegacy = new RegExp(`^(?<anki>.+)_(?<field>${fieldAlternation})_(?<ts>\\d{8,})\\.mp3$`);
-
-  const latestByKey = new Map<string, ExistingFileInfo>();
-  for (const filename of entries) {
-    const m = reNew.exec(filename) ?? reLegacy.exec(filename);
-    const field = m?.groups?.field as WordAudioFieldKey | undefined;
-    const anki = m?.groups?.anki;
-    const ts = Number(m?.groups?.ts);
-    if (!anki || !field || !Number.isFinite(ts)) continue;
-
-    let size = 0;
-    try {
-      size = fs.statSync(getWordFieldAudioAbsolutePath(filename)).size;
-    } catch {
-      continue;
-    }
-
-    const key = `${anki}::${field}`;
-    const prev = latestByKey.get(key);
-    if (!prev || Math.trunc(ts) > prev.timestampMs) {
-      latestByKey.set(key, { filename, timestampMs: Math.trunc(ts), size });
-    }
-  }
-
-  return latestByKey;
-}
-
-async function runJob(state: JobState) {
-  state.running = true;
-  state.done = false;
-  state.error = null;
-  state.startedAt = nowIso();
-  state.finishedAt = null;
-  state.processedCandidates = 0;
-  state.generated = 0;
-  state.skippedExists = 0;
-  state.skippedNoText = 0;
-  state.zeroByteFound = 0;
-  state.regeneratedZeroByte = 0;
-  state.currentId = null;
-
-  const field = state.field;
-  state.totalCandidates = await countCandidates(field);
-
-  if (isSentenceAudioField(field)) {
-    await runSentenceAudioJob(state, field);
-    state.running = false;
-    state.done = true;
-    state.finishedAt = nowIso();
-    state.currentId = null;
-    return;
-  }
-
-  const existingIndex = indexExistingFiles();
-
-  const take = 200;
-  let cursorId: number | null = null;
-
-  for (;;) {
-    const rows = await fetchBatch(field, { take, cursorId });
-
-    if (rows.length === 0) break;
-
-    for (const r of rows) {
-      state.currentId = r.id;
-
-      const ankiLinkId = asNonEmptyString(r.anki_link_id);
-      const audioKey = asNonEmptyString(r.audioKey);
-      const text = asNonEmptyString(r.value);
-      if (!audioKey || !text) {
-        state.skippedNoText += 1;
-        continue;
-      }
-
-      const key = `${sanitizeWordAudioFilenamePart(audioKey)}::${field}`;
-      const existing = existingIndex.get(key);
-      if (existing) {
-        if (existing.size === 0) {
-          state.zeroByteFound += 1;
-          await generateSpeechFromMixedText(text, path.join("words", existing.filename), "azure");
-          state.regeneratedZeroByte += 1;
-          if (ankiLinkId) await touchWordByAnkiLinkId(ankiLinkId);
-        } else {
-          state.skippedExists += 1;
-        }
-      } else {
-        const filename = buildWordFieldAudioFilename({ audioKey, field, timestampMs: Date.now() });
-        await generateSpeechFromMixedText(text, path.join("words", filename), "azure");
-        state.generated += 1;
-        existingIndex.set(key, { filename, timestampMs: Date.now(), size: 1 });
-        if (ankiLinkId) await touchWordByAnkiLinkId(ankiLinkId);
-      }
-
-      state.processedCandidates += 1;
-    }
-
-    cursorId = rows[rows.length - 1].id;
-  }
-
-  state.running = false;
-  state.done = true;
-  state.finishedAt = nowIso();
-  state.currentId = null;
-}
-
-async function runSentenceAudioJob(state: JobState, field: SentenceAudioField) {
-  const missingWhere = field === "sentence_en"
-    ? { OR: [{ sentence_en_audio_file_name: null }, { sentence_en_audio_file_name: "" }] }
-    : { OR: [{ sentence_en_meaning_fa_audio_file_name: null }, { sentence_en_meaning_fa_audio_file_name: "" }] };
-  let cursorId: number | undefined;
-
-  for (;;) {
-    const rows = await prisma.sentence.findMany({
-      where: missingWhere,
+async function fetchCandidates(field: WordAudioBatchFieldKey): Promise<Candidate[]> {
+  if (field === "base_form") {
+    return (await prisma.englishWord.findMany({
+      where: { base_form: { notIn: [""] } },
       orderBy: { id: "asc" },
-      take: 100,
-      ...(cursorId === undefined ? {} : { cursor: { id: cursorId }, skip: 1 }),
-      select: { id: true, sentence_en: true, sentence_en_meaning_fa: true },
-    });
-    if (!rows.length) break;
-
-    for (const row of rows) {
-      state.currentId = row.id;
-      const text = field === "sentence_en" ? row.sentence_en : row.sentence_en_meaning_fa;
-      if (!text?.trim()) {
-        state.skippedNoText += 1;
-        state.processedCandidates += 1;
-        continue;
-      }
-      await generateSentenceAudio(row.id, field);
-      state.generated += 1;
-      state.processedCandidates += 1;
-    }
-    cursorId = rows.at(-1)?.id;
+      select: { id: true, base_form: true, audio_file_name: true, audio_source_text: true },
+    })).map((row) => ({
+      id: row.id,
+      text: row.base_form,
+      filename: row.audio_file_name,
+      sourceText: row.audio_source_text,
+    }));
   }
+  if (field === "canonical_text") {
+    return (await prisma.persianWord.findMany({
+      where: { canonical_text: { notIn: [""] } },
+      orderBy: { id: "asc" },
+      select: { id: true, canonical_text: true, audio_file_name: true, audio_source_text: true },
+    })).map((row) => ({
+      id: row.id,
+      text: row.canonical_text,
+      filename: row.audio_file_name,
+      sourceText: row.audio_source_text,
+    }));
+  }
+  if (isWordConceptAudioField(field)) {
+    return (await prisma.word.findMany({
+      where: { AND: [{ concept_explained_fa: { not: null } }, { concept_explained_fa: { not: "" } }] },
+      orderBy: { id: "asc" },
+      select: {
+        id: true,
+        concept_explained_fa: true,
+        concept_explained_fa_audio_file_name: true,
+        concept_explained_fa_audio_source_text: true,
+      },
+    })).map((row) => ({
+      id: row.id,
+      text: row.concept_explained_fa!,
+      filename: row.concept_explained_fa_audio_file_name,
+      sourceText: row.concept_explained_fa_audio_source_text,
+    }));
+  }
+  const sentenceField = field as SentenceAudioField;
+  return (await prisma.sentence.findMany({
+    where: sentenceField === "sentence_en"
+      ? { sentence_en: { notIn: [""] } }
+      : { AND: [{ sentence_en_meaning_fa: { not: null } }, { sentence_en_meaning_fa: { not: "" } }] },
+    orderBy: { id: "asc" },
+    select: {
+      id: true,
+      sentence_en: true,
+      sentence_en_meaning_fa: true,
+      sentence_en_audio_file_name: true,
+      sentence_en_audio_source_text: true,
+      sentence_en_meaning_fa_audio_file_name: true,
+      sentence_en_meaning_fa_audio_source_text: true,
+    },
+  })).map((row) => ({
+    id: row.id,
+    text: sentenceField === "sentence_en" ? row.sentence_en : row.sentence_en_meaning_fa!,
+    filename: sentenceField === "sentence_en" ? row.sentence_en_audio_file_name : row.sentence_en_meaning_fa_audio_file_name,
+    sourceText: sentenceField === "sentence_en"
+      ? row.sentence_en_audio_source_text
+      : row.sentence_en_meaning_fa_audio_source_text,
+  }));
 }
 
-async function countCandidates(field: WordAudioFieldKey): Promise<number> {
-  if (field === "other_meanings_en") {
-    return prisma.word.count({
-      where: {
-        AND: [{ other_meanings_en: { not: null } }, { other_meanings_en: { not: "" } }],
-      },
-    });
-  }
-  if (field === "concept_explained_fa") {
-    return prisma.word.count({
-      where: {
-        AND: [{ concept_explained_fa: { not: null } }, { concept_explained_fa: { not: "" } }],
-      },
-    });
-  }
-  if (field === "sentence_en_meaning_fa") {
-    return prisma.sentence.count({
-      where: { OR: [{ sentence_en_meaning_fa_audio_file_name: null }, { sentence_en_meaning_fa_audio_file_name: "" }] },
-    });
-  }
-  if (field === "sentence_en") {
-    return prisma.sentence.count({
-      where: { OR: [{ sentence_en_audio_file_name: null }, { sentence_en_audio_file_name: "" }] },
-    });
-  }
-  if (field === "base_form") return prisma.word.count({ where: { english: { is: { base_form: { notIn: [""] } } } } });
+function existingSize(field: WordAudioBatchFieldKey, filename: string | null): number {
+  if (field === "base_form") return getEnglishWordAudioFileInfo(filename).size;
+  if (field === "canonical_text") return getPersianWordAudioFileInfo(filename).size;
+  if (isWordConceptAudioField(field)) return getWordConceptAudioFileInfo(filename).size;
+  if (isSentenceAudioField(field)) return getSentenceAudioFileInfo(filename).size;
   return 0;
 }
 
-async function fetchBatch(
-  field: WordAudioFieldKey,
-  opts: { take: number; cursorId: number | null }
-): Promise<CandidateRow[]> {
-  const base = {
-    orderBy: { id: "asc" as const },
-    take: opts.take,
-    ...(opts.cursorId ? { cursor: { id: opts.cursorId }, skip: 1 } : {}),
-  };
-
-  if (field === "base_form") {
-    const rows = await prisma.word.findMany({ ...base, select: { id: true, anki_link_id: true, english: { select: { base_form: true } } } });
-    return rows.map((r) => ({ id: r.id, anki_link_id: r.anki_link_id, audioKey: r.anki_link_id, value: r.english.base_form }));
-  }
-  if (field === "other_meanings_en") {
-    const rows = await prisma.word.findMany({
-      ...base,
-      select: { id: true, anki_link_id: true, other_meanings_en: true },
-    });
-    return rows.map((r) => ({
-      id: r.id,
-      anki_link_id: r.anki_link_id,
-      audioKey: r.anki_link_id,
-      value: r.other_meanings_en ?? null,
-    }));
-  }
-  if (field === "concept_explained_fa") {
-    const rows = await prisma.word.findMany({
-      ...base,
-      select: { id: true, anki_link_id: true, concept_explained_fa: true },
-    });
-    return rows.map((r) => ({ id: r.id, anki_link_id: r.anki_link_id, audioKey: r.anki_link_id, value: r.concept_explained_fa ?? null }));
-  }
-  return [];
+async function generate(field: WordAudioBatchFieldKey, candidate: Candidate) {
+  if (field === "base_form") return generateEnglishWordAudio(candidate.id);
+  if (field === "canonical_text") return generatePersianWordCanonicalTextAudio(candidate.id);
+  if (isWordConceptAudioField(field)) return generateWordConceptAudio(candidate.id);
+  if (isSentenceAudioField(field)) return generateSentenceAudio(candidate.id, field);
+  throw new Error(`Unsupported audio field: ${field}`);
 }
 
-export function startWordFieldVoiceJobIfNeeded(field: WordAudioFieldKey): WordFieldVoiceJobStatus {
-  const state = getState(field);
-  if (state.running) return getWordFieldVoiceJobStatus(field);
-  if (state._started && !state.done) return getWordFieldVoiceJobStatus(field);
+async function clearMissingFileMetadata(field: WordAudioBatchFieldKey, id: number) {
+  if (field === "base_form") return deleteEnglishWordAudio(id);
+  if (field === "canonical_text") return deletePersianWordAudio(id);
+  if (isWordConceptAudioField(field)) return deleteWordConceptAudio(id);
+  if (isSentenceAudioField(field)) return deleteSentenceAudio(id, field);
+}
 
-  state.jobId = `word_field_voice_${field}_${Date.now()}`;
-  state._started = true;
-
-  void runJob(state).catch((e) => {
-    state.running = false;
-    state.done = true;
-    state.error = e instanceof Error ? e.message : String(e);
-    state.finishedAt = nowIso();
-    state.currentId = null;
+async function runJob(state: JobState) {
+  Object.assign(state, {
+    running: true,
+    done: false,
+    error: null,
+    startedAt: nowIso(),
+    finishedAt: null,
+    totalCandidates: 0,
+    processedCandidates: 0,
+    generated: 0,
+    skippedExists: 0,
+    skippedNoText: 0,
+    zeroByteFound: 0,
+    regeneratedZeroByte: 0,
+    currentId: null,
   });
 
+  const candidates = (await fetchCandidates(state.field)).filter((candidate) =>
+    audioNeedsGeneration({
+      text: candidate.text,
+      sourceText: candidate.sourceText,
+      fileSize: existingSize(state.field, candidate.filename),
+    }),
+  );
+  state.totalCandidates = candidates.length;
+  for (const candidate of candidates) {
+    state.currentId = candidate.id;
+    if (!candidate.text.trim()) {
+      state.skippedNoText += 1;
+    } else {
+      const fileSize = existingSize(state.field, candidate.filename);
+      const missingFile = Boolean(candidate.filename) && fileSize <= 0;
+      const orphanedMetadata = fileSize <= 0 && Boolean(candidate.filename || candidate.sourceText);
+      if (missingFile) state.zeroByteFound += 1;
+      if (orphanedMetadata) await clearMissingFileMetadata(state.field, candidate.id);
+      await generate(state.field, candidate);
+      state.generated += 1;
+      if (missingFile) state.regeneratedZeroByte += 1;
+    }
+    state.processedCandidates += 1;
+  }
+
+  Object.assign(state, { running: false, done: true, finishedAt: nowIso(), currentId: null });
+}
+
+export function startWordFieldVoiceJobIfNeeded(field: WordAudioBatchFieldKey): WordFieldVoiceJobStatus {
+  const state = getState(field);
+  if (state.running || (state._started && !state.done)) return getWordFieldVoiceJobStatus(field);
+  state.jobId = `word_field_voice_${field}_${Date.now()}`;
+  state._started = true;
+  void runJob(state).catch((error) => {
+    Object.assign(state, {
+      running: false,
+      done: true,
+      error: error instanceof Error ? error.message : String(error),
+      finishedAt: nowIso(),
+      currentId: null,
+    });
+  });
   return getWordFieldVoiceJobStatus(field);
 }

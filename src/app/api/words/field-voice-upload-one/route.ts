@@ -2,20 +2,19 @@ import "server-only";
 
 import { NextResponse } from "next/server";
 
-import fs from "node:fs";
 import fsp from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import crypto from "node:crypto";
 import { spawn } from "node:child_process";
 
-import { WORD_AUDIO_FIELDS, buildWordFieldAudioFilename, getWordFieldAudioPublicPath } from "@/lib/audio/wordFieldAudioNaming";
-import { getWordFieldAudioAbsoluteDir, getWordFieldAudioAbsolutePath } from "@/lib/audio/wordFieldAudioPaths.server";
-import { touchSentenceById } from "@/lib/sentences/sentenceRepo";
-import { deleteAllWordFieldAudioFiles } from "@/lib/words/wordFieldVoice";
-import { touchWordByAnkiLinkId, touchWordsLinkedToSentenceId } from "@/lib/words/wordRepo";
+import { WORD_AUDIO_FIELDS } from "@/lib/audio/wordAudioFields";
+import { getEnglishWordAudioPublicPath } from "@/lib/audio/englishWordAudioNaming";
+import { saveEnglishWordAudioMp3 } from "@/lib/english/englishWordAudio.server";
 import { getSentenceAudioPublicPath, isSentenceAudioField } from "@/lib/audio/sentenceAudioNaming";
 import { saveSentenceAudioMp3 } from "@/lib/sentences/sentenceAudio.server";
+import { getWordConceptAudioPublicPath, isWordConceptAudioField } from "@/lib/audio/wordConceptAudioNaming";
+import { saveWordConceptAudioMp3 } from "@/lib/words/wordConceptAudio.server";
 
 export const runtime = "nodejs";
 
@@ -30,18 +29,6 @@ function asPositiveIntString(value: string): number | null {
   if (!Number.isFinite(n)) return null;
   const i = Math.floor(n);
   return i > 0 && String(i) === value ? i : null;
-}
-
-async function touchWordsForAudioChange(audioKey: string, field: string) {
-  if (field === "sentence_en" || field === "sentence_en_meaning_fa") {
-    const sentenceId = asPositiveIntString(audioKey);
-    if (sentenceId) {
-      await touchSentenceById(sentenceId);
-      await touchWordsLinkedToSentenceId(sentenceId);
-    }
-    return;
-  }
-  await touchWordByAnkiLinkId(audioKey);
 }
 
 function runFfmpeg(args: string[]): Promise<void> {
@@ -111,6 +98,18 @@ export async function POST(req: Request) {
         tmpOutput,
       ]);
 
+      if (field === "base_form") {
+        const englishWordId = asPositiveIntString(audioKey);
+        if (!englishWordId) throw new Error("Invalid EnglishWord id");
+        const result = await saveEnglishWordAudioMp3(englishWordId, tmpOutput);
+        return NextResponse.json({
+          ok: true,
+          filename: result.filename,
+          publicPath: result.filename ? getEnglishWordAudioPublicPath(result.filename) : null,
+          size: result.size,
+        });
+      }
+
       if (isSentenceAudioField(field)) {
         const sentenceId = asPositiveIntString(audioKey);
         if (!sentenceId) throw new Error("Invalid Sentence id");
@@ -123,28 +122,19 @@ export async function POST(req: Request) {
         });
       }
 
-      // Word-owned fields retain the existing audio/words namespace.
-      await deleteAllWordFieldAudioFiles({ audioKey, ankiLinkId: audioKey, field: field as never });
-      const filename = buildWordFieldAudioFilename({ audioKey, field: field as never, timestampMs: Date.now(), ext: "mp3" });
-      fs.mkdirSync(getWordFieldAudioAbsoluteDir(), { recursive: true });
-      const outAbs = getWordFieldAudioAbsolutePath(filename);
-      await fsp.copyFile(tmpOutput, outAbs);
-
-      let size = 0;
-      try {
-        size = fs.statSync(outAbs).size;
-      } catch {
-        size = 0;
+      if (isWordConceptAudioField(field)) {
+        const wordId = asPositiveIntString(audioKey);
+        if (!wordId) throw new Error("Invalid Word id");
+        const result = await saveWordConceptAudioMp3(wordId, tmpOutput);
+        return NextResponse.json({
+          ok: true,
+          filename: result.filename,
+          publicPath: result.filename ? getWordConceptAudioPublicPath(result.filename) : null,
+          size: result.size,
+        });
       }
 
-      await touchWordsForAudioChange(audioKey, field);
-
-      return NextResponse.json({
-        ok: true,
-        filename,
-        publicPath: getWordFieldAudioPublicPath(filename),
-        size,
-      });
+      return NextResponse.json({ ok: false, error: "Unsupported field" }, { status: 400 });
     } finally {
       await Promise.allSettled([
         fsp.rm(tmpInput, { force: true }),

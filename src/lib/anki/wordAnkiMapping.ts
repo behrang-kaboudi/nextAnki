@@ -10,15 +10,27 @@ import {
   parsePictureWordAudioFilename,
   pictureWordAudioKey,
 } from "@/lib/audio/pictureWordAudioNaming";
-import type { WordAudioFieldKey } from "@/lib/audio/wordFieldAudioNaming";
-import { getWordFieldAudioAbsolutePath } from "@/lib/audio/wordFieldAudioPaths.server";
+import { getEnglishWordAudioAbsolutePath } from "@/lib/audio/englishWordAudioPaths.server";
 import { getPersianWordAudioAbsolutePath } from "@/lib/audio/persianWordAudioPaths.server";
+import { getWordConceptAudioAbsolutePath } from "@/lib/audio/wordConceptAudioPaths.server";
 import { getSentenceAudioAbsolutePath } from "@/lib/audio/sentenceAudioPaths.server";
-import { getLatestWordFieldAudioFile } from "@/lib/words/wordFieldVoice";
 import { prisma } from "@/lib/prisma";
-import { findPrimarySentenceByAnkiLinkId } from "@/lib/sentences/sentenceRepo";
-import { hydrateWordWithPersianMeanings, type WordWithPersianMeanings } from "@/lib/words/persianMeanings.server";
-import { hydrateWordWithEnglishFields, type WordEnglishFields } from "@/lib/english/wordEnglishFields.server";
+import {
+  hydrateWordWithPersianMeanings,
+  type WordWithPersianMeanings,
+} from "@/lib/words/persianMeanings.server";
+import {
+  hydrateWordWithEnglishFields,
+  type WordEnglishFields,
+} from "@/lib/english/wordEnglishFields.server";
+import {
+  hydrateWordWithEnglishSynonyms,
+  type WordWithEnglishSynonyms,
+} from "@/lib/words/englishSynonyms.server";
+import {
+  hydrateWordsWithPrimarySentence,
+  type WordWithPrimarySentence,
+} from "@/lib/words/primarySentences.server";
 
 import { IpaCandidate } from "../ipa/setPictures/types";
 
@@ -126,48 +138,53 @@ export async function selectFile(
       where: { canonical_text: fa },
       select: { audio_file_name: true },
     });
-    return persianWord?.audio_file_name ? getPersianWordAudioAbsolutePath(persianWord.audio_file_name) : null;
+    return persianWord?.audio_file_name
+      ? getPersianWordAudioAbsolutePath(persianWord.audio_file_name)
+      : null;
   }
 
   const whereCandidates: Prisma.WordWhereInput[] = [];
 
   // Prefer strict match when we have both sides.
-  if (en && fa) whereCandidates.push({ english: { is: { base_form: en } }, meaning: { is: { canonical_text: fa } } });
+  if (en && fa)
+    whereCandidates.push({
+      english: { is: { base_form: en } },
+      meaning: { is: { canonical_text: fa } },
+    });
 
   // Fallback to whichever side is present. This is important because `target_lang`
   // controls which audio field we *want*, but the DB row can still be found via the other side.
   if (en) whereCandidates.push({ english: { is: { base_form: en } } });
   if (fa) whereCandidates.push({ meaning: { is: { canonical_text: fa } } });
 
-  let row: Pick<Word, "anki_link_id"> | null = null;
+  let row: { english: { audio_file_name: string | null } } | null = null;
   for (const where of whereCandidates) {
     row = await prisma.word.findFirst({
       where,
-      select: { anki_link_id: true },
+      select: { english: { select: { audio_file_name: true } } },
     });
     if (row) break;
   }
-
-  const ankiLinkId = row?.anki_link_id ?? null;
-  if (!ankiLinkId) return null;
-
-  const latest = getLatestWordFieldAudioFile({ ankiLinkId, field: "base_form" });
-
-  if (!latest || latest.size <= 0) return null;
-  return getWordFieldAudioAbsolutePath(latest.filename);
+  const filename = row?.english.audio_file_name ?? null;
+  if (!filename) return null;
+  const absPath = getEnglishWordAudioAbsolutePath(filename);
+  try {
+    return fs.statSync(absPath).size > 0 ? absPath : null;
+  } catch {
+    return null;
+  }
 }
 
 function toSoundTagFromAbsPath(absPath: string | null): string {
   if (!absPath) return "";
+  try {
+    const stat = fs.statSync(absPath);
+    if (!stat.isFile() || stat.size <= 0) return "";
+  } catch {
+    return "";
+  }
   const filename = path.basename(absPath);
   return filename ? ` [sound:${filename}]` : "";
-}
-
-function formatFaEnText(candidate: Pick<IpaCandidate, "fa" | "en">): string {
-  const fa = String(candidate.fa ?? "").trim();
-  const en = String(candidate.en ?? "").trim();
-  if (fa && en) return `${fa} — ${en}`;
-  return fa || en || "";
 }
 
 function asNonEmptyString(value: unknown): string | null {
@@ -186,28 +203,35 @@ export function getAnkiLinkIdFromNoteFields(
   return null;
 }
 
-type WordForAnki = Word & WordEnglishFields & Partial<Pick<WordWithPersianMeanings<Word>, "primaryPersianWord" | "otherPersianWords" | "meaning_fa" | "other_meanings_fa">>;
-export type WordAnkiFieldGenerator = (word: WordForAnki) => string | Promise<string>;
-
-async function getSentenceFields(ankiLinkId: string) {
-  const sentence = await findPrimarySentenceByAnkiLinkId(ankiLinkId);
-  return {
-    id: sentence?.id ?? null,
-    sentence_en: sentence?.sentence_en ?? "",
-    sentence_en_meaning_fa: sentence?.sentence_en_meaning_fa ?? "",
-    sentence_en_audio_file_name: sentence?.sentence_en_audio_file_name ?? null,
-    sentence_en_meaning_fa_audio_file_name: sentence?.sentence_en_meaning_fa_audio_file_name ?? null,
-  };
-}
-
-function latestAudioTag(audioKey: string, field: WordAudioFieldKey): string {
-  const latest = getLatestWordFieldAudioFile({ audioKey, ankiLinkId: audioKey, field });
-  if (!latest || latest.size <= 0) return "";
-  return `[sound:${latest.filename}]`;
-}
+type WordForAnki = Word &
+  WordEnglishFields &
+  Partial<
+    Pick<
+      WordWithPersianMeanings<Word>,
+      | "primaryPersianWord"
+      | "otherPersianWords"
+      | "meaning_fa"
+      | "other_meanings_fa"
+    >
+  > &
+  Partial<Pick<WordWithEnglishSynonyms<Word>, "synonymEnglishWords">> &
+  Partial<Pick<WordWithPrimarySentence<Word>, "sentence">>;
+export type WordAnkiFieldGenerator = (
+  word: WordForAnki,
+) => string | Promise<string>;
 
 function persianWordAudioTag(filename: string | null | undefined): string {
-  return filename ? `[sound:${filename}]` : "";
+  if (!filename) return "";
+  return toSoundTagFromAbsPath(
+    getPersianWordAudioAbsolutePath(filename),
+  ).trim();
+}
+
+function englishWordAudioTag(filename: string | null | undefined): string {
+  if (!filename) return "";
+  return toSoundTagFromAbsPath(
+    getEnglishWordAudioAbsolutePath(filename),
+  ).trim();
 }
 
 function sentenceAudioTag(filename: string | null | undefined): string {
@@ -221,7 +245,12 @@ function sentenceAudioTag(filename: string | null | undefined): string {
 }
 
 function getFirstPartSpell(word: string): string {
-  return String(word ?? "").trim().slice(0, 3).toUpperCase().split("").join("-");
+  return String(word ?? "")
+    .trim()
+    .slice(0, 3)
+    .toUpperCase()
+    .split("")
+    .join("-");
 }
 
 function getFirstPartSpellAudio(word: string): string {
@@ -238,35 +267,54 @@ function getFirstPartSpellAudio(word: string): string {
 export const WORD_ANKI_FIELD_GENERATORS = {
   anki_link_id: (w) => w.anki_link_id,
   base_form: (w) => w.base_form,
-  base_form_audio: (w) => latestAudioTag(w.anki_link_id, "base_form"),
+  base_form_audio: (w) =>
+    w.audio_file_name
+      ? toSoundTagFromAbsPath(
+          getEnglishWordAudioAbsolutePath(w.audio_file_name),
+        )
+      : "",
   "first-part-spell": (w) => getFirstPartSpell(w.base_form),
   "first-part-spell-audio": (w) => getFirstPartSpellAudio(w.base_form),
   phonetic_us: (w) => w.phonetic_us ?? "",
   pos: (w) => w.pos ?? "",
   meaning_fa: (w) => w.meaning_fa ?? "",
-  meaning_fa_audio: (w) => persianWordAudioTag(w.primaryPersianWord?.audio_file_name),
+  meaning_fa_audio: (w) =>
+    persianWordAudioTag(w.primaryPersianWord?.audio_file_name),
   other_meanings_fa: (w) => w.other_meanings_fa ?? "",
-  other_meanings_fa_audio: (w) => (w.otherPersianWords ?? []).map((meaning) => persianWordAudioTag(meaning.audio_file_name)).filter(Boolean).join(" "),
-  other_meanings_en: (w) => w.other_meanings_en ?? "",
-  other_meanings_en_audio: (w) => latestAudioTag(w.anki_link_id, "other_meanings_en"),
+  other_meanings_fa_audio: (w) =>
+    (w.otherPersianWords ?? [])
+      .map((meaning) => persianWordAudioTag(meaning.audio_file_name))
+      .filter(Boolean)
+      .join(" "),
+  other_meanings_en: (w) =>
+    (w.synonymEnglishWords ?? [])
+      .map((synonym) => synonym.base_form.trim())
+      .filter(Boolean)
+      .join(" - "),
+  other_meanings_en_audio: (w) => {
+    const audioTags = (w.synonymEnglishWords ?? [])
+      .map((synonym) => englishWordAudioTag(synonym.audio_file_name))
+      .filter(Boolean);
+
+    return audioTags.length > 0
+      ? ["[sound:bejoz.mp3]", ...audioTags].join(" ")
+      : "";
+  },
   concept_explained_fa: (w) => w.concept_explained_fa ?? "",
-  concept_explained_fa_audio: (w) => latestAudioTag(w.anki_link_id, "concept_explained_fa"),
-  sentence_en: async (w) => {
-    const sentence = await getSentenceFields(w.anki_link_id);
-    return sentence.sentence_en;
-  },
-  sentence_en_audio: async (w) => {
-    const sentence = await getSentenceFields(w.anki_link_id);
-    return sentenceAudioTag(sentence.sentence_en_audio_file_name);
-  },
-  sentence_en_meaning_fa: async (w) => {
-    const sentence = await getSentenceFields(w.anki_link_id);
-    return sentence.sentence_en_meaning_fa;
-  },
-  sentence_en_meaning_fa_audio: async (w) => {
-    const sentence = await getSentenceFields(w.anki_link_id);
-    return sentenceAudioTag(sentence.sentence_en_meaning_fa_audio_file_name);
-  },
+  concept_explained_fa_audio: (w) =>
+    w.concept_explained_fa_audio_file_name
+      ? toSoundTagFromAbsPath(
+          getWordConceptAudioAbsolutePath(
+            w.concept_explained_fa_audio_file_name,
+          ),
+        )
+      : "",
+  sentence_en: (w) => w.sentence?.sentence_en ?? "",
+  sentence_en_audio: (w) =>
+    sentenceAudioTag(w.sentence?.sentence_en_audio_file_name),
+  sentence_en_meaning_fa: (w) => w.sentence?.sentence_en_meaning_fa ?? "",
+  sentence_en_meaning_fa_audio: (w) =>
+    sentenceAudioTag(w.sentence?.sentence_en_meaning_fa_audio_file_name),
 
   // TODO: define the source-of-truth for this field (not currently present in DB schema).
   best_translate: () => "",
@@ -274,7 +322,8 @@ export const WORD_ANKI_FIELD_GENERATORS = {
   // User-managed in Anki (personal notes); intentionally not sourced from DB.
   selfGuide: () => "",
 
-  // Anki field name is `hint_to_select_letters`, but DB field is `hint_to_select`.
+  // This field intentionally stores the number of letters in the English base form.
+  // It is not the free-text Word.hint_to_select sense-disambiguation hint.
   hint_to_select_letters: (w) => String(w.base_form.length ?? ""),
 
   phonetic_us_normalized: (w) => w.phonetic_us_normalized ?? "",
@@ -287,9 +336,39 @@ export const WORD_ANKI_FIELD_GENERATORS = {
   updatedAt: (w) => w.updatedAt.toISOString(),
 } as const satisfies Record<string, WordAnkiFieldGenerator>;
 
+export type WordAnkiManagedFieldName = keyof typeof WORD_ANKI_FIELD_GENERATORS;
+
+// These are intentionally preserved in Anki and are not sourced from the current DB.
+// Keeping the list explicit prevents a misspelled configured field from being ignored.
+export const WORD_ANKI_PRESERVED_ONLY_FIELDS = [
+  "first_letter_en_hint",
+] as const;
+
+export function getUnsupportedWordAnkiFieldNames(
+  fields: readonly string[],
+): string[] {
+  const preserved = new Set<string>(WORD_ANKI_PRESERVED_ONLY_FIELDS);
+  return fields.filter(
+    (field) =>
+      !Object.hasOwn(WORD_ANKI_FIELD_GENERATORS, field) &&
+      !preserved.has(field),
+  );
+}
+
+export function assertSupportedWordAnkiFieldNames(
+  fields: readonly string[],
+): void {
+  const unsupported = getUnsupportedWordAnkiFieldNames(fields);
+  if (unsupported.length) {
+    throw new Error(
+      `Configured Anki field(s) have no DB generator or preserved-field declaration: ${unsupported.join(", ")}`,
+    );
+  }
+}
+
 export function getWordAnkiManagedFieldNames(
   fields: readonly string[],
-): Array<keyof typeof WORD_ANKI_FIELD_GENERATORS> {
+): WordAnkiManagedFieldName[] {
   return fields.filter(
     (field): field is keyof typeof WORD_ANKI_FIELD_GENERATORS =>
       Object.hasOwn(WORD_ANKI_FIELD_GENERATORS, field),
@@ -300,17 +379,27 @@ export async function generateWordAnkiFieldsForMetaLexVr9(
   word: Word | WordForAnki,
   configuredFields: readonly string[],
 ): Promise<Record<string, string>> {
-  const withEnglish = "base_form" in word ? word as WordForAnki : await hydrateWordWithEnglishFields(word);
-  const withMeanings = "primaryPersianWord" in withEnglish
-    ? withEnglish as WordForAnki
-    : await hydrateWordWithPersianMeanings(withEnglish);
+  const withEnglish =
+    "base_form" in word
+      ? (word as WordForAnki)
+      : await hydrateWordWithEnglishFields(word);
+  const withMeanings =
+    "primaryPersianWord" in withEnglish
+      ? (withEnglish as WordForAnki)
+      : await hydrateWordWithPersianMeanings(withEnglish);
+  const withSynonyms =
+    "synonymEnglishWords" in withMeanings
+      ? (withMeanings as WordForAnki)
+      : await hydrateWordWithEnglishSynonyms(withMeanings);
+  const withSentence =
+    "sentence" in withSynonyms
+      ? (withSynonyms as WordForAnki)
+      : (await hydrateWordsWithPrimarySentence([withSynonyms]))[0]!;
   const fields = getWordAnkiManagedFieldNames(configuredFields);
   return Promise.all(
     fields.map(
-      async (f) => [f, await WORD_ANKI_FIELD_GENERATORS[f](withMeanings)] as const,
+      async (f) =>
+        [f, await WORD_ANKI_FIELD_GENERATORS[f](withSentence)] as const,
     ),
-  ).then(
-    (entries) =>
-      Object.fromEntries(entries) as Record<string, string>,
-  );
+  ).then((entries) => Object.fromEntries(entries) as Record<string, string>);
 }

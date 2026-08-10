@@ -21,7 +21,9 @@ const select = {
   sentence_en: true,
   sentence_en_meaning_fa: true,
   sentence_en_audio_file_name: true,
+  sentence_en_audio_source_text: true,
   sentence_en_meaning_fa_audio_file_name: true,
+  sentence_en_meaning_fa_audio_source_text: true,
 } as const;
 
 function textFor(row: Awaited<ReturnType<typeof findSentenceAudioRecord>>, field: SentenceAudioField) {
@@ -38,10 +40,25 @@ export function filenameFor(
     : row.sentence_en_meaning_fa_audio_file_name;
 }
 
-function filenameData(field: SentenceAudioField, filename: string | null) {
+export function sourceTextFor(
+  row: NonNullable<Awaited<ReturnType<typeof findSentenceAudioRecord>>>,
+  field: SentenceAudioField,
+): string | null {
   return field === "sentence_en"
-    ? { sentence_en_audio_file_name: filename }
-    : { sentence_en_meaning_fa_audio_file_name: filename };
+    ? row.sentence_en_audio_source_text
+    : row.sentence_en_meaning_fa_audio_source_text;
+}
+
+function audioData(field: SentenceAudioField, filename: string | null, sourceText: string | null) {
+  return field === "sentence_en"
+    ? {
+        sentence_en_audio_file_name: filename,
+        sentence_en_audio_source_text: sourceText,
+      }
+    : {
+        sentence_en_meaning_fa_audio_file_name: filename,
+        sentence_en_meaning_fa_audio_source_text: sourceText,
+      };
 }
 
 function isSafeOwnedFilename(filename: string): boolean {
@@ -63,8 +80,17 @@ export function getSentenceAudioFileInfo(filename: string | null): { filename: s
   }
 }
 
-async function replaceFilename(sentenceId: number, field: SentenceAudioField, previous: string | null, filename: string) {
-  await prisma.sentence.update({ where: { id: sentenceId }, data: filenameData(field, filename) });
+async function replaceFilename(
+  sentenceId: number,
+  field: SentenceAudioField,
+  previous: string | null,
+  filename: string,
+  sourceText: string,
+) {
+  await prisma.sentence.update({
+    where: { id: sentenceId },
+    data: audioData(field, filename, sourceText),
+  });
   await touchWordsLinkedToSentenceId(sentenceId);
   if (previous && previous !== filename && isSafeOwnedFilename(previous)) {
     await fsp.rm(getSentenceAudioAbsolutePath(previous), { force: true });
@@ -80,7 +106,7 @@ export async function generateSentenceAudio(sentenceId: number, field: SentenceA
   const previous = filenameFor(row, field);
   const filename = buildSentenceAudioFilename({ sentenceId, field });
   await generateSpeechFromMixedText(text, path.join("sentences", filename), "azure");
-  await replaceFilename(sentenceId, field, previous, filename);
+  await replaceFilename(sentenceId, field, previous, filename, text);
   const info = getSentenceAudioFileInfo(filename);
   return { filename, absPath: info.absPath, size: info.size };
 }
@@ -88,10 +114,12 @@ export async function generateSentenceAudio(sentenceId: number, field: SentenceA
 export async function saveSentenceAudioMp3(sentenceId: number, field: SentenceAudioField, sourcePath: string) {
   const row = await findSentenceAudioRecord(sentenceId);
   if (!row) throw new Error(`Sentence ${sentenceId} was not found`);
+  const sourceText = textFor(row, field)?.trim();
+  if (!sourceText) throw new Error(`Sentence ${sentenceId} has no ${field}`);
   const filename = buildSentenceAudioFilename({ sentenceId, field });
   await fsp.mkdir(getSentenceAudioAbsoluteDir(), { recursive: true });
   await fsp.copyFile(sourcePath, getSentenceAudioAbsolutePath(filename));
-  await replaceFilename(sentenceId, field, filenameFor(row, field), filename);
+  await replaceFilename(sentenceId, field, filenameFor(row, field), filename, sourceText);
   const info = getSentenceAudioFileInfo(filename);
   return { filename, absPath: info.absPath, size: info.size };
 }
@@ -100,7 +128,10 @@ export async function deleteSentenceAudio(sentenceId: number, field: SentenceAud
   const row = await findSentenceAudioRecord(sentenceId);
   if (!row) throw new Error(`Sentence ${sentenceId} was not found`);
   const filename = filenameFor(row, field);
-  await prisma.sentence.update({ where: { id: sentenceId }, data: filenameData(field, null) });
+  await prisma.sentence.update({
+    where: { id: sentenceId },
+    data: audioData(field, null, null),
+  });
   await touchWordsLinkedToSentenceId(sentenceId);
   if (filename && isSafeOwnedFilename(filename)) {
     await fsp.rm(getSentenceAudioAbsolutePath(filename), { force: true });

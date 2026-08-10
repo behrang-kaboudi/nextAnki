@@ -209,7 +209,7 @@ export async function POST(req: Request) {
         if (item.phonetic_us !== undefined && phonetic_us_normalized !== undefined) {
           await prisma.englishWord.update({
             where: { id: word.englishId },
-            data: { phonetic_us: item.phonetic_us, phonetic_us_confirmed: false, phonetic_us_normalized, json_hint: null },
+            data: { phonetic_us: item.phonetic_us, phonetic_us_normalized, json_hint: null },
           });
           await touchWordsByEnglishId(word.englishId);
         }

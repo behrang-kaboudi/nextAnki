@@ -8,7 +8,6 @@ import EnglishWordRowActions from "@/app/(site)/words/tables/english-words/Engli
 import OpenPersianWordEditorModal from "@/app/(site)/words/tables/persian-words/OpenPersianWordEditorModal.client";
 
 const WORD_AUDIO_FIELDS = [
-  "other_meanings_en",
   "concept_explained_fa",
 ] as const;
 
@@ -27,7 +26,6 @@ export type WordEditorState = {
     id: number;
     base_form: string;
     phonetic_us: string | null;
-    phonetic_us_confirmed: boolean;
     phonetic_us_normalized: string | null;
     json_hint: string | null;
     audio_file_name: string | null;
@@ -44,6 +42,7 @@ export type WordEditorState = {
   } | null;
   pos: string | null;
   concept_explained_fa: string | null;
+  concept_explained_fa_audio_file_name: string | null;
   learning_depth: number | null;
   other_meanings_en: string | null;
   category: string | null;
@@ -280,7 +279,7 @@ export default function WordEditorClient({
       if (audioFieldsToDelete.length) {
         const results = await Promise.allSettled(
           audioFieldsToDelete.map(async (field) => {
-            const audioKey = word.anki_link_id;
+            const audioKey = String(word.id);
             const delRes = await fetch("/api/words/field-voice-delete-all", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -405,14 +404,14 @@ export default function WordEditorClient({
       const fieldRaw = detail.field;
       const field = typeof fieldRaw === "string" && (WORD_AUDIO_FIELDS as readonly string[]).includes(fieldRaw) ? fieldRaw : null;
       if (!field) return;
-      const expectedAudioKey = word.anki_link_id;
+      const expectedAudioKey = String(word.id);
       if (!expectedAudioKey || detail.audioKey !== expectedAudioKey) return;
       void saveRef.current?.({ force: true, audioUpdatedField: field as SaveOptions["audioUpdatedField"] });
     };
 
     window.addEventListener("wordFieldVoice:updated", onAudioUpdated);
     return () => window.removeEventListener("wordFieldVoice:updated", onAudioUpdated);
-  }, [word.anki_link_id]);
+  }, [word.id]);
 
   const statusText = saving
     ? "Saving…"
@@ -592,15 +591,12 @@ export default function WordEditorClient({
         </div>
         <div className="grid gap-4 lg:grid-cols-2">
           <InputRow label="other_meanings_en">
-            <div className="flex items-start gap-2">
-              <textarea value={word.other_meanings_en ?? ""} onChange={(e) => setWord((p) => ({ ...p, other_meanings_en: asNullableString(e.target.value, { trim: false }) }))} className="min-h-28 w-full resize-y rounded border px-3 py-2 text-sm" placeholder="nullable" />
-              <WordFieldVoiceCell field="other_meanings_en" audioKey={word.anki_link_id} text={word.other_meanings_en} />
-            </div>
+            <textarea value={word.other_meanings_en ?? ""} onChange={(e) => setWord((p) => ({ ...p, other_meanings_en: asNullableString(e.target.value, { trim: false }) }))} className="min-h-28 w-full resize-y rounded border px-3 py-2 text-sm" placeholder="nullable" />
           </InputRow>
           <InputRow label="concept_explained_fa">
             <div className="flex items-start gap-2">
               <textarea dir="rtl" value={word.concept_explained_fa ?? ""} onChange={(e) => setWord((p) => ({ ...p, concept_explained_fa: asNullableString(e.target.value, { trim: false }), conceptMergeReviewed: false }))} className="min-h-28 w-full resize-y rounded border px-3 py-2 text-sm" placeholder="nullable" />
-              <WordFieldVoiceCell field="concept_explained_fa" audioKey={word.anki_link_id} text={word.concept_explained_fa} />
+              <WordFieldVoiceCell field="concept_explained_fa" audioKey={String(word.id)} text={word.concept_explained_fa} />
             </div>
           </InputRow>
           <InputRow label="hint_to_select" className="lg:col-span-2">

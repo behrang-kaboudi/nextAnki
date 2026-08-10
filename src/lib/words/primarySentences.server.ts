@@ -10,14 +10,24 @@ export const primarySentenceSelect = {
   sentence_en: true,
   sentence_en_meaning_fa: true,
   sentence_en_audio_file_name: true,
+  sentence_en_audio_source_text: true,
   sentence_en_meaning_fa_audio_file_name: true,
+  sentence_en_meaning_fa_audio_source_text: true,
   createdAt: true,
   updatedAt: true,
 } satisfies Prisma.SentenceSelect;
 
+export type PrimarySentence = Prisma.SentenceGetPayload<{
+  select: typeof primarySentenceSelect;
+}>;
+
+export type WordWithPrimarySentence<T extends { sentenceIds: Prisma.JsonValue | null }> = T & {
+  sentence: PrimarySentence | null;
+};
+
 export async function hydrateWordsWithPrimarySentence<
   T extends { sentenceIds: Prisma.JsonValue | null },
->(words: readonly T[]) {
+>(words: readonly T[]): Promise<Array<WordWithPrimarySentence<T>>> {
   const ids = [...new Set(words.flatMap((word) => {
     const id = primarySentenceId(word.sentenceIds);
     return id ? [id] : [];

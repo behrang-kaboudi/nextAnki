@@ -34,15 +34,14 @@ export async function POST(request: Request) {
   for (const item of items) {
     try {
       const changed = await prisma.englishWord.updateMany({
-        where: { id: item.id, phonetic_us_confirmed: false, OR: [{ phonetic_us: null }, { phonetic_us: "" }] },
+        where: { id: item.id, OR: [{ phonetic_us: null }, { phonetic_us: "" }] },
         data: {
           phonetic_us: item.phonetic_us,
           phonetic_us_normalized: normalizeIpaForDb(item.phonetic_us, 2000) || null,
-          phonetic_us_confirmed: false,
           json_hint: null,
         },
       });
-      if (changed.count !== 1) throw new Error("EnglishWord was not found or is already confirmed.");
+      if (changed.count !== 1) throw new Error("EnglishWord was not found or already has phonetic_us.");
       updatedIds.push(item.id);
       results.push({ ok: true, id: item.id, phonetic_us: item.phonetic_us });
     } catch (error) {

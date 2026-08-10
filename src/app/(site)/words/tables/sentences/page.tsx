@@ -5,6 +5,7 @@ import SentenceEditorModal, { type SentenceEditorItem } from "@/app/(site)/sente
 import { PageHeader } from "@/components/page-header";
 import { TableColumnIndicators, type TableColumnIndicator } from "@/components/table-column-indicators";
 import { TableColumnSelector } from "@/components/table-column-selector";
+import { getPendingSentenceAudioIds } from "@/lib/audio/wordAudioPending.server";
 import { prisma } from "@/lib/prisma";
 import { getSentenceColumnEmptyCounts } from "@/lib/words/tableColumnEmptyCounts.server";
 import WordFieldVoiceCell from "@/app/(site)/words/hints/WordFieldVoiceCell.client";
@@ -13,20 +14,22 @@ import BatchWordFieldVoiceGenerate from "@/app/(site)/words/hints/BatchWordField
 export const metadata = { title: "Words — Sentence Table" };
 export const runtime = "nodejs";
 
-const SORT_FIELDS = ["id", "sentence_en", "sentence_en_meaning_fa", "sentence_en_audio_file_name", "sentence_en_meaning_fa_audio_file_name", "createdAt", "updatedAt"] as const;
+const SORT_FIELDS = ["id", "sentence_en", "sentence_en_meaning_fa", "sentence_en_audio_file_name", "sentence_en_audio_source_text", "sentence_en_meaning_fa_audio_file_name", "sentence_en_meaning_fa_audio_source_text", "createdAt", "updatedAt"] as const;
 type SortField = (typeof SORT_FIELDS)[number];
 const TABLE_COLUMNS = [
   { key: "id", label: "id", required: true },
   { key: "sentence_en", label: "sentence_en" },
   { key: "sentence_en_meaning_fa", label: "sentence_en_meaning_fa" },
   { key: "sentence_en_audio_file_name", label: "sentence_en_audio_file_name" },
+  { key: "sentence_en_audio_source_text", label: "sentence_en_audio_source_text" },
   { key: "sentence_en_meaning_fa_audio_file_name", label: "sentence_en_meaning_fa_audio_file_name" },
+  { key: "sentence_en_meaning_fa_audio_source_text", label: "sentence_en_meaning_fa_audio_source_text" },
   { key: "createdAt", label: "createdAt" },
   { key: "updatedAt", label: "updatedAt" },
   { key: "actions", label: "actions" },
 ] as const;
 type TableColumnKey = (typeof TABLE_COLUMNS)[number]["key"];
-const DEFAULT_COLUMNS: TableColumnKey[] = ["id", "sentence_en", "sentence_en_audio_file_name", "sentence_en_meaning_fa", "sentence_en_meaning_fa_audio_file_name", "updatedAt", "actions"];
+const DEFAULT_COLUMNS: TableColumnKey[] = ["id", "sentence_en", "sentence_en_audio_file_name", "sentence_en_audio_source_text", "sentence_en_meaning_fa", "sentence_en_meaning_fa_audio_file_name", "sentence_en_meaning_fa_audio_source_text", "updatedAt", "actions"];
 const COLUMN_INDICATORS: Partial<Record<TableColumnKey, readonly TableColumnIndicator[]>> = {
   id: [{ kind: "primary-key", text: "Primary key: Sentence.id" }],
   sentence_en: [{ kind: "unique", text: "Unique sentence text: Sentence.sentence_en" }],
@@ -59,12 +62,18 @@ export default async function SentencesTablePage({ searchParams }: { searchParam
   const missingAudio = ["sentence_en", "sentence_en_meaning_fa", "any"].includes(String(params.missingAudio)) ? String(params.missingAudio) : "";
   const hasColumn = (key: TableColumnKey) => columns.includes(key);
   const filters: Prisma.SentenceWhereInput[] = [];
-  if (q) filters.push({ OR: [{ sentence_en: { contains: q } }, { sentence_en_meaning_fa: { contains: q } }] });
-  const missingSentenceEn = { OR: [{ sentence_en_audio_file_name: null }, { sentence_en_audio_file_name: "" }] };
-  const missingMeaning = { OR: [{ sentence_en_meaning_fa_audio_file_name: null }, { sentence_en_meaning_fa_audio_file_name: "" }] };
-  if (missingAudio === "sentence_en") filters.push(missingSentenceEn);
-  if (missingAudio === "sentence_en_meaning_fa") filters.push(missingMeaning);
-  if (missingAudio === "any") filters.push({ OR: [missingSentenceEn, missingMeaning] });
+  if (q) filters.push({ OR: [{ sentence_en: { contains: q } }, { sentence_en_meaning_fa: { contains: q } }, { sentence_en_audio_source_text: { contains: q } }, { sentence_en_meaning_fa_audio_source_text: { contains: q } }] });
+  if (missingAudio) {
+    const [sentenceIds, meaningIds] = await Promise.all([
+      missingAudio === "sentence_en" || missingAudio === "any"
+        ? getPendingSentenceAudioIds("sentence_en")
+        : Promise.resolve([]),
+      missingAudio === "sentence_en_meaning_fa" || missingAudio === "any"
+        ? getPendingSentenceAudioIds("sentence_en_meaning_fa")
+        : Promise.resolve([]),
+    ]);
+    filters.push({ id: { in: [...new Set([...sentenceIds, ...meaningIds])] } });
+  }
   const where: Prisma.SentenceWhereInput | undefined = filters.length ? { AND: filters } : undefined;
   const primaryOrderBy: Prisma.SentenceOrderByWithRelationInput = sort === "sentence_en_meaning_fa"
     ? { [sort]: { sort: dir, nulls: dir === "asc" ? "first" : "last" } } as Prisma.SentenceOrderByWithRelationInput
@@ -106,12 +115,14 @@ export default async function SentencesTablePage({ searchParams }: { searchParam
       {hasColumn("id") ? <SortHeader href={href(1, "id", sort === "id" && dir === "asc" ? "desc" : "asc")} label="id" active={sort === "id"} direction={dir} indicators={COLUMN_INDICATORS.id} /> : null}
       {hasColumn("sentence_en") ? <SortHeader href={href(1, "sentence_en", sort === "sentence_en" && dir === "asc" ? "desc" : "asc")} label="sentence_en" active={sort === "sentence_en"} direction={dir} indicators={COLUMN_INDICATORS.sentence_en} /> : null}
       {hasColumn("sentence_en_audio_file_name") ? <SortHeader href={href(1, "sentence_en_audio_file_name", sort === "sentence_en_audio_file_name" && dir === "asc" ? "desc" : "asc")} label="sentence_en audio" active={sort === "sentence_en_audio_file_name"} direction={dir} /> : null}
+      {hasColumn("sentence_en_audio_source_text") ? <SortHeader href={href(1, "sentence_en_audio_source_text", sort === "sentence_en_audio_source_text" && dir === "asc" ? "desc" : "asc")} label="sentence_en audio source" active={sort === "sentence_en_audio_source_text"} direction={dir} /> : null}
       {hasColumn("sentence_en_meaning_fa") ? <SortHeader href={href(1, "sentence_en_meaning_fa", sort === "sentence_en_meaning_fa" && dir === "asc" ? "desc" : "asc")} label="sentence_en_meaning_fa" active={sort === "sentence_en_meaning_fa"} direction={dir} /> : null}
       {hasColumn("sentence_en_meaning_fa_audio_file_name") ? <SortHeader href={href(1, "sentence_en_meaning_fa_audio_file_name", sort === "sentence_en_meaning_fa_audio_file_name" && dir === "asc" ? "desc" : "asc")} label="meaning audio" active={sort === "sentence_en_meaning_fa_audio_file_name"} direction={dir} /> : null}
+      {hasColumn("sentence_en_meaning_fa_audio_source_text") ? <SortHeader href={href(1, "sentence_en_meaning_fa_audio_source_text", sort === "sentence_en_meaning_fa_audio_source_text" && dir === "asc" ? "desc" : "asc")} label="meaning audio source" active={sort === "sentence_en_meaning_fa_audio_source_text"} direction={dir} /> : null}
       {hasColumn("createdAt") ? <SortHeader href={href(1, "createdAt", sort === "createdAt" && dir === "asc" ? "desc" : "asc")} label="createdAt" active={sort === "createdAt"} direction={dir} /> : null}{hasColumn("updatedAt") ? <SortHeader href={href(1, "updatedAt", sort === "updatedAt" && dir === "asc" ? "desc" : "asc")} label="updatedAt" active={sort === "updatedAt"} direction={dir} /> : null}{hasColumn("actions") ? <th className="px-3 py-2">actions</th> : null}
     </tr></thead><tbody>{rows.map((row) => {
       const item: SentenceEditorItem = { id: row.id, sentence_en: row.sentence_en, sentence_en_meaning_fa: row.sentence_en_meaning_fa, sentence_en_audio_file_name: row.sentence_en_audio_file_name, sentence_en_meaning_fa_audio_file_name: row.sentence_en_meaning_fa_audio_file_name, createdAt: row.createdAt.toISOString(), updatedAt: row.updatedAt.toISOString() };
-      return <tr key={row.id} className="border-b align-top">{hasColumn("id") ? <td className="px-3 py-2 font-mono">{row.id}</td> : null}{hasColumn("sentence_en") ? <td className="max-w-80 px-3 py-2 text-sm"><span className="block truncate" title={row.sentence_en}>{row.sentence_en}</span></td> : null}{hasColumn("sentence_en_audio_file_name") ? <td className="max-w-64 px-3 py-2"><span className="mb-1 block truncate font-mono text-[10px] opacity-70" title={row.sentence_en_audio_file_name ?? ""}>{row.sentence_en_audio_file_name ?? "—"}</span><WordFieldVoiceCell field="sentence_en" audioKey={String(row.id)} text={row.sentence_en} /></td> : null}{hasColumn("sentence_en_meaning_fa") ? <td className="max-w-80 px-3 py-2" dir="rtl"><span className="block truncate" title={row.sentence_en_meaning_fa ?? ""}>{row.sentence_en_meaning_fa ?? "—"}</span></td> : null}{hasColumn("sentence_en_meaning_fa_audio_file_name") ? <td className="max-w-64 px-3 py-2"><span className="mb-1 block truncate font-mono text-[10px] opacity-70" title={row.sentence_en_meaning_fa_audio_file_name ?? ""}>{row.sentence_en_meaning_fa_audio_file_name ?? "—"}</span><WordFieldVoiceCell field="sentence_en_meaning_fa" audioKey={String(row.id)} text={row.sentence_en_meaning_fa} /></td> : null}{hasColumn("createdAt") ? <td className="whitespace-nowrap px-3 py-2 font-mono">{item.createdAt}</td> : null}{hasColumn("updatedAt") ? <td className="whitespace-nowrap px-3 py-2 font-mono">{item.updatedAt}</td> : null}{hasColumn("actions") ? <td className="px-3 py-2"><SentenceEditorModal item={item} compact /></td> : null}</tr>;
+      return <tr key={row.id} className="border-b align-top">{hasColumn("id") ? <td className="px-3 py-2 font-mono">{row.id}</td> : null}{hasColumn("sentence_en") ? <td className="max-w-80 px-3 py-2 text-sm"><span className="block truncate" title={row.sentence_en}>{row.sentence_en}</span></td> : null}{hasColumn("sentence_en_audio_file_name") ? <td className="max-w-64 px-3 py-2"><span className="mb-1 block truncate font-mono text-[10px] opacity-70" title={row.sentence_en_audio_file_name ?? ""}>{row.sentence_en_audio_file_name ?? "—"}</span><WordFieldVoiceCell field="sentence_en" audioKey={String(row.id)} text={row.sentence_en} /></td> : null}{hasColumn("sentence_en_audio_source_text") ? <td className="max-w-80 px-3 py-2"><span className="block truncate" title={row.sentence_en_audio_source_text ?? ""}>{row.sentence_en_audio_source_text ?? "—"}</span></td> : null}{hasColumn("sentence_en_meaning_fa") ? <td className="max-w-80 px-3 py-2" dir="rtl"><span className="block truncate" title={row.sentence_en_meaning_fa ?? ""}>{row.sentence_en_meaning_fa ?? "—"}</span></td> : null}{hasColumn("sentence_en_meaning_fa_audio_file_name") ? <td className="max-w-64 px-3 py-2"><span className="mb-1 block truncate font-mono text-[10px] opacity-70" title={row.sentence_en_meaning_fa_audio_file_name ?? ""}>{row.sentence_en_meaning_fa_audio_file_name ?? "—"}</span><WordFieldVoiceCell field="sentence_en_meaning_fa" audioKey={String(row.id)} text={row.sentence_en_meaning_fa} /></td> : null}{hasColumn("sentence_en_meaning_fa_audio_source_text") ? <td className="max-w-80 px-3 py-2" dir="rtl"><span className="block truncate" title={row.sentence_en_meaning_fa_audio_source_text ?? ""}>{row.sentence_en_meaning_fa_audio_source_text ?? "—"}</span></td> : null}{hasColumn("createdAt") ? <td className="whitespace-nowrap px-3 py-2 font-mono">{item.createdAt}</td> : null}{hasColumn("updatedAt") ? <td className="whitespace-nowrap px-3 py-2 font-mono">{item.updatedAt}</td> : null}{hasColumn("actions") ? <td className="px-3 py-2"><SentenceEditorModal item={item} compact /></td> : null}</tr>;
     })}{!rows.length ? <tr><td colSpan={columns.length} className="px-3 py-8 text-center text-sm opacity-70">No rows.</td></tr> : null}</tbody></table></div>
   </main>;
 }

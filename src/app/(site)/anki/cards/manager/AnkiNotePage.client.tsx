@@ -154,6 +154,23 @@ type TempFilterSortKey =
   | "productiveLearningAverage"
   | "threeFieldAverage";
 
+type TempFilterNumericKey =
+  | "learningDepth"
+  | "imageability"
+  | "productiveTarget"
+  | "productiveLearningAverage"
+  | "threeFieldAverage";
+
+type TempFilterComparison = "gte" | "lte";
+
+type TempFilterCriteria = {
+  search: string;
+  numeric: Record<
+    TempFilterNumericKey,
+    { comparison: TempFilterComparison; value: string }
+  >;
+};
+
 const TEMP_FILTER_COLUMNS = [
   { key: "cardId", label: "Card" },
   { key: "noteId", label: "Note" },
@@ -197,6 +214,50 @@ const TEMP_FILTER_DECK = "TempFor1WordsForNewStudy" as const;
 const FILTER_KNOWING_DECK = "WordsForNewStudy::FilterKnowing" as const;
 const FILTER_CARD_TYPE = "WordsForNewStudy-Filter" as const;
 const TEMP_FILTER_PAGE_SIZE = 100;
+
+const TEMP_FILTER_NUMERIC_FIELDS: Array<{
+  key: TempFilterNumericKey;
+  label: string;
+}> = [
+  { key: "learningDepth", label: "learning_depth" },
+  { key: "imageability", label: "imageability" },
+  { key: "productiveTarget", label: "productive_target" },
+  { key: "productiveLearningAverage", label: "میانگین PT + LD" },
+  { key: "threeFieldAverage", label: "میانگین LD + IM + PT" },
+];
+
+function createEmptyTempFilterCriteria(): TempFilterCriteria {
+  return {
+    search: "",
+    numeric: {
+      learningDepth: { comparison: "gte", value: "" },
+      imageability: { comparison: "gte", value: "" },
+      productiveTarget: { comparison: "gte", value: "" },
+      productiveLearningAverage: { comparison: "gte", value: "" },
+      threeFieldAverage: { comparison: "gte", value: "" },
+    },
+  };
+}
+
+function tempFilterMetricValue(
+  row: TempFilterCardRow,
+  key: TempFilterNumericKey,
+) {
+  if (key === "learningDepth")
+    return tempFilterNumericField(row, "learning_depth");
+  if (key === "imageability")
+    return tempFilterNumericField(row, "imageability");
+  if (key === "productiveTarget")
+    return tempFilterNumericField(row, "productive_target");
+  if (key === "productiveLearningAverage") {
+    return tempFilterAverage(row, ["productive_target", "learning_depth"]);
+  }
+  return tempFilterAverage(row, [
+    "learning_depth",
+    "imageability",
+    "productive_target",
+  ]);
+}
 
 type SyncAllStatus = {
   jobId: string;
@@ -343,6 +404,15 @@ export default function AnkiNotePage() {
   const [tempFilterMovingCardId, setTempFilterMovingCardId] = useState<
     number | null
   >(null);
+  const [tempFilterBatchMoving, setTempFilterBatchMoving] = useState(false);
+  const [selectedTempFilterCardIds, setSelectedTempFilterCardIds] = useState<
+    Record<number, boolean>
+  >({});
+  const [tempFilterDraft, setTempFilterDraft] = useState<TempFilterCriteria>(
+    createEmptyTempFilterCriteria,
+  );
+  const [tempFilterCriteria, setTempFilterCriteria] =
+    useState<TempFilterCriteria>(createEmptyTempFilterCriteria);
   const [tempFilterStatus, setTempFilterStatus] = useState<string | null>(null);
   const [tempFilterSort, setTempFilterSort] = useState<{
     key: TempFilterSortKey;
@@ -359,11 +429,7 @@ export default function AnkiNotePage() {
     () => createAnkiOperations({ timeoutMs: 120_000, retryDelayMs: 1000 }),
     [],
   );
-  const tempFilterTotalPages = Math.max(
-    1,
-    Math.ceil(tempFilterRows.length / TEMP_FILTER_PAGE_SIZE),
-  );
-  const visibleTempFilterRows = useMemo(() => {
+  const matchingTempFilterRows = useMemo(() => {
     const fieldValue = (row: TempFilterCardRow, name: string) =>
       row.fields[name]?.value.trim() ?? "";
     const compareNumbers = (left: number | null, right: number | null) => {
@@ -372,7 +438,34 @@ export default function AnkiNotePage() {
       if (right === null) return -1;
       return left - right;
     };
-    const sorted = [...tempFilterRows].sort((left, right) => {
+    const normalizedSearch = tempFilterCriteria.search.trim().toLocaleLowerCase();
+    const filtered = tempFilterRows.filter((row) => {
+      if (normalizedSearch) {
+        const searchableText = [
+          fieldValue(row, "base_form"),
+          fieldValue(row, "meaning_fa"),
+          fieldValue(row, "anki_link_id"),
+          String(row.cardId),
+          String(row.noteId),
+        ]
+          .join(" ")
+          .toLocaleLowerCase();
+        if (!searchableText.includes(normalizedSearch)) return false;
+      }
+
+      return TEMP_FILTER_NUMERIC_FIELDS.every(({ key }) => {
+        const filter = tempFilterCriteria.numeric[key];
+        if (!filter.value.trim()) return true;
+        const threshold = Number(filter.value);
+        if (!Number.isFinite(threshold)) return true;
+        const value = tempFilterMetricValue(row, key);
+        if (value === null) return false;
+        return filter.comparison === "gte"
+          ? value >= threshold
+          : value <= threshold;
+      });
+    });
+    return filtered.sort((left, right) => {
       const comparison =
         tempFilterSort.key === "cardId"
           ? left.cardId - right.cardId
@@ -431,11 +524,19 @@ export default function AnkiNotePage() {
                   );
       return tempFilterSort.direction === "asc" ? comparison : -comparison;
     });
-    return sorted.slice(
+  }, [tempFilterCriteria, tempFilterRows, tempFilterSort]);
+  const tempFilterTotalPages = Math.max(
+    1,
+    Math.ceil(matchingTempFilterRows.length / TEMP_FILTER_PAGE_SIZE),
+  );
+  const visibleTempFilterRows = useMemo(
+    () =>
+      matchingTempFilterRows.slice(
         (tempFilterPage - 1) * TEMP_FILTER_PAGE_SIZE,
         tempFilterPage * TEMP_FILTER_PAGE_SIZE,
-      );
-  }, [tempFilterPage, tempFilterRows, tempFilterSort]);
+      ),
+    [matchingTempFilterRows, tempFilterPage],
+  );
 
   const phase0RunningRef = useRef(false);
   const phase1RunningRef = useRef(false);
@@ -495,7 +596,13 @@ export default function AnkiNotePage() {
   }
 
   async function loadTempFilterCards(force = false) {
-    if (!force && (tempFilterLoading || tempFilterMovingCardId !== null)) return;
+    if (
+      !force &&
+      (tempFilterLoading ||
+        tempFilterMovingCardId !== null ||
+        tempFilterBatchMoving)
+    )
+      return;
 
     setTempFilterLoading(true);
     setTempFilterError(null);
@@ -508,6 +615,7 @@ export default function AnkiNotePage() {
       const cardIds = cardsRes.result ?? [];
       if (cardIds.length === 0) {
         setTempFilterRows([]);
+        setSelectedTempFilterCardIds({});
         setTempFilterPage(1);
         return;
       }
@@ -539,6 +647,7 @@ export default function AnkiNotePage() {
           return [{ cardId, noteId, fields: note.fields }];
         }),
       );
+      setSelectedTempFilterCardIds({});
       setTempFilterPage(1);
     } catch (caughtError) {
       setTempFilterError(
@@ -560,8 +669,38 @@ export default function AnkiNotePage() {
     setTempFilterPage(1);
   }
 
+  function updateTempFilterNumeric(
+    key: TempFilterNumericKey,
+    patch: Partial<TempFilterCriteria["numeric"][TempFilterNumericKey]>,
+  ) {
+    setTempFilterDraft((current) => ({
+      ...current,
+      numeric: {
+        ...current.numeric,
+        [key]: { ...current.numeric[key], ...patch },
+      },
+    }));
+  }
+
+  function applyTempFilters() {
+    setTempFilterCriteria(tempFilterDraft);
+    setTempFilterPage(1);
+  }
+
+  function clearTempFilters() {
+    const emptyCriteria = createEmptyTempFilterCriteria();
+    setTempFilterDraft(emptyCriteria);
+    setTempFilterCriteria(emptyCriteria);
+    setTempFilterPage(1);
+  }
+
   async function moveTempFilterCard(row: TempFilterCardRow) {
-    if (tempFilterMovingCardId !== null) return;
+    if (
+      tempFilterLoading ||
+      tempFilterMovingCardId !== null ||
+      tempFilterBatchMoving
+    )
+      return;
 
     const ankiLinkId = row.fields.anki_link_id?.value.trim();
     if (!ankiLinkId) {
@@ -583,6 +722,74 @@ export default function AnkiNotePage() {
       );
     } finally {
       setTempFilterMovingCardId(null);
+    }
+  }
+
+  function toggleTempFilterCard(cardId: number, checked: boolean) {
+    setSelectedTempFilterCardIds((current) => {
+      if (checked) return { ...current, [cardId]: true };
+      const next = { ...current };
+      delete next[cardId];
+      return next;
+    });
+  }
+
+  function toggleVisibleTempFilterCards(checked: boolean) {
+    setSelectedTempFilterCardIds((current) => {
+      const next = { ...current };
+      for (const row of visibleTempFilterRows) {
+        if (checked) next[row.cardId] = true;
+        else delete next[row.cardId];
+      }
+      return next;
+    });
+  }
+
+  async function moveSelectedTempFilterCards() {
+    if (
+      tempFilterLoading ||
+      tempFilterMovingCardId !== null ||
+      tempFilterBatchMoving
+    )
+      return;
+
+    const selectedRows = tempFilterRows.filter(
+      (row) => selectedTempFilterCardIds[row.cardId],
+    );
+    if (selectedRows.length === 0) {
+      setTempFilterStatus("حداقل یک رکورد را انتخاب کن.");
+      return;
+    }
+
+    const rowsWithoutAnkiLinkId = selectedRows.filter(
+      (row) => !row.fields.anki_link_id?.value.trim(),
+    );
+    if (rowsWithoutAnkiLinkId.length > 0) {
+      setTempFilterError(
+        `${rowsWithoutAnkiLinkId.length} رکورد انتخاب‌شده فیلد anki_link_id ندارد.`,
+      );
+      return;
+    }
+
+    setTempFilterBatchMoving(true);
+    setTempFilterError(null);
+    setTempFilterStatus(null);
+    try {
+      await addAnkiLinkIdsToStudyQueue(
+        selectedRows.map(
+          (row) => row.fields.anki_link_id?.value.trim() ?? "",
+        ),
+        setTempFilterStatus,
+      );
+      await loadTempFilterCards(true);
+    } catch (caughtError) {
+      setTempFilterError(
+        caughtError instanceof Error
+          ? caughtError.message
+          : "انتقال گروهی کارت‌ها ناموفق بود.",
+      );
+    } finally {
+      setTempFilterBatchMoving(false);
     }
   }
 
@@ -2325,7 +2532,8 @@ export default function AnkiNotePage() {
     return (
       <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-muted">
         <span>
-          {tempFilterRows.length} کارت · {TEMP_FILTER_PAGE_SIZE} کارت در هر صفحه
+          {matchingTempFilterRows.length} از {tempFilterRows.length} کارت ·{" "}
+          {TEMP_FILTER_PAGE_SIZE} کارت در هر صفحه
         </span>
         <div className="flex items-center gap-2">
           <button
@@ -2444,12 +2652,107 @@ export default function AnkiNotePage() {
           <button
             type="button"
             onClick={() => void loadTempFilterCards()}
-            disabled={tempFilterLoading || tempFilterMovingCardId !== null}
+            disabled={
+              tempFilterLoading ||
+              tempFilterMovingCardId !== null ||
+              tempFilterBatchMoving
+            }
             className="h-10 rounded-xl border border-card bg-background px-3 text-sm font-semibold text-foreground transition hover:bg-accent disabled:opacity-60"
           >
             {tempFilterLoading ? "در حال بارگذاری..." : "بارگذاری دوباره"}
           </button>
         </div>
+
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            applyTempFilters();
+          }}
+          className="mt-4 rounded-xl border border-card bg-background p-4"
+        >
+          <div className="flex flex-wrap items-end gap-3">
+            <label className="min-w-[260px] flex-1">
+              <span className="mb-1 block text-xs font-semibold text-foreground">
+                جست‌وجوی کلمه
+              </span>
+              <input
+                type="search"
+                dir="auto"
+                value={tempFilterDraft.search}
+                onChange={(event) =>
+                  setTempFilterDraft((current) => ({
+                    ...current,
+                    search: event.target.value,
+                  }))
+                }
+                placeholder="کلمه، معنی، anki_link_id، Card یا Note"
+                className="h-10 w-full rounded-lg border border-card bg-card px-3 text-sm text-foreground outline-none placeholder:text-muted focus:ring-2 focus:ring-[var(--ring)]"
+              />
+            </label>
+            <button
+              type="submit"
+              className="h-10 rounded-lg bg-[var(--primary)] px-4 text-sm font-semibold text-[var(--primary-foreground)] transition hover:opacity-95"
+            >
+              جست‌وجو و اعمال فیلترها
+            </button>
+            <button
+              type="button"
+              onClick={clearTempFilters}
+              className="h-10 rounded-lg border border-card bg-card px-4 text-sm font-semibold text-foreground transition hover:bg-accent"
+            >
+              پاک‌کردن فیلترها
+            </button>
+          </div>
+
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+            {TEMP_FILTER_NUMERIC_FIELDS.map(({ key, label }) => {
+              const filter = tempFilterDraft.numeric[key];
+              return (
+                <div
+                  key={key}
+                  className="rounded-lg border border-card bg-card p-3"
+                >
+                  <div className="mb-2 flex items-center gap-2 text-xs font-semibold text-foreground">
+                    <AnkiScoreColumnIcon metric={key} />
+                    <span dir={label.includes("میانگین") ? "rtl" : "ltr"}>
+                      {label}
+                    </span>
+                  </div>
+                  <div className="flex gap-2">
+                    <select
+                      aria-label={`نوع مقایسه ${label}`}
+                      value={filter.comparison}
+                      onChange={(event) =>
+                        updateTempFilterNumeric(key, {
+                          comparison: event.target
+                            .value as TempFilterComparison,
+                        })
+                      }
+                      className="h-10 w-[112px] rounded-lg border border-card bg-background px-2 text-xs text-foreground outline-none focus:ring-2 focus:ring-[var(--ring)]"
+                    >
+                      <option value="gte">بزرگ‌تر یا مساوی</option>
+                      <option value="lte">کوچک‌تر یا مساوی</option>
+                    </select>
+                    <input
+                      type="number"
+                      inputMode="decimal"
+                      step="any"
+                      aria-label={`مقدار فیلتر ${label}`}
+                      value={filter.value}
+                      onChange={(event) =>
+                        updateTempFilterNumeric(key, {
+                          value: event.target.value,
+                        })
+                      }
+                      placeholder="عدد"
+                      className="h-10 min-w-0 flex-1 rounded-lg border border-card bg-background px-2 text-sm text-foreground outline-none placeholder:text-muted focus:ring-2 focus:ring-[var(--ring)]"
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </form>
 
         {tempFilterError ? (
           <p className="mt-3 text-sm text-red-700">{tempFilterError}</p>
@@ -2458,12 +2761,56 @@ export default function AnkiNotePage() {
           <p className="mt-3 text-sm text-foreground/80">{tempFilterStatus}</p>
         ) : null}
 
+        <div className="mt-3 flex flex-wrap items-center gap-3 rounded-xl border border-card bg-background p-3">
+          <button
+            type="button"
+            onClick={() => void moveSelectedTempFilterCards()}
+            disabled={
+              tempFilterLoading ||
+              tempFilterBatchMoving ||
+              tempFilterMovingCardId !== null ||
+              Object.keys(selectedTempFilterCardIds).length === 0
+            }
+            className="rounded-lg bg-[var(--primary)] px-4 py-2 text-sm font-semibold text-[var(--primary-foreground)] disabled:opacity-60"
+          >
+            {tempFilterBatchMoving
+              ? "در حال انتقال گروهی..."
+              : "انتقال ساختار درختی انتخاب‌شده‌ها به صف مطالعه"}
+          </button>
+          <span className="text-xs text-muted">
+            {Object.keys(selectedTempFilterCardIds).length} رکورد انتخاب شده
+          </span>
+        </div>
+
         <div className="mt-3">{tempFilterPagination()}</div>
 
         <div className="mt-4 overflow-x-auto rounded-xl border border-card">
           <table className="w-full min-w-[1320px] text-sm">
             <thead className="bg-background text-muted">
               <tr>
+                <th className="px-3 py-2 text-center">
+                  <input
+                    type="checkbox"
+                    aria-label="انتخاب همهٔ رکوردهای این صفحه"
+                    title="انتخاب همهٔ رکوردهای این صفحه"
+                    checked={
+                      visibleTempFilterRows.length > 0 &&
+                      visibleTempFilterRows.every(
+                        (row) => selectedTempFilterCardIds[row.cardId],
+                      )
+                    }
+                    onChange={(event) =>
+                      toggleVisibleTempFilterCards(event.target.checked)
+                    }
+                    disabled={
+                      visibleTempFilterRows.length === 0 ||
+                      tempFilterLoading ||
+                      tempFilterMovingCardId !== null ||
+                      tempFilterBatchMoving
+                    }
+                    className="h-4 w-4 rounded border border-card"
+                  />
+                </th>
                 {hasTempFilterColumn("cardId") ? <th className="px-3 py-2 text-right">{tempFilterSortButton("cardId", "Card")}</th> : null}
                 {hasTempFilterColumn("noteId") ? <th className="px-3 py-2 text-right">{tempFilterSortButton("noteId", "Note")}</th> : null}
                 {hasTempFilterColumn("baseForm") ? <th className="px-3 py-2 text-right">{tempFilterSortButton("baseForm", "Base form")}</th> : null}
@@ -2479,6 +2826,23 @@ export default function AnkiNotePage() {
             <tbody>
               {visibleTempFilterRows.map((row) => (
                 <tr key={row.cardId} className="border-t border-card">
+                  <td className="px-3 py-2 text-center">
+                    <input
+                      type="checkbox"
+                      aria-label={`انتخاب رکورد ${row.cardId}`}
+                      title={`انتخاب رکورد ${row.cardId}`}
+                      checked={Boolean(selectedTempFilterCardIds[row.cardId])}
+                      onChange={(event) =>
+                        toggleTempFilterCard(row.cardId, event.target.checked)
+                      }
+                      disabled={
+                        tempFilterLoading ||
+                        tempFilterMovingCardId !== null ||
+                        tempFilterBatchMoving
+                      }
+                      className="h-4 w-4 rounded border border-card"
+                    />
+                  </td>
                   {hasTempFilterColumn("cardId") ? <td className="px-3 py-2 font-mono text-xs">{row.cardId}</td> : null}
                   {hasTempFilterColumn("noteId") ? <td className="px-3 py-2 font-mono text-xs">{row.noteId}</td> : null}
                   {hasTempFilterColumn("baseForm") ? <td className="px-3 py-2">
@@ -2517,7 +2881,11 @@ export default function AnkiNotePage() {
                     <button
                       type="button"
                       onClick={() => void moveTempFilterCard(row)}
-                      disabled={tempFilterMovingCardId !== null}
+                      disabled={
+                        tempFilterLoading ||
+                        tempFilterMovingCardId !== null ||
+                        tempFilterBatchMoving
+                      }
                       className="rounded-lg bg-[var(--primary)] px-3 py-1.5 text-xs font-semibold text-[var(--primary-foreground)] disabled:opacity-60"
                     >
                       {tempFilterMovingCardId === row.cardId
@@ -2529,7 +2897,7 @@ export default function AnkiNotePage() {
               ))}
               {!tempFilterLoading && visibleTempFilterRows.length === 0 ? (
                 <tr>
-                  <td colSpan={Math.max(1, selectedTempFilterColumns.length)} className="px-3 py-8 text-center text-muted">
+                  <td colSpan={Math.max(1, selectedTempFilterColumns.length + 1)} className="px-3 py-8 text-center text-muted">
                     کارتی در دک موقت پیدا نشد.
                   </td>
                 </tr>

@@ -3,12 +3,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import type { WordAudioFieldKey } from "@/lib/audio/wordAudioFields";
 import {
-  buildWordFieldAudioFilenameTemplate,
-  type WordAudioFieldKey,
-  getWordFieldAudioPublicPath,
-  WORD_AUDIO_PUBLIC_DIR_RELATIVE,
-} from "@/lib/audio/wordFieldAudioNaming";
+  buildEnglishWordAudioFilenameTemplate,
+  ENGLISH_WORD_AUDIO_PUBLIC_DIR_RELATIVE,
+  getEnglishWordAudioPublicPath,
+} from "@/lib/audio/englishWordAudioNaming";
 import { ActionIcon } from "@/components/icons";
 import {
   buildSentenceAudioFilenameTemplate,
@@ -16,6 +16,12 @@ import {
   isSentenceAudioField,
   SENTENCE_AUDIO_PUBLIC_DIR_RELATIVE,
 } from "@/lib/audio/sentenceAudioNaming";
+import {
+  buildWordConceptAudioFilenameTemplate,
+  getWordConceptAudioPublicPath,
+  isWordConceptAudioField,
+  WORD_CONCEPT_AUDIO_PUBLIC_DIR_RELATIVE,
+} from "@/lib/audio/wordConceptAudioNaming";
 
 export default function WordFieldVoiceCell({
   field,
@@ -49,19 +55,31 @@ export default function WordFieldVoiceCell({
   const exampleFilename = useMemo(
     () => isSentenceAudioField(field) && normalizedAudioKey && Number.isSafeInteger(Number(normalizedAudioKey))
       ? buildSentenceAudioFilenameTemplate(Number(normalizedAudioKey), field)
-      : buildWordFieldAudioFilenameTemplate({ audioKey: normalizedAudioKey ?? undefined, field }),
+      : field === "base_form" && normalizedAudioKey && Number.isSafeInteger(Number(normalizedAudioKey))
+        ? buildEnglishWordAudioFilenameTemplate(Number(normalizedAudioKey))
+      : isWordConceptAudioField(field) && normalizedAudioKey && Number.isSafeInteger(Number(normalizedAudioKey))
+        ? buildWordConceptAudioFilenameTemplate(Number(normalizedAudioKey))
+      : "owned-record__field__Date.now().mp3",
     [normalizedAudioKey, field]
   );
 
   const publicPathForFilename = useCallback(
     (filename: string) => isSentenceAudioField(field)
       ? getSentenceAudioPublicPath(filename)
-      : getWordFieldAudioPublicPath(filename),
+      : field === "base_form"
+        ? getEnglishWordAudioPublicPath(filename)
+      : isWordConceptAudioField(field)
+        ? getWordConceptAudioPublicPath(filename)
+      : null,
     [field],
   );
   const audioFolder = isSentenceAudioField(field)
     ? SENTENCE_AUDIO_PUBLIC_DIR_RELATIVE
-    : WORD_AUDIO_PUBLIC_DIR_RELATIVE;
+    : field === "base_form"
+      ? ENGLISH_WORD_AUDIO_PUBLIC_DIR_RELATIVE
+    : isWordConceptAudioField(field)
+      ? WORD_CONCEPT_AUDIO_PUBLIC_DIR_RELATIVE
+    : "audio";
 
   const fetchLatest = useCallback(async () => {
     if (!normalizedAudioKey) {

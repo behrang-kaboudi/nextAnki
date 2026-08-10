@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ActionIcon } from "@/components/icons/ActionIcon";
 import { PromptSourcesButton } from "@/components/prompts/PromptSourcesButton";
+import { RemainingCountBadge, RemainingCountButton } from "@/components/remaining-count";
 
 const PROMPT_PATHS = [
   "src/prompts/word-extraction/meaning_fa_review/rulseV1.md",
@@ -15,7 +16,11 @@ type Correction = {
   other_meanings_fa?: string[];
   invalid_sentence_ids?: number[];
 };
-export default function WordMeaningsReview() {
+export default function WordMeaningsReview({
+  pendingCount,
+}: {
+  pendingCount: number;
+}) {
   const r = useRouter(),
     [o, setO] = useState(false),
     [l, setL] = useState("0"),
@@ -211,16 +216,25 @@ export default function WordMeaningsReview() {
         disabled={b}
         className="rounded border px-3 py-2 text-sm transition active:scale-90 hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5"
       >
-        REVIEW PERSIAN MEANINGS
+        REVIEW PERSIAN MEANINGS <RemainingCountBadge count={pendingCount} />
       </button>
-      <button
-        type="button"
-        onClick={() => setResetOpen(true)}
-        disabled={b || resetBusy}
-        className="ml-2 rounded border px-3 py-2 text-sm transition active:scale-90 hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5"
-      >
-        RESET MEANINGS REVIEW
-      </button>
+      <span className="inline-flex items-center gap-1">
+        <button
+          type="button"
+          onClick={() => setResetOpen(true)}
+          disabled={b || resetBusy}
+          className="rounded border border-red-700 bg-red-600 px-2 py-1 text-xs font-semibold text-white transition active:scale-90 hover:bg-red-700 disabled:opacity-50 dark:border-red-500 dark:bg-red-700 dark:hover:bg-red-600"
+        >
+          RESET
+        </button>
+        <span
+          aria-label="About reset meanings review"
+          title="Sets all reviewed Persian meanings back to pending. Confirmation is required."
+          className="inline-flex size-5 items-center justify-center rounded-full border border-red-500 text-red-700 dark:text-red-400"
+        >
+          <ActionIcon name="help" className="size-3.5" />
+        </span>
+      </span>
       {o ? (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
@@ -321,9 +335,11 @@ export default function WordMeaningsReview() {
                     Copy all
                   </button>
                   {remaining !== null ? (
-                    <span className="ml-2 text-xs font-semibold text-amber-700">
-                      Remaining: {remaining}
-                    </span>
+                    <RemainingCountButton
+                      count={remaining}
+                      disabled={b}
+                      onClick={() => setL(String(remaining))}
+                    />
                   ) : null}
                 </div>
                 <textarea

@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { getPendingWordAudioTaskCount } from "@/lib/audio/wordAudioPending.server";
 import { prisma } from "@/lib/prisma";
 import { flattenWordEnglishRelation, WORD_ENGLISH_FIELDS_SELECT } from "@/lib/english/wordEnglishFields.server";
 import { hydrateWordsWithPersianMeanings } from "@/lib/words/persianMeanings.server";
@@ -7,7 +8,6 @@ import { hydrateWordsWithPrimarySentence } from "@/lib/words/primarySentences.se
 import BatchWordFieldVoiceGenerate from "../BatchWordFieldVoiceGenerate.client";
 import BatchWordFieldVoiceGenerateAllFields from "../BatchWordFieldVoiceGenerateAllFields.client";
 import AudioHelpModal from "../AudioHelpModal.client";
-import WordFieldVoiceDuplicatesModal from "../WordFieldVoiceDuplicatesModal.client";
 import WordFieldVoiceCell from "../WordFieldVoiceCell.client";
 
 export const metadata = {
@@ -45,7 +45,7 @@ export default async function WordHintsAudioPage({
       }
     : undefined;
 
-  const [total, rows] = await Promise.all([
+  const [total, rows, audioRemainingCount] = await Promise.all([
     prisma.word.count({ where }),
     prisma.word.findMany({
       where,
@@ -62,8 +62,10 @@ export default async function WordHintsAudioPage({
         sentenceIds: true,
         other_meanings_en: true,
         concept_explained_fa: true,
+        concept_explained_fa_audio_file_name: true,
       },
     }),
+    getPendingWordAudioTaskCount(),
   ]);
   const rowsWithSentences = await hydrateWordsWithPrimarySentence(rows.map(flattenWordEnglishRelation));
   const rowsWithMeanings = await hydrateWordsWithPersianMeanings(rowsWithSentences);
@@ -89,14 +91,14 @@ export default async function WordHintsAudioPage({
         <div>
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="text-xl font-semibold">Audio</h1>
-            <WordFieldVoiceDuplicatesModal />
-            <span aria-hidden="true" className="mx-1 h-6 w-px bg-black/20 dark:bg-white/20" />
-            <BatchWordFieldVoiceGenerateAllFields />
+            <BatchWordFieldVoiceGenerateAllFields
+              remainingCount={audioRemainingCount}
+            />
             <AudioHelpModal />
           </div>
           <p className="mt-1 text-sm opacity-80">
             UI for generating audio for <span className="font-mono">base_form</span>,{" "}
-            <span className="font-mono">other_meanings_en</span>,{" "}
+            <span className="font-mono">canonical_text</span>,{" "}
             <span className="font-mono">concept_explained_fa</span>,{" "}
             <span className="font-mono">sentence_en</span>,{" "}
             <span className="font-mono">sentence_en_meaning_fa</span>.
@@ -109,7 +111,7 @@ export default async function WordHintsAudioPage({
               field="base_form"
             />
             <BatchWordFieldVoiceGenerate
-              field="other_meanings_en"
+              field="canonical_text"
             />
             <BatchWordFieldVoiceGenerate
               field="concept_explained_fa"
@@ -196,7 +198,7 @@ export default async function WordHintsAudioPage({
                       </span>
                       <WordFieldVoiceCell
                         field="base_form"
-                        audioKey={r.anki_link_id}
+                        audioKey={String(r.englishId)}
                         text={r.base_form}
                       />
                     </div>
@@ -220,11 +222,6 @@ export default async function WordHintsAudioPage({
                       <span className="truncate" title={String(r.other_meanings_en ?? "")}>
                         {r.other_meanings_en ?? "—"}
                       </span>
-                      <WordFieldVoiceCell
-                        field="other_meanings_en"
-                        audioKey={r.anki_link_id}
-                        text={r.other_meanings_en}
-                      />
                     </div>
                   </td>
                   <td className="max-w-[360px] px-3 py-2">
@@ -234,7 +231,7 @@ export default async function WordHintsAudioPage({
                       </span>
                       <WordFieldVoiceCell
                         field="concept_explained_fa"
-                        audioKey={r.anki_link_id}
+                        audioKey={String(r.id)}
                         text={r.concept_explained_fa}
                       />
                     </div>

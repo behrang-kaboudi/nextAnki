@@ -95,6 +95,7 @@ export const siteMapGroups: SiteMapGroup[] = [
     summary: "Run and monitor the primary synchronization workflow between local word data and Anki.",
     pages: [
       { title: "Anki Word Sync", path: "/anki/sync/words", summary: "Synchronizes word fields, media, identifiers, and complete word records with Anki.", menu: true },
+      { title: "Audio Studio", path: "/anki/media/audio", summary: "Records, uploads, trims, fades, adjusts, renames, replaces, and organizes reusable audio files for Anki media synchronization.", menu: true },
     ],
   },
   {

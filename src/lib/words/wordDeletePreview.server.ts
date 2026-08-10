@@ -2,10 +2,10 @@ import "server-only";
 
 import type { Prisma } from "@prisma/client";
 
-import { WORD_AUDIO_FIELDS, type WordAudioFieldKey } from "@/lib/audio/wordFieldAudioNaming";
+import type { WordAudioFieldKey } from "@/lib/audio/wordAudioFields";
 import { prisma } from "@/lib/prisma";
-import { listWordFieldAudioFiles } from "@/lib/words/wordFieldVoice";
 import { getSentenceAudioFileInfo } from "@/lib/sentences/sentenceAudio.server";
+import { getWordConceptAudioFileInfo } from "@/lib/words/wordConceptAudio.server";
 import { primarySentenceId, wordSentenceIds } from "@/lib/words/sentenceIds";
 
 function ids(value: Prisma.JsonValue | null) {
@@ -23,6 +23,7 @@ export async function getWordDeletePreview(id: number) {
       id: true,
       anki_link_id: true,
       sentenceIds: true,
+      concept_explained_fa_audio_file_name: true,
       english: { select: { base_form: true } },
     },
   });
@@ -68,15 +69,10 @@ export async function getWordDeletePreview(id: number) {
   const linkedWordCount = primaryId
     ? 1 + otherWords.filter((other) => wordSentenceIds(other.sentenceIds).includes(primaryId)).length
     : 0;
-  const audioFiles: Array<{ field: WordAudioFieldKey; count: number; bytes: number }> = WORD_AUDIO_FIELDS.filter((field) => field !== "sentence_en" && field !== "sentence_en_meaning_fa").map((field) => {
-    const audioKey = word.anki_link_id;
-    const files = listWordFieldAudioFiles({ audioKey, ankiLinkId: audioKey, field });
-    return {
-      field,
-      count: files.length,
-      bytes: files.reduce((sum, file) => sum + file.size, 0),
-    };
-  });
+  const conceptInfo = getWordConceptAudioFileInfo(word.concept_explained_fa_audio_file_name);
+  const audioFiles: Array<{ field: WordAudioFieldKey; count: number; bytes: number }> = [
+    { field: "concept_explained_fa", count: conceptInfo.size > 0 ? 1 : 0, bytes: conceptInfo.size },
+  ];
   if (sentence && linkedWordCount <= 1) {
     for (const field of ["sentence_en", "sentence_en_meaning_fa"] as const) {
       const filename = field === "sentence_en"

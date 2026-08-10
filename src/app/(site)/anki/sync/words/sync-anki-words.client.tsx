@@ -14,7 +14,6 @@ type SyncAllStatus = {
   startedAt: string | null;
   finishedAt: string | null;
   error: string | null;
-  ignoreUpdatedAt?: boolean;
   stopRequested: boolean;
   stoppedEarly: boolean;
   total: number;
@@ -25,6 +24,7 @@ type SyncAllStatus = {
   skippedNoLinkId: number;
   skippedNoWord: number;
   failed: number;
+  failureSamples?: unknown[];
   mediaUploaded: number;
   mediaDeleted: number;
   currentNoteId: number | null;
@@ -69,20 +69,14 @@ function formatForLog(entry: LogEntry) {
 
 function Code({ children }: { children: React.ReactNode }) {
   return (
-    <span
-      dir="ltr"
-      className="rounded bg-black/5 px-1 py-0.5 font-mono text-[11px] dark:bg-white/10"
-    >
+    <span dir="ltr" className="rounded bg-black/5 px-1 py-0.5 font-mono text-[11px] dark:bg-white/10">
       {children}
     </span>
   );
 }
 
 export default function SyncAnkiWordsClient() {
-  const client = useMemo(
-    () => createAnkiOperations({ timeoutMs: 15_000, retryDelayMs: 750 }),
-    [],
-  );
+  const client = useMemo(() => createAnkiOperations({ timeoutMs: 15_000, retryDelayMs: 750 }), []);
 
   const [isRunning, setIsRunning] = useState(false);
   const progress = useJobProgressStatuses();
@@ -106,7 +100,6 @@ export default function SyncAnkiWordsClient() {
   const [jsonHintStatus, setJsonHintStatus] = useState<SyncAllStatus | null>(null);
   const [mediaSyncStatus, setMediaSyncStatus] = useState<SyncAllStatus | null>(null);
   const [fullSyncStatus, setFullSyncStatus] = useState<SyncAllStatus | null>(null);
-  const [fullSyncIgnoreUpdatedAt, setFullSyncIgnoreUpdatedAt] = useState(false);
   const [dedupStatus, setDedupStatus] = useState<SyncAllStatus | null>(null);
   const [otherMeaningsFaStatus, setOtherMeaningsFaStatus] = useState<SyncAllStatus | null>(null);
   const [meaningFaStatus, setMeaningFaStatus] = useState<SyncAllStatus | null>(null);
@@ -153,12 +146,14 @@ export default function SyncAnkiWordsClient() {
         ),
       },
       json_hint: {
-        title: "Sync json_hint + hints",
+        title: "Sync json_hint",
         body: (
           <div className="space-y-3">
             <div className="text-sm">
-              یک job سمت سرور اجرا می‌شود که نوت‌های مدل <Code>META_LEX_VR9</Code> را از Anki می‌گیرد و فیلدهای hint را
-              بر اساس دیتابیس دوباره تولید می‌کند.
+              یک job سمت سرور اجرا می‌شود که نوت‌های مدل <Code>META_LEX_VR9</Code> را از Anki می‌گیرد و فقط فیلد
+              <Code> json_hint</Code> را بر اساس دیتابیس دوباره تولید می‌کند. فیلد قدیمی{" "}
+              <Code>first_letter_en_hint</Code>
+              عمداً در Anki حفظ می‌شود و این job آن را تغییر نمی‌دهد.
             </div>
 
             <section className="rounded border p-3">
@@ -168,8 +163,8 @@ export default function SyncAnkiWordsClient() {
                   Query: <Code>note:&quot;META_LEX_VR9&quot;</Code> (از طریق AnkiConnect <Code>findNotes</Code>)
                 </li>
                 <li>
-                  برای هر note، <Code>anki_link_id</Code> از فیلدهای alias خوانده می‌شود (مثل <Code>anki_link_id</Code> /{" "}
-                  <Code>AnkiLinkId</Code> / <Code>ankiLinkId</Code>).
+                  برای هر note، <Code>anki_link_id</Code> از فیلدهای alias خوانده می‌شود (مثل <Code>anki_link_id</Code>{" "}
+                  / <Code>AnkiLinkId</Code> / <Code>ankiLinkId</Code>).
                 </li>
               </ul>
             </section>
@@ -186,26 +181,15 @@ export default function SyncAnkiWordsClient() {
                 <li>
                   اگر مقدار فعلی Anki با مقدار تولیدی یکی باشد → <Code>skippedSame</Code> (هیچ update انجام نمی‌شود)
                 </li>
-                <li>
-                  فقط همان فیلدهای مربوط به این job تغییر می‌کنند (نه همه‌ی فیلدها).
-                </li>
+                <li>فقط همان فیلدهای مربوط به این job تغییر می‌کنند (نه همه‌ی فیلدها).</li>
               </ul>
-            </section>
-
-            <section className="rounded border p-3">
-              <div className="text-xs font-semibold">مدیا/صوت</div>
-              <div className="mt-2 text-sm">
-                این دکمه هیچ عملیات <Code>storeMediaFile</Code>/<Code>deleteMediaFile</Code> انجام نمی‌دهد و فقط متن فیلدها
-                را در Anki به‌روزرسانی می‌کند. اگر خروجی شامل <Code>[sound:...]</Code> باشد، آپلود فایل‌ها باید با دکمه‌ی{" "}
-                <Code>Copy all media</Code> انجام شود.
-              </div>
             </section>
 
             <section className="rounded border p-3">
               <div className="text-xs font-semibold">API</div>
               <div className="mt-2 text-sm">
-                <Code>/api/tests/sync-anki-words/json-hint/sync-all/start</Code> •{" "}
-                <Code>/status</Code> • <Code>/stop</Code>
+                <Code>/api/tests/sync-anki-words/json-hint/sync-all/start</Code> • <Code>/status</Code> •{" "}
+                <Code>/stop</Code>
               </div>
             </section>
           </div>
@@ -216,7 +200,7 @@ export default function SyncAnkiWordsClient() {
         body: (
           <div className="space-y-3">
             <div className="text-sm">
-              یک job اجرا می‌شود که فایل‌های media (audio/image) را از پوشه‌های محلی پروژه می‌خواند و با AnkiConnect داخل
+              یک job اجرا می‌شود که تمام فایل‌های معتبر زیر <Code>public/audio</Code> را به‌صورت بازگشتی می‌خواند و داخل
               Anki media ذخیره می‌کند.
             </div>
 
@@ -224,15 +208,21 @@ export default function SyncAnkiWordsClient() {
               <div className="text-xs font-semibold">شرایط Upload</div>
               <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">
                 <li>فقط برای آیتم‌هایی اقدام می‌کند که فایل محلیِ متناظر وجود داشته باشد و سایزش صفر نباشد.</li>
-                <li>اگر فایل از قبل در Anki media وجود داشته باشد، upload/copy برای همان filename انجام نمی‌شود (بدون overwrite).</li>
+                <li>
+                  اگر فایل از قبل در Anki media وجود داشته باشد، upload/copy برای همان filename انجام نمی‌شود (بدون
+                  overwrite).
+                </li>
+                <li>
+                  <Code>Copy changed media</Code> فقط فایل‌های دارای محتوای متفاوت را overwrite می‌کند.
+                </li>
+                <li>کپی‌ها asynchronous هستند؛ Progress و Stop هنگام انتقال انبوه پاسخ‌گو باقی می‌مانند.</li>
               </ul>
             </section>
 
             <section className="rounded border p-3">
               <div className="text-xs font-semibold">API</div>
               <div className="mt-2 text-sm">
-                <Code>/api/tests/sync-anki-words/media/sync-all/start</Code> •{" "}
-                <Code>/status</Code> • <Code>/stop</Code>
+                <Code>/api/tests/sync-anki-words/media/sync-all/start</Code> • <Code>/status</Code> • <Code>/stop</Code>
               </div>
             </section>
           </div>
@@ -263,30 +253,39 @@ export default function SyncAnkiWordsClient() {
               <div className="text-xs font-semibold">شرایط Update/Skip</div>
               <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">
                 <li>اگر رکورد DB وجود نداشته باشد → skip (skippedNoWord)</li>
-                <li>اگر <Code>anki_link_id</Code> نداشته باشد → skip (skippedNoLinkId)</li>
-                <li>اگر فیلد تولیدی با مقدار فعلی یکی باشد → skip (skippedSame)</li>
                 <li>
-                  اگر گزینه‌ی <Code>Ignore updatedAt and sync all</Code> روشن باشد، fast-path مبتنی بر{" "}
-                  <Code>updatedAt</Code> غیرفعال می‌شود و همه‌ی رکوردها کامل بررسی می‌شوند.
+                  اگر <Code>anki_link_id</Code> نداشته باشد → skip (skippedNoLinkId)
                 </li>
-                <li>در غیر این صورت → updateNoteFields (updated/created)</li>
+                <li>اگر فیلد تولیدی با مقدار فعلی یکی باشد → skip (skippedSame)</li>
+                <li>تمام فیلدهای مدیریت‌شده در حافظه مقایسه می‌شوند و فقط فیلدهای متفاوت نوشته می‌شوند.</li>
+                <li>
+                  Updateها به‌صورت batch با AnkiConnect <Code>multi</Code> ارسال می‌شوند.
+                </li>
               </ul>
             </section>
 
             <section className="rounded border p-3">
               <div className="text-xs font-semibold">صوت/مدیا</div>
               <div className="mt-2 text-sm">
-                بعضی فیلدها ممکن است با توجه به فایل‌های محلی صوت، تگ <Code>[sound:filename.mp3]</Code> دریافت کنند؛ در این
-                دکمه فایل‌ها را آپلود/حذف نمی‌کند و فقط متن را می‌نویسد. برای آپلود فایل‌ها از <Code>Copy all media</Code>{" "}
-                استفاده کنید.
+                بعضی فیلدها ممکن است با توجه به فایل‌های محلی صوت، تگ <Code>[sound:filename.mp3]</Code> دریافت کنند؛ در
+                این دکمه فایل‌ها را آپلود/حذف نمی‌کند و فقط متن را می‌نویسد. برای آپلود فایل‌ها از{" "}
+                <Code>Copy all media</Code> استفاده کنید.
+              </div>
+            </section>
+
+            <section className="rounded border p-3" dir="rtl">
+              <div className="text-xs font-semibold">معنی‌های انگلیسی مرتبط</div>
+              <div className="mt-2 text-sm">
+                فیلد <Code>other_meanings_en</Code> از واژه‌های انگلیسی رکوردهای اشاره‌شده در <Code>synonymIds</Code> و
+                با جداکنندهٔ خط تیره ساخته می‌شود. فیلد <Code>other_meanings_en_audio</Code> نیز تمام صوت‌های موجود همان
+                EnglishWordها را به ترتیب آرایه به‌صورت چند تگ <Code>[sound:...]</Code> می‌نویسد.
               </div>
             </section>
 
             <section className="rounded border p-3">
               <div className="text-xs font-semibold">API</div>
               <div className="mt-2 text-sm">
-                <Code>/api/tests/sync-anki-words/full/sync-all/start</Code> •{" "}
-                <Code>/status</Code> • <Code>/stop</Code>
+                <Code>/api/tests/sync-anki-words/full/sync-all/start</Code> • <Code>/status</Code> • <Code>/stop</Code>
               </div>
             </section>
           </div>
@@ -297,14 +296,16 @@ export default function SyncAnkiWordsClient() {
         body: (
           <div className="space-y-3">
             <div className="text-sm">
-              job دِدوپ: نوت‌ها را بر اساس مقدار <Code>anki_link_id</Code> گروه‌بندی می‌کند و اگر برای یک id چند note وجود
-              داشته باشد، فقط قدیمی‌ترین (کمترین <Code>noteId</Code>) را نگه می‌دارد و بقیه را حذف می‌کند.
+              job دِدوپ: نوت‌ها را بر اساس مقدار <Code>anki_link_id</Code> گروه‌بندی می‌کند و اگر برای یک id چند note
+              وجود داشته باشد، فقط قدیمی‌ترین (کمترین <Code>noteId</Code>) را نگه می‌دارد و بقیه را حذف می‌کند.
             </div>
 
             <section className="rounded border p-3">
               <div className="text-xs font-semibold">شرایط حذف</div>
               <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">
-                <li>اگر note فاقد <Code>anki_link_id</Code> باشد، معمولاً وارد گروه‌بندی نمی‌شود.</li>
+                <li>
+                  اگر note فاقد <Code>anki_link_id</Code> باشد، معمولاً وارد گروه‌بندی نمی‌شود.
+                </li>
                 <li>اگر در یک گروه فقط ۱ note باشد، کاری انجام نمی‌شود.</li>
               </ul>
             </section>
@@ -320,29 +321,36 @@ export default function SyncAnkiWordsClient() {
             <section className="rounded border p-3">
               <div className="text-xs font-semibold">API</div>
               <div className="mt-2 text-sm">
-                <Code>/api/tests/sync-anki-words/anki-link-id/deduplicate/start</Code> •{" "}
-                <Code>/status</Code> • <Code>/stop</Code>
+                <Code>/api/tests/sync-anki-words/anki-link-id/deduplicate/start</Code> • <Code>/status</Code> •{" "}
+                <Code>/stop</Code>
               </div>
             </section>
           </div>
         ),
       },
       sentence_en: {
-        title: "Sync sentence_en",
+        title: "Sync sentence_en + audio",
         body: (
           <div className="space-y-3">
             <div className="text-sm">
-              سینک یک‌فیلد: مقدار <Code>sentence_en</Code> در Anki را از روی DB ست می‌کند (و در صورت وجود صوت محلی، sound tag
-              اضافه می‌شود).
+              متن را در <Code>sentence_en</Code> و تگ صوت را جداگانه در <Code>sentence_en_audio</Code> سینک می‌کند.
             </div>
 
             <section className="rounded border p-3">
               <div className="text-xs font-semibold">شرایط Update/Skip</div>
               <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">
-                <li>note بدون <Code>anki_link_id</Code> → <Code>skippedNoLinkId</Code></li>
-                <li>DB row برای آن id پیدا نشود → <Code>skippedNoWord</Code></li>
-                <li>مقدار جدید دقیقاً برابر مقدار فعلی باشد → <Code>skippedSame</Code></li>
-                <li>در غیر این صورت → <Code>updateNoteFields</Code> و <Code>updated += 1</Code></li>
+                <li>
+                  note بدون <Code>anki_link_id</Code> → <Code>skippedNoLinkId</Code>
+                </li>
+                <li>
+                  DB row برای آن id پیدا نشود → <Code>skippedNoWord</Code>
+                </li>
+                <li>
+                  مقدار جدید دقیقاً برابر مقدار فعلی باشد → <Code>skippedSame</Code>
+                </li>
+                <li>
+                  در غیر این صورت → <Code>updateNoteFields</Code> و <Code>updated += 1</Code>
+                </li>
               </ul>
             </section>
 
@@ -350,12 +358,10 @@ export default function SyncAnkiWordsClient() {
               <div className="text-xs font-semibold">صوت + Media</div>
               <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">
                 <li>
-                  اگر فایل صوتی محلی برای <Code>sentence_en</Code> موجود باشد و size&gt;0 → به متن <Code>[sound:filename]</Code>{" "}
-                  اضافه می‌شود.
+                  اگر فایل صوتی محلی معتبر باشد، <Code>[sound:filename]</Code> فقط در <Code>sentence_en_audio</Code>{" "}
+                  قرار می‌گیرد.
                 </li>
-                <li>
-                  این دکمه فایل صوتی را به Anki media آپلود/حذف نمی‌کند (فقط متن را آپدیت می‌کند).
-                </li>
+                <li>این دکمه فایل صوتی را به Anki media آپلود/حذف نمی‌کند (فقط متن را آپدیت می‌کند).</li>
                 <li>
                   برای همگام‌سازی فایل‌ها با Anki media از دکمه‌ی <Code>Copy all media</Code> استفاده کنید.
                 </li>
@@ -365,25 +371,28 @@ export default function SyncAnkiWordsClient() {
             <section className="rounded border p-3">
               <div className="text-xs font-semibold">API</div>
               <div className="mt-2 text-sm">
-                <Code>/api/tests/sync-anki-words/sentence-en/sync-all/start</Code> •{" "}
-                <Code>/status</Code> • <Code>/stop</Code>
+                <Code>/api/tests/sync-anki-words/sentence-en/sync-all/start</Code> • <Code>/status</Code> •{" "}
+                <Code>/stop</Code>
               </div>
             </section>
           </div>
         ),
       },
       sentence_en_meaning_fa: {
-        title: "Sync sentence_en_meaning_fa",
+        title: "Sync sentence_en_meaning_fa + audio",
         body: (
           <div className="space-y-3">
             <div className="text-sm">
-              سینک یک‌فیلد برای <Code>sentence_en_meaning_fa</Code> (DB → Anki) با همان قوانین skip/update و مدیریت sound tag.
+              متن <Code>sentence_en_meaning_fa</Code> و صوت <Code>sentence_en_meaning_fa_audio</Code> را در دو فیلد
+              مستقل سینک می‌کند.
             </div>
 
             <section className="rounded border p-3">
               <div className="text-xs font-semibold">شرایط Update/Skip</div>
               <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">
-                <li>بدون <Code>anki_link_id</Code> → skippedNoLinkId</li>
+                <li>
+                  بدون <Code>anki_link_id</Code> → skippedNoLinkId
+                </li>
                 <li>بدون DB row → skippedNoWord</li>
                 <li>عدم تغییر مقدار → skippedSame</li>
                 <li>در غیر این صورت → updateNoteFields</li>
@@ -393,28 +402,27 @@ export default function SyncAnkiWordsClient() {
             <section className="rounded border p-3">
               <div className="text-xs font-semibold">صوت + Media</div>
               <div className="mt-2 text-sm">
-                اگر فایل صوتی محلی برای همین field وجود داشته باشد و size&gt;0 باشد، tag <Code>[sound:...]</Code> به متن
-                اضافه می‌شود. این دکمه فایل را آپلود/حذف نمی‌کند؛ آپلود با <Code>Copy all media</Code> انجام می‌شود.
+                اگر فایل صوتی محلی معتبر باشد، tag <Code>[sound:...]</Code> فقط در فیلد صوت قرار می‌گیرد. این دکمه فایل
+                را آپلود/حذف نمی‌کند؛ آپلود با <Code>Copy all media</Code> انجام می‌شود.
               </div>
             </section>
 
             <section className="rounded border p-3">
               <div className="text-xs font-semibold">API</div>
               <div className="mt-2 text-sm">
-                <Code>/api/tests/sync-anki-words/sentence-en-meaning-fa/sync-all/start</Code> •{" "}
-                <Code>/status</Code> • <Code>/stop</Code>
+                <Code>/api/tests/sync-anki-words/sentence-en-meaning-fa/sync-all/start</Code> • <Code>/status</Code> •{" "}
+                <Code>/stop</Code>
               </div>
             </section>
           </div>
         ),
       },
       meaning_fa: {
-        title: "Sync meaning_fa",
+        title: "Sync meaning_fa + audio",
         body: (
           <div className="space-y-3">
             <div className="text-sm">
-              سینک یک‌فیلد برای <Code>meaning_fa</Code> (DB → Anki). مقدار جدید از DB می‌آید و فقط در صورت تفاوت، روی Anki
-              نوشته می‌شود.
+              <Code>meaning_fa</Code> و <Code>meaning_fa_audio</Code> را با هم و در دو فیلد مستقل سینک می‌کند.
             </div>
 
             <section className="rounded border p-3">
@@ -429,56 +437,60 @@ export default function SyncAnkiWordsClient() {
                 <li>
                   اگر در DB رکوردی با همان <Code>anki_link_id</Code> نباشد → <Code>skippedNoWord</Code>
                 </li>
+                <li>متن از معنی اصلی و صوت از فایل رکورد مالک PersianWord تولید می‌شود.</li>
                 <li>
-                  مقدار جدید = <Code>DB.meaning_fa</Code> + (اختیاری) sound tag
+                  اگر مقدار جدید دقیقاً برابر مقدار فعلی Anki باشد → <Code>skippedSame</Code>
                 </li>
-                <li>اگر مقدار جدید دقیقاً برابر مقدار فعلی Anki باشد → <Code>skippedSame</Code></li>
-                <li>در غیر این صورت → <Code>updateNoteFields</Code> و <Code>updated += 1</Code></li>
+                <li>
+                  در غیر این صورت → <Code>updateNoteFields</Code> و <Code>updated += 1</Code>
+                </li>
               </ul>
             </section>
 
             <section className="rounded border p-3">
               <div className="text-xs font-semibold">قانون sound tag</div>
               <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">
+                <li>نام فایل صوتی از رکورد مالک آن در دیتابیس خوانده می‌شود و فقط همان فایلِ ثبت‌شده سینک می‌شود.</li>
                 <li>
-                  سیستم آخرین فایل صوتی محلی برای این field را پیدا می‌کند (جدیدترین timestamp در{" "}
-                  <Code>public/audio/words</Code>).
+                  صوتِ معنی در فیلد مستقل <Code>meaning_fa_audio</Code> سینک می‌شود، نه داخل متن معنی.
                 </li>
-                <li>صوتِ معنی در فیلد مستقل <Code>meaning_fa_audio</Code> سینک می‌شود، نه داخل متن معنی.</li>
               </ul>
             </section>
 
             <section className="rounded border p-3">
               <div className="text-xs font-semibold">Media</div>
               <div className="mt-2 text-sm">
-                این دکمه هیچ عملیات آپلود/حذف مدیا انجام نمی‌دهد. اگر متن شامل <Code>[sound:...]</Code> است، وجود/به‌روزرسانی
-                فایل‌ها در Anki media به عهده‌ی <Code>Copy all media</Code> است.
+                این دکمه هیچ عملیات آپلود/حذف مدیا انجام نمی‌دهد. اگر متن شامل <Code>[sound:...]</Code> است،
+                وجود/به‌روزرسانی فایل‌ها در Anki media به عهده‌ی <Code>Copy all media</Code> است.
               </div>
             </section>
 
             <section className="rounded border p-3">
               <div className="text-xs font-semibold">API</div>
               <div className="mt-2 text-sm">
-                <Code>/api/tests/sync-anki-words/meaning-fa/sync-all/start</Code> •{" "}
-                <Code>/status</Code> • <Code>/stop</Code>
+                <Code>/api/tests/sync-anki-words/meaning-fa/sync-all/start</Code> • <Code>/status</Code> •{" "}
+                <Code>/stop</Code>
               </div>
             </section>
           </div>
         ),
       },
       other_meanings_fa: {
-        title: "Sync other_meanings_fa",
+        title: "Sync other_meanings_fa + audio",
         body: (
           <div className="space-y-3">
             <div className="text-sm">
-              سینک یک‌فیلد برای <Code>other_meanings_fa</Code> (DB → Anki) با قوانین مشابه: فقط وقتی مقدار جدید با مقدار فعلی
-              متفاوت باشد update می‌کند.
+              <Code>other_meanings_fa</Code> و <Code>other_meanings_fa_audio</Code> را با حفظ ترتیب{" "}
+              <Code>otherMeaningIds</Code>
+              سینک می‌کند و فقط فیلدهای تغییرکرده را می‌نویسد.
             </div>
 
             <section className="rounded border p-3">
               <div className="text-xs font-semibold">شرایط Update/Skip</div>
               <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">
-                <li>بدون <Code>anki_link_id</Code> → skippedNoLinkId</li>
+                <li>
+                  بدون <Code>anki_link_id</Code> → skippedNoLinkId
+                </li>
                 <li>بدون DB row → skippedNoWord</li>
                 <li>بدون تغییر → skippedSame</li>
               </ul>
@@ -487,34 +499,36 @@ export default function SyncAnkiWordsClient() {
             <section className="rounded border p-3">
               <div className="text-xs font-semibold">صوت + Media</div>
               <div className="mt-2 text-sm">
-                صوت‌ها در فیلد مستقل <Code>other_meanings_fa_audio</Code> و به ترتیب <Code>otherMeaningIds</Code> قرار می‌گیرند.
-                این دکمه فایل مدیا را کپی نمی‌کند؛ برای آن از <Code>Copy all media</Code> استفاده کنید.
+                صوت‌ها در فیلد مستقل <Code>other_meanings_fa_audio</Code> و به ترتیب <Code>otherMeaningIds</Code> قرار
+                می‌گیرند. این دکمه فایل مدیا را کپی نمی‌کند؛ برای آن از <Code>Copy all media</Code> استفاده کنید.
               </div>
             </section>
 
             <section className="rounded border p-3">
               <div className="text-xs font-semibold">API</div>
               <div className="mt-2 text-sm">
-                <Code>/api/tests/sync-anki-words/other-meanings-fa/sync-all/start</Code> •{" "}
-                <Code>/status</Code> • <Code>/stop</Code>
+                <Code>/api/tests/sync-anki-words/other-meanings-fa/sync-all/start</Code> • <Code>/status</Code> •{" "}
+                <Code>/stop</Code>
               </div>
             </section>
           </div>
         ),
       },
       concept_explained_fa: {
-        title: "Sync concept_explained_fa",
+        title: "Sync concept_explained_fa + audio",
         body: (
           <div className="space-y-3">
             <div className="text-sm">
-              سینک یک‌فیلد برای <Code>concept_explained_fa</Code> (DB → Anki) با قوانین مشابه: فقط وقتی مقدار جدید با مقدار
-              فعلی متفاوت باشد update می‌کند.
+              متن <Code>concept_explained_fa</Code> و صوت <Code>concept_explained_fa_audio</Code> را در دو فیلد مستقل
+              سینک می‌کند.
             </div>
 
             <section className="rounded border p-3">
               <div className="text-xs font-semibold">شرایط Update/Skip</div>
               <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">
-                <li>بدون <Code>anki_link_id</Code> → skippedNoLinkId</li>
+                <li>
+                  بدون <Code>anki_link_id</Code> → skippedNoLinkId
+                </li>
                 <li>بدون DB row → skippedNoWord</li>
                 <li>بدون تغییر → skippedSame</li>
               </ul>
@@ -523,7 +537,7 @@ export default function SyncAnkiWordsClient() {
             <section className="rounded border p-3">
               <div className="text-xs font-semibold">صوت + Media</div>
               <div className="mt-2 text-sm">
-                اگر صوت محلی برای <Code>concept_explained_fa</Code> موجود و size&gt;0 باشد، <Code>[sound:...]</Code> اضافه
+                اگر صوت محلی معتبر باشد، <Code>[sound:...]</Code> فقط در <Code>concept_explained_fa_audio</Code> نوشته
                 می‌شود. این دکمه فایل را آپلود/حذف نمی‌کند و باید با <Code>Copy all media</Code> انجام شود.
               </div>
             </section>
@@ -531,8 +545,8 @@ export default function SyncAnkiWordsClient() {
             <section className="rounded border p-3">
               <div className="text-xs font-semibold">API</div>
               <div className="mt-2 text-sm">
-                <Code>/api/tests/sync-anki-words/concept-explained-fa/sync-all/start</Code> •{" "}
-                <Code>/status</Code> • <Code>/stop</Code>
+                <Code>/api/tests/sync-anki-words/concept-explained-fa/sync-all/start</Code> • <Code>/status</Code> •{" "}
+                <Code>/stop</Code>
               </div>
             </section>
           </div>
@@ -580,7 +594,11 @@ export default function SyncAnkiWordsClient() {
   async function requestPermission() {
     const res = await client.requestPermission();
     if (!res.ok) {
-      append({ level: "error", message: "requestPermission failed", data: res.error });
+      append({
+        level: "error",
+        message: "requestPermission failed",
+        data: res.error,
+      });
       return;
     }
     const permission = res.result?.permission ?? "unknown";
@@ -589,12 +607,15 @@ export default function SyncAnkiWordsClient() {
   }
 
   async function startSyncJsonHint() {
-    if (isRunning || jsonHintStatus?.running) return;
+    if (isRunning || anySyncRunning) return;
     setIsRunning(true);
     setPreview(null);
 
     try {
-      append({ level: "info", message: "Starting sync json_hint + first_letter_*_hint (all notes)..." });
+      append({
+        level: "info",
+        message: "Starting sync json_hint (all notes)...",
+      });
       const res = await fetch("/api/tests/sync-anki-words/json-hint/sync-all/start", { method: "POST" });
       const data = (await res.json()) as { status?: SyncAllStatus } | unknown;
       setPreview(data);
@@ -602,7 +623,11 @@ export default function SyncAnkiWordsClient() {
         const s = (data as { status?: SyncAllStatus }).status ?? null;
         setJsonHintStatus(s);
       }
-      append({ level: res.ok ? "info" : "error", message: "Start result", data });
+      append({
+        level: res.ok ? "info" : "error",
+        message: "Start result",
+        data,
+      });
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       append({ level: "error", message: "Unexpected error", data: message });
@@ -612,12 +637,15 @@ export default function SyncAnkiWordsClient() {
   }
 
   async function startSyncSentenceEn() {
-    if (isRunning || sentenceEnStatus?.running) return;
+    if (isRunning || anySyncRunning) return;
     setIsRunning(true);
     setPreview(null);
 
     try {
-      append({ level: "info", message: "Starting sync sentence_en (all notes)..." });
+      append({
+        level: "info",
+        message: "Starting sync sentence_en + audio (all notes)...",
+      });
       const res = await fetch("/api/tests/sync-anki-words/sentence-en/sync-all/start", { method: "POST" });
       const data = (await res.json()) as { status?: SyncAllStatus } | unknown;
       setPreview(data);
@@ -625,7 +653,11 @@ export default function SyncAnkiWordsClient() {
         const s = (data as { status?: SyncAllStatus }).status ?? null;
         setSentenceEnStatus(s);
       }
-      append({ level: res.ok ? "info" : "error", message: "Start result", data });
+      append({
+        level: res.ok ? "info" : "error",
+        message: "Start result",
+        data,
+      });
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       append({ level: "error", message: "Unexpected error", data: message });
@@ -635,12 +667,15 @@ export default function SyncAnkiWordsClient() {
   }
 
   async function startSyncSentenceEnMeaningFa() {
-    if (isRunning || sentenceEnMeaningFaStatus?.running) return;
+    if (isRunning || anySyncRunning) return;
     setIsRunning(true);
     setPreview(null);
 
     try {
-      append({ level: "info", message: "Starting sync sentence_en_meaning_fa (all notes)..." });
+      append({
+        level: "info",
+        message: "Starting sync sentence_en_meaning_fa + audio (all notes)...",
+      });
       const res = await fetch("/api/tests/sync-anki-words/sentence-en-meaning-fa/sync-all/start", { method: "POST" });
       const data = (await res.json()) as { status?: SyncAllStatus } | unknown;
       setPreview(data);
@@ -648,7 +683,11 @@ export default function SyncAnkiWordsClient() {
         const s = (data as { status?: SyncAllStatus }).status ?? null;
         setSentenceEnMeaningFaStatus(s);
       }
-      append({ level: res.ok ? "info" : "error", message: "Start result", data });
+      append({
+        level: res.ok ? "info" : "error",
+        message: "Start result",
+        data,
+      });
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       append({ level: "error", message: "Unexpected error", data: message });
@@ -658,12 +697,15 @@ export default function SyncAnkiWordsClient() {
   }
 
   async function startSyncOtherMeaningsFa() {
-    if (isRunning || otherMeaningsFaStatus?.running) return;
+    if (isRunning || anySyncRunning) return;
     setIsRunning(true);
     setPreview(null);
 
     try {
-      append({ level: "info", message: "Starting sync other_meanings_fa (all notes)..." });
+      append({
+        level: "info",
+        message: "Starting sync other_meanings_fa + audio (all notes)...",
+      });
       const res = await fetch("/api/tests/sync-anki-words/other-meanings-fa/sync-all/start", { method: "POST" });
       const data = (await res.json()) as { status?: SyncAllStatus } | unknown;
       setPreview(data);
@@ -671,7 +713,11 @@ export default function SyncAnkiWordsClient() {
         const s = (data as { status?: SyncAllStatus }).status ?? null;
         setOtherMeaningsFaStatus(s);
       }
-      append({ level: res.ok ? "info" : "error", message: "Start result", data });
+      append({
+        level: res.ok ? "info" : "error",
+        message: "Start result",
+        data,
+      });
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       append({ level: "error", message: "Unexpected error", data: message });
@@ -681,12 +727,15 @@ export default function SyncAnkiWordsClient() {
   }
 
   async function startSyncConceptExplainedFa() {
-    if (isRunning || conceptExplainedFaStatus?.running) return;
+    if (isRunning || anySyncRunning) return;
     setIsRunning(true);
     setPreview(null);
 
     try {
-      append({ level: "info", message: "Starting sync concept_explained_fa (all notes)..." });
+      append({
+        level: "info",
+        message: "Starting sync concept_explained_fa + audio (all notes)...",
+      });
       const res = await fetch("/api/tests/sync-anki-words/concept-explained-fa/sync-all/start", { method: "POST" });
       const data = (await res.json()) as { status?: SyncAllStatus } | unknown;
       setPreview(data);
@@ -694,7 +743,11 @@ export default function SyncAnkiWordsClient() {
         const s = (data as { status?: SyncAllStatus }).status ?? null;
         setConceptExplainedFaStatus(s);
       }
-      append({ level: res.ok ? "info" : "error", message: "Start result", data });
+      append({
+        level: res.ok ? "info" : "error",
+        message: "Start result",
+        data,
+      });
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       append({ level: "error", message: "Unexpected error", data: message });
@@ -704,12 +757,15 @@ export default function SyncAnkiWordsClient() {
   }
 
   async function startSyncMeaningFa() {
-    if (isRunning || meaningFaStatus?.running) return;
+    if (isRunning || anySyncRunning) return;
     setIsRunning(true);
     setPreview(null);
 
     try {
-      append({ level: "info", message: "Starting sync meaning_fa (all notes)..." });
+      append({
+        level: "info",
+        message: "Starting sync meaning_fa + audio (all notes)...",
+      });
       const res = await fetch("/api/tests/sync-anki-words/meaning-fa/sync-all/start", { method: "POST" });
       const data = (await res.json()) as { status?: SyncAllStatus } | unknown;
       setPreview(data);
@@ -717,7 +773,11 @@ export default function SyncAnkiWordsClient() {
         const s = (data as { status?: SyncAllStatus }).status ?? null;
         setMeaningFaStatus(s);
       }
-      append({ level: res.ok ? "info" : "error", message: "Start result", data });
+      append({
+        level: res.ok ? "info" : "error",
+        message: "Start result",
+        data,
+      });
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       append({ level: "error", message: "Unexpected error", data: message });
@@ -727,20 +787,22 @@ export default function SyncAnkiWordsClient() {
   }
 
   async function startSyncAllMedia(mode: "missing" | "changed" = "missing") {
-    if (isRunning || mediaSyncStatus?.running) return;
+    if (isRunning || anySyncRunning) return;
     setIsRunning(true);
     setPreview(null);
 
     try {
       append({
         level: "info",
-        message: mode === "changed"
-          ? "Starting changed media copy (different local modification time)..."
-          : "Starting media copy (pictureWord + words)...",
+        message:
+          mode === "changed"
+            ? "Starting changed media copy (different file content)..."
+            : "Starting recursive public/audio media copy...",
       });
-      const endpoint = mode === "changed"
-        ? "/api/tests/sync-anki-words/media/sync-changed/start"
-        : "/api/tests/sync-anki-words/media/sync-all/start";
+      const endpoint =
+        mode === "changed"
+          ? "/api/tests/sync-anki-words/media/sync-changed/start"
+          : "/api/tests/sync-anki-words/media/sync-all/start";
       const res = await fetch(endpoint, { method: "POST" });
       const data = (await res.json()) as { status?: SyncAllStatus } | unknown;
       setPreview(data);
@@ -748,7 +810,11 @@ export default function SyncAnkiWordsClient() {
         const s = (data as { status?: SyncAllStatus }).status ?? null;
         setMediaSyncStatus(s);
       }
-      append({ level: res.ok ? "info" : "error", message: "Start result", data });
+      append({
+        level: res.ok ? "info" : "error",
+        message: "Start result",
+        data,
+      });
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       append({ level: "error", message: "Unexpected error", data: message });
@@ -758,21 +824,17 @@ export default function SyncAnkiWordsClient() {
   }
 
   async function startFullSyncAll() {
-    if (isRunning || fullSyncStatus?.running) return;
+    if (isRunning || anySyncRunning) return;
     setIsRunning(true);
     setPreview(null);
 
     try {
       append({
         level: "info",
-        message: fullSyncIgnoreUpdatedAt
-          ? "Starting FULL sync (DB -> Anki) with updatedAt fast-path disabled..."
-          : "Starting FULL sync (DB -> Anki)...",
+        message: "Starting optimized FULL sync (DB -> Anki)...",
       });
       const res = await fetch("/api/tests/sync-anki-words/full/sync-all/start", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ignoreUpdatedAt: fullSyncIgnoreUpdatedAt }),
       });
       const data = (await res.json()) as { status?: SyncAllStatus } | unknown;
       setPreview(data);
@@ -780,7 +842,11 @@ export default function SyncAnkiWordsClient() {
         const s = (data as { status?: SyncAllStatus }).status ?? null;
         setFullSyncStatus(s);
       }
-      append({ level: res.ok ? "info" : "error", message: "Start result", data });
+      append({
+        level: res.ok ? "info" : "error",
+        message: "Start result",
+        data,
+      });
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       append({ level: "error", message: "Unexpected error", data: message });
@@ -790,12 +856,15 @@ export default function SyncAnkiWordsClient() {
   }
 
   async function deduplicateAnkiLinkIdKeepOldest() {
-    if (isRunning || dedupStatus?.running) return;
+    if (isRunning || anySyncRunning) return;
     setIsRunning(true);
     setPreview(null);
 
     try {
-      append({ level: "info", message: "Deduplicating notes by anki_link_id (keep oldest noteId)..." });
+      append({
+        level: "info",
+        message: "Deduplicating notes by anki_link_id (keep oldest noteId)...",
+      });
       const res = await fetch("/api/tests/sync-anki-words/anki-link-id/deduplicate/start", { method: "POST" });
       const data = (await res.json()) as { status?: SyncAllStatus } | unknown;
       setPreview(data);
@@ -803,7 +872,11 @@ export default function SyncAnkiWordsClient() {
         const s = (data as { status?: SyncAllStatus }).status ?? null;
         setDedupStatus(s);
       }
-      append({ level: res.ok ? "info" : "error", message: "Start result", data });
+      append({
+        level: res.ok ? "info" : "error",
+        message: "Start result",
+        data,
+      });
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       append({ level: "error", message: "Unexpected error", data: message });
@@ -844,7 +917,11 @@ export default function SyncAnkiWordsClient() {
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       setMissingDeleteError(message);
-      append({ level: "error", message: "Failed to load Anki notes missing in DB", data: message });
+      append({
+        level: "error",
+        message: "Failed to load Anki notes missing in DB",
+        data: message,
+      });
     } finally {
       setMissingDeleteLoading(false);
     }
@@ -873,9 +950,14 @@ export default function SyncAnkiWordsClient() {
       const res = await fetch("/api/word/anki-missing/delete", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ noteIds: missingDeleteItems.map((item) => item.noteId) }),
+        body: JSON.stringify({
+          noteIds: missingDeleteItems.map((item) => item.noteId),
+        }),
       });
-      const data = (await res.json().catch(() => ({}))) as { deleted?: number; error?: string };
+      const data = (await res.json().catch(() => ({}))) as {
+        deleted?: number;
+        error?: string;
+      };
       if (!res.ok) throw new Error(data.error ?? `Request failed (${res.status})`);
 
       append({
@@ -885,16 +967,16 @@ export default function SyncAnkiWordsClient() {
       });
       const deleted = data.deleted ?? missingDeleteItems.length;
       setMissingDeleteItems([]);
-      setMissingDeleteTotalNotes((current) =>
-        current === null ? null : Math.max(0, current - deleted),
-      );
-      setMissingDeleteCheckedNotes((current) =>
-        current === null ? null : Math.max(0, current - deleted),
-      );
+      setMissingDeleteTotalNotes((current) => (current === null ? null : Math.max(0, current - deleted)));
+      setMissingDeleteCheckedNotes((current) => (current === null ? null : Math.max(0, current - deleted)));
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       setMissingDeleteError(message);
-      append({ level: "error", message: "Failed to delete Anki notes missing in DB", data: message });
+      append({
+        level: "error",
+        message: "Failed to delete Anki notes missing in DB",
+        data: message,
+      });
     } finally {
       setMissingDeleteDeleting(false);
     }
@@ -919,9 +1001,7 @@ export default function SyncAnkiWordsClient() {
     (sentenceEnStatus?.skippedNoWord ?? 0);
 
   const jsonHintSkippedTotal =
-    (jsonHintStatus?.skippedSame ?? 0) +
-    (jsonHintStatus?.skippedNoLinkId ?? 0) +
-    (jsonHintStatus?.skippedNoWord ?? 0);
+    (jsonHintStatus?.skippedSame ?? 0) + (jsonHintStatus?.skippedNoLinkId ?? 0) + (jsonHintStatus?.skippedNoWord ?? 0);
 
   const mediaSkippedTotal =
     (mediaSyncStatus?.skippedSame ?? 0) +
@@ -929,14 +1009,10 @@ export default function SyncAnkiWordsClient() {
     (mediaSyncStatus?.skippedNoWord ?? 0);
 
   const fullSkippedTotal =
-    (fullSyncStatus?.skippedSame ?? 0) +
-    (fullSyncStatus?.skippedNoLinkId ?? 0) +
-    (fullSyncStatus?.skippedNoWord ?? 0);
+    (fullSyncStatus?.skippedSame ?? 0) + (fullSyncStatus?.skippedNoLinkId ?? 0) + (fullSyncStatus?.skippedNoWord ?? 0);
 
   const dedupSkippedTotal =
-    (dedupStatus?.skippedSame ?? 0) +
-    (dedupStatus?.skippedNoLinkId ?? 0) +
-    (dedupStatus?.skippedNoWord ?? 0);
+    (dedupStatus?.skippedSame ?? 0) + (dedupStatus?.skippedNoLinkId ?? 0) + (dedupStatus?.skippedNoWord ?? 0);
 
   const conceptSkippedTotal =
     (conceptExplainedFaStatus?.skippedSame ?? 0) +
@@ -957,6 +1033,19 @@ export default function SyncAnkiWordsClient() {
     (sentenceEnMeaningFaStatus?.skippedSame ?? 0) +
     (sentenceEnMeaningFaStatus?.skippedNoLinkId ?? 0) +
     (sentenceEnMeaningFaStatus?.skippedNoWord ?? 0);
+
+  const anySyncRunning =
+    [
+      jsonHintStatus,
+      mediaSyncStatus,
+      fullSyncStatus,
+      dedupStatus,
+      sentenceEnStatus,
+      sentenceEnMeaningFaStatus,
+      meaningFaStatus,
+      otherMeaningsFaStatus,
+      conceptExplainedFaStatus,
+    ].some((status) => status?.running) || missingDeleteDeleting;
 
   return (
     <main className="mx-auto w-full max-w-6xl select-text p-4">
@@ -993,10 +1082,10 @@ export default function SyncAnkiWordsClient() {
                 <button
                   type="button"
                   onClick={() => void startSyncJsonHint()}
-                  disabled={isRunning || Boolean(jsonHintStatus?.running)}
+                  disabled={isRunning || anySyncRunning}
                   className="h-10 rounded-xl bg-foreground px-3 text-sm font-semibold text-background transition disabled:opacity-50"
                 >
-                  Sync json_hint + hints
+                  Sync json_hint
                 </button>
                 <HelpButton id="json_hint" />
               </div>
@@ -1004,7 +1093,7 @@ export default function SyncAnkiWordsClient() {
                 <button
                   type="button"
                   onClick={() => void startSyncAllMedia()}
-                  disabled={isRunning || Boolean(mediaSyncStatus?.running)}
+                  disabled={isRunning || anySyncRunning}
                   className="h-10 rounded-xl bg-foreground px-3 text-sm font-semibold text-background transition disabled:opacity-50"
                 >
                   Copy all media
@@ -1012,7 +1101,7 @@ export default function SyncAnkiWordsClient() {
                 <button
                   type="button"
                   onClick={() => void startSyncAllMedia("changed")}
-                  disabled={isRunning || Boolean(mediaSyncStatus?.running)}
+                  disabled={isRunning || anySyncRunning}
                   className="h-10 rounded-xl border border-card bg-background px-3 text-sm font-semibold text-foreground transition disabled:opacity-50"
                 >
                   Copy changed media
@@ -1023,27 +1112,18 @@ export default function SyncAnkiWordsClient() {
                 <button
                   type="button"
                   onClick={() => void startFullSyncAll()}
-                  disabled={isRunning || Boolean(fullSyncStatus?.running)}
+                  disabled={isRunning || anySyncRunning}
                   className="h-10 rounded-xl bg-foreground px-3 text-sm font-semibold text-background transition disabled:opacity-50"
                 >
                   Full sync DB → Anki
                 </button>
-                <label className="mr-2 inline-flex items-center gap-2 text-xs text-foreground/80">
-                  <input
-                    type="checkbox"
-                    checked={fullSyncIgnoreUpdatedAt}
-                    onChange={(e) => setFullSyncIgnoreUpdatedAt(e.target.checked)}
-                    disabled={isRunning || Boolean(fullSyncStatus?.running)}
-                  />
-                  Ignore updatedAt and sync all
-                </label>
                 <HelpButton id="full_sync" />
               </div>
               <div className="flex items-center gap-1">
                 <button
                   type="button"
                   onClick={() => void deduplicateAnkiLinkIdKeepOldest()}
-                  disabled={isRunning || Boolean(dedupStatus?.running)}
+                  disabled={isRunning || anySyncRunning}
                   className="h-10 rounded-xl border border-card bg-background px-3 text-sm font-semibold text-foreground transition hover:bg-black/5 dark:hover:bg-white/5 disabled:opacity-50"
                 >
                   Deduplicate (keep oldest)
@@ -1054,7 +1134,7 @@ export default function SyncAnkiWordsClient() {
                 <button
                   type="button"
                   onClick={() => void openMissingDeleteModal()}
-                  disabled={missingDeleteLoading || missingDeleteDeleting}
+                  disabled={anySyncRunning || missingDeleteLoading || missingDeleteDeleting}
                   className="h-10 rounded-xl border border-red-500/30 bg-red-600/10 px-3 text-sm font-semibold text-red-700 transition hover:bg-red-600/15 disabled:opacity-50 dark:text-red-300"
                 >
                   Delete Anki notes missing in DB
@@ -1064,10 +1144,10 @@ export default function SyncAnkiWordsClient() {
                 <button
                   type="button"
                   onClick={() => void startSyncSentenceEn()}
-                  disabled={isRunning || Boolean(sentenceEnStatus?.running)}
+                  disabled={isRunning || anySyncRunning}
                   className="h-10 rounded-xl bg-foreground px-3 text-sm font-semibold text-background transition disabled:opacity-50"
                 >
-                  Sync sentence_en
+                  Sync sentence_en + audio
                 </button>
                 <HelpButton id="sentence_en" />
               </div>
@@ -1075,10 +1155,10 @@ export default function SyncAnkiWordsClient() {
                 <button
                   type="button"
                   onClick={() => void startSyncSentenceEnMeaningFa()}
-                  disabled={isRunning || Boolean(sentenceEnMeaningFaStatus?.running)}
+                  disabled={isRunning || anySyncRunning}
                   className="h-10 rounded-xl bg-foreground px-3 text-sm font-semibold text-background transition disabled:opacity-50"
                 >
-                  Sync sentence_en_meaning_fa
+                  Sync sentence_en_meaning_fa + audio
                 </button>
                 <HelpButton id="sentence_en_meaning_fa" />
               </div>
@@ -1086,10 +1166,10 @@ export default function SyncAnkiWordsClient() {
                 <button
                   type="button"
                   onClick={() => void startSyncMeaningFa()}
-                  disabled={isRunning || Boolean(meaningFaStatus?.running)}
+                  disabled={isRunning || anySyncRunning}
                   className="h-10 rounded-xl bg-foreground px-3 text-sm font-semibold text-background transition disabled:opacity-50"
                 >
-                  Sync meaning_fa
+                  Sync meaning_fa + audio
                 </button>
                 <HelpButton id="meaning_fa" />
               </div>
@@ -1097,10 +1177,10 @@ export default function SyncAnkiWordsClient() {
                 <button
                   type="button"
                   onClick={() => void startSyncOtherMeaningsFa()}
-                  disabled={isRunning || Boolean(otherMeaningsFaStatus?.running)}
+                  disabled={isRunning || anySyncRunning}
                   className="h-10 rounded-xl bg-foreground px-3 text-sm font-semibold text-background transition disabled:opacity-50"
                 >
-                  Sync other_meanings_fa
+                  Sync other_meanings_fa + audio
                 </button>
                 <HelpButton id="other_meanings_fa" />
               </div>
@@ -1108,10 +1188,10 @@ export default function SyncAnkiWordsClient() {
                 <button
                   type="button"
                   onClick={() => void startSyncConceptExplainedFa()}
-                  disabled={isRunning || Boolean(conceptExplainedFaStatus?.running)}
+                  disabled={isRunning || anySyncRunning}
                   className="h-10 rounded-xl bg-foreground px-3 text-sm font-semibold text-background transition disabled:opacity-50"
                 >
-                  Sync concept_explained_fa
+                  Sync concept_explained_fa + audio
                 </button>
                 <HelpButton id="concept_explained_fa" />
               </div>
@@ -1179,9 +1259,9 @@ export default function SyncAnkiWordsClient() {
                   <div className="space-y-1">
                     <div className="text-base font-semibold">حذف نوت‌های Anki که در دیتابیس نیستند</div>
                     <div className="text-xs opacity-80">
-                      پیدا شده: <span className="font-semibold">{missingDeleteItems.length}</span>
-                      {" "}• بررسی‌شده: <span className="font-semibold">{missingDeleteCheckedNotes ?? "—"}</span>
-                      {" "}• کل نوت‌های query: <span className="font-semibold">{missingDeleteTotalNotes ?? "—"}</span>
+                      پیدا شده: <span className="font-semibold">{missingDeleteItems.length}</span> • بررسی‌شده:{" "}
+                      <span className="font-semibold">{missingDeleteCheckedNotes ?? "—"}</span> • کل نوت‌های query:{" "}
+                      <span className="font-semibold">{missingDeleteTotalNotes ?? "—"}</span>
                     </div>
                     {missingDeleteQuery ? (
                       <div className="text-xs opacity-80">
@@ -1232,7 +1312,9 @@ export default function SyncAnkiWordsClient() {
                         {missingDeleteItems.map((item) => (
                           <tr key={`${item.noteId}-${item.anki_link_id}`} className="border-b border-card align-top">
                             <td className="whitespace-nowrap px-3 py-2 font-mono text-neutral-700">{item.noteId}</td>
-                            <td className="whitespace-nowrap px-3 py-2 font-mono text-neutral-800">{item.anki_link_id}</td>
+                            <td className="whitespace-nowrap px-3 py-2 font-mono text-neutral-800">
+                              {item.anki_link_id}
+                            </td>
                             <td className="whitespace-nowrap px-3 py-2 text-neutral-900">{item.base_form || "—"}</td>
                             <td className="min-w-[18rem] px-3 py-2 text-neutral-900">{item.meaning_fa || "—"}</td>
                           </tr>
@@ -1254,9 +1336,7 @@ export default function SyncAnkiWordsClient() {
                     disabled={missingDeleteLoading || missingDeleteDeleting || !missingDeleteItems.length}
                     className="rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700 disabled:opacity-50"
                   >
-                    {missingDeleteDeleting
-                      ? "در حال حذف..."
-                      : `حذف همه از Anki (${missingDeleteItems.length})`}
+                    {missingDeleteDeleting ? "در حال حذف..." : `حذف همه از Anki (${missingDeleteItems.length})`}
                   </button>
                 </div>
               </div>
@@ -1267,22 +1347,26 @@ export default function SyncAnkiWordsClient() {
             <div>
               {jsonHintStatus ? (
                 <span>
-                  json_hint + hints: Processed{" "}
-                  <span className="font-semibold">{jsonHintStatus.processed}/{jsonHintStatus.total}</span> • Updated{" "}
-                  <span className="font-semibold">{jsonHintStatus.updated}</span> • Skipped{" "}
+                  json_hint: Processed{" "}
+                  <span className="font-semibold">
+                    {jsonHintStatus.processed}/{jsonHintStatus.total}
+                  </span>{" "}
+                  • Updated <span className="font-semibold">{jsonHintStatus.updated}</span> • Skipped{" "}
                   <span className="font-semibold">{jsonHintSkippedTotal}</span> • Failed{" "}
                   <span className="font-semibold">{jsonHintStatus.failed}</span>
                 </span>
               ) : (
-                <span>json_hint + hints: Processed 0/0 • Updated 0 • Skipped 0 • Failed 0</span>
+                <span>json_hint: Processed 0/0 • Updated 0 • Skipped 0 • Failed 0</span>
               )}
             </div>
             <div>
               {mediaSyncStatus ? (
                 <span>
                   media copy: Processed{" "}
-                  <span className="font-semibold">{mediaSyncStatus.processed}/{mediaSyncStatus.total}</span> • Uploaded{" "}
-                  <span className="font-semibold">{mediaSyncStatus.mediaUploaded}</span> • Skipped{" "}
+                  <span className="font-semibold">
+                    {mediaSyncStatus.processed}/{mediaSyncStatus.total}
+                  </span>{" "}
+                  • Uploaded <span className="font-semibold">{mediaSyncStatus.mediaUploaded}</span> • Skipped{" "}
                   <span className="font-semibold">{mediaSkippedTotal}</span> • Failed{" "}
                   <span className="font-semibold">{mediaSyncStatus.failed}</span>
                 </span>
@@ -1294,12 +1378,13 @@ export default function SyncAnkiWordsClient() {
               {fullSyncStatus ? (
                 <span>
                   full sync: Processed{" "}
-                  <span className="font-semibold">{fullSyncStatus.processed}/{fullSyncStatus.total}</span> • Created{" "}
-                  <span className="font-semibold">{fullSyncStatus.created ?? 0}</span> • Updated{" "}
+                  <span className="font-semibold">
+                    {fullSyncStatus.processed}/{fullSyncStatus.total}
+                  </span>{" "}
+                  • Created <span className="font-semibold">{fullSyncStatus.created ?? 0}</span> • Updated{" "}
                   <span className="font-semibold">{fullSyncStatus.updated}</span> • Skipped{" "}
                   <span className="font-semibold">{fullSkippedTotal}</span> • Failed{" "}
                   <span className="font-semibold">{fullSyncStatus.failed}</span>
-                  {fullSyncStatus.ignoreUpdatedAt ? " • Mode: ignore updatedAt" : ""}
                 </span>
               ) : (
                 <span>full sync: Processed 0/0 • Created 0 • Updated 0 • Skipped 0 • Failed 0</span>
@@ -1309,8 +1394,10 @@ export default function SyncAnkiWordsClient() {
               {dedupStatus ? (
                 <span>
                   dedup: Processed{" "}
-                  <span className="font-semibold">{dedupStatus.processed}/{dedupStatus.total}</span> • Deleted{" "}
-                  <span className="font-semibold">{dedupStatus.updated}</span> • Kept{" "}
+                  <span className="font-semibold">
+                    {dedupStatus.processed}/{dedupStatus.total}
+                  </span>{" "}
+                  • Deleted <span className="font-semibold">{dedupStatus.updated}</span> • Kept{" "}
                   <span className="font-semibold">{dedupSkippedTotal}</span> • Failed{" "}
                   <span className="font-semibold">{dedupStatus.failed}</span>
                 </span>
@@ -1321,20 +1408,22 @@ export default function SyncAnkiWordsClient() {
             <div>
               {sentenceEnStatus ? (
                 <span>
-                  sentence_en: Processed{" "}
-                  <span className="font-semibold">{sentenceEnStatus.processed}/{sentenceEnStatus.total}</span> • Updated{" "}
-                  <span className="font-semibold">{sentenceEnStatus.updated}</span> • Skipped{" "}
+                  sentence_en + audio: Processed{" "}
+                  <span className="font-semibold">
+                    {sentenceEnStatus.processed}/{sentenceEnStatus.total}
+                  </span>{" "}
+                  • Updated <span className="font-semibold">{sentenceEnStatus.updated}</span> • Skipped{" "}
                   <span className="font-semibold">{sentenceEnSkippedTotal}</span> • Failed{" "}
                   <span className="font-semibold">{sentenceEnStatus.failed}</span>
                 </span>
               ) : (
-                <span>sentence_en: Processed 0/0 • Updated 0 • Skipped 0 • Failed 0</span>
+                <span>sentence_en + audio: Processed 0/0 • Updated 0 • Skipped 0 • Failed 0</span>
               )}
             </div>
             <div>
               {sentenceEnMeaningFaStatus ? (
                 <span>
-                  sentence_en_meaning_fa: Processed{" "}
+                  sentence_en_meaning_fa + audio: Processed{" "}
                   <span className="font-semibold">
                     {sentenceEnMeaningFaStatus.processed}/{sentenceEnMeaningFaStatus.total}
                   </span>{" "}
@@ -1343,13 +1432,13 @@ export default function SyncAnkiWordsClient() {
                   <span className="font-semibold">{sentenceEnMeaningFaStatus.failed}</span>
                 </span>
               ) : (
-                <span>sentence_en_meaning_fa: Processed 0/0 • Updated 0 • Skipped 0 • Failed 0</span>
+                <span>sentence_en_meaning_fa + audio: Processed 0/0 • Updated 0 • Skipped 0 • Failed 0</span>
               )}
             </div>
             <div>
               {meaningFaStatus ? (
                 <span>
-                  meaning_fa: Processed{" "}
+                  meaning_fa + audio: Processed{" "}
                   <span className="font-semibold">
                     {meaningFaStatus.processed}/{meaningFaStatus.total}
                   </span>{" "}
@@ -1358,13 +1447,13 @@ export default function SyncAnkiWordsClient() {
                   <span className="font-semibold">{meaningFaStatus.failed}</span>
                 </span>
               ) : (
-                <span>meaning_fa: Processed 0/0 • Updated 0 • Skipped 0 • Failed 0</span>
+                <span>meaning_fa + audio: Processed 0/0 • Updated 0 • Skipped 0 • Failed 0</span>
               )}
             </div>
             <div>
               {conceptExplainedFaStatus ? (
                 <span>
-                  concept_explained_fa: Processed{" "}
+                  concept_explained_fa + audio: Processed{" "}
                   <span className="font-semibold">
                     {conceptExplainedFaStatus.processed}/{conceptExplainedFaStatus.total}
                   </span>{" "}
@@ -1373,13 +1462,13 @@ export default function SyncAnkiWordsClient() {
                   <span className="font-semibold">{conceptExplainedFaStatus.failed}</span>
                 </span>
               ) : (
-                <span>concept_explained_fa: Processed 0/0 • Updated 0 • Skipped 0 • Failed 0</span>
+                <span>concept_explained_fa + audio: Processed 0/0 • Updated 0 • Skipped 0 • Failed 0</span>
               )}
             </div>
             <div>
               {otherMeaningsFaStatus ? (
                 <span>
-                  other_meanings_fa: Processed{" "}
+                  other_meanings_fa + audio: Processed{" "}
                   <span className="font-semibold">
                     {otherMeaningsFaStatus.processed}/{otherMeaningsFaStatus.total}
                   </span>{" "}
@@ -1388,7 +1477,7 @@ export default function SyncAnkiWordsClient() {
                   <span className="font-semibold">{otherMeaningsFaStatus.failed}</span>
                 </span>
               ) : (
-                <span>other_meanings_fa: Processed 0/0 • Updated 0 • Skipped 0 • Failed 0</span>
+                <span>other_meanings_fa + audio: Processed 0/0 • Updated 0 • Skipped 0 • Failed 0</span>
               )}
             </div>
           </div>

@@ -1,17 +1,24 @@
 import "server-only";
 
-import { createAnkiConnectClient } from "@/lib/anki";
+import { createAnkiConnectClient, type AnkiMultiAction } from "@/lib/anki";
 import { AnkiNoteTypes, WordAnkiConstants } from "@/lib/anki";
 import { ensureMetaLexVr9ModelFields } from "@/lib/anki/ensureMetaLexVr9ModelFields";
 import { getAnkiStructureSettings } from "@/lib/anki/structureSettingsRepo";
 import {
   generateWordAnkiFieldsForMetaLexVr9,
+  assertSupportedWordAnkiFieldNames,
   getAnkiLinkIdFromNoteFields,
   getWordAnkiManagedFieldNames,
 } from "@/lib/anki/wordAnkiMapping";
+import {
+  acquireWordSyncJobLock,
+  getActiveWordSyncJob,
+} from "@/lib/anki/wordSyncJobLock";
 import { prisma } from "@/lib/prisma";
 import { hydrateWordsWithPersianMeanings } from "@/lib/words/persianMeanings.server";
 import { hydrateWordsWithEnglishFields } from "@/lib/english/wordEnglishFields.server";
+import { hydrateWordsWithEnglishSynonyms } from "@/lib/words/englishSynonyms.server";
+import { hydrateWordsWithPrimarySentence } from "@/lib/words/primarySentences.server";
 
 export type FullSyncAllStatus = {
   jobId: string;
@@ -20,8 +27,6 @@ export type FullSyncAllStatus = {
   startedAt: string | null;
   finishedAt: string | null;
   error: string | null;
-  ignoreUpdatedAt: boolean;
-
   stopRequested: boolean;
   stoppedEarly: boolean;
 
@@ -33,6 +38,7 @@ export type FullSyncAllStatus = {
   skippedNoLinkId: number;
   skippedNoWord: number;
   failed: number;
+  failureSamples: Array<{ noteId: number | null; error: string }>;
   mediaUploaded: number;
   mediaDeleted: number;
   currentNoteId: number | null;
@@ -50,27 +56,6 @@ function chunk<T>(arr: T[], size: number): T[][] {
   return out;
 }
 
-async function runWithConcurrency<T>(
-  items: T[],
-  concurrency: number,
-  worker: (item: T) => Promise<void>,
-): Promise<void> {
-  const c = Math.max(1, Math.trunc(concurrency) || 1);
-  let idx = 0;
-  const runners = Array.from(
-    { length: Math.min(c, items.length) },
-    async () => {
-      for (;;) {
-        const i = idx;
-        idx += 1;
-        if (i >= items.length) return;
-        await worker(items[i]);
-      }
-    },
-  );
-  await Promise.all(runners);
-}
-
 function normalizeFieldValueForCompare(value: string): string {
   return String(value ?? "")
     .replace(/<br\s*\/?>/gi, "\n")
@@ -79,10 +64,6 @@ function normalizeFieldValueForCompare(value: string): string {
     .map((line) => line.trimEnd())
     .join("\n")
     .trim();
-}
-
-function wordUpdatedAtForAnkiField(updatedAt: Date): string {
-  return updatedAt.toISOString();
 }
 
 function getState(): State {
@@ -95,7 +76,6 @@ function getState(): State {
       startedAt: null,
       finishedAt: null,
       error: null,
-      ignoreUpdatedAt: false,
       stopRequested: false,
       stoppedEarly: false,
       total: 0,
@@ -106,6 +86,7 @@ function getState(): State {
       skippedNoLinkId: 0,
       skippedNoWord: 0,
       failed: 0,
+      failureSamples: [],
       mediaUploaded: 0,
       mediaDeleted: 0,
       currentNoteId: null,
@@ -122,37 +103,118 @@ export function getFullSyncAllStatus(): FullSyncAllStatus {
   return pub;
 }
 
-async function updateNoteFields(
-  noteId: number,
-  fields: Record<string, string>,
-  anki: ReturnType<typeof createAnkiConnectClient>,
-) {
-  const res = await anki.requestDetailed("updateNoteFields", { note: { id: noteId, fields } });
-  if (!res.ok) return { ok: false as const, error: res.error };
-  return { ok: true as const };
-}
-
-async function addWordNote(
-  fields: Record<string, string>,
-  anki: ReturnType<typeof createAnkiConnectClient>,
-) {
+function addWordNoteAction(fields: Record<string, string>): AnkiMultiAction {
   const deckName = WordAnkiConstants.decks.tempRoot;
   const modelName = AnkiNoteTypes.META_LEX_VR9;
-
-  const res = await anki.requestDetailed("addNote", {
-    note: {
-      deckName,
-      modelName,
-      fields,
-      options: {
-        allowDuplicate: false,
-        duplicateScope: "collection",
-        duplicateScopeOptions: { deckName, checkChildren: true, checkAllModels: true },
+  return {
+    action: "addNote",
+    params: {
+      note: {
+        deckName,
+        modelName,
+        fields,
+        options: {
+          allowDuplicate: false,
+          duplicateScope: "collection",
+          duplicateScopeOptions: {
+            deckName,
+            checkChildren: true,
+            checkAllModels: true,
+          },
+        },
       },
     },
+  };
+}
+
+type PendingWrite = {
+  kind: "create" | "update";
+  noteId: number | null;
+  action: AnkiMultiAction;
+};
+
+const MAX_MULTI_ACTIONS = 200;
+const MAX_MULTI_PAYLOAD_BYTES = 1_000_000;
+
+function chunkWrites(writes: PendingWrite[]): PendingWrite[][] {
+  const batches: PendingWrite[][] = [];
+  let batch: PendingWrite[] = [];
+  let bytes = 0;
+  for (const write of writes) {
+    const writeBytes = Buffer.byteLength(JSON.stringify(write.action), "utf8");
+    if (
+      batch.length &&
+      (batch.length >= MAX_MULTI_ACTIONS ||
+        bytes + writeBytes > MAX_MULTI_PAYLOAD_BYTES)
+    ) {
+      batches.push(batch);
+      batch = [];
+      bytes = 0;
+    }
+    batch.push(write);
+    bytes += writeBytes;
+  }
+  if (batch.length) batches.push(batch);
+  return batches;
+}
+
+function nestedMultiError(result: unknown): string | null {
+  if (!result || typeof result !== "object" || !("error" in result))
+    return null;
+  const error = (result as { error?: unknown }).error;
+  return error == null ? null : String(error);
+}
+
+function recordWriteResult(
+  state: State,
+  write: PendingWrite,
+  error: string | null,
+) {
+  if (error) {
+    state.failed += 1;
+    if (state.failureSamples.length < 20) {
+      state.failureSamples.push({ noteId: write.noteId, error });
+    }
+  } else if (write.kind === "create") state.created += 1;
+  else state.updated += 1;
+  state.processed += 1;
+}
+
+function shouldSplitFailedBatch(error: string) {
+  return /\b413\b|payload|request entity|body.*large|too large/i.test(error);
+}
+
+async function executeWriteBatch(
+  state: State,
+  writes: PendingWrite[],
+  anki: ReturnType<typeof createAnkiConnectClient>,
+): Promise<void> {
+  if (!writes.length) return;
+  state.currentNoteId =
+    writes.find((write) => write.noteId !== null)?.noteId ?? null;
+  const response = await anki.requestDetailed("multi", {
+    actions: writes.map((write) => write.action),
   });
-  if (!res.ok) return { ok: false as const, error: res.error };
-  return { ok: true as const, noteId: res.result ?? null };
+  if (!response.ok || !Array.isArray(response.result)) {
+    const error = response.ok ? "Invalid multi response" : response.error;
+    if (writes.length > 1 && shouldSplitFailedBatch(error)) {
+      const middle = Math.ceil(writes.length / 2);
+      await executeWriteBatch(state, writes.slice(0, middle), anki);
+      await executeWriteBatch(state, writes.slice(middle), anki);
+      return;
+    }
+    for (const write of writes) recordWriteResult(state, write, error);
+    return;
+  }
+
+  for (let index = 0; index < writes.length; index += 1) {
+    const result = response.result[index];
+    const error =
+      index >= response.result.length
+        ? "Missing multi result"
+        : nestedMultiError(result);
+    recordWriteResult(state, writes[index]!, error);
+  }
 }
 
 type ExistingAnkiNoteInfo = {
@@ -161,160 +223,179 @@ type ExistingAnkiNoteInfo = {
 };
 
 async function runJob(state: State) {
-  state.running = true;
-  state.done = false;
-  state.error = null;
-  state.ignoreUpdatedAt = Boolean(state.ignoreUpdatedAt);
-  state.stopRequested = false;
-  state.stoppedEarly = false;
-  state.startedAt = nowIso();
-  state.finishedAt = null;
-  state.total = 0;
-  state.processed = 0;
-  state.created = 0;
-  state.updated = 0;
-  state.skippedSame = 0;
-  state.skippedNoLinkId = 0;
-  state.skippedNoWord = 0;
-  state.failed = 0;
-  state.mediaUploaded = 0;
-  state.mediaDeleted = 0;
-  state.currentNoteId = null;
+  const releaseLock = acquireWordSyncJobLock("full sync DB → Anki");
+  try {
+    state.running = true;
+    state.done = false;
+    state.error = null;
+    state.stopRequested = false;
+    state.stoppedEarly = false;
+    state.startedAt = nowIso();
+    state.finishedAt = null;
+    state.total = 0;
+    state.processed = 0;
+    state.created = 0;
+    state.updated = 0;
+    state.skippedSame = 0;
+    state.skippedNoLinkId = 0;
+    state.skippedNoWord = 0;
+    state.failed = 0;
+    state.failureSamples = [];
+    state.mediaUploaded = 0;
+    state.mediaDeleted = 0;
+    state.currentNoteId = null;
 
-  state.total = await prisma.word.count();
+    state.total = await prisma.word.count();
 
-  const modelName = AnkiNoteTypes.META_LEX_VR9;
-  const query = `note:"${modelName.replaceAll('"', '\\"')}"`;
+    const modelName = AnkiNoteTypes.META_LEX_VR9;
+    const query = `note:"${modelName.replaceAll('"', '\\"')}"`;
 
-  const ankiFinder = createAnkiConnectClient({ timeoutMs: 30000, retryDelayMs: 1000 });
-
-  // Ensure temp deck exists (no-op if already created).
-  await ankiFinder.requestDetailed("createDeck", { deck: WordAnkiConstants.decks.tempRoot });
-
-  // Ensure the note type exists and has the expected fields (including `updatedAt`).
-  await ensureMetaLexVr9ModelFields(ankiFinder);
-  const structureSettings = await getAnkiStructureSettings();
-  const configuredFields = structureSettings.config.noteType.fields;
-  const managedFields = getWordAnkiManagedFieldNames(configuredFields).filter(
-    (field) => field !== "selfGuide" && field !== "anki_link_id",
-  );
-
-  const idsRes = await ankiFinder.requestDetailed("findNotes", { query });
-  if (!idsRes.ok) throw new Error(idsRes.error);
-  const noteIds = idsRes.result ?? [];
-
-  const noteByAnkiLinkId = new Map<string, ExistingAnkiNoteInfo>();
-  for (const batch of chunk(noteIds, 250)) {
-    const infoRes = await ankiFinder.requestDetailed("notesInfo", { notes: batch });
-    if (!infoRes.ok) throw new Error(infoRes.error);
-    for (const n of infoRes.result ?? []) {
-      const ankiLinkId = getAnkiLinkIdFromNoteFields(n);
-      if (!ankiLinkId) continue;
-      if (noteByAnkiLinkId.has(ankiLinkId)) continue;
-
-      const fieldsByName: Partial<Record<string, string>> = {};
-      for (const f of managedFields) {
-        fieldsByName[f] = normalizeFieldValueForCompare(String(n.fields?.[f]?.value ?? ""));
-      }
-      noteByAnkiLinkId.set(ankiLinkId, { noteId: n.noteId, fieldsByName });
-    }
-  }
-
-  const concurrency = 12;
-  const clients = Array.from({ length: concurrency }, () =>
-    createAnkiConnectClient({ timeoutMs: 30000, retryDelayMs: 1000 }),
-  );
-
-  let lastId = 0;
-  const pageSize = 250;
-  for (;;) {
-    if (state.stopRequested) break;
-
-    const rows = await prisma.word.findMany({
-      where: { id: { gt: lastId } },
-      orderBy: { id: "asc" },
-      take: pageSize,
+    const ankiFinder = createAnkiConnectClient({
+      timeoutMs: 30000,
+      retryDelayMs: 1000,
     });
-    if (!rows.length) break;
-    lastId = rows[rows.length - 1]!.id;
 
-    const rowsWithMeanings = await hydrateWordsWithPersianMeanings(await hydrateWordsWithEnglishFields(rows));
-    await runWithConcurrency(rowsWithMeanings, concurrency, async (word) => {
-      if (state.stopRequested) return;
+    // Ensure temp deck exists (no-op if already created).
+    await ankiFinder.requestDetailed("createDeck", {
+      deck: WordAnkiConstants.decks.tempRoot,
+    });
 
-      const existing = noteByAnkiLinkId.get(word.anki_link_id) ?? null;
-      state.currentNoteId = existing?.noteId ?? null;
+    const structureSettings = await getAnkiStructureSettings();
+    const configuredFields = structureSettings.config.noteType.fields;
+    assertSupportedWordAnkiFieldNames(configuredFields);
+    // Validate before mutating the model, then make Anki match Structure Builder.
+    await ensureMetaLexVr9ModelFields(ankiFinder);
+    const managedFields = getWordAnkiManagedFieldNames(configuredFields).filter(
+      (field) => field !== "selfGuide" && field !== "anki_link_id",
+    );
 
-      // Fast path: If our `updatedAt` field matches, treat the note as up-to-date and skip.
-      // This avoids generating and comparing every field on every run.
-      if (existing && !state.ignoreUpdatedAt) {
-        const prevUpdatedAt = normalizeFieldValueForCompare(String(existing.fieldsByName.updatedAt ?? ""));
-        const nextUpdatedAt = normalizeFieldValueForCompare(wordUpdatedAtForAnkiField(word.updatedAt));
-        if (prevUpdatedAt && prevUpdatedAt === nextUpdatedAt) {
+    const idsRes = await ankiFinder.requestDetailed("findNotes", { query });
+    if (!idsRes.ok) throw new Error(idsRes.error);
+    const noteIds = idsRes.result ?? [];
+
+    const noteByAnkiLinkId = new Map<string, ExistingAnkiNoteInfo>();
+    for (const batch of chunk(noteIds, 1000)) {
+      const infoRes = await ankiFinder.requestDetailed("notesInfo", {
+        notes: batch,
+      });
+      if (!infoRes.ok) throw new Error(infoRes.error);
+      for (const n of infoRes.result ?? []) {
+        const ankiLinkId = getAnkiLinkIdFromNoteFields(n);
+        if (!ankiLinkId) continue;
+        if (noteByAnkiLinkId.has(ankiLinkId)) continue;
+
+        const fieldsByName: Partial<Record<string, string>> = {};
+        for (const f of managedFields) {
+          fieldsByName[f] = normalizeFieldValueForCompare(
+            String(n.fields?.[f]?.value ?? ""),
+          );
+        }
+        noteByAnkiLinkId.set(ankiLinkId, { noteId: n.noteId, fieldsByName });
+      }
+    }
+
+    let lastId = 0;
+    const pageSize = 500;
+    for (;;) {
+      if (state.stopRequested) break;
+
+      const rows = await prisma.word.findMany({
+        where: { id: { gt: lastId } },
+        orderBy: { id: "asc" },
+        take: pageSize,
+      });
+      if (!rows.length) break;
+      lastId = rows[rows.length - 1]!.id;
+
+      const hydratedRows = await hydrateWordsWithPrimarySentence(
+        await hydrateWordsWithEnglishSynonyms(
+          await hydrateWordsWithPersianMeanings(
+            await hydrateWordsWithEnglishFields(rows),
+          ),
+        ),
+      );
+      const generatedRows = await Promise.all(
+        hydratedRows.map(async (word) => ({
+          word,
+          fields: await generateWordAnkiFieldsForMetaLexVr9(
+            word,
+            configuredFields,
+          ),
+        })),
+      );
+      const pendingWrites: PendingWrite[] = [];
+      for (const { word, fields } of generatedRows) {
+        if (state.stopRequested) break;
+
+        const existing = noteByAnkiLinkId.get(word.anki_link_id) ?? null;
+        state.currentNoteId = existing?.noteId ?? null;
+
+        if (!existing) {
+          pendingWrites.push({
+            kind: "create",
+            noteId: null,
+            action: addWordNoteAction(fields),
+          });
+          continue;
+        }
+
+        const before = existing.fieldsByName;
+        const changedFields: Record<string, string> = {};
+        for (const f of managedFields) {
+          const prev = normalizeFieldValueForCompare(String(before[f] ?? ""));
+          const next = normalizeFieldValueForCompare(String(fields[f] ?? ""));
+          if (prev !== next) changedFields[f] = fields[f] ?? "";
+        }
+
+        if (!Object.keys(changedFields).length) {
           state.skippedSame += 1;
           state.processed += 1;
-          return;
+          continue;
         }
+
+        pendingWrites.push({
+          kind: "update",
+          noteId: existing.noteId,
+          action: {
+            action: "updateNoteFields",
+            params: { note: { id: existing.noteId, fields: changedFields } },
+          },
+        });
       }
 
-      const fields = await generateWordAnkiFieldsForMetaLexVr9(word, configuredFields);
-
-      if (!existing) {
-        const client = clients[Math.abs(word.id) % clients.length]!;
-        const added = await addWordNote(fields, client);
-        if (!added.ok) state.failed += 1;
-        else state.created += 1;
-        state.processed += 1;
-        return;
+      for (const batch of chunkWrites(pendingWrites)) {
+        if (state.stopRequested) break;
+        await executeWriteBatch(state, batch, ankiFinder);
       }
+    }
 
-      const before = existing.fieldsByName;
-      let same = true;
-      for (const f of managedFields) {
-        const prev = normalizeFieldValueForCompare(String(before[f] ?? ""));
-        const next = normalizeFieldValueForCompare(String(fields[f] ?? ""));
-        if (prev !== next) {
-          same = false;
-          break;
-        }
-      }
+    if (state.stopRequested && state.processed < state.total) {
+      state.stoppedEarly = true;
+    }
 
-      if (same) {
-        state.skippedSame += 1;
-        state.processed += 1;
-        return;
-      }
-
-      const client = clients[Math.abs(existing.noteId) % clients.length]!;
-      const managedUpdateFields = Object.fromEntries(
-        managedFields.map((f) => [f, fields[f]] as const),
-      ) as Record<string, string>;
-      const updated = await updateNoteFields(existing.noteId, managedUpdateFields, client);
-      if (!updated.ok) state.failed += 1;
-      else state.updated += 1;
-
-      state.processed += 1;
-    });
+    state.running = false;
+    state.done = true;
+    state.finishedAt = nowIso();
+    state.currentNoteId = null;
+  } finally {
+    releaseLock();
   }
-
-  if (state.stopRequested && state.processed < state.total) {
-    state.stoppedEarly = true;
-  }
-
-  state.running = false;
-  state.done = true;
-  state.finishedAt = nowIso();
-  state.currentNoteId = null;
 }
 
-export function startFullSyncAllIfNeeded(opts?: { ignoreUpdatedAt?: boolean }): FullSyncAllStatus {
+export function startFullSyncAllIfNeeded(): FullSyncAllStatus {
   const state = getState();
   if (state.running) return getFullSyncAllStatus();
   if (state._started && !state.done) return getFullSyncAllStatus();
+  const active = getActiveWordSyncJob();
+  if (active) {
+    state.running = false;
+    state.done = true;
+    state.error = `Anki word sync job "${active.name}" is already running (started ${active.startedAt}).`;
+    return getFullSyncAllStatus();
+  }
 
   state.jobId = `full_sync_${Date.now()}`;
   state._started = true;
-  state.ignoreUpdatedAt = Boolean(opts?.ignoreUpdatedAt);
   state.stopRequested = false;
   state.stoppedEarly = false;
 

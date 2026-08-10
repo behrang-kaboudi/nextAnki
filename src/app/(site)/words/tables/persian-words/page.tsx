@@ -4,11 +4,12 @@ import type { Prisma } from "@prisma/client";
 import { PageHeader } from "@/components/page-header";
 import { TableColumnIndicators, type TableColumnIndicator } from "@/components/table-column-indicators";
 import { TableColumnSelector } from "@/components/table-column-selector";
+import { getPendingPersianWordAudioIds } from "@/lib/audio/wordAudioPending.server";
 import { prisma } from "@/lib/prisma";
 import { getPersianWordColumnEmptyCounts } from "@/lib/words/tableColumnEmptyCounts.server";
 
 import OpenPersianWordEditorModal from "./OpenPersianWordEditorModal.client";
-import BatchPersianWordAudioGenerate from "./BatchPersianWordAudioGenerate.client";
+import BatchWordFieldVoiceGenerate from "../../hints/BatchWordFieldVoiceGenerate.client";
 import PersianWordAudioControls from "./PersianWordAudioControls.client";
 import PersianWordMeaningIpaPhase2 from "./PersianWordMeaningIpaPhase2.client";
 import AddPersianWordModal from "./AddPersianWordModal.client";
@@ -22,7 +23,7 @@ function parsePositiveInt(value: string | undefined, fallback: number) {
   return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : fallback;
 }
 
-const SORT_FIELDS = ["id", "canonical_text", "normalized_text", "meaning_fa_IPA", "meaning_fa_IPA_normalize", "audio_file_name", "createdAt", "updatedAt"] as const;
+const SORT_FIELDS = ["id", "canonical_text", "normalized_text", "meaning_fa_IPA", "meaning_fa_IPA_normalize", "audio_file_name", "audio_source_text", "createdAt", "updatedAt"] as const;
 type SortField = (typeof SORT_FIELDS)[number];
 
 const TABLE_COLUMNS = [
@@ -33,13 +34,14 @@ const TABLE_COLUMNS = [
   { key: "meaning_fa_IPA", label: "meaning_fa_IPA" },
   { key: "meaning_fa_IPA_normalize", label: "meaning_fa_IPA_normalize" },
   { key: "audio_file_name", label: "audio_file_name" },
+  { key: "audio_source_text", label: "audio_source_text" },
   { key: "createdAt", label: "createdAt" },
   { key: "updatedAt", label: "updatedAt" },
   { key: "actions", label: "actions" },
 ] as const;
 
 type TableColumnKey = (typeof TABLE_COLUMNS)[number]["key"];
-const DEFAULT_TABLE_COLUMNS: TableColumnKey[] = ["id", "canonical_text", "normalized_text", "meaning_fa_IPA", "audio_file_name", "updatedAt", "actions"];
+const DEFAULT_TABLE_COLUMNS: TableColumnKey[] = ["id", "canonical_text", "normalized_text", "meaning_fa_IPA", "audio_file_name", "audio_source_text", "updatedAt", "actions"];
 
 const COLUMN_INDICATORS: Partial<Record<TableColumnKey, readonly TableColumnIndicator[]>> = {
   id: [
@@ -100,14 +102,15 @@ export default async function PersianWordsTablePage({
     meaning_fa_IPA: { meaning_fa_IPA: dir },
     meaning_fa_IPA_normalize: { meaning_fa_IPA_normalize: dir },
     audio_file_name: { audio_file_name: dir },
+    audio_source_text: { audio_source_text: dir },
     createdAt: { createdAt: dir },
     updatedAt: { updatedAt: dir },
   };
   const filters: Prisma.PersianWordWhereInput[] = [];
-  if (q) filters.push({ OR: [{ canonical_text: { contains: q } }, { normalized_text: { contains: q } }, { meaning_fa_IPA: { contains: q } }, { meaning_fa_IPA_normalize: { contains: q } }] });
-  if (missingAudioOnly) filters.push({ OR: [{ audio_file_name: null }, { audio_file_name: "" }] });
+  if (q) filters.push({ OR: [{ canonical_text: { contains: q } }, { normalized_text: { contains: q } }, { meaning_fa_IPA: { contains: q } }, { meaning_fa_IPA_normalize: { contains: q } }, { audio_source_text: { contains: q } }] });
+  if (missingAudioOnly) filters.push({ id: { in: await getPendingPersianWordAudioIds() } });
   const where = filters.length ? { AND: filters } : undefined;
-  const [total, rows, emptyCounts] = await Promise.all([
+  const [total, rows, emptyCounts, missingMeaningIpaCount] = await Promise.all([
     prisma.persianWord.count({ where }),
     prisma.persianWord.findMany({
       where,
@@ -122,11 +125,13 @@ export default async function PersianWordsTablePage({
         meaning_fa_IPA: true,
         meaning_fa_IPA_normalize: true,
         audio_file_name: true,
+        audio_source_text: true,
         createdAt: true,
         updatedAt: true,
       },
     }),
     getPersianWordColumnEmptyCounts(),
+    prisma.persianWord.count({ where: { OR: [{ meaning_fa_IPA: null }, { meaning_fa_IPA: "" }] } }),
   ]);
   const totalPages = showAll ? 1 : Math.max(1, Math.ceil(total / pageSize));
   const pageHref = (nextPage: number) => {
@@ -179,7 +184,7 @@ export default async function PersianWordsTablePage({
             </label>
             <input type="hidden" name="sort" value={sort} />
             <input type="hidden" name="dir" value={dir} />
-            <label className="flex items-center gap-1 text-sm"><input name="missingAudio" type="checkbox" value="1" defaultChecked={missingAudioOnly} /> Only without audio</label>
+            <label className="flex items-center gap-1 text-sm"><input name="missingAudio" type="checkbox" value="1" defaultChecked={missingAudioOnly} /> Needs audio generation</label>
             {columns.map((column) => <input key={column} type="hidden" name="columns" value={column} />)}
             <button type="submit" className="rounded border px-3 py-2 text-sm hover:bg-black/5 dark:hover:bg-white/5">
               Search
@@ -189,10 +194,10 @@ export default async function PersianWordsTablePage({
           <div className="mt-3 grid gap-3 border-t pt-3 lg:grid-cols-2">
             <div className="flex flex-wrap items-center gap-2">
             <AddPersianWordModal />
-            <PersianWordMeaningIpaPhase2 />
+            <PersianWordMeaningIpaPhase2 initialMissingCount={missingMeaningIpaCount} />
             </div>
             <div className="border-t pt-3 lg:border-l lg:border-t-0 lg:pl-3 lg:pt-0">
-              <BatchPersianWordAudioGenerate />
+              <BatchWordFieldVoiceGenerate field="canonical_text" />
             </div>
           </div>
         </div>
@@ -221,6 +226,7 @@ export default async function PersianWordsTablePage({
               {hasColumn("meaning_fa_IPA") ? <SortHeader href={sortHref("meaning_fa_IPA")} label="meaning_fa_IPA" active={sort === "meaning_fa_IPA"} direction={dir} indicators={COLUMN_INDICATORS.meaning_fa_IPA} /> : null}
               {hasColumn("meaning_fa_IPA_normalize") ? <SortHeader href={sortHref("meaning_fa_IPA_normalize")} label="meaning_fa_IPA_normalize" active={sort === "meaning_fa_IPA_normalize"} direction={dir} /> : null}
               {hasColumn("audio_file_name") ? <SortHeader href={sortHref("audio_file_name")} label="audio" active={sort === "audio_file_name"} direction={dir} /> : null}
+              {hasColumn("audio_source_text") ? <SortHeader href={sortHref("audio_source_text")} label="audio_source_text" active={sort === "audio_source_text"} direction={dir} /> : null}
               {hasColumn("createdAt") ? <SortHeader href={sortHref("createdAt")} label="createdAt" active={sort === "createdAt"} direction={dir} /> : null}
               {hasColumn("updatedAt") ? <SortHeader href={sortHref("updatedAt")} label="updatedAt" active={sort === "updatedAt"} direction={dir} /> : null}
               {hasColumn("actions") ? <th className="px-3 py-2">actions</th> : null}
@@ -235,6 +241,7 @@ export default async function PersianWordsTablePage({
                   {hasColumn("meaning_fa_IPA") ? <td className="max-w-52 px-3 py-2"><span className="block truncate" title={row.meaning_fa_IPA ?? ""}>{row.meaning_fa_IPA ?? "—"}</span></td> : null}
                   {hasColumn("meaning_fa_IPA_normalize") ? <td className="max-w-52 px-3 py-2"><span className="block truncate" title={row.meaning_fa_IPA_normalize ?? ""}>{row.meaning_fa_IPA_normalize ?? "—"}</span></td> : null}
                   {hasColumn("audio_file_name") ? <td className="px-3 py-2"><PersianWordAudioControls id={row.id} filename={row.audio_file_name} /></td> : null}
+                  {hasColumn("audio_source_text") ? <td className="max-w-52 px-3 py-2" dir="rtl"><span className="block truncate" title={row.audio_source_text ?? ""}>{row.audio_source_text ?? "—"}</span></td> : null}
                   {hasColumn("createdAt") ? <td className="whitespace-nowrap px-3 py-2 font-mono">{row.createdAt.toISOString()}</td> : null}
                   {hasColumn("updatedAt") ? <td className="whitespace-nowrap px-3 py-2 font-mono">{row.updatedAt.toISOString()}</td> : null}
                   {hasColumn("actions") ? <td className="px-3 py-2"><div className="flex flex-wrap gap-1"><OpenPersianWordEditorModal id={row.id} label={row.canonical_text} /><DeletePersianWordButton id={row.id} label={row.canonical_text} /></div></td> : null}

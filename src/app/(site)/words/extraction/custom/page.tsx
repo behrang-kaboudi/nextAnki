@@ -57,8 +57,8 @@ const FIELD_POPULATION_GUIDE: Record<
     how: "The AI translates each identified English sentence. Apply response updates Sentence.sentence_en_meaning_fa and clears its old translation audio when the text changes.",
   },
   phonetic_us: {
-    when: "Counted as pending while EnglishWord.phonetic_us_confirmed is false. Custom Extraction requests a new value only when phonetic_us is null or empty; populated values remain pending until the phonetic review workflow confirms them.",
-    how: "The phonetic prompt generates American IPA. Apply response stores both the display IPA and its normalized form, marks phonetic confirmation false, and clears the old JSON hint.",
+    when: "Requested when EnglishWord.phonetic_us is null or empty.",
+    how: "The phonetic prompt generates American IPA. Apply response stores both the display IPA and its normalized form, and clears the old JSON hint.",
   },
   meaning_fa_IPA: {
     when: "Requested when a primary PersianWord exists and meaning_fa_IPA is null or empty.",

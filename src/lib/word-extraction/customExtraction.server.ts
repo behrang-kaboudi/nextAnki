@@ -74,10 +74,5 @@ export async function countCustomExtractionPendingWork(
   if (field === "other_meanings_fa") {
     return prisma.word.count({ where: { meanings_confirmed: false } });
   }
-  if (field === "phonetic_us") {
-    return prisma.word.count({
-      where: { english: { is: { phonetic_us_confirmed: false } } },
-    });
-  }
   return prisma.word.count({ where: customExtractionMissingWhere(field) });
 }

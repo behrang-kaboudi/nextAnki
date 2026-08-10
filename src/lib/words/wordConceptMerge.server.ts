@@ -13,6 +13,7 @@ type SourceWord = {
   otherMeaningIds: Prisma.JsonValue | null;
   concept_explained_fa: string | null;
   sentenceIds: Prisma.JsonValue | null;
+  meanings_confirmed: boolean;
   conceptMergeReviewed: boolean;
   english: { base_form: string };
 };
@@ -38,6 +39,7 @@ const sourceSelect = {
   otherMeaningIds: true,
   concept_explained_fa: true,
   sentenceIds: true,
+  meanings_confirmed: true,
   conceptMergeReviewed: true,
   english: { select: { base_form: true } },
 } satisfies Prisma.WordSelect;
@@ -58,6 +60,18 @@ function groupByEnglish(words: SourceWord[]) {
     groups.set(word.englishId, group);
   }
   return [...groups.values()];
+}
+
+export async function getPendingWordConceptMergeCount() {
+  const words = await prisma.word.findMany({
+    orderBy: [{ englishId: "asc" }, { id: "asc" }],
+    select: sourceSelect,
+  });
+  return groupByEnglish(words).filter(
+    (group) =>
+      group.length >= 2 &&
+      group.some((word) => !word.conceptMergeReviewed),
+  ).length;
 }
 
 function sentenceIdsFor(word: SourceWord) {
@@ -253,6 +267,7 @@ export async function applyWordConceptMerge(sourceGroups: number[][], output: Me
     }
 
     for (const row of retained) {
+      const source = byId.get(row.id)!;
       const primary = row.meaning_fa
         ? await addPersianWordWithClient(row.meaning_fa, {}, tx)
         : null;
@@ -266,6 +281,7 @@ export async function applyWordConceptMerge(sourceGroups: number[][], output: Me
           otherMeaningIds: [...new Set(otherIds.filter((id) => id !== primary?.item.id))],
           concept_explained_fa: row.concept_explained_fa || null,
           sentenceIds: row.sentenceIds,
+          meanings_confirmed: source.meanings_confirmed,
           conceptMergeReviewed: true,
         },
         select: { id: true },

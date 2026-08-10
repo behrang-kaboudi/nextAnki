@@ -1,8 +1,13 @@
 import "server-only";
 
+import { audioNeedsGeneration } from "@/lib/audio/audioSourceText";
 import { prisma } from "@/lib/prisma";
 
-import { generatePersianWordCanonicalTextAudio } from "./persianWordAudio.server";
+import {
+  deletePersianWordAudio,
+  generatePersianWordCanonicalTextAudio,
+  getPersianWordAudioFileInfo,
+} from "./persianWordAudio.server";
 
 export type PersianWordAudioJobStatus = {
   jobId: string;
@@ -21,8 +26,6 @@ export type PersianWordAudioJobStatus = {
 };
 
 type JobState = PersianWordAudioJobStatus & { _started: boolean };
-
-const missingAudioWhere = { OR: [{ audio_file_name: null }, { audio_file_name: "" }] };
 
 function nowIso() {
   return new Date().toISOString();
@@ -69,20 +72,17 @@ async function runJob(state: JobState) {
   state.currentId = null;
   state.currentText = null;
   state.currentFilename = null;
-  state.totalCandidates = await prisma.persianWord.count({ where: missingAudioWhere });
-
-  let cursorId: number | undefined;
-  for (;;) {
-    const rows = await prisma.persianWord.findMany({
-      where: missingAudioWhere,
+  const rows = (await prisma.persianWord.findMany({
       orderBy: { id: "asc" },
-      take: 100,
-      ...(cursorId === undefined ? {} : { cursor: { id: cursorId }, skip: 1 }),
-      select: { id: true, canonical_text: true },
-    });
-    if (!rows.length) break;
+      select: { id: true, canonical_text: true, audio_file_name: true, audio_source_text: true },
+    })).filter((row) => audioNeedsGeneration({
+      text: row.canonical_text,
+      sourceText: row.audio_source_text,
+      fileSize: getPersianWordAudioFileInfo(row.audio_file_name).size,
+    }));
+  state.totalCandidates = rows.length;
 
-    for (const row of rows) {
+  for (const row of rows) {
       state.currentId = row.id;
       state.currentText = row.canonical_text;
       if (!row.canonical_text.trim()) {
@@ -90,12 +90,13 @@ async function runJob(state: JobState) {
         state.processedCandidates += 1;
         continue;
       }
+      if ((row.audio_file_name || row.audio_source_text) && getPersianWordAudioFileInfo(row.audio_file_name).size <= 0) {
+        await deletePersianWordAudio(row.id);
+      }
       const result = await generatePersianWordCanonicalTextAudio(row.id);
       state.currentFilename = result.filename;
       state.generated += 1;
       state.processedCandidates += 1;
-    }
-    cursorId = rows.at(-1)?.id;
   }
 
   state.running = false;

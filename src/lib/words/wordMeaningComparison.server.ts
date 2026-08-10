@@ -136,6 +136,22 @@ export async function prepareWordMeaningComparison(limit: number) {
   };
 }
 
+export async function getPendingWordMeaningComparisonCount() {
+  const words = await prisma.word.findMany({
+    orderBy: { id: "asc" },
+    select: comparisonSelect,
+  });
+  const candidateGroups = buildGroups(words).filter(
+    ({ words: group }) => !isFullyCompared(group),
+  );
+  if (!candidateGroups.length) return 0;
+  return prisma.persianWord.count({
+    where: {
+      id: { in: candidateGroups.map((group) => group.persianWordId) },
+    },
+  });
+}
+
 function isPositiveId(value: unknown): value is number {
   return typeof value === "number" && Number.isSafeInteger(value) && value > 0;
 }

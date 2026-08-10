@@ -4,38 +4,38 @@ import type { Prisma } from "@prisma/client";
 import { PageHeader } from "@/components/page-header";
 import { TableColumnIndicators, type TableColumnIndicator } from "@/components/table-column-indicators";
 import { TableColumnSelector } from "@/components/table-column-selector";
+import { getPendingEnglishWordAudioIds } from "@/lib/audio/wordAudioPending.server";
 import { prisma } from "@/lib/prisma";
 import { getEnglishWordColumnEmptyCounts } from "@/lib/words/tableColumnEmptyCounts.server";
 
 import AddEnglishWordModal from "./AddEnglishWordModal.client";
-import BatchEnglishWordAudioGenerate from "./BatchEnglishWordAudioGenerate.client";
-import BatchEnglishWordJsonHintGenerate from "./BatchEnglishWordJsonHintGenerate.client";
+import BatchWordFieldVoiceGenerate from "../../hints/BatchWordFieldVoiceGenerate.client";
+import BatchEnglishWordJsonHintGenerate from "../../hints/BatchEnglishWordJsonHintGenerate.client";
 import DictionaryApiUsImport from "./DictionaryApiUsImport.client";
 import EnglishWordAudioControls from "./EnglishWordAudioControls.client";
 import EnglishWordJsonHintControls from "./EnglishWordJsonHintControls.client";
 import EnglishWordPhoneticUsPrompt from "./EnglishWordPhoneticUsPrompt.client";
-import PhoneticUsConfirmedCell from "./PhoneticUsConfirmedCell.client";
 import EnglishWordRowActions from "./EnglishWordRowActions.client";
 
 export const metadata = { title: "Words — EnglishWord Table" };
 export const runtime = "nodejs";
 
-const SORT_FIELDS = ["id", "base_form", "phonetic_us", "phonetic_us_confirmed", "phonetic_us_normalized", "audio_file_name", "createdAt", "updatedAt"] as const;
+const SORT_FIELDS = ["id", "base_form", "phonetic_us", "phonetic_us_normalized", "audio_file_name", "audio_source_text", "createdAt", "updatedAt"] as const;
 type SortField = (typeof SORT_FIELDS)[number];
 const TABLE_COLUMNS = [
   { key: "id", label: "id", required: true },
   { key: "base_form", label: "base_form" },
   { key: "phonetic_us", label: "phonetic_us" },
-  { key: "phonetic_us_confirmed", label: "phonetic_us_confirmed" },
   { key: "phonetic_us_normalized", label: "phonetic_us_normalized" },
   { key: "json_hint", label: "json_hint" },
   { key: "audio", label: "audio_file_name" },
+  { key: "audio_source_text", label: "audio_source_text" },
   { key: "createdAt", label: "createdAt" },
   { key: "updatedAt", label: "updatedAt" },
   { key: "actions", label: "actions" },
 ] as const;
 type TableColumnKey = (typeof TABLE_COLUMNS)[number]["key"];
-const DEFAULT_COLUMNS: TableColumnKey[] = ["id", "base_form", "phonetic_us", "phonetic_us_confirmed", "phonetic_us_normalized", "audio", "updatedAt", "actions"];
+const DEFAULT_COLUMNS: TableColumnKey[] = ["id", "base_form", "phonetic_us", "phonetic_us_normalized", "audio", "audio_source_text", "updatedAt", "actions"];
 const COLUMN_INDICATORS: Partial<Record<TableColumnKey, readonly TableColumnIndicator[]>> = {
   id: [{ kind: "primary-key", text: "Primary key: EnglishWord.id" }],
   base_form: [{ kind: "unique", text: "Unique English base form" }],
@@ -65,15 +65,21 @@ export default async function EnglishWordsTablePage({ searchParams }: { searchPa
   const missingAudio = params.missingAudio === "1";
   const columns = parseColumns(params.columns);
   const hasColumn = (key: TableColumnKey) => columns.includes(key);
+  const pendingAudioIds = missingAudio ? await getPendingEnglishWordAudioIds() : [];
   const where: Prisma.EnglishWordWhereInput | undefined = q || missingAudio ? { AND: [
-    ...(q ? [{ OR: [{ base_form: { contains: q } }, { phonetic_us: { contains: q } }, { phonetic_us_normalized: { contains: q } }] }] : []),
-    ...(missingAudio ? [{ OR: [{ audio_file_name: null }, { audio_file_name: "" }] }] : []),
+    ...(q ? [{ OR: [{ base_form: { contains: q } }, { phonetic_us: { contains: q } }, { phonetic_us_normalized: { contains: q } }, { audio_source_text: { contains: q } }] }] : []),
+    ...(missingAudio ? [{ id: { in: pendingAudioIds } }] : []),
   ] } : undefined;
   const orderBy: Prisma.EnglishWordOrderByWithRelationInput[] = [{ [sort]: dir } as Prisma.EnglishWordOrderByWithRelationInput, ...(sort === "id" ? [] : [{ id: "desc" as const }])];
-  const [total, rows, emptyCounts] = await Promise.all([
+  const [total, rows, emptyCounts, jsonHintRemainingCount, jsonHintTotalCount, phoneticCreateRemainingCount] = await Promise.all([
     prisma.englishWord.count({ where }),
     prisma.englishWord.findMany({ where, orderBy, skip: (page - 1) * 100, take: 100 }),
     getEnglishWordColumnEmptyCounts(),
+    prisma.englishWord.count({ where: { OR: [{ json_hint: null }, { json_hint: "" }] } }),
+    prisma.englishWord.count(),
+    prisma.englishWord.count({
+      where: { OR: [{ phonetic_us: null }, { phonetic_us: "" }] },
+    }),
   ]);
   const totalPages = Math.max(1, Math.ceil(total / 100));
   const href = (nextPage: number, nextSort = sort, nextDir = dir) => {
@@ -90,10 +96,10 @@ export default async function EnglishWordsTablePage({ searchParams }: { searchPa
     <PageHeader title="EnglishWord Table" subtitle="Canonical English words and phrases with US pronunciation, JSON hints, and one audio file." />
     <section className="mt-4 overflow-hidden rounded border">
       <div className="p-3">
-      <form className="flex flex-wrap items-center gap-2"><input name="q" defaultValue={q} placeholder="Search text or IPA…" className="w-full rounded border px-3 py-2 text-sm sm:w-80" /><input type="hidden" name="sort" value={sort} /><input type="hidden" name="dir" value={dir} /><label className="flex items-center gap-1 text-sm"><input name="missingAudio" value="1" type="checkbox" defaultChecked={missingAudio} /> Only without audio</label>{columns.map((column) => <input key={column} type="hidden" name="columns" value={column} />)}<button type="submit" className="rounded border px-3 py-2 text-sm">Search</button>{q || missingAudio ? <Link href={`/words/tables/english-words?${clearQuery}`} className="rounded border px-3 py-2 text-sm">Clear</Link> : null}</form>
+      <form className="flex flex-wrap items-center gap-2"><input name="q" defaultValue={q} placeholder="Search text, source text, or IPA…" className="w-full rounded border px-3 py-2 text-sm sm:w-80" /><input type="hidden" name="sort" value={sort} /><input type="hidden" name="dir" value={dir} /><label className="flex items-center gap-1 text-sm"><input name="missingAudio" value="1" type="checkbox" defaultChecked={missingAudio} /> Needs audio generation</label>{columns.map((column) => <input key={column} type="hidden" name="columns" value={column} />)}<button type="submit" className="rounded border px-3 py-2 text-sm">Search</button>{q || missingAudio ? <Link href={`/words/tables/english-words?${clearQuery}`} className="rounded border px-3 py-2 text-sm">Clear</Link> : null}</form>
         <div className="mt-3 grid gap-3 border-t pt-3 lg:grid-cols-2">
-          <div className="flex flex-wrap items-center gap-2"><AddEnglishWordModal /><EnglishWordPhoneticUsPrompt /><EnglishWordPhoneticUsPrompt mode="review" /></div>
-          <div className="space-y-3 border-t pt-3 lg:border-l lg:border-t-0 lg:pl-3 lg:pt-0"><BatchEnglishWordAudioGenerate /><div className="border-t pt-3"><BatchEnglishWordJsonHintGenerate /></div></div>
+          <div className="flex flex-wrap items-center gap-2"><AddEnglishWordModal /><EnglishWordPhoneticUsPrompt initialRemainingCount={phoneticCreateRemainingCount} /></div>
+          <div className="space-y-3 border-t pt-3 lg:border-l lg:border-t-0 lg:pl-3 lg:pt-0"><BatchWordFieldVoiceGenerate field="base_form" /><div className="border-t pt-3"><BatchEnglishWordJsonHintGenerate initialRemainingCount={jsonHintRemainingCount} initialTotalCount={jsonHintTotalCount} /></div></div>
         </div>
       </div>
     </section>
@@ -104,13 +110,13 @@ export default async function EnglishWordsTablePage({ searchParams }: { searchPa
       {hasColumn("id") ? <SortHeader href={href(1, "id", sort === "id" && dir === "asc" ? "desc" : "asc")} label="id" active={sort === "id"} direction={dir} indicators={COLUMN_INDICATORS.id} /> : null}
       {hasColumn("base_form") ? <SortHeader href={href(1, "base_form", sort === "base_form" && dir === "asc" ? "desc" : "asc")} label="base_form" active={sort === "base_form"} direction={dir} indicators={COLUMN_INDICATORS.base_form} /> : null}
       {hasColumn("phonetic_us") ? <SortHeader href={href(1, "phonetic_us", sort === "phonetic_us" && dir === "asc" ? "desc" : "asc")} label="phonetic_us" active={sort === "phonetic_us"} direction={dir} /> : null}
-      {hasColumn("phonetic_us_confirmed") ? <SortHeader href={href(1, "phonetic_us_confirmed", sort === "phonetic_us_confirmed" && dir === "asc" ? "desc" : "asc")} label="phonetic_us_confirmed" active={sort === "phonetic_us_confirmed"} direction={dir} /> : null}
       {hasColumn("phonetic_us_normalized") ? <SortHeader href={href(1, "phonetic_us_normalized", sort === "phonetic_us_normalized" && dir === "asc" ? "desc" : "asc")} label="phonetic_us_normalized" active={sort === "phonetic_us_normalized"} direction={dir} indicators={COLUMN_INDICATORS.phonetic_us_normalized} /> : null}
       {hasColumn("json_hint") ? <th className="px-3 py-2">json_hint</th> : null}
       {hasColumn("audio") ? <SortHeader href={href(1, "audio_file_name", sort === "audio_file_name" && dir === "asc" ? "desc" : "asc")} label="audio" active={sort === "audio_file_name"} direction={dir} /> : null}
+      {hasColumn("audio_source_text") ? <SortHeader href={href(1, "audio_source_text", sort === "audio_source_text" && dir === "asc" ? "desc" : "asc")} label="audio_source_text" active={sort === "audio_source_text"} direction={dir} /> : null}
       {hasColumn("createdAt") ? <SortHeader href={href(1, "createdAt", sort === "createdAt" && dir === "asc" ? "desc" : "asc")} label="createdAt" active={sort === "createdAt"} direction={dir} /> : null}{hasColumn("updatedAt") ? <SortHeader href={href(1, "updatedAt", sort === "updatedAt" && dir === "asc" ? "desc" : "asc")} label="updatedAt" active={sort === "updatedAt"} direction={dir} /> : null}{hasColumn("actions") ? <th className="px-3 py-2">actions</th> : null}
     </tr></thead><tbody>{rows.map((item) => <tr key={item.id} className="border-b align-top">
-      {hasColumn("id") ? <td className="px-3 py-2 font-mono">{item.id}</td> : null}{hasColumn("base_form") ? <td className="max-w-60 px-3 py-2 text-sm">{item.base_form}</td> : null}{hasColumn("phonetic_us") ? <td className="max-w-60 px-3 py-2 font-mono">{item.phonetic_us ?? "—"}</td> : null}{hasColumn("phonetic_us_confirmed") ? <td className="px-3 py-2"><PhoneticUsConfirmedCell id={item.id} confirmed={item.phonetic_us_confirmed} /></td> : null}{hasColumn("phonetic_us_normalized") ? <td className="max-w-60 px-3 py-2 font-mono">{item.phonetic_us_normalized ?? "—"}</td> : null}{hasColumn("json_hint") ? <td className="max-w-48 px-3 py-2 font-mono"><EnglishWordJsonHintControls id={item.id} jsonHint={item.json_hint} /></td> : null}{hasColumn("audio") ? <td className="min-w-48 px-3 py-2"><EnglishWordAudioControls id={item.id} filename={item.audio_file_name} /></td> : null}{hasColumn("createdAt") ? <td className="whitespace-nowrap px-3 py-2 font-mono">{item.createdAt.toISOString()}</td> : null}{hasColumn("updatedAt") ? <td className="whitespace-nowrap px-3 py-2 font-mono">{item.updatedAt.toISOString()}</td> : null}{hasColumn("actions") ? <td className="px-3 py-2"><EnglishWordRowActions item={item} showAudio={false} /></td> : null}
+      {hasColumn("id") ? <td className="px-3 py-2 font-mono">{item.id}</td> : null}{hasColumn("base_form") ? <td className="max-w-60 px-3 py-2 text-sm">{item.base_form}</td> : null}{hasColumn("phonetic_us") ? <td className="max-w-60 px-3 py-2 font-mono">{item.phonetic_us ?? "—"}</td> : null}{hasColumn("phonetic_us_normalized") ? <td className="max-w-60 px-3 py-2 font-mono">{item.phonetic_us_normalized ?? "—"}</td> : null}{hasColumn("json_hint") ? <td className="max-w-48 px-3 py-2 font-mono"><EnglishWordJsonHintControls id={item.id} jsonHint={item.json_hint} /></td> : null}{hasColumn("audio") ? <td className="min-w-48 px-3 py-2"><EnglishWordAudioControls id={item.id} filename={item.audio_file_name} /></td> : null}{hasColumn("audio_source_text") ? <td className="max-w-60 px-3 py-2"><span className="block truncate" title={item.audio_source_text ?? ""}>{item.audio_source_text ?? "—"}</span></td> : null}{hasColumn("createdAt") ? <td className="whitespace-nowrap px-3 py-2 font-mono">{item.createdAt.toISOString()}</td> : null}{hasColumn("updatedAt") ? <td className="whitespace-nowrap px-3 py-2 font-mono">{item.updatedAt.toISOString()}</td> : null}{hasColumn("actions") ? <td className="px-3 py-2"><EnglishWordRowActions item={item} showAudio={false} /></td> : null}
     </tr>)}{!rows.length ? <tr><td colSpan={columns.length} className="px-3 py-8 text-center text-sm opacity-70">No rows.</td></tr> : null}</tbody></table></div>
   </main>;
 }

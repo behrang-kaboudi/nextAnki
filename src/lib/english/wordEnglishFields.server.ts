@@ -9,6 +9,8 @@ export const WORD_ENGLISH_FIELDS_SELECT = {
   phonetic_us: true,
   phonetic_us_normalized: true,
   json_hint: true,
+  audio_file_name: true,
+  audio_source_text: true,
 } satisfies Prisma.EnglishWordSelect;
 
 export type WordEnglishFields = Prisma.EnglishWordGetPayload<{

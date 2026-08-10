@@ -10,7 +10,6 @@ export type EnglishWord = {
   id: number;
   base_form: string;
   phonetic_us: string | null;
-  phonetic_us_confirmed: boolean;
   phonetic_us_normalized: string | null;
   json_hint: string | null;
   audio_file_name: string | null;
@@ -68,7 +67,6 @@ export default function EnglishWordRowActions({ item: initialItem, showAudio = t
         <div className="flex-1 overflow-auto p-4 sm:p-6"><div className="grid gap-4 sm:grid-cols-2">
           <label className="grid gap-1 text-sm">base_form<input value={item.base_form} onChange={(event) => setItem((current) => ({ ...current, base_form: event.target.value }))} className="rounded border px-3 py-2" /></label>
           <label className="grid gap-1 text-sm">phonetic_us<input value={item.phonetic_us ?? ""} onChange={(event) => setItem((current) => ({ ...current, phonetic_us: event.target.value || null }))} className="rounded border px-3 py-2" /></label>
-          <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={item.phonetic_us_confirmed} onChange={(event) => setItem((current) => ({ ...current, phonetic_us_confirmed: event.target.checked }))} /> phonetic_us confirmed</label>
           <label className="grid gap-1 text-sm">phonetic_us_normalized <span className="rounded border bg-black/5 px-3 py-2 font-mono text-xs opacity-70">Recalculated when saved: {item.phonetic_us_normalized ?? "—"}</span></label>
           <label className="grid gap-1 text-sm sm:col-span-2">json_hint<textarea value={item.json_hint ?? ""} onChange={(event) => setItem((current) => ({ ...current, json_hint: event.target.value || null }))} rows={14} className="min-h-64 resize-y rounded border px-3 py-2 font-mono text-xs" /></label>
           <p className="text-xs opacity-70 sm:col-span-2">The English text is normalized on every save.</p>

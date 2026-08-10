@@ -33,6 +33,8 @@ export async function getWordColumnEmptyCounts(): Promise<TableColumnEmptyCounts
       synonymIds: true,
       pos: true,
       concept_explained_fa: true,
+      concept_explained_fa_audio_file_name: true,
+      concept_explained_fa_audio_source_text: true,
       learning_depth: true,
       other_meanings_en: true,
       category: true,
@@ -54,6 +56,8 @@ export async function getWordColumnEmptyCounts(): Promise<TableColumnEmptyCounts
     meanings_confirmed: 0,
     pos: countEmpty(rows, "pos"),
     concept_explained_fa: countEmpty(rows, "concept_explained_fa"),
+    concept_explained_fa_audio_file_name: countEmpty(rows, "concept_explained_fa_audio_file_name"),
+    concept_explained_fa_audio_source_text: countEmpty(rows, "concept_explained_fa_audio_source_text"),
     learning_depth: countEmpty(rows, "learning_depth"),
     other_meanings_en: countEmpty(rows, "other_meanings_en"),
     category: countEmpty(rows, "category"),
@@ -74,6 +78,7 @@ export async function getEnglishWordColumnEmptyCounts(): Promise<TableColumnEmpt
       phonetic_us_normalized: true,
       json_hint: true,
       audio_file_name: true,
+      audio_source_text: true,
     },
   });
 
@@ -81,10 +86,10 @@ export async function getEnglishWordColumnEmptyCounts(): Promise<TableColumnEmpt
     id: 0,
     base_form: countEmpty(rows, "base_form"),
     phonetic_us: countEmpty(rows, "phonetic_us"),
-    phonetic_us_confirmed: 0,
     phonetic_us_normalized: countEmpty(rows, "phonetic_us_normalized"),
     json_hint: countEmpty(rows, "json_hint"),
     audio: countEmpty(rows, "audio_file_name"),
+    audio_source_text: countEmpty(rows, "audio_source_text"),
     createdAt: 0,
     updatedAt: 0,
   };
@@ -99,6 +104,7 @@ export async function getPersianWordColumnEmptyCounts(): Promise<TableColumnEmpt
       meaning_fa_IPA: true,
       meaning_fa_IPA_normalize: true,
       audio_file_name: true,
+      audio_source_text: true,
     },
   });
 
@@ -110,6 +116,7 @@ export async function getPersianWordColumnEmptyCounts(): Promise<TableColumnEmpt
     meaning_fa_IPA: countEmpty(rows, "meaning_fa_IPA"),
     meaning_fa_IPA_normalize: countEmpty(rows, "meaning_fa_IPA_normalize"),
     audio_file_name: countEmpty(rows, "audio_file_name"),
+    audio_source_text: countEmpty(rows, "audio_source_text"),
     createdAt: 0,
     updatedAt: 0,
   };
@@ -121,7 +128,9 @@ export async function getSentenceColumnEmptyCounts(): Promise<TableColumnEmptyCo
       sentence_en: true,
       sentence_en_meaning_fa: true,
       sentence_en_audio_file_name: true,
+      sentence_en_audio_source_text: true,
       sentence_en_meaning_fa_audio_file_name: true,
+      sentence_en_meaning_fa_audio_source_text: true,
     },
   });
 
@@ -133,9 +142,17 @@ export async function getSentenceColumnEmptyCounts(): Promise<TableColumnEmptyCo
       rows,
       "sentence_en_audio_file_name",
     ),
+    sentence_en_audio_source_text: countEmpty(
+      rows,
+      "sentence_en_audio_source_text",
+    ),
     sentence_en_meaning_fa_audio_file_name: countEmpty(
       rows,
       "sentence_en_meaning_fa_audio_file_name",
+    ),
+    sentence_en_meaning_fa_audio_source_text: countEmpty(
+      rows,
+      "sentence_en_meaning_fa_audio_source_text",
     ),
     createdAt: 0,
     updatedAt: 0,

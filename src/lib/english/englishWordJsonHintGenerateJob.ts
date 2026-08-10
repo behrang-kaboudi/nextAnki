@@ -5,14 +5,15 @@ import { createPreloadedPictureCandidateLookup } from "@/lib/ipa/setPictures/pre
 
 import { generateEnglishWordJsonHints } from "./englishWordJsonHint.server";
 
-export type EnglishWordJsonHintJobStatus = { jobId: string; running: boolean; done: boolean; startedAt: string | null; finishedAt: string | null; error: string | null; totalCandidates: number; processedCandidates: number; generated: number; skippedNoPhonetic: number; currentId: number | null; currentText: string | null; };
+export type EnglishWordJsonHintJobMode = "missing" | "all";
+export type EnglishWordJsonHintJobStatus = { jobId: string; mode: EnglishWordJsonHintJobMode; running: boolean; done: boolean; startedAt: string | null; finishedAt: string | null; error: string | null; totalCandidates: number; processedCandidates: number; generated: number; skippedNoPhonetic: number; currentId: number | null; currentText: string | null; };
 type State = EnglishWordJsonHintJobStatus & { _started: boolean };
 const missingJsonHintWhere = { OR: [{ json_hint: null }, { json_hint: "" }] };
 const nowIso = () => new Date().toISOString();
 
 function getState(): State {
   const globalState = globalThis as unknown as { __englishWordJsonHintJob?: State };
-  if (!globalState.__englishWordJsonHintJob) globalState.__englishWordJsonHintJob = { jobId: `english_word_json_hint_${Date.now()}`, running: false, done: false, startedAt: null, finishedAt: null, error: null, totalCandidates: 0, processedCandidates: 0, generated: 0, skippedNoPhonetic: 0, currentId: null, currentText: null, _started: false };
+  if (!globalState.__englishWordJsonHintJob) globalState.__englishWordJsonHintJob = { jobId: `english_word_json_hint_${Date.now()}`, mode: "missing", running: false, done: false, startedAt: null, finishedAt: null, error: null, totalCandidates: 0, processedCandidates: 0, generated: 0, skippedNoPhonetic: 0, currentId: null, currentText: null, _started: false };
   return globalState.__englishWordJsonHintJob;
 }
 
@@ -20,6 +21,7 @@ export function getEnglishWordJsonHintJobStatus(): EnglishWordJsonHintJobStatus 
   const state = getState();
   return {
     jobId: state.jobId,
+    mode: state.mode,
     running: state.running,
     done: state.done,
     startedAt: state.startedAt,
@@ -36,11 +38,12 @@ export function getEnglishWordJsonHintJobStatus(): EnglishWordJsonHintJobStatus 
 
 async function runJob(state: State) {
   Object.assign(state, { running: true, done: false, error: null, startedAt: nowIso(), finishedAt: null, processedCandidates: 0, generated: 0, skippedNoPhonetic: 0, currentId: null, currentText: null });
-  state.totalCandidates = await prisma.englishWord.count({ where: missingJsonHintWhere });
+  const where = state.mode === "missing" ? missingJsonHintWhere : undefined;
+  state.totalCandidates = await prisma.englishWord.count({ where });
   const lookup = await createPreloadedPictureCandidateLookup();
   let cursorId: number | undefined;
   for (;;) {
-    const rows = await prisma.englishWord.findMany({ where: missingJsonHintWhere, orderBy: { id: "asc" }, take: 100, ...(cursorId === undefined ? {} : { cursor: { id: cursorId }, skip: 1 }), select: { id: true, base_form: true, phonetic_us_normalized: true } });
+    const rows = await prisma.englishWord.findMany({ where, orderBy: { id: "asc" }, take: 100, ...(cursorId === undefined ? {} : { cursor: { id: cursorId }, skip: 1 }), select: { id: true, base_form: true, phonetic_us_normalized: true } });
     if (!rows.length) break;
     const current = rows.at(-1)!;
     state.currentId = current.id; state.currentText = current.base_form;
@@ -55,10 +58,10 @@ async function runJob(state: State) {
   Object.assign(state, { running: false, done: true, finishedAt: nowIso(), currentId: null, currentText: null });
 }
 
-export function startEnglishWordJsonHintJobIfNeeded(): EnglishWordJsonHintJobStatus {
+export function startEnglishWordJsonHintJobIfNeeded(mode: EnglishWordJsonHintJobMode = "missing"): EnglishWordJsonHintJobStatus {
   const state = getState();
   if (state.running || (state._started && !state.done)) return getEnglishWordJsonHintJobStatus();
-  state.jobId = `english_word_json_hint_${Date.now()}`; state._started = true;
+  state.jobId = `english_word_json_hint_${mode}_${Date.now()}`; state.mode = mode; state._started = true;
   void runJob(state).catch((error) => { Object.assign(state, { running: false, done: true, error: error instanceof Error ? error.message : String(error), finishedAt: nowIso(), currentId: null, currentText: null }); });
   return getEnglishWordJsonHintJobStatus();
 }

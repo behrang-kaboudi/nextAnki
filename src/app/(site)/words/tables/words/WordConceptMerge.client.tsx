@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { PromptSourcesButton } from "@/components/prompts/PromptSourcesButton";
+import { RemainingCountBadge, RemainingCountButton } from "@/components/remaining-count";
 
 const PROMPT_PATH = "src/prompts/word-extraction/merge_word_concepts/rulseV1.md";
 
@@ -29,7 +30,7 @@ type PrepareResponse = {
 const buttonClass =
   "rounded border px-3 py-2 text-sm transition active:scale-90 hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5";
 
-export default function WordConceptMerge() {
+export default function WordConceptMerge({ remainingCount }: { remainingCount: number }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [showSelectionHelp, setShowSelectionHelp] = useState(false);
@@ -158,8 +159,22 @@ export default function WordConceptMerge() {
   const copyText = `${prompt}\n\n${JSON.stringify(groups, null, 2)}`;
   return (
     <>
-      <button type="button" disabled={busy} onClick={() => void createData(true)} className={buttonClass}>
-        {busy && !open ? "PREPARING…" : "MERGE WORD CONCEPTS"}
+      <button
+        type="button"
+        disabled={busy}
+        aria-busy={busy && !open}
+        onClick={() => void createData(true)}
+        className="relative rounded border px-3 py-2 text-sm hover:bg-black/5 disabled:opacity-100 dark:hover:bg-white/5"
+      >
+        MERGE WORD CONCEPTS <RemainingCountBadge count={remainingCount} />
+        {busy && !open ? (
+          <span className="absolute inset-0 flex items-center justify-center gap-1 rounded bg-background/85" aria-hidden="true">
+            <span className="size-1.5 animate-bounce rounded-full bg-current [animation-delay:-0.3s]" />
+            <span className="size-1.5 animate-bounce rounded-full bg-current [animation-delay:-0.15s]" />
+            <span className="size-1.5 animate-bounce rounded-full bg-current" />
+          </span>
+        ) : null}
+        {busy && !open ? <span className="sr-only">Preparing</span> : null}
       </button>
 
       {open ? (
@@ -208,7 +223,7 @@ export default function WordConceptMerge() {
                   <li>گروه باید حداقل دو رکورد <code>Word</code> داشته باشد.</li>
                   <li>حداقل یک رکورد گروه باید <code>conceptMergeReviewed=false</code> داشته باشد.</li>
                   <li>گروهی که تمام رکوردهایش بررسی شده‌اند دوباره به پرامپت ارسال نمی‌شود.</li>
-                  <li><code>Group count = 0</code> یعنی تمام گروه‌های واجد شرایط.</li>
+                  <li><code>Count = 0</code> یعنی تمام گروه‌های واجد شرایط.</li>
                 </ul>
                 <div className="mt-2 font-semibold">پس از تأیید چه تغییری می‌کند؟</div>
                 <ul className="list-disc pr-5">
@@ -230,7 +245,7 @@ export default function WordConceptMerge() {
               <section className="flex min-h-0 flex-col gap-2">
                 <div className="flex flex-wrap items-center gap-2">
                   <label className="text-xs">
-                    Group count
+                    Count
                     <input type="number" min="0" value={limit} disabled={busy} onChange={(event) => setLimit(event.target.value)} className="ml-2 w-20 rounded border px-2 py-1" />
                   </label>
                   <button type="button" disabled={busy} onClick={() => void createData(false)} className={buttonClass}>
@@ -242,7 +257,11 @@ export default function WordConceptMerge() {
                     onClick={() => void navigator.clipboard.writeText(copyText).then(() => setNotice("Prompt and grouped data copied ✓")).catch((reason) => setError(reason instanceof Error ? reason.message : String(reason)))}
                     className={buttonClass}
                   >Copy all</button>
-                  <span className="text-xs font-semibold text-amber-700">Eligible groups: {totalGroups}</span>
+                  <RemainingCountButton
+                    count={totalGroups}
+                    disabled={busy}
+                    onClick={() => setLimit(String(totalGroups))}
+                  />
                 </div>
                 <textarea readOnly value={copyText} className="min-h-0 flex-1 rounded border p-3 font-mono text-xs" />
               </section>

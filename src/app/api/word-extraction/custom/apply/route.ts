@@ -268,7 +268,6 @@ export async function POST(request: Request) {
               data: {
                 phonetic_us: phonetic,
                 phonetic_us_normalized: normalizeIpaForDb(phonetic, 2000),
-                phonetic_us_confirmed: false,
                 json_hint: null,
               },
             });
@@ -335,9 +334,6 @@ export async function POST(request: Request) {
                   where: { id: sentence.sentence_id },
                   data: {
                     sentence_en_meaning_fa: sentence.sentence_en_meaning_fa,
-                    ...(sentence.sentence_en_meaning_fa !== existing.sentence_en_meaning_fa
-                      ? { sentence_en_meaning_fa_audio_file_name: null }
-                      : {}),
                   },
                 });
                 updatedFields.push(`sentence_en_meaning_fa:${sentence.sentence_id}`);
@@ -356,7 +352,6 @@ export async function POST(request: Request) {
                 ? {}
                 : {
                     sentence_en_meaning_fa: sentence.sentence_en_meaning_fa,
-                    sentence_en_meaning_fa_audio_file_name: null,
                   },
               select: { id: true },
             });

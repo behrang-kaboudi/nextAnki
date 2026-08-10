@@ -3,6 +3,10 @@ import "server-only";
 import { createAnkiConnectClient } from "@/lib/anki";
 import { AnkiNoteTypes } from "@/lib/anki";
 import { getAnkiLinkIdFromNoteFields } from "@/lib/anki/wordAnkiMapping";
+import {
+  acquireWordSyncJobLock,
+  getActiveWordSyncJob,
+} from "@/lib/anki/wordSyncJobLock";
 
 export type AnkiLinkIdDedupStatus = {
   jobId: string;
@@ -75,90 +79,105 @@ export function getAnkiLinkIdDedupStatus(): AnkiLinkIdDedupStatus {
 }
 
 async function runJob(state: State) {
-  state.running = true;
-  state.done = false;
-  state.error = null;
-  state.stopRequested = false;
-  state.stoppedEarly = false;
-  state.startedAt = nowIso();
-  state.finishedAt = null;
-  state.total = 0;
-  state.processed = 0;
-  state.updated = 0;
-  state.skippedSame = 0;
-  state.skippedNoLinkId = 0;
-  state.skippedNoWord = 0;
-  state.failed = 0;
-  state.mediaUploaded = 0;
-  state.mediaDeleted = 0;
-  state.currentNoteId = null;
+  const releaseLock = acquireWordSyncJobLock("deduplicate Anki word notes");
+  try {
+    state.running = true;
+    state.done = false;
+    state.error = null;
+    state.stopRequested = false;
+    state.stoppedEarly = false;
+    state.startedAt = nowIso();
+    state.finishedAt = null;
+    state.total = 0;
+    state.processed = 0;
+    state.updated = 0;
+    state.skippedSame = 0;
+    state.skippedNoLinkId = 0;
+    state.skippedNoWord = 0;
+    state.failed = 0;
+    state.mediaUploaded = 0;
+    state.mediaDeleted = 0;
+    state.currentNoteId = null;
 
-  const anki = createAnkiConnectClient({ timeoutMs: 30_000, retryDelayMs: 1000 });
-  const modelName = AnkiNoteTypes.META_LEX_VR9;
-  const query = `note:"${modelName.replaceAll('"', '\\"')}"`;
+    const anki = createAnkiConnectClient({
+      timeoutMs: 30_000,
+      retryDelayMs: 1000,
+    });
+    const modelName = AnkiNoteTypes.META_LEX_VR9;
+    const query = `note:"${modelName.replaceAll('"', '\\"')}"`;
 
-  const found = await anki.requestDetailed("findNotes", { query });
-  if (!found.ok) throw new Error(found.error);
-  const noteIds = found.result ?? [];
+    const found = await anki.requestDetailed("findNotes", { query });
+    if (!found.ok) throw new Error(found.error);
+    const noteIds = found.result ?? [];
 
-  const byLinkId = new Map<string, number[]>();
+    const byLinkId = new Map<string, number[]>();
 
-  for (const batch of chunk(noteIds, 250)) {
-    if (state.stopRequested) break;
-    const info = await anki.requestDetailed("notesInfo", { notes: batch });
-    if (!info.ok) throw new Error(info.error);
+    for (const batch of chunk(noteIds, 250)) {
+      if (state.stopRequested) break;
+      const info = await anki.requestDetailed("notesInfo", { notes: batch });
+      if (!info.ok) throw new Error(info.error);
 
-    for (const n of info.result ?? []) {
-      const linkId = getAnkiLinkIdFromNoteFields(n);
-      if (!linkId) {
-        state.skippedNoLinkId += 1;
+      for (const n of info.result ?? []) {
+        const linkId = getAnkiLinkIdFromNoteFields(n);
+        if (!linkId) {
+          state.skippedNoLinkId += 1;
+          continue;
+        }
+        const prev = byLinkId.get(linkId);
+        if (prev) prev.push(n.noteId);
+        else byLinkId.set(linkId, [n.noteId]);
+      }
+    }
+
+    const toDelete: number[] = [];
+    for (const [, ids] of byLinkId.entries()) {
+      if (ids.length <= 1) continue;
+      ids.sort((a, b) => a - b);
+      state.skippedSame += 1; // kept oldest
+      toDelete.push(...ids.slice(1));
+    }
+
+    state.total = toDelete.length;
+
+    for (const batch of chunk(toDelete, 100)) {
+      if (state.stopRequested) break;
+      state.currentNoteId = batch[0] ?? null;
+
+      const res = await anki.requestDetailed("deleteNotes", { notes: batch });
+      if (!res.ok) {
+        state.failed += batch.length;
+        state.processed += batch.length;
         continue;
       }
-      const prev = byLinkId.get(linkId);
-      if (prev) prev.push(n.noteId);
-      else byLinkId.set(linkId, [n.noteId]);
-    }
-  }
 
-  const toDelete: number[] = [];
-  for (const [, ids] of byLinkId.entries()) {
-    if (ids.length <= 1) continue;
-    ids.sort((a, b) => a - b);
-    state.skippedSame += 1; // kept oldest
-    toDelete.push(...ids.slice(1));
-  }
-
-  state.total = toDelete.length;
-
-  for (const batch of chunk(toDelete, 100)) {
-    if (state.stopRequested) break;
-    state.currentNoteId = batch[0] ?? null;
-
-    const res = await anki.requestDetailed("deleteNotes", { notes: batch });
-    if (!res.ok) {
-      state.failed += batch.length;
+      state.updated += batch.length;
       state.processed += batch.length;
-      continue;
     }
 
-    state.updated += batch.length;
-    state.processed += batch.length;
-  }
+    if (state.stopRequested && state.processed < state.total) {
+      state.stoppedEarly = true;
+    }
 
-  if (state.stopRequested && state.processed < state.total) {
-    state.stoppedEarly = true;
+    state.running = false;
+    state.done = true;
+    state.finishedAt = nowIso();
+    state.currentNoteId = null;
+  } finally {
+    releaseLock();
   }
-
-  state.running = false;
-  state.done = true;
-  state.finishedAt = nowIso();
-  state.currentNoteId = null;
 }
 
 export function startAnkiLinkIdDedupIfNeeded(): AnkiLinkIdDedupStatus {
   const state = getState();
   if (state.running) return getAnkiLinkIdDedupStatus();
   if (state._started && !state.done) return getAnkiLinkIdDedupStatus();
+  const active = getActiveWordSyncJob();
+  if (active) {
+    state.running = false;
+    state.done = true;
+    state.error = `Anki word sync job "${active.name}" is already running (started ${active.startedAt}).`;
+    return getAnkiLinkIdDedupStatus();
+  }
 
   state.jobId = `anki_link_id_dedup_${Date.now()}`;
   state._started = true;

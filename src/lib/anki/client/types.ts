@@ -56,6 +56,21 @@ export type AnkiNote = {
   }>;
 };
 
+export type AnkiMultiAction =
+  | {
+      action: "updateNoteFields";
+      params: { note: { id: number; fields: AnkiNoteFields } };
+    }
+  | {
+      action: "addNote";
+      params: { note: AnkiNote };
+    };
+
+export type AnkiMultiActionResult =
+  | number
+  | null
+  | { result: unknown; error: string | null };
+
 export type AnkiNotesInfo = Array<{
   noteId: number;
   modelName: string;
@@ -101,6 +116,10 @@ export type AnkiConnectActionMap = {
   };
   version: { params?: Record<string, never>; result: number };
   sync: { params?: Record<string, never>; result: null };
+  multi: {
+    params: { actions: AnkiMultiAction[] };
+    result: AnkiMultiActionResult[];
+  };
 
   storeMediaFile: {
     params: { filename: string; data: string; deleteExisting?: boolean };

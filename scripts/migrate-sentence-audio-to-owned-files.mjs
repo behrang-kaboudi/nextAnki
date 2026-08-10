@@ -93,8 +93,12 @@ async function main() {
   const rows = await prisma.sentence.findMany({
     select: {
       id: true,
+      sentence_en: true,
+      sentence_en_meaning_fa: true,
       sentence_en_audio_file_name: true,
+      sentence_en_audio_source_text: true,
       sentence_en_meaning_fa_audio_file_name: true,
+      sentence_en_meaning_fa_audio_source_text: true,
     },
   });
   let updatedRows = 0;
@@ -103,14 +107,20 @@ async function main() {
     const updates = batch.flatMap((row) => {
       const { id } = row;
       const sentenceEn = latest.get(`${id}:sentence_en`)?.filename ?? null;
-      const meaningFa = latest.get(`${id}:sentence_en_meaning_fa`)?.filename ?? null;
+      const meaningFa = row.sentence_en_meaning_fa?.trim()
+        ? latest.get(`${id}:sentence_en_meaning_fa`)?.filename ?? null
+        : null;
       if (row.sentence_en_audio_file_name === sentenceEn && row.sentence_en_meaning_fa_audio_file_name === meaningFa) return [];
       updatedRows += 1;
       return [prisma.sentence.update({
         where: { id },
         data: {
           sentence_en_audio_file_name: sentenceEn,
+          sentence_en_audio_source_text: sentenceEn ? row.sentence_en.trim() : null,
           sentence_en_meaning_fa_audio_file_name: meaningFa,
+          sentence_en_meaning_fa_audio_source_text: meaningFa
+            ? row.sentence_en_meaning_fa?.trim() || null
+            : null,
         },
       })];
     });

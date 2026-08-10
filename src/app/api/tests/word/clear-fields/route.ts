@@ -91,7 +91,6 @@ export async function POST(req: Request) {
     const englishData = Object.fromEntries(
       englishFields.map((field) => [field, CLEARABLE_ENGLISH_FIELD_VALUES[field as keyof typeof CLEARABLE_ENGLISH_FIELD_VALUES]]),
     ) as Prisma.EnglishWordUpdateManyMutationInput;
-    if (englishFields.includes("phonetic_us")) englishData.phonetic_us_confirmed = false;
     const englishIds = (await prisma.englishWord.findMany({ select: { id: true } })).map((row) => row.id);
     const englishResult = await prisma.englishWord.updateMany({ data: englishData });
     englishUpdatedCount = englishResult.count;

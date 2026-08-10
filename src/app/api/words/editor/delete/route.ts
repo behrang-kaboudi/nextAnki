@@ -2,12 +2,11 @@ import "server-only";
 
 import { NextResponse } from "next/server";
 
-import { WORD_AUDIO_FIELDS } from "@/lib/audio/wordFieldAudioNaming";
 import { prisma } from "@/lib/prisma";
-import { deleteAllWordFieldAudioFiles } from "@/lib/words/wordFieldVoice";
 import { deleteWord } from "@/lib/words/wordRepo";
 import { deleteSentenceAudio } from "@/lib/sentences/sentenceAudio.server";
 import { primarySentenceId, wordSentenceIds } from "@/lib/words/sentenceIds";
+import { deleteWordConceptAudio } from "@/lib/words/wordConceptAudio.server";
 
 export const runtime = "nodejs";
 
@@ -45,13 +44,9 @@ export async function POST(req: Request) {
       wordSentenceIds(other.sentenceIds).includes(primaryId),
     );
 
-    const audio = await Promise.all(
-      WORD_AUDIO_FIELDS.filter((field) => field !== "sentence_en" && field !== "sentence_en_meaning_fa").map(async (field) => {
-        const audioKey = word.anki_link_id;
-        const res = await deleteAllWordFieldAudioFiles({ audioKey, ankiLinkId: audioKey, field });
-        return { field, ...res };
-      }),
-    );
+    const audio: Array<{ field: string; deleted: number; failed: number; deletedBytes: number }> = [
+      { field: "concept_explained_fa", ...(await deleteWordConceptAudio(word.id)) },
+    ];
 
     await deleteWord({ where: { id } });
     if (primaryId != null && !linkedElsewhere) {

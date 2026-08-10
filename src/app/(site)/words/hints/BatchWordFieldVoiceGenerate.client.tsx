@@ -3,15 +3,14 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import type { WordAudioFieldKey } from "@/lib/audio/wordFieldAudioNaming";
-import {
-  WORD_AUDIO_FILENAME_SEPARATOR,
-  WORD_AUDIO_PUBLIC_DIR_RELATIVE,
-} from "@/lib/audio/wordFieldAudioNaming";
+import type { WordAudioBatchFieldKey } from "@/lib/audio/wordAudioFields";
+import { ENGLISH_WORD_AUDIO_PUBLIC_DIR_RELATIVE } from "@/lib/audio/englishWordAudioNaming";
+import { PERSIAN_WORD_AUDIO_PUBLIC_DIR_RELATIVE } from "@/lib/audio/persianWordAudioNaming";
 import { ActionIcon } from "@/components/icons";
 import { wordFieldVoiceProgressTopic } from "@/lib/progress/topics";
 import { useJobProgress } from "@/lib/progress/useJobProgress";
-import { isSentenceAudioField, SENTENCE_AUDIO_FILENAME_SEPARATOR, SENTENCE_AUDIO_PUBLIC_DIR_RELATIVE } from "@/lib/audio/sentenceAudioNaming";
+import { isSentenceAudioField, SENTENCE_AUDIO_PUBLIC_DIR_RELATIVE } from "@/lib/audio/sentenceAudioNaming";
+import { isWordConceptAudioField, WORD_CONCEPT_AUDIO_PUBLIC_DIR_RELATIVE } from "@/lib/audio/wordConceptAudioNaming";
 
 type WordFieldVoiceStatus = {
   jobId: string;
@@ -28,9 +27,9 @@ type WordFieldVoiceStatus = {
   currentId: number | null;
 };
 
-const FIELD_LABEL: Record<WordAudioFieldKey, string> = {
+const FIELD_LABEL: Record<WordAudioBatchFieldKey, string> = {
   base_form: "base_form",
-  other_meanings_en: "other_meanings_en",
+  canonical_text: "canonical_text",
   concept_explained_fa: "concept_explained_fa",
   sentence_en: "sentence_en",
   sentence_en_meaning_fa: "sentence_en_meaning_fa",
@@ -39,12 +38,18 @@ const FIELD_LABEL: Record<WordAudioFieldKey, string> = {
 export default function BatchWordFieldVoiceGenerate({
   field,
 }: {
-  field: WordAudioFieldKey;
+  field: WordAudioBatchFieldKey;
 }) {
   const router = useRouter();
-  const sentenceOwned = isSentenceAudioField(field);
-  const audioFolder = sentenceOwned ? SENTENCE_AUDIO_PUBLIC_DIR_RELATIVE : WORD_AUDIO_PUBLIC_DIR_RELATIVE;
-  const separator = sentenceOwned ? SENTENCE_AUDIO_FILENAME_SEPARATOR : WORD_AUDIO_FILENAME_SEPARATOR;
+  const audioFolder = isSentenceAudioField(field)
+    ? SENTENCE_AUDIO_PUBLIC_DIR_RELATIVE
+    : field === "base_form"
+      ? ENGLISH_WORD_AUDIO_PUBLIC_DIR_RELATIVE
+      : field === "canonical_text"
+        ? PERSIAN_WORD_AUDIO_PUBLIC_DIR_RELATIVE
+      : isWordConceptAudioField(field)
+        ? WORD_CONCEPT_AUDIO_PUBLIC_DIR_RELATIVE
+        : "audio";
   const { status: streamedStatus } = useJobProgress<WordFieldVoiceStatus>(
     wordFieldVoiceProgressTopic(field),
   );
@@ -72,6 +77,8 @@ export default function BatchWordFieldVoiceGenerate({
             totalWords?: number;
             eligibleWords?: number;
             withAudioWords?: number;
+            currentAudioWords?: number;
+            staleAudioWords?: number;
             missingAudioWords?: number;
             noTextWords?: number;
             missingOfTotalRatio?: number;
@@ -84,19 +91,20 @@ export default function BatchWordFieldVoiceGenerate({
       const pct = (v: number) => `${(v * 100).toFixed(1)}%`;
       const msg =
         `field=${FIELD_LABEL[field]} | ` +
-        `missing=${nf.format(data.missingAudioWords ?? 0)}/${nf.format(data.totalWords ?? 0)} (${pct(data.missingOfTotalRatio ?? 0)}) ` +
-        `eligible=${nf.format(data.eligibleWords ?? 0)} (missing of eligible: ${pct(data.missingOfEligibleRatio ?? 0)}) ` +
+        `pending=${nf.format(data.missingAudioWords ?? 0)}/${nf.format(data.totalWords ?? 0)} (${pct(data.missingOfTotalRatio ?? 0)}) ` +
+        `stale=${nf.format(data.staleAudioWords ?? 0)} eligible=${nf.format(data.eligibleWords ?? 0)} (pending of eligible: ${pct(data.missingOfEligibleRatio ?? 0)}) ` +
         `noText=${nf.format(data.noTextWords ?? 0)}`;
       setStatsText(msg);
 
       const RLM = "\u200F";
       window.alert(
         `${RLM}آمار صوت (${FIELD_LABEL[field]}):\n` +
-          `${RLM}بدون صوت (فقط رکوردهای دارای متن): ${nf.format(data.missingAudioWords ?? 0)}\n` +
+          `${RLM}نیازمند تولید یا بازتولید: ${nf.format(data.missingAudioWords ?? 0)}\n` +
+          `${RLM}دارای صوت قدیمی: ${nf.format(data.staleAudioWords ?? 0)}\n` +
           `${RLM}کل رکوردها در دیتابیس: ${nf.format(data.totalWords ?? 0)}\n` +
-          `${RLM}نسبت بدون صوت به کل: ${pct(data.missingOfTotalRatio ?? 0)}\n` +
+          `${RLM}نسبت نیازمند تولید به کل: ${pct(data.missingOfTotalRatio ?? 0)}\n` +
           `${RLM}دارای متن (قابل تولید): ${nf.format(data.eligibleWords ?? 0)}\n` +
-          `${RLM}بدون صوت نسبت به دارای متن: ${pct(data.missingOfEligibleRatio ?? 0)}`
+          `${RLM}نیازمند تولید نسبت به دارای متن: ${pct(data.missingOfEligibleRatio ?? 0)}`
       );
     } catch (e) {
       setStatsText(null);
@@ -139,7 +147,7 @@ export default function BatchWordFieldVoiceGenerate({
       streamedStatus.totalCandidates - streamedStatus.processedCandidates,
     );
     setStatusText(
-      `done=${streamedStatus.processedCandidates}/${streamedStatus.totalCandidates} remaining=${remaining} currentId=${streamedStatus.currentId ?? "—"} generated=${streamedStatus.generated} skippedExists=${streamedStatus.skippedExists} zeroByte=${streamedStatus.zeroByteFound} regeneratedZeroByte=${streamedStatus.regeneratedZeroByte}`,
+      `done=${streamedStatus.processedCandidates}/${streamedStatus.totalCandidates} remaining=${remaining} currentId=${streamedStatus.currentId ?? "—"} generated=${streamedStatus.generated} zeroByte=${streamedStatus.zeroByteFound} regeneratedZeroByte=${streamedStatus.regeneratedZeroByte}`,
     );
   }, [streamedStatus]);
 
@@ -162,8 +170,8 @@ export default function BatchWordFieldVoiceGenerate({
           type="button"
           onClick={() => void generateAll()}
           disabled={busy || running}
-          aria-label={`Generate voices (ALL) — ${FIELD_LABEL[field]}`}
-          title={`Generate voices (ALL) — ${FIELD_LABEL[field]}`}
+          aria-label={`Generate missing or outdated voices — ${FIELD_LABEL[field]}`}
+          title={`Generate missing or outdated voices — ${FIELD_LABEL[field]}`}
           className="inline-flex items-center gap-1.5 rounded border px-2 py-1.5 text-sm hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5"
         >
           {busy || running ? (
@@ -171,7 +179,7 @@ export default function BatchWordFieldVoiceGenerate({
           ) : (
             <ActionIcon name="sparkles" className="size-4" />
           )}
-          <span className="text-[10px] font-semibold opacity-80">ALL</span>
+          <span className="text-[10px] font-semibold opacity-80">PENDING</span>
         </button>
         <button
           type="button"
@@ -194,10 +202,7 @@ export default function BatchWordFieldVoiceGenerate({
       {statsText ? <div className="text-xs opacity-80">{statsText}</div> : null}
       <div className="text-xs opacity-80">
         Folder: <span className="font-mono">public/{audioFolder}</span> •
-        name:{" "}
-        <span className="font-mono">
-          {sentenceOwned ? "s" : "audioKey"}{separator}{sentenceOwned ? "Sentence.id" : "field"}{separator}{sentenceOwned ? "field" : "Date.now()"}{sentenceOwned ? <>{separator}Date.now().mp3</> : ".mp3"}
-        </span>
+        owner and filename are persisted in the database
       </div>
     </div>
   );

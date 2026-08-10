@@ -46,8 +46,8 @@ The audio API must validate the record id and upload, normalize saved output to 
 
 - Place the batch job in the right side of the control card.
 - Use the same structure as `BatchPersianWordAudioGenerate`: a title, one-sentence scope, action button, progress counts, current item, and error.
-- For missing audio, the scope must be explicit: only rows whose model-specific audio filename field is empty are processed. Use the actual model and field names in the sentence.
-- Do not overwrite completed data in a "missing" job. Per-record generate actions may explicitly replace the existing file.
+- For audio generation, process rows whose owned file is missing or whose saved audio source text differs from the current text. Use the actual model and field names in the sentence.
+- Do not overwrite current audio in a batch job. Per-record generate actions may explicitly replace the existing file.
 - Publish progress through `JOB_PROGRESS_TOPICS` and register the server status getter in `jobProgressCatalog`.
 
 ## Reuse checklist
@@ -59,3 +59,5 @@ Before adding a control, search for an equivalent under the model's sibling page
 - compact icon set: `src/components/icons/ActionIcon.tsx`.
 
 If a new model needs a different behavior, keep the same visual interaction contract unless the difference is intentional and documented in the page itself.
+
+When adding a field to an existing model table, do not stop at rendering its raw value. Compare the closest sibling implementation and account for every applicable part of its contract: column selection, sorting, filtering (including missing-value filters), field-specific controls, mutation feedback, and server refresh. Owned audio fields must render the standard audio controls rather than a filename-only cell.
