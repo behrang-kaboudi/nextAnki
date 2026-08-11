@@ -1,7 +1,7 @@
 import "server-only";
 
 import { WORD_AUDIO_BATCH_FIELDS, type WordAudioBatchFieldKey } from "@/lib/audio/wordAudioFields";
-import { audioNeedsGeneration } from "@/lib/audio/audioSourceText";
+import { getAudioGenerationReason, type AudioGenerationReason } from "@/lib/audio/audioSourceText";
 import { isSentenceAudioField, type SentenceAudioField } from "@/lib/audio/sentenceAudioNaming";
 import { isWordConceptAudioField } from "@/lib/audio/wordConceptAudioNaming";
 import {
@@ -36,6 +36,10 @@ export type WordFieldVoiceJobStatus = {
   error: string | null;
   totalCandidates: number;
   processedCandidates: number;
+  missingFileCandidates: number;
+  changedTextCandidates: number;
+  processedMissingFile: number;
+  processedChangedText: number;
   generated: number;
   skippedExists: number;
   skippedNoText: number;
@@ -51,6 +55,7 @@ type Candidate = {
   filename: string | null;
   sourceText: string | null;
 };
+type CandidateWithReason = Candidate & { reason: AudioGenerationReason };
 
 const nowIso = () => new Date().toISOString();
 
@@ -65,6 +70,10 @@ function createInitialState(field: WordAudioBatchFieldKey): JobState {
     error: null,
     totalCandidates: 0,
     processedCandidates: 0,
+    missingFileCandidates: 0,
+    changedTextCandidates: 0,
+    processedMissingFile: 0,
+    processedChangedText: 0,
     generated: 0,
     skippedExists: 0,
     skippedNoText: 0,
@@ -197,6 +206,10 @@ async function runJob(state: JobState) {
     finishedAt: null,
     totalCandidates: 0,
     processedCandidates: 0,
+    missingFileCandidates: 0,
+    changedTextCandidates: 0,
+    processedMissingFile: 0,
+    processedChangedText: 0,
     generated: 0,
     skippedExists: 0,
     skippedNoText: 0,
@@ -205,14 +218,17 @@ async function runJob(state: JobState) {
     currentId: null,
   });
 
-  const candidates = (await fetchCandidates(state.field)).filter((candidate) =>
-    audioNeedsGeneration({
+  const candidates = (await fetchCandidates(state.field)).flatMap((candidate): CandidateWithReason[] => {
+    const reason = getAudioGenerationReason({
       text: candidate.text,
       sourceText: candidate.sourceText,
       fileSize: existingSize(state.field, candidate.filename),
-    }),
-  );
+    });
+    return reason ? [{ ...candidate, reason }] : [];
+  });
   state.totalCandidates = candidates.length;
+  state.missingFileCandidates = candidates.filter((candidate) => candidate.reason === "missing-file").length;
+  state.changedTextCandidates = candidates.filter((candidate) => candidate.reason === "changed-text").length;
   for (const candidate of candidates) {
     state.currentId = candidate.id;
     if (!candidate.text.trim()) {
@@ -228,6 +244,8 @@ async function runJob(state: JobState) {
       if (missingFile) state.regeneratedZeroByte += 1;
     }
     state.processedCandidates += 1;
+    if (candidate.reason === "missing-file") state.processedMissingFile += 1;
+    else state.processedChangedText += 1;
   }
 
   Object.assign(state, { running: false, done: true, finishedAt: nowIso(), currentId: null });

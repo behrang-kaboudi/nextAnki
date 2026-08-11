@@ -16,6 +16,10 @@ type FieldStatus = {
   error: string | null;
   totalCandidates: number;
   processedCandidates: number;
+  missingFileCandidates: number;
+  changedTextCandidates: number;
+  processedMissingFile: number;
+  processedChangedText: number;
   generated: number;
   skippedNoText: number;
   currentId: number | null;
@@ -45,8 +49,12 @@ async function apiStartField(field: WordAudioBatchFieldKey) {
 
 export default function BatchWordFieldVoiceGenerateAllFields({
   remainingCount,
+  missingFileCount,
+  changedTextCount,
 }: {
   remainingCount: number;
+  missingFileCount?: number;
+  changedTextCount?: number;
 }) {
   const router = useRouter();
   const fields = WORD_AUDIO_BATCH_FIELDS;
@@ -69,6 +77,15 @@ export default function BatchWordFieldVoiceGenerateAllFields({
   const processed = statuses.reduce((sum, { status }) => sum + (status?.processedCandidates ?? 0), 0);
   const generated = statuses.reduce((sum, { status }) => sum + (status?.generated ?? 0), 0);
   const remaining = Math.max(0, total - processed);
+  const runningMissingFile = statuses.reduce(
+    (sum, { status }) => sum + Math.max(0, (status?.missingFileCandidates ?? 0) - (status?.processedMissingFile ?? 0)),
+    0,
+  );
+  const runningChangedText = statuses.reduce(
+    (sum, { status }) => sum + Math.max(0, (status?.changedTextCandidates ?? 0) - (status?.processedChangedText ?? 0)),
+    0,
+  );
+  const showReasonCounts = missingFileCount !== undefined && changedTextCount !== undefined;
   const showProgress = running || Object.keys(launchedJobIds).length > 0;
 
   const run = useCallback(async () => {
@@ -138,6 +155,16 @@ export default function BatchWordFieldVoiceGenerateAllFields({
         {running ? "Generating all missing audio" : "Generate all missing audio"}
         <RemainingCountBadge count={running ? remaining : remainingCount} />
       </button>
+      {showReasonCounts ? (
+        <div className="flex flex-wrap items-center gap-1.5 text-xs opacity-80" aria-label="Remaining audio generation reasons">
+          <span className="rounded-full border px-2 py-1">
+            Missing file: {(running ? runningMissingFile : missingFileCount).toLocaleString()}
+          </span>
+          <span className="rounded-full border px-2 py-1">
+            Text changed: {(running ? runningChangedText : changedTextCount).toLocaleString()}
+          </span>
+        </div>
+      ) : null}
       {statusText ? <span className="text-xs opacity-70">{statusText}</span> : null}
       {error ? <span className="max-w-[520px] truncate text-xs text-red-600" title={error}>{error}</span> : null}
       {showProgress ? (

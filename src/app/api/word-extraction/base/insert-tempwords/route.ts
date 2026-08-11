@@ -5,6 +5,7 @@ import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 
 import { normalizeEnglishWordText } from "@/lib/english/normalize";
+import { findEnglishWordIdsByKnownForm } from "@/lib/english/englishWordForms.server";
 import {
   normalizePersianForStorage,
   normalizePersianFull,
@@ -167,8 +168,11 @@ export async function POST(request: Request) {
     for (const item of items) {
       try {
         const normalizedMeaning = normalizePersianFull(item.meaning_fa);
+        const knownEnglishWordIds = await findEnglishWordIdsByKnownForm(item.base_form);
         const candidates = await prisma.word.findMany({
-          where: { english: { is: { base_form: item.base_form } } },
+          where: knownEnglishWordIds.length
+            ? { englishId: { in: knownEnglishWordIds } }
+            : { english: { is: { base_form: item.base_form } } },
           orderBy: { id: "asc" },
           select: {
             id: true,

@@ -2,6 +2,23 @@ export function normalizedAudioSourceText(text: string | null | undefined): stri
   return String(text ?? "").trim();
 }
 
+export type AudioGenerationReason = "missing-file" | "changed-text";
+
+export function getAudioGenerationReason({
+  text,
+  sourceText,
+  fileSize,
+}: {
+  text: string | null | undefined;
+  sourceText: string | null | undefined;
+  fileSize: number;
+}): AudioGenerationReason | null {
+  const currentText = normalizedAudioSourceText(text);
+  if (!currentText) return null;
+  if (fileSize <= 0) return "missing-file";
+  return sourceText !== currentText ? "changed-text" : null;
+}
+
 export function audioNeedsGeneration({
   text,
   sourceText,
@@ -11,6 +28,5 @@ export function audioNeedsGeneration({
   sourceText: string | null | undefined;
   fileSize: number;
 }): boolean {
-  const currentText = normalizedAudioSourceText(text);
-  return Boolean(currentText) && (fileSize <= 0 || sourceText !== currentText);
+  return getAudioGenerationReason({ text, sourceText, fileSize }) !== null;
 }

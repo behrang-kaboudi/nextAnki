@@ -54,6 +54,8 @@ model Word {
   sentenceIds                            Json?
   /// True after this Word has passed the Word Concept Merge workflow.
   conceptMergeReviewed                   Boolean      @default(false)
+  /// True after this Word has passed the regular-inflection merge workflow.
+  inflectionMergeReviewed                Boolean      @default(false)
   meanings_confirmed                     Boolean      @default(false)
   pos                                    String?
   concept_explained_fa                   String?      @db.Text
@@ -75,6 +77,7 @@ model Word {
   @@index([englishId], map: "Word_englishId_idx")
   @@index([meaningId], map: "Word_meaningId_idx")
   @@index([conceptMergeReviewed], map: "Word_conceptMergeReviewed_idx")
+  @@index([inflectionMergeReviewed], map: "Word_inflectionMergeReviewed_idx")
   @@map("word")
 }
 
@@ -96,6 +99,59 @@ model WordRemovedFieldArchive {
   @@map("word_removed_field_archive")
 }
 
+/// Records a reversible, table-wide Word field maintenance operation.
+model WordFieldMaintenanceOperation {
+  id           String                         @id @db.VarChar(36)
+  field        String
+  label        String
+  affectedRows Int
+  status       String                         @default("completed")
+  createdAt    DateTime                       @default(now())
+  undoneAt     DateTime?
+  snapshots    WordFieldMaintenanceSnapshot[]
+
+  @@index([createdAt], map: "WordFieldMaintenanceOperation_createdAt_idx")
+  @@map("word_field_maintenance_operation")
+}
+
+/// Stores the exact pre-change Word values needed to undo one maintenance operation.
+model WordFieldMaintenanceSnapshot {
+  operationId String                        @db.VarChar(36)
+  wordId      Int
+  data        Json
+  operation   WordFieldMaintenanceOperation @relation(fields: [operationId], references: [id], onDelete: Cascade)
+
+  @@id([operationId, wordId])
+  @@map("word_field_maintenance_snapshot")
+}
+
+/// Records reversible, table-wide maintenance for non-Word model tables.
+model TableFieldMaintenanceOperation {
+  id           String                          @id @db.VarChar(36)
+  model        String
+  field        String
+  label        String
+  affectedRows Int
+  status       String                          @default("completed")
+  createdAt    DateTime                        @default(now())
+  undoneAt     DateTime?
+  snapshots    TableFieldMaintenanceSnapshot[]
+
+  @@index([model, createdAt], map: "TableFieldMaintenanceOperation_model_createdAt_idx")
+  @@map("table_field_maintenance_operation")
+}
+
+/// Stores exact pre-change values for one non-Word table maintenance operation.
+model TableFieldMaintenanceSnapshot {
+  operationId String                         @db.VarChar(36)
+  recordId    Int
+  data        Json
+  operation   TableFieldMaintenanceOperation @relation(fields: [operationId], references: [id], onDelete: Cascade)
+
+  @@id([operationId, recordId])
+  @@map("table_field_maintenance_snapshot")
+}
+
 model EnglishWord {
   id                     Int      @id @default(autoincrement())
   base_form              String   @unique(map: "EnglishWord_base_form_key")
@@ -107,9 +163,25 @@ model EnglishWord {
   createdAt              DateTime @default(now())
   updatedAt              DateTime @updatedAt
   words                  Word[]   @relation("WordEnglish")
+  forms                  EnglishWordForm[]
 
   @@index([phonetic_us_normalized], map: "EnglishWord_phonetic_us_normalized_idx")
   @@map("english_word")
+}
+
+/// A confirmed surface form that resolves to one canonical EnglishWord.
+/// The same spelling may belong to multiple EnglishWords when its senses differ.
+model EnglishWordForm {
+  id            Int         @id @default(autoincrement())
+  englishWordId Int
+  form          String
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  englishWord   EnglishWord @relation(fields: [englishWordId], references: [id], onDelete: Cascade)
+
+  @@unique([englishWordId, form], map: "EnglishWordForm_englishWordId_form_key")
+  @@index([form], map: "EnglishWordForm_form_idx")
+  @@map("english_word_form")
 }
 
 model Sentence {

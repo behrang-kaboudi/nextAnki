@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { PromptSourcesButton } from "@/components/prompts/PromptSourcesButton";
 import { RemainingCountBadge, RemainingCountButton } from "@/components/remaining-count";
+import { BulkReviewStatusActions } from "@/components/review-status/BulkReviewStatusActions.client";
 
 const PROMPT_PATH = "src/prompts/word-extraction/merge_word_concepts/rulseV1.md";
 
@@ -159,23 +160,35 @@ export default function WordConceptMerge({ remainingCount }: { remainingCount: n
   const copyText = `${prompt}\n\n${JSON.stringify(groups, null, 2)}`;
   return (
     <>
-      <button
-        type="button"
-        disabled={busy}
-        aria-busy={busy && !open}
-        onClick={() => void createData(true)}
-        className="relative rounded border px-3 py-2 text-sm hover:bg-black/5 disabled:opacity-100 dark:hover:bg-white/5"
-      >
-        MERGE WORD CONCEPTS <RemainingCountBadge count={remainingCount} />
-        {busy && !open ? (
-          <span className="absolute inset-0 flex items-center justify-center gap-1 rounded bg-background/85" aria-hidden="true">
-            <span className="size-1.5 animate-bounce rounded-full bg-current [animation-delay:-0.3s]" />
-            <span className="size-1.5 animate-bounce rounded-full bg-current [animation-delay:-0.15s]" />
-            <span className="size-1.5 animate-bounce rounded-full bg-current" />
-          </span>
-        ) : null}
-        {busy && !open ? <span className="sr-only">Preparing</span> : null}
-      </button>
+      <div className="inline-flex items-start gap-1">
+        <button
+          type="button"
+          disabled={busy}
+          aria-busy={busy && !open}
+          onClick={() => void createData(true)}
+          className="relative rounded border px-3 py-2 text-sm hover:bg-black/5 disabled:opacity-100 dark:hover:bg-white/5"
+        >
+          MERGE WORD CONCEPTS <RemainingCountBadge count={remainingCount} />
+          {busy && !open ? (
+            <span className="absolute inset-0 flex items-center justify-center gap-1 rounded bg-background/85" aria-hidden="true">
+              <span className="size-1.5 animate-bounce rounded-full bg-current [animation-delay:-0.3s]" />
+              <span className="size-1.5 animate-bounce rounded-full bg-current [animation-delay:-0.15s]" />
+              <span className="size-1.5 animate-bounce rounded-full bg-current" />
+            </span>
+          ) : null}
+          {busy && !open ? <span className="sr-only">Preparing</span> : null}
+        </button>
+        <BulkReviewStatusActions
+          pendingCount={remainingCount}
+          pendingUnit="گروه در انتظار"
+          confirmEndpoint="/api/words/concept-merge/confirm-all"
+          resetEndpoint="/api/words/concept-merge/reset-reviewed"
+          confirmSubject="بررسی‌های Merge Word Concept"
+          confirmWarning="این کار فقط وضعیت بررسی را تأیید می‌کند؛ هیچ رکوردی ادغام یا حذف نمی‌شود."
+          resetSubject="بررسی‌های Merge Word Concept"
+          resetWarning="تمام Wordهای بررسی‌شده دوباره Pending می‌شوند. هیچ کانسپت، معنا یا رکوردی تغییر یا حذف نمی‌شود."
+        />
+      </div>
 
       {open ? (
         <div

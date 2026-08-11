@@ -21,6 +21,22 @@
 ## Hard Rules (Project-wide)
 - No raw SQL for `Word` writes in app code; use `src/lib/words/wordRepo.ts`.
 
+### Strict preservation and no unrequested changes
+- Make only the exact changes explicitly requested by the user.
+- Never delete, remove, hide, replace, rename, relocate, disable, simplify, or deprecate any existing item unless the user explicitly requests that exact action.
+- This prohibition applies to UI elements, buttons, icons, help indicators, tooltips, labels, text, notices, modals, behavior, interactions, validation, confirmations, application states, code, components, functions, variables, imports, comments, routes, APIs, tests, styles, configuration, documentation, files, database behavior, data, records, fields, assets, audio, images, backups, and generated files.
+- Never remove something merely because it appears redundant, unused, superseded, duplicated, unnecessary after a new implementation, cleaner to replace, better handled elsewhere, or available inside another modal, component, or workflow.
+- Adding a new feature does not authorize replacing or removing an existing feature. Add new functionality while preserving all existing functionality and UI unless the user explicitly requests a replacement.
+- Do not perform unsolicited cleanup, refactoring, reorganization, modernization, renaming, formatting, deduplication, consolidation, or design improvement.
+- Do not make temporary deletions or removals. Temporary removal is still prohibited.
+- Do not infer permission to remove something from the general intent of a request. Permission must be explicit and specific to the exact item being removed or changed.
+- If completing a request appears to require removing, replacing, hiding, renaming, moving, or disabling an existing item, stop before making that change, identify the exact item and reason, and ask the user for explicit permission.
+- If a requested addition conflicts with existing behavior, preserve the existing behavior and ask the user how to resolve the conflict. Do not choose a resolution independently.
+- Before finishing every task, inspect the complete diff and verify that no existing UI or behavior was lost, no unrelated code or file changed, no unsolicited cleanup occurred, and every modification maps directly to an explicit user request.
+- If an unrequested removal or unrelated change was made accidentally, restore it before reporting completion.
+- When uncertain whether a change is authorized, treat it as unauthorized and ask the user first.
+- Core principle: preserve everything by default. Change only what the user explicitly requested. Addition is not permission for removal.
+
 ## Development Server Workflow
 - The agent is responsible for all development-server commands. Do not ask the user to stop, start, restart, or recover the server after agent work.
 - Agents must use `dev:start`, `dev:stop`, and `dev:restart`; reserve `npm run dev` for the user's foreground terminal. It automatically takes over any managed background server and runs on the same configured port.

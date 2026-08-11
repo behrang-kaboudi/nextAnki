@@ -4,6 +4,7 @@ import type { Prisma } from "@prisma/client";
 import { PageHeader } from "@/components/page-header";
 import { TableColumnIndicators, type TableColumnIndicator } from "@/components/table-column-indicators";
 import { TableColumnSelector } from "@/components/table-column-selector";
+import TableFieldMaintenance from "@/components/table-field-maintenance/TableFieldMaintenance.client";
 import { getPendingEnglishWordAudioIds } from "@/lib/audio/wordAudioPending.server";
 import { prisma } from "@/lib/prisma";
 import { getEnglishWordColumnEmptyCounts } from "@/lib/words/tableColumnEmptyCounts.server";
@@ -98,7 +99,7 @@ export default async function EnglishWordsTablePage({ searchParams }: { searchPa
       <div className="p-3">
       <form className="flex flex-wrap items-center gap-2"><input name="q" defaultValue={q} placeholder="Search text, source text, or IPA…" className="w-full rounded border px-3 py-2 text-sm sm:w-80" /><input type="hidden" name="sort" value={sort} /><input type="hidden" name="dir" value={dir} /><label className="flex items-center gap-1 text-sm"><input name="missingAudio" value="1" type="checkbox" defaultChecked={missingAudio} /> Needs audio generation</label>{columns.map((column) => <input key={column} type="hidden" name="columns" value={column} />)}<button type="submit" className="rounded border px-3 py-2 text-sm">Search</button>{q || missingAudio ? <Link href={`/words/tables/english-words?${clearQuery}`} className="rounded border px-3 py-2 text-sm">Clear</Link> : null}</form>
         <div className="mt-3 grid gap-3 border-t pt-3 lg:grid-cols-2">
-          <div className="flex flex-wrap items-center gap-2"><AddEnglishWordModal /><EnglishWordPhoneticUsPrompt initialRemainingCount={phoneticCreateRemainingCount} /></div>
+          <div className="flex flex-wrap items-center gap-2"><AddEnglishWordModal /><EnglishWordPhoneticUsPrompt initialRemainingCount={phoneticCreateRemainingCount} /><TableFieldMaintenance modelLabel="EnglishWord" apiBase="/api/table-field-maintenance/EnglishWord" /></div>
           <div className="space-y-3 border-t pt-3 lg:border-l lg:border-t-0 lg:pl-3 lg:pt-0"><BatchWordFieldVoiceGenerate field="base_form" /><div className="border-t pt-3"><BatchEnglishWordJsonHintGenerate initialRemainingCount={jsonHintRemainingCount} initialTotalCount={jsonHintTotalCount} /></div></div>
         </div>
       </div>

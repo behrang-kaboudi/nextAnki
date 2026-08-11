@@ -4,6 +4,7 @@ import type { Prisma } from "@prisma/client";
 import { PageHeader } from "@/components/page-header";
 import { TableColumnIndicators, type TableColumnIndicator } from "@/components/table-column-indicators";
 import { TableColumnSelector } from "@/components/table-column-selector";
+import TableFieldMaintenance from "@/components/table-field-maintenance/TableFieldMaintenance.client";
 import { getPendingPersianWordAudioIds } from "@/lib/audio/wordAudioPending.server";
 import { prisma } from "@/lib/prisma";
 import { getPersianWordColumnEmptyCounts } from "@/lib/words/tableColumnEmptyCounts.server";
@@ -195,6 +196,7 @@ export default async function PersianWordsTablePage({
             <div className="flex flex-wrap items-center gap-2">
             <AddPersianWordModal />
             <PersianWordMeaningIpaPhase2 initialMissingCount={missingMeaningIpaCount} />
+            <TableFieldMaintenance modelLabel="PersianWord" apiBase="/api/table-field-maintenance/PersianWord" />
             </div>
             <div className="border-t pt-3 lg:border-l lg:border-t-0 lg:pl-3 lg:pt-0">
               <BatchWordFieldVoiceGenerate field="canonical_text" />

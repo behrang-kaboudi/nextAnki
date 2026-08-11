@@ -161,9 +161,9 @@ export default function BatchWordFieldVoiceGenerate({
   }, [field, jobId, notifiedDoneJobId, router, running]);
 
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex items-center gap-2">
-        <span className="rounded border px-2 py-1 text-xs font-semibold">
+    <div className="flex min-w-0 flex-col gap-2">
+      <div className="flex min-w-0 flex-wrap items-center gap-2">
+        <span className="max-w-full break-all rounded border px-2 py-1 text-xs font-semibold">
           {FIELD_LABEL[field]}
         </span>
         <button
@@ -191,16 +191,21 @@ export default function BatchWordFieldVoiceGenerate({
         >
           {statsBusy ? <span className="animate-pulse opacity-70">…</span> : <span className="text-[10px] font-semibold opacity-80">STATS</span>}
         </button>
-        {jobId ? <span className="text-xs opacity-70">job: {jobId}</span> : null}
       </div>
+      {jobId ? (
+        <div className="flex min-w-0 items-center gap-1 text-xs opacity-70">
+          <span className="shrink-0">job:</span>
+          <code className="truncate" title={jobId}>{jobId}</code>
+        </div>
+      ) : null}
       {error ? (
         <div className="max-w-[520px] truncate text-xs text-red-600" title={error}>
           {error}
         </div>
       ) : null}
-      {statusText ? <div className="text-xs opacity-80">{statusText}</div> : null}
-      {statsText ? <div className="text-xs opacity-80">{statsText}</div> : null}
-      <div className="text-xs opacity-80">
+      {statusText ? <div className="break-words text-xs leading-relaxed opacity-80">{statusText}</div> : null}
+      {statsText ? <div className="break-words text-xs leading-relaxed opacity-80">{statsText}</div> : null}
+      <div className="break-words text-xs leading-relaxed opacity-80">
         Folder: <span className="font-mono">public/{audioFolder}</span> •
         owner and filename are persisted in the database
       </div>

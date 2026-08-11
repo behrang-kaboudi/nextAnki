@@ -8,7 +8,7 @@ import {
 } from "@/components/table-column-indicators";
 import { TableColumnSelector } from "@/components/table-column-selector";
 import {
-  getPendingWordAudioTaskCount,
+  getPendingWordAudioTaskCounts,
   getPendingWordConceptAudioIds,
 } from "@/lib/audio/wordAudioPending.server";
 import { prisma } from "@/lib/prisma";
@@ -17,6 +17,7 @@ import { getWordColumnEmptyCounts } from "@/lib/words/tableColumnEmptyCounts.ser
 import { hydrateWordsWithPrimarySentence } from "@/lib/words/primarySentences.server";
 import { primarySentenceId } from "@/lib/words/sentenceIds";
 import { getPendingWordConceptMergeCount } from "@/lib/words/wordConceptMerge.server";
+import { getPendingWordInflectionMergeCount } from "@/lib/words/wordInflectionMerge.server";
 import { getPendingWordMeaningComparisonCount } from "@/lib/words/wordMeaningComparison.server";
 
 import OpenWordEditorModal from "../../editor/OpenWordEditorModal.client";
@@ -28,6 +29,7 @@ import WordArrayRelationModal, {
 } from "./WordArrayRelationModal.client";
 import WordMeaningsReview from "./WordMeaningsReview.client";
 import WordConceptMerge from "./WordConceptMerge.client";
+import WordInflectionMerge from "./WordInflectionMerge.client";
 import WordMeaningComparison from "./WordMeaningComparison.client";
 import DeleteWordModalButton from "./DeleteWordModalButton.client";
 import WordFieldVoiceCell from "../../hints/WordFieldVoiceCell.client";
@@ -35,6 +37,7 @@ import BatchWordFieldVoiceGenerateAllFields from "../../hints/BatchWordFieldVoic
 import BatchEnglishWordJsonHintGenerate from "../../hints/BatchEnglishWordJsonHintGenerate.client";
 import PersianWordMeaningIpaPhase2 from "../persian-words/PersianWordMeaningIpaPhase2.client";
 import EnglishWordPhoneticUsPrompt from "../english-words/EnglishWordPhoneticUsPrompt.client";
+import TableFieldMaintenance from "@/components/table-field-maintenance/TableFieldMaintenance.client";
 
 export const metadata = { title: "Words — Word Table" };
 export const runtime = "nodejs";
@@ -50,6 +53,7 @@ const SORT_FIELDS = [
   "meaningId",
   "sentenceIds",
   "conceptMergeReviewed",
+  "inflectionMergeReviewed",
   "otherMeaningIds",
   "comparedMeaningWordIds",
   "synonymIds",
@@ -76,6 +80,7 @@ const TABLE_COLUMNS = [
   { key: "meaningId", label: "meaningId" },
   { key: "sentenceIds", label: "sentenceIds" },
   { key: "conceptMergeReviewed", label: "conceptMergeReviewed" },
+  { key: "inflectionMergeReviewed", label: "inflectionMergeReviewed" },
   { key: "otherMeaningIds", label: "otherMeaningIds" },
   { key: "comparedMeaningWordIds", label: "comparedMeaningWordIds" },
   { key: "synonymIds", label: "synonymIds" },
@@ -104,6 +109,7 @@ const DEFAULT_TABLE_COLUMNS: TableColumnKey[] = [
   "meaningId",
   "sentenceIds",
   "conceptMergeReviewed",
+  "inflectionMergeReviewed",
   "otherMeaningIds",
   "comparedMeaningWordIds",
   "synonymIds",
@@ -374,6 +380,7 @@ export default async function WordsTablePage({
       meaningId: { meaningId: dir },
       sentenceIds: { sentenceIds: dir },
       conceptMergeReviewed: { conceptMergeReviewed: dir },
+      inflectionMergeReviewed: { inflectionMergeReviewed: dir },
       otherMeaningIds: { otherMeaningIds: dir },
       comparedMeaningWordIds: { comparedMeaningWordIds: dir },
       synonymIds: { synonymIds: dir },
@@ -403,8 +410,9 @@ export default async function WordsTablePage({
     emptyCounts,
     meaningReviewRemainingCount,
     conceptMergeRemainingCount,
+    inflectionMergeRemainingCount,
     meaningComparisonRemainingCount,
-    audioRemainingCount,
+    audioRemainingCounts,
     jsonHintRemainingCount,
     jsonHintTotalCount,
     missingMeaningIpaCount,
@@ -428,6 +436,7 @@ export default async function WordsTablePage({
         meaningId: true,
         sentenceIds: true,
         conceptMergeReviewed: true,
+        inflectionMergeReviewed: true,
         otherMeaningIds: true,
         comparedMeaningWordIds: true,
         synonymIds: true,
@@ -449,8 +458,9 @@ export default async function WordsTablePage({
     getWordColumnEmptyCounts(),
     prisma.word.count({ where: { meanings_confirmed: false } }),
     getPendingWordConceptMergeCount(),
+    getPendingWordInflectionMergeCount(),
     getPendingWordMeaningComparisonCount(),
-    getPendingWordAudioTaskCount(),
+    getPendingWordAudioTaskCounts(),
     prisma.englishWord.count({
       where: { OR: [{ json_hint: null }, { json_hint: "" }] },
     }),
@@ -636,6 +646,7 @@ export default async function WordsTablePage({
                 pendingCount={meaningReviewRemainingCount}
               />
               <WordConceptMerge remainingCount={conceptMergeRemainingCount} />
+              <WordInflectionMerge remainingCount={inflectionMergeRemainingCount} />
               <WordMeaningComparison
                 remainingCount={meaningComparisonRemainingCount}
               />
@@ -654,6 +665,15 @@ export default async function WordsTablePage({
                 An empty otherMeaningIds value is complete only when its AI review status is reviewed.
               </span>
             </div>
+            <div className="mt-3 border-t pt-3">
+              <div className="mb-2">
+                <div className="text-sm font-semibold">Data maintenance</div>
+                <div className="text-xs opacity-70">
+                  Preview and clear supported Word fields with dependency-aware recovery snapshots.
+                </div>
+              </div>
+              <TableFieldMaintenance modelLabel="Word" apiBase="/api/words/field-maintenance" />
+            </div>
           </div>
           <div className="space-y-3 border-t pt-3 lg:border-l lg:border-t-0 lg:pl-3 lg:pt-0">
             <section className="flex flex-col gap-2">
@@ -664,7 +684,9 @@ export default async function WordsTablePage({
                 </div>
               </div>
               <BatchWordFieldVoiceGenerateAllFields
-                remainingCount={audioRemainingCount}
+                remainingCount={audioRemainingCounts.total}
+                missingFileCount={audioRemainingCounts.missingFile}
+                changedTextCount={audioRemainingCounts.changedText}
               />
             </section>
             <div className="border-t pt-3">
@@ -755,6 +777,14 @@ export default async function WordsTablePage({
                     href={sortHref("conceptMergeReviewed")}
                     label="conceptMergeReviewed"
                     active={sort === "conceptMergeReviewed"}
+                    direction={dir}
+                  />
+                ) : null}
+                {hasColumn("inflectionMergeReviewed") ? (
+                  <SortHeader
+                    href={sortHref("inflectionMergeReviewed")}
+                    label="inflectionMergeReviewed"
+                    active={sort === "inflectionMergeReviewed"}
                     direction={dir}
                   />
                 ) : null}
@@ -955,6 +985,9 @@ export default async function WordsTablePage({
                   ) : null}
                   {hasColumn("conceptMergeReviewed") ? (
                     <td className="px-3 py-2">{row.conceptMergeReviewed ? "true" : "false"}</td>
+                  ) : null}
+                  {hasColumn("inflectionMergeReviewed") ? (
+                    <td className="px-3 py-2">{row.inflectionMergeReviewed ? "true" : "false"}</td>
                   ) : null}
                   {hasColumn("otherMeaningIds") ? (
                     <td className="max-w-64 px-3 py-2 font-mono">

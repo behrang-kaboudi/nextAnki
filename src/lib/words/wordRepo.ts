@@ -22,6 +22,17 @@ const conceptMergeInputs = new Set([
   "concept_explained_fa",
 ]);
 
+const inflectionMergeInputs = new Set([
+  "englishId",
+  "english",
+  "meaningId",
+  "meaning",
+  "otherMeaningIds",
+  "sentenceIds",
+  "pos",
+  "concept_explained_fa",
+]);
+
 function resetConceptMergeReview(data: unknown) {
   if (!data || typeof data !== "object" || Array.isArray(data)) return;
   const record = data as Record<string, unknown>;
@@ -49,6 +60,15 @@ function resetMeaningReview(data: unknown) {
   }
 }
 
+function resetInflectionMergeReview(data: unknown) {
+  if (!data || typeof data !== "object" || Array.isArray(data)) return;
+  const record = data as Record<string, unknown>;
+  if (record.inflectionMergeReviewed !== undefined) return;
+  if (Object.keys(record).some((key) => inflectionMergeInputs.has(key))) {
+    record.inflectionMergeReviewed = false;
+  }
+}
+
 type WordWriteClient = Pick<PrismaClient, "word"> | Pick<Prisma.TransactionClient, "word">;
 
 export async function updateWord(
@@ -58,14 +78,19 @@ export async function updateWord(
   stripManualUpdatedAt(args);
   resetConceptMergeReview(args.data);
   resetMeaningReview(args.data);
+  resetInflectionMergeReview(args.data);
   return client.word.update(args);
 }
 
-export async function updateManyWords(args: Prisma.WordUpdateManyArgs) {
+export async function updateManyWords(
+  args: Prisma.WordUpdateManyArgs,
+  client: WordWriteClient = prisma,
+) {
   stripManualUpdatedAt(args);
   resetConceptMergeReview(args.data);
   resetMeaningReview(args.data);
-  return prisma.word.updateMany(args);
+  resetInflectionMergeReview(args.data);
+  return client.word.updateMany(args);
 }
 
 export async function touchWordByAnkiLinkId(ankiLinkId: string) {
@@ -95,10 +120,11 @@ export async function touchWordsByIds(
     resetConceptMergeReviewed?: boolean;
     resetMeaningsConfirmed?: boolean;
   },
+  client: WordWriteClient = prisma,
 ) {
   const uniqueIds = [...new Set(ids.filter((id) => Number.isSafeInteger(id) && id > 0))];
   if (!uniqueIds.length) return { count: 0 };
-  return prisma.word.updateMany({
+  return client.word.updateMany({
     where: { id: { in: uniqueIds } },
     data: {
       updatedAt: new Date(),
@@ -126,10 +152,13 @@ export async function touchWordsByEnglishId(
   });
 }
 
-export async function touchWordsByEnglishIds(englishIds: readonly number[]) {
+export async function touchWordsByEnglishIds(
+  englishIds: readonly number[],
+  client: WordWriteClient = prisma,
+) {
   const uniqueIds = [...new Set(englishIds.filter((id) => Number.isSafeInteger(id) && id > 0))];
   if (!uniqueIds.length) return { count: 0 };
-  return prisma.word.updateMany({ where: { englishId: { in: uniqueIds } }, data: { updatedAt: new Date() } });
+  return client.word.updateMany({ where: { englishId: { in: uniqueIds } }, data: { updatedAt: new Date() } });
 }
 
 export async function deleteWord(

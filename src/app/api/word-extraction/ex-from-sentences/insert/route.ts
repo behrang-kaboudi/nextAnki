@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { upsertPrimarySentenceByAnkiLinkId } from "@/lib/sentences/sentenceRepo";
 import { addPersianWord } from "@/lib/tables/persianWord";
 import { normalizeEnglishWordText } from "@/lib/english/normalize";
+import { findEnglishWordIdsByKnownForm } from "@/lib/english/englishWordForms.server";
 import { updateWord } from "@/lib/words/wordRepo";
 
 export const runtime = "nodejs";
@@ -199,8 +200,11 @@ export async function POST(req: Request) {
 
       for (const item of row.items) {
         try {
+          const knownEnglishWordIds = await findEnglishWordIdsByKnownForm(item.base_form);
           const candidates = await prisma.word.findMany({
-            where: { english: { is: { base_form: item.base_form } } },
+            where: knownEnglishWordIds.length
+              ? { englishId: { in: knownEnglishWordIds } }
+              : { english: { is: { base_form: item.base_form } } },
             select: { id: true, anki_link_id: true, meaning: { select: { normalized_text: true } } },
           });
 

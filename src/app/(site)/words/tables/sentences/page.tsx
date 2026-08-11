@@ -5,6 +5,7 @@ import SentenceEditorModal, { type SentenceEditorItem } from "@/app/(site)/sente
 import { PageHeader } from "@/components/page-header";
 import { TableColumnIndicators, type TableColumnIndicator } from "@/components/table-column-indicators";
 import { TableColumnSelector } from "@/components/table-column-selector";
+import TableFieldMaintenance from "@/components/table-field-maintenance/TableFieldMaintenance.client";
 import { getPendingSentenceAudioIds } from "@/lib/audio/wordAudioPending.server";
 import { prisma } from "@/lib/prisma";
 import { getSentenceColumnEmptyCounts } from "@/lib/words/tableColumnEmptyCounts.server";
@@ -107,7 +108,16 @@ export default async function SentencesTablePage({ searchParams }: { searchParam
     <PageHeader title="Sentence Table" subtitle="Browse unique sentence records and manage their owned English and Persian audio files." />
     <section className="mt-4 overflow-hidden rounded border"><div className="p-3">
       <form className="flex flex-wrap items-center gap-2"><input name="q" defaultValue={q} placeholder="Search sentence or Persian meaning…" className="w-full rounded border px-3 py-2 text-sm sm:w-96" /><label className="flex items-center gap-1 text-sm">Missing audio <select name="missingAudio" defaultValue={missingAudio} className="rounded border px-2 py-2"><option value="">All</option><option value="any">Either field</option><option value="sentence_en">sentence_en</option><option value="sentence_en_meaning_fa">sentence_en_meaning_fa</option></select></label><label className="flex items-center gap-1 text-sm">Rows <select name="pageSize" defaultValue={String(pageSize)} className="rounded border px-2 py-2"><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option><option value="200">200</option></select></label><input type="hidden" name="sort" value={sort} /><input type="hidden" name="dir" value={dir} />{columns.map((column) => <input key={column} type="hidden" name="columns" value={column} />)}<button type="submit" className="rounded border px-3 py-2 text-sm hover:bg-black/5 dark:hover:bg-white/5">Search</button>{q || missingAudio ? <Link href={clearHref} className="rounded border px-3 py-2 text-sm hover:bg-black/5 dark:hover:bg-white/5">Clear</Link> : null}</form>
-      <div className="mt-3 grid gap-3 border-t pt-3 lg:grid-cols-2"><div className="text-sm opacity-75">Use each audio column to play, generate, record, or delete the filename stored on that Sentence row.</div><div className="grid gap-2 sm:grid-cols-2"><BatchWordFieldVoiceGenerate field="sentence_en" /><BatchWordFieldVoiceGenerate field="sentence_en_meaning_fa" /></div></div>
+      <div className="mt-3 grid gap-4 border-t pt-3 lg:grid-cols-[minmax(240px,0.7fr)_minmax(0,1.3fr)]">
+        <div className="flex flex-col items-start gap-2">
+          <TableFieldMaintenance modelLabel="Sentence" apiBase="/api/table-field-maintenance/Sentence" />
+          <p className="max-w-md text-sm leading-relaxed opacity-70">Clear database fields safely with dependency previews, audio quarantine, and Undo.</p>
+        </div>
+        <div className="grid min-w-0 gap-3 xl:grid-cols-2">
+          <div className="min-w-0 rounded-lg border bg-black/[0.015] p-3 dark:bg-white/[0.025]"><BatchWordFieldVoiceGenerate field="sentence_en" /></div>
+          <div className="min-w-0 rounded-lg border bg-black/[0.015] p-3 dark:bg-white/[0.025]"><BatchWordFieldVoiceGenerate field="sentence_en_meaning_fa" /></div>
+        </div>
+      </div>
     </div></section>
     <section className="mt-4 rounded border p-3"><TableColumnSelector key={columns.join(",")} columns={TABLE_COLUMNS} selectedColumns={columns} emptyCounts={emptyCounts} /></section>
     <div className="mt-4 flex items-center justify-between gap-3 text-sm"><span className="opacity-80">Total: <strong>{total}</strong> • Page <strong>{page}/{totalPages}</strong></span><div className="flex gap-2"><Link href={href(Math.max(1, page - 1))} aria-disabled={page <= 1} className="rounded border px-3 py-2 hover:bg-black/5 aria-disabled:pointer-events-none aria-disabled:opacity-50 dark:hover:bg-white/5">Prev</Link><Link href={href(Math.min(totalPages, page + 1))} aria-disabled={page >= totalPages} className="rounded border px-3 py-2 hover:bg-black/5 aria-disabled:pointer-events-none aria-disabled:opacity-50 dark:hover:bg-white/5">Next</Link></div></div>

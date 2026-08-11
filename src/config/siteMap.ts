@@ -176,7 +176,6 @@ export const siteMapGroups: SiteMapGroup[] = [
     summary: "Run temporary or destructive vocabulary maintenance checks.",
     pages: [
       { title: "Sentence Fields", path: "/tests/words/sentence-fields", summary: "Temporarily reviews and updates sentence fields stored on word records.", menu: true },
-      { title: "Clear Word Fields", path: "/tests/words/clear-fields", summary: "Clears selected word fields through a dedicated maintenance endpoint.", menu: true },
     ],
   },
   {

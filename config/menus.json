@@ -153,8 +153,7 @@
             "label": "Word Tests",
             "icon": "database",
             "items": [
-              { "type": "link", "label": "Sentence Fields", "href": "/tests/words/sentence-fields", "icon": "database", "description": "Review temporary sentence fields on words." },
-              { "type": "link", "label": "Clear Word Fields", "href": "/tests/words/clear-fields", "icon": "tools", "description": "Clear selected word fields." }
+              { "type": "link", "label": "Sentence Fields", "href": "/tests/words/sentence-fields", "icon": "database", "description": "Review temporary sentence fields on words." }
             ]
           },
           { "type": "link", "label": "Test Functions", "href": "/tests/functions", "icon": "code", "description": "Exercise reusable test function helpers." }

@@ -6,7 +6,13 @@ import { getPersianWordAudioFileInfo } from "@/lib/persian/persianWordAudio.serv
 import { getSentenceAudioFileInfo } from "@/lib/sentences/sentenceAudio.server";
 import { getWordConceptAudioFileInfo } from "@/lib/words/wordConceptAudio.server";
 
-import { audioNeedsGeneration } from "./audioSourceText";
+import { audioNeedsGeneration, getAudioGenerationReason } from "./audioSourceText";
+
+export type PendingWordAudioTaskCounts = {
+  total: number;
+  missingFile: number;
+  changedText: number;
+};
 
 export async function getPendingEnglishWordAudioIds(): Promise<number[]> {
   const rows = await prisma.englishWord.findMany({
@@ -73,13 +79,66 @@ export async function getPendingSentenceAudioIds(
   })).map((row) => row.id);
 }
 
-export async function getPendingWordAudioTaskCount(): Promise<number> {
-  const pendingByField = await Promise.all([
-    getPendingEnglishWordAudioIds(),
-    getPendingPersianWordAudioIds(),
-    getPendingWordConceptAudioIds(),
-    getPendingSentenceAudioIds("sentence_en"),
-    getPendingSentenceAudioIds("sentence_en_meaning_fa"),
+export async function getPendingWordAudioTaskCounts(): Promise<PendingWordAudioTaskCounts> {
+  const [englishWords, persianWords, concepts, sentences] = await Promise.all([
+    prisma.englishWord.findMany({
+      select: { base_form: true, audio_file_name: true, audio_source_text: true },
+    }),
+    prisma.persianWord.findMany({
+      select: { canonical_text: true, audio_file_name: true, audio_source_text: true },
+    }),
+    prisma.word.findMany({
+      select: {
+        concept_explained_fa: true,
+        concept_explained_fa_audio_file_name: true,
+        concept_explained_fa_audio_source_text: true,
+      },
+    }),
+    prisma.sentence.findMany({
+      select: {
+        sentence_en: true,
+        sentence_en_meaning_fa: true,
+        sentence_en_audio_file_name: true,
+        sentence_en_audio_source_text: true,
+        sentence_en_meaning_fa_audio_file_name: true,
+        sentence_en_meaning_fa_audio_source_text: true,
+      },
+    }),
   ]);
-  return pendingByField.reduce((total, ids) => total + ids.length, 0);
+  const reasons = [
+    ...englishWords.map((row) => getAudioGenerationReason({
+      text: row.base_form,
+      sourceText: row.audio_source_text,
+      fileSize: getEnglishWordAudioFileInfo(row.audio_file_name).size,
+    })),
+    ...persianWords.map((row) => getAudioGenerationReason({
+      text: row.canonical_text,
+      sourceText: row.audio_source_text,
+      fileSize: getPersianWordAudioFileInfo(row.audio_file_name).size,
+    })),
+    ...concepts.map((row) => getAudioGenerationReason({
+      text: row.concept_explained_fa,
+      sourceText: row.concept_explained_fa_audio_source_text,
+      fileSize: getWordConceptAudioFileInfo(row.concept_explained_fa_audio_file_name).size,
+    })),
+    ...sentences.flatMap((row) => [
+      getAudioGenerationReason({
+        text: row.sentence_en,
+        sourceText: row.sentence_en_audio_source_text,
+        fileSize: getSentenceAudioFileInfo(row.sentence_en_audio_file_name).size,
+      }),
+      getAudioGenerationReason({
+        text: row.sentence_en_meaning_fa,
+        sourceText: row.sentence_en_meaning_fa_audio_source_text,
+        fileSize: getSentenceAudioFileInfo(row.sentence_en_meaning_fa_audio_file_name).size,
+      }),
+    ]),
+  ];
+  const missingFile = reasons.filter((reason) => reason === "missing-file").length;
+  const changedText = reasons.filter((reason) => reason === "changed-text").length;
+  return { total: missingFile + changedText, missingFile, changedText };
+}
+
+export async function getPendingWordAudioTaskCount(): Promise<number> {
+  return (await getPendingWordAudioTaskCounts()).total;
 }

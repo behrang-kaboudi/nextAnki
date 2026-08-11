@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { ActionIcon } from "@/components/icons/ActionIcon";
 import { PromptSourcesButton } from "@/components/prompts/PromptSourcesButton";
 import { RemainingCountBadge, RemainingCountButton } from "@/components/remaining-count";
+import { BulkReviewStatusActions } from "@/components/review-status/BulkReviewStatusActions.client";
 
 const PROMPT_PATHS = [
   "src/prompts/word-extraction/meaning_fa_review/rulseV1.md",
@@ -39,31 +40,6 @@ export default function WordMeaningsReview({
   const [showApplyAllHelp, setShowApplyAllHelp] = useState(false);
   const [showWorkflowGuide, setShowWorkflowGuide] = useState(false);
   const [applyAllConfirmOpen, setApplyAllConfirmOpen] = useState(false);
-  const [resetOpen, setResetOpen] = useState(false);
-  const [resetBusy, setResetBusy] = useState(false);
-  const resetConfirmed = async () => {
-    setResetBusy(true);
-    try {
-      const response = await fetch(
-        "/api/words/meanings-review/reset-confirmed",
-        { method: "POST" },
-      );
-      const result = (await response.json()) as {
-        ok?: boolean;
-        reset?: number;
-        error?: string;
-      };
-      if (!response.ok || !result.ok)
-        throw new Error(result.error || "Could not reset review status.");
-      setNotice(`Reset ${result.reset ?? 0} review statuses ✓`);
-      setResetOpen(false);
-      r.refresh();
-    } catch (error) {
-      setE(error instanceof Error ? error.message : String(error));
-    } finally {
-      setResetBusy(false);
-    }
-  };
   const load = async () => {
     setB(true);
     setE(null);
@@ -207,34 +183,31 @@ export default function WordMeaningsReview({
       );
   return (
     <>
-      <button
-        type="button"
-        onClick={() => {
-          setO(true);
-          void load();
-        }}
-        disabled={b}
-        className="rounded border px-3 py-2 text-sm transition active:scale-90 hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5"
-      >
-        REVIEW PERSIAN MEANINGS <RemainingCountBadge count={pendingCount} />
-      </button>
-      <span className="inline-flex items-center gap-1">
+      <div className="inline-flex items-start gap-1">
         <button
           type="button"
-          onClick={() => setResetOpen(true)}
-          disabled={b || resetBusy}
-          className="rounded border border-red-700 bg-red-600 px-2 py-1 text-xs font-semibold text-white transition active:scale-90 hover:bg-red-700 disabled:opacity-50 dark:border-red-500 dark:bg-red-700 dark:hover:bg-red-600"
+          onClick={() => {
+            setO(true);
+            void load();
+          }}
+          disabled={b}
+          className="rounded border px-3 py-2 text-sm transition active:scale-90 hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5"
         >
-          RESET
+          REVIEW PERSIAN MEANINGS <RemainingCountBadge count={pendingCount} />
         </button>
-        <span
-          aria-label="About reset meanings review"
-          title="Sets all reviewed Persian meanings back to pending. Confirmation is required."
-          className="inline-flex size-5 items-center justify-center rounded-full border border-red-500 text-red-700 dark:text-red-400"
-        >
-          <ActionIcon name="help" className="size-3.5" />
-        </span>
-      </span>
+        <BulkReviewStatusActions
+          pendingCount={pendingCount}
+          pendingUnit="رکورد در انتظار"
+          confirmEndpoint="/api/words/meanings-review/confirm-all"
+          resetEndpoint="/api/words/meanings-review/reset-confirmed"
+          confirmSubject="معانی فارسی"
+          confirmWarning="این کار فقط وضعیت مرور را تأیید می‌کند و مقدار معنا، دیگرمعنا یا جمله را تغییر نمی‌دهد."
+          resetSubject="مرورهای معانی فارسی"
+          resetWarning="تمام رکوردهای تأییدشده دوباره Pending می‌شوند. هیچ معنا، دیگرمعنا یا جمله‌ای تغییر نمی‌کند."
+          resetHelpLabel="About reset meanings review"
+          resetHelpText="Sets all reviewed Persian meanings back to pending. Confirmation is required."
+        />
+      </div>
       {o ? (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
@@ -588,45 +561,6 @@ export default function WordMeaningsReview({
                 className="rounded border px-3 py-2 text-sm transition active:scale-90 hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5"
               >
                 تأیید و اعمال همه
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
-      {resetOpen ? (
-        <div
-          className="fixed inset-0 z-[80] flex items-center justify-center bg-black/60 p-4"
-          role="dialog"
-          aria-modal="true"
-        >
-          <div
-            dir="rtl"
-            className="w-full max-w-md rounded-2xl border border-card bg-background p-5 text-right shadow-elevated"
-          >
-            <h2 className="text-base font-semibold">
-              بازنشانی وضعیت مرور معانی؟
-            </h2>
-            <p className="mt-3 text-sm leading-6">
-              تمام رکوردهای تأییدشده دوباره{" "}
-              <code>meanings_confirmed=false</code> می‌شوند. هیچ معنا، دیگرمعنا
-              یا جمله‌ای تغییر نمی‌کند.
-            </p>
-            <div className="mt-5 flex justify-end gap-2">
-              <button
-                type="button"
-                disabled={resetBusy}
-                onClick={() => setResetOpen(false)}
-                className="rounded border px-3 py-2 text-sm transition active:scale-90 hover:bg-black/5 disabled:opacity-50"
-              >
-                انصراف
-              </button>
-              <button
-                type="button"
-                disabled={resetBusy}
-                onClick={() => void resetConfirmed()}
-                className="rounded border px-3 py-2 text-sm transition active:scale-90 hover:bg-black/5 disabled:opacity-50"
-              >
-                {resetBusy ? "در حال بازنشانی…" : "تأیید بازنشانی"}
               </button>
             </div>
           </div>
