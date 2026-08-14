@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
 import { hydrateWordsWithPrimarySentence } from "@/lib/words/primarySentences.server";
+import { meaningReviewNotNeedsActionWhere } from "@/lib/words/meaningReviewStatus";
 
 export const runtime = "nodejs";
 
@@ -22,7 +23,10 @@ export async function GET(req: Request) {
     const limit = parseLimit(url.searchParams.get("limit"), 20);
 
     const where: Prisma.WordSenseWhereInput = {
-      english: { OR: [{ phonetic_us: null }, { phonetic_us: "" }] },
+      AND: [
+        meaningReviewNotNeedsActionWhere,
+        { english: { OR: [{ phonetic_us: null }, { phonetic_us: "" }] } },
+      ],
     };
     const [total, words] = await Promise.all([
       prisma.wordSense.count({ where }),

@@ -10,7 +10,7 @@ import {
   CUSTOM_EXTRACTION_OUTPUT_FIELDS,
   type CustomExtractionFieldKey,
 } from "@/lib/word-extraction/customExtractionFields";
-import { updateWordSense } from "@/lib/words/wordSenseRepo";
+import { touchWordSensesLinkedToSentenceId, updateWordSense } from "@/lib/words/wordSenseRepo";
 import { wordSentenceIds } from "@/lib/words/sentenceIds";
 
 export const runtime = "nodejs";
@@ -275,8 +275,13 @@ export async function POST(request: Request) {
           }
           if ("meaning_fa" in item.fields) {
             const meaningFa = validateFieldValue("meaning_fa", item.fields.meaning_fa) as string;
-            const meaning = await addPersianWordWithClient(meaningFa, {}, tx);
-            meaningId = meaning.item.id;
+            const meaningFaIpa = "meaning_fa_IPA" in item.fields
+              ? validateFieldValue("meaning_fa_IPA", item.fields.meaning_fa_IPA) as string
+              : null;
+            meaningId = (await addPersianWordWithClient(meaningFa, {
+              meaningFaIpa,
+              meaningFaIpaNormalized: meaningFaIpa ? normalizeIpaForDb(meaningFaIpa, 2000) : null,
+            }, tx)).item.id;
             wordPatch.meaning = { connect: { id: meaningId } };
             updatedFields.push("meaning_fa");
           }
@@ -293,7 +298,6 @@ export async function POST(request: Request) {
             wordPatch.otherMeaningIds = [
               ...new Set(otherIds.filter((otherId) => otherId !== meaningId)),
             ];
-            wordPatch.meanings_confirmed = true;
             updatedFields.push("other_meanings_fa");
           }
           if ("meaning_fa_IPA" in item.fields) {
@@ -304,6 +308,7 @@ export async function POST(request: Request) {
               data: {
                 meaning_fa_IPA: meaningIpa,
                 meaning_fa_IPA_normalize: normalizeIpaForDb(meaningIpa, 2000),
+                meaning_fa_IPA_confirmed: false,
               },
             });
             updatedFields.push("meaning_fa_IPA");
@@ -329,19 +334,31 @@ export async function POST(request: Request) {
               if (sentence.sentence_en !== undefined && sentence.sentence_en !== existing.sentence_en) {
                 throw new Error(`Existing Sentence ${sentence.sentence_id} text cannot be replaced by sentence_en extraction.`);
               }
-              if (sentence.sentence_en_meaning_fa !== undefined) {
+              if (
+                sentence.sentence_en_meaning_fa !== undefined &&
+                sentence.sentence_en_meaning_fa !== existing.sentence_en_meaning_fa
+              ) {
                 await tx.sentence.update({
                   where: { id: sentence.sentence_id },
                   data: {
                     sentence_en_meaning_fa: sentence.sentence_en_meaning_fa,
                   },
                 });
+                await touchWordSensesLinkedToSentenceId(
+                  sentence.sentence_id,
+                  { resetMeaningReviewStatus: true },
+                  tx,
+                );
                 updatedFields.push(`sentence_en_meaning_fa:${sentence.sentence_id}`);
               }
               continue;
             }
 
             const sentenceEn = sentence.sentence_en!;
+            const existingByText = await tx.sentence.findUnique({
+              where: { sentence_en: sentenceEn },
+              select: { id: true, sentence_en_meaning_fa: true },
+            });
             const createdOrFound = await tx.sentence.upsert({
               where: { sentence_en: sentenceEn },
               create: {
@@ -357,7 +374,15 @@ export async function POST(request: Request) {
             });
             associatedSentenceIds.add(createdOrFound.id);
             updatedFields.push(`sentence_en:${createdOrFound.id}`);
-            if (sentence.sentence_en_meaning_fa !== undefined) {
+            if (
+              sentence.sentence_en_meaning_fa !== undefined &&
+              existingByText?.sentence_en_meaning_fa !== sentence.sentence_en_meaning_fa
+            ) {
+              await touchWordSensesLinkedToSentenceId(
+                createdOrFound.id,
+                { resetMeaningReviewStatus: true },
+                tx,
+              );
               updatedFields.push(`sentence_en_meaning_fa:${createdOrFound.id}`);
             }
           }

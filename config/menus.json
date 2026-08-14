@@ -12,175 +12,451 @@
       {
         "type": "group",
         "label": "Words",
-        "icon": "database",
         "items": [
-          { "type": "link", "label": "WordSense Editor", "href": "/words/editor", "icon": "database", "description": "Search and edit WordSense records." },
-          { "type": "link", "label": "Word Extraction", "href": "/words/extraction", "icon": "sparkles", "description": "Choose between new-word intake and completion of existing vocabulary records." },
+          {
+            "type": "link",
+            "label": "WordSense Editor",
+            "href": "/words/editor",
+            "icon": "database",
+            "description": "Search and edit WordSense records."
+          },
+          {
+            "type": "link",
+            "label": "Word Extraction",
+            "href": "/words/extraction",
+            "icon": "sparkles",
+            "description": "Choose between new-word intake and completion of existing vocabulary records."
+          },
           {
             "type": "group",
             "label": "Word Hints",
-            "icon": "brain",
             "items": [
-              { "type": "link", "label": "Audio Hints", "href": "/words/hints/audio", "icon": "audio", "description": "Generate and maintain word-field audio." },
-              { "type": "link", "label": "JSON Hints", "href": "/words/hints/json", "icon": "code", "description": "Generate and review structured word hints." }
-            ]
+              {
+                "type": "link",
+                "label": "Audio Hints",
+                "href": "/words/hints/audio",
+                "icon": "audio",
+                "description": "Generate and maintain word-field audio."
+              },
+              {
+                "type": "link",
+                "label": "JSON Hints",
+                "href": "/words/hints/json",
+                "icon": "code",
+                "description": "Generate and review structured word hints."
+              }
+            ],
+            "icon": "brain"
           },
-          { "type": "link", "label": "Word Cleanup", "href": "/words/cleanup", "icon": "tools", "description": "Remove local words missing from Anki." }
-        ]
+          {
+            "type": "link",
+            "label": "Word Cleanup",
+            "href": "/words/cleanup",
+            "icon": "tools",
+            "description": "Remove local words missing from Anki."
+          }
+        ],
+        "icon": "database"
       },
       {
         "type": "group",
         "label": "Word Tables",
-        "icon": "database",
         "items": [
-          { "type": "link", "label": "WordSense Table", "href": "/words/tables/words", "icon": "database", "description": "Browse WordSense records with search, sorting, and direct editing." },
-          { "type": "link", "label": "Persian Word Table", "href": "/words/tables/persian-words", "icon": "database", "description": "Browse and edit Persian word table records and their audio." },
-          { "type": "link", "label": "English Word Table", "href": "/words/tables/english-words", "icon": "database", "description": "Browse canonical English words, US IPA, JSON hints, audio, and WordSense links." },
-          { "type": "link", "label": "Sentence Table", "href": "/words/tables/sentences", "icon": "database", "description": "Browse Sentence records and manage persisted English and Persian audio filenames." }
-        ]
+          {
+            "type": "link",
+            "label": "WordSense Table",
+            "href": "/words/tables/words",
+            "icon": "database",
+            "description": "Browse WordSense records with search, sorting, and direct editing."
+          },
+          {
+            "type": "link",
+            "label": "Persian Word Table",
+            "href": "/words/tables/persian-words",
+            "icon": "database",
+            "description": "Browse and edit Persian word table records and their audio."
+          },
+          {
+            "type": "link",
+            "label": "English Word Table",
+            "href": "/words/tables/english-words",
+            "icon": "database",
+            "description": "Browse canonical English words, US IPA, JSON hints, audio, and WordSense links."
+          },
+          {
+            "type": "link",
+            "label": "Sentence Table",
+            "href": "/words/tables/sentences",
+            "icon": "database",
+            "description": "Browse Sentence records and manage persisted English and Persian audio filenames."
+          }
+        ],
+        "icon": "database"
       },
       {
         "type": "group",
         "label": "Anki",
-        "icon": "anki",
         "items": [
-          { "type": "link", "label": "Audio Studio", "href": "/anki/media/audio", "icon": "audio", "description": "Record, edit, rename, and organize reusable audio files copied to Anki media." },
+          {
+            "type": "link",
+            "label": "Audio Studio",
+            "href": "/anki/media/audio",
+            "icon": "audio",
+            "description": "Record, edit, rename, and organize reusable audio files copied to Anki media."
+          },
+          {
+            "type": "link",
+            "label": "Knowing Filter Manager",
+            "href": "/anki/cards/knowing-filter",
+            "icon": "search",
+            "description": "Manage cards in knowing-filter decks."
+          },
+          {
+            "type": "link",
+            "label": "Anki Word Sync",
+            "href": "/anki/sync/words",
+            "icon": "link",
+            "description": "Run and monitor the primary word synchronization workflow."
+          },
+          {
+            "type": "link",
+            "label": "Structure Builder",
+            "href": "/anki/structure",
+            "icon": "tools",
+            "description": "Create and inspect required Anki structure."
+          },
           {
             "type": "group",
             "label": "Cards",
-            "icon": "app",
             "items": [
-              { "type": "link", "label": "Card Manager", "href": "/anki/cards/manager", "icon": "database", "description": "Manage matching Anki notes, cards, and study state." },
-              { "type": "link", "label": "Add Cards for Study", "href": "/anki/cards/study", "icon": "app", "description": "Select words and add their cards to study." },
-              { "type": "link", "label": "Transfer Cards", "href": "/anki/cards/transfer", "icon": "link", "description": "Move matching card types between decks." },
-              { "type": "link", "label": "Reset Equivalent Cards", "href": "/anki/cards/reset", "icon": "tools", "description": "Review and reset equivalent bilingual cards." },
-              { "type": "link", "label": "Suspension Manager", "href": "/anki/cards/suspensions", "icon": "tools", "description": "Find and manage suspended cards." },
-              { "type": "link", "label": "Knowing Filter Manager", "href": "/anki/cards/knowing-filter", "icon": "search", "description": "Manage cards in knowing-filter decks." }
-            ]
+              {
+                "type": "link",
+                "label": "Card Manager",
+                "href": "/anki/cards/manager",
+                "icon": "database",
+                "description": "Manage matching Anki notes, cards, and study state."
+              },
+              {
+                "type": "link",
+                "label": "Add Cards for Study",
+                "href": "/anki/cards/study",
+                "icon": "app",
+                "description": "Select words and add their cards to study."
+              },
+              {
+                "type": "link",
+                "label": "Transfer Cards",
+                "href": "/anki/cards/transfer",
+                "icon": "link",
+                "description": "Move matching card types between decks."
+              },
+              {
+                "type": "link",
+                "label": "Reset Equivalent Cards",
+                "href": "/anki/cards/reset",
+                "icon": "tools",
+                "description": "Review and reset equivalent bilingual cards."
+              },
+              {
+                "type": "link",
+                "label": "Suspension Manager",
+                "href": "/anki/cards/suspensions",
+                "icon": "tools",
+                "description": "Find and manage suspended cards."
+              }
+            ],
+            "icon": "app"
           },
           {
             "type": "group",
             "label": "Setup",
-            "icon": "settings",
             "items": [
-              { "type": "link", "label": "Connection", "href": "/anki/connection", "icon": "link", "description": "View AnkiConnect settings and prerequisites." },
-              { "type": "link", "label": "Structure Builder", "href": "/anki/structure", "icon": "tools", "description": "Create and inspect required Anki structure." },
-              { "type": "link", "label": "Migrations", "href": "/anki/migrations", "icon": "tools", "description": "Run one-time Anki migrations." }
-            ]
-          },
-          {
-            "type": "group",
-            "label": "Synchronization",
-            "icon": "link",
-            "items": [
-              { "type": "link", "label": "Anki Word Sync", "href": "/anki/sync/words", "icon": "link", "description": "Run and monitor the primary word synchronization workflow." }
-            ]
+              {
+                "type": "link",
+                "label": "Connection",
+                "href": "/anki/connection",
+                "icon": "link",
+                "description": "View AnkiConnect settings and prerequisites."
+              },
+              {
+                "type": "link",
+                "label": "Migrations",
+                "href": "/anki/migrations",
+                "icon": "tools",
+                "description": "Run one-time Anki migrations."
+              }
+            ],
+            "icon": "settings"
           }
-        ]
+        ],
+        "icon": "anki"
       },
       {
         "type": "group",
         "label": "IPA",
-        "icon": "ipa",
         "items": [
-          { "type": "link", "label": "IPA Keywords", "href": "/ipa/keywords", "icon": "ipa", "description": "Manage IPA keyword mappings." },
-          { "type": "link", "label": "Picture Words", "href": "/ipa/picture-words", "icon": "image", "description": "Maintain visual pronunciation associations." },
-          { "type": "link", "label": "Picture Word Audio", "href": "/ipa/picture-words/audio", "icon": "audio", "description": "Manage audio for picture words." }
-        ]
+          {
+            "type": "link",
+            "label": "IPA Keywords",
+            "href": "/ipa/keywords",
+            "icon": "ipa",
+            "description": "Manage IPA keyword mappings."
+          },
+          {
+            "type": "link",
+            "label": "Picture Words",
+            "href": "/ipa/picture-words",
+            "icon": "image",
+            "description": "Maintain visual pronunciation associations."
+          },
+          {
+            "type": "link",
+            "label": "Picture Word Audio",
+            "href": "/ipa/picture-words/audio",
+            "icon": "audio",
+            "description": "Manage audio for picture words."
+          }
+        ],
+        "icon": "ipa"
       },
       {
         "type": "group",
         "label": "AI",
-        "icon": "sparkles",
         "items": [
-          { "type": "link", "label": "Prompt Builder", "href": "/ai/prompt-builder", "icon": "sparkles", "description": "Build and preview reusable AI prompts." },
-          { "type": "link", "label": "Local AI Studio", "href": "/ai/local-chat", "icon": "brain", "description": "Manage LM Studio models and chat with them locally." }
-        ]
+          {
+            "type": "link",
+            "label": "Prompt Builder",
+            "href": "/ai/prompt-builder",
+            "icon": "sparkles",
+            "description": "Build and preview reusable AI prompts."
+          },
+          {
+            "type": "link",
+            "label": "Local AI Studio",
+            "href": "/ai/local-chat",
+            "icon": "brain",
+            "description": "Manage LM Studio models and chat with them locally."
+          }
+        ],
+        "icon": "sparkles"
       },
       {
         "type": "group",
         "label": "Administration",
-        "icon": "admin",
         "items": [
-          { "type": "link", "label": "Data Manager", "href": "/admin/data", "icon": "database", "description": "Manage records across application models." },
-          { "type": "link", "label": "Database Compare", "href": "/admin/database-compare", "icon": "database", "description": "Compare local and GitHub database fingerprints." },
-          { "type": "link", "label": "Database Backup", "href": "/admin/database-backup", "icon": "database", "description": "Create or restore the complete local database backup." },
-          { "type": "link", "label": "Navigation Manager", "href": "/admin/navigation", "icon": "settings", "description": "Edit site and dashboard navigation." }
-        ]
+          {
+            "type": "link",
+            "label": "Data Manager",
+            "href": "/admin/data",
+            "icon": "database",
+            "description": "Manage records across application models."
+          },
+          {
+            "type": "link",
+            "label": "Database Compare",
+            "href": "/admin/database-compare",
+            "icon": "database",
+            "description": "Compare local and GitHub database fingerprints."
+          },
+          {
+            "type": "link",
+            "label": "Database Backup",
+            "href": "/admin/database-backup",
+            "icon": "database",
+            "description": "Create or restore the complete local database backup."
+          },
+          {
+            "type": "link",
+            "label": "Navigation Manager",
+            "href": "/admin/navigation",
+            "icon": "settings",
+            "description": "Edit site and dashboard navigation."
+          }
+        ],
+        "icon": "admin"
       },
       {
         "type": "group",
         "label": "Tests",
-        "icon": "tools",
         "items": [
-          { "type": "link", "label": "Tests Hub", "href": "/tests", "icon": "tools", "description": "Search all internal test pages." },
+          {
+            "type": "link",
+            "label": "Tests Hub",
+            "href": "/tests",
+            "icon": "tools",
+            "description": "Search all internal test pages."
+          },
           {
             "type": "group",
             "label": "Anki Tests",
-            "icon": "anki",
             "items": [
-              { "type": "link", "label": "AnkiConnect Playground", "href": "/tests/anki/connection", "icon": "link", "description": "Call low-level AnkiConnect actions." },
-              { "type": "link", "label": "Anki Review Log", "href": "/tests/anki/review-log", "icon": "file", "description": "Inspect AnkiDroid review-log output." }
-            ]
+              {
+                "type": "link",
+                "label": "AnkiConnect Playground",
+                "href": "/tests/anki/connection",
+                "icon": "link",
+                "description": "Call low-level AnkiConnect actions."
+              },
+              {
+                "type": "link",
+                "label": "Anki Review Log",
+                "href": "/tests/anki/review-log",
+                "icon": "file",
+                "description": "Inspect AnkiDroid review-log output."
+              }
+            ],
+            "icon": "anki"
           },
           {
             "type": "group",
             "label": "Editor Tests",
-            "icon": "file",
             "items": [
-              { "type": "link", "label": "Editor Test", "href": "/tests/editors/basic", "icon": "file", "description": "Test the shared rich-text editor." },
-              { "type": "link", "label": "Editor Demo", "href": "/tests/editors/demo", "icon": "file", "description": "View a full editor demonstration." }
-            ]
+              {
+                "type": "link",
+                "label": "Editor Test",
+                "href": "/tests/editors/basic",
+                "icon": "file",
+                "description": "Test the shared rich-text editor."
+              },
+              {
+                "type": "link",
+                "label": "Editor Demo",
+                "href": "/tests/editors/demo",
+                "icon": "file",
+                "description": "View a full editor demonstration."
+              }
+            ],
+            "icon": "file"
           },
           {
             "type": "group",
             "label": "IPA Tests",
-            "icon": "ipa",
             "items": [
-              { "type": "link", "label": "IPA Word Test", "href": "/tests/ipa/words", "icon": "ipa", "description": "Inspect and normalize special IPA words." }
-            ]
+              {
+                "type": "link",
+                "label": "IPA Word Test",
+                "href": "/tests/ipa/words",
+                "icon": "ipa",
+                "description": "Inspect and normalize special IPA words."
+              }
+            ],
+            "icon": "ipa"
           },
           {
             "type": "group",
             "label": "Sync Tests",
-            "icon": "link",
             "items": [
-              { "type": "link", "label": "Sentence Card Sync", "href": "/tests/sync/sentence-cards", "icon": "link", "description": "Ensure and synchronize sentence cards." }
-            ]
+              {
+                "type": "link",
+                "label": "Sentence Card Sync",
+                "href": "/tests/sync/sentence-cards",
+                "icon": "link",
+                "description": "Ensure and synchronize sentence cards."
+              }
+            ],
+            "icon": "link"
           },
           {
             "type": "group",
             "label": "Word Tests",
-            "icon": "database",
             "items": [
-              { "type": "link", "label": "Sentence Fields", "href": "/tests/words/sentence-fields", "icon": "database", "description": "Review temporary sentence fields on words." }
-            ]
+              {
+                "type": "link",
+                "label": "Sentence Fields",
+                "href": "/tests/words/sentence-fields",
+                "icon": "database",
+                "description": "Review temporary sentence fields on words."
+              }
+            ],
+            "icon": "database"
           },
-          { "type": "link", "label": "Test Functions", "href": "/tests/functions", "icon": "code", "description": "Exercise reusable test function helpers." }
-        ]
+          {
+            "type": "link",
+            "label": "Test Functions",
+            "href": "/tests/functions",
+            "icon": "code",
+            "description": "Exercise reusable test function helpers."
+          }
+        ],
+        "icon": "tools"
       },
       {
         "type": "group",
         "label": "Information",
-        "icon": "book",
         "items": [
-          { "type": "link", "label": "Features", "href": "/features", "icon": "app", "description": "Review product capabilities." },
-          { "type": "link", "label": "Guides", "href": "/guides", "icon": "book", "description": "Open practical workflow instructions." },
-          { "type": "link", "label": "Documentation", "href": "/docs", "icon": "book", "description": "Review the documentation roadmap." },
-          { "type": "link", "label": "Site Map", "href": "/site-map", "icon": "search", "description": "See what every canonical page does." },
-          { "type": "link", "label": "About", "href": "/about", "icon": "about", "description": "Learn about the project." }
-        ]
+          {
+            "type": "link",
+            "label": "Features",
+            "href": "/features",
+            "icon": "app",
+            "description": "Review product capabilities."
+          },
+          {
+            "type": "link",
+            "label": "Guides",
+            "href": "/guides",
+            "icon": "book",
+            "description": "Open practical workflow instructions."
+          },
+          {
+            "type": "link",
+            "label": "Documentation",
+            "href": "/docs",
+            "icon": "book",
+            "description": "Review the documentation roadmap."
+          },
+          {
+            "type": "link",
+            "label": "Site Map",
+            "href": "/site-map",
+            "icon": "search",
+            "description": "See what every canonical page does."
+          },
+          {
+            "type": "link",
+            "label": "About",
+            "href": "/about",
+            "icon": "about",
+            "description": "Learn about the project."
+          }
+        ],
+        "icon": "book"
       }
     ]
   },
   "dashboard": {
     "id": "dashboard",
     "primary": [
-      { "type": "link", "label": "Data Manager", "href": "/admin/data", "icon": "database" },
-      { "type": "link", "label": "Database Compare", "href": "/admin/database-compare", "icon": "database" },
-      { "type": "link", "label": "Database Backup", "href": "/admin/database-backup", "icon": "database" },
-      { "type": "link", "label": "Navigation Manager", "href": "/admin/navigation", "icon": "settings" },
-      { "type": "link", "label": "Site Map", "href": "/site-map", "icon": "search" }
+      {
+        "type": "link",
+        "label": "Data Manager",
+        "href": "/admin/data",
+        "icon": "database"
+      },
+      {
+        "type": "link",
+        "label": "Database Compare",
+        "href": "/admin/database-compare",
+        "icon": "database"
+      },
+      {
+        "type": "link",
+        "label": "Database Backup",
+        "href": "/admin/database-backup",
+        "icon": "database"
+      },
+      {
+        "type": "link",
+        "label": "Navigation Manager",
+        "href": "/admin/navigation",
+        "icon": "settings"
+      },
+      {
+        "type": "link",
+        "label": "Site Map",
+        "href": "/site-map",
+        "icon": "search"
+      }
     ]
   }
 }

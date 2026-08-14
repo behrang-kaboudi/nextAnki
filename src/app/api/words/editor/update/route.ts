@@ -1,6 +1,7 @@
 import "server-only";
 
 import { NextResponse } from "next/server";
+import { MeaningReviewStatus } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
 import { getWordEditorInitial } from "@/lib/words/editorPayload";
@@ -99,9 +100,9 @@ export async function POST(req: Request) {
       }
     }
 
-    if (d.meanings_confirmed !== undefined && typeof d.meanings_confirmed !== "boolean") {
+    if (d.meaningReviewStatus !== undefined && !Object.values(MeaningReviewStatus).includes(d.meaningReviewStatus as MeaningReviewStatus)) {
       return NextResponse.json(
-        { ok: false, error: "meanings_confirmed must be a boolean." },
+        { ok: false, error: "meaningReviewStatus is invalid." },
         { status: 400 },
       );
     }
@@ -137,8 +138,8 @@ export async function POST(req: Request) {
         sentenceIds,
         comparedMeaningWordIds,
         synonymIds,
-        meanings_confirmed:
-          typeof d.meanings_confirmed === "boolean" ? d.meanings_confirmed : undefined,
+        meaningReviewStatus:
+          typeof d.meaningReviewStatus === "string" ? d.meaningReviewStatus as MeaningReviewStatus : undefined,
         conceptMergeReviewed:
           typeof d.conceptMergeReviewed === "boolean" ? d.conceptMergeReviewed : undefined,
       },

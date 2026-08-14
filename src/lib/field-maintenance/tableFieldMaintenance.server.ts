@@ -5,7 +5,7 @@ import { statSync } from "node:fs";
 import { access, mkdir, rename } from "node:fs/promises";
 import path from "node:path";
 
-import { Prisma } from "@prisma/client";
+import { MeaningReviewStatus, Prisma } from "@prisma/client";
 
 import { getEnglishWordAudioAbsolutePath } from "@/lib/audio/englishWordAudioPaths.server";
 import { getPersianWordAudioAbsolutePath } from "@/lib/audio/persianWordAudioPaths.server";
@@ -97,7 +97,7 @@ const CONFIG: Record<TableMaintenanceModel, { label: string; fields: FieldPolicy
         key: "meaning_fa_IPA", label: "Persian meaning IPA (meaning_fa_IPA)",
         description: "Clears source Persian IPA and its normalized derivative.",
         consequences: ["Clears meaning_fa_IPA_normalize because it is derived from the source IPA.", "Touches WordSense rows that reference the affected PersianWord records."],
-        snapshotFields: ["meaning_fa_IPA", "meaning_fa_IPA_normalize"], clearData: { meaning_fa_IPA: null, meaning_fa_IPA_normalize: null },
+        snapshotFields: ["meaning_fa_IPA", "meaning_fa_IPA_normalize", "meaning_fa_IPA_confirmed"], clearData: { meaning_fa_IPA: null, meaning_fa_IPA_normalize: null, meaning_fa_IPA_confirmed: false },
       }),
       managed("meaning_fa_IPA_normalize", "meaning_fa_IPA_normalize", "meaning_fa_IPA", "Persian meaning IPA (meaning_fa_IPA)", "This normalized value is derived from meaning_fa_IPA and is cleared through its source-field policy."),
       action({
@@ -171,7 +171,7 @@ function getActionPolicy(model: TableMaintenanceModel, field: string) {
 }
 
 type MaintenanceRow = { id: number; [key: string]: unknown };
-type LinkedWord = { id: number; meanings_confirmed: boolean; conceptMergeReviewed: boolean };
+type LinkedWord = { id: number; meaningReviewStatus: MeaningReviewStatus; conceptMergeReviewed: boolean };
 
 function isPopulated(value: unknown) {
   if (value == null) return false;
@@ -193,9 +193,9 @@ async function loadAffectedRows(model: TableMaintenanceModel, policy: ActionPoli
 async function linkedWords(model: TableMaintenanceModel, recordIds: readonly number[]): Promise<LinkedWord[]> {
   if (!recordIds.length) return [];
   if (model === "EnglishWord") {
-    return prisma.wordSense.findMany({ where: { englishId: { in: [...recordIds] } }, select: { id: true, meanings_confirmed: true, conceptMergeReviewed: true } });
+    return prisma.wordSense.findMany({ where: { englishId: { in: [...recordIds] } }, select: { id: true, meaningReviewStatus: true, conceptMergeReviewed: true } });
   }
-  const records = await prisma.wordSense.findMany({ select: { id: true, meaningId: true, otherMeaningIds: true, sentenceIds: true, meanings_confirmed: true, conceptMergeReviewed: true } });
+  const records = await prisma.wordSense.findMany({ select: { id: true, meaningId: true, otherMeaningIds: true, sentenceIds: true, meaningReviewStatus: true, conceptMergeReviewed: true } });
   const ids = new Set(recordIds);
   return records.filter((word) => model === "PersianWord"
     ? (word.meaningId !== null && ids.has(word.meaningId)) || (Array.isArray(word.otherMeaningIds) && word.otherMeaningIds.some((id) => {
@@ -241,7 +241,7 @@ export async function previewTableFieldSelection(model: TableMaintenanceModel, f
     mode: "action" as const,
     field, label: policy.label, description: policy.description, consequences: policy.consequences,
     affectedRows: rows.length,
-    aiMeaningReviewsReset: policy.resetLinkedReviews ? related.filter((word) => word.meanings_confirmed).length : 0,
+    aiMeaningReviewsReset: policy.resetLinkedReviews ? related.filter((word) => word.meaningReviewStatus === MeaningReviewStatus.CONFIRMED).length : 0,
     conceptMergeReviewsReset: policy.resetLinkedReviews ? related.filter((word) => word.conceptMergeReviewed).length : 0,
     ...audioStats(rows, policy),
     confirmationText: confirmationText(model, field, rows.length),
@@ -335,7 +335,7 @@ async function updateTargetRows(tx: Prisma.TransactionClient, model: TableMainte
 
 async function touchRelatedWords(tx: Prisma.TransactionClient, model: TableMaintenanceModel, recordIds: number[], related: LinkedWord[], reset: boolean) {
   if (model === "EnglishWord") return touchWordSensesByEnglishIds(recordIds, tx);
-  return touchWordSensesByIds(related.map((word) => word.id), reset ? { resetConceptMergeReviewed: true, resetMeaningsConfirmed: true } : undefined, tx);
+  return touchWordSensesByIds(related.map((word) => word.id), reset ? { resetConceptMergeReviewed: true, resetMeaningReviewStatus: true } : undefined, tx);
 }
 
 export async function executeTableFieldMaintenance(args: { model: TableMaintenanceModel; field: string; expectedAffectedRows: number; confirmation: string }) {
@@ -365,7 +365,19 @@ export async function executeTableFieldMaintenance(args: { model: TableMaintenan
 function parseSnapshot(recordId: number, value: Prisma.JsonValue) {
   if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error(`Invalid recovery snapshot for record ${recordId}.`);
   const { __linkedWords, ...data } = value as Record<string, unknown>;
-  const linked = Array.isArray(__linkedWords) ? __linkedWords.filter((item): item is LinkedWord => Boolean(item && typeof item === "object" && "id" in item)) : [];
+  const linked = Array.isArray(__linkedWords) ? __linkedWords.flatMap((item) => {
+    if (!item || typeof item !== "object" || !("id" in item)) return [];
+    const legacy = item as Record<string, unknown>;
+    return [{
+      id: Number(legacy.id),
+      meaningReviewStatus: typeof legacy.meaningReviewStatus === "string"
+        ? legacy.meaningReviewStatus as MeaningReviewStatus
+        : legacy.meanings_confirmed === true
+          ? MeaningReviewStatus.CONFIRMED
+          : MeaningReviewStatus.PENDING,
+      conceptMergeReviewed: legacy.conceptMergeReviewed === true,
+    }];
+  }) : [];
   return { id: recordId, data, linked };
 }
 
@@ -392,7 +404,7 @@ export async function undoTableFieldMaintenance(model: TableMaintenanceModel, op
         const linked = new Map<number, LinkedWord>();
         for (const snapshot of snapshots) for (const word of snapshot.linked) linked.set(word.id, word);
         for (const word of linked.values()) {
-          await updateManyWordSenses({ where: { id: word.id }, data: { meanings_confirmed: word.meanings_confirmed, conceptMergeReviewed: word.conceptMergeReviewed } }, tx);
+          await updateManyWordSenses({ where: { id: word.id }, data: { meaningReviewStatus: word.meaningReviewStatus, conceptMergeReviewed: word.conceptMergeReviewed } }, tx);
         }
         await tx.tableFieldMaintenanceOperation.update({ where: { id: operation.id }, data: { status: "undone", undoneAt: new Date() } });
       }, { maxWait: 10_000, timeout: 120_000 });

@@ -14,6 +14,7 @@ import {
 } from "@/lib/word-extraction/customExtractionFields";
 import { prisma } from "@/lib/prisma";
 import { wordSentenceIds } from "@/lib/words/sentenceIds";
+import { meaningReviewNotNeedsActionWhere } from "@/lib/words/meaningReviewStatus";
 
 export const runtime = "nodejs";
 
@@ -60,7 +61,7 @@ export async function GET(request: Request) {
     const missingConditions: Prisma.WordSenseWhereInput[] = regularOutputs.map(customExtractionMissingWhere);
     if (translationMissingWordIds.length) missingConditions.push({ id: { in: translationMissingWordIds } });
     const where: Prisma.WordSenseWhereInput = missingConditions.length
-      ? { OR: missingConditions }
+      ? { AND: [meaningReviewNotNeedsActionWhere, { OR: missingConditions }] }
       : { id: { lt: 0 } };
     const total = await prisma.wordSense.count({ where });
     const rows = await prisma.wordSense.findMany({
@@ -70,7 +71,6 @@ export async function GET(request: Request) {
         select: {
           id: true,
           sentenceIds: true,
-          meanings_confirmed: true,
           imageability: true,
           learning_depth: true,
           productive_target: true,
@@ -132,7 +132,7 @@ export async function GET(request: Request) {
         switch (field) {
           case "base_form": return !row.english.base_form.trim();
           case "meaning_fa": return !row.meaning?.canonical_text?.trim();
-          case "other_meanings_fa": return !row.meanings_confirmed && Boolean(row.meaning);
+          case "other_meanings_fa": return row.otherMeaningIds == null && Boolean(row.meaning);
           case "meaning_fa_IPA": return Boolean(row.meaning) && !row.meaning?.meaning_fa_IPA?.trim();
           case "phonetic_us": return !row.english.phonetic_us?.trim();
           case "sentence_en": return associatedSentences.length === 0;

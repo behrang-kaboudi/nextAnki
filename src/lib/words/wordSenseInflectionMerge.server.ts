@@ -3,13 +3,14 @@ import "server-only";
 import path from "node:path";
 import { rm } from "node:fs/promises";
 
-import type { Prisma } from "@prisma/client";
+import { MeaningReviewStatus, type Prisma } from "@prisma/client";
 
 import { getEnglishWordAudioAbsolutePath } from "@/lib/audio/englishWordAudioPaths.server";
 import { getWordSenseConceptAudioAbsolutePath } from "@/lib/audio/wordSenseConceptAudioPaths.server";
 import { normalizeEnglishWordText } from "@/lib/english/normalize";
 import { prisma } from "@/lib/prisma";
 import { deleteWordSense, updateWordSense } from "@/lib/words/wordSenseRepo";
+import { selectParallelPromptLane, type ParallelPromptPartition } from "@/lib/words/parallelPromptPartition";
 
 const sourceWordSenseSelect = {
   id: true,
@@ -22,7 +23,7 @@ const sourceWordSenseSelect = {
   sentenceIds: true,
   conceptMergeReviewed: true,
   inflectionMergeReviewed: true,
-  meanings_confirmed: true,
+  meaningReviewStatus: true,
   pos: true,
   concept_explained_fa: true,
   concept_explained_fa_audio_file_name: true,
@@ -104,8 +105,8 @@ function appendLastToken(form: string, nextLastToken: string) {
   return parts.join(" ");
 }
 
-/** Returns conservative dictionary-form candidates for regular s/es, ing and ed spellings. */
-export function regularBaseFormCandidates(value: string): string[] {
+/** Returns conservative dictionary-form candidates allowed for the supplied POS. */
+export function regularBaseFormCandidates(value: string, pos: string): string[] {
   const form = normalizeEnglishWordText(value);
   if (!form) return [];
   const last = form.split(" ").at(-1) ?? "";
@@ -114,23 +115,27 @@ export function regularBaseFormCandidates(value: string): string[] {
     if (token.length >= 2 && token !== last) candidates.add(appendLastToken(form, token));
   };
 
-  if (last.endsWith("ies") && last.length > 3) add(`${last.slice(0, -3)}y`);
-  if (last.endsWith("es") && last.length > 3) add(last.slice(0, -2));
-  if (last.endsWith("s") && !last.endsWith("ss") && last.length > 2) add(last.slice(0, -1));
-
-  if (last.endsWith("ing") && last.length > 5) {
-    const stem = last.slice(0, -3);
-    add(stem);
-    add(`${stem}e`);
-    if (/([^aeiou])\1$/u.test(stem)) add(stem.slice(0, -1));
+  if (normalizePos(pos) === "noun") {
+    if (last.endsWith("ies") && last.length > 3) add(`${last.slice(0, -3)}y`);
+    if (last.endsWith("es") && last.length > 3) add(last.slice(0, -2));
+    if (last.endsWith("s") && !last.endsWith("ss") && last.length > 2) add(last.slice(0, -1));
   }
 
-  if (last.endsWith("ied") && last.length > 4) add(`${last.slice(0, -3)}y`);
-  if (last.endsWith("ed") && last.length > 4) {
-    const stem = last.slice(0, -2);
-    add(stem);
-    add(last.slice(0, -1));
-    if (/([^aeiou])\1$/u.test(stem)) add(stem.slice(0, -1));
+  if (normalizePos(pos) === "verb") {
+    if (last.endsWith("ing") && last.length > 5) {
+      const stem = last.slice(0, -3);
+      add(stem);
+      add(`${stem}e`);
+      if (/([^aeiou])\1$/u.test(stem)) add(stem.slice(0, -1));
+    }
+
+    if (last.endsWith("ied") && last.length > 4) add(`${last.slice(0, -3)}y`);
+    if (last.endsWith("ed") && last.length > 4) {
+      const stem = last.slice(0, -2);
+      add(stem);
+      add(last.slice(0, -1));
+      if (/([^aeiou])\1$/u.test(stem)) add(stem.slice(0, -1));
+    }
   }
 
   return [...candidates];
@@ -166,40 +171,46 @@ async function buildInflectionSourceGroups(client: ReadClient): Promise<Inflecti
     select: {
       id: true,
       base_form: true,
-      wordSenses: { orderBy: { id: "asc" }, select: sourceWordSenseSelect },
+      wordSenses: {
+        where: { meaningReviewStatus: MeaningReviewStatus.CONFIRMED },
+        orderBy: { id: "asc" },
+        select: sourceWordSenseSelect,
+      },
     },
   });
   const byForm = new Map(englishWords.map((word) => [word.base_form, word]));
-  const sets = new DisjointSet();
-  for (const word of englishWords) {
-    sets.add(word.id);
-    for (const candidate of regularBaseFormCandidates(word.base_form)) {
-      const base = byForm.get(candidate);
-      if (base) sets.union(word.id, base.id);
-    }
-  }
-
-  const components = new Map<number, typeof englishWords>();
-  for (const word of englishWords) {
-    const root = sets.find(word.id);
-    const component = components.get(root) ?? [];
-    component.push(word);
-    components.set(root, component);
-  }
-
   const candidates: Array<{
     pos: string;
     englishWords: Array<(typeof englishWords)[number] & { wordsForPos: SourceWordSense[] }>;
   }> = [];
-  for (const component of components.values()) {
-    if (component.length < 2) continue;
-    const positions = [...new Set(component.flatMap((word) => word.wordSenses.map((row) => normalizePos(row.pos))))].sort();
-    for (const pos of positions) {
-      const matching = component.flatMap((word) => {
-        const wordsForPos = word.wordSenses.filter((row) => normalizePos(row.pos) === pos);
-        return wordsForPos.length ? [{ ...word, wordsForPos }] : [];
-      });
-      if (matching.length >= 2 && matching.some((word) => word.wordsForPos.some((row) => !row.inflectionMergeReviewed))) {
+  for (const pos of ["noun", "verb"] as const) {
+    const wordsForPos = englishWords.filter((word) =>
+      word.wordSenses.some((row) => normalizePos(row.pos) === pos),
+    );
+    const sets = new DisjointSet();
+    for (const word of wordsForPos) {
+      sets.add(word.id);
+      for (const candidate of regularBaseFormCandidates(word.base_form, pos)) {
+        const base = byForm.get(candidate);
+        if (base?.wordSenses.some((row) => normalizePos(row.pos) === pos)) sets.union(word.id, base.id);
+      }
+    }
+
+    const components = new Map<number, typeof englishWords>();
+    for (const word of wordsForPos) {
+      const root = sets.find(word.id);
+      const component = components.get(root) ?? [];
+      component.push(word);
+      components.set(root, component);
+    }
+
+    for (const component of components.values()) {
+      if (component.length < 2) continue;
+      const matching = component.map((word) => ({
+        ...word,
+        wordsForPos: word.wordSenses.filter((row) => normalizePos(row.pos) === pos),
+      }));
+      if (matching.some((word) => word.wordsForPos.some((row) => !row.inflectionMergeReviewed))) {
         candidates.push({ pos, englishWords: matching });
       }
     }
@@ -272,11 +283,16 @@ export async function getPendingWordSenseInflectionMergeCount() {
   return (await buildInflectionSourceGroups(prisma)).length;
 }
 
-export async function prepareWordSenseInflectionMerge(limit: number) {
+export async function prepareWordSenseInflectionMerge(partition: ParallelPromptPartition) {
   const eligible = await buildInflectionSourceGroups(prisma);
-  const selected = limit > 0 ? eligible.slice(0, limit) : eligible;
+  const { items: selected, laneEligibleCount } = selectParallelPromptLane(
+    eligible,
+    (group) => group.groupKey,
+    partition,
+  );
   return {
     totalEligibleGroups: eligible.length,
+    laneEligibleCount,
     sourceGroups: selected.map(sourceFingerprint),
     items: selected,
   };
@@ -320,6 +336,33 @@ export function parseInflectionMergeOutput(value: unknown): InflectionOutputGrou
   });
 }
 
+export async function loadWordSenseInflectionMergeGroups(output: InflectionOutputGroup[]) {
+  const currentByGroupKey = new Map(
+    (await buildInflectionSourceGroups(prisma)).map((group) => [group.groupKey, group]),
+  );
+  const seenGroupKeys = new Set<string>();
+  const items = output.map((result, index) => {
+    if (seenGroupKeys.has(result.groupKey)) {
+      throw new Error(`Output group ${index + 1} repeats groupKey ${result.groupKey}.`);
+    }
+    seenGroupKeys.add(result.groupKey);
+    const current = currentByGroupKey.get(result.groupKey);
+    if (!current || current.pos !== result.pos) {
+      throw new Error(`Candidate group ${result.groupKey} no longer exists or is no longer eligible.`);
+    }
+    const currentWordIds = sourceFingerprint(current).wordIds;
+    const outputWordIds = result.entries.flatMap((entry) => [entry.keepWordId, ...entry.deleteWordIds]);
+    if (new Set(outputWordIds).size !== outputWordIds.length || !sameIds(currentWordIds, outputWordIds)) {
+      throw new Error(`Response ids do not contain the complete current group ${result.groupKey}.`);
+    }
+    return current;
+  });
+  return {
+    items,
+    sourceGroups: items.map(sourceFingerprint),
+  };
+}
+
 function safeFilename(value: string | null) {
   return value && path.basename(value) === value ? value : null;
 }
@@ -345,6 +388,11 @@ export async function applyWordSenseInflectionMerge(
     const englishById = new Map(currentEnglishWords.map((word) => [word.id, word]));
     const sourceWordIds = [...new Set(sourceGroups.flatMap((group) => group.wordIds))];
     const words = await tx.wordSense.findMany({ where: { id: { in: sourceWordIds } }, select: sourceWordSenseSelect });
+    if (words.length !== sourceWordIds.length || words.some(
+      (word) => word.meaningReviewStatus !== MeaningReviewStatus.CONFIRMED,
+    )) {
+      throw new Error("One or more source WordSense records are no longer confirmed. Create the data again.");
+    }
     const wordById = new Map(words.map((word) => [word.id, word]));
 
     const replacements = new Map<number, number>();
@@ -412,9 +460,6 @@ export async function applyWordSenseInflectionMerge(
         ...cluster.flatMap((word) => mappedIds(word.comparedMeaningWordIds, replacements, keeper.id)),
         ...synonymIds,
       ])].filter((id) => !entry.deleteWordIds.includes(id));
-      const meaningsChanged = keeper.meaningId !== primaryMeaningId ||
-        !sameIds(positiveIds(keeper.otherMeaningIds), otherMeaningIds);
-
       await updateWordSense({
         where: { id: keeper.id },
         data: {
@@ -424,7 +469,7 @@ export async function applyWordSenseInflectionMerge(
           sentenceIds,
           synonymIds,
           comparedMeaningWordIds,
-          meanings_confirmed: meaningsChanged ? false : keeper.meanings_confirmed,
+          meaningReviewStatus: MeaningReviewStatus.CONFIRMED,
           conceptMergeReviewed: true,
           inflectionMergeReviewed: true,
         },

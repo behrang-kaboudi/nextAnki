@@ -94,7 +94,7 @@ export async function POST(req: Request) {
 
     let updated = 0;
     const results: Array<
-      | { ok: true; id: number; meaning_fa_IPA: string; meaning_fa_IPA_normalized: string }
+      | { ok: true; id: number; meaning_fa_IPA: string; meaning_fa_IPA_normalized: string; meaning_fa_IPA_confirmed: boolean }
       | { ok: false; id: number; error: string }
     > = [];
 
@@ -105,8 +105,8 @@ export async function POST(req: Request) {
         if (!word?.meaningId) throw new Error("WordSense has no primary PersianWord.");
         const row = await prisma.persianWord.update({
           where: { id: word.meaningId },
-          data: { meaning_fa_IPA: item.meaning_fa_IPA, meaning_fa_IPA_normalize: meaning_fa_IPA_normalized },
-          select: { id: true, meaning_fa_IPA: true, meaning_fa_IPA_normalize: true },
+          data: { meaning_fa_IPA: item.meaning_fa_IPA, meaning_fa_IPA_normalize: meaning_fa_IPA_normalized, meaning_fa_IPA_confirmed: true },
+          select: { id: true, meaning_fa_IPA: true, meaning_fa_IPA_normalize: true, meaning_fa_IPA_confirmed: true },
         });
         await touchWordsReferencingPersianWord(row.id);
 
@@ -116,6 +116,7 @@ export async function POST(req: Request) {
           id: row.id,
           meaning_fa_IPA: row.meaning_fa_IPA ?? "",
           meaning_fa_IPA_normalized: row.meaning_fa_IPA_normalize ?? "",
+          meaning_fa_IPA_confirmed: row.meaning_fa_IPA_confirmed,
         });
       } catch (e) {
         results.push({ ok: false, id: item.id, error: e instanceof Error ? e.message : String(e) });

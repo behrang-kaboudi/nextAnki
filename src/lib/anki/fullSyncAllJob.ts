@@ -8,8 +8,10 @@ import {
   generateWordAnkiFieldsForMetaLexVr9,
   assertSupportedWordAnkiFieldNames,
   getAnkiLinkIdFromNoteFields,
+  getHydratedWordAnkiReadinessIssues,
   getWordAnkiManagedFieldNames,
 } from "@/lib/anki/wordAnkiMapping";
+import { REQUIRED_WORD_ANKI_FIELD_NAMES } from "@/lib/anki/wordAnkiSyncReadiness";
 import {
   acquireWordSyncJobLock,
   getActiveWordSyncJob,
@@ -37,6 +39,12 @@ export type FullSyncAllStatus = {
   skippedSame: number;
   skippedNoLinkId: number;
   skippedNoWord: number;
+  skippedNotReady: number;
+  readinessFailureSamples: Array<{
+    wordSenseId: number;
+    ankiLinkId: string;
+    issues: Array<{ field: string; reason: "missing" | "invalid" }>;
+  }>;
   failed: number;
   failureSamples: Array<{ noteId: number | null; error: string }>;
   mediaUploaded: number;
@@ -85,6 +93,8 @@ function getState(): State {
       skippedSame: 0,
       skippedNoLinkId: 0,
       skippedNoWord: 0,
+      skippedNotReady: 0,
+      readinessFailureSamples: [],
       failed: 0,
       failureSamples: [],
       mediaUploaded: 0,
@@ -239,6 +249,8 @@ async function runJob(state: State) {
     state.skippedSame = 0;
     state.skippedNoLinkId = 0;
     state.skippedNoWord = 0;
+    state.skippedNotReady = 0;
+    state.readinessFailureSamples = [];
     state.failed = 0;
     state.failureSamples = [];
     state.mediaUploaded = 0;
@@ -263,6 +275,14 @@ async function runJob(state: State) {
     const structureSettings = await getAnkiStructureSettings();
     const configuredFields = structureSettings.config.noteType.fields;
     assertSupportedWordAnkiFieldNames(configuredFields);
+    const missingRequiredConfiguredFields = REQUIRED_WORD_ANKI_FIELD_NAMES.filter(
+      (field) => !configuredFields.includes(field),
+    );
+    if (missingRequiredConfiguredFields.length) {
+      throw new Error(
+        `Required Word sync field(s) are not configured on the Anki note type: ${missingRequiredConfiguredFields.join(", ")}`,
+      );
+    }
     // Validate before mutating the model, then make Anki match Structure Builder.
     await ensureMetaLexVr9ModelFields(ankiFinder);
     const managedFields = getWordAnkiManagedFieldNames(configuredFields).filter(
@@ -326,6 +346,20 @@ async function runJob(state: State) {
       const pendingWrites: PendingWrite[] = [];
       for (const { word, fields } of generatedRows) {
         if (state.stopRequested) break;
+
+        const readinessIssues = getHydratedWordAnkiReadinessIssues(word, fields);
+        if (readinessIssues.length) {
+          state.skippedNotReady += 1;
+          state.processed += 1;
+          if (state.readinessFailureSamples.length < 20) {
+            state.readinessFailureSamples.push({
+              wordSenseId: word.id,
+              ankiLinkId: word.anki_link_id,
+              issues: readinessIssues,
+            });
+          }
+          continue;
+        }
 
         const existing = noteByAnkiLinkId.get(word.anki_link_id) ?? null;
         state.currentNoteId = existing?.noteId ?? null;

@@ -2,6 +2,7 @@
 
 ## General
 - Keep changes minimal and scoped to the request.
+- When the user explicitly asks Codex to inspect or operate an already-open browser page, use only that browser and that existing tab. If the requested browser or tab is unavailable to browser tooling, stop and explain the limitation, then propose available alternatives without using any of them until the user explicitly chooses or authorizes one.
 - Prefer TypeScript + Prisma Client over raw SQL.
 - When touching DB behavior, consider both `schema.prisma` and any code paths that write to the DB.
 - Reuse-first is mandatory for every change: before implementing behavior or UI, search the project for the same or closest existing flow, component, helper, page, API route, and interaction pattern. Extend or compose the established implementation instead of creating a parallel variant.
@@ -39,6 +40,7 @@
 
 ## Development Server Workflow
 - The agent is responsible for all development-server commands. Do not ask the user to stop, start, restart, or recover the server after agent work.
+- For tasks that do not require code changes, never pause, stop, restart, or otherwise interrupt any development server, application, background job, or shared service. Use only non-disruptive read-only inspection; if the inspection cannot continue without disruption, report the blocker and ask the user instead of interrupting anything.
 - Agents must use `dev:start`, `dev:stop`, and `dev:restart`; reserve `npm run dev` for the user's foreground terminal. It automatically takes over any managed background server and runs on the same configured port.
 - For every code-changing task, run `npm run dev:status` before the first file write.
 - Keep the development server running for small, low-risk changes comparable to a simple save, such as a few localized lines in one file, copy/documentation edits, or an isolated style adjustment that needs only one quick check.

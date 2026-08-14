@@ -10,7 +10,7 @@ import PersianWordAudioControls from "./PersianWordAudioControls.client";
 
 const IPA_SPECIAL_CHARACTERS = ["æ", "ɪ", "ɜ", "ə", "ʊ", "ʌ", "ʔ", "ʧ", "ʤ", "ɑ", "ɔ", "ŋ", "θ", "ð", "ʃ", "ʒ", "ɡ"] as const;
 
-type PersianWord = { id: number; canonical_text: string; normalized_text: string; not_normalized_texts: unknown; meaning_fa_IPA: string | null; meaning_fa_IPA_normalize: string | null; audio_file_name: string | null; audio_source_text: string | null };
+type PersianWord = { id: number; canonical_text: string; normalized_text: string; not_normalized_texts: unknown; meaning_fa_IPA: string | null; meaning_fa_IPA_normalize: string | null; meaning_fa_IPA_confirmed: boolean; audio_file_name: string | null; audio_source_text: string | null };
 type WordReference = { id: number; base_form: string; roles: Array<"primary" | "secondary"> };
 
 function stringArray(value: unknown): string[] {
@@ -67,13 +67,18 @@ export default function OpenPersianWordEditorModal({ id, label, trigger, trigger
     setSaved(false);
   };
   const registerIpaFocus = (event: FocusEvent<HTMLInputElement>) => { lastFocusedInputRef.current = event.currentTarget; };
+  const updateMeaningIpa = (value: string | null) => {
+    setItem((current) => current ? { ...current, meaning_fa_IPA: value, meaning_fa_IPA_confirmed: false } : current);
+    setDirty(true);
+    setSaved(false);
+  };
   const insertSpecialChar = (character: string) => {
     const element = lastFocusedInputRef.current;
     if (!element) return;
     const start = element.selectionStart ?? element.value.length;
     const end = element.selectionEnd ?? element.value.length;
     const nextValue = element.value.slice(0, start) + character + element.value.slice(end);
-    update("meaning_fa_IPA", nextValue);
+    updateMeaningIpa(nextValue);
     requestAnimationFrame(() => { element.focus(); element.setSelectionRange(start + character.length, start + character.length); });
   };
 
@@ -105,8 +110,12 @@ export default function OpenPersianWordEditorModal({ id, label, trigger, trigger
           {item ? <div className="grid gap-4 lg:grid-cols-2">
             <label className="grid gap-1 text-sm lg:col-span-2">Canonical text<input value={item.canonical_text} onChange={(event) => update("canonical_text", event.target.value)} dir="rtl" className="rounded border px-3 py-2 text-base" /></label>
             <label className="grid gap-1 text-sm">Normalized text <span className="rounded border bg-black/5 px-3 py-2 opacity-70" dir="rtl">{item.normalized_text}</span></label>
-            <label className="grid gap-1 text-sm">Persian IPA<input value={item.meaning_fa_IPA ?? ""} onChange={(event) => update("meaning_fa_IPA", event.target.value || null)} onFocus={registerIpaFocus} className="rounded border px-3 py-2" /></label>
+            <label className="grid gap-1 text-sm">Persian IPA<input value={item.meaning_fa_IPA ?? ""} onChange={(event) => updateMeaningIpa(event.target.value || null)} onFocus={registerIpaFocus} className="rounded border px-3 py-2" /></label>
             <label className="grid gap-1 text-sm">Normalized Persian IPA <span className="rounded border bg-black/5 px-3 py-2 opacity-70">{item.meaning_fa_IPA_normalize ?? "—"}</span></label>
+            <label className="flex items-center gap-2 rounded border px-3 py-2 text-sm">
+              <input type="checkbox" checked={item.meaning_fa_IPA_confirmed} disabled={!item.meaning_fa_IPA?.trim()} onChange={(event) => update("meaning_fa_IPA_confirmed", event.target.checked)} />
+              Human-confirmed Persian IPA
+            </label>
             <div className="lg:col-span-2"><SpecialCharactersBar characters={IPA_SPECIAL_CHARACTERS} onPick={insertSpecialChar} title="Special characters" helpText="Click a field, then click a character." /></div>
             <section className="rounded border border-amber-500/30 bg-amber-500/5 p-3 text-sm lg:col-span-2">
               <div className="font-semibold">Affected WordSense records ({references.length})</div>

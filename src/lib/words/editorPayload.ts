@@ -14,7 +14,7 @@ export type WordEditorInitial = {
   otherMeaningIds: number[];
   comparedMeaningWordIds: number[];
   synonymIds: number[];
-  meanings_confirmed: boolean;
+  meaningReviewStatus: "PENDING" | "CONFIRMED" | "NEEDS_ACTION_INVALID_PRIMARY" | "NEEDS_ACTION_NORMALIZATION_CONFLICT" | "NEEDS_ACTION_MISSING_PRIMARY";
   english: {
     id: number;
     base_form: string;
@@ -79,7 +79,7 @@ export async function getWordEditorInitial(id: number): Promise<WordEditorInitia
     conceptMergeReviewed: word.conceptMergeReviewed,
     comparedMeaningWordIds: meaningIds(word.comparedMeaningWordIds),
     synonymIds: meaningIds(word.synonymIds),
-    meanings_confirmed: word.meanings_confirmed,
+    meaningReviewStatus: word.meaningReviewStatus,
     english: {
       id: word.english.id,
       base_form: word.english.base_form,

@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { prisma } from "@/lib/prisma";
-import { hydrateWordSensesWithPersianMeanings } from "@/lib/words/persianMeanings.server";
-import { hydrateMeaningReviewSentences } from "@/lib/words/meaningReviewSentences.server";
+import { loadMeaningReviewPromptRecords } from "@/lib/words/meaningReviewWorkflow.server";
 
 export const runtime = "nodejs";
 
@@ -15,43 +13,23 @@ export async function POST(request: Request) {
     !ids.length ||
     ids.some(
       (id) => typeof id !== "number" || !Number.isSafeInteger(id) || id <= 0,
-    )
+    ) ||
+    new Set(ids).size !== ids.length
   )
     return NextResponse.json(
       { ok: false, error: "ids must be positive integers." },
       { status: 400 },
     );
-  const raw = await prisma.wordSense.findMany({
-    where: { id: { in: [...new Set(ids)] } },
-    select: {
-      id: true,
-      meaningId: true,
-      otherMeaningIds: true,
-      pos: true,
-      concept_explained_fa: true,
-      sentenceIds: true,
-      english: { select: { base_form: true } },
-    },
-  });
-  const words = await hydrateMeaningReviewSentences(
-    await hydrateWordSensesWithPersianMeanings(raw),
-  );
+  const records = await loadMeaningReviewPromptRecords({ ids });
+  if (records.length !== ids.length) {
+    return NextResponse.json(
+      { ok: false, error: "One or more response ids no longer exist." },
+      { status: 400 },
+    );
+  }
+  const recordById = new Map(records.map((record) => [record.id, record]));
   return NextResponse.json({
     ok: true,
-    items: words.map((word) => ({
-      id: word.id,
-      base_form: word.english.base_form,
-      meaning_fa: word.meaning_fa,
-      other_meanings_fa: word.otherPersianWords.map(
-        (meaning) => meaning.canonical_text,
-      ),
-      pos: word.pos ?? "",
-      concept_explained_fa: word.concept_explained_fa ?? "",
-      sentences: word.reviewSentences.map((sentence) => ({
-        id: sentence.id,
-        sentence_en: sentence.sentence_en,
-        sentence_en_meaning_fa: sentence.sentence_en_meaning_fa ?? "",
-      })),
-    })),
+    items: ids.map((id) => recordById.get(id)!),
   });
 }

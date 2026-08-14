@@ -5,6 +5,7 @@ import { Prisma } from "@prisma/client";
 import type { CustomExtractionFieldKey } from "@/lib/word-extraction/customExtractionFields";
 import { prisma } from "@/lib/prisma";
 import { wordSentenceIds } from "@/lib/words/sentenceIds";
+import { meaningReviewNotNeedsActionWhere } from "@/lib/words/meaningReviewStatus";
 
 export async function listWordIdsMissingSentenceTranslation() {
   const missingSentences = await prisma.sentence.findMany({
@@ -15,6 +16,7 @@ export async function listWordIdsMissingSentenceTranslation() {
   if (!missingIds.size) return [];
 
   const words = await prisma.wordSense.findMany({
+    where: meaningReviewNotNeedsActionWhere,
     select: { id: true, sentenceIds: true },
   });
   return words
@@ -29,7 +31,13 @@ export function customExtractionMissingWhere(field: CustomExtractionFieldKey): P
     case "meaning_fa":
       return { OR: [{ meaning: { is: null } }, { meaning: { is: { canonical_text: "" } } }] };
     case "other_meanings_fa":
-      return { meanings_confirmed: false, meaning: { isNot: null } };
+      return {
+        meaning: { isNot: null },
+        OR: [
+          { otherMeaningIds: { equals: Prisma.DbNull } },
+          { otherMeaningIds: { equals: Prisma.JsonNull } },
+        ],
+      };
     case "meaning_fa_IPA":
       return { meaning: { is: { OR: [{ meaning_fa_IPA: null }, { meaning_fa_IPA: "" }] } } };
     case "phonetic_us":
@@ -72,7 +80,11 @@ export async function countCustomExtractionPendingWork(
     return (await listWordIdsMissingSentenceTranslation()).length;
   }
   if (field === "other_meanings_fa") {
-    return prisma.wordSense.count({ where: { meanings_confirmed: false } });
+    return prisma.wordSense.count({
+      where: { AND: [meaningReviewNotNeedsActionWhere, customExtractionMissingWhere(field)] },
+    });
   }
-  return prisma.wordSense.count({ where: customExtractionMissingWhere(field) });
+  return prisma.wordSense.count({
+    where: { AND: [meaningReviewNotNeedsActionWhere, customExtractionMissingWhere(field)] },
+  });
 }

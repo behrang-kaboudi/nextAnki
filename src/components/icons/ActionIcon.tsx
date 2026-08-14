@@ -22,7 +22,7 @@ function Icon({
 }
 
 export type ActionIconName =
-  "play" | "pause" | "sparkles" | "mic" | "stop" | "trash" | "edit" | "help";
+  "play" | "pause" | "sparkles" | "mic" | "stop" | "trash" | "edit" | "help" | "check" | "x";
 
 export function ActionIcon({
   name,
@@ -91,6 +91,19 @@ export function ActionIcon({
           <circle cx="12" cy="12" r="9" />
           <path d="M9.8 9a2.4 2.4 0 1 1 4.1 1.7c-.9.8-1.9 1.2-1.9 2.8" />
           <path d="M12 17h.01" />
+        </Icon>
+      );
+    case "check":
+      return (
+        <Icon className={className}>
+          <path d="m5 12 4 4L19 6" />
+        </Icon>
+      );
+    case "x":
+      return (
+        <Icon className={className}>
+          <path d="m6 6 12 12" />
+          <path d="m18 6-12 12" />
         </Icon>
       );
     default:

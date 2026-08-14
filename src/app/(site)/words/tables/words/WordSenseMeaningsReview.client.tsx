@@ -1,30 +1,78 @@
 "use client";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ActionIcon } from "@/components/icons/ActionIcon";
 import { PromptSourcesButton } from "@/components/prompts/PromptSourcesButton";
+import { ParallelPromptBatchControls } from "@/components/prompts/ParallelPromptBatchControls.client";
 import { RemainingCountBadge, RemainingCountButton } from "@/components/remaining-count";
 import { BulkReviewStatusActions } from "@/components/review-status/BulkReviewStatusActions.client";
+import DeleteWordSenseModalButton from "./DeleteWordSenseModalButton.client";
+import {
+  MeaningReviewSingleFlight,
+  meaningReviewRequestKey,
+  prepareMeaningReviewFinalization,
+  type MeaningReviewCorrection as Correction,
+  type MeaningReviewPreviewRecord,
+} from "@/lib/words/meaningReviewFinalization";
 
 const PROMPT_PATHS = [
   "src/prompts/word-extraction/meaning_fa_review/rulseV1.md",
   "src/prompts/word-extraction/other_meanings_fa/rulseV1.md",
+  "src/prompts/word-extraction/pos/rulseV1.md",
+  "src/prompts/word-extraction/concept_explained_fa/rulseV1.md",
+  "src/prompts/word-extraction/sentence_en/rulseV1.md",
+  "src/prompts/word-extraction/sentence_meaning_fa/rulseV1.md",
 ] as const;
+const ATTENTION_PROMPT_PATH = "src/prompts/word-extraction/meaning_fa_attention/rulseV1.md";
 
-type Correction = {
+type AttentionItem = {
   id: number;
-  meaning_fa?: string;
-  other_meanings_fa?: string[];
-  invalid_sentence_ids?: number[];
+  meaningReviewStatus: string;
+  pos: string | null;
+  concept_explained_fa: string | null;
+  english: { base_form: string };
+  meaning: { canonical_text: string } | null;
+};
+
+type ApplyOutcome = {
+  id: number;
+  status: "updated" | "review_confirmed" | "already_current" | "attention_required";
+};
+type ApplyReport = {
+  total: number;
+  updated: number;
+  reviewConfirmed: number;
+  unchanged: number;
+  attentionRequired: number;
+  attentionRequiredIds: number[];
+  idempotentReplay: boolean;
+  conflictReportId: string | null;
+  reportPersistenceWarning?: string;
+  results: ApplyOutcome[];
+};
+type EligibilitySummary = {
+  totalEligible: number;
+  pendingReview: number;
+  excludedMissingMeaning: number;
+  needsAction: number;
+  missingOtherMeanings: number;
+  missingPos: number;
+  missingConcept: number;
+  missingSentence: number;
+  missingSentenceTranslation: number;
 };
 export default function WordSenseMeaningsReview({
   pendingCount,
+  statusPendingCount,
+  initialSummary,
 }: {
   pendingCount: number;
+  statusPendingCount: number;
+  initialSummary: EligibilitySummary;
 }) {
   const r = useRouter(),
     [o, setO] = useState(false),
-    [l, setL] = useState("0"),
+    [l, setL] = useState("50"),
     [d, setD] = useState(""),
     [prompt, setPrompt] = useState(""),
     [a, setA] = useState(""),
@@ -32,18 +80,111 @@ export default function WordSenseMeaningsReview({
     [e, setE] = useState<string | null>(null),
     [remaining, setRemaining] = useState<number | null>(null),
     [notice, setNotice] = useState<string | null>(null);
+  const [laneCount, setLaneCount] = useState(1);
+  const [laneNumber, setLaneNumber] = useState(1);
+  const [laneEligibleCount, setLaneEligibleCount] = useState<number | null>(null);
+  const [loadedCount, setLoadedCount] = useState(0);
+  const [summary, setSummary] = useState(initialSummary);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [corrections, setCorrections] = useState<Correction[]>([]);
   const [confirmedIds, setConfirmedIds] = useState<Set<number>>(new Set());
   const [drafts, setDrafts] = useState<Record<number, string>>({});
   const [showCloseHelp, setShowCloseHelp] = useState(false);
-  const [showApplyAllHelp, setShowApplyAllHelp] = useState(false);
   const [showWorkflowGuide, setShowWorkflowGuide] = useState(false);
-  const [applyAllConfirmOpen, setApplyAllConfirmOpen] = useState(false);
-  const load = async () => {
+  const [confirmError, setConfirmError] = useState<string | null>(null);
+  const [confirmReport, setConfirmReport] = useState<ApplyReport | null>(null);
+  const [outcomeById, setOutcomeById] = useState<Record<number, ApplyOutcome["status"]>>({});
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportJson, setReportJson] = useState("");
+  const [reportLoading, setReportLoading] = useState(false);
+  const [attentionOpen, setAttentionOpen] = useState(false);
+  const [attentionItems, setAttentionItems] = useState<AttentionItem[]>([]);
+  const [attentionPromptRecords, setAttentionPromptRecords] = useState<unknown[]>([]);
+  const [attentionPrompt, setAttentionPrompt] = useState("");
+  const [attentionCopied, setAttentionCopied] = useState(false);
+  const [attentionDrafts, setAttentionDrafts] = useState<Record<number, string>>({});
+  const [attentionLoading, setAttentionLoading] = useState(false);
+  const loadAttention = async () => {
+    setAttentionLoading(true);
+    setE(null);
+    try {
+      const [response, promptResponse] = await Promise.all([
+        fetch("/api/words/meanings-review/needs-action"),
+        fetch(`/api/ai/prompt-file?path=${encodeURIComponent(ATTENTION_PROMPT_PATH)}`),
+      ]);
+      const json = await response.json() as {
+        ok?: boolean;
+        items?: AttentionItem[];
+        promptRecords?: unknown[];
+        error?: string;
+      };
+      const promptJson = await promptResponse.json() as { text?: string; error?: string };
+      if (!response.ok || !json.ok) throw new Error(json.error || "Could not load records needing action.");
+      if (!promptResponse.ok || !promptJson.text) {
+        throw new Error(promptJson.error || "Could not load the attention analysis prompt.");
+      }
+      const items = json.items ?? [];
+      setAttentionItems(items);
+      setAttentionPromptRecords(json.promptRecords ?? []);
+      setAttentionPrompt(promptJson.text);
+      setAttentionCopied(false);
+      setAttentionDrafts(Object.fromEntries(items.map((item) => [item.id, item.meaning?.canonical_text ?? ""])));
+      setAttentionOpen(true);
+    } catch (error) {
+      setE(error instanceof Error ? error.message : String(error));
+    } finally {
+      setAttentionLoading(false);
+    }
+  };
+  const copyAttentionPrompt = async () => {
+    try {
+      await navigator.clipboard.writeText(
+        `${attentionPrompt}\n\n# Current database snapshot\n\n${JSON.stringify(attentionPromptRecords, null, 2)}`,
+      );
+      setAttentionCopied(true);
+      window.setTimeout(() => setAttentionCopied(false), 1500);
+    } catch (error) {
+      setE(error instanceof Error ? error.message : String(error));
+    }
+  };
+  const resolveAttention = async (id: number, action: "confirm_current" | "replace_primary") => {
+    setAttentionLoading(true);
+    setE(null);
+    try {
+      const response = await fetch("/api/words/meanings-review/needs-action/resolve", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, action, meaning_fa: attentionDrafts[id] }),
+      });
+      const json = await response.json() as { ok?: boolean; error?: string };
+      if (!response.ok || !json.ok) throw new Error(json.error || "Could not resolve this record.");
+      setAttentionItems((items) => items.filter((item) => item.id !== id));
+      setSummary((current) => ({ ...current, needsAction: Math.max(0, current.needsAction - 1) }));
+      r.refresh();
+    } catch (error) {
+      setE(error instanceof Error ? error.message : String(error));
+    } finally {
+      setAttentionLoading(false);
+    }
+  };
+  const requestGate = useRef(new MeaningReviewSingleFlight());
+  const clearLoadedLane = () => {
+    setD("");
+    setA("");
+    setLaneEligibleCount(null);
+    setLoadedCount(0);
+    setCorrections([]);
+    setConfirmedIds(new Set());
+    setDrafts({});
+    setConfirmError(null);
+    setConfirmReport(null);
+    setOutcomeById({});
+    setNotice(null);
+  };
+  const load = async (finalNotice?: string) => {
     setB(true);
     setE(null);
-    setNotice(null);
+    if (!finalNotice) setNotice(null);
     try {
       const [promptResponses, x] = await Promise.all([
           Promise.all(PROMPT_PATHS.map(async (path) => {
@@ -52,21 +193,28 @@ export default function WordSenseMeaningsReview({
             if (!response.ok || !json.text) throw new Error(json.error || `Could not load ${path}.`);
             return json.text;
           })),
-          fetch(`/api/words/meanings-review?limit=${encodeURIComponent(l)}`),
+          fetch(`/api/words/meanings-review?batchSize=${encodeURIComponent(l)}&laneCount=${laneCount}&laneNumber=${laneNumber}`),
         ]),
         j = (await x.json()) as {
           ok?: boolean;
           items?: unknown;
+          totalEligible?: number;
           totalUnconfirmed?: number;
+          summary?: EligibilitySummary;
+          laneEligibleCount?: number;
           error?: string;
         };
       if (!x.ok || !j.ok) throw Error(j.error || "Could not create data.");
       setPrompt(promptResponses.join("\n\n"));
       setD(JSON.stringify(j.items, null, 2));
       setRemaining(
-        typeof j.totalUnconfirmed === "number" ? j.totalUnconfirmed : null,
+        typeof j.totalEligible === "number" ? j.totalEligible : null,
       );
-      setNotice("Data created ✓");
+      if (j.summary) setSummary(j.summary);
+      const items = Array.isArray(j.items) ? j.items : [];
+      setLoadedCount(items.length);
+      setLaneEligibleCount(typeof j.laneEligibleCount === "number" ? j.laneEligibleCount : null);
+      setNotice(finalNotice ?? `Lane ${laneNumber}/${laneCount} data created ✓`);
     } catch (x) {
       setE(x instanceof Error ? x.message : String(x));
     } finally {
@@ -79,8 +227,17 @@ export default function WordSenseMeaningsReview({
     setNotice(null);
     try {
       const c = JSON.parse(a) as unknown;
-      if (!Array.isArray(c)) throw Error("Response must be a JSON array.");
-      const parsed = c as Correction[];
+      const responseObject = !Array.isArray(c) && c && typeof c === "object"
+        ? c as Record<string, unknown>
+        : null;
+      const reviewedIds = responseObject?.reviewedIds;
+      const parsed = responseObject?.results as Correction[];
+      if (!Array.isArray(reviewedIds) || !reviewedIds.length ||
+          reviewedIds.some((id) => typeof id !== "number" || !Number.isSafeInteger(id) || id <= 0) ||
+          new Set(reviewedIds).size !== reviewedIds.length ||
+          !Array.isArray(parsed)) {
+        throw Error("Response must include unique positive reviewedIds and a results array.");
+      }
       if (
         parsed.some(
           (item) =>
@@ -88,28 +245,28 @@ export default function WordSenseMeaningsReview({
             typeof item !== "object" ||
             typeof item.id !== "number" ||
             !Number.isSafeInteger(item.id) ||
-            item.id <= 0,
-        )
+            item.id <= 0 ||
+            item.mode !== "review",
+        ) || new Set(parsed.map((item) => item.id)).size !== parsed.length ||
+        parsed.some((item) => !reviewedIds.includes(item.id))
       )
         throw Error("Response contains an invalid record.");
-      if (!d || JSON.parse(d).length === 0) {
-        const recordsResponse = await fetch(
-          "/api/words/meanings-review/records",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ ids: parsed.map((item) => item.id) }),
-          },
-        );
-        const recordsJson = (await recordsResponse.json()) as {
-          ok?: boolean;
-          items?: unknown;
-          error?: string;
-        };
-        if (!recordsResponse.ok || !recordsJson.ok)
-          throw Error(recordsJson.error || "Could not load current records.");
-        setD(JSON.stringify(recordsJson.items ?? [], null, 2));
-      }
+      const recordsResponse = await fetch(
+        "/api/words/meanings-review/records",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ids: reviewedIds }),
+        },
+      );
+      const recordsJson = (await recordsResponse.json()) as {
+        ok?: boolean;
+        items?: unknown;
+        error?: string;
+      };
+      if (!recordsResponse.ok || !recordsJson.ok)
+        throw Error(recordsJson.error || "Could not rebuild current records from the response IDs.");
+      setD(JSON.stringify(recordsJson.items ?? [], null, 2));
       setCorrections(parsed);
       setDrafts(
         Object.fromEntries(
@@ -117,6 +274,9 @@ export default function WordSenseMeaningsReview({
         ),
       );
       setConfirmedIds(new Set());
+      setConfirmError(null);
+      setConfirmReport(null);
+      setOutcomeById({});
       setConfirmOpen(true);
     } catch (x) {
       setE(x instanceof Error ? x.message : String(x));
@@ -124,54 +284,136 @@ export default function WordSenseMeaningsReview({
       setB(false);
     }
   };
-  const commit = async (ids: number[], nextCorrections: Correction[]) => {
+  const commit = async (request: {
+    ids: number[];
+    results: Correction[];
+    requestKey: string;
+  }) => {
+    if (!requestGate.current.begin()) {
+      setConfirmError("This review request is already being processed.");
+      return null;
+    }
     setB(true);
     setE(null);
+    setConfirmError(null);
     try {
       const x = await fetch("/api/words/meanings-review/update-bulk", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ids, corrections: nextCorrections }),
+          body: JSON.stringify(request),
         }),
-        j = await x.json();
-      if (!x.ok || !j.ok) throw Error(j.error || "Could not apply review.");
-      setNotice(`Updated ${j.updated}/${j.total} ✓`);
+        j = await x.json() as {
+          ok?: boolean;
+          error?: string;
+          failedId?: number;
+          rolledBack?: boolean;
+          updated?: number;
+          reviewConfirmed?: number;
+          unchanged?: number;
+          total?: number;
+          attentionRequired?: number;
+          attentionRequiredIds?: number[];
+          idempotentReplay?: boolean;
+          conflictReportId?: string | null;
+          reportPersistenceWarning?: string;
+          results?: ApplyOutcome[];
+        };
+      if (!x.ok || !j.ok) {
+        const failedRecord = j.failedId ? ` WordSense ${j.failedId}:` : "";
+        const rollback = j.rolledBack ? " No changes were committed." : "";
+        throw Error(`${failedRecord} ${j.error || "Could not apply review."}${rollback}`.trim());
+      }
+      const report: ApplyReport = {
+        total: j.total ?? request.ids.length,
+        updated: j.updated ?? 0,
+        reviewConfirmed: j.reviewConfirmed ?? 0,
+        unchanged: j.unchanged ?? 0,
+        attentionRequired: j.attentionRequired ?? 0,
+        attentionRequiredIds: j.attentionRequiredIds ?? [],
+        idempotentReplay: j.idempotentReplay ?? false,
+        conflictReportId: j.conflictReportId ?? null,
+        reportPersistenceWarning: j.reportPersistenceWarning,
+        results: j.results ?? [],
+      };
+      setConfirmReport(report);
+      setOutcomeById((current) => ({
+        ...current,
+        ...Object.fromEntries(report.results.map((outcome) => [outcome.id, outcome.status])),
+      }));
       r.refresh();
-      setConfirmedIds((current) => new Set([...current, ...ids]));
-      if (ids.length > 1) setA("");
-      return true;
+      setConfirmedIds((current) => new Set([...current, ...request.ids]));
+      if (request.ids.length > 1) setA("");
+      return report;
     } catch (x) {
-      setE(x instanceof Error ? x.message : String(x));
-      return false;
+      setConfirmError(x instanceof Error ? x.message : String(x));
+      return null;
     } finally {
+      requestGate.current.end();
       setB(false);
     }
   };
+  const reportText = (report: ApplyReport) => [
+    `Processed ${report.total} ✓`,
+    `Content updated: ${report.updated}`,
+    `Reviewed only: ${report.reviewConfirmed}`,
+    `Already current: ${report.unchanged}`,
+    `Moved to Needs Your Action: ${report.attentionRequired}`,
+    `Attention required: ${report.attentionRequired}`,
+    ...(report.idempotentReplay ? ["Idempotent replay: no duplicate changes"] : []),
+  ].join(" • ");
+  const showConflictReports = async () => {
+    setReportLoading(true);
+    setE(null);
+    try {
+      const response = await fetch("/api/words/meanings-review/conflict-reports");
+      const json = await response.json() as { ok?: boolean; reports?: unknown; error?: string };
+      if (!response.ok || !json.ok) throw new Error(json.error || "Could not load JSON reports.");
+      setReportJson(JSON.stringify(json.reports ?? [], null, 2));
+      setReportOpen(true);
+    } catch (error) {
+      setE(error instanceof Error ? error.message : String(error));
+    } finally {
+      setReportLoading(false);
+    }
+  };
   const closeAndConfirm = async () => {
-    const ids = ((d ? JSON.parse(d) : []) as Array<{ id: number }>).map(
-      (item) => item.id,
-    );
-    const targetIds = ids.length ? ids : corrections.map((item) => item.id);
-    const confirmedCorrections = corrections.filter((item) =>
-      confirmedIds.has(item.id),
-    );
-    if (!targetIds.length || (await commit(targetIds, confirmedCorrections))) {
-      setConfirmOpen(false);
-      await load();
+    try {
+      const request = prepareMeaningReviewFinalization({
+        previewRecords: (d ? JSON.parse(d) : []) as MeaningReviewPreviewRecord[],
+        corrections,
+        drafts,
+        confirmedIds,
+      });
+      const report = await commit(request);
+      if (report) {
+        const finalNotice = reportText(report);
+        setNotice(finalNotice);
+        setConfirmOpen(false);
+        await load(finalNotice);
+      }
+    } catch (error) {
+      setConfirmError(error instanceof Error ? error.message : String(error));
     }
   };
   const confirmOne = async (id: number) => {
     try {
       const draft = JSON.parse(drafts[id] ?? "") as Correction;
-      if (!draft || typeof draft !== "object" || draft.id !== id) {
-        throw new Error("The new value must be valid JSON with the same id.");
+      if (!draft || typeof draft !== "object" || draft.id !== id || draft.mode !== "review") {
+        throw new Error("The new value must be valid JSON with the same id and mode=review.");
       }
-      setCorrections((current) =>
-        current.map((item) => (item.id === id ? draft : item)),
-      );
-      await commit([id], [draft]);
+      const request = {
+        ids: [id],
+        results: [draft],
+        requestKey: meaningReviewRequestKey([id], [draft]),
+      };
+      const report = await commit(request);
+      if (report) {
+        setCorrections((current) =>
+          current.map((item) => (item.id === id ? draft : item)),
+        );
+      }
     } catch (error) {
-      setE(error instanceof Error ? error.message : String(error));
+      setConfirmError(error instanceof Error ? error.message : String(error));
     }
   };
   const copyAll = () =>
@@ -193,21 +435,81 @@ export default function WordSenseMeaningsReview({
           disabled={b}
           className="rounded border px-3 py-2 text-sm transition active:scale-90 hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5"
         >
-          REVIEW PERSIAN MEANINGS <RemainingCountBadge count={pendingCount} />
+          1. REVIEW PERSIAN MEANINGS <RemainingCountBadge count={pendingCount} />
+        </button>
+        <button
+          type="button"
+          onClick={() => void loadAttention()}
+          disabled={attentionLoading}
+          className="rounded border border-amber-500 px-3 py-2 text-sm text-amber-800 transition active:scale-90 hover:bg-amber-500/10 disabled:opacity-50 dark:text-amber-300"
+        >
+          NEEDS YOUR ACTION <RemainingCountBadge count={summary.needsAction} />
         </button>
         <BulkReviewStatusActions
-          pendingCount={pendingCount}
+          pendingCount={statusPendingCount}
           pendingUnit="رکورد در انتظار"
           confirmEndpoint="/api/words/meanings-review/confirm-all"
           resetEndpoint="/api/words/meanings-review/reset-confirmed"
           confirmSubject="معانی فارسی"
-          confirmWarning="این کار فقط وضعیت مرور را تأیید می‌کند و مقدار معنا، دیگرمعنا یا جمله را تغییر نمی‌دهد."
+          confirmWarning="این کار فقط رکوردهای دارای معنی و شش بخش کامل را تأیید می‌کند. رکورد ناقص یا فاقد معنی تغییر نمی‌کند و هیچ مقدار محتوایی ویرایش نمی‌شود."
           resetSubject="مرورهای معانی فارسی"
           resetWarning="تمام رکوردهای تأییدشده دوباره Pending می‌شوند. هیچ معنا، دیگرمعنا یا جمله‌ای تغییر نمی‌کند."
           resetHelpLabel="About reset meanings review"
           resetHelpText="Sets all reviewed Persian meanings back to pending. Confirmation is required."
         />
       </div>
+      {attentionOpen ? (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4" onMouseDown={(event) => event.target === event.currentTarget && !attentionLoading && setAttentionOpen(false)}>
+          <div className="flex max-h-[88vh] w-full max-w-5xl flex-col rounded-2xl border border-card bg-background p-5 shadow-elevated">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <b>Meaning review — needs your action</b>
+                <p dir="rtl" className="mt-1 text-right text-sm opacity-70">این رکوردها از Remaining خارج شده‌اند و دوباره برای AI ارسال نمی‌شوند. معنی را اصلاح و تأیید کنید، معنی فعلی را نگه دارید، یا کل WordSense را حذف کنید.</p>
+              </div>
+              <div className="flex flex-wrap items-center justify-end gap-2">
+                <PromptSourcesButton paths={[ATTENTION_PROMPT_PATH]} label="ATTENTION PROMPT FILE" />
+                <button
+                  type="button"
+                  disabled={attentionLoading || !attentionPrompt || !attentionPromptRecords.length}
+                  onClick={() => void copyAttentionPrompt()}
+                  className="rounded border border-amber-500 bg-amber-500/10 px-3 py-2 text-sm font-semibold text-amber-800 disabled:opacity-50 dark:text-amber-300"
+                >
+                  {attentionCopied ? "COPIED ✓" : `COPY ATTENTION PROMPT (${attentionPromptRecords.length})`}
+                </button>
+                <button type="button" disabled={attentionLoading} onClick={() => setAttentionOpen(false)} className="rounded border px-3 py-2 text-sm">Close</button>
+              </div>
+            </div>
+            <p dir="rtl" className="mt-3 rounded border border-amber-500/30 bg-amber-500/10 p-3 text-right text-sm">
+              دکمهٔ Copy، دستور تحلیل و snapshot فعلی دیتابیس را با هم کپی می‌کند. مدل باید علت ثبت‌شده را از تشخیص احتمالی جدا کند و برای هر رکورد اقدام پیشنهادی بدهد؛ هیچ تغییری مستقیماً اعمال نمی‌شود.
+            </p>
+            {e ? <div className="mt-3 rounded border border-red-500/30 bg-red-500/10 p-2 text-red-700">{e}</div> : null}
+            <div className="mt-4 min-h-0 flex-1 space-y-3 overflow-auto">
+              {attentionItems.length ? attentionItems.map((item) => {
+                const missing = item.meaningReviewStatus === "NEEDS_ACTION_MISSING_PRIMARY";
+                return (
+                  <section key={item.id} className="rounded border p-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div><b>#{item.id} — {item.english.base_form}</b><div className="text-xs text-amber-700">{item.meaningReviewStatus}</div></div>
+                      <DeleteWordSenseModalButton id={item.id} label={item.english.base_form} onDeleted={(id) => {
+                        setAttentionItems((items) => items.filter((entry) => entry.id !== id));
+                        setSummary((current) => ({ ...current, needsAction: Math.max(0, current.needsAction - 1) }));
+                      }} />
+                    </div>
+                    <label className="mt-3 block text-sm">
+                      <span>Primary Persian meaning</span>
+                      <input dir="rtl" value={attentionDrafts[item.id] ?? ""} onChange={(event) => setAttentionDrafts((current) => ({ ...current, [item.id]: event.target.value }))} className="mt-1 w-full rounded border bg-transparent px-3 py-2 text-right" placeholder="معنی فارسی را وارد کنید" />
+                    </label>
+                    <div className="mt-3 flex flex-wrap justify-end gap-2">
+                      {!missing && item.meaning?.canonical_text ? <button type="button" disabled={attentionLoading} onClick={() => void resolveAttention(item.id, "confirm_current")} className="rounded border px-3 py-2 text-sm">Keep current &amp; confirm</button> : null}
+                      <button type="button" disabled={attentionLoading || !(attentionDrafts[item.id] ?? "").trim()} onClick={() => void resolveAttention(item.id, "replace_primary")} className="rounded border border-emerald-600 bg-emerald-600 px-3 py-2 text-sm text-white disabled:opacity-50">{missing ? "Add & confirm" : "Save & confirm"}</button>
+                    </div>
+                  </section>
+                );
+              }) : <div dir="rtl" className="rounded border p-6 text-center">هیچ رکوردی نیازمند اقدام نیست.</div>}
+            </div>
+          </div>
+        </div>
+      ) : null}
       {o ? (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
@@ -220,10 +522,18 @@ export default function WordSenseMeaningsReview({
               <div>
                 <b>Persian meanings review — WordSense</b>
                 <div className="text-xs opacity-70">
-                  Only corrections are returned; Apply confirms all loaded rows.
+                  Reviews and completes the six core WordSense fields in staged mode.
                 </div>
               </div>
               <div className="flex flex-wrap items-center justify-end gap-2">
+                <button
+                  type="button"
+                  disabled={reportLoading}
+                  onClick={() => void showConflictReports()}
+                  className="rounded border px-3 py-2 text-sm transition active:scale-90 hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5"
+                >
+                  <span dir="rtl">نمایش گزارش JSON موارد کنارگذاشته‌شده</span>
+                </button>
                 <button
                   type="button"
                   aria-expanded={showWorkflowGuide}
@@ -251,22 +561,52 @@ export default function WordSenseMeaningsReview({
               >
                 <div className="font-semibold">هدف این مرحله</div>
                 <p>
-                  معنی فارسی هر رکورد و تعلق جمله‌ها به همان معنی بررسی می‌شود.
-                  این مرحله رکوردهای تکراری را با هم ترکیب یا حذف نمی‌کند.
+                  <code>meaning_fa</code> معنی مرجع و ثابت WordSense است. concept،
+                  معانی دیگر، نقش دستوری، جمله و ترجمه با همین معنی هماهنگ و در
+                  صورت نیاز تکمیل یا اصلاح می‌شوند.
                 </p>
                 <div className="mt-2 font-semibold">شرایط انتخاب رکوردها</div>
                 <ul className="list-disc pr-5">
-                  <li>فقط رکوردهایی انتخاب می‌شوند که هنوز <code>meanings_confirmed=false</code> دارند.</li>
-                  <li>رکوردها از شناسهٔ قدیمی‌تر به جدیدتر و به تعداد واردشده در Count خوانده می‌شوند؛ در این مرحله Count صفر یعنی هیچ رکوردی.</li>
+                  <li>فقط WordSense دارای معنی اصلی وارد این workflow می‌شود.</li>
+                  <li>رکورد بدون معنی برای data entry آینده کنار گذاشته می‌شود و مدل برای آن معنی حدس نمی‌زند.</li>
+                  <li>فقط رکورد دارای <code>meaningReviewStatus=PENDING</code> وارد صف AI می‌شود.</li>
+                  <li><code>otherMeaningIds=null</code> یعنی هنوز تعیین نشده و ناقص است؛ <code>[]</code> یعنی بررسی شده ولی معادل جایگزین مفیدی وجود ندارد.</li>
+                  <li>رکوردها به laneهای پایدار و بدون هم‌پوشانی تقسیم می‌شوند؛ هر lane را می‌توان هم‌زمان به یک مدل جدا داد.</li>
                   <li>همهٔ جمله‌های موجود در آرایهٔ <code>sentenceIds</code> برای بررسی به مدل نشان داده می‌شوند.</li>
                 </ul>
-                <div className="mt-2 font-semibold">پس از تأیید چه تغییری می‌کند؟</div>
+                <div className="mt-2 font-semibold">اولویت قطعی معنی و concept</div>
                 <ul className="list-disc pr-5">
-                  <li>در صورت پیشنهاد اصلاح، <code>meaningId</code> و <code>otherMeaningIds</code> با معنی‌های نهایی جایگزین می‌شوند.</li>
-                  <li>شناسهٔ جمله‌هایی که مدل نامعتبر اعلام کرده از آرایهٔ <code>sentenceIds</code> حذف می‌شود.</li>
-                  <li>رکوردهای تأییدشده <code>meanings_confirmed=true</code> می‌گیرند.</li>
-                  <li>اولین شناسهٔ آرایه، یعنی <code>sentenceIds[0]</code>، جملهٔ اصلی WordSense برای فیلدها و صدای کارت Anki است.</li>
-                  <li>هیچ رکورد WordSense، Sentence یا PersianWord و هیچ ستون دیتابیس در این مرحله حذف نمی‌شود.</li>
+                  <li><code>meaning_fa</code> هویت معنایی و مرجع اصلی است؛ فیلد دیگری اجازه ندارد sense آن را تغییر دهد.</li>
+                  <li>اگر concept خالی یا ناسازگار است، براساس معنی اصلاح یا تولید می‌شود.</li>
+                  <li>معنی فقط برای ایراد سطحی مانند غلط املایی، فاصله، صورت دستوری آشکار یا فارسی کمی غیرطبیعی اصلاح می‌شود؛ تغییر sense ممنوع است.</li>
+                  <li>اگر معنی اساساً متعلق به <code>base_form</code> نیست، مدل فقط <code>invalid_primary_meaning=true</code> گزارش می‌کند؛ هیچ داده‌ای تغییر نمی‌کند و رکورد برای رسیدگی یا حذف دستی pending می‌ماند.</li>
+                </ul>
+                <div className="mt-2 font-semibold">هماهنگ‌سازی فیلدهای وابسته</div>
+                <ul className="list-disc pr-5">
+                  <li>معانی دیگر فقط معادل‌های طبیعی همان sense هستند و معانی متعلق به sense دیگر کنار گذاشته می‌شوند.</li>
+                  <li><code>pos</code> از معنی و concept نهایی تشخیص داده و در صورت نیاز اصلاح می‌شود.</li>
+                  <li>اگر جمله با معنی و concept هماهنگ است ولی <code>pos</code> ذخیره‌شده اشتباه است، جمله حفظ و فقط <code>pos</code> اصلاح می‌شود.</li>
+                  <li>اگر جمله sense یا نقش دیگری دارد، از این WordSense جدا و دقیقاً یک جملهٔ جایگزین همراه ترجمه تولید می‌شود.</li>
+                  <li>جملهٔ طبیعی و هماهنگ صرفاً برای بهتر یا متفاوت‌کردن متن عوض نمی‌شود.</li>
+                </ul>
+                <div className="mt-2 font-semibold">چه چیزهایی ساخته یا تغییر داده می‌شوند؟</div>
+                <ul className="list-disc pr-5">
+                  <li>concept، معانی دیگر، <code>pos</code>، جمله و ترجمه فقط در صورت نیاز ذخیره یا اصلاح می‌شوند.</li>
+                  <li>برای معنی فارسی جدید، PersianWord موجود reuse می‌شود و فقط اگر وجود نداشته باشد PersianWord جدید ساخته می‌شود.</li>
+                  <li>برای جملهٔ جدید نیز Sentence موجود reuse می‌شود و فقط اگر متن آن وجود نداشته باشد Sentence جدید همراه ترجمه ساخته و به WordSense متصل می‌شود.</li>
+                  <li>ترجمهٔ خالی Sentence موجود می‌تواند تکمیل شود و ID جملهٔ نامعتبر فقط از <code>sentenceIds</code> این WordSense خارج می‌شود.</li>
+                  <li>اگر جملهٔ اصلی نامعتبر باشد، جملهٔ جایگزین در جایگاه آن قرار می‌گیرد تا <code>sentenceIds[0]</code> همچنان جملهٔ اصلی باشد.</li>
+                </ul>
+                <div className="mt-2 font-semibold">پایان فرایند و جلوگیری از حلقه</div>
+                <ul className="list-disc pr-5">
+                  <li>برای Paste و اعمال پاسخ، اجرای دوبارهٔ <code>Create data</code> لازم نیست؛ رکوردهای فعلی مستقیماً از روی <code>reviewedIds</code> خوانده می‌شوند.</li>
+                  <li>مقدار یکسان دوباره نوشته نمی‌شود؛ مقدار متفاوت اعمال می‌شود و نتیجهٔ بدون نیاز به تغییر نیز در گزارش مشخص است.</li>
+                  <li>رکورد معتبر در همان review کامل می‌شود و وضعیت <code>CONFIRMED</code> می‌گیرد؛ بنابراین از صف خارج می‌شود.</li>
+                  <li>برای هر WordSense در هر اجرا حداکثر یک جملهٔ جدید پذیرفته می‌شود و جملهٔ تازه در همان اجرا دوباره بررسی یا تکثیر نمی‌شود.</li>
+                  <li>گزارش معنی نامعتبر از صف AI خارج می‌شود و در «Needs Your Action» برای اصلاح، تأیید یا حذف دستی قرار می‌گیرد.</li>
+                  <li>اگر ساخت PersianWord به‌علت چند رکورد با normalized_text یکسان مبهم باشد، گزارش JSON حفظ می‌شود و WordSense بدون حذف وارد «Needs Your Action» می‌شود.</li>
+                  <li>Sentence، EnglishWord و PersianWordهای مرتبط در این حالت حذف نمی‌شوند و هیچ WordSense جدیدی نیز در این مرحله ساخته نمی‌شود.</li>
+                  <li>این مرحله WordSenseهای تکراری را ادغام یا حذف نمی‌کند؛ آن کار متعلق به workflowهای merge است.</li>
                 </ul>
               </div>
             ) : null}
@@ -276,25 +616,59 @@ export default function WordSenseMeaningsReview({
                 {notice}
               </div>
             ) : null}
+            {!confirmOpen && confirmReport ? (
+              <div className="rounded border border-emerald-500/30 bg-emerald-500/5 p-3 text-xs text-emerald-900">
+                <div>
+                  Updated ids: {confirmReport.results.filter((item) => item.status === "updated").map((item) => item.id).join(", ") || "none"}
+                </div>
+                <div>
+                  Reviewed-only ids: {confirmReport.results.filter((item) => item.status === "review_confirmed").map((item) => item.id).join(", ") || "none"}
+                </div>
+                <div>
+                  Already-current ids: {confirmReport.results.filter((item) => item.status === "already_current").map((item) => item.id).join(", ") || "none"}
+                </div>
+                <div>
+                  Attention-required ids: {confirmReport.attentionRequiredIds.join(", ") || "none"}
+                </div>
+                <div>
+                  JSON-reported normalization conflicts moved to Needs Your Action; no WordSense was auto-deleted.
+                </div>
+                {confirmReport.conflictReportId ? (
+                  <div>Conflict report: {confirmReport.conflictReportId}</div>
+                ) : null}
+              </div>
+            ) : null}
+            <div dir="rtl" className="flex flex-wrap gap-2 text-right text-xs">
+              <span className="rounded-full border px-2 py-1">کل واجد شرایط: {summary.totalEligible.toLocaleString()}</span>
+              <span className="rounded-full border px-2 py-1">مرور معنی: {summary.pendingReview.toLocaleString()}</span>
+              <span className="rounded-full border px-2 py-1">فاقد معنی و خارج فرایند: {summary.excludedMissingMeaning.toLocaleString()}</span>
+              <span className="rounded-full border px-2 py-1">معانی دیگر ناقص: {summary.missingOtherMeanings.toLocaleString()}</span>
+              <span className="rounded-full border px-2 py-1">نقش ناقص: {summary.missingPos.toLocaleString()}</span>
+              <span className="rounded-full border px-2 py-1">concept ناقص: {summary.missingConcept.toLocaleString()}</span>
+              <span className="rounded-full border px-2 py-1">جمله ناقص: {summary.missingSentence.toLocaleString()}</span>
+              <span className="rounded-full border px-2 py-1">ترجمه ناقص: {summary.missingSentenceTranslation.toLocaleString()}</span>
+            </div>
             <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-2">
               <section className="flex min-h-0 flex-col gap-2">
-                <div>
-                  <label className="text-xs">
-                    Count{" "}
-                    <input
-                      type="number"
-                      min="0"
-                      value={l}
-                      disabled={b}
-                      onChange={(x) => setL(x.target.value)}
-                      className="ml-1 w-20 rounded border px-2 py-1"
-                    />
-                  </label>
+                <div className="flex flex-col gap-2">
+                  <ParallelPromptBatchControls
+                    batchSize={l}
+                    disabled={b}
+                    laneCount={laneCount}
+                    laneNumber={laneNumber}
+                    laneEligibleCount={laneEligibleCount}
+                    loadedCount={loadedCount}
+                    totalEligibleCount={remaining}
+                    onBatchSizeChange={(value) => { clearLoadedLane(); setL(value); }}
+                    onLaneCountChange={(value) => { clearLoadedLane(); setLaneCount(value); }}
+                    onLaneNumberChange={(value) => { clearLoadedLane(); setLaneNumber(value); }}
+                  />
+                  <div className="flex flex-wrap items-center gap-2">
                   <button
                     type="button"
                     onClick={() => void load()}
                     disabled={b}
-                    className="ml-2 rounded border px-2 py-1 text-xs transition active:scale-90 hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5"
+                    className="rounded border px-2 py-1 text-xs transition active:scale-90 hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5"
                   >
                     {b ? "Loading…" : "Create data"}
                   </button>
@@ -303,9 +677,9 @@ export default function WordSenseMeaningsReview({
                     type="button"
                     onClick={copyAll}
                     disabled={b || !d}
-                    className="ml-2 rounded border px-2 py-1 text-xs transition active:scale-90 hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5"
+                    className="rounded border px-2 py-1 text-xs transition active:scale-90 hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5"
                   >
-                    Copy all
+                    Copy lane {laneNumber}
                   </button>
                   {remaining !== null ? (
                     <RemainingCountButton
@@ -314,6 +688,7 @@ export default function WordSenseMeaningsReview({
                       onClick={() => setL(String(remaining))}
                     />
                   ) : null}
+                  </div>
                 </div>
                 <textarea
                   readOnly
@@ -323,12 +698,15 @@ export default function WordSenseMeaningsReview({
               </section>
               <section className="flex min-h-0 flex-col gap-2">
                 <b>Response JSON</b>
+                <div dir="rtl" className="text-right text-xs opacity-70">
+                  پاسخ را می‌توان بدون اجرای دوبارهٔ Create data اعمال کرد؛ رکوردها از روی reviewedIds خوانده می‌شوند.
+                </div>
                 <textarea
                   value={a}
                   disabled={b}
                   onChange={(x) => setA(x.target.value)}
                   className="min-h-0 flex-1 rounded border p-3 font-mono text-xs"
-                  placeholder='[{"id":1,"meaning_fa":"...","other_meanings_fa":[],"invalid_sentence_ids":[12]}]'
+                  placeholder='{"reviewedIds":[1],"results":[{"id":1,"mode":"review","pos":"noun"}]}'
                 />
                 <div className="flex gap-2">
                   <button
@@ -365,14 +743,19 @@ export default function WordSenseMeaningsReview({
         </div>
       ) : null}
       {confirmOpen ? (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4">
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="meaning-review-confirm-title"
+        >
           <div className="flex h-[85vh] w-full max-w-6xl flex-col gap-4 rounded-2xl border border-card bg-background p-6 shadow-elevated">
             <div className="flex justify-between">
               <div>
-                <b>Confirm meaning updates</b>
+                <b id="meaning-review-confirm-title">Confirm meaning updates</b>
                 <div className="text-xs opacity-70">
-                  Compare old and new values, edit the new JSON if needed, then
-                  confirm each record.
+                  Compare or edit the proposed JSON. Row confirmation is optional;
+                  the final action validates and processes every remaining preview record.
                 </div>
               </div>
               <div className="relative flex gap-2">
@@ -390,7 +773,7 @@ export default function WordSenseMeaningsReview({
                   onClick={() => void closeAndConfirm()}
                   className="rounded border px-2 py-1 text-sm transition active:scale-90 hover:bg-black/5 disabled:opacity-50"
                 >
-                  MARK ALL AS REVIEWED AND CLOSE
+                  {b ? "PROCESSING…" : "MARK ALL AS REVIEWED AND CLOSE"}
                 </button>
                 <button
                   type="button"
@@ -406,16 +789,44 @@ export default function WordSenseMeaningsReview({
                     dir="rtl"
                     className="absolute right-0 top-full z-10 mt-2 w-72 rounded border bg-background p-3 text-right text-xs shadow-elevated"
                   >
-                    این دکمه تمام رکوردهای batch را فقط به‌عنوان مرورشده ثبت
-                    می‌کند (<code>meanings_confirmed=true</code>). تغییرات
-                    پیشنهادیِ ردیف‌هایی که جداگانه Confirm نشده‌اند اعمال
-                    نمی‌شود.
+                    این دکمه تمام تغییرات پیشنهادی را در یک تراکنش دیتابیس اعمال می‌کند،
+                    رکوردهای کامل را مرورشده ثبت می‌کند و سپس پنجره را می‌بندد.
+                    خطای ابهام normalized_text ابتدا در فایل JSON گزارش می‌شود و
+                    WordSense مربوط بدون حذف وارد Needs Your Action می‌شود.
+                    گزارش‌های معنی نامعتبر نیز از صف AI خارج و وارد همان بخش می‌شوند.
                   </div>
                 ) : null}
               </div>
             </div>
+            {confirmError ? (
+              <div
+                role="alert"
+                className="rounded border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-700"
+              >
+                <strong>Nothing was committed.</strong> {confirmError}
+              </div>
+            ) : null}
+            {confirmReport ? (
+              <div className="rounded border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-800">
+                <div>{reportText(confirmReport)}</div>
+                {confirmReport.attentionRequiredIds.length ? (
+                  <div className="mt-1">
+                    Invalid primary meaning / attention required: {confirmReport.attentionRequiredIds.join(", ")}
+                  </div>
+                ) : null}
+                {confirmReport.reportPersistenceWarning ? (
+                  <div className="mt-1 text-amber-800">{confirmReport.reportPersistenceWarning}</div>
+                ) : null}
+              </div>
+            ) : null}
             <div className="min-h-0 flex-1 overflow-auto rounded border">
-              <table className="w-full text-left text-xs">
+              <table className="w-full table-fixed text-left text-xs">
+                <colgroup>
+                  <col className="w-[6%]" />
+                  <col className="w-[43%]" />
+                  <col className="w-[43%]" />
+                  <col className="w-[8%]" />
+                </colgroup>
                 <thead className="sticky top-0 bg-background">
                   <tr className="border-b">
                     <th className="px-3 py-2">id</th>
@@ -432,6 +843,9 @@ export default function WordSenseMeaningsReview({
                     const current = old.find(
                       (item) => item.id === correction.id,
                     );
+                    const draft =
+                      drafts[correction.id] ??
+                      JSON.stringify(correction, null, 2);
                     return (
                       <tr
                         key={correction.id}
@@ -439,16 +853,14 @@ export default function WordSenseMeaningsReview({
                       >
                         <td className="px-3 py-2 font-mono">{correction.id}</td>
                         <td className="px-3 py-2">
-                          <pre className="whitespace-pre-wrap font-mono">
+                          <pre className="whitespace-pre-wrap break-words font-mono">
                             {JSON.stringify(current ?? "Not loaded", null, 2)}
                           </pre>
                         </td>
                         <td className="px-3 py-2">
                           <textarea
-                            value={
-                              drafts[correction.id] ??
-                              JSON.stringify(correction, null, 2)
-                            }
+                            value={draft}
+                            rows={Math.max(18, draft.split("\n").length + 1)}
                             onChange={(event) =>
                               setDrafts((current) => ({
                                 ...current,
@@ -456,7 +868,7 @@ export default function WordSenseMeaningsReview({
                               }))
                             }
                             disabled={b}
-                            className="min-h-32 w-full rounded border p-2 font-mono disabled:opacity-50"
+                            className="min-h-[28rem] w-full resize-y rounded border p-3 font-mono disabled:opacity-50"
                           />
                         </td>
                         <td className="px-3 py-2">
@@ -466,9 +878,11 @@ export default function WordSenseMeaningsReview({
                             onClick={() => void confirmOne(correction.id)}
                             className="rounded border px-2 py-1 transition active:scale-90 hover:bg-black/5 disabled:opacity-50"
                           >
-                            {confirmedIds.has(correction.id)
-                              ? "Confirm update ✓"
-                              : "Confirm"}
+                            {outcomeById[correction.id] === "attention_required"
+                              ? "Attention required"
+                              : confirmedIds.has(correction.id)
+                                ? "Confirmed ✓"
+                                : "Confirm"}
                           </button>
                         </td>
                       </tr>
@@ -477,92 +891,42 @@ export default function WordSenseMeaningsReview({
                 </tbody>
               </table>
             </div>
-            <div className="flex justify-end gap-2">
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setShowApplyAllHelp((current) => !current)}
-                  aria-label="About apply all proposed changes"
-                  title="About apply all proposed changes"
-                  className="rounded border p-1.5 transition active:scale-90 hover:bg-black/5 dark:hover:bg-white/5"
-                >
-                  <ActionIcon name="help" />
-                </button>
-                {showApplyAllHelp ? (
-                  <div
-                    dir="rtl"
-                    className="absolute bottom-full right-0 z-10 mb-2 w-80 rounded border bg-background p-3 text-right text-xs shadow-elevated"
-                  >
-                    <strong>APPLY ALL PROPOSED CHANGES</strong> همهٔ تغییرات
-                    پیشنهادشده در ستون New را برای تمام رکوردها در دیتابیس اعمال
-                    می‌کند و همه را مرورشده ثبت می‌کند. در مقابل،{" "}
-                    <strong>MARK ALL AS REVIEWED AND CLOSE</strong> فقط{" "}
-                    <code>meanings_confirmed=true</code> را ثبت می‌کند و تغییرات
-                    ردیف‌هایی که جداگانه Confirm نشده‌اند را نادیده می‌گیرد.
-                  </div>
-                ) : null}
-              </div>
-              <button
-                type="button"
-                disabled={
-                  b || !corrections.some((item) => !confirmedIds.has(item.id))
-                }
-                onClick={() => setApplyAllConfirmOpen(true)}
-                className="rounded border px-3 py-2 text-sm transition active:scale-90 hover:bg-black/5 disabled:opacity-50"
-              >
-                APPLY ALL PROPOSED CHANGES
-              </button>
-            </div>
           </div>
         </div>
       ) : null}
-      {applyAllConfirmOpen ? (
+      {reportOpen ? (
         <div
           className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 p-4"
           role="dialog"
           aria-modal="true"
+          aria-labelledby="meaning-review-conflict-reports-title"
         >
-          <div
-            dir="rtl"
-            className="w-full max-w-lg rounded-2xl border border-card bg-background p-5 text-right shadow-elevated"
-          >
-            <h2 className="text-base font-semibold">
-              اعمال همهٔ تغییرات پیشنهادی؟
-            </h2>
-            <p className="mt-3 text-sm leading-6">
-              این عملیات تمام تغییرات ستون New را برای همهٔ رکوردهای
-              نمایش‌داده‌شده در دیتابیس ثبت می‌کند و همه را مرورشده علامت می‌زند
-              (<code>meanings_confirmed=true</code>). برخلاف{" "}
-              <strong>MARK ALL AS REVIEWED AND CLOSE</strong>، تغییرات تأییدنشده
-              نیز اعمال می‌شوند.
-            </p>
-            <div className="mt-5 flex justify-end gap-2">
-              <button
-                type="button"
-                disabled={b}
-                onClick={() => setApplyAllConfirmOpen(false)}
-                className="rounded border px-3 py-2 text-sm transition active:scale-90 hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5"
-              >
-                انصراف
-              </button>
-              <button
-                type="button"
-                disabled={b}
-                onClick={() => {
-                  const ids = (
-                    (d ? JSON.parse(d) : []) as Array<{ id: number }>
-                  ).map((item) => item.id);
-                  const targetIds = ids.length
-                    ? ids
-                    : corrections.map((item) => item.id);
-                  setApplyAllConfirmOpen(false);
-                  void commit(targetIds, corrections);
-                }}
-                className="rounded border px-3 py-2 text-sm transition active:scale-90 hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5"
-              >
-                تأیید و اعمال همه
-              </button>
+          <div className="flex h-[85vh] w-full max-w-6xl flex-col gap-3 rounded-2xl border border-card bg-background p-6 shadow-elevated">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <b id="meaning-review-conflict-reports-title">Meaning review conflict reports — JSON</b>
+                <div dir="rtl" className="mt-1 text-right text-xs opacity-70">
+                  این داده‌ها از فایل‌های ماندگار داخل پوشه backups خوانده می‌شوند و شامل snapshot، پیشنهاد، علت ابهام و شناسهٔ WordSense حذف‌شده هستند.
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => void navigator.clipboard.writeText(reportJson)}
+                  className="rounded border px-3 py-2 text-sm transition active:scale-90 hover:bg-black/5 dark:hover:bg-white/5"
+                >
+                  Copy JSON
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setReportOpen(false)}
+                  className="rounded border px-3 py-2 text-sm transition active:scale-90 hover:bg-black/5 dark:hover:bg-white/5"
+                >
+                  Close
+                </button>
+              </div>
             </div>
+            <textarea readOnly value={reportJson} className="min-h-0 flex-1 rounded border p-3 font-mono text-xs" />
           </div>
         </div>
       ) : null}

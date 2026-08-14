@@ -70,6 +70,8 @@ export async function POST(req: Request) {
     }
 
     const sentence_en_meaning_fa = normalizeNullableString(d.sentence_en_meaning_fa) ?? null;
+    const semanticChanged = existing.sentence_en !== sentence_en ||
+      existing.sentence_en_meaning_fa !== sentence_en_meaning_fa;
     const updated = await prisma.sentence.update({
       where: { id },
       data: {
@@ -84,7 +86,9 @@ export async function POST(req: Request) {
       },
     });
 
-    const touchedWords = await touchWordSensesLinkedToSentenceId(id);
+    const touchedWords = await touchWordSensesLinkedToSentenceId(id, {
+      resetMeaningReviewStatus: semanticChanged,
+    });
 
     return NextResponse.json({
       ok: true as const,

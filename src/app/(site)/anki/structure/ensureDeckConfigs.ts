@@ -31,6 +31,7 @@ type DesiredDeckConfig = {
   relearningSteps: number[] | null;
   initialFactor: number | null;
   easyBonus: number | null;
+  intervalModifier: number | null;
   graduatingIntervalDays: number | null;
   easyIntervalDays: number | null;
   minimumIntervalDays: number | null;
@@ -49,6 +50,7 @@ function desiredDeckConfig(
       relearningSteps: editable.relearningSteps ? parseSteps(editable.relearningSteps) : null,
       initialFactor: startingEase !== null ? Math.round(startingEase * 1000) : null,
       easyBonus: editable.easyBonus ? parseNumber(editable.easyBonus) : null,
+      intervalModifier: editable.intervalModifier ? parseNumber(editable.intervalModifier) : null,
       graduatingIntervalDays: editable.graduatingInterval ? parseNumber(editable.graduatingInterval) : null,
       easyIntervalDays: editable.easyInterval ? parseNumber(editable.easyInterval) : null,
       minimumIntervalDays: editable.minimumInterval ? parseNumber(editable.minimumInterval) : null,
@@ -67,6 +69,10 @@ function desiredDeckConfig(
     null;
   const wantsEasyBonusRaw =
     (desired as { EasyBonus?: string }).EasyBonus ?? (desired as { easyBonus?: string }).easyBonus ?? null;
+  const wantsIntervalModifierRaw =
+    (desired as { IntervalModifier?: string }).IntervalModifier ??
+    (desired as { intervalModifier?: string }).intervalModifier ??
+    null;
   const wantsGraduatingIntervalRaw =
     (desired as { graduatingInterval?: string }).graduatingInterval ??
     (desired as { GraduatingInterval?: string }).GraduatingInterval ??
@@ -89,6 +95,7 @@ function desiredDeckConfig(
     relearningSteps: wantsRelearningStepsRaw ? parseSteps(wantsRelearningStepsRaw) : null,
     initialFactor: startingEase !== null ? Math.round(startingEase * 1000) : null,
     easyBonus: wantsEasyBonusRaw ? parseNumber(wantsEasyBonusRaw) : null,
+    intervalModifier: wantsIntervalModifierRaw ? parseNumber(wantsIntervalModifierRaw) : null,
     graduatingIntervalDays: wantsGraduatingIntervalRaw ? parseNumber(wantsGraduatingIntervalRaw) : null,
     easyIntervalDays: wantsEasyIntervalRaw ? parseNumber(wantsEasyIntervalRaw) : null,
     minimumIntervalDays: wantsMinimumIntervalRaw ? parseNumber(wantsMinimumIntervalRaw) : null,
@@ -116,6 +123,10 @@ function applyDesiredValues(config: AnkiDeckConfig, desired: DesiredDeckConfig) 
   }
   if (desired.initialFactor !== null) setInitialFactor(config.new, desired.initialFactor);
   if (desired.easyBonus !== null) config.rev.ease4 = desired.easyBonus;
+  if (desired.intervalModifier !== null) {
+    config.rev.ivlFct = desired.intervalModifier;
+    if ("ivl_fct" in config.rev) config.rev.ivl_fct = desired.intervalModifier;
+  }
   if (desired.graduatingIntervalDays !== null && desired.easyIntervalDays !== null) {
     setGraduatingAndEasyIntervals(config.new, desired.graduatingIntervalDays, desired.easyIntervalDays);
   }
@@ -132,6 +143,8 @@ function configNeedsUpdate(current: AnkiDeckConfig, desired: DesiredDeckConfig) 
     null;
   const curInitialFactor = getInitialFactor(current.new);
   const curEase4 = asNumber(current.rev?.ease4) ?? null;
+  const curIntervalModifier =
+    asNumber(current.rev?.ivlFct) ?? asNumber(current.rev?.ivl_fct) ?? null;
   const curInts = getNewInts(current.new);
   const wantsInts =
     desired.graduatingIntervalDays !== null && desired.easyIntervalDays !== null
@@ -146,6 +159,7 @@ function configNeedsUpdate(current: AnkiDeckConfig, desired: DesiredDeckConfig) 
     (desired.minimumIntervalDays !== null ? curMinimumInterval !== desired.minimumIntervalDays : false) ||
     (desired.initialFactor !== null ? curInitialFactor !== desired.initialFactor : false) ||
     (desired.easyBonus !== null ? curEase4 !== desired.easyBonus : false) ||
+    (desired.intervalModifier !== null ? curIntervalModifier !== desired.intervalModifier : false) ||
     (wantsInts ? !(Array.isArray(curInts) && curInts[0] === wantsInts[0] && curInts[1] === wantsInts[1]) : false)
   );
 }
@@ -272,12 +286,17 @@ async function confirmDeckConfig(pair: DeckConfigPair, desired: DesiredDeckConfi
 
   const confirmNew = getPerDay(confirm.new);
   const confirmRev = getPerDay(confirm.rev);
+  const confirmEasyBonus = asNumber(confirm.rev?.ease4);
+  const confirmIntervalModifier =
+    asNumber(confirm.rev?.ivlFct) ?? asNumber(confirm.rev?.ivl_fct);
   if (
     confirm.name !== pair.configName ||
     confirmNew !== desired.newCardsPerDay ||
-    confirmRev !== desired.maximumReviewsPerDay
+    confirmRev !== desired.maximumReviewsPerDay ||
+    (desired.easyBonus !== null && confirmEasyBonus !== desired.easyBonus) ||
+    (desired.intervalModifier !== null && confirmIntervalModifier !== desired.intervalModifier)
   ) {
-    appendLog(`✗ Confirm mismatch: name=${confirm.name} new/day=${confirmNew} reviews/day=${confirmRev}`);
+    appendLog(`✗ Confirm mismatch: name=${confirm.name} new/day=${confirmNew} reviews/day=${confirmRev} easyBonus=${confirmEasyBonus} intervalModifier=${confirmIntervalModifier}`);
     return { ok: false };
   }
 

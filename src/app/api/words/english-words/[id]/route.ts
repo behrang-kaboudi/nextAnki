@@ -57,7 +57,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     });
     await touchWordSensesByEnglishId(id, {
       resetConceptMergeReviewed: base_form !== current.base_form,
-      resetMeaningsConfirmed: base_form !== current.base_form,
+      resetMeaningReviewStatus: base_form !== current.base_form,
     });
     return NextResponse.json({ ok: true, item });
   } catch (error) {

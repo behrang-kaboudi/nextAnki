@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { PromptSourcesButton } from "@/components/prompts/PromptSourcesButton";
+import { ParallelPromptBatchControls } from "@/components/prompts/ParallelPromptBatchControls.client";
 import { RemainingCountBadge, RemainingCountButton } from "@/components/remaining-count";
 
 const PROMPT_PATH = "src/prompts/word-extraction/merge_inflected_forms/rulseV1.md";
@@ -94,7 +95,10 @@ export default function WordSenseInflectionMerge({ remainingCount }: { remaining
   const [showGuide, setShowGuide] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [limit, setLimit] = useState("0");
+  const [limit, setLimit] = useState("50");
+  const [laneCount, setLaneCount] = useState(1);
+  const [laneNumber, setLaneNumber] = useState(1);
+  const [laneEligibleCount, setLaneEligibleCount] = useState<number | null>(null);
   const [prompt, setPrompt] = useState("");
   const [groups, setGroups] = useState<SourceGroup[]>([]);
   const [sourceGroups, setSourceGroups] = useState<SourceFingerprint[]>([]);
@@ -103,11 +107,19 @@ export default function WordSenseInflectionMerge({ remainingCount }: { remaining
   const [preview, setPreview] = useState<OutputGroup[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const clearLoadedLane = () => {
+    setGroups([]);
+    setSourceGroups([]);
+    setLaneEligibleCount(null);
+    setResponse("");
+    setPreview([]);
+    setNotice(null);
+  };
 
   const createData = async (showModal: boolean, successNotice?: string) => {
     const parsedLimit = Number(limit);
-    if (!Number.isSafeInteger(parsedLimit) || parsedLimit < 0) {
-      setError("Count must be a non-negative integer; 0 means all groups.");
+    if (!Number.isSafeInteger(parsedLimit) || parsedLimit < 1) {
+      setError("Batch size must be a positive integer.");
       return;
     }
     setBusy(true);
@@ -119,7 +131,7 @@ export default function WordSenseInflectionMerge({ remainingCount }: { remaining
         fetch("/api/words/inflection-merge/prepare", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ limit: parsedLimit }),
+          body: JSON.stringify({ batchSize: parsedLimit, laneCount, laneNumber }),
         }),
       ]);
       const promptJson = (await promptResponse.json()) as { text?: string; error?: string };
@@ -128,6 +140,7 @@ export default function WordSenseInflectionMerge({ remainingCount }: { remaining
         items?: SourceGroup[];
         sourceGroups?: SourceFingerprint[];
         totalEligibleGroups?: number;
+        laneEligibleCount?: number;
         error?: string;
       };
       if (!promptResponse.ok || typeof promptJson.text !== "string") {
@@ -140,9 +153,10 @@ export default function WordSenseInflectionMerge({ remainingCount }: { remaining
       setGroups(dataJson.items);
       setSourceGroups(dataJson.sourceGroups);
       setTotalGroups(dataJson.totalEligibleGroups ?? dataJson.items.length);
+      setLaneEligibleCount(typeof dataJson.laneEligibleCount === "number" ? dataJson.laneEligibleCount : null);
       setResponse("");
       setPreview([]);
-      setNotice(successNotice ?? `Created ${dataJson.items.length} POS-separated inflection group(s) ✓`);
+      setNotice(successNotice ?? `Created lane ${laneNumber}/${laneCount} with ${dataJson.items.length} POS-separated inflection group(s) ✓`);
       if (showModal) setOpen(true);
       router.refresh();
     } catch (reason) {
@@ -152,13 +166,38 @@ export default function WordSenseInflectionMerge({ remainingCount }: { remaining
     }
   };
 
-  const openPreview = () => {
+  const openPreview = async () => {
+    setBusy(true);
     setError(null);
     try {
-      setPreview(parsePreview(response, groups));
+      const value = JSON.parse(response) as unknown;
+      const recordsResponse = await fetch("/api/words/inflection-merge/records", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ output: value }),
+      });
+      const recordsJson = (await recordsResponse.json()) as {
+        ok?: boolean;
+        output?: OutputGroup[];
+        items?: SourceGroup[];
+        sourceGroups?: SourceFingerprint[];
+        error?: string;
+      };
+      if (!recordsResponse.ok || !recordsJson.ok || !Array.isArray(recordsJson.output) ||
+          !Array.isArray(recordsJson.items) || !Array.isArray(recordsJson.sourceGroups)) {
+        throw new Error(recordsJson.error || "Could not rebuild inflection groups from this response.");
+      }
+      const parsed = parsePreview(JSON.stringify(recordsJson.output), recordsJson.items);
+      setGroups(recordsJson.items);
+      setSourceGroups(recordsJson.sourceGroups);
+      setTotalGroups(recordsJson.items.length);
+      setPreview(parsed);
+      setNotice(`Rebuilt and validated ${recordsJson.sourceGroups.length} current group(s) from the response IDs ✓`);
       setConfirmOpen(true);
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : String(reason));
+    } finally {
+      setBusy(false);
     }
   };
 
@@ -210,7 +249,7 @@ export default function WordSenseInflectionMerge({ remainingCount }: { remaining
         onClick={() => void createData(true)}
         className="relative rounded border px-3 py-2 text-sm hover:bg-black/5 disabled:opacity-100 dark:hover:bg-white/5"
       >
-        MERGE INFLECTED FORMS <RemainingCountBadge count={remainingCount} />
+        3. MERGE INFLECTED FORMS <RemainingCountBadge count={remainingCount} />
         {busy && !open ? (
           <span className="absolute inset-0 flex items-center justify-center gap-1 rounded bg-background/85" aria-hidden="true">
             <span className="size-1.5 animate-bounce rounded-full bg-current [animation-delay:-0.3s]" />
@@ -260,14 +299,14 @@ export default function WordSenseInflectionMerge({ remainingCount }: { remaining
               >
                 <div className="font-semibold">هدف این مرحله</div>
                 <p>
-                  فرم‌های قانونمند <span dir="ltr">s/es</span>، <span dir="ltr">ing</span> و <span dir="ltr">ed</span> که همان مفهوم آموزشی را تکرار می‌کنند شناسایی می‌شوند. قدیمی‌ترین WordSense باقی می‌ماند، اطلاعات ضروری روی آن جمع می‌شود و WordSenseهای تکراری فقط پس از تأیید شما حذف می‌شوند.
+                  جمع‌های قانونمند اسم با <span dir="ltr">s/es</span> و شکل‌های قانونمند فعل با <span dir="ltr">ing/ed</span> که همان مفهوم آموزشی را تکرار می‌کنند شناسایی می‌شوند. قدیمی‌ترین WordSense باقی می‌ماند، اطلاعات ضروری روی آن جمع می‌شود و WordSenseهای تکراری فقط پس از تأیید شما حذف می‌شوند.
                 </p>
                 <div className="mt-2 font-semibold">چگونه candidateها ساخته می‌شوند؟</div>
                 <ul className="list-disc pr-5">
-                  <li>برنامه فقط قواعد املایی قانونمند را برای پیدا کردن خانواده‌های احتمالی اجرا می‌کند؛ تصمیم نهایی با پاسخ AI بیرونی است.</li>
-                  <li>گروه‌ها بر اساس <code>pos</code> جدا می‌شوند و معنی فارسی، توضیح مفهوم و متن جمله‌ها نیز برای جلوگیری از حذف اشتباه فرستاده می‌شوند.</li>
+                  <li>برنامه قواعد جمع <span dir="ltr">s/es/ies</span> را فقط برای WordSenseهای اسم و قواعد <span dir="ltr">ing/ed</span> را فقط برای WordSenseهای فعل اجرا می‌کند؛ تصمیم نهایی با پاسخ AI بیرونی است.</li>
+                  <li>گروه‌ها از ابتدا بر اساس <code>pos</code> ساخته می‌شوند و معنی فارسی، توضیح مفهوم و متن جمله‌ها نیز برای جلوگیری از حذف اشتباه فرستاده می‌شوند.</li>
                   <li>افعال و جمع‌های بی‌قاعده، comparative/superlative و خانواده‌های اشتقاقی در این مرحله بررسی نمی‌شوند.</li>
-                  <li><code>Count = 0</code> یعنی تمام گروه‌های بررسی‌نشدهٔ واجد شرایط.</li>
+                  <li>گروه‌ها به laneهای پایدار و بدون هم‌پوشانی تقسیم می‌شوند و Batch size سقف تعداد گروه در هر lane است.</li>
                 </ul>
                 <div className="mt-2 font-semibold">پاسخ AI چه چیزی تعیین می‌کند؟</div>
                 <ul className="list-disc pr-5">
@@ -294,11 +333,20 @@ export default function WordSenseInflectionMerge({ remainingCount }: { remaining
             {notice ? <div className="rounded border border-emerald-500/30 bg-emerald-500/10 p-2 text-sm text-emerald-800">{notice}</div> : null}
             <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-2">
               <section className="flex min-h-0 flex-col gap-2">
-                <div className="flex flex-wrap items-center gap-2">
-                  <label className="text-xs">
-                    Count
-                    <input type="number" min="0" value={limit} disabled={busy} onChange={(event) => setLimit(event.target.value)} className="ml-2 w-20 rounded border px-2 py-1" />
-                  </label>
+                <div className="flex flex-col gap-2">
+                  <ParallelPromptBatchControls
+                    batchSize={limit}
+                    disabled={busy}
+                    laneCount={laneCount}
+                    laneNumber={laneNumber}
+                    laneEligibleCount={laneEligibleCount}
+                    loadedCount={groups.length}
+                    totalEligibleCount={totalGroups}
+                    onBatchSizeChange={(value) => { clearLoadedLane(); setLimit(value); }}
+                    onLaneCountChange={(value) => { clearLoadedLane(); setLaneCount(value); }}
+                    onLaneNumberChange={(value) => { clearLoadedLane(); setLaneNumber(value); }}
+                  />
+                  <div className="flex flex-wrap items-center gap-2">
                   <button type="button" disabled={busy} onClick={() => void createData(false)} className={buttonClass}>
                     {busy ? "Creating…" : "Create data"}
                   </button>
@@ -307,8 +355,9 @@ export default function WordSenseInflectionMerge({ remainingCount }: { remaining
                     disabled={busy || groups.length === 0}
                     onClick={() => void navigator.clipboard.writeText(copyText).then(() => setNotice("Prompt and grouped data copied ✓")).catch((reason) => setError(reason instanceof Error ? reason.message : String(reason)))}
                     className={buttonClass}
-                  >Copy all</button>
+                  >Copy lane {laneNumber}</button>
                   <RemainingCountButton count={totalGroups} disabled={busy} onClick={() => setLimit(String(totalGroups))} />
+                  </div>
                 </div>
                 <textarea readOnly value={copyText} className="min-h-0 flex-1 rounded border p-3 font-mono text-xs" />
               </section>
@@ -328,7 +377,7 @@ export default function WordSenseInflectionMerge({ remainingCount }: { remaining
                     onClick={() => void navigator.clipboard.readText().then(setResponse).catch((reason) => setError(reason instanceof Error ? reason.message : String(reason)))}
                     className={buttonClass}
                   >Paste response</button>
-                  <button type="button" disabled={busy || !response.trim()} onClick={openPreview} className={`${buttonClass} flex-1`}>
+                  <button type="button" disabled={busy || !response.trim()} onClick={() => void openPreview()} className={`${buttonClass} flex-1`}>
                     PREVIEW CHANGES
                   </button>
                 </div>

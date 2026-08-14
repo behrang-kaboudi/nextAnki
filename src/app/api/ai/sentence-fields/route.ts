@@ -8,6 +8,8 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { geminiGenerateWithExplicitCache } from "@/lib/ai/model_runner/gemini";
 import { primarySentenceId } from "@/lib/words/sentenceIds";
+import { meaningReviewNotNeedsActionWhere } from "@/lib/words/meaningReviewStatus";
+import { touchWordSensesLinkedToSentenceId } from "@/lib/words/wordSenseRepo";
 
 export const runtime = "nodejs";
 
@@ -135,6 +137,7 @@ export async function POST(req: Request) {
       const [missingSentences, candidateWords] = await Promise.all([
         prisma.sentence.findMany({ select: { id: true, sentence_en: true } }),
         prisma.wordSense.findMany({
+          where: meaningReviewNotNeedsActionWhere,
           orderBy: { anki_link_id: "asc" },
           select: {
             id: true,
@@ -294,6 +297,12 @@ export async function POST(req: Request) {
                   sentence_en_meaning_fa: true,
                 },
               });
+
+          await touchWordSensesLinkedToSentenceId(
+            item.id,
+            { resetMeaningReviewStatus: true },
+            tx,
+          );
 
           const savedWord = await tx.wordSense.findUnique({
             where: { id: word.id },

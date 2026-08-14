@@ -21,7 +21,7 @@ export type WordEditorState = {
   otherMeaningIds: number[];
   comparedMeaningWordIds: number[];
   synonymIds: number[];
-  meanings_confirmed: boolean;
+  meaningReviewStatus: "PENDING" | "CONFIRMED" | "NEEDS_ACTION_INVALID_PRIMARY" | "NEEDS_ACTION_NORMALIZATION_CONFLICT" | "NEEDS_ACTION_MISSING_PRIMARY";
   english: {
     id: number;
     base_form: string;
@@ -254,7 +254,7 @@ export default function WordEditorClient({
             otherMeaningIds: word.otherMeaningIds,
             comparedMeaningWordIds: word.comparedMeaningWordIds,
             synonymIds: word.synonymIds,
-            meanings_confirmed: word.meanings_confirmed,
+            meaningReviewStatus: word.meaningReviewStatus,
             conceptMergeReviewed: word.conceptMergeReviewed,
           },
         }),
@@ -569,11 +569,10 @@ export default function WordEditorClient({
           <InputRow label="productive_target (0–101)">
             <input type="number" min={0} max={101} step={1} value={word.productive_target == null ? "" : String(word.productive_target)} onChange={(e) => setWord((p) => ({ ...p, productive_target: asNullableNumber(e.target.value) }))} className="w-full rounded border px-2.5 py-2 text-sm" placeholder="integer" />
           </InputRow>
-          <InputRow label="meanings_confirmed">
-            <label className="flex h-10 items-center gap-2 rounded border px-2.5 text-xs">
-              <input type="checkbox" checked={word.meanings_confirmed} onChange={(e) => setWord((p) => ({ ...p, meanings_confirmed: e.target.checked }))} />
-              <span>{word.meanings_confirmed ? "Confirmed" : "Not confirmed"}</span>
-            </label>
+          <InputRow label="meaningReviewStatus">
+            <select value={word.meaningReviewStatus} onChange={(e) => setWord((p) => ({ ...p, meaningReviewStatus: e.target.value as WordEditorState["meaningReviewStatus"] }))} className="h-10 w-full rounded border bg-transparent px-2.5 text-xs">
+              <option value="PENDING">PENDING</option><option value="CONFIRMED">CONFIRMED</option><option value="NEEDS_ACTION_INVALID_PRIMARY">NEEDS_ACTION_INVALID_PRIMARY</option><option value="NEEDS_ACTION_NORMALIZATION_CONFLICT">NEEDS_ACTION_NORMALIZATION_CONFLICT</option><option value="NEEDS_ACTION_MISSING_PRIMARY">NEEDS_ACTION_MISSING_PRIMARY</option>
+            </select>
           </InputRow>
           <InputRow label="conceptMergeReviewed">
             <label className="flex h-10 items-center gap-2 rounded border px-2.5 text-xs">
@@ -611,8 +610,8 @@ export default function WordEditorClient({
           <p className="mt-1 text-xs text-muted">Enter comma-separated positive IDs or a JSON array.</p>
         </div>
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-          <IdListInput label="otherMeaningIds" value={word.otherMeaningIds} onChange={(otherMeaningIds) => setWord((p) => ({ ...p, otherMeaningIds, meanings_confirmed: false, conceptMergeReviewed: false }))} />
-          <IdListInput label="sentenceIds" value={word.sentenceIds} onChange={(sentenceIds) => setWord((p) => ({ ...p, sentenceIds, meanings_confirmed: false }))} />
+          <IdListInput label="otherMeaningIds" value={word.otherMeaningIds} onChange={(otherMeaningIds) => setWord((p) => ({ ...p, otherMeaningIds, meaningReviewStatus: "PENDING", conceptMergeReviewed: false }))} />
+          <IdListInput label="sentenceIds" value={word.sentenceIds} onChange={(sentenceIds) => setWord((p) => ({ ...p, sentenceIds, meaningReviewStatus: "PENDING" }))} />
           <IdListInput label="comparedMeaningWordIds" value={word.comparedMeaningWordIds} onChange={(comparedMeaningWordIds) => setWord((p) => ({ ...p, comparedMeaningWordIds }))} />
           <IdListInput label="synonymIds" value={word.synonymIds} onChange={(synonymIds) => setWord((p) => ({ ...p, synonymIds }))} />
         </div>

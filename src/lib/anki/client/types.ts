@@ -105,6 +105,8 @@ export type AnkiDeckConfig = {
     perDay?: number;
     per_day?: number;
     ease4?: number;
+    ivlFct?: number;
+    ivl_fct?: number;
     [k: string]: unknown;
   };
 };

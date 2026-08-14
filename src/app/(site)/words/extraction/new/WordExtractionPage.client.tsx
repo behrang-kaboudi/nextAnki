@@ -116,6 +116,7 @@ export default function WordExtractionPage() {
       meaning_fa: string;
       dbMeaningIpa: string;
       dbMeaningIpaNormalized: string;
+      dbMeaningIpaConfirmed: boolean;
       inputMeaningIpa: string;
       saving: boolean;
       deleting: boolean;
@@ -141,7 +142,7 @@ export default function WordExtractionPage() {
 
     setMeaningIpaRows((cur) =>
       cur.map((r) =>
-        r.id === id ? { ...r, inputMeaningIpa: nextValue, saved: false } : r,
+        r.id === id ? { ...r, inputMeaningIpa: nextValue, dbMeaningIpaConfirmed: false, saved: false } : r,
       ),
     );
 
@@ -489,6 +490,7 @@ export default function WordExtractionPage() {
           meaning_fa: string;
           meaning_fa_IPA: string;
           meaning_fa_IPA_normalized: string;
+          meaning_fa_IPA_confirmed: boolean;
         }>;
       } | null;
       if (!res.ok || !json?.ok)
@@ -508,6 +510,7 @@ export default function WordExtractionPage() {
           meaning_fa: db.meaning_fa,
           dbMeaningIpa: db.meaning_fa_IPA,
           dbMeaningIpaNormalized: db.meaning_fa_IPA_normalized,
+          dbMeaningIpaConfirmed: db.meaning_fa_IPA_confirmed,
           inputMeaningIpa: p.meaning_fa_IPA,
           saving: false,
           deleting: false,
@@ -982,7 +985,7 @@ export default function WordExtractionPage() {
       const json = (await res.json().catch(() => null)) as {
         ok?: boolean;
         error?: string;
-        item?: { meaning_fa_IPA: string; meaning_fa_IPA_normalized: string };
+        item?: { meaning_fa_IPA: string; meaning_fa_IPA_normalized: string; meaning_fa_IPA_confirmed: boolean };
       } | null;
       if (!res.ok || !json?.ok)
         throw new Error(json?.error ?? `Request failed (${res.status})`);
@@ -996,6 +999,7 @@ export default function WordExtractionPage() {
                 dbMeaningIpaNormalized:
                   json.item?.meaning_fa_IPA_normalized ??
                   r.dbMeaningIpaNormalized,
+                dbMeaningIpaConfirmed: json.item?.meaning_fa_IPA_confirmed === true,
                 saving: false,
                 deleting: false,
                 saveError: null,
@@ -1119,6 +1123,7 @@ export default function WordExtractionPage() {
               id: number;
               meaning_fa_IPA: string;
               meaning_fa_IPA_normalized: string;
+              meaning_fa_IPA_confirmed: boolean;
             }
           | { ok: false; id: number; error: string }
         >;
@@ -1155,6 +1160,7 @@ export default function WordExtractionPage() {
             ...r,
             dbMeaningIpa: result.meaning_fa_IPA,
             dbMeaningIpaNormalized: result.meaning_fa_IPA_normalized,
+            dbMeaningIpaConfirmed: result.meaning_fa_IPA_confirmed,
             saving: false,
             deleting: false,
             saveError: null,
@@ -2089,11 +2095,10 @@ export default function WordExtractionPage() {
             <div className="flex items-start justify-between gap-3">
               <div>
                 <div className="text-base font-semibold">
-                  Apply meaning_fa_IPA (per row)
+                  Review and confirm meaning_fa_IPA
                 </div>
                 <div className="mt-1 text-xs opacity-70">
-                  Paste JSON in Prompt (left): [{"{"}id, meaning_fa_IPA{"}"}]
-                  then open this modal.
+                  Paste JSON in Prompt (left), review the values here, then use Update &amp; confirm. Every successful update sets meaning_fa_IPA_confirmed=true.
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -2104,9 +2109,9 @@ export default function WordExtractionPage() {
                     isMeaningIpaBulkSaving || meaningIpaRows.length === 0
                   }
                   className="rounded border px-3 py-1 text-sm hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5"
-                  title="Updates meaning_fa_IPA and meaning_fa_IPA_normalized for all loaded rows"
+                  title="Updates and human-confirms meaning_fa_IPA for all loaded rows"
                 >
-                  {isMeaningIpaBulkSaving ? "Updating all..." : "Update all"}
+                  {isMeaningIpaBulkSaving ? "Updating and confirming all..." : "Update & confirm all"}
                 </button>
                 <button
                   type="button"
@@ -2164,6 +2169,9 @@ export default function WordExtractionPage() {
                       meaning_fa_IPA (DB)
                     </th>
                     <th className="whitespace-nowrap px-3 py-2 font-semibold">
+                      confirmed
+                    </th>
+                    <th className="whitespace-nowrap px-3 py-2 font-semibold">
                       meaning_fa_IPA (input/edit)
                     </th>
                     <th className="whitespace-nowrap px-3 py-2 font-semibold">
@@ -2192,6 +2200,9 @@ export default function WordExtractionPage() {
                       >
                         {r.dbMeaningIpa || "—"}
                       </td>
+                      <td className={r.dbMeaningIpaConfirmed ? "px-3 py-2 font-semibold text-emerald-700" : "px-3 py-2 font-semibold text-amber-700"}>
+                        {r.dbMeaningIpaConfirmed ? "True" : "False"}
+                      </td>
                       <td className="px-3 py-2">
                         <input
                           value={r.inputMeaningIpa}
@@ -2200,7 +2211,7 @@ export default function WordExtractionPage() {
                             setMeaningIpaRows((cur) =>
                               cur.map((x) =>
                                 x.id === r.id
-                                  ? { ...x, inputMeaningIpa: v, saved: false }
+                                  ? { ...x, inputMeaningIpa: v, dbMeaningIpaConfirmed: false, saved: false }
                                   : x,
                               ),
                             );
@@ -2222,7 +2233,7 @@ export default function WordExtractionPage() {
                         ) : null}
                         {r.saved ? (
                           <div className="mt-1 text-[11px] text-green-700">
-                            Saved
+                            Confirmed
                           </div>
                         ) : null}
                       </td>
@@ -2235,9 +2246,9 @@ export default function WordExtractionPage() {
                             }
                             disabled={r.saving || r.deleting}
                             className="rounded border px-2 py-1 text-[11px] hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5"
-                            title="Updates meaning_fa_IPA and meaning_fa_IPA_normalized for this row"
+                            title="Updates and human-confirms meaning_fa_IPA for this row"
                           >
-                            {r.saving ? "Saving…" : "Update"}
+                            {r.saving ? "Saving…" : "Update & confirm"}
                           </button>
                           <button
                             type="button"
@@ -2257,7 +2268,7 @@ export default function WordExtractionPage() {
                   {meaningIpaRows.length === 0 ? (
                     <tr>
                       <td
-                        colSpan={5}
+                        colSpan={7}
                         className="px-3 py-6 text-center text-sm opacity-70"
                       >
                         No rows loaded.

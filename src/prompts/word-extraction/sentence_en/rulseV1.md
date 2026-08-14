@@ -7,6 +7,7 @@ Generate ONE natural, modern, and commonly used English example sentence in the 
 
 STRICT REQUIREMENTS FOR sentence_en:
 Most important the usage of base_form is base of the meaning_fa field not other meanings of base_form.
+If a `pos` value is provided, the base_form MUST be used with exactly that grammatical role in the sentence.
 
 1. The sentence MUST:
    - sound natural to a native American English speaker

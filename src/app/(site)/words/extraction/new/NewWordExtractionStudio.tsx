@@ -3,6 +3,11 @@
 import Link from "next/link";
 import { useCallback, useState } from "react";
 import { PromptSourcesButton } from "@/components/prompts/PromptSourcesButton";
+import { PersianWordResolutionModal } from "@/components/words/PersianWordResolutionModal.client";
+import type {
+  PersianWordAmbiguity,
+  PersianWordResolutionSelection,
+} from "@/lib/words/persianWordResolution";
 
 const buttonBase =
   "inline-flex min-h-11 items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold transition hover:-translate-y-0.5 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0";
@@ -59,7 +64,9 @@ type InsertResultItem =
 
 type InsertResponse = {
   ok?: boolean;
+  code?: string;
   error?: string;
+  ambiguities?: PersianWordAmbiguity[];
   inserted?: number;
   skippedExisting?: number;
   failed?: number;
@@ -174,12 +181,16 @@ export default function NewWordExtractionStudio() {
   const [insertBusy, setInsertBusy] = useState(false);
   const [insertResult, setInsertResult] = useState<InsertResponse | null>(null);
   const [insertError, setInsertError] = useState("");
+  const [resolutionAmbiguities, setResolutionAmbiguities] = useState<PersianWordAmbiguity[]>([]);
+  const [pendingInsertRows, setPendingInsertRows] = useState<BaseWordRow[] | null>(null);
 
   const resetResponseState = useCallback(() => {
     setValidatedRows([]);
     setValidationError("");
     setInsertResult(null);
     setInsertError("");
+    setResolutionAmbiguities([]);
+    setPendingInsertRows(null);
   }, []);
 
   const buildBasePrompt = useCallback(async () => {
@@ -265,10 +276,10 @@ export default function NewWordExtractionStudio() {
     }
   }, [aiResponse]);
 
-  const insertTempWords = useCallback(async () => {
-    const rows = validateResponse();
-    if (!rows) return;
-
+  const submitInsert = useCallback(async (
+    rows: BaseWordRow[],
+    selections: PersianWordResolutionSelection[] = [],
+  ) => {
     setInsertBusy(true);
     setInsertError("");
     setInsertResult(null);
@@ -276,17 +287,35 @@ export default function NewWordExtractionStudio() {
       const response = await fetch("/api/word-extraction/base/insert-tempwords", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify(rows),
+        body: JSON.stringify(selections.length ? { items: rows, persian_word_resolutions: selections } : rows),
       });
       const json = (await response.json().catch(() => null)) as InsertResponse | null;
+      if (
+        response.status === 409 &&
+        json?.code === "PERSIAN_WORD_RESOLUTION_REQUIRED" &&
+        Array.isArray(json.ambiguities) &&
+        json.ambiguities.length
+      ) {
+        setPendingInsertRows(rows);
+        setResolutionAmbiguities(json.ambiguities);
+        return;
+      }
       if (!response.ok || !json?.ok) throw new Error(json?.error ?? `Insert failed (${response.status}).`);
+      setResolutionAmbiguities([]);
+      setPendingInsertRows(null);
       setInsertResult(json);
     } catch (error) {
       setInsertError(error instanceof Error ? error.message : String(error));
     } finally {
       setInsertBusy(false);
     }
-  }, [validateResponse]);
+  }, []);
+
+  const insertTempWords = useCallback(async () => {
+    const rows = validateResponse();
+    if (!rows) return;
+    await submitInsert(rows);
+  }, [submitInsert, validateResponse]);
 
   return (
     <main className="mx-auto grid w-full max-w-6xl gap-6 pb-12">
@@ -557,6 +586,18 @@ export default function NewWordExtractionStudio() {
           </div>
         </div>
       ) : null}
+      <PersianWordResolutionModal
+        ambiguities={resolutionAmbiguities}
+        busy={insertBusy}
+        onCancel={() => {
+          setResolutionAmbiguities([]);
+          setPendingInsertRows(null);
+          setInsertError("Import cancelled; no ambiguous record was saved.");
+        }}
+        onConfirm={(selections) => {
+          if (pendingInsertRows) void submitInsert(pendingInsertRows, selections);
+        }}
+      />
     </main>
   );
 }

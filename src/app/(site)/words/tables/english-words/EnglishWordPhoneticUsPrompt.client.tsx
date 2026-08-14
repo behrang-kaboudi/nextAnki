@@ -3,6 +3,7 @@
 import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import { PromptSourcesButton } from "@/components/prompts/PromptSourcesButton";
+import { ParallelPromptBatchControls } from "@/components/prompts/ParallelPromptBatchControls.client";
 import { RemainingCountBadge, RemainingCountButton } from "@/components/remaining-count";
 
 type ResponseItem = { id: number; phonetic_us: string };
@@ -54,6 +55,10 @@ export default function EnglishWordPhoneticUsPrompt({
   };
   const [open, setOpen] = useState(false);
   const [limit, setLimit] = useState("50");
+  const [laneCount, setLaneCount] = useState(3);
+  const [laneNumber, setLaneNumber] = useState(1);
+  const [laneEligibleCount, setLaneEligibleCount] = useState<number | null>(null);
+  const [loadedCount, setLoadedCount] = useState(0);
   const [prompt, setPrompt] = useState("");
   const [data, setData] = useState("");
   const [response, setResponse] = useState("");
@@ -62,6 +67,13 @@ export default function EnglishWordPhoneticUsPrompt({
   const [applying, setApplying] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const clearLoadedLane = () => {
+    setData("");
+    setResponse("");
+    setLaneEligibleCount(null);
+    setLoadedCount(0);
+    setNotice(null);
+  };
 
   const loadData = useCallback(async () => {
     setLoading(true); setError(null);
@@ -75,16 +87,18 @@ export default function EnglishWordPhoneticUsPrompt({
               return json.text;
             });
         })),
-        fetch(`${config.recordsUrl}?limit=${encodeURIComponent(limit)}`),
+        fetch(`${config.recordsUrl}?batchSize=${encodeURIComponent(limit)}&laneCount=${laneCount}&laneNumber=${laneNumber}`),
       ]);
-      const rowsJson = await readJson<{ ok?: boolean; items?: unknown; totalUnconfirmed?: number; error?: string }>(rowsResponse, "Could not load unconfirmed rows");
+      const rowsJson = await readJson<{ ok?: boolean; items?: unknown; totalUnconfirmed?: number; laneEligibleCount?: number; error?: string }>(rowsResponse, "Could not load unconfirmed rows");
       if (!rowsResponse.ok || !rowsJson.ok) throw new Error(rowsJson.error || "Could not load unconfirmed rows.");
       setPrompt(promptResponses.join("\n\n"));
       setData(JSON.stringify(rowsJson.items ?? [], null, 2));
       setRemaining(typeof rowsJson.totalUnconfirmed === "number" ? rowsJson.totalUnconfirmed : initialRemainingCount);
-      setNotice("Data created ✓");
+      setLaneEligibleCount(typeof rowsJson.laneEligibleCount === "number" ? rowsJson.laneEligibleCount : null);
+      setLoadedCount(Array.isArray(rowsJson.items) ? rowsJson.items.length : 0);
+      setNotice(`Lane ${laneNumber}/${laneCount} data created ✓`);
     } catch (reason) { setError(reason instanceof Error ? reason.message : String(reason)); } finally { setLoading(false); }
-  }, [config.batchPromptPath, config.recordsUrl, initialRemainingCount, limit]);
+  }, [config.batchPromptPath, config.recordsUrl, initialRemainingCount, laneCount, laneNumber, limit]);
 
   const openModal = async () => {
     setOpen(true); setResponse(""); setNotice(null); await loadData();
@@ -94,6 +108,15 @@ export default function EnglishWordPhoneticUsPrompt({
     setApplying(true); setError(null); setNotice(null);
     try {
       const items = parseResponse(response);
+      const recordsResult = await fetch(config.recordsUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: items.map((item) => item.id) }),
+      });
+      const recordsJson = await readJson<{ ok?: boolean; error?: string }>(recordsResult, "Could not validate response ids");
+      if (!recordsResult.ok || !recordsJson.ok) {
+        throw new Error(recordsJson.error || "Could not rebuild current records from the response IDs.");
+      }
       const result = await fetch(config.updateUrl, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(items) });
       const json = await readJson<{ ok?: boolean; total?: number; updated?: number; results?: Array<{ ok: boolean; error?: string }>; error?: string }>(result, "Could not update phonetic_us");
       if (!result.ok || !json.ok) throw new Error(json.error || "Could not update phonetic_us.");
@@ -107,6 +130,28 @@ export default function EnglishWordPhoneticUsPrompt({
 
   return <>
     <button type="button" onClick={() => void openModal()} disabled={loading} className="rounded border px-3 py-2 text-sm hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5">{config.buttonLabel} <RemainingCountBadge count={remaining} /></button>
-    {open ? <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" role="dialog" aria-modal="true"><div className="flex h-[85vh] w-full max-w-7xl flex-col gap-4 rounded-2xl border border-card bg-background p-6 shadow-elevated"><div className="flex items-start justify-between gap-3"><div><div className="text-base font-semibold">{config.title}</div><div className="mt-1 text-xs opacity-70">{config.description}</div></div><div className="flex items-center gap-2"><PromptSourcesButton paths={[config.batchPromptPath, PHONETIC_PROMPT_PATH]} /><button type="button" onClick={() => !applying && setOpen(false)} className="rounded border px-2 py-1 text-sm">Close</button></div></div>{error ? <div className="rounded border border-red-500/30 bg-red-600/10 p-3 text-sm text-red-700">{error}</div> : null}{notice ? <div className="rounded border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-800">{notice}</div> : null}<div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-2"><section className="flex min-h-0 flex-col gap-2"><div className="flex flex-wrap items-center gap-2"><button type="button" onClick={() => copy(prompt, "Prompt")} className="rounded border px-2 py-1 text-xs">Copy prompt</button><button type="button" onClick={() => copy(data, "Data")} className="rounded border px-2 py-1 text-xs">Copy data</button><button type="button" onClick={() => copy(`${prompt}\n\n${data}`, "Prompt and data")} className="rounded border px-2 py-1 text-xs">Copy all</button><label className="flex items-center gap-1 text-xs">Count <input type="number" min="1" value={limit} onChange={(event) => setLimit(event.target.value)} className="w-20 rounded border px-2 py-1" /></label><button type="button" onClick={() => void loadData()} disabled={loading || applying} className="rounded border px-2 py-1 text-xs disabled:opacity-50">{loading ? "Creating…" : "Create data"}</button><RemainingCountButton count={remaining} disabled={loading || applying} onClick={() => setLimit(String(remaining))} /></div><textarea readOnly value={`${prompt}${data ? `\n\n${data}` : ""}`} className="min-h-0 flex-1 resize-none rounded border p-3 font-mono text-xs" /></section><section className="flex min-h-0 flex-col gap-2"><div className="text-sm font-semibold">Response JSON</div><textarea value={response} onChange={(event) => setResponse(event.target.value)} placeholder={config.placeholder} className="min-h-0 flex-1 resize-none rounded border p-3 font-mono text-xs" /><div className="flex gap-2"><button type="button" onClick={() => void navigator.clipboard.readText().then(setResponse).catch((reason) => setError(reason instanceof Error ? reason.message : String(reason)))} className="rounded border px-3 py-2 text-sm hover:bg-black/5">Paste response</button><button type="button" onClick={() => void apply()} disabled={!response.trim() || applying} className="rounded border px-3 py-2 text-sm hover:bg-black/5 disabled:opacity-50">{applying ? "Updating…" : config.applyLabel}</button></div></section></div></div></div> : null}
+    {open ? (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" role="dialog" aria-modal="true">
+        <div className="flex h-[85vh] w-full max-w-7xl flex-col gap-4 rounded-2xl border border-card bg-background p-6 shadow-elevated">
+          <div className="flex items-start justify-between gap-3"><div><div className="text-base font-semibold">{config.title}</div><div className="mt-1 text-xs opacity-70">{config.description}</div></div><div className="flex items-center gap-2"><PromptSourcesButton paths={[config.batchPromptPath, PHONETIC_PROMPT_PATH]} /><button type="button" onClick={() => !applying && setOpen(false)} className="rounded border px-2 py-1 text-sm">Close</button></div></div>
+          {error ? <div className="rounded border border-red-500/30 bg-red-600/10 p-3 text-sm text-red-700">{error}</div> : null}
+          {notice ? <div className="rounded border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-800">{notice}</div> : null}
+          <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-2">
+            <section className="flex min-h-0 flex-col gap-2">
+              <ParallelPromptBatchControls batchSize={limit} disabled={loading || applying} laneCount={laneCount} laneNumber={laneNumber} laneEligibleCount={laneEligibleCount} loadedCount={loadedCount} totalEligibleCount={remaining} onBatchSizeChange={(value) => { clearLoadedLane(); setLimit(value); }} onLaneCountChange={(value) => { clearLoadedLane(); setLaneCount(value); }} onLaneNumberChange={(value) => { clearLoadedLane(); setLaneNumber(value); }} />
+              <div className="flex flex-wrap items-center gap-2">
+                <button type="button" onClick={() => copy(prompt, "Prompt")} className="rounded border px-2 py-1 text-xs">Copy prompt</button>
+                <button type="button" onClick={() => copy(data, "Data")} className="rounded border px-2 py-1 text-xs">Copy data</button>
+                <button type="button" onClick={() => copy(`${prompt}\n\n${data}`, "Prompt and lane data")} disabled={!data} className="rounded border px-2 py-1 text-xs disabled:opacity-50">Copy lane {laneNumber}</button>
+                <button type="button" onClick={() => void loadData()} disabled={loading || applying} className="rounded border px-2 py-1 text-xs disabled:opacity-50">{loading ? "Creating…" : "Create lane data"}</button>
+                <RemainingCountButton count={remaining} disabled={loading || applying} onClick={() => setLimit(String(remaining))} />
+              </div>
+              <textarea readOnly value={`${prompt}${data ? `\n\n${data}` : ""}`} className="min-h-0 flex-1 resize-none rounded border p-3 font-mono text-xs" />
+            </section>
+            <section className="flex min-h-0 flex-col gap-2"><div className="text-sm font-semibold">Response JSON</div><textarea value={response} onChange={(event) => setResponse(event.target.value)} placeholder={config.placeholder} className="min-h-0 flex-1 resize-none rounded border p-3 font-mono text-xs" /><div className="flex gap-2"><button type="button" onClick={() => void navigator.clipboard.readText().then(setResponse).catch((reason) => setError(reason instanceof Error ? reason.message : String(reason)))} className="rounded border px-3 py-2 text-sm hover:bg-black/5">Paste response</button><button type="button" onClick={() => void apply()} disabled={!response.trim() || applying} className="rounded border px-3 py-2 text-sm hover:bg-black/5 disabled:opacity-50">{applying ? "Updating…" : config.applyLabel}</button></div></section>
+          </div>
+        </div>
+      </div>
+    ) : null}
   </>;
 }

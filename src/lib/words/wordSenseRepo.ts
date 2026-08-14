@@ -1,8 +1,13 @@
 import "server-only";
 
-import type { Prisma, PrismaClient } from "@prisma/client";
+import { MeaningReviewStatus, type Prisma, type PrismaClient } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
+import {
+  isMeaningReviewNeedsAction,
+  meaningReviewStatusAfterSemanticChange,
+  NEEDS_ACTION_MEANING_REVIEW_STATUSES,
+} from "@/lib/words/meaningReviewStatus";
 import { wordSentenceIds } from "@/lib/words/sentenceIds";
 
 function stripManualUpdatedAt<T extends { data?: unknown }>(args: T): T {
@@ -49,15 +54,28 @@ const meaningReviewInputs = new Set([
   "meaning",
   "otherMeaningIds",
   "sentenceIds",
+  "pos",
+  "concept_explained_fa",
 ]);
 
-function resetMeaningReview(data: unknown) {
+function needsMeaningReviewReset(data: unknown) {
   if (!data || typeof data !== "object" || Array.isArray(data)) return;
   const record = data as Record<string, unknown>;
-  if (record.meanings_confirmed !== undefined) return;
-  if (Object.keys(record).some((key) => meaningReviewInputs.has(key))) {
-    record.meanings_confirmed = false;
+  return record.meaningReviewStatus === undefined &&
+    Object.keys(record).some((key) => meaningReviewInputs.has(key));
+}
+
+function nextMeaningId(data: Record<string, unknown>, currentMeaningId: number | null) {
+  if (data.meaningId === null || typeof data.meaningId === "number") return data.meaningId;
+  if (data.meaning && typeof data.meaning === "object" && !Array.isArray(data.meaning)) {
+    const relation = data.meaning as Record<string, unknown>;
+    if (relation.disconnect === true || relation.delete === true) return null;
+    if (relation.connect && typeof relation.connect === "object" && !Array.isArray(relation.connect)) {
+      const id = (relation.connect as Record<string, unknown>).id;
+      if (typeof id === "number") return id;
+    }
   }
+  return currentMeaningId;
 }
 
 function resetInflectionMergeReview(data: unknown) {
@@ -77,7 +95,18 @@ export async function updateWordSense(
 ) {
   stripManualUpdatedAt(args);
   resetConceptMergeReview(args.data);
-  resetMeaningReview(args.data);
+  if (needsMeaningReviewReset(args.data)) {
+    const current = await client.wordSense.findUnique({
+      where: args.where,
+      select: { meaningId: true, meaningReviewStatus: true },
+    });
+    if (current) {
+      const data = args.data as Record<string, unknown>;
+      data.meaningReviewStatus = isMeaningReviewNeedsAction(current.meaningReviewStatus)
+        ? current.meaningReviewStatus
+        : meaningReviewStatusAfterSemanticChange(nextMeaningId(data, current.meaningId));
+    }
+  }
   resetInflectionMergeReview(args.data);
   return client.wordSense.update(args);
 }
@@ -88,7 +117,9 @@ export async function updateManyWordSenses(
 ) {
   stripManualUpdatedAt(args);
   resetConceptMergeReview(args.data);
-  resetMeaningReview(args.data);
+  if (needsMeaningReviewReset(args.data)) {
+    throw new Error("Semantic WordSense updateMany writes must set meaningReviewStatus explicitly.");
+  }
   resetInflectionMergeReview(args.data);
   return client.wordSense.updateMany(args);
 }
@@ -100,14 +131,44 @@ export async function touchWordSenseByAnkiLinkId(ankiLinkId: string) {
   });
 }
 
-export async function touchWordSensesLinkedToSentenceId(sentenceId: number) {
-  const words = await prisma.wordSense.findMany({ select: { id: true, sentenceIds: true } });
-  const ids = words
-    .filter((word) => wordSentenceIds(word.sentenceIds).includes(sentenceId))
-    .map((word) => word.id);
-  if (!ids.length) return { count: 0 };
-  return prisma.wordSense.updateMany({
-    where: { id: { in: ids } },
+export async function touchWordSensesLinkedToSentenceId(
+  sentenceId: number,
+  options?: { resetMeaningReviewStatus?: boolean },
+  client: WordSenseWriteClient = prisma,
+) {
+  const words = await client.wordSense.findMany({
+    select: { id: true, sentenceIds: true, meaningId: true, meaningReviewStatus: true },
+  });
+  const linkedWords = words
+    .filter((word) => wordSentenceIds(word.sentenceIds).includes(sentenceId));
+  if (!linkedWords.length) return { count: 0 };
+  if (options?.resetMeaningReviewStatus) {
+    const eligibleWords = linkedWords.filter(
+      (word) => !NEEDS_ACTION_MEANING_REVIEW_STATUSES.includes(
+        word.meaningReviewStatus as (typeof NEEDS_ACTION_MEANING_REVIEW_STATUSES)[number],
+      ),
+    );
+    const withMeaningIds = eligibleWords.filter((word) => word.meaningId !== null).map((word) => word.id);
+    const missingMeaningIds = eligibleWords.filter((word) => word.meaningId === null).map((word) => word.id);
+    const pending = withMeaningIds.length
+      ? await client.wordSense.updateMany({
+          where: { id: { in: withMeaningIds } },
+          data: { meaningReviewStatus: MeaningReviewStatus.PENDING, updatedAt: new Date() },
+        })
+      : { count: 0 };
+    const missing = missingMeaningIds.length
+      ? await client.wordSense.updateMany({
+          where: { id: { in: missingMeaningIds } },
+          data: {
+            meaningReviewStatus: MeaningReviewStatus.NEEDS_ACTION_MISSING_PRIMARY,
+            updatedAt: new Date(),
+          },
+        })
+      : { count: 0 };
+    return { count: pending.count + missing.count };
+  }
+  return client.wordSense.updateMany({
+    where: { id: { in: linkedWords.map((word) => word.id) } },
     // Audio and Sentence edits are real sync-relevant changes even when no WordSense column changes.
     data: { updatedAt: new Date() },
   });
@@ -118,20 +179,38 @@ export async function touchWordSensesByIds(
   ids: readonly number[],
   options?: {
     resetConceptMergeReviewed?: boolean;
-    resetMeaningsConfirmed?: boolean;
+    resetMeaningReviewStatus?: boolean;
   },
   client: WordSenseWriteClient = prisma,
 ) {
   const uniqueIds = [...new Set(ids.filter((id) => Number.isSafeInteger(id) && id > 0))];
   if (!uniqueIds.length) return { count: 0 };
-  return client.wordSense.updateMany({
+  const touched = await client.wordSense.updateMany({
     where: { id: { in: uniqueIds } },
     data: {
       updatedAt: new Date(),
       ...(options?.resetConceptMergeReviewed ? { conceptMergeReviewed: false } : {}),
-      ...(options?.resetMeaningsConfirmed ? { meanings_confirmed: false } : {}),
     },
   });
+  if (options?.resetMeaningReviewStatus) {
+    await client.wordSense.updateMany({
+      where: {
+        id: { in: uniqueIds },
+        meaningId: { not: null },
+        meaningReviewStatus: { notIn: [...NEEDS_ACTION_MEANING_REVIEW_STATUSES] },
+      },
+      data: { meaningReviewStatus: MeaningReviewStatus.PENDING },
+    });
+    await client.wordSense.updateMany({
+      where: {
+        id: { in: uniqueIds },
+        meaningId: null,
+        meaningReviewStatus: { notIn: [...NEEDS_ACTION_MEANING_REVIEW_STATUSES] },
+      },
+      data: { meaningReviewStatus: MeaningReviewStatus.NEEDS_ACTION_MISSING_PRIMARY },
+    });
+  }
+  return touched;
 }
 
 /** Touch dependent WordSenses when their relation-owned English fields change. */
@@ -139,17 +218,35 @@ export async function touchWordSensesByEnglishId(
   englishId: number,
   options?: {
     resetConceptMergeReviewed?: boolean;
-    resetMeaningsConfirmed?: boolean;
+    resetMeaningReviewStatus?: boolean;
   },
 ) {
-  return prisma.wordSense.updateMany({
+  const touched = await prisma.wordSense.updateMany({
     where: { englishId },
     data: {
       updatedAt: new Date(),
       ...(options?.resetConceptMergeReviewed ? { conceptMergeReviewed: false } : {}),
-      ...(options?.resetMeaningsConfirmed ? { meanings_confirmed: false } : {}),
     },
   });
+  if (options?.resetMeaningReviewStatus) {
+    await prisma.wordSense.updateMany({
+      where: {
+        englishId,
+        meaningId: { not: null },
+        meaningReviewStatus: { notIn: [...NEEDS_ACTION_MEANING_REVIEW_STATUSES] },
+      },
+      data: { meaningReviewStatus: MeaningReviewStatus.PENDING },
+    });
+    await prisma.wordSense.updateMany({
+      where: {
+        englishId,
+        meaningId: null,
+        meaningReviewStatus: { notIn: [...NEEDS_ACTION_MEANING_REVIEW_STATUSES] },
+      },
+      data: { meaningReviewStatus: MeaningReviewStatus.NEEDS_ACTION_MISSING_PRIMARY },
+    });
+  }
+  return touched;
 }
 
 export async function touchWordSensesByEnglishIds(

@@ -40,6 +40,14 @@ enum PictureWordUsage {
   notSet
 }
 
+enum MeaningReviewStatus {
+  PENDING
+  CONFIRMED
+  NEEDS_ACTION_INVALID_PRIMARY
+  NEEDS_ACTION_NORMALIZATION_CONFLICT
+  NEEDS_ACTION_MISSING_PRIMARY
+}
+
 model WordSense {
   id                                     Int          @id @default(autoincrement())
   anki_link_id                           String       @unique(map: "WordSense_anki_link_id_key")
@@ -56,7 +64,7 @@ model WordSense {
   conceptMergeReviewed                   Boolean      @default(false)
   /// True after this WordSense has passed the regular-inflection merge workflow.
   inflectionMergeReviewed                Boolean      @default(false)
-  meanings_confirmed                     Boolean      @default(false)
+  meaningReviewStatus                    MeaningReviewStatus @default(PENDING)
   pos                                    String?
   concept_explained_fa                   String?      @db.Text
   concept_explained_fa_audio_file_name   String?
@@ -78,6 +86,7 @@ model WordSense {
   @@index([meaningId], map: "WordSense_meaningId_idx")
   @@index([conceptMergeReviewed], map: "WordSense_conceptMergeReviewed_idx")
   @@index([inflectionMergeReviewed], map: "WordSense_inflectionMergeReviewed_idx")
+  @@index([meaningReviewStatus], map: "WordSense_meaningReviewStatus_idx")
   @@map("word_sense")
 }
 
@@ -216,6 +225,7 @@ model PersianWord {
   not_normalized_texts     Json
   meaning_fa_IPA           String?
   meaning_fa_IPA_normalize String?
+  meaning_fa_IPA_confirmed Boolean     @default(false)
   audio_file_name          String?
   audio_source_text        String?     @db.Text
   createdAt                DateTime    @default(now())
@@ -224,6 +234,8 @@ model PersianWord {
 
   @@index([canonical_text], map: "PersianWord_canonical_text_idx")
   @@index([normalized_text], map: "PersianWord_normalized_text_idx")
+  @@index([meaning_fa_IPA_confirmed], map: "PersianWord_meaning_fa_IPA_confirmed_idx")
+  @@unique([normalized_text, meaning_fa_IPA], map: "PersianWord_normalized_text_meaning_fa_IPA_key")
   @@map("persian_word")
 }
 

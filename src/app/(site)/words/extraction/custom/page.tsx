@@ -45,8 +45,8 @@ const FIELD_POPULATION_GUIDE: Record<
     how: "The meaning prompt asks the AI for the primary Persian meaning. Apply response reuses or creates a PersianWord and connects it through WordSense.meaningId.",
   },
   other_meanings_fa: {
-    when: "Counted as pending while WordSense.meanings_confirmed is false, even when otherMeaningIds already contains values. It becomes an AI output once a primary Persian meaning exists.",
-    how: "The field prompt reviews the exact word sense and returns a JSON array of alternative meanings, or an empty array. Apply response reuses or creates the PersianWord records, replaces otherMeaningIds, and sets meanings_confirmed to true.",
+    when: "Counted as pending only while WordSense.otherMeaningIds is null and a primary Persian meaning exists. An empty array means the field was reviewed and no useful alternative exists.",
+    how: "The field prompt returns a JSON array of alternative meanings, or an empty array. Apply reuses or creates PersianWord records and replaces otherMeaningIds; final Meaning Review status remains the responsibility of the dedicated workflow.",
   },
   sentence_en: {
     when: "Requested when WordSense.sentenceIds is null, empty, or contains no sentence IDs.",
@@ -62,7 +62,7 @@ const FIELD_POPULATION_GUIDE: Record<
   },
   meaning_fa_IPA: {
     when: "Requested when a primary PersianWord exists and meaning_fa_IPA is null or empty.",
-    how: "The Persian-IPA prompt generates pronunciation for the primary Persian meaning. Apply response stores the IPA and its normalized form on PersianWord.",
+    how: "The Persian-IPA prompt generates pronunciation for the primary Persian meaning. Apply response stores the IPA immediately, saves its normalized form, and sets meaning_fa_IPA_confirmed to false until human review.",
   },
   imageability: {
     when: "Requested when WordSense.imageability is null or 0.",

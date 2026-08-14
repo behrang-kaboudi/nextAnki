@@ -176,6 +176,7 @@ export const siteMapGroups: SiteMapGroup[] = [
     summary: "Run temporary or destructive vocabulary maintenance checks.",
     pages: [
       { title: "Sentence Fields", path: "/tests/words/sentence-fields", summary: "Temporarily reviews and updates sentence fields stored on word records.", menu: true },
+      { title: "External Source Catalog", path: "/tests/words/external-sources", summary: "Browses the read-only, deduplicated B-amooz and TTWordBank catalog with quality categories, search, source filters, evidence, and unresolved items.", menu: true },
     ],
   },
   {

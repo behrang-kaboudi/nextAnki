@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { PromptSourcesButton } from "@/components/prompts/PromptSourcesButton";
+import { ParallelPromptBatchControls } from "@/components/prompts/ParallelPromptBatchControls.client";
 import { RemainingCountBadge, RemainingCountButton } from "@/components/remaining-count";
 
 const PROMPT_PATH = "src/prompts/word-extraction/compare_word_meanings/rulseV1.md";
@@ -68,7 +69,10 @@ export default function WordSenseMeaningComparison({ remainingCount }: { remaini
   const [busyGroupId, setBusyGroupId] = useState<number | null>(null);
   const [applyingAll, setApplyingAll] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [limit, setLimit] = useState("0");
+  const [limit, setLimit] = useState("50");
+  const [laneCount, setLaneCount] = useState(1);
+  const [laneNumber, setLaneNumber] = useState(1);
+  const [laneEligibleCount, setLaneEligibleCount] = useState<number | null>(null);
   const [prompt, setPrompt] = useState("");
   const [groups, setGroups] = useState<SourceGroup[]>([]);
   const [totalGroups, setTotalGroups] = useState(0);
@@ -78,11 +82,20 @@ export default function WordSenseMeaningComparison({ remainingCount }: { remaini
   const [confirmed, setConfirmed] = useState<Set<number>>(new Set());
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const clearLoadedLane = () => {
+    setGroups([]);
+    setLaneEligibleCount(null);
+    setResponse("");
+    setOutputs([]);
+    setDrafts({});
+    setConfirmed(new Set());
+    setNotice(null);
+  };
 
   const createData = async (showModal: boolean) => {
     const parsedLimit = Number(limit);
-    if (!Number.isSafeInteger(parsedLimit) || parsedLimit < 0) {
-      setError("Count must be a non-negative integer; 0 means all remaining items.");
+    if (!Number.isSafeInteger(parsedLimit) || parsedLimit < 1) {
+      setError("Batch size must be a positive integer.");
       return;
     }
     setLoading(true);
@@ -94,7 +107,7 @@ export default function WordSenseMeaningComparison({ remainingCount }: { remaini
         fetch("/api/words/meaning-comparison/prepare", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ limit: parsedLimit }),
+          body: JSON.stringify({ batchSize: parsedLimit, laneCount, laneNumber }),
         }),
       ]);
       const promptJson = (await promptResponse.json()) as { text?: string; error?: string };
@@ -102,6 +115,7 @@ export default function WordSenseMeaningComparison({ remainingCount }: { remaini
         ok?: boolean;
         items?: SourceGroup[];
         totalEligibleGroups?: number;
+        laneEligibleCount?: number;
         error?: string;
       };
       if (!promptResponse.ok || typeof promptJson.text !== "string") {
@@ -113,11 +127,12 @@ export default function WordSenseMeaningComparison({ remainingCount }: { remaini
       setPrompt(promptJson.text);
       setGroups(dataJson.items);
       setTotalGroups(dataJson.totalEligibleGroups ?? dataJson.items.length);
+      setLaneEligibleCount(typeof dataJson.laneEligibleCount === "number" ? dataJson.laneEligibleCount : null);
       setResponse("");
       setOutputs([]);
       setDrafts({});
       setConfirmed(new Set());
-      setNotice(`Created ${dataJson.items.length} candidate group(s) ✓`);
+      setNotice(`Created lane ${laneNumber}/${laneCount} with ${dataJson.items.length} candidate group(s) ✓`);
       if (showModal) setOpen(true);
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : String(reason));
@@ -195,24 +210,39 @@ export default function WordSenseMeaningComparison({ remainingCount }: { remaini
     if (!pending.length) return;
     setError(null);
     setApplyingAll(true);
-    let confirmedCount = 0;
-    let updatedCount = 0;
     try {
-      for (const source of pending) {
-        setBusyGroupId(source.persianWordId);
-        updatedCount += await applyGroup(source);
-        confirmedCount += 1;
-        setConfirmed((current) => new Set([...current, source.persianWordId]));
+      const output = pending.map((source) => (
+        parseResponse(`[${drafts[source.persianWordId] ?? ""}]`, [source])[0]
+      ));
+      const applyResponse = await fetch("/api/words/meaning-comparison/apply-batch", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sourceGroups: pending.map((source) => ({
+            persianWordId: source.persianWordId,
+            sourceWordIds: source.records.map((record) => record.id),
+          })),
+          output,
+        }),
+      });
+      const result = (await applyResponse.json()) as {
+        ok?: boolean;
+        confirmed?: number;
+        updated?: number;
+        error?: string;
+      };
+      if (!applyResponse.ok || !result.ok) {
+        throw new Error(result.error || "Could not apply these comparison groups.");
       }
-      setNotice(`Confirmed all ${confirmedCount} remaining group(s); updated ${updatedCount} WordSense record(s) ✓`);
+      setConfirmed((current) => new Set([
+        ...current,
+        ...pending.map((source) => source.persianWordId),
+      ]));
+      setNotice(`Confirmed all ${result.confirmed ?? pending.length} remaining group(s); updated ${result.updated ?? 0} WordSense record(s) ✓`);
       router.refresh();
     } catch (reason) {
-      setError(
-        `Stopped after confirming ${confirmedCount} group(s): ${reason instanceof Error ? reason.message : String(reason)}`,
-      );
-      if (confirmedCount > 0) router.refresh();
+      setError(reason instanceof Error ? reason.message : String(reason));
     } finally {
-      setBusyGroupId(null);
       setApplyingAll(false);
     }
   };
@@ -229,7 +259,7 @@ export default function WordSenseMeaningComparison({ remainingCount }: { remaini
         onClick={() => void createData(true)}
         className="relative rounded border px-3 py-2 text-sm hover:bg-black/5 disabled:opacity-100 dark:hover:bg-white/5"
       >
-        COMPARE WORD MEANINGS <RemainingCountBadge count={remainingCount} />
+        4. COMPARE WORD MEANINGS <RemainingCountBadge count={remainingCount} />
         {loading && !open ? (
           <span className="absolute inset-0 flex items-center justify-center gap-1 rounded bg-background/85" aria-hidden="true">
             <span className="size-1.5 animate-bounce rounded-full bg-current [animation-delay:-0.3s]" />
@@ -286,7 +316,7 @@ export default function WordSenseMeaningComparison({ remainingCount }: { remaini
                   <li>هر معنی موجود در <code>meaningId</code> یا <code>otherMeaningIds</code> یک گروه می‌سازد.</li>
                   <li>فقط گروه‌هایی انتخاب می‌شوند که آن معنی فارسی را دست‌کم دو WordSense استفاده کرده باشند.</li>
                   <li>گروهی که تمام اعضایش قبلاً یکدیگر را در <code>comparedMeaningWordIds</code> ثبت کرده‌اند دوباره نمایش داده نمی‌شود.</li>
-                  <li>شناسهٔ PersianWord مشترک باید هنوز در دیتابیس موجود باشد؛ <code>Count = 0</code> یعنی تمام گروه‌های واجد شرایط.</li>
+                  <li>شناسهٔ PersianWord مشترک باید هنوز در دیتابیس موجود باشد؛ گروه‌ها میان laneهای پایدار و بدون هم‌پوشانی تقسیم می‌شوند.</li>
                 </ul>
                 <div className="mt-2 font-semibold">پس از تأیید چه تغییری می‌کند؟</div>
                 <ul className="list-disc pr-5">
@@ -301,11 +331,20 @@ export default function WordSenseMeaningComparison({ remainingCount }: { remaini
             {notice ? <div className="rounded border border-emerald-500/30 bg-emerald-500/10 p-2 text-sm text-emerald-800">{notice}</div> : null}
             <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-2">
               <section className="flex min-h-0 flex-col gap-2">
-                <div className="flex flex-wrap items-center gap-2">
-                  <label className="text-xs">
-                    Count
-                    <input type="number" min="0" value={limit} disabled={loading} onChange={(event) => setLimit(event.target.value)} className="ml-2 w-20 rounded border px-2 py-1" />
-                  </label>
+                <div className="flex flex-col gap-2">
+                  <ParallelPromptBatchControls
+                    batchSize={limit}
+                    disabled={loading}
+                    laneCount={laneCount}
+                    laneNumber={laneNumber}
+                    laneEligibleCount={laneEligibleCount}
+                    loadedCount={groups.length}
+                    totalEligibleCount={totalGroups}
+                    onBatchSizeChange={(value) => { clearLoadedLane(); setLimit(value); }}
+                    onLaneCountChange={(value) => { clearLoadedLane(); setLaneCount(value); }}
+                    onLaneNumberChange={(value) => { clearLoadedLane(); setLaneNumber(value); }}
+                  />
+                  <div className="flex flex-wrap items-center gap-2">
                   <button type="button" disabled={loading} onClick={() => void createData(false)} className={buttonClass}>
                     {loading ? "Creating…" : "Create data"}
                   </button>
@@ -314,12 +353,13 @@ export default function WordSenseMeaningComparison({ remainingCount }: { remaini
                     disabled={loading || groups.length === 0}
                     onClick={() => void navigator.clipboard.writeText(copyText).then(() => setNotice("Prompt and grouped data copied ✓")).catch((reason) => setError(reason instanceof Error ? reason.message : String(reason)))}
                     className={buttonClass}
-                  >Copy all</button>
+                  >Copy lane {laneNumber}</button>
                   <RemainingCountButton
                     count={totalGroups}
                     disabled={loading}
                     onClick={() => setLimit(String(totalGroups))}
                   />
+                  </div>
                 </div>
                 <textarea readOnly value={copyText} className="min-h-0 flex-1 rounded border p-3 font-mono text-xs" />
               </section>
@@ -360,11 +400,11 @@ export default function WordSenseMeaningComparison({ remainingCount }: { remaini
               <div className="flex flex-wrap gap-2">
                 <button
                   type="button"
-                  disabled={busyGroupId !== null || confirmed.size === groups.length}
+                  disabled={busyGroupId !== null || applyingAll || confirmed.size === groups.length}
                   onClick={() => void confirmAllGroups()}
                   className={buttonClass}
                 >{applyingAll ? "CONFIRMING ALL…" : "CONFIRM ALL GROUPS"}</button>
-                <button type="button" disabled={busyGroupId !== null} onClick={() => setReviewOpen(false)} className={buttonClass}>Back without further changes</button>
+                <button type="button" disabled={busyGroupId !== null || applyingAll} onClick={() => setReviewOpen(false)} className={buttonClass}>Back without further changes</button>
               </div>
             </div>
             {error ? <div className="rounded border border-red-500/30 bg-red-500/10 p-2 text-sm text-red-700">{error}</div> : null}
@@ -378,7 +418,7 @@ export default function WordSenseMeaningComparison({ remainingCount }: { remaini
                       <div className="text-sm font-semibold">Group {index + 1} • PersianWord {source.persianWordId} • {source.shared_persian_meaning}</div>
                       <button
                         type="button"
-                        disabled={busyGroupId !== null || isConfirmed}
+                        disabled={busyGroupId !== null || applyingAll || isConfirmed}
                         onClick={() => void confirmGroup(source)}
                         className={buttonClass}
                       >{isConfirmed ? "CONFIRMED ✓" : busyGroupId === source.persianWordId ? "APPLYING…" : "CONFIRM THIS GROUP"}</button>
@@ -392,7 +432,7 @@ export default function WordSenseMeaningComparison({ remainingCount }: { remaini
                         <div className="mb-1 text-xs font-semibold opacity-70">Proposed values (editable JSON)</div>
                         <textarea
                           value={drafts[source.persianWordId] ?? JSON.stringify(outputByPersianId.get(source.persianWordId), null, 2)}
-                          disabled={busyGroupId !== null || isConfirmed}
+                          disabled={busyGroupId !== null || applyingAll || isConfirmed}
                           onChange={(event) => setDrafts((current) => ({ ...current, [source.persianWordId]: event.target.value }))}
                           className="h-80 w-full rounded border p-3 font-mono text-xs"
                         />

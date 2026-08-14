@@ -11,6 +11,7 @@ export const PERSIAN_WORD_MEANING_SELECT = {
   normalized_text: true,
   meaning_fa_IPA: true,
   meaning_fa_IPA_normalize: true,
+  meaning_fa_IPA_confirmed: true,
   audio_file_name: true,
 } satisfies Prisma.PersianWordSelect;
 
@@ -30,6 +31,7 @@ export type WordSenseWithPersianMeanings<T extends WordMeaningReference> = T & {
   meaning_fa: string;
   meaning_fa_IPA: string;
   meaning_fa_IPA_normalized: string;
+  meaning_fa_IPA_confirmed: boolean;
   other_meanings_fa: string | null;
 };
 
@@ -70,6 +72,7 @@ export async function hydrateWordSensesWithPersianMeanings<T extends WordMeaning
       meaning_fa: primaryPersianWord?.canonical_text ?? "",
       meaning_fa_IPA: primaryPersianWord?.meaning_fa_IPA ?? "",
       meaning_fa_IPA_normalized: primaryPersianWord?.meaning_fa_IPA_normalize ?? "",
+      meaning_fa_IPA_confirmed: primaryPersianWord?.meaning_fa_IPA_confirmed ?? false,
       other_meanings_fa: otherPersianWords.length ? otherPersianWords.map((meaning) => meaning.canonical_text).join("*") : null,
     };
   });
@@ -83,7 +86,7 @@ export async function touchWordsReferencingPersianWord(
   persianWordId: number,
   options?: {
     resetConceptMergeReviewed?: boolean;
-    resetMeaningsConfirmed?: boolean;
+    resetMeaningReviewStatus?: boolean;
   },
 ) {
   const references = await prisma.wordSense.findMany({
@@ -98,6 +101,22 @@ export async function touchWordsReferencingPersianWord(
   });
   await touchWordSensesByIds(references.map((reference) => reference.id), options);
   return references.length;
+}
+
+export async function touchWordsReferencingPersianWords(persianWordIds: readonly number[]) {
+  const targetIds = new Set(persianWordIds);
+  if (!targetIds.size) return 0;
+  const references = await prisma.wordSense.findMany({
+    select: { id: true, meaningId: true, otherMeaningIds: true },
+  });
+  const wordSenseIds = references
+    .filter((reference) =>
+      (reference.meaningId !== null && targetIds.has(reference.meaningId)) ||
+      meaningIds(reference.otherMeaningIds).some((id) => targetIds.has(id)),
+    )
+    .map((reference) => reference.id);
+  await touchWordSensesByIds(wordSenseIds);
+  return wordSenseIds.length;
 }
 
 export async function getPersianWordReferences(persianWordId: number) {

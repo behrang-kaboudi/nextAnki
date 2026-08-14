@@ -2,8 +2,10 @@ import { NextResponse } from "next/server";
 
 import {
   applyWordSenseConceptMerge,
+  ConceptMergePersianWordResolutionRequiredError,
   parseMergeOutput,
 } from "@/lib/words/wordSenseConceptMerge.server";
+import { parsePersianWordResolutionSelections } from "@/lib/words/persianWordResolution.server";
 
 export const runtime = "nodejs";
 
@@ -29,9 +31,21 @@ export async function POST(request: Request) {
   }
   try {
     const output = parseMergeOutput(body?.output);
-    const result = await applyWordSenseConceptMerge(sourceGroups, output);
+    const selections = parsePersianWordResolutionSelections(body?.persian_word_resolutions);
+    const result = await applyWordSenseConceptMerge(sourceGroups, output, selections);
     return NextResponse.json({ ok: true, ...result });
   } catch (error) {
+    if (error instanceof ConceptMergePersianWordResolutionRequiredError) {
+      return NextResponse.json(
+        {
+          ok: false,
+          code: "PERSIAN_WORD_RESOLUTION_REQUIRED",
+          error: error.message,
+          ambiguities: error.ambiguities,
+        },
+        { status: 409 },
+      );
+    }
     return NextResponse.json(
       { ok: false, error: error instanceof Error ? error.message : String(error) },
       { status: 400 },

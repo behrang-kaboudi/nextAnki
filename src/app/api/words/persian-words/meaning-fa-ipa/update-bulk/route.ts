@@ -3,6 +3,7 @@ import { Prisma } from "@prisma/client";
 
 import { normalizeIpaForDb } from "@/lib/ipa/normalize";
 import { prisma } from "@/lib/prisma";
+import { touchWordsReferencingPersianWord } from "@/lib/words/persianMeanings.server";
 
 export const runtime = "nodejs";
 
@@ -14,7 +15,7 @@ type DuplicateConflict = {
 };
 
 type UpdateResult =
-  | { ok: true; id: number; meaning_fa_IPA: string | null; meaning_fa_IPA_normalize: string | null }
+  | { ok: true; id: number; meaning_fa_IPA: string | null; meaning_fa_IPA_normalize: string | null; meaning_fa_IPA_confirmed: boolean }
   | { ok: false; id: number; error: string; duplicateConflict?: DuplicateConflict };
 
 function parseItems(value: unknown): Item[] | null {
@@ -40,7 +41,8 @@ export async function POST(request: Request) {
   for (const item of items) {
     try {
       const normalized = normalizeIpaForDb(item.meaning_fa_IPA, 2000);
-      const row = await prisma.persianWord.update({ where: { id: item.id }, data: { meaning_fa_IPA: item.meaning_fa_IPA, meaning_fa_IPA_normalize: normalized }, select: { id: true, meaning_fa_IPA: true, meaning_fa_IPA_normalize: true } });
+      const row = await prisma.persianWord.update({ where: { id: item.id }, data: { meaning_fa_IPA: item.meaning_fa_IPA, meaning_fa_IPA_normalize: normalized, meaning_fa_IPA_confirmed: true }, select: { id: true, meaning_fa_IPA: true, meaning_fa_IPA_normalize: true, meaning_fa_IPA_confirmed: true } });
+      await touchWordsReferencingPersianWord(row.id);
       results.push({ ok: true, ...row });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {

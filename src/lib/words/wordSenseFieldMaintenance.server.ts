@@ -5,11 +5,22 @@ import { statSync } from "node:fs";
 import { access, mkdir, rename } from "node:fs/promises";
 import path from "node:path";
 
-import { Prisma } from "@prisma/client";
+import { MeaningReviewStatus, Prisma } from "@prisma/client";
 
 import { getWordSenseConceptAudioAbsolutePath } from "@/lib/audio/wordSenseConceptAudioPaths.server";
+import { getPendingWordSenseConceptAudioIds } from "@/lib/audio/wordAudioPending.server";
 import { getJobProgressSnapshot } from "@/lib/progress/jobProgressCatalog";
 import { prisma } from "@/lib/prisma";
+import { wordSentenceIds } from "@/lib/words/sentenceIds";
+import {
+  analyzeSentenceLinkImpact,
+  isIdempotentMaintenanceReplay,
+  mergeRestoredSentenceIds,
+  missingRequestedIds,
+  normalizeWordSenseMaintenanceScope,
+  sameSentenceLinkState,
+  type NormalizedWordSenseMaintenanceScope,
+} from "@/lib/words/wordSenseMaintenanceScope";
 import { updateManyWordSenses, updateWordSense } from "@/lib/words/wordSenseRepo";
 
 const WORD_MAINTENANCE_SELECT = {
@@ -20,7 +31,7 @@ const WORD_MAINTENANCE_SELECT = {
   synonymIds: true,
   sentenceIds: true,
   conceptMergeReviewed: true,
-  meanings_confirmed: true,
+  meaningReviewStatus: true,
   pos: true,
   concept_explained_fa: true,
   concept_explained_fa_audio_file_name: true,
@@ -41,7 +52,7 @@ export type WordMaintenanceField =
   | "otherMeaningIds"
   | "sentenceIds"
   | "conceptMergeReviewed"
-  | "meanings_confirmed"
+  | "meaningReviewStatus"
   | "pos"
   | "concept_explained_fa"
   | "concept_audio"
@@ -77,7 +88,7 @@ function hasNumber(value: number | null) {
   return value !== null;
 }
 
-const reviewFields: SnapshotField[] = ["meanings_confirmed", "conceptMergeReviewed"];
+const reviewFields: SnapshotField[] = ["meaningReviewStatus", "conceptMergeReviewed"];
 const comparisonFields: SnapshotField[] = ["comparedMeaningWordIds", "synonymIds"];
 const conceptAudioFields: SnapshotField[] = [
   "concept_explained_fa_audio_file_name",
@@ -98,7 +109,7 @@ const POLICIES: Policy[] = [
     clearData: {
       meaningId: null,
       otherMeaningIds: Prisma.DbNull,
-      meanings_confirmed: false,
+      meaningReviewStatus: MeaningReviewStatus.NEEDS_ACTION_MISSING_PRIMARY,
       conceptMergeReviewed: false,
       comparedMeaningWordIds: Prisma.DbNull,
       synonymIds: Prisma.DbNull,
@@ -116,7 +127,7 @@ const POLICIES: Policy[] = [
     snapshotFields: ["otherMeaningIds", ...reviewFields, ...comparisonFields],
     clearData: {
       otherMeaningIds: Prisma.DbNull,
-      meanings_confirmed: false,
+      meaningReviewStatus: MeaningReviewStatus.PENDING,
       conceptMergeReviewed: false,
       comparedMeaningWordIds: Prisma.DbNull,
       synonymIds: Prisma.DbNull,
@@ -131,7 +142,7 @@ const POLICIES: Policy[] = [
     snapshotFields: ["sentenceIds", ...reviewFields],
     clearData: {
       sentenceIds: Prisma.DbNull,
-      meanings_confirmed: false,
+      meaningReviewStatus: MeaningReviewStatus.PENDING,
       conceptMergeReviewed: false,
     },
     isAffected: (row) => hasJsonValue(row.sentenceIds),
@@ -146,13 +157,13 @@ const POLICIES: Policy[] = [
     isAffected: (row) => row.conceptMergeReviewed,
   },
   {
-    key: "meanings_confirmed",
-    label: "AI meaning review status",
-    description: "Marks every AI-reviewed meaning as pending again.",
+    key: "meaningReviewStatus",
+    label: "Meaning review status",
+    description: "Moves every finalized meaning review back to PENDING.",
     consequences: ["Does not remove primary or alternate meaning links."],
-    snapshotFields: ["meanings_confirmed"],
-    clearData: { meanings_confirmed: false },
-    isAffected: (row) => row.meanings_confirmed,
+    snapshotFields: ["meaningReviewStatus"],
+    clearData: { meaningReviewStatus: MeaningReviewStatus.PENDING },
+    isAffected: (row) => row.meaningReviewStatus !== MeaningReviewStatus.PENDING,
   },
   {
     key: "pos",
@@ -165,7 +176,7 @@ const POLICIES: Policy[] = [
     snapshotFields: ["pos", ...reviewFields, ...comparisonFields],
     clearData: {
       pos: null,
-      meanings_confirmed: false,
+      meaningReviewStatus: MeaningReviewStatus.PENDING,
       conceptMergeReviewed: false,
       comparedMeaningWordIds: Prisma.DbNull,
       synonymIds: Prisma.DbNull,
@@ -189,7 +200,7 @@ const POLICIES: Policy[] = [
     ],
     clearData: {
       concept_explained_fa: null,
-      meanings_confirmed: false,
+      meaningReviewStatus: MeaningReviewStatus.PENDING,
       conceptMergeReviewed: false,
       comparedMeaningWordIds: Prisma.DbNull,
       synonymIds: Prisma.DbNull,
@@ -453,7 +464,8 @@ export async function previewWordSenseFieldMaintenance(field: WordMaintenanceFie
     consequences: policy.consequences,
     affectedRows: rows.length,
     aiMeaningReviewsReset: rows.filter((row) =>
-      row.meanings_confirmed && policy.clearData.meanings_confirmed === false,
+      row.meaningReviewStatus === MeaningReviewStatus.CONFIRMED &&
+      policy.clearData.meaningReviewStatus === MeaningReviewStatus.PENDING,
     ).length,
     conceptMergeReviewsReset: rows.filter((row) =>
       row.conceptMergeReviewed && policy.clearData.conceptMergeReviewed === false,
@@ -478,6 +490,339 @@ export async function previewWordFieldSelection(field: WordMaintenanceSelectionK
     managedBy: managedPolicy?.key ?? null,
     managedByLabel: managedPolicy?.label ?? null,
   };
+}
+
+const SENTENCE_SNAPSHOT_SELECT = {
+  id: true,
+  sentence_en: true,
+  sentence_en_meaning_fa: true,
+  sentence_en_audio_file_name: true,
+  sentence_en_audio_source_text: true,
+  sentence_en_meaning_fa_audio_file_name: true,
+  sentence_en_meaning_fa_audio_source_text: true,
+  createdAt: true,
+  updatedAt: true,
+} satisfies Prisma.SentenceSelect;
+
+type SentenceSnapshot = Prisma.SentenceGetPayload<{ select: typeof SENTENCE_SNAPSHOT_SELECT }>;
+type StoredSentencePreview = {
+  id: string;
+  expiresAt: number;
+  scope: NormalizedWordSenseMaintenanceScope;
+  deleteOrphanedSentences: boolean;
+  wordStates: Array<{ id: number; sentenceIds: number[]; updatedAt: string }>;
+  impact: ReturnType<typeof analyzeSentenceLinkImpact>;
+  orphanedSentences: SentenceSnapshot[];
+  missingSentenceIds: number[];
+  confirmationText: string;
+};
+
+const previewState = globalThis as typeof globalThis & {
+  __wordSenseSentenceMaintenancePreviews?: Map<string, StoredSentencePreview>;
+};
+const sentencePreviews = previewState.__wordSenseSentenceMaintenancePreviews ?? new Map<string, StoredSentencePreview>();
+previewState.__wordSenseSentenceMaintenancePreviews = sentencePreviews;
+const SENTENCE_PREVIEW_TTL_MS = 10 * 60 * 1000;
+
+function pruneSentencePreviews(now = Date.now()) {
+  for (const [id, preview] of sentencePreviews) {
+    if (preview.expiresAt <= now) sentencePreviews.delete(id);
+  }
+}
+
+async function filteredWordSenseWhere(filter: Extract<NormalizedWordSenseMaintenanceScope, { kind: "filtered_results" }>["filter"]) {
+  const matchingPersianIds = filter.q
+    ? (await prisma.persianWord.findMany({
+        where: {
+          OR: [
+            { canonical_text: { contains: filter.q } },
+            { meaning_fa_IPA: { contains: filter.q } },
+            { meaning_fa_IPA_normalize: { contains: filter.q } },
+          ],
+        },
+        select: { id: true },
+      })).map((row) => row.id)
+    : [];
+  const searchWhere: Prisma.WordSenseWhereInput | undefined = filter.q
+    ? {
+        OR: [
+          { english: { is: { base_form: { contains: filter.q } } } },
+          { anki_link_id: { contains: filter.q } },
+          { meaning: { is: { id: { in: matchingPersianIds } } } },
+          ...matchingPersianIds.map((id) => ({ otherMeaningIds: { array_contains: id } })),
+        ],
+      }
+    : undefined;
+  const reviewWhere: Prisma.WordSenseWhereInput | undefined = filter.review === "pending"
+    ? { meaningReviewStatus: MeaningReviewStatus.PENDING }
+    : filter.review === "reviewed"
+      ? { meaningReviewStatus: MeaningReviewStatus.CONFIRMED }
+      : undefined;
+  const audioWhere: Prisma.WordSenseWhereInput | undefined = filter.missingConceptAudio
+    ? { id: { in: await getPendingWordSenseConceptAudioIds() } }
+    : undefined;
+  return searchWhere || reviewWhere || audioWhere
+    ? { AND: [searchWhere, reviewWhere, audioWhere].filter(Boolean) as Prisma.WordSenseWhereInput[] }
+    : undefined;
+}
+
+async function resolveWordSenseScope(scopeValue: unknown) {
+  const scope = normalizeWordSenseMaintenanceScope(scopeValue);
+  let where: Prisma.WordSenseWhereInput | undefined;
+  let requestedIds: number[] | null = null;
+  if (scope.kind === "explicit_ids" || scope.kind === "selected_rows" || scope.kind === "id_range") {
+    requestedIds = scope.ids;
+    where = { id: { in: requestedIds } };
+  } else if (scope.kind === "filtered_results") {
+    where = await filteredWordSenseWhere(scope.filter);
+  }
+  const rows = await prisma.wordSense.findMany({
+    where,
+    orderBy: { id: "asc" },
+    select: { id: true, sentenceIds: true, updatedAt: true },
+  });
+  const missingIds = requestedIds ? missingRequestedIds(requestedIds, rows.map((row) => row.id)) : [];
+  if (missingIds.length) {
+    throw new Error(`WordSense id(s) not found: ${missingIds.join(", ")}. The Scope was not changed and execution is blocked.`);
+  }
+  if (!rows.length) throw new Error("The selected Scope contains no WordSense rows.");
+  return { scope, rows };
+}
+
+function scopedSentenceConfirmation(scope: NormalizedWordSenseMaintenanceScope, affectedRows: number, linkCount: number) {
+  const prefix = scope.kind === "all_rows" ? "CLEAR ALL" : "CLEAR SCOPED";
+  return `${prefix} WordSense.sentenceIds ${affectedRows} ROWS ${linkCount} LINKS`;
+}
+
+export async function previewScopedSentenceLinkMaintenance(args: {
+  scope: unknown;
+  deleteOrphanedSentences: boolean;
+}) {
+  pruneSentencePreviews();
+  const { scope, rows } = await resolveWordSenseScope(args.scope);
+  const allWords = await prisma.wordSense.findMany({ select: { id: true, sentenceIds: true } });
+  const scopedWords = rows.map((row) => ({ id: row.id, sentenceIds: wordSentenceIds(row.sentenceIds) }));
+  const impact = analyzeSentenceLinkImpact(
+    scopedWords,
+    allWords.map((row) => ({ id: row.id, sentenceIds: wordSentenceIds(row.sentenceIds) })),
+  );
+  const existingSentences = impact.linkedSentenceIds.length
+    ? await prisma.sentence.findMany({
+        where: { id: { in: impact.linkedSentenceIds } },
+        orderBy: { id: "asc" },
+        select: SENTENCE_SNAPSHOT_SELECT,
+      })
+    : [];
+  const sentenceById = new Map(existingSentences.map((sentence) => [sentence.id, sentence]));
+  const missingSentenceIds = impact.linkedSentenceIds.filter((id) => !sentenceById.has(id));
+  const orphanedSentences = impact.orphanedSentenceIds.flatMap((id) => {
+    const sentence = sentenceById.get(id);
+    return sentence ? [sentence] : [];
+  });
+  const id = randomUUID();
+  const expiresAt = Date.now() + SENTENCE_PREVIEW_TTL_MS;
+  const confirmation = scopedSentenceConfirmation(scope, impact.affectedWordIds.length, impact.linkCount);
+  const stored: StoredSentencePreview = {
+    id,
+    expiresAt,
+    scope,
+    deleteOrphanedSentences: args.deleteOrphanedSentences,
+    wordStates: rows.map((row) => ({
+      id: row.id,
+      sentenceIds: wordSentenceIds(row.sentenceIds),
+      updatedAt: row.updatedAt.toISOString(),
+    })),
+    impact,
+    orphanedSentences,
+    missingSentenceIds,
+    confirmationText: confirmation,
+  };
+  sentencePreviews.set(id, stored);
+  return {
+    mode: "action" as const,
+    operationKind: "sentence_links" as const,
+    field: "sentenceIds" as const,
+    label: getPolicy("sentenceIds").label,
+    description: "Unlinks sentences only from the WordSense rows resolved by this Scope.",
+    consequences: getPolicy("sentenceIds").consequences,
+    affectedRows: impact.affectedWordIds.length,
+    scopedRows: rows.length,
+    aiMeaningReviewsReset: 0,
+    conceptMergeReviewsReset: 0,
+    fileCount: 0,
+    bytes: 0,
+    previewId: id,
+    expiresAt: new Date(expiresAt).toISOString(),
+    scope,
+    linkCount: impact.linkCount,
+    affectedWordSenseIds: impact.affectedWordIds,
+    linkedSentenceIds: impact.linkedSentenceIds,
+    sharedSentenceIds: impact.sharedSentenceIds,
+    orphanedSentenceIds: orphanedSentences.map((sentence) => sentence.id),
+    missingSentenceIds,
+    deleteOrphanedSentences: args.deleteOrphanedSentences,
+    confirmationText: confirmation,
+  };
+}
+
+function serializeSentence(sentence: SentenceSnapshot) {
+  return {
+    ...sentence,
+    createdAt: sentence.createdAt.toISOString(),
+    updatedAt: sentence.updatedAt.toISOString(),
+  };
+}
+
+type SentenceMaintenanceMetadata = {
+  kind: "sentence_links";
+  requestId: string;
+  previewId: string;
+  scope: NormalizedWordSenseMaintenanceScope;
+  linkCount: number;
+  affectedWordSenseIds: number[];
+  sharedSentenceIds: number[];
+  orphanedSentenceIds: number[];
+  protectedSentenceIds: number[];
+  missingSentenceIds: number[];
+  deletedSentences: ReturnType<typeof serializeSentence>[];
+};
+
+function maintenanceMetadata(data: Prisma.JsonValue): SentenceMaintenanceMetadata | null {
+  if (!data || typeof data !== "object" || Array.isArray(data)) return null;
+  const value = (data as Record<string, unknown>)._maintenance;
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const metadata = value as Partial<SentenceMaintenanceMetadata>;
+  return metadata.kind === "sentence_links" ? metadata as SentenceMaintenanceMetadata : null;
+}
+
+export async function executeScopedSentenceLinkMaintenance(args: {
+  previewId: string;
+  requestId: string;
+  confirmation: string;
+}) {
+  return withMaintenanceLock(async () => {
+    assertNoRunningJobs();
+    const prior = await prisma.wordFieldMaintenanceOperation.findUnique({
+      where: { id: args.requestId },
+      include: { snapshots: { orderBy: { wordId: "asc" }, take: 1 } },
+    });
+    if (prior) {
+      const metadata = prior.snapshots[0] ? maintenanceMetadata(prior.snapshots[0].data) : null;
+      if (!metadata || !isIdempotentMaintenanceReplay(metadata.previewId, args.previewId)) {
+        throw new Error("This request id already belongs to a different maintenance operation.");
+      }
+      return {
+        operationId: prior.id,
+        affectedRows: prior.affectedRows,
+        unlinkedSentenceLinks: metadata.linkCount,
+        deletedSentences: metadata.deletedSentences.length,
+        protectedSentences: metadata.protectedSentenceIds.length,
+        idempotentReplay: true,
+        report: metadata,
+      };
+    }
+
+    pruneSentencePreviews();
+    const preview = sentencePreviews.get(args.previewId);
+    if (!preview) throw new Error("The preview expired or is no longer available. Preview changes again.");
+    if (args.confirmation !== preview.confirmationText) {
+      throw new Error(`Confirmation text must exactly match: ${preview.confirmationText}`);
+    }
+    if (!preview.impact.affectedWordIds.length) throw new Error("There are no sentence links to clear in this Scope.");
+
+    const result = await prisma.$transaction(async (tx) => {
+      const currentRows = await tx.wordSense.findMany({
+        where: { id: { in: preview.wordStates.map((row) => row.id) } },
+        orderBy: { id: "asc" },
+        select: { id: true, sentenceIds: true, updatedAt: true, meaningReviewStatus: true, conceptMergeReviewed: true },
+      });
+      const currentStates = currentRows.map((row) => ({
+        id: row.id,
+        sentenceIds: wordSentenceIds(row.sentenceIds),
+        updatedAt: row.updatedAt.toISOString(),
+      }));
+      if (!sameSentenceLinkState(preview.wordStates, currentStates)) {
+        throw new Error("The preview is stale because one or more scoped WordSense rows changed. Preview changes again.");
+      }
+
+      const affectedIds = new Set(preview.impact.affectedWordIds);
+      const affectedRows = currentRows.filter((row) => affectedIds.has(row.id));
+      for (const row of affectedRows) {
+        await updateWordSense({
+          where: { id: row.id },
+          data: { sentenceIds: Prisma.DbNull, meaningReviewStatus: MeaningReviewStatus.PENDING, conceptMergeReviewed: false },
+          select: { id: true },
+        }, tx);
+      }
+
+      const protectedSentenceIds: number[] = [];
+      const deletedSentences: SentenceSnapshot[] = [];
+      if (preview.deleteOrphanedSentences) {
+        const remainingWords = await tx.wordSense.findMany({ select: { sentenceIds: true } });
+        const remainingLinks = new Set(remainingWords.flatMap((row) => wordSentenceIds(row.sentenceIds)));
+        for (const sentence of preview.orphanedSentences) {
+          if (remainingLinks.has(sentence.id)) {
+            protectedSentenceIds.push(sentence.id);
+            continue;
+          }
+          const currentSentence = await tx.sentence.findUnique({ where: { id: sentence.id }, select: SENTENCE_SNAPSHOT_SELECT });
+          if (!currentSentence) continue;
+          if (currentSentence.updatedAt.getTime() !== sentence.updatedAt.getTime()) {
+            throw new Error(`Sentence ${sentence.id} changed after Preview. No changes were committed.`);
+          }
+          const deleted = await tx.sentence.deleteMany({ where: { id: sentence.id } });
+          if (deleted.count) deletedSentences.push(currentSentence);
+        }
+      }
+
+      const metadata: SentenceMaintenanceMetadata = {
+        kind: "sentence_links",
+        requestId: args.requestId,
+        previewId: preview.id,
+        scope: preview.scope,
+        linkCount: preview.impact.linkCount,
+        affectedWordSenseIds: preview.impact.affectedWordIds,
+        sharedSentenceIds: preview.impact.sharedSentenceIds,
+        orphanedSentenceIds: preview.orphanedSentences.map((sentence) => sentence.id),
+        protectedSentenceIds,
+        missingSentenceIds: preview.missingSentenceIds,
+        deletedSentences: deletedSentences.map(serializeSentence),
+      };
+      await tx.wordFieldMaintenanceOperation.create({
+        data: {
+          id: args.requestId,
+          field: "sentenceIds",
+          label: "Sentence links (scoped)",
+          affectedRows: affectedRows.length,
+          status: "completed",
+        },
+      });
+      await tx.wordFieldMaintenanceSnapshot.createMany({
+        data: affectedRows.map((row, index) => ({
+          operationId: args.requestId,
+          wordId: row.id,
+          data: {
+            sentenceIds: row.sentenceIds ?? null,
+            meaningReviewStatus: row.meaningReviewStatus,
+            conceptMergeReviewed: row.conceptMergeReviewed,
+            ...(index === 0 ? { _maintenance: metadata } : {}),
+          } as Prisma.InputJsonObject,
+        })),
+      });
+      return { metadata, affectedRows: affectedRows.length };
+    }, { isolationLevel: "Serializable", maxWait: 10_000, timeout: 120_000 });
+
+    sentencePreviews.delete(args.previewId);
+    return {
+      operationId: args.requestId,
+      affectedRows: result.affectedRows,
+      unlinkedSentenceLinks: result.metadata.linkCount,
+      deletedSentences: result.metadata.deletedSentences.length,
+      protectedSentences: result.metadata.protectedSentenceIds.length,
+      idempotentReplay: false,
+      report: result.metadata,
+    };
+  });
 }
 
 function operationQuarantineDir(operationId: string) {
@@ -639,7 +984,16 @@ function snapshotToWord(row: { wordId: number; data: Prisma.JsonValue }): Mainte
   if (!row.data || typeof row.data !== "object" || Array.isArray(row.data)) {
     throw new Error(`Invalid recovery snapshot for WordSense ${row.wordId}.`);
   }
-  return { id: row.wordId, ...(row.data as Record<string, unknown>) } as MaintenanceWordSense;
+  const data = row.data as Record<string, unknown>;
+  return {
+    id: row.wordId,
+    ...data,
+    meaningReviewStatus: typeof data.meaningReviewStatus === "string"
+      ? data.meaningReviewStatus
+      : data.meanings_confirmed === true
+        ? MeaningReviewStatus.CONFIRMED
+        : MeaningReviewStatus.PENDING,
+  } as MaintenanceWordSense;
 }
 
 function restoreData(data: Prisma.JsonValue): Prisma.WordSenseUncheckedUpdateInput {
@@ -647,15 +1001,39 @@ function restoreData(data: Prisma.JsonValue): Prisma.WordSenseUncheckedUpdateInp
     throw new Error("Invalid WordSense field maintenance snapshot data.");
   }
   const jsonFields = new Set(["otherMeaningIds", "comparedMeaningWordIds", "synonymIds", "sentenceIds"]);
-  return Object.fromEntries(Object.entries(data).map(([key, value]) => [
-    key,
-    jsonFields.has(key) && value === null ? Prisma.DbNull : value,
-  ])) as Prisma.WordSenseUncheckedUpdateInput;
+  const record = data as Record<string, unknown>;
+  const restored = Object.fromEntries(Object.entries(record)
+    .filter(([key]) => !key.startsWith("_") && key !== "meanings_confirmed")
+    .map(([key, value]) => [
+      key,
+      jsonFields.has(key) && value === null ? Prisma.DbNull : value,
+    ])) as Prisma.WordSenseUncheckedUpdateInput;
+  if (!("meaningReviewStatus" in restored) && "meanings_confirmed" in record) {
+    restored.meaningReviewStatus = record.meanings_confirmed === true
+      ? MeaningReviewStatus.CONFIRMED
+      : MeaningReviewStatus.PENDING;
+  }
+  return restored;
 }
 
 export async function undoWordSenseFieldMaintenance(operationId: string) {
   return withMaintenanceLock(async () => {
     assertNoRunningJobs();
+    const operation = await prisma.wordFieldMaintenanceOperation.findUnique({
+      where: { id: operationId },
+      include: { snapshots: { orderBy: { wordId: "asc" } } },
+    });
+    if (!operation) throw new Error("This maintenance operation does not exist.");
+    const metadata = operation.snapshots[0] ? maintenanceMetadata(operation.snapshots[0].data) : null;
+    if (operation.status === "undone") {
+      return {
+        operationId: operation.id,
+        restoredRows: operation.snapshots.length,
+        restoredFiles: 0,
+        restoredSentences: metadata?.deletedSentences.length ?? 0,
+        idempotentReplay: true,
+      };
+    }
     const latest = await prisma.wordFieldMaintenanceOperation.findFirst({
       where: { status: "completed" },
       orderBy: { createdAt: "desc" },
@@ -664,24 +1042,56 @@ export async function undoWordSenseFieldMaintenance(operationId: string) {
     if (!latest || latest.id !== operationId) {
       throw new Error("Only the latest completed maintenance operation can be undone.");
     }
-    const operation = await prisma.wordFieldMaintenanceOperation.findUnique({
-      where: { id: operationId },
-      include: { snapshots: { orderBy: { wordId: "asc" } } },
-    });
-    if (!operation || operation.status !== "completed") {
+    if (operation.status !== "completed") {
       throw new Error("This maintenance operation is not available for undo.");
     }
-    if (!isWordMaintenanceField(operation.field)) {
+    const operationField = operation.field === "meanings_confirmed"
+      ? "meaningReviewStatus"
+      : operation.field;
+    if (!isWordMaintenanceField(operationField)) {
       throw new Error(`Unsupported archived maintenance field: ${operation.field}`);
     }
-    const policy = getPolicy(operation.field);
+    const policy = getPolicy(operationField);
     const snapshotWords = operation.snapshots.map(snapshotToWord);
     const moved = policy.quarantinesConceptAudio
       ? await moveQuarantinedFilesBack(operation.id, snapshotWords)
       : [];
     try {
       await prisma.$transaction(async (tx) => {
+        if (metadata) {
+          for (const sentence of metadata.deletedSentences) {
+            const existingById = await tx.sentence.findUnique({ where: { id: sentence.id }, select: { id: true, sentence_en: true } });
+            if (existingById) {
+              if (existingById.sentence_en !== sentence.sentence_en) {
+                throw new Error(`Cannot restore Sentence ${sentence.id}; that id is now used by another sentence.`);
+              }
+              continue;
+            }
+            const existingByText = await tx.sentence.findUnique({ where: { sentence_en: sentence.sentence_en }, select: { id: true } });
+            if (existingByText) {
+              throw new Error(`Cannot restore Sentence ${sentence.id}; its text is now used by Sentence ${existingByText.id}.`);
+            }
+            await tx.sentence.create({
+              data: {
+                ...sentence,
+                createdAt: new Date(sentence.createdAt),
+                updatedAt: new Date(sentence.updatedAt),
+              },
+            });
+          }
+        }
         for (const snapshot of operation.snapshots) {
+          if (metadata) {
+            const current = await tx.wordSense.findUnique({ where: { id: snapshot.wordId }, select: { sentenceIds: true } });
+            if (!current) throw new Error(`Cannot restore missing WordSense ${snapshot.wordId}.`);
+            const originalData = snapshot.data as Record<string, Prisma.JsonValue>;
+            const originalIds = wordSentenceIds(originalData.sentenceIds ?? null);
+            const currentIds = wordSentenceIds(current.sentenceIds);
+            const mergedIds = mergeRestoredSentenceIds(originalIds, currentIds);
+            const data = { ...restoreData(snapshot.data), sentenceIds: mergedIds };
+            await updateWordSense({ where: { id: snapshot.wordId }, data, select: { id: true } }, tx);
+            continue;
+          }
           await updateWordSense(
             { where: { id: snapshot.wordId }, data: restoreData(snapshot.data), select: { id: true } },
             tx,
@@ -691,12 +1101,18 @@ export async function undoWordSenseFieldMaintenance(operationId: string) {
           where: { id: operation.id },
           data: { status: "undone", undoneAt: new Date() },
         });
-      }, { maxWait: 10_000, timeout: 120_000 });
+      }, { isolationLevel: "Serializable", maxWait: 10_000, timeout: 120_000 });
     } catch (error) {
       await restoreMovedFiles(moved);
       throw error;
     }
-    return { operationId: operation.id, restoredRows: operation.snapshots.length, restoredFiles: moved.length };
+    return {
+      operationId: operation.id,
+      restoredRows: operation.snapshots.length,
+      restoredFiles: moved.length,
+      restoredSentences: metadata?.deletedSentences.length ?? 0,
+      idempotentReplay: false,
+    };
   });
 }
 
@@ -712,13 +1128,37 @@ export async function listWordSenseFieldMaintenanceOperations(limit = 8) {
       status: true,
       createdAt: true,
       undoneAt: true,
+      snapshots: { orderBy: { wordId: "asc" as const }, take: 1, select: { data: true } },
     },
   });
   const latestCompletedId = operations.find((operation) => operation.status === "completed")?.id ?? null;
-  return operations.map((operation) => ({
+  return operations.map(({ snapshots, ...operation }) => ({
     ...operation,
     createdAt: operation.createdAt.toISOString(),
     undoneAt: operation.undoneAt?.toISOString() ?? null,
     canUndo: operation.id === latestCompletedId,
+    report: snapshots[0] ? maintenanceMetadata(snapshots[0].data) : null,
   }));
+}
+
+export async function sentenceIdsForWordSenseMaintenanceOperation(operationId: string) {
+  const snapshot = await prisma.wordFieldMaintenanceSnapshot.findFirst({
+    where: { operationId },
+    orderBy: { wordId: "asc" },
+    select: { data: true },
+  });
+  const metadata = snapshot ? maintenanceMetadata(snapshot.data) : null;
+  if (!metadata) return [];
+  return [...new Set([
+    ...metadata.sharedSentenceIds,
+    ...metadata.orphanedSentenceIds,
+    ...metadata.protectedSentenceIds,
+    ...metadata.missingSentenceIds,
+    ...metadata.deletedSentences.map((sentence) => sentence.id),
+  ])].sort((a, b) => a - b);
+}
+
+export function sentenceIdsForActiveWordSenseMaintenancePreview(previewId: string) {
+  pruneSentencePreviews();
+  return sentencePreviews.get(previewId)?.impact.linkedSentenceIds ?? [];
 }

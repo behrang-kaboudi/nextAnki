@@ -11,7 +11,11 @@ import {
   normalizePersianFull,
 } from "@/lib/persian/normalize";
 import { prisma } from "@/lib/prisma";
-import { addPersianWord, findPersianWord } from "@/lib/tables/persianWord";
+import { addPersianWord } from "@/lib/tables/persianWord";
+import {
+  parsePersianWordResolutionSelections,
+  resolvePersianWordOccurrences,
+} from "@/lib/words/persianWordResolution.server";
 import { updateWordSense } from "@/lib/words/wordSenseRepo";
 import { primarySentenceId } from "@/lib/words/sentenceIds";
 
@@ -24,12 +28,14 @@ type PayloadItem = {
   concept_explained_fa: string;
   sentence_en: string;
   sentence_en_meaning_fa: string;
+  other_meanings_fa?: string[];
+  productive_target?: number;
 };
 
 type AuditChange = {
   entity: "WordSense" | "EnglishWord" | "PersianWord" | "Sentence";
   field: string;
-  action: "created" | "reused" | "kept" | "linked";
+  action: "created" | "reused" | "kept" | "linked" | "updated";
   recordId?: number;
   before?: string | number | number[] | null;
   after?: string | number | number[] | null;
@@ -38,6 +44,16 @@ type AuditChange = {
 };
 
 const allowedKeys = [
+  "base_form",
+  "meaning_fa",
+  "pos",
+  "concept_explained_fa",
+  "sentence_en",
+  "sentence_en_meaning_fa",
+  "other_meanings_fa",
+  "productive_target",
+] as const;
+const requiredKeys = [
   "base_form",
   "meaning_fa",
   "pos",
@@ -73,12 +89,9 @@ function validateItem(
   const keys = Object.keys(value);
   const issues: string[] = [];
   const extraKeys = keys.filter((key) => !allowedKeySet.has(key));
-  const missingKeys = allowedKeys.filter((key) => !(key in value));
+  const missingKeys = requiredKeys.filter((key) => !(key in value));
   if (extraKeys.length) issues.push(`Extra field(s): ${extraKeys.join(", ")}`);
   if (missingKeys.length) issues.push(`Missing field(s): ${missingKeys.join(", ")}`);
-  if (keys.length !== allowedKeys.length) {
-    issues.push(`Item must have exactly ${allowedKeys.length} fields`);
-  }
 
   const base_form = normalizeEnglishWordText(asNonEmptyString(value.base_form) ?? "");
   const meaningFaRaw = asNonEmptyString(value.meaning_fa);
@@ -86,6 +99,8 @@ function validateItem(
   const concept_explained_fa = asNonEmptyString(value.concept_explained_fa);
   const sentence_en = asNonEmptyString(value.sentence_en);
   const sentence_en_meaning_fa = asNonEmptyString(value.sentence_en_meaning_fa);
+  const otherMeaningsRaw = value.other_meanings_fa;
+  const productiveTarget = value.productive_target;
 
   if (!base_form) issues.push("base_form must be a non-empty string");
   if (!meaningFaRaw) issues.push("meaning_fa must be a non-empty string");
@@ -93,6 +108,14 @@ function validateItem(
   if (!concept_explained_fa) issues.push("concept_explained_fa must be a non-empty string");
   if (!sentence_en) issues.push("sentence_en must be a non-empty string");
   if (!sentence_en_meaning_fa) issues.push("sentence_en_meaning_fa must be a non-empty string");
+  if (otherMeaningsRaw !== undefined && (
+    !Array.isArray(otherMeaningsRaw) ||
+    otherMeaningsRaw.length > 4 ||
+    otherMeaningsRaw.some((meaning) => !asNonEmptyString(meaning))
+  )) issues.push("other_meanings_fa must be an array of at most four non-empty strings");
+  if (productiveTarget !== undefined && (
+    typeof productiveTarget !== "number" || !Number.isInteger(productiveTarget) || productiveTarget < 1 || productiveTarget > 101
+  )) issues.push("productive_target must be an integer from 1 to 101");
   if (issues.length) return { ok: false, issues };
   if (!meaningFaRaw || !concept_explained_fa || !sentence_en || !sentence_en_meaning_fa) {
     return { ok: false, issues: ["Invalid input"] };
@@ -101,6 +124,16 @@ function validateItem(
   const meaning_fa = normalizePersianForStorage(meaningFaRaw);
   if (!meaning_fa || !normalizePersianFull(meaning_fa)) {
     return { ok: false, issues: ["meaning_fa must contain Persian letters"] };
+  }
+  const other_meanings_fa = Array.isArray(otherMeaningsRaw)
+    ? otherMeaningsRaw.map((meaning) => normalizePersianForStorage(String(meaning)))
+    : undefined;
+  if (other_meanings_fa?.some((meaning) => !meaning || !normalizePersianFull(meaning))) {
+    return { ok: false, issues: ["other_meanings_fa must contain Persian letters"] };
+  }
+  const normalizedOtherMeanings = (other_meanings_fa ?? []).map(normalizePersianFull);
+  if (normalizedOtherMeanings.includes(normalizePersianFull(meaning_fa)) || new Set(normalizedOtherMeanings).size !== normalizedOtherMeanings.length) {
+    return { ok: false, issues: ["other_meanings_fa must be unique and must not repeat meaning_fa"] };
   }
 
   return {
@@ -112,6 +145,8 @@ function validateItem(
       concept_explained_fa,
       sentence_en,
       sentence_en_meaning_fa,
+      ...(other_meanings_fa ? { other_meanings_fa } : {}),
+      ...(typeof productiveTarget === "number" ? { productive_target: productiveTarget } : {}),
     },
   };
 }
@@ -119,13 +154,14 @@ function validateItem(
 export async function POST(request: Request) {
   try {
     const body = (await request.json().catch(() => null)) as unknown;
-    if (!Array.isArray(body)) {
-      return NextResponse.json({ ok: false, error: "Body must be an array" }, { status: 400 });
+    const wrappedBody = isPlainObject(body) ? body : null;
+    const rawItems = Array.isArray(body) ? body : wrappedBody?.items;
+    if (!Array.isArray(rawItems)) {
+      return NextResponse.json({ ok: false, error: "Body must be an array or an object containing items" }, { status: 400 });
     }
-
     const items: PayloadItem[] = [];
     const validationErrors: Array<{ index: number; issues: string[] }> = [];
-    body.forEach((row, index) => {
+    rawItems.forEach((row, index) => {
       const validated = validateItem(row);
       if (validated.ok) items.push(validated.item);
       else validationErrors.push({ index, issues: validated.issues });
@@ -142,6 +178,61 @@ export async function POST(request: Request) {
     }
     if (!items.length) {
       return NextResponse.json({ ok: false, error: "No valid items" }, { status: 400 });
+    }
+
+    let selections;
+    try {
+      selections = parsePersianWordResolutionSelections(wrappedBody?.persian_word_resolutions);
+    } catch (error) {
+      return NextResponse.json(
+        { ok: false, error: error instanceof Error ? error.message : String(error) },
+        { status: 400 },
+      );
+    }
+    const resolutionKey = (itemIndex: number, field: "meaning_fa" | "other_meanings_fa", meaningIndex = 0) =>
+      `items.${itemIndex}.${field}.${meaningIndex}`;
+    const occurrences = items.flatMap((item, itemIndex) => {
+      const context = {
+        base_form: item.base_form,
+        pos: item.pos,
+        concept_explained_fa: item.concept_explained_fa,
+        sentence_en: item.sentence_en,
+        sentence_en_meaning_fa: item.sentence_en_meaning_fa,
+      };
+      return [
+        {
+          key: resolutionKey(itemIndex, "meaning_fa"),
+          text: item.meaning_fa,
+          field: "meaning_fa" as const,
+          context,
+        },
+        ...(item.other_meanings_fa ?? []).map((meaning, meaningIndex) => ({
+          key: resolutionKey(itemIndex, "other_meanings_fa", meaningIndex),
+          text: meaning,
+          field: "other_meanings_fa" as const,
+          context,
+        })),
+      ];
+    });
+    let resolution: Awaited<ReturnType<typeof resolvePersianWordOccurrences>>;
+    try {
+      resolution = await resolvePersianWordOccurrences(occurrences, selections);
+    } catch (error) {
+      return NextResponse.json(
+        { ok: false, error: error instanceof Error ? error.message : String(error) },
+        { status: 400 },
+      );
+    }
+    if (resolution.ambiguities.length) {
+      return NextResponse.json(
+        {
+          ok: false,
+          code: "PERSIAN_WORD_RESOLUTION_REQUIRED",
+          error: "One or more Persian meanings have multiple pronunciation records and require human selection.",
+          ambiguities: resolution.ambiguities,
+        },
+        { status: 409 },
+      );
     }
 
     let inserted = 0;
@@ -165,9 +256,10 @@ export async function POST(request: Request) {
         }
     > = [];
 
-    for (const item of items) {
+    for (const [itemIndex, item] of items.entries()) {
       try {
         const normalizedMeaning = normalizePersianFull(item.meaning_fa);
+        const resolvedPrimaryId = resolution.resolvedIds.get(resolutionKey(itemIndex, "meaning_fa")) ?? null;
         const knownEnglishWordIds = await findEnglishWordIdsByKnownForm(item.base_form);
         const candidates = await prisma.wordSense.findMany({
           where: knownEnglishWordIds.length
@@ -180,6 +272,7 @@ export async function POST(request: Request) {
             meaningId: true,
             pos: true,
             concept_explained_fa: true,
+            productive_target: true,
             sentenceIds: true,
             updatedAt: true,
             meaning: {
@@ -189,11 +282,21 @@ export async function POST(request: Request) {
         });
         const existing = candidates.find(
           (candidate) =>
-            candidate.meaning?.normalized_text === normalizedMeaning &&
+            (resolvedPrimaryId
+              ? candidate.meaningId === resolvedPrimaryId
+              : candidate.meaning?.normalized_text === normalizedMeaning) &&
             normalizePos(candidate.pos) === item.pos,
         );
 
         if (existing) {
+          const scoreUpdate = {
+            ...(item.productive_target !== undefined && item.productive_target !== existing.productive_target
+              ? { productive_target: item.productive_target }
+              : {}),
+          };
+          if (Object.keys(scoreUpdate).length) {
+            await updateWordSense({ where: { id: existing.id }, data: scoreUpdate });
+          }
           const existingSentenceId = primarySentenceId(existing.sentenceIds);
           const existingSentence = existingSentenceId
             ? await prisma.sentence.findUnique({
@@ -275,12 +378,24 @@ export async function POST(request: Request) {
             },
             {
               entity: "WordSense",
+              field: "productive_target",
+              action: "productive_target" in scoreUpdate ? "updated" : "kept",
+              recordId: existing.id,
+              before: existing.productive_target,
+              after: item.productive_target ?? existing.productive_target,
+              incoming: item.productive_target,
+              reason: "productive_target موجود با امتیاز جدید فایل همگام شد.",
+            },
+            {
+              entity: "WordSense",
               field: "updatedAt",
-              action: "kept",
+              action: Object.keys(scoreUpdate).length ? "updated" : "kept",
               recordId: existing.id,
               before: existing.updatedAt.toISOString(),
               after: existing.updatedAt.toISOString(),
-              reason: "هیچ Write انجام نشد؛ updatedAt نیز تغییر نکرد.",
+              reason: Object.keys(scoreUpdate).length
+                ? "به‌دلیل همگام‌سازی امتیازها، updatedAt تازه شد."
+                : "هیچ Write انجام نشد؛ updatedAt نیز تغییر نکرد.",
             },
           ];
           skippedExisting += 1;
@@ -299,10 +414,22 @@ export async function POST(request: Request) {
           where: { base_form: item.base_form },
           select: { id: true },
         });
-        const foundPersianWord = await findPersianWord(item.meaning_fa);
-        const persianMeaning = foundPersianWord.item
-          ? { action: "unchanged" as const, item: foundPersianWord.item }
+        const selectedPrimary = resolvedPrimaryId
+          ? await prisma.persianWord.findUnique({
+              where: { id: resolvedPrimaryId },
+              select: { id: true, canonical_text: true, normalized_text: true, not_normalized_texts: true },
+            })
+          : null;
+        if (resolvedPrimaryId && !selectedPrimary) {
+          throw new Error(`Resolved PersianWord ${resolvedPrimaryId} no longer exists. Retry the import.`);
+        }
+        const persianMeaning = selectedPrimary
+          ? { action: "unchanged" as const, item: selectedPrimary }
           : await addPersianWord(item.meaning_fa);
+        const otherMeaningIds = await Promise.all((item.other_meanings_fa ?? []).map(async (meaning, meaningIndex) => {
+          const selectedId = resolution.resolvedIds.get(resolutionKey(itemIndex, "other_meanings_fa", meaningIndex)) ?? null;
+          return selectedId ?? (await addPersianWord(meaning)).item.id;
+        }));
 
         const created = await prisma.$transaction(async (tx) => {
           const englishWord = existingEnglishWord ?? await tx.englishWord.create({
@@ -333,10 +460,13 @@ export async function POST(request: Request) {
               anki_link_id: `pending_${randomUUID()}`,
               englishId: englishWord.id,
               meaningId: persianMeaning.item.id,
+              otherMeaningIds: [...new Set(otherMeaningIds.filter((id) => id !== persianMeaning.item.id))],
               pos: item.pos,
               concept_explained_fa: item.concept_explained_fa,
               sentenceIds: [sentence.id],
               conceptMergeReviewed: false,
+              meaningReviewStatus: "PENDING",
+              productive_target: item.productive_target,
             },
             select: { id: true },
           });
@@ -365,13 +495,13 @@ export async function POST(request: Request) {
           {
             entity: "PersianWord",
             field: "meaning_fa",
-            action: foundPersianWord.item ? "reused" : "created",
+            action: persianMeaning.action === "created" ? "created" : "reused",
             recordId: persianMeaning.item.id,
             after: persianMeaning.item.canonical_text,
             incoming: item.meaning_fa,
-            reason: foundPersianWord.item
-              ? "PersianWord موجود بدون افزودن variant و بدون Update استفاده شد."
-              : "PersianWord جدید Insert شد.",
+            reason: persianMeaning.action === "created"
+              ? "PersianWord جدید Insert شد."
+              : "PersianWord موجود پس از حل تطابق متن و تلفظ استفاده شد.",
           },
           {
             entity: "Sentence",

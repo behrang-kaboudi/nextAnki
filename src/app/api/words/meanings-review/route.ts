@@ -1,52 +1,38 @@
 import { NextResponse } from "next/server";
 
-import { prisma } from "@/lib/prisma";
-import { hydrateWordSensesWithPersianMeanings } from "@/lib/words/persianMeanings.server";
-import { hydrateMeaningReviewSentences } from "@/lib/words/meaningReviewSentences.server";
+import {
+  isMeaningReviewEligible,
+  loadMeaningReviewPromptRecords,
+  summarizeMeaningReviewEligibility,
+} from "@/lib/words/meaningReviewWorkflow.server";
+import { parseParallelPromptPartition, selectParallelPromptLane } from "@/lib/words/parallelPromptPartition";
 
 export const runtime = "nodejs";
 
 export async function GET(request: Request) {
-  const limit = Number(new URL(request.url).searchParams.get("limit"));
-  const take = Number.isSafeInteger(limit) && limit >= 0 ? limit : 50;
-  const where = { meanings_confirmed: false };
-  const [raw, totalUnconfirmed] = await Promise.all([
-    prisma.wordSense.findMany({
-      where,
-      orderBy: { id: "asc" },
-      take,
-      select: {
-        id: true,
-        meaningId: true,
-        otherMeaningIds: true,
-        pos: true,
-        concept_explained_fa: true,
-        sentenceIds: true,
-        english: { select: { base_form: true, phonetic_us: true } },
-      },
-    }),
-    prisma.wordSense.count({ where }),
-  ]);
-  const words = await hydrateMeaningReviewSentences(
-    await hydrateWordSensesWithPersianMeanings(raw),
+  const params = new URL(request.url).searchParams;
+  const partition = parseParallelPromptPartition({
+    laneCount: Number(params.get("laneCount") ?? "1"),
+    laneNumber: Number(params.get("laneNumber") ?? "1"),
+    batchSize: Number(params.get("batchSize") ?? params.get("limit") ?? "50"),
+  }, 50);
+  if (!partition) {
+    return NextResponse.json({ ok: false, error: "Invalid parallel lane or batch size." }, { status: 400 });
+  }
+  const allRecords = await loadMeaningReviewPromptRecords();
+  const summary = summarizeMeaningReviewEligibility(allRecords);
+  const eligible = allRecords.filter(isMeaningReviewEligible);
+  const { items, laneEligibleCount } = selectParallelPromptLane(
+    eligible,
+    (record) => record.id,
+    partition,
   );
   return NextResponse.json({
     ok: true,
-    totalUnconfirmed,
-    items: words.map((word) => ({
-      id: word.id,
-      base_form: word.english.base_form,
-      meaning_fa: word.meaning_fa,
-      other_meanings_fa: word.otherPersianWords.map(
-        (meaning) => meaning.canonical_text,
-      ),
-      pos: word.pos ?? "",
-      concept_explained_fa: word.concept_explained_fa ?? "",
-      sentences: word.reviewSentences.map((sentence) => ({
-        id: sentence.id,
-        sentence_en: sentence.sentence_en,
-        sentence_en_meaning_fa: sentence.sentence_en_meaning_fa ?? "",
-      })),
-    })),
+    totalEligible: summary.totalEligible,
+    totalUnconfirmed: summary.pendingReview,
+    summary,
+    laneEligibleCount,
+    items,
   });
 }

@@ -6,9 +6,11 @@ import { createAnkiConnectClient, type AnkiMultiAction } from "@/lib/anki";
 import { AnkiNoteTypes } from "@/lib/anki";
 import {
   generateWordAnkiFieldsForMetaLexVr9,
+  getHydratedWordAnkiReadinessIssues,
   getAnkiLinkIdFromNoteFields,
   type WordAnkiManagedFieldName,
 } from "@/lib/anki/wordAnkiMapping";
+import { REQUIRED_WORD_ANKI_FIELD_NAMES } from "@/lib/anki/wordAnkiSyncReadiness";
 import {
   acquireWordSyncJobLock,
   getActiveWordSyncJob,
@@ -40,6 +42,12 @@ export type WordFieldsSyncAllStatus = {
   skippedSame: number;
   skippedNoLinkId: number;
   skippedNoWord: number;
+  skippedNotReady: number;
+  readinessFailureSamples: Array<{
+    wordSenseId: number;
+    ankiLinkId: string;
+    issues: Array<{ field: string; reason: "missing" | "invalid" }>;
+  }>;
   failed: number;
   failureSamples: WordFieldsSyncFailure[];
   mediaUploaded: number;
@@ -146,6 +154,8 @@ async function runJob(state: State, options: JobOptions) {
     state.skippedSame = 0;
     state.skippedNoLinkId = 0;
     state.skippedNoWord = 0;
+    state.skippedNotReady = 0;
+    state.readinessFailureSamples = [];
     state.failed = 0;
     state.failureSamples = [];
     state.mediaUploaded = 0;
@@ -157,8 +167,17 @@ async function runJob(state: State, options: JobOptions) {
       retryDelayMs: 1000,
     });
     const structureSettings = await getAnkiStructureSettings();
+    const configuredFields = structureSettings.config.noteType.fields;
+    const missingRequiredConfiguredFields = REQUIRED_WORD_ANKI_FIELD_NAMES.filter(
+      (field) => !configuredFields.includes(field),
+    );
+    if (missingRequiredConfiguredFields.length) {
+      throw new Error(
+        `Required Word sync field(s) are not configured on the Anki note type: ${missingRequiredConfiguredFields.join(", ")}`,
+      );
+    }
     const missingFields = options.fields.filter(
-      (field) => !structureSettings.config.noteType.fields.includes(field),
+      (field) => !configuredFields.includes(field),
     );
     if (missingFields.length) {
       throw new Error(
@@ -232,9 +251,28 @@ async function runJob(state: State, options: JobOptions) {
         continue;
       }
 
-      const generated = await generateWordAnkiFieldsForMetaLexVr9(
+      const allGeneratedFields = await generateWordAnkiFieldsForMetaLexVr9(
         word,
-        options.fields,
+        configuredFields,
+      );
+      const readinessIssues = getHydratedWordAnkiReadinessIssues(
+        word,
+        allGeneratedFields,
+      );
+      if (readinessIssues.length) {
+        state.skippedNotReady += 1;
+        state.processed += 1;
+        if (state.readinessFailureSamples.length < 20) {
+          state.readinessFailureSamples.push({
+            wordSenseId: word.id,
+            ankiLinkId,
+            issues: readinessIssues,
+          });
+        }
+        continue;
+      }
+      const generated = Object.fromEntries(
+        options.fields.map((field) => [field, allGeneratedFields[field] ?? ""]),
       );
       const changedFields = Object.fromEntries(
         options.fields
@@ -320,6 +358,8 @@ export function createWordFieldsSyncAllJob(options: JobOptions) {
         skippedSame: 0,
         skippedNoLinkId: 0,
         skippedNoWord: 0,
+        skippedNotReady: 0,
+        readinessFailureSamples: [],
         failed: 0,
         failureSamples: [],
         mediaUploaded: 0,

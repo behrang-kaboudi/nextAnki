@@ -1,9 +1,10 @@
 import "server-only";
 
-import type { Prisma } from "@prisma/client";
+import { MeaningReviewStatus, type Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
 import { updateWordSense } from "@/lib/words/wordSenseRepo";
+import { selectParallelPromptLane, type ParallelPromptPartition } from "@/lib/words/parallelPromptPartition";
 
 type ComparisonSourceWordSense = {
   id: number;
@@ -11,8 +12,11 @@ type ComparisonSourceWordSense = {
   otherMeaningIds: Prisma.JsonValue | null;
   comparedMeaningWordIds: Prisma.JsonValue | null;
   synonymIds: Prisma.JsonValue | null;
+  conceptMergeReviewed: boolean;
+  inflectionMergeReviewed: boolean;
   pos: string | null;
   concept_explained_fa: string | null;
+  meaningReviewStatus: MeaningReviewStatus;
   english: { base_form: string };
 };
 
@@ -25,14 +29,22 @@ export type MeaningComparisonOutputGroup = {
   }>;
 };
 
+export type MeaningComparisonSourceGroup = {
+  persianWordId: number;
+  sourceWordIds: number[];
+};
+
 const comparisonSelect = {
   id: true,
   meaningId: true,
   otherMeaningIds: true,
   comparedMeaningWordIds: true,
   synonymIds: true,
+  conceptMergeReviewed: true,
+  inflectionMergeReviewed: true,
   pos: true,
   concept_explained_fa: true,
+  meaningReviewStatus: true,
   english: { select: { base_form: true } },
 } satisfies Prisma.WordSenseSelect;
 
@@ -76,6 +88,36 @@ function buildGroups(words: ComparisonSourceWordSense[]) {
     }));
 }
 
+function comparisonLaneKeys(
+  groups: Array<{ persianWordId: number; words: ComparisonSourceWordSense[] }>,
+) {
+  const parent = new Map(groups.map((group) => [group.persianWordId, group.persianWordId]));
+  const find = (id: number): number => {
+    const current = parent.get(id) ?? id;
+    if (current === id) return id;
+    const root = find(current);
+    parent.set(id, root);
+    return root;
+  };
+  const union = (left: number, right: number) => {
+    const leftRoot = find(left);
+    const rightRoot = find(right);
+    if (leftRoot === rightRoot) return;
+    const smallest = Math.min(leftRoot, rightRoot);
+    parent.set(leftRoot, smallest);
+    parent.set(rightRoot, smallest);
+  };
+  const firstGroupByWordSenseId = new Map<number, number>();
+  for (const group of groups) {
+    for (const word of group.words) {
+      const firstGroup = firstGroupByWordSenseId.get(word.id);
+      if (firstGroup === undefined) firstGroupByWordSenseId.set(word.id, group.persianWordId);
+      else union(group.persianWordId, firstGroup);
+    }
+  }
+  return new Map(groups.map((group) => [group.persianWordId, find(group.persianWordId)]));
+}
+
 async function comparisonItemsForGroups(
   groups: Array<{ persianWordId: number; words: ComparisonSourceWordSense[] }>,
 ) {
@@ -112,8 +154,9 @@ async function comparisonItemsForGroups(
   }));
 }
 
-export async function prepareWordSenseMeaningComparison(limit: number) {
+export async function prepareWordSenseMeaningComparison(partition: ParallelPromptPartition) {
   const words = await prisma.wordSense.findMany({
+    where: { meaningReviewStatus: MeaningReviewStatus.CONFIRMED },
     orderBy: { id: "asc" },
     select: comparisonSelect,
   });
@@ -126,18 +169,27 @@ export async function prepareWordSenseMeaningComparison(limit: number) {
     : [];
   const existingSharedMeaningIds = new Set(existingSharedMeanings.map((meaning) => meaning.id));
   const eligible = candidateGroups.filter((group) => existingSharedMeaningIds.has(group.persianWordId));
-  const selected = limit > 0 ? eligible.slice(0, limit) : eligible;
+  // Comparison groups may share WordSense rows. Keep every connected set in one
+  // lane so separate models never update the same WordSense concurrently.
+  const laneKeyByPersianWordId = comparisonLaneKeys(eligible);
+  const { items: selected, laneEligibleCount } = selectParallelPromptLane(
+    eligible,
+    (group) => laneKeyByPersianWordId.get(group.persianWordId) ?? group.persianWordId,
+    partition,
+  );
 
   // Ignore stale PersianWord ids in JSON when building prompt data; primary meaning ids
   // are protected by their foreign key. The existing otherMeaningIds field is not changed.
   return {
     totalEligibleGroups: eligible.length,
+    laneEligibleCount,
     items: await comparisonItemsForGroups(selected),
   };
 }
 
 export async function getPendingWordSenseMeaningComparisonCount() {
   const words = await prisma.wordSense.findMany({
+    where: { meaningReviewStatus: MeaningReviewStatus.CONFIRMED },
     orderBy: { id: "asc" },
     select: comparisonSelect,
   });
@@ -180,7 +232,7 @@ export function parseMeaningComparisonOutput(value: unknown): MeaningComparisonO
       const concept = typeof record.concept_explained_fa === "string"
         ? record.concept_explained_fa.trim()
         : "";
-      if (!isPositiveId(record.id) || seenRecords.has(record.id) || !concept || concept.split(/\s+/u).length > 20 ||
+      if (!isPositiveId(record.id) || seenRecords.has(record.id) || !concept || concept.split(/\s+/u).length > 30 ||
           !hasOnlyKeys(record, ["id", "concept_explained_fa", "synonymIds"]) || !Array.isArray(record.synonymIds) ||
           !record.synonymIds.every(isPositiveId) || new Set(record.synonymIds).size !== record.synonymIds.length ||
           record.synonymIds.includes(record.id)) {
@@ -211,7 +263,11 @@ function sameOrderedIds(left: readonly number[], right: readonly number[]) {
 export async function loadWordSenseMeaningComparisonGroups(
   output: MeaningComparisonOutputGroup[],
 ) {
-  const words = await prisma.wordSense.findMany({ orderBy: { id: "asc" }, select: comparisonSelect });
+  const words = await prisma.wordSense.findMany({
+    where: { meaningReviewStatus: MeaningReviewStatus.CONFIRMED },
+    orderBy: { id: "asc" },
+    select: comparisonSelect,
+  });
   const currentByPersianWordId = new Map(
     buildGroups(words).map((group) => [group.persianWordId, group]),
   );
@@ -237,47 +293,100 @@ export async function applyWordSenseMeaningComparison(
   sourceWordIds: number[],
   output: MeaningComparisonOutputGroup,
 ) {
-  return prisma.$transaction(async (tx) => {
-    if (!isPositiveId(persianWordId) || output.persianWordId !== persianWordId ||
-        sourceWordIds.length < 2 || sourceWordIds.some((id) => !isPositiveId(id)) ||
-        new Set(sourceWordIds).size !== sourceWordIds.length) {
-      throw new Error("The source candidate group is invalid.");
-    }
-    const allWords = await tx.wordSense.findMany({ orderBy: { id: "asc" }, select: comparisonSelect });
-    const currentGroup = buildGroups(allWords).find((group) => group.persianWordId === persianWordId);
-    const currentIds = currentGroup?.words.map((word) => word.id) ?? [];
-    if (!sameOrderedIds(sourceWordIds, currentIds)) {
-      throw new Error("This candidate group changed. Create the data again before confirming it.");
-    }
-    if (!currentGroup) throw new Error("This candidate group no longer exists.");
-    if (!sameOrderedIds(sourceWordIds, output.records.map((record) => record.id))) {
-      throw new Error("The output must contain every source WordSense id exactly once and in source order.");
-    }
+  const result = await applyWordSenseMeaningComparisonBatch(
+    [{ persianWordId, sourceWordIds }],
+    [output],
+  );
+  return { updated: result.updated };
+}
 
+export async function applyWordSenseMeaningComparisonBatch(
+  sourceGroups: MeaningComparisonSourceGroup[],
+  output: MeaningComparisonOutputGroup[],
+) {
+  return prisma.$transaction(async (tx) => {
+    if (!sourceGroups.length || sourceGroups.length !== output.length) {
+      throw new Error("Every output group needs one matching source candidate group.");
+    }
+    const allWords = await tx.wordSense.findMany({
+      where: { meaningReviewStatus: MeaningReviewStatus.CONFIRMED },
+      orderBy: { id: "asc" },
+      select: comparisonSelect,
+    });
+    const currentGroupByPersianWordId = new Map(
+      buildGroups(allWords).map((group) => [group.persianWordId, group]),
+    );
     const validWordIds = new Set(allWords.map((word) => word.id));
-    const currentById = new Map(currentGroup.words.map((word) => [word.id, word]));
-    for (const record of output.records) {
-      const current = currentById.get(record.id)!;
-      const existingSynonyms = positiveUniqueIds(current.synonymIds)
-        .filter((id) => id !== record.id && validWordIds.has(id));
-      const nextSynonyms = [...new Set([...existingSynonyms, ...record.synonymIds])].sort((a, b) => a - b);
-      const existingCompared = positiveUniqueIds(current.comparedMeaningWordIds)
-        .filter((id) => id !== record.id && validWordIds.has(id));
-      const nextCompared = [...new Set([
-        ...existingCompared,
-        ...sourceWordIds.filter((id) => id !== record.id),
-        ...nextSynonyms,
-      ])].sort((a, b) => a - b);
-      await updateWordSense({
-        where: { id: record.id },
-        data: {
+    const nextById = new Map(allWords.map((word) => [word.id, { ...word }]));
+    const affectedIds = new Set<number>();
+    let updated = 0;
+
+    // Validate and calculate every final value before the first database write.
+    // A WordSense can belong to multiple groups, so this mutable snapshot preserves
+    // the current submitted-group ordering while accumulating every relationship.
+    for (let groupIndex = 0; groupIndex < output.length; groupIndex += 1) {
+      const source = sourceGroups[groupIndex];
+      const outputGroup = output[groupIndex];
+      if (!isPositiveId(source?.persianWordId) || outputGroup.persianWordId !== source.persianWordId ||
+          !Array.isArray(source.sourceWordIds) || source.sourceWordIds.length < 2 ||
+          source.sourceWordIds.some((id) => !isPositiveId(id)) ||
+          new Set(source.sourceWordIds).size !== source.sourceWordIds.length) {
+        throw new Error(`Source candidate group ${groupIndex + 1} is invalid.`);
+      }
+      const currentGroup = currentGroupByPersianWordId.get(source.persianWordId);
+      if (!currentGroup) {
+        throw new Error(`PersianWord group ${source.persianWordId} no longer exists.`);
+      }
+      const currentIds = currentGroup?.words.map((word) => word.id) ?? [];
+      if (!sameOrderedIds(source.sourceWordIds, currentIds)) {
+        throw new Error(
+          `PersianWord group ${source.persianWordId} changed. Create the data again before confirming it.`,
+        );
+      }
+      if (!sameOrderedIds(source.sourceWordIds, outputGroup.records.map((record) => record.id))) {
+        throw new Error(
+          `Output for PersianWord group ${source.persianWordId} must contain every source WordSense id exactly once and in source order.`,
+        );
+      }
+
+      for (const record of outputGroup.records) {
+        const current = nextById.get(record.id)!;
+        const existingSynonyms = positiveUniqueIds(current.synonymIds)
+          .filter((id) => id !== record.id && validWordIds.has(id));
+        const nextSynonyms = [...new Set([...existingSynonyms, ...record.synonymIds])].sort((a, b) => a - b);
+        const existingCompared = positiveUniqueIds(current.comparedMeaningWordIds)
+          .filter((id) => id !== record.id && validWordIds.has(id));
+        const nextCompared = [...new Set([
+          ...existingCompared,
+          ...source.sourceWordIds.filter((id) => id !== record.id),
+          ...nextSynonyms,
+        ])].sort((a, b) => a - b);
+        nextById.set(record.id, {
+          ...current,
           concept_explained_fa: record.concept_explained_fa,
           comparedMeaningWordIds: nextCompared,
           synonymIds: nextSynonyms,
+        });
+        affectedIds.add(record.id);
+        updated += 1;
+      }
+    }
+
+    for (const id of affectedIds) {
+      const next = nextById.get(id)!;
+      await updateWordSense({
+        where: { id },
+        data: {
+          concept_explained_fa: next.concept_explained_fa,
+          comparedMeaningWordIds: positiveUniqueIds(next.comparedMeaningWordIds),
+          synonymIds: positiveUniqueIds(next.synonymIds),
+          conceptMergeReviewed: next.conceptMergeReviewed,
+          inflectionMergeReviewed: next.inflectionMergeReviewed,
+          meaningReviewStatus: MeaningReviewStatus.CONFIRMED,
         },
         select: { id: true },
       }, tx);
     }
-    return { updated: output.records.length };
+    return { confirmed: output.length, updated, uniqueUpdated: affectedIds.size };
   }, { maxWait: 10_000, timeout: 120_000 });
 }

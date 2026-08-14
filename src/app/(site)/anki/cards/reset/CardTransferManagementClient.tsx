@@ -7,6 +7,7 @@ import {
   ankiOperations,
   chunkArray,
   getLastRevlogByCardIds,
+  type AnkiNotesInfo,
   WordAnkiConstants,
 } from "@/lib/anki";
 
@@ -66,6 +67,18 @@ type ReviewResetScanResult = {
   matchingSourceCards: ReviewResetCandidate[];
 };
 
+type SuspendedCardCandidate = {
+  sourceDeck: string;
+  sourceCardId: number;
+  noteId: number;
+  baseForm: string;
+  meaningFa: string;
+};
+
+type SuspendedCardScanResult = {
+  candidates: SuspendedCardCandidate[];
+};
+
 type PronunciationResetCandidate = {
   sourceCardId: number;
   pronunciationCardId: number;
@@ -109,6 +122,9 @@ export default function CardTransferManagementClient() {
   const [reviewResetCandidates, setReviewResetCandidates] = useState<ReviewResetCandidate[]>([]);
   const [reviewResetStatus, setReviewResetStatus] = useState<string | null>(null);
   const [reviewResetError, setReviewResetError] = useState<string | null>(null);
+  const [suspendedCardCandidates, setSuspendedCardCandidates] = useState<SuspendedCardCandidate[]>([]);
+  const [suspendedCardStatus, setSuspendedCardStatus] = useState<string | null>(null);
+  const [suspendedCardError, setSuspendedCardError] = useState<string | null>(null);
   const [pronunciationResetCandidates, setPronunciationResetCandidates] = useState<PronunciationResetCandidate[]>([]);
   const [pronunciationResetStatus, setPronunciationResetStatus] = useState<string | null>(null);
   const [pronunciationResetError, setPronunciationResetError] = useState<string | null>(null);
@@ -290,6 +306,51 @@ export default function CardTransferManagementClient() {
   function formatReviewResetStatus(result: ReviewResetScanResult, resetCount?: number) {
     const resetText = resetCount == null ? "" : ` | ریست‌شده: ${resetCount}`;
     return `کارت‌های مبدا با فلگ Orange: ${result.orangeSourceCards} | Review با interval بالای ۱۰ سال: ${result.reviewCardsOverTenYears} | کارت‌های مبدا قابل ریست: ${result.matchingSourceCards.length}${resetText}`;
+  }
+
+  async function scanSuspendedCards(): Promise<SuspendedCardScanResult> {
+    const candidates: SuspendedCardCandidate[] = [];
+
+    for (const source of SOURCE_CARDS) {
+      const response = await ankiOperations.findCards({
+        query: `deck:"${escapeAnkiQueryValue(source.deck)}" card:"${escapeAnkiQueryValue(source.cardTemplate)}" is:suspended`,
+      });
+      if (!response.ok) throw new Error(response.error);
+
+      const cards: Array<{ cardId: number; note: number }> = [];
+      for (const batch of chunkArray(response.result ?? [], BATCH_SIZE)) {
+        const infoResponse = await ankiOperations.cardsInfo({ cards: batch });
+        if (!infoResponse.ok) throw new Error(infoResponse.error);
+        cards.push(...(infoResponse.result ?? []));
+      }
+
+      const noteIds = [...new Set(cards.map((card) => card.note))];
+      if (!noteIds.length) continue;
+      const notesById = new Map<number, AnkiNotesInfo[number]>();
+      for (const batch of chunkArray(noteIds, BATCH_SIZE)) {
+        const notesResponse = await ankiOperations.notesInfo({ notes: batch });
+        if (!notesResponse.ok) throw new Error(notesResponse.error);
+        for (const note of notesResponse.result ?? []) notesById.set(note.noteId, note);
+      }
+
+      for (const card of cards) {
+        const note = notesById.get(card.note);
+        candidates.push({
+          sourceDeck: source.deck,
+          sourceCardId: card.cardId,
+          noteId: card.note,
+          baseForm: note?.fields.base_form?.value ?? "",
+          meaningFa: note?.fields.meaning_fa?.value ?? "",
+        });
+      }
+    }
+
+    return { candidates };
+  }
+
+  function formatSuspendedCardStatus(result: SuspendedCardScanResult, resetCount?: number) {
+    const resetText = resetCount == null ? "" : ` | ریست‌شده: ${resetCount}`;
+    return `کارت‌های Suspend‌شده در EnToFa و FaToEn: ${result.candidates.length}${resetText}`;
   }
 
   async function scanPronunciationSourceCandidates(
@@ -604,6 +665,43 @@ export default function CardTransferManagementClient() {
     }
   }
 
+  async function testSuspendedCards() {
+    if (running || previewLoading) return;
+    setPreviewLoading(true);
+    setSuspendedCardError(null);
+    setSuspendedCardStatus("در حال استخراج کارت‌های Suspend‌شده؛ هیچ کارتی ریست نمی‌شود…");
+    try {
+      const result = await scanSuspendedCards();
+      setSuspendedCardCandidates(result.candidates);
+      setSuspendedCardStatus(`Preview آماده است — ${formatSuspendedCardStatus(result)}`);
+    } catch (caught) {
+      setSuspendedCardCandidates([]);
+      setSuspendedCardError(caught instanceof Error ? caught.message : "ارتباط با AnkiConnect ناموفق بود.");
+      setSuspendedCardStatus(null);
+    } finally {
+      setPreviewLoading(false);
+    }
+  }
+
+  async function resetSuspendedCards() {
+    if (running || previewLoading) return;
+    setRunning(true);
+    setSuspendedCardError(null);
+    setSuspendedCardStatus("در حال استخراج و ریست کارت‌های Suspend‌شده…");
+    try {
+      const result = await scanSuspendedCards();
+      setSuspendedCardCandidates(result.candidates);
+      const cardIds = [...new Set(result.candidates.map((candidate) => candidate.sourceCardId))];
+      await resetCardsToStudyQueue(cardIds);
+      setSuspendedCardStatus(`انجام شد — ${formatSuspendedCardStatus(result, cardIds.length)}`);
+    } catch (caught) {
+      setSuspendedCardError(caught instanceof Error ? caught.message : "ارتباط با AnkiConnect ناموفق بود.");
+      setSuspendedCardStatus(null);
+    } finally {
+      setRunning(false);
+    }
+  }
+
   async function testReviewUnknownCards() {
     if (running || previewLoading) return;
 
@@ -725,7 +823,7 @@ export default function CardTransferManagementClient() {
     if (running || previewLoading) return;
     setRunning(true);
     setMainRunAllError(null);
-    setMainRunAllStatus("در حال اجرای گام‌های ۱ تا ۳…");
+    setMainRunAllStatus("در حال اجرای گام‌های ۱ تا ۴…");
     let currentStep = "گام ۱: بلد نبودن صوت";
     const report: string[] = [];
     try {
@@ -746,13 +844,19 @@ export default function CardTransferManagementClient() {
       await updateCardFlagsWithRollback(stepTwoSourceIds, 0, ORANGE_FLAG);
       report.push(`گام ۲: ${stepTwoSourceIds.length} کارت اصلی`);
 
-      currentStep = "گام ۳: اتمام مرور";
-      const stepThree = await scanCandidates();
-      const stepThreeReviewIds = [...new Set(stepThree.candidates.map((card) => card.reviewCardId))];
-      const stepThreeSourceIds = [...new Set(stepThree.candidates.map((card) => card.sourceCardId))];
-      await resetCardsToStudyQueue(stepThreeReviewIds);
-      await updateCardFlagsWithRollback(stepThreeSourceIds, ORANGE_FLAG, 0);
-      report.push(`گام ۳: ${stepThreeReviewIds.length} کارت Review`);
+      currentStep = "گام ۳: ریست کارت‌های Suspend‌شده";
+      const stepThree = await scanSuspendedCards();
+      const stepThreeCardIds = [...new Set(stepThree.candidates.map((card) => card.sourceCardId))];
+      await resetCardsToStudyQueue(stepThreeCardIds);
+      report.push(`گام ۳: ${stepThreeCardIds.length} کارت Suspend‌شده`);
+
+      currentStep = "گام ۴: اتمام مرور";
+      const stepFour = await scanCandidates();
+      const stepFourReviewIds = [...new Set(stepFour.candidates.map((card) => card.reviewCardId))];
+      const stepFourSourceIds = [...new Set(stepFour.candidates.map((card) => card.sourceCardId))];
+      await resetCardsToStudyQueue(stepFourReviewIds);
+      await updateCardFlagsWithRollback(stepFourSourceIds, ORANGE_FLAG, 0);
+      report.push(`گام ۴: ${stepFourReviewIds.length} کارت Review`);
       setMainRunAllStatus(`انجام شد — ${report.join(" | ")}`);
     } catch (caught) {
       const message = caught instanceof Error ? caught.message : "ارتباط با AnkiConnect ناموفق بود.";
@@ -811,7 +915,7 @@ export default function CardTransferManagementClient() {
             </div>
             <div className="flex items-center gap-2">
               <button type="button" onClick={() => void runAllMainSteps()} disabled={running || previewLoading} className="h-10 rounded-xl bg-[var(--primary)] px-3 text-xs font-bold text-[var(--primary-foreground)] disabled:opacity-60">
-                {running ? "در حال اجرا…" : "انجام ۳ مرحله"}
+                {running ? "در حال اجرا…" : "انجام ۴ مرحله"}
               </button>
               <button type="button" onClick={() => setIsHelpOpen(true)} aria-label="راهنمای کارت‌های اصلی" className="grid size-10 shrink-0 place-items-center rounded-full border border-card bg-card text-lg font-bold text-foreground shadow-elevated">?</button>
             </div>
@@ -877,17 +981,17 @@ export default function CardTransferManagementClient() {
           {reviewResetStatus && <p className="rounded-xl border border-card p-3 text-sm text-foreground">{reviewResetStatus}</p>}
           </section>
 
-          <section className="grid gap-3 rounded-2xl border border-card bg-background p-3 md:col-span-2">
+          <section className="grid gap-3 rounded-2xl border border-card bg-background p-3">
           <div>
-            <h2 className="text-base font-semibold text-foreground">۳. اتمام مرور</h2>
+            <h2 className="text-base font-semibold text-foreground">۳. ریست کارت‌های Suspend‌شده</h2>
             <p className="mt-1 text-xs leading-5 text-muted">
-              بدون فلگ + Again + <span dir="ltr">ivl &gt; 3650</span>: Review ریست و سپس Orange ثبت می‌شود.
+              کارت‌های Suspend‌شدهٔ <span dir="ltr">EnToFa</span> و <span dir="ltr">FaToEn</span> به کارت New تبدیل می‌شوند.
             </p>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             <button
               type="button"
-              onClick={() => void testReviewUnknownCards()}
+              onClick={() => void testSuspendedCards()}
               disabled={running || previewLoading}
               className="h-11 rounded-xl border border-card px-4 text-sm font-semibold text-foreground disabled:opacity-60"
             >
@@ -895,15 +999,44 @@ export default function CardTransferManagementClient() {
             </button>
             <button
               type="button"
+              onClick={() => void resetSuspendedCards()}
+              disabled={running || previewLoading}
+              className="h-11 rounded-xl bg-[var(--primary)] px-4 text-sm font-semibold text-[var(--primary-foreground)] disabled:opacity-60"
+            >
+              {running ? "در حال ریست…" : "ریست Suspend"}
+            </button>
+          </div>
+          {suspendedCardError && <p className="text-sm font-semibold text-red-700 dark:text-red-400">{suspendedCardError}</p>}
+          {suspendedCardStatus && <p className="rounded-xl border border-card p-3 text-sm text-foreground">{suspendedCardStatus}</p>}
+          </section>
+
+          <section className="grid gap-2 rounded-2xl border border-card bg-background p-2">
+          <div>
+            <h2 className="text-sm font-semibold text-foreground">۴. اتمام مرور</h2>
+            <p className="mt-1 text-xs leading-4 text-muted">
+              بدون فلگ + Again + <span dir="ltr">ivl &gt; 3650</span>: Review ریست و سپس Orange ثبت می‌شود.
+            </p>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <button
+              type="button"
+              onClick={() => void testReviewUnknownCards()}
+              disabled={running || previewLoading}
+              className="h-10 rounded-xl border border-card px-3 text-xs font-semibold text-foreground disabled:opacity-60"
+            >
+              {previewLoading ? "در حال آماده‌سازی Preview…" : "Test / Preview"}
+            </button>
+            <button
+              type="button"
               onClick={() => void reviewUnknownCards()}
               disabled={running || previewLoading}
-              className="h-11 min-w-0 rounded-xl bg-[var(--primary)] px-3 text-xs font-semibold leading-5 text-[var(--primary-foreground)] disabled:opacity-60"
+              className="h-10 min-w-0 rounded-xl bg-[var(--primary)] px-3 text-xs font-semibold leading-4 text-[var(--primary-foreground)] disabled:opacity-60"
             >
               {running ? "در حال انجام…" : "ریست مرور + Orange"}
             </button>
           </div>
-          {error && <p className="text-sm font-semibold text-red-700 dark:text-red-400">{error}</p>}
-          {status && <p className="rounded-xl border border-card p-3 text-sm text-foreground">{status}</p>}
+          {error && <p className="text-xs font-semibold text-red-700 dark:text-red-400">{error}</p>}
+          {status && <p className="rounded-xl border border-card p-2 text-xs text-foreground">{status}</p>}
           </section>
           </div>
         </section>
@@ -965,9 +1098,38 @@ export default function CardTransferManagementClient() {
           ) : null}
         </section>
 
-        <section className={`${candidates.length === 0 ? "hidden " : ""}order-4 overflow-hidden rounded-2xl border border-card bg-background xl:col-span-2`}>
+        <section className={`${suspendedCardCandidates.length === 0 ? "hidden " : ""}order-4 overflow-hidden rounded-2xl border border-card bg-background xl:col-span-2`}>
           <div className="border-b border-card p-4">
-            <h2 className="font-semibold text-foreground">نتیجهٔ گام ۳: اتمام مرور</h2>
+            <h2 className="font-semibold text-foreground">نتیجهٔ گام ۳: ریست کارت‌های Suspend‌شده</h2>
+            <p className="mt-1 text-sm text-muted">کارت‌های Suspend‌شدهٔ EnToFa و FaToEn که با ریست به صف New برمی‌گردند</p>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-right text-sm">
+              <thead className="bg-card/50 text-xs text-muted">
+                <tr>
+                  <th className="whitespace-nowrap px-4 py-3">لغت</th>
+                  <th className="whitespace-nowrap px-4 py-3">معنی فارسی</th>
+                  <th className="whitespace-nowrap px-4 py-3">دک مبدا</th>
+                  <th className="whitespace-nowrap px-4 py-3">Source Card</th>
+                </tr>
+              </thead>
+              <tbody>
+                {suspendedCardCandidates.map((candidate) => (
+                  <tr key={candidate.sourceCardId} className="border-t border-card">
+                    <td className="px-4 py-3 font-semibold text-foreground">{candidate.baseForm || "—"}</td>
+                    <td className="px-4 py-3 text-foreground">{candidate.meaningFa || "—"}</td>
+                    <td className="px-4 py-3 text-muted">{candidate.sourceDeck}</td>
+                    <td className="px-4 py-3 font-mono text-xs text-muted">{candidate.sourceCardId}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section className={`${candidates.length === 0 ? "hidden " : ""}order-5 overflow-hidden rounded-2xl border border-card bg-background xl:col-span-2`}>
+          <div className="border-b border-card p-4">
+            <h2 className="font-semibold text-foreground">نتیجهٔ گام ۴: اتمام مرور</h2>
             <p className="mt-1 text-sm text-muted">کارت‌های بدون فلگ Orange با Again و interval بالای ۱۰ سال و کارت Review متناظر</p>
           </div>
           <div className="overflow-x-auto">
@@ -1131,6 +1293,10 @@ export default function CardTransferManagementClient() {
                 <li>
                   <span className="font-semibold">بلد نبودن کارت‌های دک‌های اصلی:</span>{" "}
                   کارت‌های <span dir="ltr">EnToFa</span> و <span dir="ltr">FaToEn</span> با فلگ Orange (کد ۲) بررسی می‌شوند. اگر کارت متناظر <span dir="ltr">{REVIEW_CARD_TEMPLATE}</span> در دک <span dir="ltr">{REVIEW_DECK}</span> آخرین <span dir="ltr">ivl</span> بیشتر از ۳۶۵۰ روز داشته باشد، ابتدا کارت‌های مبدا ریست و فقط پس از موفقیت، فلگ Orange آن‌ها حذف می‌شود.
+                </li>
+                <li>
+                  <span className="font-semibold">ریست کارت‌های Suspend‌شده:</span>{" "}
+                  همهٔ کارت‌های Suspend‌شده با نوع <span dir="ltr">EnToFa</span> در دک <span dir="ltr">{WordAnkiConstants.decks.EnToFa}</span> و نوع <span dir="ltr">FaToEn</span> در دک <span dir="ltr">{WordAnkiConstants.decks.FaToEn}</span> ریست می‌شوند و به صف New برمی‌گردند.
                 </li>
                 <li>
                   <span className="font-semibold">اتمام مرور:</span>{" "}

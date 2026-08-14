@@ -55,7 +55,7 @@ export async function getWordColumnEmptyCounts(): Promise<TableColumnEmptyCounts
     otherMeaningIds: countEmpty(rows, "otherMeaningIds"),
     comparedMeaningWordIds: countEmpty(rows, "comparedMeaningWordIds"),
     synonymIds: countEmpty(rows, "synonymIds"),
-    meanings_confirmed: 0,
+    meaningReviewStatus: 0,
     pos: countEmpty(rows, "pos"),
     concept_explained_fa: countEmpty(rows, "concept_explained_fa"),
     concept_explained_fa_audio_file_name: countEmpty(rows, "concept_explained_fa_audio_file_name"),

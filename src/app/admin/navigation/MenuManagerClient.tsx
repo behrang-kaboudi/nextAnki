@@ -19,6 +19,13 @@ type PendingMove = {
   fromTop: number;
   toTop: number;
 };
+type ParentOption = {
+  value: string;
+  label: string;
+  disabled?: boolean;
+};
+
+const MAX_MENU_DEPTH = 3;
 
 const emptyMenus: EditableMenus = {
   site: { id: "marketing", primary: [] },
@@ -129,6 +136,66 @@ function getBreadcrumbs(items: MenuItem[], path: Path) {
     currentItems = item.type === "group" ? item.items : [];
   }
   return labels;
+}
+
+function isPathPrefix(prefix: Path, path: Path) {
+  return prefix.length <= path.length && prefix.every((part, index) => part === path[index]);
+}
+
+function canPlaceItemAtDepth(item: MenuItem, depth: number): boolean {
+  if (depth > MAX_MENU_DEPTH) return false;
+  if (item.type === "link") return true;
+  if (depth >= MAX_MENU_DEPTH) return false;
+  return item.items.every((child) => canPlaceItemAtDepth(child, depth + 1));
+}
+
+function collectParentOptions(
+  items: MenuItem[],
+  movingPath: Path,
+  movingItem: MenuItem,
+  parentPath: Path = [],
+  parentLabels: string[] = [],
+): ParentOption[] {
+  return items.flatMap((item, index) => {
+    if (item.type !== "group") return [];
+
+    const path = [...parentPath, index];
+    const labels = [...parentLabels, item.label || "Untitled"];
+    const isInsideMovingItem = isPathPrefix(movingPath, path);
+    const exceedsDepth = !canPlaceItemAtDepth(movingItem, path.length + 1);
+    const disabled = isInsideMovingItem || exceedsDepth;
+    const reason = isInsideMovingItem ? "inside this item" : exceedsDepth ? "max 3 levels" : "";
+
+    return [
+      {
+        value: pathKey(path),
+        label: `${labels.join(" / ")}${reason ? ` (${reason})` : ""}`,
+        disabled,
+      },
+      ...collectParentOptions(item.items, movingPath, movingItem, path, labels),
+    ];
+  });
+}
+
+function removeAtPath(items: MenuItem[], path: Path): MenuItem[] {
+  const parentPath = path.slice(0, -1);
+  const index = path[path.length - 1];
+  return updateListAtPath(items, parentPath, (siblings) => siblings.filter((_, siblingIndex) => siblingIndex !== index));
+}
+
+function adjustPathAfterRemoval(path: Path, removedPath: Path): Path {
+  const removedParentPath = removedPath.slice(0, -1);
+  const removedIndex = removedPath[removedPath.length - 1];
+  if (
+    removedIndex == null ||
+    path.length <= removedParentPath.length ||
+    !isPathPrefix(removedParentPath, path) ||
+    path[removedParentPath.length] <= removedIndex
+  ) {
+    return path;
+  }
+
+  return path.map((part, index) => (index === removedParentPath.length ? part - 1 : part));
 }
 
 function FieldLabel({ children }: { children: React.ReactNode }) {
@@ -374,19 +441,23 @@ function ItemInspector({
   path,
   breadcrumbs,
   iconNames,
+  parentOptions,
   onChange,
   onAddChild,
   onDelete,
   onOpenHrefPicker,
+  onMoveToParent,
 }: {
   item: MenuItem | null;
   path: Path | null;
   breadcrumbs: string[];
   iconNames: MenuIconName[];
+  parentOptions: ParentOption[];
   onChange: (path: Path, item: MenuItem) => void;
   onAddChild: (path: Path, item: MenuItem) => void;
   onDelete: (path: Path) => void;
   onOpenHrefPicker: (path: Path) => void;
+  onMoveToParent: (path: Path, parentPath: Path) => void;
 }) {
   const [confirmingDelete, setConfirmingDelete] = useState(false);
 
@@ -455,6 +526,27 @@ function ItemInspector({
             placeholder="Navigation label"
             className="min-h-11 rounded-xl border border-black/10 bg-white px-3 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 dark:border-white/15 dark:bg-white/5"
           />
+        </FieldLabel>
+
+        <FieldLabel>
+          Parent
+          <select
+            value={pathKey(path.slice(0, -1))}
+            onChange={(event) =>
+              onMoveToParent(path, event.target.value ? event.target.value.split(".").map(Number) : [])
+            }
+            className="min-h-11 rounded-xl border border-black/10 bg-white px-3 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 dark:border-white/15 dark:bg-neutral-900"
+          >
+            <option value="">Root level</option>
+            {parentOptions.map((option) => (
+              <option key={option.value} value={option.value} disabled={option.disabled}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+          <span className="text-[11px] font-normal leading-5 text-muted">
+            Move this item to the root or into another menu group. Links cannot contain children.
+          </span>
         </FieldLabel>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
@@ -885,6 +977,31 @@ export function MenuManagerClient({
     if (samePath(selectedPath, path)) setSelectedPath(targetPath);
   }
 
+  function handleMoveToParent(path: Path, destinationParentPath: Path) {
+    const currentParentPath = path.slice(0, -1);
+    if (samePath(currentParentPath, destinationParentPath)) return;
+
+    const item = getAtPath(menus[activeMenu].primary, path);
+    if (!item || isPathPrefix(path, destinationParentPath)) return;
+    if (!canPlaceItemAtDepth(item, destinationParentPath.length + 1)) return;
+
+    const adjustedParentPath = adjustPathAfterRemoval(destinationParentPath, path);
+    const withoutItem = removeAtPath(menus[activeMenu].primary, path);
+    const destinationItems = getListAtPath(withoutItem, adjustedParentPath);
+    if (!destinationItems) return;
+
+    const nextPath = [...adjustedParentPath, destinationItems.length];
+    updateActiveMenu((menu) => ({
+      ...menu,
+      primary: updateListAtPath(removeAtPath(menu.primary, path), adjustedParentPath, (items) => [...items, item]),
+    }));
+
+    setSelectedPath(nextPath);
+    if (samePath(hrefPickerPath, path)) setHrefPickerPath(nextPath);
+    setCollapsedPaths(new Set());
+    setQuery("");
+  }
+
   function chooseHref(path: Path, href: string) {
     const item = getAtPath(menus[activeMenu].primary, path);
     handleChange(path, item?.type === "link" ? { ...item, href } : createLink());
@@ -915,6 +1032,9 @@ export function MenuManagerClient({
   const stats = useMemo(() => countMenuItems(active.primary), [active.primary]);
   const groupPaths = useMemo(() => collectGroupPaths(active.primary), [active.primary]);
   const breadcrumbs = selectedPath ? getBreadcrumbs(active.primary, selectedPath) : [];
+  const parentOptions = selectedPath && selectedItem
+    ? collectParentOptions(active.primary, selectedPath, selectedItem)
+    : [];
   const visibleRootCount = active.primary.filter((item) => itemContainsQuery(item, normalizedQuery)).length;
   const statusTone = saving
     ? "bg-sky-500"
@@ -1120,10 +1240,12 @@ export function MenuManagerClient({
             path={selectedPath}
             breadcrumbs={breadcrumbs}
             iconNames={iconNames}
+            parentOptions={parentOptions}
             onChange={handleChange}
             onAddChild={handleAddChild}
             onDelete={handleDelete}
             onOpenHrefPicker={setHrefPickerPath}
+            onMoveToParent={handleMoveToParent}
           />
         </aside>
       </section>

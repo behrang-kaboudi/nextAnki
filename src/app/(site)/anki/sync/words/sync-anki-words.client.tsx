@@ -23,6 +23,12 @@ type SyncAllStatus = {
   skippedSame: number;
   skippedNoLinkId: number;
   skippedNoWord: number;
+  skippedNotReady?: number;
+  readinessFailureSamples?: Array<{
+    wordSenseId: number;
+    ankiLinkId: string;
+    issues: Array<{ field: string; reason: "missing" | "invalid" }>;
+  }>;
   failed: number;
   failureSamples?: unknown[];
   mediaUploaded: number;
@@ -998,10 +1004,14 @@ export default function SyncAnkiWordsClient() {
   const sentenceEnSkippedTotal =
     (sentenceEnStatus?.skippedSame ?? 0) +
     (sentenceEnStatus?.skippedNoLinkId ?? 0) +
-    (sentenceEnStatus?.skippedNoWord ?? 0);
+    (sentenceEnStatus?.skippedNoWord ?? 0) +
+    (sentenceEnStatus?.skippedNotReady ?? 0);
 
   const jsonHintSkippedTotal =
-    (jsonHintStatus?.skippedSame ?? 0) + (jsonHintStatus?.skippedNoLinkId ?? 0) + (jsonHintStatus?.skippedNoWord ?? 0);
+    (jsonHintStatus?.skippedSame ?? 0) +
+    (jsonHintStatus?.skippedNoLinkId ?? 0) +
+    (jsonHintStatus?.skippedNoWord ?? 0) +
+    (jsonHintStatus?.skippedNotReady ?? 0);
 
   const mediaSkippedTotal =
     (mediaSyncStatus?.skippedSame ?? 0) +
@@ -1009,7 +1019,10 @@ export default function SyncAnkiWordsClient() {
     (mediaSyncStatus?.skippedNoWord ?? 0);
 
   const fullSkippedTotal =
-    (fullSyncStatus?.skippedSame ?? 0) + (fullSyncStatus?.skippedNoLinkId ?? 0) + (fullSyncStatus?.skippedNoWord ?? 0);
+    (fullSyncStatus?.skippedSame ?? 0) +
+    (fullSyncStatus?.skippedNoLinkId ?? 0) +
+    (fullSyncStatus?.skippedNoWord ?? 0) +
+    (fullSyncStatus?.skippedNotReady ?? 0);
 
   const dedupSkippedTotal =
     (dedupStatus?.skippedSame ?? 0) + (dedupStatus?.skippedNoLinkId ?? 0) + (dedupStatus?.skippedNoWord ?? 0);
@@ -1017,22 +1030,26 @@ export default function SyncAnkiWordsClient() {
   const conceptSkippedTotal =
     (conceptExplainedFaStatus?.skippedSame ?? 0) +
     (conceptExplainedFaStatus?.skippedNoLinkId ?? 0) +
-    (conceptExplainedFaStatus?.skippedNoWord ?? 0);
+    (conceptExplainedFaStatus?.skippedNoWord ?? 0) +
+    (conceptExplainedFaStatus?.skippedNotReady ?? 0);
 
   const otherSkippedTotal =
     (otherMeaningsFaStatus?.skippedSame ?? 0) +
     (otherMeaningsFaStatus?.skippedNoLinkId ?? 0) +
-    (otherMeaningsFaStatus?.skippedNoWord ?? 0);
+    (otherMeaningsFaStatus?.skippedNoWord ?? 0) +
+    (otherMeaningsFaStatus?.skippedNotReady ?? 0);
 
   const meaningSkippedTotal =
     (meaningFaStatus?.skippedSame ?? 0) +
     (meaningFaStatus?.skippedNoLinkId ?? 0) +
-    (meaningFaStatus?.skippedNoWord ?? 0);
+    (meaningFaStatus?.skippedNoWord ?? 0) +
+    (meaningFaStatus?.skippedNotReady ?? 0);
 
   const sentenceSkippedTotal =
     (sentenceEnMeaningFaStatus?.skippedSame ?? 0) +
     (sentenceEnMeaningFaStatus?.skippedNoLinkId ?? 0) +
-    (sentenceEnMeaningFaStatus?.skippedNoWord ?? 0);
+    (sentenceEnMeaningFaStatus?.skippedNoWord ?? 0) +
+    (sentenceEnMeaningFaStatus?.skippedNotReady ?? 0);
 
   const anySyncRunning =
     [
@@ -1376,16 +1393,29 @@ export default function SyncAnkiWordsClient() {
             </div>
             <div>
               {fullSyncStatus ? (
-                <span>
-                  full sync: Processed{" "}
-                  <span className="font-semibold">
-                    {fullSyncStatus.processed}/{fullSyncStatus.total}
-                  </span>{" "}
-                  • Created <span className="font-semibold">{fullSyncStatus.created ?? 0}</span> • Updated{" "}
-                  <span className="font-semibold">{fullSyncStatus.updated}</span> • Skipped{" "}
-                  <span className="font-semibold">{fullSkippedTotal}</span> • Failed{" "}
-                  <span className="font-semibold">{fullSyncStatus.failed}</span>
-                </span>
+                <>
+                  <span>
+                    full sync: Processed{" "}
+                    <span className="font-semibold">
+                      {fullSyncStatus.processed}/{fullSyncStatus.total}
+                    </span>{" "}
+                    • Created <span className="font-semibold">{fullSyncStatus.created ?? 0}</span> • Updated{" "}
+                    <span className="font-semibold">{fullSyncStatus.updated}</span> • Skipped{" "}
+                    <span className="font-semibold">{fullSkippedTotal}</span> • Not ready{" "}
+                    <span className="font-semibold">{fullSyncStatus.skippedNotReady ?? 0}</span> • Failed{" "}
+                    <span className="font-semibold">{fullSyncStatus.failed}</span>
+                  </span>
+                  {fullSyncStatus.readinessFailureSamples?.length ? (
+                    <details className="mt-1">
+                      <summary dir="rtl" className="cursor-pointer text-right">
+                        نمونهٔ رکوردهای آماده‌نبودۀ Sync و دلیل آن‌ها
+                      </summary>
+                      <pre dir="ltr" className="mt-1 max-h-56 overflow-auto whitespace-pre-wrap text-xs">
+                        {JSON.stringify(fullSyncStatus.readinessFailureSamples, null, 2)}
+                      </pre>
+                    </details>
+                  ) : null}
+                </>
               ) : (
                 <span>full sync: Processed 0/0 • Created 0 • Updated 0 • Skipped 0 • Failed 0</span>
               )}

@@ -15,6 +15,7 @@ import { getPersianWordAudioAbsolutePath } from "@/lib/audio/persianWordAudioPat
 import { getWordSenseConceptAudioAbsolutePath } from "@/lib/audio/wordSenseConceptAudioPaths.server";
 import { getSentenceAudioAbsolutePath } from "@/lib/audio/sentenceAudioPaths.server";
 import { prisma } from "@/lib/prisma";
+import { getWordAnkiReadinessIssues } from "@/lib/anki/wordAnkiSyncReadiness";
 import {
   hydrateWordSenseWithPersianMeanings,
   type WordSenseWithPersianMeanings,
@@ -180,6 +181,7 @@ function toSoundTagFromAbsPath(absPath: string | null): string {
   try {
     const stat = fs.statSync(absPath);
     if (!stat.isFile() || stat.size <= 0) return "";
+    fs.accessSync(absPath, fs.constants.R_OK);
   } catch {
     return "";
   }
@@ -237,7 +239,9 @@ function englishWordAudioTag(filename: string | null | undefined): string {
 function sentenceAudioTag(filename: string | null | undefined): string {
   if (!filename) return "";
   try {
-    const stat = fs.statSync(getSentenceAudioAbsolutePath(filename));
+    const absolutePath = getSentenceAudioAbsolutePath(filename);
+    const stat = fs.statSync(absolutePath);
+    fs.accessSync(absolutePath, fs.constants.R_OK);
     return stat.isFile() && stat.size > 0 ? `[sound:${filename}]` : "";
   } catch {
     return "";
@@ -264,6 +268,26 @@ function getFirstPartSpellAudio(word: string): string {
     .join(" ");
 }
 
+function getFirstSixLetters(word: string): string {
+  return String(word ?? "")
+    .trim()
+    .slice(0, 6)
+    .toUpperCase()
+    .split("")
+    .join("-");
+}
+
+function getFirstSixLettersAudio(word: string): string {
+  return String(word ?? "")
+    .trim()
+    .slice(0, 6)
+    .toLowerCase()
+    .split("")
+    .filter((letter) => /^[a-z]$/.test(letter))
+    .map((letter) => `[sound:alphabet-${letter}.mp3]`)
+    .join(" ");
+}
+
 export const WORD_ANKI_FIELD_GENERATORS = {
   anki_link_id: (w) => w.anki_link_id,
   base_form: (w) => w.base_form,
@@ -275,6 +299,8 @@ export const WORD_ANKI_FIELD_GENERATORS = {
       : "",
   "first-part-spell": (w) => getFirstPartSpell(w.base_form),
   "first-part-spell-audio": (w) => getFirstPartSpellAudio(w.base_form),
+  "first-six-letters": (w) => getFirstSixLetters(w.base_form),
+  "first-six-letters-audio": (w) => getFirstSixLettersAudio(w.base_form),
   phonetic_us: (w) => w.phonetic_us ?? "",
   pos: (w) => w.pos ?? "",
   meaning_fa: (w) => w.meaning_fa ?? "",
@@ -337,6 +363,28 @@ export const WORD_ANKI_FIELD_GENERATORS = {
 } as const satisfies Record<string, WordAnkiFieldGenerator>;
 
 export type WordAnkiManagedFieldName = keyof typeof WORD_ANKI_FIELD_GENERATORS;
+
+export function getHydratedWordAnkiReadinessIssues(
+  word: WordForAnki,
+  fields: Partial<Record<string, string>>,
+) {
+  return getWordAnkiReadinessIssues({
+    fields,
+    sourceTexts: {
+      audio_source_text: word.audio_source_text,
+      concept_explained_fa_audio_source_text:
+        word.concept_explained_fa_audio_source_text,
+      sentence_en_audio_source_text: word.sentence?.sentence_en_audio_source_text,
+      sentence_en_meaning_fa_audio_source_text:
+        word.sentence?.sentence_en_meaning_fa_audio_source_text,
+    },
+    scores: {
+      learning_depth: word.learning_depth,
+      imageability: word.imageability,
+      productive_target: word.productive_target,
+    },
+  });
+}
 
 // These are intentionally preserved in Anki and are not sourced from the current DB.
 // Keeping the list explicit prevents a misspelled configured field from being ignored.

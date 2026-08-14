@@ -31,7 +31,7 @@ function bytesLabel(bytes: number) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-export default function DeleteWordSenseModalButton({ id, label }: { id: number; label: string }) {
+export default function DeleteWordSenseModalButton({ id, label, onDeleted }: { id: number; label: string; onDeleted?: (id: number) => void }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -74,6 +74,7 @@ export default function DeleteWordSenseModalButton({ id, label }: { id: number; 
       const result = (await response.json()) as { ok?: boolean; error?: string };
       if (!response.ok || !result.ok) throw new Error(result.error || "Could not delete this WordSense.");
       setOpen(false);
+      onDeleted?.(id);
       router.refresh();
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : String(reason));

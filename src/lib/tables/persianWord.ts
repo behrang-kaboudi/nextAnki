@@ -33,10 +33,19 @@ function stringVariants(value: Prisma.JsonValue): string[] {
 
 async function findPersianWordByNormalizedText(
   normalizedText: string,
-  db: Prisma.TransactionClient | typeof prisma
+  db: Prisma.TransactionClient | typeof prisma,
+  meaningFaIpa?: string | null,
+  meaningFaIpaNormalized?: string | null,
 ): Promise<PersianWordItem | null> {
   const matches = await db.persianWord.findMany({
-    where: { normalized_text: normalizedText },
+    where: {
+      normalized_text: normalizedText,
+      ...(meaningFaIpa
+        ? { meaning_fa_IPA: meaningFaIpa }
+        : meaningFaIpaNormalized
+          ? { meaning_fa_IPA_normalize: meaningFaIpaNormalized }
+          : {}),
+    },
     orderBy: { id: "asc" },
     take: 2,
     select: persianWordSelect,
@@ -44,7 +53,7 @@ async function findPersianWordByNormalizedText(
 
   if (matches.length > 1) {
     throw new PersianWordNormalizationConflictError(
-      `More than one PersianWord has normalized_text "${normalizedText}".`
+      `More than one PersianWord matches normalized_text "${normalizedText}"${meaningFaIpa || meaningFaIpaNormalized ? " and the supplied IPA" : ""}.`,
     );
   }
 
@@ -86,7 +95,12 @@ export async function addPersianWordWithClient(
   const normalizedText = normalizePersianFull(rawText);
   if (!canonicalText || !normalizedText) throw new Error("The word must contain at least one Persian letter.");
 
-  const existing = await findPersianWordByNormalizedText(normalizedText, db);
+  const existing = await findPersianWordByNormalizedText(
+    normalizedText,
+    db,
+    options.meaningFaIpa,
+    options.meaningFaIpaNormalized,
+  );
 
   if (!existing) {
     const item = await db.persianWord.create({
@@ -96,6 +110,7 @@ export async function addPersianWordWithClient(
           not_normalized_texts: rawText === canonicalText ? [] : [rawText],
           meaning_fa_IPA: options.meaningFaIpa?.trim() || null,
           meaning_fa_IPA_normalize: options.meaningFaIpaNormalized?.trim() || null,
+          meaning_fa_IPA_confirmed: false,
         },
         select: persianWordSelect,
       });

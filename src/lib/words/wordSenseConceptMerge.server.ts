@@ -1,22 +1,35 @@
 import "server-only";
 
-import type { Prisma } from "@prisma/client";
+import { MeaningReviewStatus, type Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
 import { addPersianWordWithClient } from "@/lib/tables/persianWord";
+import {
+  conceptMergePersianResolutionKey,
+  preferredConceptMergePersianWordIds,
+} from "@/lib/words/conceptMergePersianIdentity";
 import { deleteWordSense, updateWordSense } from "@/lib/words/wordSenseRepo";
+import { selectParallelPromptLane, type ParallelPromptPartition } from "@/lib/words/parallelPromptPartition";
+import { resolvePersianWordOccurrences } from "@/lib/words/persianWordResolution.server";
+import type {
+  PersianWordAmbiguity,
+  PersianWordResolutionSelection,
+} from "@/lib/words/persianWordResolution";
 
 type SourceWordSense = {
   id: number;
   englishId: number;
   meaningId: number | null;
   otherMeaningIds: Prisma.JsonValue | null;
+  pos: string | null;
   concept_explained_fa: string | null;
   sentenceIds: Prisma.JsonValue | null;
-  meanings_confirmed: boolean;
+  meaningReviewStatus: MeaningReviewStatus;
   conceptMergeReviewed: boolean;
   english: { base_form: string };
 };
+
+type ConceptMergeReadClient = Pick<Prisma.TransactionClient, "persianWord" | "sentence">;
 
 export type MergeOutputRow =
   | {
@@ -37,12 +50,20 @@ const sourceSelect = {
   englishId: true,
   meaningId: true,
   otherMeaningIds: true,
+  pos: true,
   concept_explained_fa: true,
   sentenceIds: true,
-  meanings_confirmed: true,
+  meaningReviewStatus: true,
   conceptMergeReviewed: true,
   english: { select: { base_form: true } },
 } satisfies Prisma.WordSenseSelect;
+
+export class ConceptMergePersianWordResolutionRequiredError extends Error {
+  constructor(public readonly ambiguities: PersianWordAmbiguity[]) {
+    super("One or more Persian meanings have multiple pronunciation records and require human selection.");
+    this.name = "ConceptMergePersianWordResolutionRequiredError";
+  }
+}
 
 function positiveIds(value: Prisma.JsonValue | null): number[] {
   if (!Array.isArray(value)) return [];
@@ -64,6 +85,7 @@ function groupByEnglish(words: SourceWordSense[]) {
 
 export async function getPendingWordSenseConceptMergeCount() {
   const words = await prisma.wordSense.findMany({
+    where: { meaningReviewStatus: MeaningReviewStatus.CONFIRMED },
     orderBy: [{ englishId: "asc" }, { id: "asc" }],
     select: sourceSelect,
   });
@@ -78,9 +100,62 @@ function sentenceIdsFor(word: SourceWordSense) {
   return positiveIds(word.sentenceIds);
 }
 
-export async function prepareWordSenseConceptMerge(limit: number) {
+async function conceptMergeItemsForGroups(
+  groups: SourceWordSense[][],
+  client: ConceptMergeReadClient,
+) {
+  const meaningIds = [...new Set(groups.flatMap((group) =>
+    group.flatMap((word) => [
+      ...(word.meaningId ? [word.meaningId] : []),
+      ...positiveIds(word.otherMeaningIds),
+    ]),
+  ))];
+  const sentenceIds = [...new Set(groups.flatMap((group) => group.flatMap(sentenceIdsFor)))];
+  const sentences = sentenceIds.length
+    ? await client.sentence.findMany({
+        where: { id: { in: sentenceIds } },
+        select: { id: true, sentence_en: true, sentence_en_meaning_fa: true },
+      })
+    : [];
+  const sentenceById = new Map(sentences.map((sentence) => [sentence.id, sentence]));
+  const meanings = meaningIds.length
+    ? await client.persianWord.findMany({
+        where: { id: { in: meaningIds } },
+        select: { id: true, canonical_text: true },
+      })
+    : [];
+  const meaningById = new Map(meanings.map((meaning) => [meaning.id, meaning.canonical_text]));
+
+  return groups.map((group) =>
+    group.map((word) => ({
+      id: word.id,
+      word: word.english.base_form,
+      meaning_fa: word.meaningId ? meaningById.get(word.meaningId) ?? "" : "",
+      other_meanings_fa: positiveIds(word.otherMeaningIds)
+        .filter((id) => id !== word.meaningId)
+        .flatMap((id) => {
+          const meaning = meaningById.get(id);
+          return meaning ? [meaning] : [];
+        }),
+      concept_explained_fa: word.concept_explained_fa ?? "",
+      pos: word.pos ?? "",
+      sentenceIds: positiveIds(word.sentenceIds),
+      sentences: positiveIds(word.sentenceIds).flatMap((id) => {
+        const sentence = sentenceById.get(id);
+        return sentence ? [{
+          id: sentence.id,
+          sentence_en: sentence.sentence_en,
+          sentence_en_meaning_fa: sentence.sentence_en_meaning_fa,
+        }] : [];
+      }),
+    })),
+  );
+}
+
+export async function prepareWordSenseConceptMerge(partition: ParallelPromptPartition) {
   return prisma.$transaction(async (tx) => {
     const words = await tx.wordSense.findMany({
+      where: { meaningReviewStatus: MeaningReviewStatus.CONFIRMED },
       orderBy: [{ englishId: "asc" }, { id: "asc" }],
       select: sourceSelect,
     });
@@ -107,40 +182,17 @@ export async function prepareWordSenseConceptMerge(limit: number) {
         group.length >= 2 &&
         group.some((word) => !word.conceptMergeReviewed),
     );
-    const selected = limit > 0 ? eligible.slice(0, limit) : eligible;
-    const meaningIds = [...new Set(selected.flatMap((group) =>
-      group.flatMap((word) => [
-        ...(word.meaningId ? [word.meaningId] : []),
-        ...positiveIds(word.otherMeaningIds),
-      ]),
-    ))];
-    const meanings = meaningIds.length
-      ? await tx.persianWord.findMany({
-          where: { id: { in: meaningIds } },
-          select: { id: true, canonical_text: true },
-        })
-      : [];
-    const meaningById = new Map(meanings.map((meaning) => [meaning.id, meaning.canonical_text]));
-
+    const { items: selected, laneEligibleCount } = selectParallelPromptLane(
+      eligible,
+      (group) => group[0].englishId,
+      partition,
+    );
     return {
       reviewedSingleRecords,
       totalEligibleGroups: eligible.length,
+      laneEligibleCount,
       sourceGroups: selected.map((group) => group.map((word) => word.id)),
-      items: selected.map((group) =>
-        group.map((word) => ({
-          id: word.id,
-          word: word.english.base_form,
-          meaning_fa: word.meaningId ? meaningById.get(word.meaningId) ?? "" : "",
-          other_meanings_fa: positiveIds(word.otherMeaningIds)
-            .filter((id) => id !== word.meaningId)
-            .flatMap((id) => {
-              const meaning = meaningById.get(id);
-              return meaning ? [meaning] : [];
-            }),
-          concept_explained_fa: word.concept_explained_fa ?? "",
-          sentenceIds: positiveIds(word.sentenceIds),
-        })),
-      ),
+      items: await conceptMergeItemsForGroups(selected, tx),
     };
   }, { maxWait: 10_000, timeout: 120_000 });
 }
@@ -205,11 +257,66 @@ export function parseMergeOutput(value: unknown): MergeOutputRow[] {
   return rows;
 }
 
+export async function loadWordSenseConceptMergeGroups(output: MergeOutputRow[]) {
+  const outputIds = output.map((row) => row.id);
+  const referencedWords = await prisma.wordSense.findMany({
+    where: {
+      id: { in: outputIds },
+      meaningReviewStatus: MeaningReviewStatus.CONFIRMED,
+    },
+    select: sourceSelect,
+  });
+  if (referencedWords.length !== outputIds.length) {
+    throw new Error("One or more response ids no longer exist.");
+  }
+  const referencedById = new Map(referencedWords.map((word) => [word.id, word]));
+  const englishIds: number[] = [];
+  const seenEnglishIds = new Set<number>();
+  for (const id of outputIds) {
+    const englishId = referencedById.get(id)!.englishId;
+    if (!seenEnglishIds.has(englishId)) {
+      seenEnglishIds.add(englishId);
+      englishIds.push(englishId);
+    }
+  }
+  const currentWords = await prisma.wordSense.findMany({
+    where: {
+      englishId: { in: englishIds },
+      meaningReviewStatus: MeaningReviewStatus.CONFIRMED,
+    },
+    orderBy: [{ englishId: "asc" }, { id: "asc" }],
+    select: sourceSelect,
+  });
+  const currentGroupsByEnglishId = new Map(
+    groupByEnglish(currentWords).map((group) => [group[0].englishId, group]),
+  );
+  const groups = englishIds.map((englishId) => {
+    const group = currentGroupsByEnglishId.get(englishId) ?? [];
+    const responseGroupIds = outputIds.filter((id) => referencedById.get(id)?.englishId === englishId);
+    const currentIds = group.map((word) => word.id);
+    if (group.length < 2 || !sameIds(responseGroupIds, currentIds)) {
+      throw new Error(`Response ids do not contain the complete current group for englishId ${englishId}.`);
+    }
+    if (!group.some((word) => !word.conceptMergeReviewed)) {
+      throw new Error(`The group for englishId ${englishId} was already reviewed.`);
+    }
+    return group;
+  });
+  return {
+    sourceGroups: groups.map((group) => group.map((word) => word.id)),
+    items: await conceptMergeItemsForGroups(groups, prisma),
+  };
+}
+
 function sameIds(left: readonly number[], right: readonly number[]) {
   return left.length === right.length && left.every((id) => right.includes(id));
 }
 
-export async function applyWordSenseConceptMerge(sourceGroups: number[][], output: MergeOutputRow[]) {
+export async function applyWordSenseConceptMerge(
+  sourceGroups: number[][],
+  output: MergeOutputRow[],
+  selections: PersianWordResolutionSelection[] = [],
+) {
   return prisma.$transaction(async (tx) => {
     const sourceIds = sourceGroups.flat();
     if (!sourceGroups.length || sourceGroups.some((group) => group.length < 2) ||
@@ -231,6 +338,9 @@ export async function applyWordSenseConceptMerge(sourceGroups: number[][], outpu
     }
     const words = await tx.wordSense.findMany({ where: { id: { in: sourceIds } }, select: sourceSelect });
     if (words.length !== sourceIds.length) throw new Error("One or more source records no longer exist.");
+    if (words.some((word) => word.meaningReviewStatus !== MeaningReviewStatus.CONFIRMED)) {
+      throw new Error("One or more source records are no longer confirmed. Create the data again.");
+    }
     const byId = new Map(words.map((word) => [word.id, word]));
 
     for (const groupIds of sourceGroups) {
@@ -240,7 +350,10 @@ export async function applyWordSenseConceptMerge(sourceGroups: number[][], outpu
       if (!group.some((word) => !word.conceptMergeReviewed)) {
         throw new Error(`The group for englishId ${englishId} is no longer eligible for concept merging.`);
       }
-      const currentIds = (await tx.wordSense.findMany({ where: { englishId }, select: { id: true } })).map((word) => word.id);
+      const currentIds = (await tx.wordSense.findMany({
+        where: { englishId, meaningReviewStatus: MeaningReviewStatus.CONFIRMED },
+        select: { id: true },
+      })).map((word) => word.id);
       if (!sameIds(groupIds, currentIds)) throw new Error(`The records for englishId ${englishId} changed. Create the data again.`);
     }
 
@@ -266,22 +379,98 @@ export async function applyWordSenseConceptMerge(sourceGroups: number[][], outpu
       if (!retained.some((row) => groupIds.includes(row.id))) throw new Error("Every source group must retain at least one record.");
     }
 
+    const referencedMeaningIds = [...new Set(words.flatMap((word) => [
+      ...(word.meaningId ? [word.meaningId] : []),
+      ...positiveIds(word.otherMeaningIds),
+    ]))];
+    const referencedMeanings = referencedMeaningIds.length
+      ? await tx.persianWord.findMany({
+          where: { id: { in: referencedMeaningIds } },
+          select: { id: true, canonical_text: true },
+        })
+      : [];
+    const canonicalTextById = new Map(
+      referencedMeanings.map((meaning) => [meaning.id, meaning.canonical_text]),
+    );
+    const stableIds = new Map<string, number>();
+    const occurrences: Array<{
+      key: string;
+      text: string;
+      field: "meaning_fa" | "other_meanings_fa";
+      context: {
+        base_form: string;
+        pos: string | null;
+        concept_explained_fa: string;
+      };
+      preferredIds: number[];
+    }> = [];
     for (const row of retained) {
       const source = byId.get(row.id)!;
-      const primary = row.meaning_fa
-        ? await addPersianWordWithClient(row.meaning_fa, {}, tx)
+      const clusterIds = [row.id, ...row.mergedRecordIds];
+      const clusterMeaningIds = [...new Set(clusterIds.flatMap((id) => {
+        const word = byId.get(id)!;
+        return [
+          ...(word.meaningId ? [word.meaningId] : []),
+          ...positiveIds(word.otherMeaningIds),
+        ];
+      }))];
+      const sourceMeaningIds = [
+        ...(source.meaningId ? [source.meaningId] : []),
+        ...positiveIds(source.otherMeaningIds),
+      ];
+      const context = {
+        base_form: source.english.base_form,
+        pos: source.pos,
+        concept_explained_fa: row.concept_explained_fa,
+      };
+      const addOccurrence = (
+        text: string,
+        field: "meaning_fa" | "other_meanings_fa",
+        index: number,
+      ) => {
+        const key = conceptMergePersianResolutionKey(row.id, field, index);
+        const preferredIds = preferredConceptMergePersianWordIds({
+          text,
+          field,
+          sourcePrimaryId: source.meaningId,
+          sourceMeaningIds,
+          clusterMeaningIds,
+          canonicalTextById,
+        });
+        if (preferredIds.length === 1) stableIds.set(key, preferredIds[0]);
+        else occurrences.push({ key, text, field, context, preferredIds });
+      };
+      if (row.meaning_fa) addOccurrence(row.meaning_fa, "meaning_fa", 0);
+      row.other_meanings_fa.forEach((meaning, index) => {
+        if (meaning !== row.meaning_fa) addOccurrence(meaning, "other_meanings_fa", index);
+      });
+    }
+    const resolution = await resolvePersianWordOccurrences(occurrences, selections, tx);
+    if (resolution.ambiguities.length) {
+      throw new ConceptMergePersianWordResolutionRequiredError(resolution.ambiguities);
+    }
+
+    for (const row of retained) {
+      const primaryKey = conceptMergePersianResolutionKey(row.id, "meaning_fa");
+      const resolvedPrimaryId = stableIds.get(primaryKey) ?? resolution.resolvedIds.get(primaryKey) ?? null;
+      const primaryId = row.meaning_fa
+        ? resolvedPrimaryId ?? (await addPersianWordWithClient(row.meaning_fa, {}, tx)).item.id
         : null;
       const otherIds = await Promise.all(row.other_meanings_fa
         .filter((meaning) => meaning !== row.meaning_fa)
-        .map(async (meaning) => (await addPersianWordWithClient(meaning, {}, tx)).item.id));
+        .map(async (meaning, index) => {
+          const key = conceptMergePersianResolutionKey(row.id, "other_meanings_fa", index);
+          return stableIds.get(key) ?? resolution.resolvedIds.get(key) ??
+            (await addPersianWordWithClient(meaning, {}, tx)).item.id;
+        }));
       await updateWordSense({
         where: { id: row.id },
         data: {
-          meaningId: primary?.item.id ?? null,
-          otherMeaningIds: [...new Set(otherIds.filter((id) => id !== primary?.item.id))],
+          meaningId: primaryId,
+          otherMeaningIds: [...new Set(otherIds.filter((id) => id !== primaryId))],
           concept_explained_fa: row.concept_explained_fa || null,
           sentenceIds: row.sentenceIds,
-          meanings_confirmed: source.meanings_confirmed,
+          meaningReviewStatus: MeaningReviewStatus.CONFIRMED,
           conceptMergeReviewed: true,
         },
         select: { id: true },

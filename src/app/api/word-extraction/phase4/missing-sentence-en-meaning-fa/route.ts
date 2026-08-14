@@ -4,12 +4,14 @@ import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
 import { hydrateWordsWithPrimarySentence } from "@/lib/words/primarySentences.server";
+import { meaningReviewNotNeedsActionWhere } from "@/lib/words/meaningReviewStatus";
 
 export const runtime = "nodejs";
 
 export async function GET() {
   try {
     const words = await prisma.wordSense.findMany({
+      where: meaningReviewNotNeedsActionWhere,
       orderBy: { id: "desc" },
       select: {
         id: true,

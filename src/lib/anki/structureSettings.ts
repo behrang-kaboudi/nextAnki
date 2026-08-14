@@ -103,6 +103,7 @@ export type EditableDeckConfig = {
   relearningSteps: string;
   startingEase: string;
   easyBonus: string;
+  intervalModifier: string;
   graduatingInterval: string;
   easyInterval: string;
   minimumInterval: string;
@@ -142,6 +143,7 @@ export function createDefaultEditableDeckConfig(
     relearningSteps: "2m 10m",
     startingEase: "3.5",
     easyBonus: "1.8",
+    intervalModifier: "1",
     graduatingInterval: "1",
     easyInterval: "4",
     minimumInterval: "1",
@@ -163,7 +165,7 @@ export type AnkiStructureNoteType = {
 };
 
 export type AnkiStructureConfig = {
-  schemaVersion: 4;
+  schemaVersion: 5;
   profileName: string;
   decks: AnkiStructureDeck[];
   deckConfigs: EditableDeckConfig[];
@@ -212,6 +214,7 @@ function defaultDeckConfig(key: LegacyConfigKey): EditableDeckConfig {
     relearningSteps: optionalString(source.RelearningSteps ?? source.relearningSteps),
     startingEase: optionalString(source.StartingEase ?? source.startingEase),
     easyBonus: optionalString(source.EasyBonus ?? source.easyBonus),
+    intervalModifier: optionalString(source.IntervalModifier ?? source.intervalModifier ?? "1"),
     graduatingInterval: optionalString(source.graduatingInterval ?? source.GraduatingInterval),
     easyInterval: optionalString(source.easyInterval ?? source.EasyInterval),
     minimumInterval: optionalString(source.minimumInterval ?? source.MinimumInterval ?? "1"),
@@ -240,7 +243,7 @@ export function createDefaultAnkiStructureConfig(): AnkiStructureConfig {
   }));
 
   return {
-    schemaVersion: 4,
+    schemaVersion: 5,
     profileName: "پروفایل اصلی",
     decks,
     deckConfigs,
@@ -306,6 +309,7 @@ function normalizeDeckConfigItem(
     relearningSteps: text("relearningSteps"),
     startingEase: text("startingEase"),
     easyBonus: text("easyBonus"),
+    intervalModifier: text("intervalModifier"),
     graduatingInterval: text("graduatingInterval"),
     easyInterval: text("easyInterval"),
     minimumInterval: text("minimumInterval"),
@@ -327,6 +331,7 @@ function normalizeDeckConfigs(input: Record<string, unknown>, defaults: AnkiStru
           relearningSteps: "2m 10m",
           startingEase: "3.5",
           easyBonus: "1.8",
+          intervalModifier: "1",
           graduatingInterval: "1",
           easyInterval: "4",
           minimumInterval: "1",
@@ -400,7 +405,7 @@ export function normalizeAnkiStructureConfig(value: unknown): AnkiStructureConfi
       : {};
 
   return {
-    schemaVersion: 4,
+    schemaVersion: 5,
     profileName:
       typeof input.profileName === "string" && input.profileName.trim()
         ? input.profileName.trim()
@@ -478,10 +483,18 @@ export function validateAnkiStructureConfig(config: AnkiStructureConfig) {
   });
 
   const deckIdSet = new Set(deckIds);
+  const assignedDeckIds = config.deckConfigs.flatMap((item) => item.deckIds);
+  const duplicateDeckAssignments = duplicateValues(assignedDeckIds);
+  if (duplicateDeckAssignments.length) {
+    const duplicateDeckNames = duplicateDeckAssignments.map(
+      (deckId) => config.decks.find((deck) => deck.id === deckId)?.name ?? deckId,
+    );
+    errors.push(`هر دک فقط می‌تواند یک Deck Config داشته باشد: ${duplicateDeckNames.join("، ")}`);
+  }
   config.deckConfigs.forEach((item, index) => {
     if (!item.id.trim()) errors.push(`شناسه Deck Config ردیف ${index + 1} خالی است.`);
     if (!item.configName.trim()) errors.push(`نام Deck Config ردیف ${index + 1} خالی است.`);
-    if (!item.deckIds.length || item.deckIds.some((deckId) => !deckIdSet.has(deckId))) {
+    if (item.deckIds.some((deckId) => !deckIdSet.has(deckId))) {
       errors.push(`دک Deck Config «${item.configName || index + 1}» معتبر نیست.`);
     }
     if (!Number.isFinite(item.newCardsPerDay) || item.newCardsPerDay < 0) {
@@ -489,6 +502,10 @@ export function validateAnkiStructureConfig(config: AnkiStructureConfig) {
     }
     if (!Number.isFinite(item.maximumReviewsPerDay) || item.maximumReviewsPerDay < 0) {
       errors.push(`Maximum reviews/day در ${item.configName || index + 1} معتبر نیست.`);
+    }
+    const intervalModifier = Number(item.intervalModifier);
+    if (!item.intervalModifier.trim() || !Number.isFinite(intervalModifier) || intervalModifier <= 0) {
+      errors.push(`Interval modifier در ${item.configName || index + 1} باید عددی بزرگ‌تر از صفر باشد.`);
     }
 
     const learningSteps = parseStudyStepsToMinutes(item.learningSteps);

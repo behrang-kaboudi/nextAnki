@@ -31,11 +31,14 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
   try {
     const body = (await request.json()) as Record<string, unknown>;
-    const current = await prisma.persianWord.findUnique({ where: { id }, select: { canonical_text: true } });
+    const current = await prisma.persianWord.findUnique({ where: { id }, select: { canonical_text: true, meaning_fa_IPA: true } });
     if (!current) return NextResponse.json({ ok: false, error: "PersianWord not found." }, { status: 404 });
     const canonicalText = normalizePersianHalf(String(body.canonical_text ?? ""));
     const normalizedText = normalizePersianFull(canonicalText);
     const meaningFaIpa = asNullableString(body.meaning_fa_IPA);
+    const requestedMeaningFaIpaConfirmed = typeof body.meaning_fa_IPA_confirmed === "boolean"
+      ? body.meaning_fa_IPA_confirmed
+      : undefined;
     if (!canonicalText || !normalizedText) {
       return NextResponse.json({ ok: false, error: "canonical_text must contain Persian letters." }, { status: 400 });
     }
@@ -52,11 +55,16 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         not_normalized_texts: variants as Prisma.InputJsonValue,
         meaning_fa_IPA: meaningFaIpa,
         meaning_fa_IPA_normalize: meaningFaIpa ? normalizeIpaForDb(meaningFaIpa, 2000) : null,
+        ...(meaningFaIpa !== current.meaning_fa_IPA
+          ? { meaning_fa_IPA_confirmed: meaningFaIpa ? requestedMeaningFaIpaConfirmed === true : false }
+          : requestedMeaningFaIpaConfirmed !== undefined
+            ? { meaning_fa_IPA_confirmed: meaningFaIpa ? requestedMeaningFaIpaConfirmed : false }
+            : {}),
       },
     });
     await touchWordsReferencingPersianWord(id, {
       resetConceptMergeReviewed: canonicalText !== current.canonical_text,
-      resetMeaningsConfirmed: canonicalText !== current.canonical_text,
+      resetMeaningReviewStatus: canonicalText !== current.canonical_text,
     });
     return NextResponse.json({ ok: true, item });
   } catch (error) {

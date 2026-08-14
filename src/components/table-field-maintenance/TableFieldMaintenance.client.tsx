@@ -24,6 +24,26 @@ type Operation = {
   createdAt: string;
   undoneAt: string | null;
   canUndo: boolean;
+  report?: SentenceMaintenanceReport | null;
+};
+
+type ScopeKind = "explicit_ids" | "id_range" | "selected_rows" | "filtered_results" | "all_rows";
+type ScopeContext = {
+  filter: { q: string; review: "all" | "pending" | "reviewed"; missingConceptAudio: boolean };
+  filteredCount: number;
+};
+
+type SentenceMaintenanceReport = {
+  kind: "sentence_links";
+  requestId: string;
+  previewId: string;
+  linkCount: number;
+  affectedWordSenseIds: number[];
+  sharedSentenceIds: number[];
+  orphanedSentenceIds: number[];
+  protectedSentenceIds: number[];
+  missingSentenceIds: number[];
+  deletedSentences: Array<{ id: number }>;
 };
 
 type ActionPreview = {
@@ -38,6 +58,17 @@ type ActionPreview = {
   fileCount: number;
   bytes: number;
   confirmationText: string;
+  operationKind?: "sentence_links";
+  previewId?: string;
+  expiresAt?: string;
+  scopedRows?: number;
+  linkCount?: number;
+  affectedWordSenseIds?: number[];
+  linkedSentenceIds?: number[];
+  sharedSentenceIds?: number[];
+  orphanedSentenceIds?: number[];
+  missingSentenceIds?: number[];
+  deleteOrphanedSentences?: boolean;
 };
 
 type GuidePreview = {
@@ -72,9 +103,11 @@ function formatDate(value: string) {
 export default function TableFieldMaintenance({
   modelLabel,
   apiBase,
+  scopeContext,
 }: {
   modelLabel: string;
   apiBase: string;
+  scopeContext?: ScopeContext;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -90,6 +123,13 @@ export default function TableFieldMaintenance({
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [showHelp, setShowHelp] = useState(false);
+  const [scopeKind, setScopeKind] = useState<ScopeKind>("explicit_ids");
+  const [explicitIds, setExplicitIds] = useState("");
+  const [rangeStart, setRangeStart] = useState("");
+  const [rangeEnd, setRangeEnd] = useState("");
+  const [deleteOrphanedSentences, setDeleteOrphanedSentences] = useState(false);
+  const [lastReport, setLastReport] = useState<Record<string, unknown> | null>(null);
+  const [executionRequestId, setExecutionRequestId] = useState("");
 
   async function loadConfiguration() {
     setLoading(true);
@@ -120,6 +160,8 @@ export default function TableFieldMaintenance({
     setNotice(null);
     setPreview(null);
     setConfirmation("");
+    setLastReport(null);
+    setExecutionRequestId("");
     void loadConfiguration();
   }
 
@@ -127,7 +169,28 @@ export default function TableFieldMaintenance({
     if (!executing && !undoing) setOpen(false);
   }
 
-  async function createPreview() {
+  function selectedRowIds() {
+    return Array.from(document.querySelectorAll<HTMLInputElement>("input[data-word-sense-maintenance-row]:checked"))
+      .map((input) => Number(input.value))
+      .filter((id) => Number.isSafeInteger(id) && id > 0);
+  }
+
+  function currentScope() {
+    if (scopeKind === "explicit_ids") return { kind: scopeKind, input: explicitIds };
+    if (scopeKind === "id_range") return { kind: scopeKind, startId: Number(rangeStart), endId: Number(rangeEnd) };
+    if (scopeKind === "selected_rows") return { kind: scopeKind, ids: selectedRowIds() };
+    if (scopeKind === "filtered_results") return { kind: scopeKind, filter: scopeContext?.filter };
+    return { kind: "all_rows" as const };
+  }
+
+  function invalidatePreview() {
+    setPreview(null);
+    setConfirmation("");
+    setError(null);
+    setExecutionRequestId("");
+  }
+
+  async function createPreview(nextDeleteOrphaned = deleteOrphanedSentences) {
     if (!field) return;
     setPreviewing(true);
     setError(null);
@@ -138,13 +201,20 @@ export default function TableFieldMaintenance({
       const response = await fetch(`${apiBase}/preview`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ field }),
+        body: JSON.stringify({
+          field,
+          ...(field === "sentenceIds" ? {
+            scope: currentScope(),
+            deleteOrphanedSentences: nextDeleteOrphaned,
+          } : {}),
+        }),
       });
       const result = (await response.json()) as { ok?: boolean; preview?: Preview; error?: string };
       if (!response.ok || !result.ok || !result.preview) {
         throw new Error(result.error || "Could not prepare the field-maintenance preview.");
       }
       setPreview(result.preview);
+      setExecutionRequestId(crypto.randomUUID());
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : String(reason));
     } finally {
@@ -165,20 +235,33 @@ export default function TableFieldMaintenance({
           field: preview.field,
           expectedAffectedRows: preview.affectedRows,
           confirmation,
+          ...(preview.operationKind === "sentence_links" ? {
+            previewId: preview.previewId,
+            requestId: executionRequestId,
+          } : {}),
         }),
       });
       const result = (await response.json()) as {
         ok?: boolean;
-        result?: { affectedRows: number; quarantinedFiles: number };
+        result?: {
+          affectedRows: number;
+          quarantinedFiles?: number;
+          unlinkedSentenceLinks?: number;
+          deletedSentences?: number;
+          protectedSentences?: number;
+          report?: SentenceMaintenanceReport;
+        };
         error?: string;
       };
       if (!response.ok || !result.ok || !result.result) {
         throw new Error(result.error || "Could not clear the selected field.");
       }
-      setNotice(
-        `Cleared ${result.result.affectedRows.toLocaleString()} ${modelLabel} rows. ` +
-        `${result.result.quarantinedFiles.toLocaleString()} audio file(s) were quarantined.`,
-      );
+      setNotice(preview.operationKind === "sentence_links"
+        ? `Unlinked ${(result.result.unlinkedSentenceLinks ?? 0).toLocaleString()} sentence link(s) from ${result.result.affectedRows.toLocaleString()} WordSense row(s). ` +
+          `Deleted ${(result.result.deletedSentences ?? 0).toLocaleString()} newly unreferenced Sentence row(s); ${(result.result.protectedSentences ?? 0).toLocaleString()} were protected after recheck.`
+        : `Cleared ${result.result.affectedRows.toLocaleString()} ${modelLabel} rows. ` +
+          `${(result.result.quarantinedFiles ?? 0).toLocaleString()} audio file(s) were quarantined.`);
+      if (result.result.report) setLastReport(result.result.report as unknown as Record<string, unknown>);
       setPreview(null);
       setConfirmation("");
       await loadConfiguration();
@@ -194,6 +277,16 @@ export default function TableFieldMaintenance({
   const managedFields = fields.filter((item) => item.kind === "managed");
   const protectedFields = fields.filter((item) => item.kind === "protected");
   const selectedField = fields.find((item) => item.key === field);
+  const isSentenceLinks = modelLabel === "WordSense" && field === "sentenceIds";
+
+  function downloadJson(name: string, value: unknown) {
+    const url = URL.createObjectURL(new Blob([JSON.stringify(value, null, 2)], { type: "application/json" }));
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = name;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  }
 
   async function undo(operationId: string) {
     setUndoing(operationId);
@@ -207,7 +300,7 @@ export default function TableFieldMaintenance({
       });
       const result = (await response.json()) as {
         ok?: boolean;
-        result?: { restoredRows: number; restoredFiles: number };
+        result?: { restoredRows: number; restoredFiles: number; restoredSentences?: number };
         error?: string;
       };
       if (!response.ok || !result.ok || !result.result) {
@@ -215,7 +308,8 @@ export default function TableFieldMaintenance({
       }
       setNotice(
         `Restored ${result.result.restoredRows.toLocaleString()} ${modelLabel} rows and ` +
-        `${result.result.restoredFiles.toLocaleString()} audio file(s).`,
+        `${result.result.restoredFiles.toLocaleString()} audio file(s)` +
+        `${result.result.restoredSentences ? ` and ${result.result.restoredSentences.toLocaleString()} Sentence row(s)` : ""}.`,
       );
       await loadConfiguration();
       router.refresh();
@@ -265,11 +359,17 @@ export default function TableFieldMaintenance({
             {notice ? (
               <div className="mt-4 rounded border border-green-500/30 bg-green-500/10 p-3 text-sm text-green-800 dark:text-green-200">
                 {notice}
+                {lastReport ? (
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    <a href={`/words/tables/sentences?maintenanceOperationId=${encodeURIComponent(String(lastReport.requestId))}`} className="underline">Inspect affected Sentences</a>
+                    <button type="button" onClick={() => downloadJson("word-sense-maintenance-result.json", lastReport)} className="underline">Export result JSON</button>
+                  </div>
+                ) : null}
               </div>
             ) : null}
 
             <section className="mt-4 rounded border p-3">
-              <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
+              <div className="grid gap-3">
                 <div className="grid gap-1 text-sm">
                   <span className="inline-flex items-center gap-2">
                     {modelLabel} field or managed bundle
@@ -290,8 +390,7 @@ export default function TableFieldMaintenance({
                     disabled={loading || executing || Boolean(undoing)}
                     onChange={(event) => {
                       setField(event.target.value);
-                      setPreview(null);
-                      setConfirmation("");
+                      invalidatePreview();
                     }}
                     className="rounded border bg-background px-3 py-2"
                   >
@@ -312,11 +411,66 @@ export default function TableFieldMaintenance({
                     </optgroup>
                   </select>
                 </div>
+                {isSentenceLinks ? (
+                  <fieldset className="grid gap-3 rounded border bg-black/[0.015] p-3 dark:bg-white/[0.025]">
+                    <legend className="px-1 text-sm font-semibold">Scope</legend>
+                    <label className="grid gap-1 text-sm">
+                      Scope type
+                      <select
+                        value={scopeKind}
+                        disabled={previewing || executing || Boolean(undoing)}
+                        onChange={(event) => {
+                          setScopeKind(event.target.value as ScopeKind);
+                          invalidatePreview();
+                        }}
+                        className="rounded border bg-background px-3 py-2"
+                      >
+                        <option value="explicit_ids">Explicit WordSense ids</option>
+                        <option value="id_range">WordSense id range</option>
+                        <option value="selected_rows">Selected rows</option>
+                        <option value="filtered_results">Current filtered results</option>
+                        <option value="all_rows">Entire table</option>
+                      </select>
+                    </label>
+                    {scopeKind === "explicit_ids" ? (
+                      <label className="grid gap-1 text-sm">
+                        WordSense ids
+                        <textarea
+                          value={explicitIds}
+                          onChange={(event) => { setExplicitIds(event.target.value); invalidatePreview(); }}
+                          placeholder={'[12, 34, 56] or 12, 34\n56'}
+                          rows={3}
+                          className="rounded border bg-background px-3 py-2 font-mono"
+                        />
+                        <span className="text-xs opacity-70">JSON arrays and comma-, whitespace-, or newline-separated ids are accepted. Duplicates are removed.</span>
+                      </label>
+                    ) : null}
+                    {scopeKind === "id_range" ? (
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        <label className="grid gap-1 text-sm">Start id<input inputMode="numeric" value={rangeStart} onChange={(event) => { setRangeStart(event.target.value); invalidatePreview(); }} className="rounded border bg-background px-3 py-2 font-mono" /></label>
+                        <label className="grid gap-1 text-sm">End id<input inputMode="numeric" value={rangeEnd} onChange={(event) => { setRangeEnd(event.target.value); invalidatePreview(); }} className="rounded border bg-background px-3 py-2 font-mono" /></label>
+                      </div>
+                    ) : null}
+                    {scopeKind === "selected_rows" ? (
+                      <p className="text-sm opacity-75">Uses the checked rows currently visible in the WordSense table. Missing or stale selections block execution.</p>
+                    ) : null}
+                    {scopeKind === "filtered_results" ? (
+                      <div className="rounded border bg-background p-2 text-sm">
+                        Current filters resolve on the server: <strong>{scopeContext?.filteredCount.toLocaleString() ?? "—"}</strong> matching row(s).
+                      </div>
+                    ) : null}
+                    {scopeKind === "all_rows" ? (
+                      <div className="rounded border border-red-500/40 bg-red-500/10 p-2 text-sm text-red-800 dark:text-red-200">
+                        Entire table is the highest-risk Scope. Confirmation explicitly says <strong>CLEAR ALL</strong>, and execution never expands beyond the rows captured by Preview.
+                      </div>
+                    ) : null}
+                  </fieldset>
+                ) : null}
                 <button
                   type="button"
                   disabled={!field || previewing || executing || Boolean(undoing)}
                   onClick={() => void createPreview()}
-                  className={textButtonClass}
+                  className={`${textButtonClass} justify-self-end`}
                 >
                   {previewing ? "Preparing…" : "Preview changes"}
                 </button>
@@ -412,6 +566,47 @@ export default function TableFieldMaintenance({
                       <div className="font-semibold text-red-700 dark:text-red-300">Destructive change preview</div>
                       <div className="mt-1 text-sm">{preview.description}</div>
                     </div>
+                    {preview.operationKind === "sentence_links" ? (
+                      <>
+                        <dl className="grid gap-2 text-sm sm:grid-cols-2 lg:grid-cols-3">
+                          <div className="rounded border bg-background p-2"><dt className="text-xs opacity-70">Scoped WordSense rows</dt><dd className="font-mono font-semibold">{preview.scopedRows?.toLocaleString()}</dd></div>
+                          <div className="rounded border bg-background p-2"><dt className="text-xs opacity-70">WordSenses changed</dt><dd className="font-mono font-semibold">{preview.affectedRows.toLocaleString()}</dd></div>
+                          <div className="rounded border bg-background p-2"><dt className="text-xs opacity-70">Sentence links removed</dt><dd className="font-mono font-semibold">{preview.linkCount?.toLocaleString()}</dd></div>
+                          <div className="rounded border bg-background p-2"><dt className="text-xs opacity-70">Distinct Sentences</dt><dd className="font-mono font-semibold">{preview.linkedSentenceIds?.length.toLocaleString()}</dd></div>
+                          <div className="rounded border bg-background p-2"><dt className="text-xs opacity-70">Shared and protected</dt><dd className="font-mono font-semibold">{preview.sharedSentenceIds?.length.toLocaleString()}</dd></div>
+                          <div className="rounded border bg-background p-2"><dt className="text-xs opacity-70">Will become unreferenced</dt><dd className="font-mono font-semibold">{preview.orphanedSentenceIds?.length.toLocaleString()}</dd></div>
+                        </dl>
+                        <div className="flex flex-wrap items-center justify-between gap-3 rounded border bg-background p-3 text-sm">
+                          <label className="flex items-start gap-2">
+                            <input
+                              type="checkbox"
+                              checked={deleteOrphanedSentences}
+                              disabled={previewing || executing}
+                              onChange={(event) => {
+                                const checked = event.target.checked;
+                                setDeleteOrphanedSentences(checked);
+                                setPreview(null);
+                                setConfirmation("");
+                                void createPreview(checked);
+                              }}
+                            />
+                            <span>Delete Sentence rows that this operation leaves with no WordSense links (rechecked during execution and restorable by Undo).</span>
+                          </label>
+                          <div className="flex flex-wrap gap-3">
+                            {preview.linkedSentenceIds?.length ? (
+                              <a href={`/words/tables/sentences?maintenancePreviewId=${encodeURIComponent(preview.previewId ?? "")}`} className="underline">Inspect affected Sentences</a>
+                            ) : null}
+                            <button type="button" onClick={() => downloadJson("word-sense-maintenance-preview.json", preview)} className="underline">Export preview JSON</button>
+                          </div>
+                        </div>
+                        {preview.missingSentenceIds?.length ? (
+                          <div className="rounded border border-amber-500/40 bg-amber-500/10 p-2 text-sm text-amber-900 dark:text-amber-100">
+                            Referenced Sentence id(s) not found: {preview.missingSentenceIds.join(", ")}. Their broken links will be reported but no Sentence deletion is attempted.
+                          </div>
+                        ) : null}
+                        <p className="text-xs opacity-70">Preview expires at {preview.expiresAt ? formatDate(preview.expiresAt) : "—"}. Any Scope or option change requires a new Preview.</p>
+                      </>
+                    ) : (
                     <dl className="grid gap-2 text-sm sm:grid-cols-2">
                       <div className="rounded border bg-background p-2">
                         <dt className="text-xs opacity-70">Populated {modelLabel} rows</dt>
@@ -432,6 +627,7 @@ export default function TableFieldMaintenance({
                         </dd>
                       </div>
                     </dl>
+                    )}
                     {preview.consequences.length ? (
                       <div>
                         <div className="text-sm font-semibold">Dependent changes</div>
@@ -465,7 +661,11 @@ export default function TableFieldMaintenance({
                         onClick={() => void execute()}
                         className={`${textButtonClass} border-red-600 bg-red-600 text-white hover:bg-red-700`}
                       >
-                        {executing ? "Clearing field…" : "Clear field and save recovery snapshot"}
+                        {executing
+                          ? "Applying confirmed changes…"
+                          : preview.operationKind === "sentence_links"
+                            ? "Unlink sentences and save recovery snapshot"
+                            : "Clear field and save recovery snapshot"}
                       </button>
                     </div>
                   </>
@@ -487,6 +687,12 @@ export default function TableFieldMaintenance({
                         <div className="text-xs opacity-70">
                           {operation.affectedRows.toLocaleString()} rows • {formatDate(operation.createdAt)} • {operation.status}
                         </div>
+                        {operation.report ? (
+                          <div className="mt-1 flex gap-3 text-xs">
+                            <a href={`/words/tables/sentences?maintenanceOperationId=${encodeURIComponent(operation.id)}`} className="underline">Inspect Sentences</a>
+                            <button type="button" onClick={() => downloadJson(`word-sense-maintenance-${operation.id}.json`, operation.report)} className="underline">Export report</button>
+                          </div>
+                        ) : null}
                       </div>
                       <button
                         type="button"

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { Prisma } from "@prisma/client";
+import { MeaningReviewStatus, type Prisma } from "@prisma/client";
 
 import { PageHeader } from "@/components/page-header";
 import {
@@ -19,6 +19,7 @@ import { primarySentenceId } from "@/lib/words/sentenceIds";
 import { getPendingWordSenseConceptMergeCount } from "@/lib/words/wordSenseConceptMerge.server";
 import { getPendingWordSenseInflectionMergeCount } from "@/lib/words/wordSenseInflectionMerge.server";
 import { getPendingWordSenseMeaningComparisonCount } from "@/lib/words/wordSenseMeaningComparison.server";
+import { getMeaningReviewEligibilitySummary } from "@/lib/words/meaningReviewWorkflow.server";
 
 import OpenWordSenseEditorModal from "../../editor/OpenWordSenseEditorModal.client";
 import WordSenseRelationPopover, {
@@ -38,6 +39,8 @@ import BatchEnglishWordJsonHintGenerate from "../../hints/BatchEnglishWordJsonHi
 import PersianWordMeaningIpaPhase2 from "../persian-words/PersianWordMeaningIpaPhase2.client";
 import EnglishWordPhoneticUsPrompt from "../english-words/EnglishWordPhoneticUsPrompt.client";
 import TableFieldMaintenance from "@/components/table-field-maintenance/TableFieldMaintenance.client";
+import WordSenseSelectVisibleRows from "./WordSenseSelectVisibleRows.client";
+import PersianMeaningIpaReview from "./PersianMeaningIpaReview.client";
 
 export const metadata = { title: "Words — WordSense Table" };
 export const runtime = "nodejs";
@@ -57,7 +60,7 @@ const SORT_FIELDS = [
   "otherMeaningIds",
   "comparedMeaningWordIds",
   "synonymIds",
-  "meanings_confirmed",
+  "meaningReviewStatus",
   "pos",
   "concept_explained_fa",
   "concept_explained_fa_audio_file_name",
@@ -84,7 +87,7 @@ const TABLE_COLUMNS = [
   { key: "otherMeaningIds", label: "otherMeaningIds" },
   { key: "comparedMeaningWordIds", label: "comparedMeaningWordIds" },
   { key: "synonymIds", label: "synonymIds" },
-  { key: "meanings_confirmed", label: "AI meaning review" },
+  { key: "meaningReviewStatus", label: "Meaning review status" },
   { key: "pos", label: "pos" },
   { key: "concept_explained_fa", label: "concept_explained_fa" },
   { key: "concept_explained_fa_audio_file_name", label: "concept audio" },
@@ -113,7 +116,7 @@ const DEFAULT_TABLE_COLUMNS: TableColumnKey[] = [
   "otherMeaningIds",
   "comparedMeaningWordIds",
   "synonymIds",
-  "meanings_confirmed",
+  "meaningReviewStatus",
   "pos",
   "concept_explained_fa",
   "concept_explained_fa_audio_file_name",
@@ -150,7 +153,8 @@ const COLUMN_INDICATORS: Partial<
 };
 
 function parseColumns(value: string | string[] | undefined): TableColumnKey[] {
-  const requested = Array.isArray(value) ? value : value ? [value] : [];
+  const raw = Array.isArray(value) ? value : value ? [value] : [];
+  const requested = raw.map((key) => key === "meanings_confirmed" ? "meaningReviewStatus" : key);
   return requested.length
     ? TABLE_COLUMNS.map((column) => column.key).filter(
         (key) => key === "id" || requested.includes(key),
@@ -159,6 +163,7 @@ function parseColumns(value: string | string[] | undefined): TableColumnKey[] {
 }
 
 function parseSortField(value: string | undefined): SortField {
+  if (value === "meanings_confirmed") return "meaningReviewStatus";
   return SORT_FIELDS.includes(value as SortField)
     ? (value as SortField)
     : "updatedAt";
@@ -355,9 +360,9 @@ export default async function WordsTablePage({
     : undefined;
   const reviewWhere: Prisma.WordSenseWhereInput | undefined =
     review === "pending"
-      ? { meanings_confirmed: false }
+      ? { meaningReviewStatus: MeaningReviewStatus.PENDING }
       : review === "reviewed"
-        ? { meanings_confirmed: true }
+        ? { meaningReviewStatus: MeaningReviewStatus.CONFIRMED }
         : undefined;
   const audioWhere: Prisma.WordSenseWhereInput | undefined = missingConceptAudioOnly
     ? { id: { in: await getPendingWordSenseConceptAudioIds() } }
@@ -371,8 +376,8 @@ export default async function WordsTablePage({
         }
       : undefined;
   const pendingReviewWhere: Prisma.WordSenseWhereInput = searchWhere
-    ? { AND: [searchWhere, { meanings_confirmed: false }] }
-    : { meanings_confirmed: false };
+    ? { AND: [searchWhere, { meaningReviewStatus: MeaningReviewStatus.PENDING }] }
+    : { meaningReviewStatus: MeaningReviewStatus.PENDING };
   const primaryOrderBy: Record<SortField, Prisma.WordSenseOrderByWithRelationInput> =
     {
       id: { id: dir },
@@ -384,7 +389,7 @@ export default async function WordsTablePage({
       otherMeaningIds: { otherMeaningIds: dir },
       comparedMeaningWordIds: { comparedMeaningWordIds: dir },
       synonymIds: { synonymIds: dir },
-      meanings_confirmed: { meanings_confirmed: dir },
+      meaningReviewStatus: { meaningReviewStatus: dir },
       pos: { pos: dir },
       concept_explained_fa: { concept_explained_fa: dir },
       concept_explained_fa_audio_file_name: {
@@ -408,7 +413,7 @@ export default async function WordsTablePage({
     pendingReviewCount,
     rawRows,
     emptyCounts,
-    meaningReviewRemainingCount,
+    meaningReviewSummary,
     conceptMergeRemainingCount,
     inflectionMergeRemainingCount,
     meaningComparisonRemainingCount,
@@ -416,6 +421,7 @@ export default async function WordsTablePage({
     jsonHintRemainingCount,
     jsonHintTotalCount,
     missingMeaningIpaCount,
+    pendingMeaningIpaReviewCount,
     phoneticCreateRemainingCount,
   ] = await Promise.all([
     prisma.wordSense.count({ where }),
@@ -440,7 +446,7 @@ export default async function WordsTablePage({
         otherMeaningIds: true,
         comparedMeaningWordIds: true,
         synonymIds: true,
-        meanings_confirmed: true,
+        meaningReviewStatus: true,
         pos: true,
         concept_explained_fa: true,
         concept_explained_fa_audio_file_name: true,
@@ -456,7 +462,7 @@ export default async function WordsTablePage({
       },
     }),
     getWordColumnEmptyCounts(),
-    prisma.wordSense.count({ where: { meanings_confirmed: false } }),
+    getMeaningReviewEligibilitySummary(),
     getPendingWordSenseConceptMergeCount(),
     getPendingWordSenseInflectionMergeCount(),
     getPendingWordSenseMeaningComparisonCount(),
@@ -467,6 +473,12 @@ export default async function WordsTablePage({
     prisma.englishWord.count(),
     prisma.persianWord.count({
       where: { OR: [{ meaning_fa_IPA: null }, { meaning_fa_IPA: "" }] },
+    }),
+    prisma.persianWord.count({
+      where: {
+        meaning_fa_IPA_confirmed: false,
+        AND: [{ meaning_fa_IPA: { not: null } }, { meaning_fa_IPA: { not: "" } }],
+      },
     }),
     prisma.englishWord.count({
       where: { OR: [{ phonetic_us: null }, { phonetic_us: "" }] },
@@ -643,16 +655,21 @@ export default async function WordsTablePage({
           <div>
             <div className="flex flex-wrap gap-2">
               <WordSenseMeaningsReview
-                pendingCount={meaningReviewRemainingCount}
+                pendingCount={meaningReviewSummary.totalEligible}
+                statusPendingCount={meaningReviewSummary.pendingReview}
+                initialSummary={meaningReviewSummary}
               />
               <WordSenseConceptMerge remainingCount={conceptMergeRemainingCount} />
               <WordSenseInflectionMerge remainingCount={inflectionMergeRemainingCount} />
               <WordSenseMeaningComparison
                 remainingCount={meaningComparisonRemainingCount}
               />
-              <PersianWordMeaningIpaPhase2
-                initialMissingCount={missingMeaningIpaCount}
-              />
+              <div className="inline-flex flex-wrap items-start gap-2 rounded-xl border border-card bg-background p-1.5">
+                <PersianWordMeaningIpaPhase2
+                  initialMissingCount={missingMeaningIpaCount}
+                />
+                <PersianMeaningIpaReview pendingCount={pendingMeaningIpaReviewCount} />
+              </div>
               <EnglishWordPhoneticUsPrompt
                 initialRemainingCount={phoneticCreateRemainingCount}
               />
@@ -662,7 +679,7 @@ export default async function WordsTablePage({
                 {pendingReviewCount.toLocaleString()} need AI review
               </span>
               <span className="text-muted">
-                An empty otherMeaningIds value is complete only when its AI review status is reviewed.
+                An empty otherMeaningIds value is complete only when meaningReviewStatus is CONFIRMED.
               </span>
             </div>
             <div className="mt-3 border-t pt-3">
@@ -672,7 +689,14 @@ export default async function WordsTablePage({
                   Preview and clear supported WordSense fields with dependency-aware recovery snapshots.
                 </div>
               </div>
-              <TableFieldMaintenance modelLabel="WordSense" apiBase="/api/words/field-maintenance" />
+              <TableFieldMaintenance
+                modelLabel="WordSense"
+                apiBase="/api/words/field-maintenance"
+                scopeContext={{
+                  filter: { q, review, missingConceptAudio: missingConceptAudioOnly },
+                  filteredCount: total,
+                }}
+              />
             </div>
           </div>
           <div className="space-y-3 border-t pt-3 lg:border-l lg:border-t-0 lg:pl-3 lg:pt-0">
@@ -737,6 +761,7 @@ export default async function WordsTablePage({
           <table className="w-full text-left text-xs">
             <thead className="sticky top-0 bg-background">
               <tr className="border-b">
+                <th className="whitespace-nowrap px-3 py-2"><WordSenseSelectVisibleRows /></th>
                 {hasColumn("id") ? (
                   <SortHeader
                     href={sortHref("id")}
@@ -812,11 +837,11 @@ export default async function WordsTablePage({
                     direction={dir}
                   />
                 ) : null}
-                {hasColumn("meanings_confirmed") ? (
+                {hasColumn("meaningReviewStatus") ? (
                   <SortHeader
-                    href={sortHref("meanings_confirmed")}
+                    href={sortHref("meaningReviewStatus")}
                     label="AI meaning review"
-                    active={sort === "meanings_confirmed"}
+                    active={sort === "meaningReviewStatus"}
                     direction={dir}
                   />
                 ) : null}
@@ -933,6 +958,14 @@ export default async function WordsTablePage({
             <tbody>
               {rows.map((row) => (
                 <tr key={row.id} className="border-b align-middle">
+                  <td className="px-3 py-2">
+                    <input
+                      type="checkbox"
+                      value={row.id}
+                      data-word-sense-maintenance-row
+                      aria-label={`Select WordSense ${row.id}`}
+                    />
+                  </td>
                   {hasColumn("id") ? (
                     <td className="whitespace-nowrap px-3 py-2 font-mono">
                       {row.id}
@@ -1041,16 +1074,22 @@ export default async function WordsTablePage({
                       )}
                     </td>
                   ) : null}
-                  {hasColumn("meanings_confirmed") ? (
+                  {hasColumn("meaningReviewStatus") ? (
                     <td className="whitespace-nowrap px-3 py-2">
                       <span
                         className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${
-                          row.meanings_confirmed
+                          row.meaningReviewStatus === MeaningReviewStatus.CONFIRMED
                             ? "bg-emerald-500/10 text-emerald-700"
-                            : "bg-amber-500/10 text-amber-700"
+                            : row.meaningReviewStatus === MeaningReviewStatus.PENDING
+                              ? "bg-amber-500/10 text-amber-700"
+                              : "bg-red-500/10 text-red-700"
                         }`}
                       >
-                        {row.meanings_confirmed ? "AI Reviewed" : "Pending AI Review"}
+                        {row.meaningReviewStatus === MeaningReviewStatus.CONFIRMED
+                          ? "AI Reviewed"
+                          : row.meaningReviewStatus === MeaningReviewStatus.PENDING
+                            ? "Pending AI Review"
+                            : "Needs Your Action"}
                       </span>
                     </td>
                   ) : null}
@@ -1128,7 +1167,7 @@ export default async function WordsTablePage({
               {!rows.length ? (
                 <tr>
                   <td
-                    colSpan={columns.length}
+                    colSpan={columns.length + 1}
                     className="px-3 py-6 text-center text-sm opacity-70"
                   >
                     No rows.

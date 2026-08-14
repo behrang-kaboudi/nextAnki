@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
 import { hydrateWordsWithPrimarySentence } from "@/lib/words/primarySentences.server";
+import { meaningReviewNotNeedsActionWhere } from "@/lib/words/meaningReviewStatus";
 
 export const runtime = "nodejs";
 
@@ -73,6 +74,7 @@ export async function GET(req: Request) {
     let hydrated;
     if (field === "sentence_en_meaning_fa") {
       const allWords = await prisma.wordSense.findMany({
+        where: meaningReviewNotNeedsActionWhere,
         orderBy: { id: "desc" },
         select: wordSelect,
       });
@@ -83,7 +85,9 @@ export async function GET(req: Request) {
       total = missing.length;
       hydrated = missing.slice(0, limit);
     } else {
-      const where = missingWordWhere(field);
+      const where: Prisma.WordSenseWhereInput = {
+        AND: [meaningReviewNotNeedsActionWhere, missingWordWhere(field)],
+      };
       const [count, words] = await Promise.all([
         prisma.wordSense.count({ where }),
         prisma.wordSense.findMany({ where, orderBy: { id: "desc" }, take: limit, select: wordSelect }),

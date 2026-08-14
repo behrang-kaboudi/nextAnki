@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { hydrateWordSensesWithPersianMeanings } from "@/lib/words/persianMeanings.server";
 import { flattenWordSenseEnglishRelation, WORD_SENSE_ENGLISH_FIELDS_SELECT } from "@/lib/english/wordSenseEnglishFields.server";
+import { meaningReviewNotNeedsActionWhere } from "@/lib/words/meaningReviewStatus";
 
 export const runtime = "nodejs";
 
@@ -31,7 +32,7 @@ export async function POST(req: Request) {
     }
 
     const rows = await prisma.wordSense.findMany({
-      where: { id: { in: ids } },
+      where: { AND: [meaningReviewNotNeedsActionWhere, { id: { in: ids } }] },
       select: {
         id: true,
         englishId: true,

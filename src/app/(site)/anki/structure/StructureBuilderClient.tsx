@@ -7,7 +7,6 @@ import { PageHeader } from "@/components/page-header";
 import {
   createStructureId,
   createDefaultEditableDeckConfig,
-  DEFAULT_STUDY_CONFIG_NAME,
   findStructureDeck,
   normalizeDeckConfigName,
   type AnkiStructureCardType,
@@ -221,17 +220,16 @@ function AddDeckModal({
         <label className="grid gap-1.5">
           <span className="text-xs font-semibold text-foreground">تنظیمات مطالعه</span>
           <select
-            required={configs.length > 0}
             value={configId}
             onChange={(event) => onConfigChange(event.target.value)}
             className="h-11 rounded-xl border border-card bg-background px-3 text-sm text-foreground outline-none focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--ring)]"
           >
-            <option value="">انتخاب Config</option>
+            <option value="">این برنامه تنظیمات مطالعهٔ این دک را مدیریت نکند</option>
             {configs.map((config) => (
               <option key={config.id} value={config.id}>{config.configName}</option>
             ))}
           </select>
-          {!configs.length ? <span className="text-[11px] leading-5 text-amber-700">ابتدا حداقل یک Deck Config بسازید.</span> : null}
+          <span className="text-[11px] leading-5 text-muted">هر دک حداکثر یک Config دارد؛ انتخاب جدید، تخصیص قبلی را جابه‌جا می‌کند.</span>
         </label>
         <label className="flex items-center justify-between rounded-xl border border-card bg-background px-3 py-3 text-xs font-semibold">
           در Step 1 ساخته و مدیریت شود
@@ -293,31 +291,26 @@ function ConfigEditor({
   };
 
   return (
-    <Modal title={`ویرایش ${draft.configName || "Deck Config"}`} subtitle="تنظیمات مطالعه و دک مقصد" onClose={onClose}>
+    <Modal title={`ویرایش ${draft.configName || "Deck Config"}`} subtitle="تنظیمات مطالعه و گزارش دک‌های استفاده‌کننده" onClose={onClose}>
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="sm:col-span-2">
         <Field label="نام Deck Config" value={draft.configName} onChange={(raw) => update("configName", raw)} />
         </div>
         <div className="grid gap-2 sm:col-span-2">
-          <span className="text-xs font-semibold">دک‌های متصل</span>
+          <span className="text-xs font-semibold">گزارش دک‌های استفاده‌کننده</span>
           <div className="grid gap-2 rounded-xl border border-card bg-background p-3 sm:grid-cols-2">
-            {decks.map((deck) => (
-              <label key={deck.id} className="flex items-center gap-2 text-xs">
-                <input
-                  type="checkbox"
-                  checked={draft.deckIds.includes(deck.id)}
-                  onChange={(event) => setDraft({
-                    ...draft,
-                    deckIds: event.target.checked
-                      ? Array.from(new Set([...draft.deckIds, deck.id]))
-                      : draft.deckIds.filter((id) => id !== deck.id),
-                  })}
-                  className="size-4 accent-[var(--primary)]"
-                />
-                <span>{deck.title} — {deck.name}</span>
-              </label>
-            ))}
+            {draft.deckIds.length ? draft.deckIds.map((deckId) => {
+              const deck = decks.find((candidate) => candidate.id === deckId);
+              return deck ? (
+                <div key={deck.id} className="rounded-lg border border-card bg-card px-3 py-2 text-xs">
+                  {deck.title} — <span dir="ltr">{deck.name}</span>
+                </div>
+              ) : null;
+            }) : (
+              <p className="text-xs text-muted sm:col-span-2">هیچ دکی از این Config استفاده نمی‌کند.</p>
+            )}
           </div>
+          <span className="text-[11px] leading-5 text-muted">تخصیص یا جابه‌جایی Config فقط از پنجرهٔ ویرایش همان دک انجام می‌شود.</span>
         </div>
         <Field label="کارت جدید در روز" type="number" value={draft.newCardsPerDay} onChange={(raw) => update("newCardsPerDay", raw)} />
         <Field label="حداکثر مرور در روز" type="number" value={draft.maximumReviewsPerDay} onChange={(raw) => update("maximumReviewsPerDay", raw)} />
@@ -344,9 +337,10 @@ function ConfigEditor({
         </div>
         <Field label="Starting ease" value={draft.startingEase} onChange={(raw) => update("startingEase", raw)} hint="مثال: 2.50" />
         <Field label="Easy bonus" value={draft.easyBonus} onChange={(raw) => update("easyBonus", raw)} hint="مثال: 1.3" />
+        <Field label="Interval modifier" value={draft.intervalModifier} onChange={(raw) => update("intervalModifier", raw)} hint="مثال: 1.0 (معادل 100٪)" />
       </div>
       <div className="mt-6 rounded-2xl border border-blue-500/20 bg-blue-500/5 p-4 text-xs leading-6 text-muted">
-        تغییرات تا زمان زدن دکمه «ذخیره و پایان ویرایش» فقط در همین فرم باقی می‌مانند و سپس یک‌بار در دیتابیس و Anki اعمال می‌شوند.
+        تغییرات با زدن دکمه «ذخیره و پایان ویرایش» فقط در دیتابیس ذخیره می‌شوند. اعمال روی Anki فقط با دکمهٔ «همگام‌سازی کامل» انجام می‌شود.
       </div>
       <div className="mt-5 flex justify-end">
         <button type="button" onClick={() => { onChange(draft); onClose(); }} className="h-10 rounded-xl bg-[var(--primary)] px-5 text-sm font-semibold text-white">
@@ -503,6 +497,7 @@ function LogPanel({
 export default function StructureBuilderClient() {
   const [activeTab, setActiveTab] = useState<TabKey>("overview");
   const [helpKey, setHelpKey] = useState<HelpKey | null>(null);
+  const [differenceDialogItems, setDifferenceDialogItems] = useState<string[] | null>(null);
   const [newDeck, setNewDeck] = useState<AnkiStructureDeck | null>(null);
   const [editingDeckId, setEditingDeckId] = useState<string | null>(null);
   const [newDeckConfigId, setNewDeckConfigId] = useState("");
@@ -527,45 +522,22 @@ export default function StructureBuilderClient() {
     stepStatuses,
     manualIntervalsRequiredDecks,
     setSettings,
-    saveAndSyncSettings,
-    syncCardTypes,
+    saveSettings,
     resetSettings,
     checkStructure,
     clearLogs,
     handleCreateStructure,
-    step1EnsureDecks,
-    step2EnsureDeckConfigs,
-    step3EnsureMetaLexVr9CardTypes,
-    step4EnsureMetaLexVr9NoteType,
-    step5EnsureMetaLexVr9Templates,
-    step6MoveDefaultCardsToTemp,
     handleCopyTemplatesFromAnki,
   } = useStructureBuilder();
-
-  const stepRunners = useMemo(
-    () => [
-      step1EnsureDecks,
-      step2EnsureDeckConfigs,
-      step3EnsureMetaLexVr9CardTypes,
-      step4EnsureMetaLexVr9NoteType,
-      step5EnsureMetaLexVr9Templates,
-      step6MoveDefaultCardsToTemp,
-    ],
-    [
-      step1EnsureDecks,
-      step2EnsureDeckConfigs,
-      step3EnsureMetaLexVr9CardTypes,
-      step4EnsureMetaLexVr9NoteType,
-      step5EnsureMetaLexVr9Templates,
-      step6MoveDefaultCardsToTemp,
-    ],
-  );
   const cardTypeIssues = useMemo(
     () => new Map(settings.noteType.cardTypes.map((card) => [card.id, getCardTypeIssues(settings.noteType.cardTypes, card)])),
     [settings.noteType.cardTypes],
   );
   const hasCardTypeIssues = Array.from(cardTypeIssues.values()).some((issues) => issues.length > 0);
   const warningCard = settings.noteType.cardTypes.find((card) => card.id === cardWarningId) ?? null;
+  const hasSyncDifferences = Boolean(
+    inspection?.connected && Object.values(inspection.steps).some((status) => status.state === "needs-change"),
+  );
 
   const openAddDeckModal = () => {
     const deckNumber = settings.decks.length + 1;
@@ -576,7 +548,7 @@ export default function StructureBuilderClient() {
       managed: true,
     });
     setEditingDeckId(null);
-    setNewDeckConfigId(settings.deckConfigs[0]?.id ?? "");
+    setNewDeckConfigId("");
     setNewDeckError(null);
   };
 
@@ -606,20 +578,17 @@ export default function StructureBuilderClient() {
     }
 
     setNewDeckError(null);
-    const nextDeckConfigs = settings.deckConfigs.map((item) =>
-      item.id === newDeckConfigId
-        ? { ...item, deckIds: Array.from(new Set([...item.deckIds, deck.id])) }
-        : item,
-    );
+    const nextDeckConfigs = settings.deckConfigs.map((item) => ({
+      ...item,
+      deckIds: item.id === newDeckConfigId
+        ? Array.from(new Set([...item.deckIds.filter((deckId) => deckId !== deck.id), deck.id]))
+        : item.deckIds.filter((deckId) => deckId !== deck.id),
+    }));
     const nextSettings = editingDeckId
       ? {
           ...settings,
           decks: settings.decks.map((item) => item.id === editingDeckId ? deck : item),
-          deckConfigs: nextDeckConfigs.map((item) =>
-            item.id === newDeckConfigId
-              ? item
-              : { ...item, deckIds: item.deckIds.filter((deckId) => deckId !== editingDeckId) },
-          ),
+          deckConfigs: nextDeckConfigs,
           noteType: {
             ...settings.noteType,
             cardTypes: settings.noteType.cardTypes.map((card) =>
@@ -628,7 +597,7 @@ export default function StructureBuilderClient() {
           },
         }
       : { ...settings, decks: [...settings.decks, deck], deckConfigs: nextDeckConfigs };
-    const saved = await saveAndSyncSettings(nextSettings);
+    const saved = await saveSettings(nextSettings);
     if (saved) {
       setNewDeck(null);
       setEditingDeckId(null);
@@ -646,8 +615,7 @@ export default function StructureBuilderClient() {
       ...settings,
       decks: remaining,
       deckConfigs: settings.deckConfigs
-        .map((item) => ({ ...item, deckIds: item.deckIds.filter((deckId) => deckId !== id) }))
-        .filter((item) => item.deckIds.length > 0),
+        .map((item) => ({ ...item, deckIds: item.deckIds.filter((deckId) => deckId !== id) })),
       noteType: {
         ...settings.noteType,
         cardTypes: settings.noteType.cardTypes.map((item) =>
@@ -664,7 +632,7 @@ export default function StructureBuilderClient() {
   };
 
   const updateDeckConfig = (id: string, value: EditableDeckConfig) => {
-    setSettings({
+    const nextSettings = {
       ...settings,
       deckConfigs: settings.deckConfigs.map((item) => item.id === id
         ? { ...value, configName: normalizeDeckConfigName(value.configName) }
@@ -672,15 +640,16 @@ export default function StructureBuilderClient() {
       noteType: {
         ...settings.noteType,
       },
-    });
+    };
+    setSettings(nextSettings);
+    void saveSettings(nextSettings);
   };
 
   const addDeckConfig = () => {
     const id = createStructureId("config");
-    const deckId = settings.decks[0]?.id ?? "";
     const next: EditableDeckConfig = createDefaultEditableDeckConfig(
       id,
-      [deckId],
+      [],
       normalizeDeckConfigName(`NewDeckConfig${settings.deckConfigs.length + 1}`),
     );
     setSettings({ ...settings, deckConfigs: [...settings.deckConfigs, next] });
@@ -692,29 +661,12 @@ export default function StructureBuilderClient() {
     if (!item) return;
     const affectedDeckIds = item.deckIds;
     const usageMessage = affectedDeckIds.length
-      ? `\n${affectedDeckIds.length} دک استفاده‌کننده به Config پیش‌فرض منتقل می‌شوند.`
+      ? `\n${affectedDeckIds.length} دک استفاده‌کننده بدون Config مدیریت‌شده باقی می‌مانند.`
       : "";
     if (!window.confirm(`Deck Config «${item.configName}» از تنظیمات حذف شود؟${usageMessage}`)) return;
-    const fallback = settings.deckConfigs.find(
-      (candidate) => candidate.id !== id && candidate.configName === DEFAULT_STUDY_CONFIG_NAME,
-    ) ?? createDefaultEditableDeckConfig(
-      createStructureId("config"),
-      affectedDeckIds,
-    );
-    const remainingConfigs = settings.deckConfigs
-      .filter((candidate) => candidate.id !== id && candidate.id !== fallback.id)
-      .map((candidate) => ({
-        ...candidate,
-        deckIds: candidate.deckIds.filter((deckId) => !affectedDeckIds.includes(deckId)),
-      }))
-      .filter((candidate) => candidate.deckIds.length > 0);
-    remainingConfigs.push({
-      ...fallback,
-      deckIds: Array.from(new Set([...fallback.deckIds, ...affectedDeckIds])),
-    });
     setSettings({
       ...settings,
-      deckConfigs: remainingConfigs,
+      deckConfigs: settings.deckConfigs.filter((candidate) => candidate.id !== id),
     });
   };
 
@@ -744,7 +696,7 @@ export default function StructureBuilderClient() {
 
   const removeCardType = (id: string) => {
     const item = settings.noteType.cardTypes.find((candidate) => candidate.id === id);
-    if (!item || !window.confirm(`Card Type «${item.name}» حذف شود؟ اجرای Step 3 آن را از Anki نیز حذف می‌کند.`)) return;
+    if (!item || !window.confirm(`Card Type «${item.name}» حذف شود؟ «همگام‌سازی کامل» آن را از Anki نیز حذف می‌کند.`)) return;
     setSettings({
       ...settings,
       noteType: {
@@ -770,7 +722,7 @@ export default function StructureBuilderClient() {
 
   const removeField = (index: number) => {
     const field = settings.noteType.fields[index];
-    if (!window.confirm(`فیلد «${field}» حذف شود؟ اجرای Step 4 آن را از Anki نیز حذف می‌کند.`)) return;
+    if (!window.confirm(`فیلد «${field}» حذف شود؟ «همگام‌سازی کامل» آن را از Anki نیز حذف می‌کند.`)) return;
     setSettings({
       ...settings,
       noteType: {
@@ -826,15 +778,34 @@ export default function StructureBuilderClient() {
             >
               {isRunning ? "در حال پردازش…" : "فقط بررسی؛ بدون تغییر"}
             </button>
-            <button
-              type="button"
-              onClick={() => void handleCreateStructure()}
-              disabled={isRunning || isLoadingSettings || settingsErrors.length > 0}
-              className="flex h-12 items-center justify-center gap-2 rounded-2xl bg-white px-5 text-sm font-bold text-[#0b3764] shadow-lg transition hover:-translate-y-0.5 disabled:translate-y-0 disabled:opacity-50"
-            >
-              <ActionIcon name="sparkles" />
-              هماهنگ‌سازی کامل
-            </button>
+            <div className="grid gap-1.5">
+              <button
+                type="button"
+                onClick={() => void handleCreateStructure()}
+                disabled={isRunning || isLoadingSettings || settingsErrors.length > 0}
+                className="flex h-12 items-center justify-center gap-2 rounded-2xl bg-white px-5 text-sm font-bold text-[#0b3764] shadow-lg transition hover:-translate-y-0.5 disabled:translate-y-0 disabled:opacity-50"
+              >
+                <ActionIcon name="sparkles" />
+                هماهنگ‌سازی کامل
+              </button>
+              {isSettingsDirty ? (
+                <div dir="rtl" className="rounded-xl border border-amber-200/35 bg-amber-300/10 px-2.5 py-2 text-center text-xs font-bold leading-5 text-amber-100">
+                  تغییر جدید وجود دارد؛ برای ذخیره و اعمال روی Anki، «هماهنگ‌سازی کامل» را بزنید.
+                </div>
+              ) : inspection?.connected && (inspection.differenceCount ?? 0) > 0 ? (
+                <div dir="rtl" className="flex items-center justify-center gap-1 text-center text-xs font-bold leading-5 text-red-200">
+                  <span>{inspection.differenceCount?.toLocaleString("fa-IR")} مورد اختلاف وجود دارد؛ هماهنگ‌سازی کامل لازم است.</span>
+                  <button
+                    type="button"
+                    onClick={() => setDifferenceDialogItems([...inspection.differences])}
+                    aria-label="نمایش جزئیات اختلاف‌ها"
+                    className="grid size-5 shrink-0 place-items-center rounded-full border border-red-200/70 text-[11px] font-black text-red-100 transition hover:bg-red-200/15 focus:outline-none focus:ring-2 focus:ring-red-200/60"
+                  >
+                    ؟
+                  </button>
+                </div>
+              ) : null}
+            </div>
           </div>
         </div>
       </section>
@@ -864,20 +835,47 @@ export default function StructureBuilderClient() {
         </div>
       ) : null}
 
+      <div className={`rounded-2xl border p-4 text-sm ${
+        isSettingsDirty
+          ? "border-amber-500/30 bg-amber-500/5 text-amber-800"
+          : !inspection
+            ? "border-blue-500/25 bg-blue-500/5 text-blue-900"
+            : !inspection.connected
+              ? "border-red-500/25 bg-red-500/5 text-red-800"
+              : hasSyncDifferences
+                ? "border-amber-500/30 bg-amber-500/5 text-amber-800"
+                : "border-emerald-500/25 bg-emerald-500/5 text-emerald-800"
+      }`}>
+        <p className="font-bold">
+          {isSettingsDirty
+            ? "تغییرات هنوز در دیتابیس ذخیره نشده‌اند."
+            : !inspection
+              ? "تنظیمات ذخیره شده‌اند؛ مقایسه با Anki نیاز به به‌روزرسانی دارد."
+              : !inspection.connected
+                ? "مقایسه با Anki انجام نشد؛ Anki یا AnkiConnect در دسترس نیست."
+                : hasSyncDifferences
+                  ? "تنظیمات ذخیره‌شده با Anki هماهنگ نیستند."
+                  : "تنظیمات ذخیره‌شده با Anki هماهنگ هستند."}
+        </p>
+        <p className="mt-1 text-xs leading-6 opacity-80">
+          ذخیره‌سازی فقط دیتابیس را تغییر می‌دهد؛ تنها دکمهٔ «همگام‌سازی کامل» تغییرات را روی Anki اعمال می‌کند. مقایسه هنگام بازشدن صفحه و با دکمهٔ «فقط بررسی» بدون تغییر Anki انجام می‌شود.
+        </p>
+      </div>
+
       {activeTab === "overview" ? (
         <div className="grid gap-6 xl:grid-cols-[1fr_360px]">
           <section className="rounded-3xl border border-card bg-card p-4 shadow-elevated sm:p-6">
             <div className="flex items-end justify-between gap-3">
               <div>
                 <h2 className="text-lg font-bold text-foreground">مراحل هماهنگ‌سازی</h2>
-                <p className="mt-1 text-xs leading-6 text-muted">هر مرحله مستقل قابل بررسی و اجراست.</p>
+                <p className="mt-1 text-xs leading-6 text-muted">نتیجهٔ مقایسهٔ هر مرحله جداگانه نمایش داده می‌شود؛ اعمال تغییرات فقط با «همگام‌سازی کامل» انجام می‌شود.</p>
               </div>
               <button type="button" onClick={() => setHelpKey("create")} className="text-xs font-bold text-[var(--primary)]">
                 راهنمای اجرای کامل
               </button>
             </div>
             <div className="mt-5 grid gap-3 md:grid-cols-2">
-              {steps.map((step, index) => {
+              {steps.map((step) => {
                 const status = stepStatuses[step.number];
                 const appearance = statusPresentation(status);
                 return (
@@ -901,12 +899,12 @@ export default function StructureBuilderClient() {
                     <div className="mt-4 flex gap-2 border-t border-card pt-3">
                       <button
                         type="button"
-                        onClick={() => void stepRunners[index]()}
-                        disabled={isRunning}
+                        disabled
+                        title="اعمال این مرحله فقط از طریق همگام‌سازی کامل انجام می‌شود."
                         className="flex h-9 flex-1 items-center justify-center gap-1.5 rounded-xl bg-[var(--primary)] px-3 text-xs font-bold text-white disabled:opacity-50"
                       >
                         <ActionIcon name="play" className="size-3.5" />
-                        اجرای مرحله
+                        فقط با همگام‌سازی کامل
                       </button>
                       <button type="button" onClick={() => setHelpKey(step.helpKey)} className="h-9 rounded-xl border border-card px-3 text-xs font-bold text-muted hover:text-foreground">
                         راهنما
@@ -936,7 +934,7 @@ export default function StructureBuilderClient() {
               <div className="mt-4 grid gap-2">
                 <button
                   type="button"
-                  onClick={() => void saveAndSyncSettings()}
+                  onClick={() => void saveSettings()}
                   disabled={isSavingSettings || !isSettingsDirty || settingsErrors.length > 0}
                   className="h-11 rounded-xl bg-[var(--primary)] px-4 text-sm font-bold text-white disabled:opacity-40"
                 >
@@ -985,7 +983,7 @@ export default function StructureBuilderClient() {
             </div>
             <div className="flex gap-2">
               <button type="button" onClick={openAddDeckModal} className="h-10 rounded-xl border border-[var(--primary)] px-4 text-xs font-bold text-[var(--primary)]">+ افزودن دک</button>
-              <button type="button" onClick={() => void saveAndSyncSettings()} disabled={isSavingSettings || !isSettingsDirty || settingsErrors.length > 0} className="h-10 rounded-xl bg-[var(--primary)] px-4 text-xs font-bold text-white disabled:opacity-40">ذخیره تغییرات</button>
+              <button type="button" onClick={() => void saveSettings()} disabled={isSavingSettings || !isSettingsDirty || settingsErrors.length > 0} className="h-10 rounded-xl bg-[var(--primary)] px-4 text-xs font-bold text-white disabled:opacity-40">ذخیره تغییرات</button>
             </div>
           </div>
           <div className="mt-4 grid gap-2 md:grid-cols-2 xl:grid-cols-4">
@@ -1027,11 +1025,11 @@ export default function StructureBuilderClient() {
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
               <h2 className="text-lg font-bold text-foreground">تنظیمات مطالعه</h2>
-              <p className="mt-1 text-xs leading-6 text-muted">هر تنظیم می‌تواند به چند دک متصل باشد و با Step 2 روی همه‌ی آن‌ها اعمال می‌شود.</p>
+              <p className="mt-1 text-xs leading-6 text-muted">تخصیص Config فقط از بخش «دک‌ها» انجام می‌شود. این بخش تنظیمات و گزارش دک‌های استفاده‌کننده را نشان می‌دهد.</p>
             </div>
             <div className="flex gap-2">
               <button type="button" onClick={addDeckConfig} disabled={!settings.decks.length} className="h-9 rounded-lg border border-[var(--primary)] px-3 text-xs font-bold text-[var(--primary)] disabled:opacity-40">+ افزودن Config</button>
-              <button type="button" onClick={() => void saveAndSyncSettings()} disabled={isSavingSettings || !isSettingsDirty || settingsErrors.length > 0} className="h-9 rounded-lg bg-[var(--primary)] px-3 text-xs font-bold text-white disabled:opacity-40">ذخیره تغییرات</button>
+              <button type="button" onClick={() => void saveSettings()} disabled={isSavingSettings || !isSettingsDirty || settingsErrors.length > 0} className="h-9 rounded-lg bg-[var(--primary)] px-3 text-xs font-bold text-white disabled:opacity-40">ذخیره تغییرات</button>
             </div>
           </div>
           <div className="mt-4 grid gap-2 md:grid-cols-2 xl:grid-cols-4">
@@ -1047,6 +1045,9 @@ export default function StructureBuilderClient() {
                       <span className="mt-1 inline-flex items-center rounded-full bg-card px-2 py-0.5 text-[10px] font-semibold text-muted">
                         {decks.length} دک استفاده‌کننده
                       </span>
+                      <p className="mt-2 line-clamp-2 text-[10px] leading-5 text-muted">
+                        {decks.length ? decks.map((deck) => deck.title).join("، ") : "بدون دک استفاده‌کننده"}
+                      </p>
                     </div>
                     <div className="flex shrink-0 gap-1">
                       <button type="button" onClick={() => setEditingConfig(item.id)} className="h-8 rounded-lg border border-card bg-card px-2.5 text-[11px] font-bold text-[var(--primary)]">ویرایش</button>
@@ -1069,12 +1070,12 @@ export default function StructureBuilderClient() {
                 <h2 className="text-lg font-bold text-foreground">Note Type</h2>
                 <p className="mt-1 text-xs leading-6 text-muted">نام مدل و فیلدها از این بخش مدیریت می‌شوند.</p>
               </div>
-              <button type="button" onClick={() => void saveAndSyncSettings()} disabled={isSavingSettings || !isSettingsDirty || settingsErrors.length > 0} className="h-10 rounded-xl bg-[var(--primary)] px-4 text-xs font-bold text-white disabled:opacity-40">ذخیره تغییرات</button>
+              <button type="button" onClick={() => void saveSettings()} disabled={isSavingSettings || !isSettingsDirty || settingsErrors.length > 0} className="h-10 rounded-xl bg-[var(--primary)] px-4 text-xs font-bold text-white disabled:opacity-40">ذخیره تغییرات</button>
             </div>
             <div className="mt-5 rounded-2xl border border-blue-500/25 bg-blue-500/5 p-4 text-xs leading-6 text-blue-950">
               <p className="font-bold">Note Type مبدا: {settings.noteType.name || "Meta-LEX-vR9"}</p>
               <p className="mt-1 text-blue-950/75">
-                Card Typeهایی که در بخش «Card Typeها و Templateها» اضافه می‌کنید، به همین Note Type در Anki اضافه می‌شوند. برای اعمال در Anki، ذخیره‌سازی را انجام دهید یا Step 3 «Card Typeها» را اجرا کنید؛ صرفاً اضافه‌شدن کارت در فرم، تغییر Anki را تضمین نمی‌کند.
+                Card Typeهایی که در بخش «Card Typeها و Templateها» اضافه می‌کنید، فقط در دیتابیس ذخیره می‌شوند. اعمال آن‌ها روی Anki فقط با «همگام‌سازی کامل» انجام می‌شود.
               </p>
             </div>
             <div className="mt-5 max-w-xl">
@@ -1139,13 +1140,13 @@ export default function StructureBuilderClient() {
                 ایجاد Card Type برای Note Type: Meta-LEX-vR9
               </p>
               <p className="mt-1 max-w-3xl text-xs leading-6 text-muted">
-                افزودن در Step 3 و محتوای Front/Back در Step 5 اعمال می‌شود. هر Card Type می‌تواند به چند دک مرتبط باشد؛ تنظیمات مطالعه فقط به دک‌ها مربوط است. حذف، Card Type و کارت‌های مرتبط را از Anki حذف می‌کند.
+                افزودن Card Type و محتوای Front/Back فقط هنگام «همگام‌سازی کامل» روی Anki اعمال می‌شود. هر Card Type می‌تواند به چند دک مرتبط باشد؛ تنظیمات مطالعه فقط به دک‌ها مربوط است.
               </p>
             </div>
             <div className="flex gap-2">
               <button type="button" onClick={addCardType} disabled={Boolean(pendingCardType) || isRunning} className="h-10 rounded-xl border border-[var(--primary)] px-4 text-xs font-bold text-[var(--primary)] disabled:opacity-40">+ افزودن Card Type</button>
-              <button type="button" onClick={() => void syncCardTypes()} disabled={isRunning || isSavingSettings || settingsErrors.length > 0 || hasCardTypeIssues} className="h-10 rounded-xl border border-[var(--primary)] px-4 text-xs font-bold text-[var(--primary)] disabled:opacity-40">اعمال Card Typeها در Anki</button>
-              <button type="button" onClick={() => void saveAndSyncSettings()} disabled={isRunning || isSavingSettings || !isSettingsDirty || settingsErrors.length > 0 || hasCardTypeIssues} className="h-10 rounded-xl bg-[var(--primary)] px-4 text-xs font-bold text-white disabled:opacity-40">ذخیره و هماهنگ‌سازی کامل</button>
+              <button type="button" disabled title="اعمال روی Anki فقط با دکمهٔ همگام‌سازی کامل بالای صفحه انجام می‌شود." className="h-10 rounded-xl border border-[var(--primary)] px-4 text-xs font-bold text-[var(--primary)] disabled:opacity-40">اعمال فقط با همگام‌سازی کامل</button>
+              <button type="button" onClick={() => void saveSettings()} disabled={isRunning || isSavingSettings || !isSettingsDirty || settingsErrors.length > 0 || hasCardTypeIssues} className="h-10 rounded-xl bg-[var(--primary)] px-4 text-xs font-bold text-white disabled:opacity-40">ذخیره تغییرات</button>
             </div>
           </div>
           <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
@@ -1255,6 +1256,27 @@ export default function StructureBuilderClient() {
         </button>
       ) : null}
 
+      {differenceDialogItems?.length ? (
+        <Modal
+          title={`جزئیات ${differenceDialogItems.length.toLocaleString("fa-IR")} مورد اختلاف`}
+          subtitle="این موارد با اجرای «هماهنگ‌سازی کامل» از تنظیمات ذخیره‌شده روی Anki اعمال می‌شوند."
+          onClose={() => setDifferenceDialogItems(null)}
+        >
+          <ol className="list-decimal space-y-3 pe-5 text-sm leading-7 text-foreground">
+            {differenceDialogItems.map((difference, index) => (
+              <li key={`${index}-${difference}`} className="break-words rounded-2xl border border-red-500/20 bg-red-500/5 px-4 py-3 [overflow-wrap:anywhere]">
+                {difference}
+              </li>
+            ))}
+          </ol>
+          <div className="mt-6 flex justify-end">
+            <button type="button" onClick={() => setDifferenceDialogItems(null)} className="h-10 rounded-xl bg-[var(--primary)] px-5 text-sm font-semibold text-white">
+              بستن
+            </button>
+          </div>
+        </Modal>
+      ) : null}
+
       {helpKey ? <HelpModal helpKey={helpKey} onClose={() => setHelpKey(null)} /> : null}
       {newDeck ? (
         <AddDeckModal
@@ -1301,7 +1323,7 @@ export default function StructureBuilderClient() {
             </div>
             <div className="rounded-2xl border border-blue-500/25 bg-blue-500/5 p-4 text-blue-950">
               <p className="font-bold">نحوه رفع</p>
-              <p className="mt-1">در ویرایش Card Type، Front Template را کمی تغییر دهید تا با Front کارت‌های دیگر یکسان نباشد؛ مثلاً یک wrapper یا متن/شرط متفاوت اضافه کنید. سپس ذخیره کنید و دوباره «اعمال Card Typeها در Anki» را بزنید.</p>
+              <p className="mt-1">در ویرایش Card Type، Front Template را کمی تغییر دهید تا با Front کارت‌های دیگر یکسان نباشد؛ مثلاً یک wrapper یا متن/شرط متفاوت اضافه کنید. سپس ذخیره کنید و «همگام‌سازی کامل» را بزنید.</p>
             </div>
             <div className="flex justify-end">
               <button type="button" onClick={() => { setCardWarningId(null); setEditingCardType(warningCard.id); }} className="h-10 rounded-xl bg-[var(--primary)] px-5 text-sm font-semibold text-white">ویرایش Front Template</button>

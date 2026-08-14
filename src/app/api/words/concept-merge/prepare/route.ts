@@ -1,20 +1,25 @@
 import { NextResponse } from "next/server";
 
 import { prepareWordSenseConceptMerge } from "@/lib/words/wordSenseConceptMerge.server";
+import { parseParallelPromptPartition } from "@/lib/words/parallelPromptPartition";
 
 export const runtime = "nodejs";
 
 export async function POST(request: Request) {
-  const body = (await request.json().catch(() => null)) as { limit?: unknown } | null;
-  const limit = body?.limit;
-  if (typeof limit !== "number" || !Number.isSafeInteger(limit) || limit < 0) {
+  const body = (await request.json().catch(() => null)) as Record<string, unknown> | null;
+  const partition = parseParallelPromptPartition({
+    laneCount: body?.laneCount,
+    laneNumber: body?.laneNumber,
+    batchSize: body?.batchSize ?? body?.limit,
+  }, 50);
+  if (!partition) {
     return NextResponse.json(
-      { ok: false, error: "limit must be a non-negative integer." },
+      { ok: false, error: "Invalid parallel lane or batch size." },
       { status: 400 },
     );
   }
   try {
-    return NextResponse.json({ ok: true, ...(await prepareWordSenseConceptMerge(limit)) });
+    return NextResponse.json({ ok: true, ...(await prepareWordSenseConceptMerge(partition)) });
   } catch (error) {
     return NextResponse.json(
       { ok: false, error: error instanceof Error ? error.message : String(error) },

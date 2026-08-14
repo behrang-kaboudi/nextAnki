@@ -83,6 +83,7 @@ export async function upsertPrimarySentenceByAnkiLinkId(args: {
     });
 
     if (existingSentence?.sentence_en === nextSentenceEn) {
+      const semanticChanged = existingSentence.sentence_en_meaning_fa !== sentence_en_meaning_fa;
       const updated = await tx.sentence.update({
         where: { id: existingSentence.id },
         data: {
@@ -91,7 +92,16 @@ export async function upsertPrimarySentenceByAnkiLinkId(args: {
         },
         select: sentenceSelect,
       });
-      await updateWordSense({ where: { id: word.id }, data: { sentenceIds: currentIds } }, tx);
+      if (semanticChanged) {
+        await updateWordSense({ where: { id: word.id }, data: { sentenceIds: currentIds } }, tx);
+        await touchWordSensesLinkedToSentenceId(
+          existingSentence.id,
+          { resetMeaningReviewStatus: true },
+          tx,
+        );
+      } else {
+        await updateWordSense({ where: { id: word.id }, data: { anki_link_id: ankiLinkId } }, tx);
+      }
       return updated;
     }
 
@@ -109,6 +119,11 @@ export async function upsertPrimarySentenceByAnkiLinkId(args: {
           data: { sentence_en_meaning_fa },
           select: sentenceSelect,
         });
+        await touchWordSensesLinkedToSentenceId(
+          matchedSentence.id,
+          { resetMeaningReviewStatus: true },
+          tx,
+        );
         nextMeaning = updated.sentence_en_meaning_fa;
       }
 
@@ -135,6 +150,11 @@ export async function upsertPrimarySentenceByAnkiLinkId(args: {
         select: sentenceSelect,
       });
       await updateWordSense({ where: { id: word.id }, data: { sentenceIds: currentIds } }, tx);
+      await touchWordSensesLinkedToSentenceId(
+        existingSentence.id,
+        { resetMeaningReviewStatus: true },
+        tx,
+      );
       return updated;
     }
 
@@ -164,13 +184,19 @@ export async function updatePrimarySentenceByAnkiLinkId(
   if (!current) {
     throw new Error(`Primary sentence not found for anki_link_id=${ankiLinkId}`);
   }
+  const semanticChanged =
+    (data.sentence_en !== undefined && data.sentence_en !== current.sentence_en) ||
+    (data.sentence_en_meaning_fa !== undefined &&
+      data.sentence_en_meaning_fa !== current.sentence_en_meaning_fa);
   const updated = await prisma.sentence.update({
     where: { id: current.id },
     data: {
       ...data,
     },
   });
-  await touchWordSensesLinkedToSentenceId(current.id);
+  await touchWordSensesLinkedToSentenceId(current.id, {
+    resetMeaningReviewStatus: semanticChanged,
+  });
   return updated;
 }
 
