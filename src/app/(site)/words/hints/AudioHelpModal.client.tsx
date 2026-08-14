@@ -5,7 +5,7 @@ import { useState } from "react";
 import { ENGLISH_WORD_AUDIO_PUBLIC_DIR_RELATIVE } from "@/lib/audio/englishWordAudioNaming";
 import { SENTENCE_AUDIO_PUBLIC_DIR_RELATIVE } from "@/lib/audio/sentenceAudioNaming";
 import { WORD_AUDIO_FIELDS } from "@/lib/audio/wordAudioFields";
-import { WORD_CONCEPT_AUDIO_PUBLIC_DIR_RELATIVE } from "@/lib/audio/wordConceptAudioNaming";
+import { WORD_SENSE_CONCEPT_AUDIO_PUBLIC_DIR_RELATIVE } from "@/lib/audio/wordSenseConceptAudioNaming";
 
 function Code({ children }: { children: React.ReactNode }) {
   return <span dir="ltr" className="rounded bg-black/5 px-1 py-0.5 font-mono text-[11px] dark:bg-white/10">{children}</span>;
@@ -31,9 +31,9 @@ export default function AudioHelpModal() {
                 <div className="text-xs font-semibold">مالکیت فایل‌ها</div>
                 <ul className="mt-2 list-disc space-y-1 ps-5">
                   <li><Code>base_form</Code>: جدول <Code>EnglishWord.audio_file_name</Code> در <Code>public/{ENGLISH_WORD_AUDIO_PUBLIC_DIR_RELATIVE}</Code></li>
-                  <li><Code>concept_explained_fa</Code>: جدول <Code>Word.concept_explained_fa_audio_file_name</Code> در <Code>public/{WORD_CONCEPT_AUDIO_PUBLIC_DIR_RELATIVE}</Code></li>
+                  <li><Code>concept_explained_fa</Code>: جدول <Code>WordSense.concept_explained_fa_audio_file_name</Code> در <Code>public/{WORD_SENSE_CONCEPT_AUDIO_PUBLIC_DIR_RELATIVE}</Code></li>
                   <li><Code>sentence_en</Code> و <Code>sentence_en_meaning_fa</Code>: ستون‌های صوتی جدول <Code>Sentence</Code> در <Code>public/{SENTENCE_AUDIO_PUBLIC_DIR_RELATIVE}</Code></li>
-                  <li><Code>other_meanings_en</Code> از <Code>Word.synonymIds</Code> ساخته می‌شود؛ فیلد <Code>other_meanings_en_audio</Code> نیز فایل صوتی <Code>EnglishWord</Code> هر synonym را به همان ترتیب می‌خواند.</li>
+                  <li><Code>other_meanings_en</Code> از <Code>WordSense.synonymIds</Code> ساخته می‌شود؛ فیلد <Code>other_meanings_en_audio</Code> نیز فایل صوتی <Code>EnglishWord</Code> هر synonym را به همان ترتیب می‌خواند.</li>
                 </ul>
               </section>
               <section className="rounded border p-3">

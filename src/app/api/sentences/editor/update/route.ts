@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
-import { touchWordsLinkedToSentenceId } from "@/lib/words/wordRepo";
+import { touchWordSensesLinkedToSentenceId } from "@/lib/words/wordSenseRepo";
 
 export const runtime = "nodejs";
 
@@ -84,7 +84,7 @@ export async function POST(req: Request) {
       },
     });
 
-    const touchedWords = await touchWordsLinkedToSentenceId(id);
+    const touchedWords = await touchWordSensesLinkedToSentenceId(id);
 
     return NextResponse.json({
       ok: true as const,

@@ -83,8 +83,8 @@ export default function WordCleanupPage() {
   return (
     <div className="grid gap-6">
       <PageHeader
-        title="Anki Notes Missing in DB (Word)"
-        subtitle="Reads notes from AnkiConnect and lists those whose `anki_link_id` does not exist in the `Word` table."
+        title="Anki Notes Missing in DB (WordSense)"
+        subtitle="Reads notes from AnkiConnect and lists those whose `anki_link_id` does not exist in the `word_sense` table."
       />
 
       <div className="grid gap-3 rounded-2xl border border-card bg-card p-6 shadow-elevated">

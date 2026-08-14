@@ -2,7 +2,7 @@ import "server-only";
 
 import { NextResponse } from "next/server";
 
-import { undoWordFieldMaintenance } from "@/lib/words/wordFieldMaintenance.server";
+import { undoWordSenseFieldMaintenance } from "@/lib/words/wordSenseFieldMaintenance.server";
 
 export const runtime = "nodejs";
 
@@ -14,7 +14,7 @@ export async function POST(request: Request) {
   try {
     return NextResponse.json({
       ok: true,
-      result: await undoWordFieldMaintenance(body.operationId),
+      result: await undoWordSenseFieldMaintenance(body.operationId),
     });
   } catch (error) {
     return NextResponse.json(

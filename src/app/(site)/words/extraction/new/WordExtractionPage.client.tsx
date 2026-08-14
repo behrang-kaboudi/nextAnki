@@ -500,7 +500,7 @@ export default function WordExtractionPage() {
       const rows = inputPairs.map((p) => {
         const db = byId.get(p.id);
         if (!db) {
-          throw new Error(`Word not found in DB for id=${p.id}`);
+          throw new Error(`WordSense not found in DB for id=${p.id}`);
         }
         return {
           id: db.id,

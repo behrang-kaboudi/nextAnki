@@ -198,9 +198,9 @@ export function SentenceFieldsClient({
           const cached = usageObj.cachedContentTokenCount;
           const total = usageObj.totalTokenCount;
           const id = json.item?.id ?? json.saved?.id ?? "?";
-          setBulkLast(`Word #${id} cached=${cached ?? "?"} total=${total ?? "?"}`);
+          setBulkLast(`WordSense #${id} cached=${cached ?? "?"} total=${total ?? "?"}`);
           appendBulkLog(
-            `w${idx}: Word #${id} ${json.saved ? "saved" : "not-saved"} cached=${cached ?? "?"} total=${total ?? "?"}`
+            `w${idx}: WordSense #${id} ${json.saved ? "saved" : "not-saved"} cached=${cached ?? "?"} total=${total ?? "?"}`
           );
         } catch (e) {
           if (controller.signal.aborted) return;
@@ -268,7 +268,7 @@ export function SentenceFieldsClient({
               {selectedItem ? (
                 <>
                   {" "}
-                  • Word #{selectedItem.id} • {selectedItem.base_form} —{" "}
+                  • WordSense #{selectedItem.id} • {selectedItem.base_form} —{" "}
                   {selectedItem.meaning_fa}
                 </>
               ) : null}
@@ -354,7 +354,7 @@ export function SentenceFieldsClient({
 
         {saved ? (
           <div className="mt-3 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3 text-sm text-emerald-800">
-            Saved to DB: Word #{saved.id} • {saved.base_form}
+            Saved to DB: WordSense #{saved.id} • {saved.base_form}
           </div>
         ) : saveNote ? (
           <div className="mt-3 rounded-xl border border-amber-500/20 bg-amber-500/10 p-3 text-sm text-amber-900">

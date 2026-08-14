@@ -57,13 +57,13 @@ export async function GET(request: Request) {
       ? await listWordIdsMissingSentenceTranslation()
       : [];
     const regularOutputs = outputs.filter((field) => field !== "sentence_en_meaning_fa");
-    const missingConditions: Prisma.WordWhereInput[] = regularOutputs.map(customExtractionMissingWhere);
+    const missingConditions: Prisma.WordSenseWhereInput[] = regularOutputs.map(customExtractionMissingWhere);
     if (translationMissingWordIds.length) missingConditions.push({ id: { in: translationMissingWordIds } });
-    const where: Prisma.WordWhereInput = missingConditions.length
+    const where: Prisma.WordSenseWhereInput = missingConditions.length
       ? { OR: missingConditions }
       : { id: { lt: 0 } };
-    const total = await prisma.word.count({ where });
-    const rows = await prisma.word.findMany({
+    const total = await prisma.wordSense.count({ where });
+    const rows = await prisma.wordSense.findMany({
         where,
         orderBy: { id: "desc" },
         take: limit,

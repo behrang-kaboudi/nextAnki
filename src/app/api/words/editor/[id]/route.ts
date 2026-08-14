@@ -23,7 +23,7 @@ export async function GET(
 
     const item = await getWordEditorInitial(Math.floor(id));
     if (!item) {
-      return NextResponse.json({ ok: false, error: `Word ${id} not found.` }, { status: 404 });
+      return NextResponse.json({ ok: false, error: `WordSense ${id} not found.` }, { status: 404 });
     }
 
     return NextResponse.json({ ok: true, item });

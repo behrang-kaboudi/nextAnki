@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export default function DeleteWordButton({
+export default function DeleteWordSenseButton({
   id,
   label,
 }: {

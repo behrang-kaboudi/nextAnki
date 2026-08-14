@@ -12,7 +12,7 @@ export type WordArrayRelationEntry = {
   conceptExplainedFa: string | null;
 };
 
-export default function WordArrayRelationModal({
+export default function WordSenseArrayRelationModal({
   label,
   entries,
   children,
@@ -39,7 +39,7 @@ export default function WordArrayRelationModal({
         type="button"
         aria-haspopup="dialog"
         aria-expanded={open}
-        aria-label={`Show Word records referenced by ${label}`}
+        aria-label={`Show WordSense records referenced by ${label}`}
         onClick={() => setOpen(true)}
         className="block max-w-full truncate text-left underline decoration-dotted underline-offset-4 hover:text-blue-700 dark:hover:text-blue-300"
       >
@@ -52,7 +52,7 @@ export default function WordArrayRelationModal({
             className="fixed inset-0 z-[90] flex items-center justify-center bg-black/55 p-3 backdrop-blur-sm sm:p-6"
             role="dialog"
             aria-modal="true"
-            aria-label={`Word records referenced by ${label}`}
+            aria-label={`WordSense records referenced by ${label}`}
             onMouseDown={(event) => {
               if (event.target === event.currentTarget) close();
             }}
@@ -62,7 +62,7 @@ export default function WordArrayRelationModal({
                 <div className="min-w-0">
                   <div className="truncate text-base font-semibold">{label}</div>
                   <div className="text-xs opacity-70">
-                    {entries.length} referenced Word {entries.length === 1 ? "record" : "records"}
+                    {entries.length} referenced WordSense {entries.length === 1 ? "record" : "records"}
                   </div>
                 </div>
                 <button
@@ -89,7 +89,7 @@ export default function WordArrayRelationModal({
                     {entries.map((entry) => (
                       <tr key={entry.id} className="border-b align-top last:border-0">
                         <td className="whitespace-nowrap px-3 py-2 font-mono">{entry.id}</td>
-                        <td className="px-3 py-2">{entry.baseForm ?? <span className="text-red-700">Missing Word</span>}</td>
+                        <td className="px-3 py-2">{entry.baseForm ?? <span className="text-red-700">Missing WordSense</span>}</td>
                         <td className="px-3 py-2" dir="rtl">{entry.meaning ?? "—"}</td>
                         <td className="px-3 py-2">{entry.pos ?? "—"}</td>
                         <td className="max-w-md whitespace-pre-wrap px-3 py-2" dir="rtl">{entry.conceptExplainedFa ?? "—"}</td>

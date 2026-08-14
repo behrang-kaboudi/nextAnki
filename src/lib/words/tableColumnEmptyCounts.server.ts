@@ -22,7 +22,7 @@ function countEmpty<T extends Record<string, unknown>>(
 }
 
 export async function getWordColumnEmptyCounts(): Promise<TableColumnEmptyCounts> {
-  const rows = await prisma.word.findMany({
+  const rows = await prisma.wordSense.findMany({
     select: {
       anki_link_id: true,
       meaningId: true,

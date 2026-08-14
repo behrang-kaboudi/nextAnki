@@ -6,12 +6,12 @@ import { rm } from "node:fs/promises";
 import type { Prisma } from "@prisma/client";
 
 import { getEnglishWordAudioAbsolutePath } from "@/lib/audio/englishWordAudioPaths.server";
-import { getWordConceptAudioAbsolutePath } from "@/lib/audio/wordConceptAudioPaths.server";
+import { getWordSenseConceptAudioAbsolutePath } from "@/lib/audio/wordSenseConceptAudioPaths.server";
 import { normalizeEnglishWordText } from "@/lib/english/normalize";
 import { prisma } from "@/lib/prisma";
-import { deleteWord, updateWord } from "@/lib/words/wordRepo";
+import { deleteWordSense, updateWordSense } from "@/lib/words/wordSenseRepo";
 
-const sourceWordSelect = {
+const sourceWordSenseSelect = {
   id: true,
   anki_link_id: true,
   englishId: true,
@@ -28,11 +28,11 @@ const sourceWordSelect = {
   concept_explained_fa_audio_file_name: true,
   english: { select: { id: true, base_form: true } },
   meaning: { select: { canonical_text: true } },
-} satisfies Prisma.WordSelect;
+} satisfies Prisma.WordSenseSelect;
 
-type SourceWord = Prisma.WordGetPayload<{ select: typeof sourceWordSelect }>;
+type SourceWordSense = Prisma.WordSenseGetPayload<{ select: typeof sourceWordSenseSelect }>;
 
-export type InflectionSourceWord = {
+export type InflectionSourceWordSense = {
   wordId: number;
   englishWordId: number;
   baseForm: string;
@@ -53,7 +53,7 @@ export type InflectionSourceGroup = {
   englishWords: Array<{
     englishWordId: number;
     baseForm: string;
-    words: InflectionSourceWord[];
+    words: InflectionSourceWordSense[];
   }>;
 };
 
@@ -166,7 +166,7 @@ async function buildInflectionSourceGroups(client: ReadClient): Promise<Inflecti
     select: {
       id: true,
       base_form: true,
-      words: { orderBy: { id: "asc" }, select: sourceWordSelect },
+      wordSenses: { orderBy: { id: "asc" }, select: sourceWordSenseSelect },
     },
   });
   const byForm = new Map(englishWords.map((word) => [word.base_form, word]));
@@ -189,14 +189,14 @@ async function buildInflectionSourceGroups(client: ReadClient): Promise<Inflecti
 
   const candidates: Array<{
     pos: string;
-    englishWords: Array<(typeof englishWords)[number] & { wordsForPos: SourceWord[] }>;
+    englishWords: Array<(typeof englishWords)[number] & { wordsForPos: SourceWordSense[] }>;
   }> = [];
   for (const component of components.values()) {
     if (component.length < 2) continue;
-    const positions = [...new Set(component.flatMap((word) => word.words.map((row) => normalizePos(row.pos))))].sort();
+    const positions = [...new Set(component.flatMap((word) => word.wordSenses.map((row) => normalizePos(row.pos))))].sort();
     for (const pos of positions) {
       const matching = component.flatMap((word) => {
-        const wordsForPos = word.words.filter((row) => normalizePos(row.pos) === pos);
+        const wordsForPos = word.wordSenses.filter((row) => normalizePos(row.pos) === pos);
         return wordsForPos.length ? [{ ...word, wordsForPos }] : [];
       });
       if (matching.length >= 2 && matching.some((word) => word.wordsForPos.some((row) => !row.inflectionMergeReviewed))) {
@@ -268,11 +268,11 @@ export function sourceFingerprint(group: InflectionSourceGroup): InflectionSourc
   };
 }
 
-export async function getPendingWordInflectionMergeCount() {
+export async function getPendingWordSenseInflectionMergeCount() {
   return (await buildInflectionSourceGroups(prisma)).length;
 }
 
-export async function prepareWordInflectionMerge(limit: number) {
+export async function prepareWordSenseInflectionMerge(limit: number) {
   const eligible = await buildInflectionSourceGroups(prisma);
   const selected = limit > 0 ? eligible.slice(0, limit) : eligible;
   return {
@@ -328,7 +328,7 @@ function mappedIds(value: Prisma.JsonValue | null, replacements: ReadonlyMap<num
   return [...new Set(positiveIds(value).map((id) => replacements.get(id) ?? id).filter((id) => id !== selfId))];
 }
 
-export async function applyWordInflectionMerge(
+export async function applyWordSenseInflectionMerge(
   sourceGroups: InflectionSourceFingerprint[],
   output: InflectionOutputGroup[],
 ) {
@@ -344,7 +344,7 @@ export async function applyWordInflectionMerge(
     });
     const englishById = new Map(currentEnglishWords.map((word) => [word.id, word]));
     const sourceWordIds = [...new Set(sourceGroups.flatMap((group) => group.wordIds))];
-    const words = await tx.word.findMany({ where: { id: { in: sourceWordIds } }, select: sourceWordSelect });
+    const words = await tx.wordSense.findMany({ where: { id: { in: sourceWordIds } }, select: sourceWordSenseSelect });
     const wordById = new Map(words.map((word) => [word.id, word]));
 
     const replacements = new Map<number, number>();
@@ -364,7 +364,7 @@ export async function applyWordInflectionMerge(
       }
       const outputWordIds = result.entries.flatMap((entry) => [entry.keepWordId, ...entry.deleteWordIds]);
       if (!sameIds(source.wordIds, outputWordIds) || new Set(outputWordIds).size !== outputWordIds.length) {
-        throw new Error(`Every Word in ${source.groupKey} must appear exactly once as a keeper or deletion.`);
+        throw new Error(`Every WordSense in ${source.groupKey} must appear exactly once as a keeper or deletion.`);
       }
       for (const entry of result.entries) {
         const canonical = englishById.get(entry.canonicalEnglishWordId);
@@ -374,16 +374,16 @@ export async function applyWordInflectionMerge(
         const clusterIds = [entry.keepWordId, ...entry.deleteWordIds];
         const clusterWords = clusterIds.map((id) => wordById.get(id));
         if (clusterWords.some((word) => !word || normalizePos(word.pos) !== source.pos)) {
-          throw new Error(`An entry in ${source.groupKey} contains a missing Word or a different POS.`);
+          throw new Error(`An entry in ${source.groupKey} contains a missing WordSense or a different POS.`);
         }
         if (Math.min(...clusterIds) !== entry.keepWordId) {
-          throw new Error(`Word ${entry.keepWordId} must be the oldest Word in its merge entry.`);
+          throw new Error(`WordSense ${entry.keepWordId} must be the oldest WordSense in its merge entry.`);
         }
         if (!clusterWords.some((word) => word?.englishId === canonical.id)) {
-          throw new Error(`Canonical EnglishWord ${canonical.id} must already own a Word in its merge entry.`);
+          throw new Error(`Canonical EnglishWord ${canonical.id} must already own a WordSense in its merge entry.`);
         }
         for (const id of clusterIds) {
-          if (seenWordIds.has(id)) throw new Error(`Word ${id} appears in more than one output entry.`);
+          if (seenWordIds.has(id)) throw new Error(`WordSense ${id} appears in more than one output entry.`);
           seenWordIds.add(id);
         }
         for (const id of entry.deleteWordIds) replacements.set(id, entry.keepWordId);
@@ -415,7 +415,7 @@ export async function applyWordInflectionMerge(
       const meaningsChanged = keeper.meaningId !== primaryMeaningId ||
         !sameIds(positiveIds(keeper.otherMeaningIds), otherMeaningIds);
 
-      await updateWord({
+      await updateWordSense({
         where: { id: keeper.id },
         data: {
           englishId: entry.canonicalEnglishWordId,
@@ -445,7 +445,7 @@ export async function applyWordInflectionMerge(
       }
     }
 
-    const allWords = await tx.word.findMany({
+    const allWords = await tx.wordSense.findMany({
       select: { id: true, comparedMeaningWordIds: true, synonymIds: true },
     });
     const deletedIds = new Set(replacements.keys());
@@ -458,7 +458,7 @@ export async function applyWordInflectionMerge(
       ])];
       if (!sameIds(positiveIds(word.synonymIds), nextSynonyms) ||
           !sameIds(positiveIds(word.comparedMeaningWordIds), nextCompared)) {
-        await updateWord({
+        await updateWordSense({
           where: { id: word.id },
           data: { synonymIds: nextSynonyms, comparedMeaningWordIds: nextCompared },
           select: { id: true },
@@ -467,7 +467,7 @@ export async function applyWordInflectionMerge(
     }
 
     for (const entry of entryPlans) {
-      for (const id of entry.deleteWordIds) await deleteWord({ where: { id } }, tx);
+      for (const id of entry.deleteWordIds) await deleteWordSense({ where: { id } }, tx);
     }
 
     const orphanAudioFiles = new Set<string>();
@@ -479,11 +479,11 @@ export async function applyWordInflectionMerge(
         base_form: true,
         audio_file_name: true,
         forms: { select: { form: true } },
-        _count: { select: { words: true } },
+        _count: { select: { wordSenses: true } },
       },
     });
     for (const source of possibleOrphans) {
-      if (source._count.words !== 0) continue;
+      if (source._count.wordSenses !== 0) continue;
       const targets = sourceToTargets.get(source.id) ?? new Set<number>();
       for (const targetId of targets) {
         const target = englishById.get(targetId);
@@ -523,7 +523,7 @@ export async function applyWordInflectionMerge(
   await Promise.all([
     ...dbResult.conceptAudioFiles.map(async (filename) => {
       try {
-        await rm(getWordConceptAudioAbsolutePath(filename), { force: true });
+        await rm(getWordSenseConceptAudioAbsolutePath(filename), { force: true });
         deletedAudioFiles += 1;
       } catch {
         failedAudioFiles += 1;

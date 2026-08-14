@@ -49,11 +49,11 @@ export async function POST(req: Request) {
         OR: [
           { base_form: { contains: q } },
           {
-            words: {
+            wordSenses: {
               some: { meaning: { is: { canonical_text: { contains: q } } } },
             },
           },
-          { words: { some: { anki_link_id: { contains: q } } } },
+          { wordSenses: { some: { anki_link_id: { contains: q } } } },
         ],
       });
     }

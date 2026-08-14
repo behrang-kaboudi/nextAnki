@@ -28,7 +28,7 @@ export async function GET(req: Request) {
       }>
     >(Prisma.sql`
       SELECT w.id, ew.base_form, COALESCE(pw.canonical_text, '') AS meaning_fa
-      FROM word w
+      FROM word_sense w
       INNER JOIN english_word ew ON ew.id = w.englishId
       LEFT JOIN persian_word pw ON pw.id = w.meaningId
       WHERE pw.meaning_fa_IPA IS NULL OR pw.meaning_fa_IPA = ''

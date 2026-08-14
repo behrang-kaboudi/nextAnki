@@ -30,7 +30,7 @@ const REQUIRED_FIELDS = [
 type BaseWordRow = Record<(typeof REQUIRED_FIELDS)[number], string>;
 
 type AuditChange = {
-  entity: "Word" | "EnglishWord" | "PersianWord" | "Sentence";
+  entity: "WordSense" | "EnglishWord" | "PersianWord" | "Sentence";
   field: string;
   action: "created" | "reused" | "updated" | "kept" | "linked" | "removed";
   recordId?: number;
@@ -431,7 +431,7 @@ export default function NewWordExtractionStudio() {
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="font-semibold text-slate-900">{result.base_form}</span>
                     <span dir="rtl" className="text-sm text-slate-600">{result.meaning_fa}</span>
-                    {result.ok ? <span className="text-xs text-slate-400">Word #{result.id}</span> : null}
+                    {result.ok ? <span className="text-xs text-slate-400">WordSense #{result.id}</span> : null}
                   </div>
                   <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide ${
                     result.action === "inserted"
@@ -440,7 +440,7 @@ export default function NewWordExtractionStudio() {
                         ? "bg-amber-100 text-amber-800"
                         : "bg-red-100 text-red-800"
                   }`}>
-                    {result.action === "inserted" ? "Word inserted" : result.action === "skipped_exists" ? "Not inserted — same key" : "Failed"}
+                    {result.action === "inserted" ? "WordSense inserted" : result.action === "skipped_exists" ? "Not inserted — same key" : "Failed"}
                   </span>
                 </div>
                 {result.ok ? (

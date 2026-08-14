@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import WordEditorClient from "./[id]/word-editor.client";
+import WordEditorClient from "./[id]/word-sense-editor.client";
 import type { WordEditorInitial } from "@/lib/words/editorPayload";
 
 type LoadState =
@@ -12,7 +12,7 @@ type LoadState =
   | { status: "ready"; item: WordEditorInitial; error: null }
   | { status: "error"; item: null; error: string };
 
-export default function OpenWordEditorModal({
+export default function OpenWordSenseEditorModal({
   id,
   label,
 }: {
@@ -91,7 +91,7 @@ export default function OpenWordEditorModal({
             <div className="flex items-center justify-between gap-3 border-b border-card bg-background/95 px-4 py-3 backdrop-blur sm:px-5">
               <div className="min-w-0">
                 <div className="truncate text-sm font-semibold">
-                  Edit Word #{id} — {label}
+                  Edit WordSense #{id} — {label}
                 </div>
                 <div className="text-xs opacity-70">Loaded in-place from /words/editor</div>
               </div>

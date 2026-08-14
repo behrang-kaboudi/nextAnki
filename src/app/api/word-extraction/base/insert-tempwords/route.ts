@@ -12,7 +12,7 @@ import {
 } from "@/lib/persian/normalize";
 import { prisma } from "@/lib/prisma";
 import { addPersianWord, findPersianWord } from "@/lib/tables/persianWord";
-import { updateWord } from "@/lib/words/wordRepo";
+import { updateWordSense } from "@/lib/words/wordSenseRepo";
 import { primarySentenceId } from "@/lib/words/sentenceIds";
 
 export const runtime = "nodejs";
@@ -27,7 +27,7 @@ type PayloadItem = {
 };
 
 type AuditChange = {
-  entity: "Word" | "EnglishWord" | "PersianWord" | "Sentence";
+  entity: "WordSense" | "EnglishWord" | "PersianWord" | "Sentence";
   field: string;
   action: "created" | "reused" | "kept" | "linked";
   recordId?: number;
@@ -169,7 +169,7 @@ export async function POST(request: Request) {
       try {
         const normalizedMeaning = normalizePersianFull(item.meaning_fa);
         const knownEnglishWordIds = await findEnglishWordIdsByKnownForm(item.base_form);
-        const candidates = await prisma.word.findMany({
+        const candidates = await prisma.wordSense.findMany({
           where: knownEnglishWordIds.length
             ? { englishId: { in: knownEnglishWordIds } }
             : { english: { is: { base_form: item.base_form } } },
@@ -207,7 +207,7 @@ export async function POST(request: Request) {
             : null;
           const changes: AuditChange[] = [
             {
-              entity: "Word",
+              entity: "WordSense",
               field: "record",
               action: "kept",
               recordId: existing.id,
@@ -234,7 +234,7 @@ export async function POST(request: Request) {
               reason: "meaning_fa بخشی از کلید تکراری بود و بدون تغییر باقی ماند.",
             },
             {
-              entity: "Word",
+              entity: "WordSense",
               field: "pos",
               action: "kept",
               recordId: existing.id,
@@ -244,7 +244,7 @@ export async function POST(request: Request) {
               reason: "pos بخشی از کلید تکراری بود و بدون تغییر باقی ماند.",
             },
             {
-              entity: "Word",
+              entity: "WordSense",
               field: "concept_explained_fa",
               action: "kept",
               recordId: existing.id,
@@ -274,7 +274,7 @@ export async function POST(request: Request) {
               reason: "رکورد تکراری بود؛ ترجمهٔ ورودی نادیده گرفته شد و مقدار قبلی تغییر نکرد.",
             },
             {
-              entity: "Word",
+              entity: "WordSense",
               field: "updatedAt",
               action: "kept",
               recordId: existing.id,
@@ -328,7 +328,7 @@ export async function POST(request: Request) {
               sentence_en_meaning_fa: true,
             },
           });
-          const pending = await tx.word.create({
+          const pending = await tx.wordSense.create({
             data: {
               anki_link_id: `pending_${randomUUID()}`,
               englishId: englishWord.id,
@@ -340,7 +340,7 @@ export async function POST(request: Request) {
             },
             select: { id: true },
           });
-          await updateWord(
+          await updateWordSense(
             {
               where: { id: pending.id },
               data: { anki_link_id: `${pending.id}_${Date.now()}` },
@@ -397,35 +397,35 @@ export async function POST(request: Request) {
               : "ترجمه همراه Sentence جدید Insert شد.",
           },
           {
-            entity: "Word",
+            entity: "WordSense",
             field: "record",
             action: "created",
             recordId: created.pending.id,
-            reason: "ترکیب base_form + meaning_fa + pos در دیتابیس وجود نداشت؛ Word Candidate جدید Insert شد.",
+            reason: "ترکیب base_form + meaning_fa + pos در دیتابیس وجود نداشت؛ WordSense Candidate جدید Insert شد.",
           },
           {
-            entity: "Word",
+            entity: "WordSense",
             field: "pos",
             action: "created",
             recordId: created.pending.id,
             after: item.pos,
-            reason: "pos روی Word جدید ذخیره شد.",
+            reason: "pos روی WordSense جدید ذخیره شد.",
           },
           {
-            entity: "Word",
+            entity: "WordSense",
             field: "concept_explained_fa",
             action: "created",
             recordId: created.pending.id,
             after: item.concept_explained_fa,
-            reason: "مفهوم روی Word جدید ذخیره شد.",
+            reason: "مفهوم روی WordSense جدید ذخیره شد.",
           },
           {
-            entity: "Word",
+            entity: "WordSense",
             field: "sentenceIds",
             action: "linked",
             recordId: created.pending.id,
             after: [created.sentence.id],
-            reason: "Sentence فقط به Word جدید متصل شد؛ هیچ Word قبلی تغییر نکرد.",
+            reason: "Sentence فقط به WordSense جدید متصل شد؛ هیچ WordSense قبلی تغییر نکرد.",
           },
         ];
         inserted += 1;

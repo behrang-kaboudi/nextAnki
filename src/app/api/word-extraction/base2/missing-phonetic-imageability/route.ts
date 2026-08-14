@@ -21,12 +21,12 @@ export async function GET(req: Request) {
     const url = new URL(req.url);
     const limit = parseLimit(url.searchParams.get("limit"), 20);
 
-    const where: Prisma.WordWhereInput = {
+    const where: Prisma.WordSenseWhereInput = {
       english: { OR: [{ phonetic_us: null }, { phonetic_us: "" }] },
     };
     const [total, words] = await Promise.all([
-      prisma.word.count({ where }),
-      prisma.word.findMany({
+      prisma.wordSense.count({ where }),
+      prisma.wordSense.findMany({
         where,
         orderBy: { id: "desc" },
         take: limit,

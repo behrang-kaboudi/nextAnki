@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 
 import {
-  applyWordMeaningComparison,
+  applyWordSenseMeaningComparison,
   parseMeaningComparisonOutput,
-} from "@/lib/words/wordMeaningComparison.server";
+} from "@/lib/words/wordSenseMeaningComparison.server";
 
 export const runtime = "nodejs";
 
@@ -20,7 +20,7 @@ export async function POST(request: Request) {
   try {
     const groups = parseMeaningComparisonOutput(body?.output);
     if (groups.length !== 1) throw new Error("Confirm exactly one candidate group at a time.");
-    const result = await applyWordMeaningComparison(persianWordId, sourceWordIds as number[], groups[0]);
+    const result = await applyWordSenseMeaningComparison(persianWordId, sourceWordIds as number[], groups[0]);
     return NextResponse.json({ ok: true, ...result });
   } catch (error) {
     return NextResponse.json(

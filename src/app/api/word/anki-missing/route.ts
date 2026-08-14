@@ -59,7 +59,7 @@ export async function POST(req: Request) {
     const client = createAnkiOperations({ timeoutMs: 30_000 });
     const [noteIdsRes, wordRows] = await Promise.all([
       client.findNotes({ query }),
-      prisma.word.findMany({ select: { anki_link_id: true } }),
+      prisma.wordSense.findMany({ select: { anki_link_id: true } }),
     ]);
     if (!noteIdsRes.ok) {
       return NextResponse.json({ ok: false, error: noteIdsRes.error }, { status: 502 });

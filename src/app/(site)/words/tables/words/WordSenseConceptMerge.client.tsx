@@ -31,7 +31,7 @@ type PrepareResponse = {
 const buttonClass =
   "rounded border px-3 py-2 text-sm transition active:scale-90 hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5";
 
-export default function WordConceptMerge({ remainingCount }: { remainingCount: number }) {
+export default function WordSenseConceptMerge({ remainingCount }: { remainingCount: number }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [showSelectionHelp, setShowSelectionHelp] = useState(false);
@@ -147,7 +147,7 @@ export default function WordConceptMerge({ remainingCount }: { remainingCount: n
       router.refresh();
       await createData(
         false,
-        `Updated ${result.updated ?? 0} and deleted ${result.deleted ?? 0} Word record(s) ✓`,
+        `Updated ${result.updated ?? 0} and deleted ${result.deleted ?? 0} WordSense record(s) ✓`,
       );
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : String(reason));
@@ -183,10 +183,10 @@ export default function WordConceptMerge({ remainingCount }: { remainingCount: n
           pendingUnit="گروه در انتظار"
           confirmEndpoint="/api/words/concept-merge/confirm-all"
           resetEndpoint="/api/words/concept-merge/reset-reviewed"
-          confirmSubject="بررسی‌های Merge Word Concept"
+          confirmSubject="بررسی‌های Merge WordSense Concept"
           confirmWarning="این کار فقط وضعیت بررسی را تأیید می‌کند؛ هیچ رکوردی ادغام یا حذف نمی‌شود."
-          resetSubject="بررسی‌های Merge Word Concept"
-          resetWarning="تمام Wordهای بررسی‌شده دوباره Pending می‌شوند. هیچ کانسپت، معنا یا رکوردی تغییر یا حذف نمی‌شود."
+          resetSubject="بررسی‌های Merge WordSense Concept"
+          resetWarning="تمام WordSenseهای بررسی‌شده دوباره Pending می‌شوند. هیچ کانسپت، معنا یا رکوردی تغییر یا حذف نمی‌شود."
         />
       </div>
 
@@ -200,7 +200,7 @@ export default function WordConceptMerge({ remainingCount }: { remainingCount: n
           <div className="flex h-[85vh] w-full max-w-7xl flex-col gap-4 rounded-2xl border border-card bg-background p-6 shadow-elevated">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <b>Merge word concepts — Word</b>
+                <b>Merge word concepts — WordSense</b>
                 <div className="text-xs opacity-70">
                   Candidate records are grouped by englishId. Nothing is deleted until the human confirmation step.
                 </div>
@@ -233,19 +233,19 @@ export default function WordConceptMerge({ remainingCount }: { remainingCount: n
                 <div className="mt-2 font-semibold">شرایط انتخاب رکوردها</div>
                 <ul className="list-disc pr-5">
                   <li>رکوردها بر اساس <code>englishId</code> یکسان گروه‌بندی می‌شوند.</li>
-                  <li>گروه باید حداقل دو رکورد <code>Word</code> داشته باشد.</li>
+                  <li>گروه باید حداقل دو رکورد <code>WordSense</code> داشته باشد.</li>
                   <li>حداقل یک رکورد گروه باید <code>conceptMergeReviewed=false</code> داشته باشد.</li>
                   <li>گروهی که تمام رکوردهایش بررسی شده‌اند دوباره به پرامپت ارسال نمی‌شود.</li>
                   <li><code>Count = 0</code> یعنی تمام گروه‌های واجد شرایط.</li>
                 </ul>
                 <div className="mt-2 font-semibold">پس از تأیید چه تغییری می‌کند؟</div>
                 <ul className="list-disc pr-5">
-                  <li>در هر مفهوم ادغام‌شده، قدیمی‌ترین Word باقی می‌ماند و <code>meaningId</code>، <code>otherMeaningIds</code> و <code>concept_explained_fa</code> آن با نتیجهٔ نهایی به‌روزرسانی می‌شوند.</li>
+                  <li>در هر مفهوم ادغام‌شده، قدیمی‌ترین WordSense باقی می‌ماند و <code>meaningId</code>، <code>otherMeaningIds</code> و <code>concept_explained_fa</code> آن با نتیجهٔ نهایی به‌روزرسانی می‌شوند.</li>
                   <li>تمام جمله‌های معتبر گروه بدون تکرار در <code>sentenceIds</code> رکورد باقی‌مانده جمع می‌شوند و ترتیب آن‌ها حفظ می‌شود.</li>
-                  <li>Wordهای جدیدترِ ادغام‌شده حذف می‌شوند، اما رکوردهای Sentence و PersianWord حذف نمی‌شوند.</li>
-                  <li>ارجاع به Wordهای حذف‌شده از <code>synonymIds</code> و <code>comparedMeaningWordIds</code> سایر رکوردها پاک می‌شود.</li>
+                  <li>WordSenseهای جدیدترِ ادغام‌شده حذف می‌شوند، اما رکوردهای Sentence و PersianWord حذف نمی‌شوند.</li>
+                  <li>ارجاع به WordSenseهای حذف‌شده از <code>synonymIds</code> و <code>comparedMeaningWordIds</code> سایر رکوردها پاک می‌شود.</li>
                   <li>گروه تک‌رکوردی به مدل فرستاده نمی‌شود و فقط بررسی‌شده علامت می‌خورد.</li>
-                  <li>هیچ ستون دیتابیس حذف نمی‌شود؛ فقط مقدارهای بالا تغییر می‌کنند و ردیف‌های Word اضافه حذف می‌شوند.</li>
+                  <li>هیچ ستون دیتابیس حذف نمی‌شود؛ فقط مقدارهای بالا تغییر می‌کنند و ردیف‌های WordSense اضافه حذف می‌شوند.</li>
                 </ul>
                 <p className="mt-2 font-medium text-amber-800 dark:text-amber-300">
                   وضعیت انتخاب رکوردها فقط از <code>conceptMergeReviewed</code> خوانده می‌شود و به جمله‌ها وابسته نیست.

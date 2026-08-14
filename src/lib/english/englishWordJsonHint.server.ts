@@ -5,7 +5,7 @@ import { pickPictureSymbolsForWord } from "@/lib/ipa/setPictures/setForAny";
 import { createPreloadedPictureCandidateLookup } from "@/lib/ipa/setPictures/preloadedLookup";
 import { prisma } from "@/lib/prisma";
 import { stringifyJsonHintWithTimestamp } from "@/lib/words/jsonHint";
-import { touchWordsByEnglishIds } from "@/lib/words/wordRepo";
+import { touchWordSensesByEnglishIds } from "@/lib/words/wordSenseRepo";
 
 export type EnglishWordJsonHintInput = {
   id: number;
@@ -77,7 +77,7 @@ export async function generateEnglishWordJsonHints(
       data: { json_hint: result.jsonHint },
     });
   });
-  await touchWordsByEnglishIds(updates.map((result) => result.id));
+  await touchWordSensesByEnglishIds(updates.map((result) => result.id));
   return results;
 }
 

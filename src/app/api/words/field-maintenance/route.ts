@@ -3,15 +3,15 @@ import "server-only";
 import { NextResponse } from "next/server";
 
 import {
-  listWordFieldMaintenanceOperations,
+  listWordSenseFieldMaintenanceOperations,
   listWordMaintenancePolicies,
-} from "@/lib/words/wordFieldMaintenance.server";
+} from "@/lib/words/wordSenseFieldMaintenance.server";
 
 export const runtime = "nodejs";
 
 export async function GET() {
   try {
-    const [operations] = await Promise.all([listWordFieldMaintenanceOperations()]);
+    const [operations] = await Promise.all([listWordSenseFieldMaintenanceOperations()]);
     return NextResponse.json({
       ok: true,
       fields: listWordMaintenancePolicies(),

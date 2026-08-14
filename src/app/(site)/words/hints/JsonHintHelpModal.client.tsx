@@ -57,7 +57,7 @@ export default function JsonHintHelpModal() {
               <section className="rounded border p-3">
                 <div className="text-xs font-semibold">این دکمه دقیقاً چه کار می‌کند؟</div>
                 <div className="mt-2 text-sm">
-                  برای هر رکورد جدول <Code>Word</Code> (یا فقط رکوردهای مطابق Search)، مقدار{" "}
+                  برای هر رکورد جدول <Code>WordSense</Code> (یا فقط رکوردهای مطابق Search)، مقدار{" "}
                   <Code>EnglishWord.json_hint</Code> را محاسبه می‌کند و اگر نتیجه با مقدار فعلی متفاوت باشد در دیتابیس ذخیره
                   می‌کند.
                 </div>
@@ -79,7 +79,7 @@ export default function JsonHintHelpModal() {
                       <Code>generatedAtMs</Code> را با زمان فعلی تنظیم می‌کند.
                     </li>
                     <li>
-                      اگر برای یک Word نتواند hint بسازد (مثلاً{" "}
+                      اگر برای یک WordSense نتواند hint بسازد (مثلاً{" "}
                       <Code>phonetic_us_normalized</Code> خالی باشد): json_hint را{" "}
                       <Code>null</Code> می‌کند (یعنی ممکن است json_hint قبلی پاک شود).
                     </li>
@@ -99,7 +99,7 @@ export default function JsonHintHelpModal() {
               <section className="rounded border p-3">
                 <div className="text-xs font-semibold">چه چیزهایی باعث تغییر خروجی می‌شوند؟</div>
                 <div className="mt-2 text-sm">
-                  حتی اگر روی خود Word چیزی تغییر نداده باشی، این‌ها می‌توانند json_hint را تغییر دهند:
+                  حتی اگر روی خود WordSense چیزی تغییر نداده باشی، این‌ها می‌توانند json_hint را تغییر دهند:
                   <ul className="mt-2 list-disc space-y-1 ps-5 text-sm">
                     <li>تغییر در جدول <Code>PictureWord</Code> (اضافه/حذف/ویرایش)</li>
                     <li>تغییر در <Code>phonetic_us_normalized</Code> یا <Code>imageability</Code></li>

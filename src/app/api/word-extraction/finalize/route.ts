@@ -15,7 +15,7 @@ export async function POST() {
   try {
     // 1) Validate required fields are present and non-empty.
     // Note: some fields are optional in the schema, but Finalize requires them.
-    const rows = await prisma.word.findMany({
+    const rows = await prisma.wordSense.findMany({
       select: {
         id: true,
         sentenceIds: true,
@@ -59,7 +59,7 @@ export async function POST() {
         {
           ok: false,
           phase: "validate",
-          error: "Some Word rows are missing required fields",
+          error: "Some WordSense rows are missing required fields",
           totalInvalid,
           sample,
         },
@@ -68,7 +68,7 @@ export async function POST() {
     }
 
     // 2) Validate anki_link_id is in the `${id}_${now}` format and matches the row id.
-    const ankiRows = await prisma.word.findMany({
+    const ankiRows = await prisma.wordSense.findMany({
       orderBy: { id: "asc" },
       select: { id: true, anki_link_id: true },
     });
@@ -83,7 +83,7 @@ export async function POST() {
         {
           ok: false,
           phase: "validate_anki_link_id",
-          error: "Some Word rows have invalid anki_link_id (must be `${id}_${now}` and match the row id).",
+          error: "Some WordSense rows have invalid anki_link_id (must be `${id}_${now}` and match the row id).",
           invalidAnkiCount,
           sample: invalidAnkiSample,
         },

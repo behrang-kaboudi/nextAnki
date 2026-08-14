@@ -3,7 +3,7 @@ import "server-only";
 import fs from "node:fs";
 import path from "node:path";
 
-import type { Prisma, Word } from "@prisma/client";
+import type { Prisma, WordSense } from "@prisma/client";
 
 import type { AnkiNotesInfo } from "@/lib/anki";
 import {
@@ -12,24 +12,24 @@ import {
 } from "@/lib/audio/pictureWordAudioNaming";
 import { getEnglishWordAudioAbsolutePath } from "@/lib/audio/englishWordAudioPaths.server";
 import { getPersianWordAudioAbsolutePath } from "@/lib/audio/persianWordAudioPaths.server";
-import { getWordConceptAudioAbsolutePath } from "@/lib/audio/wordConceptAudioPaths.server";
+import { getWordSenseConceptAudioAbsolutePath } from "@/lib/audio/wordSenseConceptAudioPaths.server";
 import { getSentenceAudioAbsolutePath } from "@/lib/audio/sentenceAudioPaths.server";
 import { prisma } from "@/lib/prisma";
 import {
-  hydrateWordWithPersianMeanings,
-  type WordWithPersianMeanings,
+  hydrateWordSenseWithPersianMeanings,
+  type WordSenseWithPersianMeanings,
 } from "@/lib/words/persianMeanings.server";
 import {
-  hydrateWordWithEnglishFields,
-  type WordEnglishFields,
-} from "@/lib/english/wordEnglishFields.server";
+  hydrateWordSenseWithEnglishFields,
+  type WordSenseEnglishFields,
+} from "@/lib/english/wordSenseEnglishFields.server";
 import {
-  hydrateWordWithEnglishSynonyms,
-  type WordWithEnglishSynonyms,
+  hydrateWordSenseWithEnglishSynonyms,
+  type WordSenseWithEnglishSynonyms,
 } from "@/lib/words/englishSynonyms.server";
 import {
   hydrateWordsWithPrimarySentence,
-  type WordWithPrimarySentence,
+  type WordSenseWithPrimarySentence,
 } from "@/lib/words/primarySentences.server";
 
 import { IpaCandidate } from "../ipa/setPictures/types";
@@ -143,7 +143,7 @@ export async function selectFile(
       : null;
   }
 
-  const whereCandidates: Prisma.WordWhereInput[] = [];
+  const whereCandidates: Prisma.WordSenseWhereInput[] = [];
 
   // Prefer strict match when we have both sides.
   if (en && fa)
@@ -159,7 +159,7 @@ export async function selectFile(
 
   let row: { english: { audio_file_name: string | null } } | null = null;
   for (const where of whereCandidates) {
-    row = await prisma.word.findFirst({
+    row = await prisma.wordSense.findFirst({
       where,
       select: { english: { select: { audio_file_name: true } } },
     });
@@ -203,19 +203,19 @@ export function getAnkiLinkIdFromNoteFields(
   return null;
 }
 
-type WordForAnki = Word &
-  WordEnglishFields &
+type WordForAnki = WordSense &
+  WordSenseEnglishFields &
   Partial<
     Pick<
-      WordWithPersianMeanings<Word>,
+      WordSenseWithPersianMeanings<WordSense>,
       | "primaryPersianWord"
       | "otherPersianWords"
       | "meaning_fa"
       | "other_meanings_fa"
     >
   > &
-  Partial<Pick<WordWithEnglishSynonyms<Word>, "synonymEnglishWords">> &
-  Partial<Pick<WordWithPrimarySentence<Word>, "sentence">>;
+  Partial<Pick<WordSenseWithEnglishSynonyms<WordSense>, "synonymEnglishWords">> &
+  Partial<Pick<WordSenseWithPrimarySentence<WordSense>, "sentence">>;
 export type WordAnkiFieldGenerator = (
   word: WordForAnki,
 ) => string | Promise<string>;
@@ -304,7 +304,7 @@ export const WORD_ANKI_FIELD_GENERATORS = {
   concept_explained_fa_audio: (w) =>
     w.concept_explained_fa_audio_file_name
       ? toSoundTagFromAbsPath(
-          getWordConceptAudioAbsolutePath(
+          getWordSenseConceptAudioAbsolutePath(
             w.concept_explained_fa_audio_file_name,
           ),
         )
@@ -323,7 +323,7 @@ export const WORD_ANKI_FIELD_GENERATORS = {
   selfGuide: () => "",
 
   // This field intentionally stores the number of letters in the English base form.
-  // It is not the free-text Word.hint_to_select sense-disambiguation hint.
+  // It is not the free-text WordSense.hint_to_select sense-disambiguation hint.
   hint_to_select_letters: (w) => String(w.base_form.length ?? ""),
 
   phonetic_us_normalized: (w) => w.phonetic_us_normalized ?? "",
@@ -376,21 +376,21 @@ export function getWordAnkiManagedFieldNames(
 }
 
 export async function generateWordAnkiFieldsForMetaLexVr9(
-  word: Word | WordForAnki,
+  word: WordSense | WordForAnki,
   configuredFields: readonly string[],
 ): Promise<Record<string, string>> {
   const withEnglish =
     "base_form" in word
       ? (word as WordForAnki)
-      : await hydrateWordWithEnglishFields(word);
+      : await hydrateWordSenseWithEnglishFields(word);
   const withMeanings =
     "primaryPersianWord" in withEnglish
       ? (withEnglish as WordForAnki)
-      : await hydrateWordWithPersianMeanings(withEnglish);
+      : await hydrateWordSenseWithPersianMeanings(withEnglish);
   const withSynonyms =
     "synonymEnglishWords" in withMeanings
       ? (withMeanings as WordForAnki)
-      : await hydrateWordWithEnglishSynonyms(withMeanings);
+      : await hydrateWordSenseWithEnglishSynonyms(withMeanings);
   const withSentence =
     "sentence" in withSynonyms
       ? (withSynonyms as WordForAnki)

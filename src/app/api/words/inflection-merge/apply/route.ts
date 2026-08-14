@@ -3,10 +3,10 @@ import "server-only";
 import { NextResponse } from "next/server";
 
 import {
-  applyWordInflectionMerge,
+  applyWordSenseInflectionMerge,
   parseInflectionMergeOutput,
   type InflectionSourceFingerprint,
-} from "@/lib/words/wordInflectionMerge.server";
+} from "@/lib/words/wordSenseInflectionMerge.server";
 
 export const runtime = "nodejs";
 
@@ -30,7 +30,7 @@ export async function POST(request: Request) {
   }
   try {
     const output = parseInflectionMergeOutput(body?.output);
-    return NextResponse.json({ ok: true, ...(await applyWordInflectionMerge(sourceGroups, output)) });
+    return NextResponse.json({ ok: true, ...(await applyWordSenseInflectionMerge(sourceGroups, output)) });
   } catch (error) {
     return NextResponse.json(
       { ok: false, error: error instanceof Error ? error.message : String(error) },

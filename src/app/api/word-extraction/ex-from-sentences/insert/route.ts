@@ -8,7 +8,7 @@ import { upsertPrimarySentenceByAnkiLinkId } from "@/lib/sentences/sentenceRepo"
 import { addPersianWord } from "@/lib/tables/persianWord";
 import { normalizeEnglishWordText } from "@/lib/english/normalize";
 import { findEnglishWordIdsByKnownForm } from "@/lib/english/englishWordForms.server";
-import { updateWord } from "@/lib/words/wordRepo";
+import { updateWordSense } from "@/lib/words/wordSenseRepo";
 
 export const runtime = "nodejs";
 
@@ -201,7 +201,7 @@ export async function POST(req: Request) {
       for (const item of row.items) {
         try {
           const knownEnglishWordIds = await findEnglishWordIdsByKnownForm(item.base_form);
-          const candidates = await prisma.word.findMany({
+          const candidates = await prisma.wordSense.findMany({
             where: knownEnglishWordIds.length
               ? { englishId: { in: knownEnglishWordIds } }
               : { english: { is: { base_form: item.base_form } } },
@@ -234,7 +234,7 @@ export async function POST(req: Request) {
               create: { base_form: item.base_form },
               select: { id: true },
             });
-            const pending = await tx.word.create({
+            const pending = await tx.wordSense.create({
               data: {
                 anki_link_id: `pending_${randomUUID()}`,
                 englishId: englishWord.id,
@@ -244,7 +244,7 @@ export async function POST(req: Request) {
             });
 
             const code = `${pending.id}_${Date.now()}`;
-            const createdWord = await updateWord(
+            const createdWord = await updateWordSense(
               {
                 where: { id: pending.id },
                 data: { anki_link_id: code },

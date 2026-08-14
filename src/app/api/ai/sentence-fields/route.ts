@@ -75,7 +75,7 @@ export async function GET() {
   try {
     const [sentences, words] = await Promise.all([
       prisma.sentence.findMany({ select: { id: true, sentence_en: true } }),
-      prisma.word.findMany({ select: { sentenceIds: true } }),
+      prisma.wordSense.findMany({ select: { sentenceIds: true } }),
     ]);
     const missingIds = new Set(
       sentences.filter((sentence) => !sentence.sentence_en.trim()).map((sentence) => sentence.id),
@@ -134,7 +134,7 @@ export async function POST(req: Request) {
       const claimToken = `${PROCESSING_PREFIX}${crypto.randomUUID()}`;
       const [missingSentences, candidateWords] = await Promise.all([
         prisma.sentence.findMany({ select: { id: true, sentence_en: true } }),
-        prisma.word.findMany({
+        prisma.wordSense.findMany({
           orderBy: { anki_link_id: "asc" },
           select: {
             id: true,
@@ -295,7 +295,7 @@ export async function POST(req: Request) {
                 },
               });
 
-          const savedWord = await tx.word.findUnique({
+          const savedWord = await tx.wordSense.findUnique({
             where: { id: word.id },
             select: {
               id: true,

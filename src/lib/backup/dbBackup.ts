@@ -90,8 +90,8 @@ export async function getDbFingerprint(prisma: PrismaClient) {
     userRoleCount,
     rolePermissionCount,
   ] = await Promise.all([
-    countOrNull(() => prisma.word.count()),
-    maxDateOrNull(async () => (await prisma.word.aggregate({ _max: { updatedAt: true } }))._max.updatedAt ?? null),
+    countOrNull(() => prisma.wordSense.count()),
+    maxDateOrNull(async () => (await prisma.wordSense.aggregate({ _max: { updatedAt: true } }))._max.updatedAt ?? null),
     countOrNull(() => prisma.englishWord.count()),
     maxDateOrNull(
       async () => (await prisma.englishWord.aggregate({ _max: { updatedAt: true } }))._max.updatedAt ?? null
@@ -219,7 +219,7 @@ async function writeJsonBackup(prisma: PrismaClient, outputFile: string) {
   const snapshot = {
     createdAt: new Date().toISOString(),
     data: {
-      word: await prisma.word.findMany(),
+      word: await prisma.wordSense.findMany(),
       englishWord: await prisma.englishWord.findMany(),
       sentence: await prisma.sentence.findMany(),
       ipaKeyword: await prisma.ipaKeyword.findMany(),

@@ -47,7 +47,7 @@
 [{"persianWordId":123,"records":[{"id":10,"concept_explained_fa":"توضیح فارسی حداکثر ۲۰ کلمه","synonymIds":[11]},{"id":11,"concept_explained_fa":"توضیح فارسی حداکثر ۲۰ کلمه","synonymIds":[10]}]}]
 
 - ترتیب گروه‌ها و رکوردها را مطابق ورودی نگه دار.
-- `synonymIds` فقط می‌تواند شامل ID سایر Wordهای همان گروه باشد.
+- `synonymIds` فقط می‌تواند شامل ID سایر WordSenseهای همان گروه باشد.
 - ID خود رکورد و ID تکراری در `synonymIds` قرار نده.
 - رابطه‌ها را دوطرفه برگردان: اگر ID رکورد B در `synonymIds` رکورد A است، ID رکورد A نیز باید در `synonymIds` رکورد B باشد.
 - حتی اگر هیچ تغییری در concept لازم نیست، مقدار نهایی `concept_explained_fa` را برگردان.

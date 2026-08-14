@@ -17,7 +17,7 @@ type Correction = {
   other_meanings_fa?: string[];
   invalid_sentence_ids?: number[];
 };
-export default function WordMeaningsReview({
+export default function WordSenseMeaningsReview({
   pendingCount,
 }: {
   pendingCount: number;
@@ -218,7 +218,7 @@ export default function WordMeaningsReview({
           <div className="flex h-[85vh] w-full max-w-7xl flex-col gap-4 rounded-2xl border border-card bg-background p-6 shadow-elevated">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <b>Persian meanings review — Word</b>
+                <b>Persian meanings review — WordSense</b>
                 <div className="text-xs opacity-70">
                   Only corrections are returned; Apply confirms all loaded rows.
                 </div>
@@ -265,8 +265,8 @@ export default function WordMeaningsReview({
                   <li>در صورت پیشنهاد اصلاح، <code>meaningId</code> و <code>otherMeaningIds</code> با معنی‌های نهایی جایگزین می‌شوند.</li>
                   <li>شناسهٔ جمله‌هایی که مدل نامعتبر اعلام کرده از آرایهٔ <code>sentenceIds</code> حذف می‌شود.</li>
                   <li>رکوردهای تأییدشده <code>meanings_confirmed=true</code> می‌گیرند.</li>
-                  <li>اولین شناسهٔ آرایه، یعنی <code>sentenceIds[0]</code>، جملهٔ اصلی Word برای فیلدها و صدای کارت Anki است.</li>
-                  <li>هیچ رکورد Word، Sentence یا PersianWord و هیچ ستون دیتابیس در این مرحله حذف نمی‌شود.</li>
+                  <li>اولین شناسهٔ آرایه، یعنی <code>sentenceIds[0]</code>، جملهٔ اصلی WordSense برای فیلدها و صدای کارت Anki است.</li>
+                  <li>هیچ رکورد WordSense، Sentence یا PersianWord و هیچ ستون دیتابیس در این مرحله حذف نمی‌شود.</li>
                 </ul>
               </div>
             ) : null}

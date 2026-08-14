@@ -7,8 +7,8 @@ import { getEnglishWordAudioPublicPath } from "@/lib/audio/englishWordAudioNamin
 import { deleteEnglishWordAudio, findEnglishWordAudioRecord, getEnglishWordAudioFileInfo } from "@/lib/english/englishWordAudio.server";
 import { getSentenceAudioPublicPath, isSentenceAudioField } from "@/lib/audio/sentenceAudioNaming";
 import { deleteSentenceAudio, filenameFor, findSentenceAudioRecord, getSentenceAudioFileInfo, sourceTextFor } from "@/lib/sentences/sentenceAudio.server";
-import { getWordConceptAudioPublicPath, isWordConceptAudioField } from "@/lib/audio/wordConceptAudioNaming";
-import { deleteWordConceptAudio, findWordConceptAudioRecord, getWordConceptAudioFileInfo } from "@/lib/words/wordConceptAudio.server";
+import { getWordSenseConceptAudioPublicPath, isWordSenseConceptAudioField } from "@/lib/audio/wordSenseConceptAudioNaming";
+import { deleteWordSenseConceptAudio, findWordSenseConceptAudioRecord, getWordSenseConceptAudioFileInfo } from "@/lib/words/wordSenseConceptAudio.server";
 
 export const runtime = "nodejs";
 
@@ -73,22 +73,22 @@ export async function GET(req: Request) {
     });
   }
 
-  if (isWordConceptAudioField(field)) {
+  if (isWordSenseConceptAudioField(field)) {
     const wordId = Number(audioKey);
     if (!Number.isSafeInteger(wordId) || wordId <= 0) {
-      return NextResponse.json({ ok: false, error: "Invalid Word id" }, { status: 400 });
+      return NextResponse.json({ ok: false, error: "Invalid WordSense id" }, { status: 400 });
     }
-    const row = await findWordConceptAudioRecord(wordId);
-    if (!row) return NextResponse.json({ ok: false, error: "Word not found" }, { status: 404 });
-    const info = getWordConceptAudioFileInfo(row.concept_explained_fa_audio_file_name);
+    const row = await findWordSenseConceptAudioRecord(wordId);
+    if (!row) return NextResponse.json({ ok: false, error: "WordSense not found" }, { status: 404 });
+    const info = getWordSenseConceptAudioFileInfo(row.concept_explained_fa_audio_file_name);
     if (info.size <= 0 && (row.concept_explained_fa_audio_file_name || row.concept_explained_fa_audio_source_text)) {
-      await deleteWordConceptAudio(wordId);
+      await deleteWordSenseConceptAudio(wordId);
       return NextResponse.json({ ok: true, filename: null, publicPath: null, size: 0 });
     }
     return NextResponse.json({
       ok: true,
       filename: info.filename,
-      publicPath: info.filename ? getWordConceptAudioPublicPath(info.filename) : null,
+      publicPath: info.filename ? getWordSenseConceptAudioPublicPath(info.filename) : null,
       size: info.size,
     });
   }

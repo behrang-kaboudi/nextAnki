@@ -4,8 +4,8 @@ import { NextResponse } from "next/server";
 
 import { normalizeIpaForDb } from "@/lib/ipa/normalize";
 import { prisma } from "@/lib/prisma";
-import { updateWord } from "@/lib/words/wordRepo";
-import { touchWordsByEnglishId } from "@/lib/words/wordRepo";
+import { updateWordSense } from "@/lib/words/wordSenseRepo";
+import { touchWordSensesByEnglishId } from "@/lib/words/wordSenseRepo";
 
 export const runtime = "nodejs";
 
@@ -204,17 +204,17 @@ export async function POST(req: Request) {
         if (item.pos !== undefined) patch.pos = item.pos;
         if (item.concept_explained_fa !== undefined) patch.concept_explained_fa = item.concept_explained_fa;
 
-        const word = await prisma.word.findUnique({ where: { id: item.id }, select: { id: true, englishId: true } });
-        if (!word) throw new Error(`Word ${item.id} not found.`);
+        const word = await prisma.wordSense.findUnique({ where: { id: item.id }, select: { id: true, englishId: true } });
+        if (!word) throw new Error(`WordSense ${item.id} not found.`);
         if (item.phonetic_us !== undefined && phonetic_us_normalized !== undefined) {
           await prisma.englishWord.update({
             where: { id: word.englishId },
             data: { phonetic_us: item.phonetic_us, phonetic_us_normalized, json_hint: null },
           });
-          await touchWordsByEnglishId(word.englishId);
+          await touchWordSensesByEnglishId(word.englishId);
         }
         if (Object.keys(patch).length) {
-          await updateWord({ where: { id: item.id }, data: patch, select: { id: true } });
+          await updateWordSense({ where: { id: item.id }, data: patch, select: { id: true } });
         }
         updated += 1;
         results.push({

@@ -16,18 +16,18 @@ export type WordSynonymReference = {
   synonymIds: Prisma.JsonValue | null;
 };
 
-export type WordWithEnglishSynonyms<T extends WordSynonymReference> = T & {
+export type WordSenseWithEnglishSynonyms<T extends WordSynonymReference> = T & {
   synonymEnglishWords: SynonymEnglishWord[];
 };
 
-export async function hydrateWordsWithEnglishSynonyms<T extends WordSynonymReference>(
+export async function hydrateWordSensesWithEnglishSynonyms<T extends WordSynonymReference>(
   words: readonly T[],
-): Promise<Array<WordWithEnglishSynonyms<T>>> {
+): Promise<Array<WordSenseWithEnglishSynonyms<T>>> {
   if (!words.length) return [];
 
   const ids = [...new Set(words.flatMap((word) => meaningIds(word.synonymIds)))];
   const synonyms = ids.length
-    ? await prisma.word.findMany({
+    ? await prisma.wordSense.findMany({
         where: { id: { in: ids } },
         select: {
           id: true,
@@ -57,6 +57,6 @@ export async function hydrateWordsWithEnglishSynonyms<T extends WordSynonymRefer
   }));
 }
 
-export async function hydrateWordWithEnglishSynonyms<T extends WordSynonymReference>(word: T) {
-  return (await hydrateWordsWithEnglishSynonyms([word]))[0]!;
+export async function hydrateWordSenseWithEnglishSynonyms<T extends WordSynonymReference>(word: T) {
+  return (await hydrateWordSensesWithEnglishSynonyms([word]))[0]!;
 }

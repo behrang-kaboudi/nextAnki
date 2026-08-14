@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 
 import {
-  loadWordMeaningComparisonGroups,
+  loadWordSenseMeaningComparisonGroups,
   parseMeaningComparisonOutput,
-} from "@/lib/words/wordMeaningComparison.server";
+} from "@/lib/words/wordSenseMeaningComparison.server";
 
 export const runtime = "nodejs";
 
@@ -13,7 +13,7 @@ export async function POST(request: Request) {
     const output = parseMeaningComparisonOutput(body?.output);
     return NextResponse.json({
       ok: true,
-      ...(await loadWordMeaningComparisonGroups(output)),
+      ...(await loadWordSenseMeaningComparisonGroups(output)),
     });
   } catch (error) {
     return NextResponse.json(

@@ -3,9 +3,9 @@ import "server-only";
 import { NextResponse } from "next/server";
 
 import {
-  executeWordFieldMaintenance,
+  executeWordSenseFieldMaintenance,
   isWordMaintenanceField,
-} from "@/lib/words/wordFieldMaintenance.server";
+} from "@/lib/words/wordSenseFieldMaintenance.server";
 
 export const runtime = "nodejs";
 
@@ -27,7 +27,7 @@ export async function POST(request: Request) {
     );
   }
   try {
-    const result = await executeWordFieldMaintenance({
+    const result = await executeWordSenseFieldMaintenance({
       field: body.field,
       expectedAffectedRows: Number(body.expectedAffectedRows),
       confirmation: body.confirmation,

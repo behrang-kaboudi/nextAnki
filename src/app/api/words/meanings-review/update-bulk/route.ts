@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { addPersianWordWithClient } from "@/lib/tables/persianWord";
 import { meaningReviewSentenceIds } from "@/lib/words/meaningReviewSentences.server";
-import { updateWord } from "@/lib/words/wordRepo";
+import { updateWordSense } from "@/lib/words/wordSenseRepo";
 
 export const runtime = "nodejs";
 
@@ -112,11 +112,11 @@ export async function POST(request: Request) {
     try {
       const correction = corrections.get(id);
       await prisma.$transaction(async (tx) => {
-        const word = await tx.word.findUnique({
+        const word = await tx.wordSense.findUnique({
           where: { id },
           select: { sentenceIds: true },
         });
-        if (!word) throw new Error(`Word ${id} no longer exists.`);
+        if (!word) throw new Error(`WordSense ${id} no longer exists.`);
         const referencedSentenceIds = meaningReviewSentenceIds(word);
         const existingSentences = referencedSentenceIds.length
           ? await tx.sentence.findMany({
@@ -132,7 +132,7 @@ export async function POST(request: Request) {
         );
         const invalidSentenceIds = correction?.invalid_sentence_ids ?? [];
         if (invalidSentenceIds.some((sentenceId) => !currentSentenceIds.includes(sentenceId))) {
-          throw new Error(`Correction for Word ${id} contains an unrelated sentence id.`);
+          throw new Error(`Correction for WordSense ${id} contains an unrelated sentence id.`);
         }
         const remainingSentenceIds = currentSentenceIds.filter(
           (sentenceId) => !invalidSentenceIds.includes(sentenceId),
@@ -163,7 +163,7 @@ export async function POST(request: Request) {
             ],
           };
         }
-        await updateWord({
+        await updateWordSense({
           where: { id },
           data: {
             ...meaningData,

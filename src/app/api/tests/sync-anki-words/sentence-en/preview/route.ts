@@ -4,7 +4,7 @@ import { createAnkiOperations } from "@/lib/anki";
 import { AnkiNoteTypes } from "@/lib/anki";
 import { WORD_ANKI_FIELD_GENERATORS, getAnkiLinkIdFromNoteFields } from "@/lib/anki/wordAnkiMapping";
 import { prisma } from "@/lib/prisma";
-import { hydrateWordWithEnglishFields } from "@/lib/english/wordEnglishFields.server";
+import { hydrateWordSenseWithEnglishFields } from "@/lib/english/wordSenseEnglishFields.server";
 
 export const runtime = "nodejs";
 
@@ -55,14 +55,14 @@ export async function POST() {
     );
   }
 
-  const rawWord = await prisma.word.findUnique({ where: { anki_link_id: ankiLinkId } });
+  const rawWord = await prisma.wordSense.findUnique({ where: { anki_link_id: ankiLinkId } });
   if (!rawWord) {
     return NextResponse.json(
       { ok: false as const, error: `DB word not found for anki_link_id=${ankiLinkId}` },
       { status: 404 },
     );
   }
-  const word = await hydrateWordWithEnglishFields(rawWord);
+  const word = await hydrateWordSenseWithEnglishFields(rawWord);
 
   const ankiSentenceEn = note.fields?.sentence_en?.value ?? "";
   const generatedSentenceEn = await WORD_ANKI_FIELD_GENERATORS.sentence_en(word);

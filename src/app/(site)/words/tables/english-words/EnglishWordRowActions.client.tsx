@@ -61,7 +61,7 @@ export default function EnglishWordRowActions({ item: initialItem, showAudio = t
     {open ? <ModalPortal><div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/55 p-3 backdrop-blur-sm sm:p-6" role="dialog" aria-modal="true" onMouseDown={(event) => event.target === event.currentTarget && !busy && setOpen(false)}>
       <div className="flex h-[min(92dvh,54rem)] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-card bg-background shadow-elevated">
         <div className="flex shrink-0 items-center justify-between gap-3 border-b border-card bg-background/95 px-4 py-3 backdrop-blur sm:px-6">
-          <div><h2 className="text-base font-semibold">Edit EnglishWord #{item.id}</h2><p className="text-xs opacity-70">Edit EnglishWord fields without leaving the Word record.</p></div>
+          <div><h2 className="text-base font-semibold">Edit EnglishWord #{item.id}</h2><p className="text-xs opacity-70">Edit EnglishWord fields without leaving the WordSense record.</p></div>
           <button type="button" disabled={busy} onClick={() => setOpen(false)} className="rounded border px-3 py-2 text-sm hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5">Close</button>
         </div>
         <div className="flex-1 overflow-auto p-4 sm:p-6"><div className="grid gap-4 sm:grid-cols-2">

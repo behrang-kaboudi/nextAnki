@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
-import { hydrateWordsWithPersianMeanings } from "@/lib/words/persianMeanings.server";
+import { hydrateWordSensesWithPersianMeanings } from "@/lib/words/persianMeanings.server";
 import { hydrateMeaningReviewSentences } from "@/lib/words/meaningReviewSentences.server";
 
 export const runtime = "nodejs";
@@ -21,7 +21,7 @@ export async function POST(request: Request) {
       { ok: false, error: "ids must be positive integers." },
       { status: 400 },
     );
-  const raw = await prisma.word.findMany({
+  const raw = await prisma.wordSense.findMany({
     where: { id: { in: [...new Set(ids)] } },
     select: {
       id: true,
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
     },
   });
   const words = await hydrateMeaningReviewSentences(
-    await hydrateWordsWithPersianMeanings(raw),
+    await hydrateWordSensesWithPersianMeanings(raw),
   );
   return NextResponse.json({
     ok: true,

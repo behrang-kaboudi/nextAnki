@@ -10,7 +10,7 @@ import {
   CUSTOM_EXTRACTION_OUTPUT_FIELDS,
   type CustomExtractionFieldKey,
 } from "@/lib/word-extraction/customExtractionFields";
-import { updateWord } from "@/lib/words/wordRepo";
+import { updateWordSense } from "@/lib/words/wordSenseRepo";
 import { wordSentenceIds } from "@/lib/words/sentenceIds";
 
 export const runtime = "nodejs";
@@ -239,7 +239,7 @@ export async function POST(request: Request) {
     for (const item of validated.items) {
       try {
         const result = await prisma.$transaction(async (tx) => {
-          const word = await tx.word.findUnique({
+          const word = await tx.wordSense.findUnique({
             where: { id: item.word_id },
             select: {
               id: true,
@@ -249,10 +249,10 @@ export async function POST(request: Request) {
               sentenceIds: true,
             },
           });
-          if (!word) throw new Error(`Word ${item.word_id} not found.`);
+          if (!word) throw new Error(`WordSense ${item.word_id} not found.`);
 
           const updatedFields: string[] = [];
-          const wordPatch: Prisma.WordUpdateInput = {};
+          const wordPatch: Prisma.WordSenseUpdateInput = {};
           let meaningId = word.meaningId;
 
           if ("base_form" in item.fields) {
@@ -282,7 +282,7 @@ export async function POST(request: Request) {
           }
           if ("other_meanings_fa" in item.fields) {
             if (!meaningId) {
-              throw new Error("other_meanings_fa cannot be applied because this Word has no primary PersianWord.");
+              throw new Error("other_meanings_fa cannot be applied because this WordSense has no primary PersianWord.");
             }
             const otherMeanings = validateOtherMeanings(item.fields.other_meanings_fa);
             const otherIds = await Promise.all(
@@ -298,7 +298,7 @@ export async function POST(request: Request) {
           }
           if ("meaning_fa_IPA" in item.fields) {
             const meaningIpa = validateFieldValue("meaning_fa_IPA", item.fields.meaning_fa_IPA) as string;
-            if (!meaningId) throw new Error("meaning_fa_IPA cannot be applied because this Word has no PersianWord.");
+            if (!meaningId) throw new Error("meaning_fa_IPA cannot be applied because this WordSense has no PersianWord.");
             await tx.persianWord.update({
               where: { id: meaningId },
               data: {
@@ -319,7 +319,7 @@ export async function POST(request: Request) {
           for (const sentence of item.sentences) {
             if (sentence.sentence_id !== null) {
               if (!associatedSentenceIds.has(sentence.sentence_id)) {
-                throw new Error(`Sentence ${sentence.sentence_id} is not linked to Word ${word.id}.`);
+                throw new Error(`Sentence ${sentence.sentence_id} is not linked to WordSense ${word.id}.`);
               }
               const existing = await tx.sentence.findUnique({
                 where: { id: sentence.sentence_id },
@@ -366,7 +366,7 @@ export async function POST(request: Request) {
             wordPatch.sentenceIds = [...associatedSentenceIds];
           }
           if (!Object.keys(wordPatch).length) wordPatch.anki_link_id = word.anki_link_id;
-          await updateWord({ where: { id: word.id }, data: wordPatch, select: { id: true } }, tx);
+          await updateWordSense({ where: { id: word.id }, data: wordPatch, select: { id: true } }, tx);
 
           return { updatedFields, sentenceIds: [...associatedSentenceIds] };
         });

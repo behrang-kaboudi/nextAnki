@@ -31,8 +31,8 @@ export async function POST(req: Request) {
 
     const meaning_fa_IPA_normalized = normalizeIpaForDb(meaning_fa_IPA, 2000);
 
-    const word = await prisma.word.findUnique({ where: { id }, select: { meaningId: true } });
-    if (!word?.meaningId) return NextResponse.json({ ok: false, error: "Word has no primary PersianWord." }, { status: 409 });
+    const word = await prisma.wordSense.findUnique({ where: { id }, select: { meaningId: true } });
+    if (!word?.meaningId) return NextResponse.json({ ok: false, error: "WordSense has no primary PersianWord." }, { status: 409 });
     const updated = await prisma.persianWord.update({ where: { id: word.meaningId }, data: { meaning_fa_IPA, meaning_fa_IPA_normalize: meaning_fa_IPA_normalized }, select: { id: true, meaning_fa_IPA: true, meaning_fa_IPA_normalize: true } });
     await touchWordsReferencingPersianWord(updated.id);
 

@@ -41,16 +41,16 @@ const FIELD_POPULATION_GUIDE: Record<
     how: "The base-form prompt asks the AI to normalize the English word or phrase. Apply response updates the linked EnglishWord record.",
   },
   meaning_fa: {
-    when: "Requested when the Word has no primary Persian meaning, or the linked PersianWord text is empty.",
-    how: "The meaning prompt asks the AI for the primary Persian meaning. Apply response reuses or creates a PersianWord and connects it through Word.meaningId.",
+    when: "Requested when the WordSense has no primary Persian meaning, or the linked PersianWord text is empty.",
+    how: "The meaning prompt asks the AI for the primary Persian meaning. Apply response reuses or creates a PersianWord and connects it through WordSense.meaningId.",
   },
   other_meanings_fa: {
-    when: "Counted as pending while Word.meanings_confirmed is false, even when otherMeaningIds already contains values. It becomes an AI output once a primary Persian meaning exists.",
+    when: "Counted as pending while WordSense.meanings_confirmed is false, even when otherMeaningIds already contains values. It becomes an AI output once a primary Persian meaning exists.",
     how: "The field prompt reviews the exact word sense and returns a JSON array of alternative meanings, or an empty array. Apply response reuses or creates the PersianWord records, replaces otherMeaningIds, and sets meanings_confirmed to true.",
   },
   sentence_en: {
-    when: "Requested when Word.sentenceIds is null, empty, or contains no sentence IDs.",
-    how: "The AI returns one new sentence with sentence_id: null. Apply response reuses an exact matching Sentence or creates one, then adds its ID to Word.sentenceIds.",
+    when: "Requested when WordSense.sentenceIds is null, empty, or contains no sentence IDs.",
+    how: "The AI returns one new sentence with sentence_id: null. Apply response reuses an exact matching Sentence or creates one, then adds its ID to WordSense.sentenceIds.",
   },
   sentence_en_meaning_fa: {
     when: "Requested for linked sentences whose Persian translation is empty. It is also requested for a newly generated sentence when both sentence outputs are selected.",
@@ -65,35 +65,35 @@ const FIELD_POPULATION_GUIDE: Record<
     how: "The Persian-IPA prompt generates pronunciation for the primary Persian meaning. Apply response stores the IPA and its normalized form on PersianWord.",
   },
   imageability: {
-    when: "Requested when Word.imageability is null or 0.",
+    when: "Requested when WordSense.imageability is null or 0.",
     how: "The imageability prompt asks the AI for an integer score from 0 to 100. Zero is accepted, but is treated as missing and will be selected again later.",
   },
   learning_depth: {
-    when: "Requested when Word.learning_depth is null or 0.",
+    when: "Requested when WordSense.learning_depth is null or 0.",
     how: "The learning-depth prompt asks the AI for -100 or a score from 0 to 1. Zero is treated as missing and will be selected again later.",
   },
   productive_target: {
-    when: "Requested when Word.productive_target is null or 0.",
+    when: "Requested when WordSense.productive_target is null or 0.",
     how: "The productive-target prompt asks the AI for an integer from 0 to 101. Zero is treated as missing and will be selected again later.",
   },
   pos: {
-    when: "Requested when Word.pos is null or empty.",
-    how: "The part-of-speech prompt asks the AI for the grammatical role that matches this exact word sense, then Apply response writes it to Word.pos.",
+    when: "Requested when WordSense.pos is null or empty.",
+    how: "The part-of-speech prompt asks the AI for the grammatical role that matches this exact word sense, then Apply response writes it to WordSense.pos.",
   },
   concept_explained_fa: {
-    when: "Requested when Word.concept_explained_fa is null or empty.",
-    how: "The concept prompt asks the AI for a Persian explanation of this exact sense. Apply response writes it to Word.concept_explained_fa.",
+    when: "Requested when WordSense.concept_explained_fa is null or empty.",
+    how: "The concept prompt asks the AI for a Persian explanation of this exact sense. Apply response writes it to WordSense.concept_explained_fa.",
   },
   other_meanings_en: {
-    when: "Counted as pending when Word.other_meanings_en is null or empty. It is context only on this page and is not currently available under Fields to fill.",
+    when: "Counted as pending when WordSense.other_meanings_en is null or empty. It is context only on this page and is not currently available under Fields to fill.",
     how: "Selecting it as an input sends the existing value to the AI as context. Custom Extraction does not change this field because no output prompt or apply rule is registered for it.",
   },
   category: {
-    when: "Counted as pending when Word.category is null or empty. It is context only on this page and is not currently available under Fields to fill.",
+    when: "Counted as pending when WordSense.category is null or empty. It is context only on this page and is not currently available under Fields to fill.",
     how: "Selecting it as an input sends the existing value to the AI as context. Custom Extraction does not change this field because no output prompt or apply rule is registered for it.",
   },
   hint_to_select: {
-    when: "Counted as pending when Word.hint_to_select is null or empty. It is context only on this page and is not currently available under Fields to fill.",
+    when: "Counted as pending when WordSense.hint_to_select is null or empty. It is context only on this page and is not currently available under Fields to fill.",
     how: "Selecting it as an input sends the existing value to the AI as context. Custom Extraction does not change this field because no output prompt or apply rule is registered for it.",
   },
 };

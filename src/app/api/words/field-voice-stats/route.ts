@@ -5,12 +5,12 @@ import { NextResponse } from "next/server";
 import { WORD_AUDIO_BATCH_FIELDS, type WordAudioBatchFieldKey } from "@/lib/audio/wordAudioFields";
 import { audioNeedsGeneration } from "@/lib/audio/audioSourceText";
 import { isSentenceAudioField } from "@/lib/audio/sentenceAudioNaming";
-import { isWordConceptAudioField } from "@/lib/audio/wordConceptAudioNaming";
+import { isWordSenseConceptAudioField } from "@/lib/audio/wordSenseConceptAudioNaming";
 import { getEnglishWordAudioFileInfo } from "@/lib/english/englishWordAudio.server";
 import { prisma } from "@/lib/prisma";
 import { getPersianWordAudioFileInfo } from "@/lib/persian/persianWordAudio.server";
 import { getSentenceAudioFileInfo } from "@/lib/sentences/sentenceAudio.server";
-import { getWordConceptAudioFileInfo } from "@/lib/words/wordConceptAudio.server";
+import { getWordSenseConceptAudioFileInfo } from "@/lib/words/wordSenseConceptAudio.server";
 
 export const runtime = "nodejs";
 
@@ -72,9 +72,9 @@ export async function GET(req: Request) {
   } else if (field === "canonical_text") {
     rows = (await prisma.persianWord.findMany({ select: { canonical_text: true, audio_file_name: true, audio_source_text: true } }))
       .map((row) => ({ text: row.canonical_text, sourceText: row.audio_source_text, size: getPersianWordAudioFileInfo(row.audio_file_name).size }));
-  } else if (isWordConceptAudioField(field)) {
-    rows = (await prisma.word.findMany({ select: { concept_explained_fa: true, concept_explained_fa_audio_file_name: true, concept_explained_fa_audio_source_text: true } }))
-      .map((row) => ({ text: row.concept_explained_fa, sourceText: row.concept_explained_fa_audio_source_text, size: getWordConceptAudioFileInfo(row.concept_explained_fa_audio_file_name).size }));
+  } else if (isWordSenseConceptAudioField(field)) {
+    rows = (await prisma.wordSense.findMany({ select: { concept_explained_fa: true, concept_explained_fa_audio_file_name: true, concept_explained_fa_audio_source_text: true } }))
+      .map((row) => ({ text: row.concept_explained_fa, sourceText: row.concept_explained_fa_audio_source_text, size: getWordSenseConceptAudioFileInfo(row.concept_explained_fa_audio_file_name).size }));
   } else if (isSentenceAudioField(field)) {
     rows = (await prisma.sentence.findMany({
       select: {

@@ -223,7 +223,7 @@ async function updateWords() {
   let skippedMissing = 0;
 
   for (const item of UPDATES) {
-    const word = await prisma.word.findUnique({
+    const word = await prisma.wordSense.findUnique({
       where: { id: item.id },
       select: { english: { select: { id: true, base_form: true } } },
     });
@@ -239,7 +239,7 @@ async function updateWords() {
       where: { id: word.english.id },
       data: { phonetic_us: item.phonetic_us, json_hint: null },
     });
-    await prisma.word.updateMany({
+    await prisma.wordSense.updateMany({
       where: { englishId: word.english.id },
       data: { updatedAt: new Date() },
     });
@@ -274,7 +274,7 @@ async function backfillNormalizedFrom(minId) {
 async function main() {
   const result = await updateWords();
   process.stdout.write(
-    `Word phonetic_us update: updated=${result.updated} skippedMissing=${result.skippedMissing} skippedMismatch=${result.skippedMismatch}\n`
+    `WordSense phonetic_us update: updated=${result.updated} skippedMissing=${result.skippedMissing} skippedMismatch=${result.skippedMismatch}\n`
   );
   await backfillNormalizedFrom(0);
   process.stdout.write("Backfill normalized: done\n");

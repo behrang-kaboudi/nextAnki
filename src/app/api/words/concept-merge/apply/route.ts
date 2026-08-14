@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 
 import {
-  applyWordConceptMerge,
+  applyWordSenseConceptMerge,
   parseMergeOutput,
-} from "@/lib/words/wordConceptMerge.server";
+} from "@/lib/words/wordSenseConceptMerge.server";
 
 export const runtime = "nodejs";
 
@@ -29,7 +29,7 @@ export async function POST(request: Request) {
   }
   try {
     const output = parseMergeOutput(body?.output);
-    const result = await applyWordConceptMerge(sourceGroups, output);
+    const result = await applyWordSenseConceptMerge(sourceGroups, output);
     return NextResponse.json({ ok: true, ...result });
   } catch (error) {
     return NextResponse.json(

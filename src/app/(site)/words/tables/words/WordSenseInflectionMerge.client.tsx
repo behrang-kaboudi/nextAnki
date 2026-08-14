@@ -8,7 +8,7 @@ import { RemainingCountBadge, RemainingCountButton } from "@/components/remainin
 
 const PROMPT_PATH = "src/prompts/word-extraction/merge_inflected_forms/rulseV1.md";
 
-type SourceWord = {
+type SourceWordSense = {
   wordId: number;
   englishWordId: number;
   baseForm: string;
@@ -22,7 +22,7 @@ type SourceWord = {
 type SourceGroup = {
   groupKey: string;
   pos: string;
-  englishWords: Array<{ englishWordId: number; baseForm: string; words: SourceWord[] }>;
+  englishWords: Array<{ englishWordId: number; baseForm: string; words: SourceWordSense[] }>;
 };
 
 type SourceFingerprint = {
@@ -76,19 +76,19 @@ function parsePreview(value: string, groups: SourceGroup[]): OutputGroup[] {
       }
       const clusterIds = [entry.keepWordId, ...entry.deleteWordIds];
       if (Math.min(...clusterIds) !== entry.keepWordId) {
-        throw new Error(`Word ${entry.keepWordId} is not the oldest Word in its entry.`);
+        throw new Error(`WordSense ${entry.keepWordId} is not the oldest WordSense in its entry.`);
       }
       outputWordIds.push(...clusterIds);
     }
     if (outputWordIds.length !== sourceWordIds.length || new Set(outputWordIds).size !== outputWordIds.length ||
         sourceWordIds.some((id) => !outputWordIds.includes(id))) {
-      throw new Error(`Every Word in ${source.groupKey} must appear exactly once.`);
+      throw new Error(`Every WordSense in ${source.groupKey} must appear exactly once.`);
     }
     return { groupKey: source.groupKey, pos: source.pos, entries };
   });
 }
 
-export default function WordInflectionMerge({ remainingCount }: { remainingCount: number }) {
+export default function WordSenseInflectionMerge({ remainingCount }: { remainingCount: number }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
@@ -186,7 +186,7 @@ export default function WordInflectionMerge({ remainingCount }: { remainingCount
       router.refresh();
       await createData(
         false,
-        `Kept ${result.updated ?? 0}, deleted ${result.deleted ?? 0} Word and ${result.deletedEnglishWords ?? 0} empty EnglishWord record(s), and saved ${result.savedForms ?? 0} confirmed form(s)${result.failedAudioFiles ? `; ${result.failedAudioFiles} audio cleanup(s) failed` : ""} ✓`,
+        `Kept ${result.updated ?? 0}, deleted ${result.deleted ?? 0} WordSense and ${result.deletedEnglishWords ?? 0} empty EnglishWord record(s), and saved ${result.savedForms ?? 0} confirmed form(s)${result.failedAudioFiles ? `; ${result.failedAudioFiles} audio cleanup(s) failed` : ""} ✓`,
       );
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : String(reason));
@@ -231,7 +231,7 @@ export default function WordInflectionMerge({ remainingCount }: { remainingCount
           <div className="flex h-[85vh] w-full max-w-7xl flex-col gap-4 rounded-2xl border border-card bg-background p-6 shadow-elevated">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <b>Merge inflected forms — Word</b>
+                <b>Merge inflected forms — WordSense</b>
                 <div className="text-xs opacity-70">
                   Copy the prompt and POS-separated data to an external AI, paste JSON here, preview every deletion, then confirm.
                 </div>
@@ -260,7 +260,7 @@ export default function WordInflectionMerge({ remainingCount }: { remainingCount
               >
                 <div className="font-semibold">هدف این مرحله</div>
                 <p>
-                  فرم‌های قانونمند <span dir="ltr">s/es</span>، <span dir="ltr">ing</span> و <span dir="ltr">ed</span> که همان مفهوم آموزشی را تکرار می‌کنند شناسایی می‌شوند. قدیمی‌ترین Word باقی می‌ماند، اطلاعات ضروری روی آن جمع می‌شود و Wordهای تکراری فقط پس از تأیید شما حذف می‌شوند.
+                  فرم‌های قانونمند <span dir="ltr">s/es</span>، <span dir="ltr">ing</span> و <span dir="ltr">ed</span> که همان مفهوم آموزشی را تکرار می‌کنند شناسایی می‌شوند. قدیمی‌ترین WordSense باقی می‌ماند، اطلاعات ضروری روی آن جمع می‌شود و WordSenseهای تکراری فقط پس از تأیید شما حذف می‌شوند.
                 </p>
                 <div className="mt-2 font-semibold">چگونه candidateها ساخته می‌شوند؟</div>
                 <ul className="list-disc pr-5">
@@ -272,20 +272,20 @@ export default function WordInflectionMerge({ remainingCount }: { remainingCount
                 <div className="mt-2 font-semibold">پاسخ AI چه چیزی تعیین می‌کند؟</div>
                 <ul className="list-disc pr-5">
                   <li>فرم اصلی انگلیسی و EnglishWord مقصد برای هر مفهوم؛</li>
-                  <li>قدیمی‌ترین Wordی که باید باقی بماند؛</li>
-                  <li>Wordهای جدیدتری که دقیقاً همان مفهوم را در شکل صرفی دیگر تکرار کرده‌اند؛</li>
+                  <li>قدیمی‌ترین WordSenseی که باید باقی بماند؛</li>
+                  <li>WordSenseهای جدیدتری که دقیقاً همان مفهوم را در شکل صرفی دیگر تکرار کرده‌اند؛</li>
                   <li>مفهوم‌های مستقلی که باید با <code>deleteWordIds: []</code> جدا بمانند.</li>
                 </ul>
                 <div className="mt-2 font-semibold">پس از تأیید چه تغییری می‌کند؟</div>
                 <ul className="list-disc pr-5">
-                  <li>تمام sentence IDها، معنی‌های معتبر و روابط Wordهای حذف‌شونده بدون تکرار روی keeper حفظ می‌شوند.</li>
-                  <li>ارجاع‌های <code>synonymIds</code> و <code>comparedMeaningWordIds</code> از Word حذف‌شده به keeper منتقل می‌شوند.</li>
-                  <li>Word تکراری، concept audio متعلق به آن و EnglishWord خالی‌شده همراه با فایل صوتی متعلق به آن حذف می‌شوند.</li>
+                  <li>تمام sentence IDها، معنی‌های معتبر و روابط WordSenseهای حذف‌شونده بدون تکرار روی keeper حفظ می‌شوند.</li>
+                  <li>ارجاع‌های <code>synonymIds</code> و <code>comparedMeaningWordIds</code> از WordSense حذف‌شده به keeper منتقل می‌شوند.</li>
+                  <li>WordSense تکراری، concept audio متعلق به آن و EnglishWord خالی‌شده همراه با فایل صوتی متعلق به آن حذف می‌شوند.</li>
                   <li>فرم‌های تأییدشده در جدول <code>EnglishWordForm</code> ذخیره می‌شوند؛ این جدول مفهوم آموزشی جدیدی ایجاد نمی‌کند.</li>
-                  <li>Word از دیتابیس حذف می‌شود؛ Note متناظر در Anki تا اجرای ابزار موجودِ <span dir="ltr">Anki notes missing in DB</span> باقی می‌ماند و از همان‌جا قابل پاک‌سازی است.</li>
+                  <li>WordSense از دیتابیس حذف می‌شود؛ Note متناظر در Anki تا اجرای ابزار موجودِ <span dir="ltr">Anki notes missing in DB</span> باقی می‌ماند و از همان‌جا قابل پاک‌سازی است.</li>
                 </ul>
                 <p className="mt-2 font-medium text-amber-800 dark:text-amber-300">
-                  <span>نمونه: </span><span dir="ltr">building</span><span> به معنی «ساختمان» مستقل می‌ماند، ولی کاربرد فعلی فعل </span><span dir="ltr">build</span><span> می‌تواند با Word فعل ادغام شود.</span>
+                  <span>نمونه: </span><span dir="ltr">building</span><span> به معنی «ساختمان» مستقل می‌ماند، ولی کاربرد فعلی فعل </span><span dir="ltr">build</span><span> می‌تواند با WordSense فعل ادغام شود.</span>
                 </p>
               </div>
             ) : null}
@@ -344,7 +344,7 @@ export default function WordInflectionMerge({ remainingCount }: { remainingCount
             <div className="flex items-start justify-between gap-3">
               <div>
                 <b>Confirm inflection merges</b>
-                <div className="text-xs opacity-70">Review every keeper, canonical form and permanent Word deletion. Final validation runs again in one database transaction.</div>
+                <div className="text-xs opacity-70">Review every keeper, canonical form and permanent WordSense deletion. Final validation runs again in one database transaction.</div>
               </div>
               <button type="button" disabled={busy} onClick={() => setConfirmOpen(false)} className={buttonClass}>Back without saving</button>
             </div>
@@ -355,8 +355,8 @@ export default function WordInflectionMerge({ remainingCount }: { remainingCount
                   <tr className="border-b">
                     <th className="px-3 py-2">group / POS</th>
                     <th className="px-3 py-2">canonical EnglishWord</th>
-                    <th className="px-3 py-2">keeper Word</th>
-                    <th className="px-3 py-2">Word records deleted after merge</th>
+                    <th className="px-3 py-2">keeper WordSense</th>
+                    <th className="px-3 py-2">WordSense records deleted after merge</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -376,14 +376,14 @@ export default function WordInflectionMerge({ remainingCount }: { remainingCount
                           {alternateForms.length ? <><br /><span>Save form(s): </span><span dir="ltr">{alternateForms.join(", ")}</span></> : null}
                         </td>
                         <td className="bg-emerald-500/10 px-3 py-2">
-                          <b>KEEP Word {entry.keepWordId}</b><br />
+                          <b>KEEP WordSense {entry.keepWordId}</b><br />
                           <span dir="ltr">{keeper?.baseForm ?? "Unknown"}</span>
                           {keeper?.meaningFa ? <><br /><span dir="rtl">{keeper.meaningFa}</span></> : null}
                         </td>
                         <td className={entry.deleteWordIds.length ? "bg-red-500/10 px-3 py-2" : "px-3 py-2 opacity-70"}>
                           {entry.deleteWordIds.length ? entry.deleteWordIds.map((id) => {
                             const row = sourceWordById.get(id);
-                            return <div key={id}><b>DELETE Word {id}</b> — <span dir="ltr">{row?.baseForm ?? "Unknown"}</span>{row?.meaningFa ? <> — <span dir="rtl">{row.meaningFa}</span></> : null}</div>;
+                            return <div key={id}><b>DELETE WordSense {id}</b> — <span dir="ltr">{row?.baseForm ?? "Unknown"}</span>{row?.meaningFa ? <> — <span dir="rtl">{row.meaningFa}</span></> : null}</div>;
                           }) : "Keep as an independent concept"}
                         </td>
                       </tr>
@@ -393,7 +393,7 @@ export default function WordInflectionMerge({ remainingCount }: { remainingCount
               </table>
             </div>
             <div className="flex items-center justify-between gap-3">
-              <span className="text-sm">Keep {preview.flatMap((group) => group.entries).length} • Permanently delete {totalDeleted} Word record(s)</span>
+              <span className="text-sm">Keep {preview.flatMap((group) => group.entries).length} • Permanently delete {totalDeleted} WordSense record(s)</span>
               <button type="button" disabled={busy} onClick={() => void applyConfirmed()} className={buttonClass}>
                 {busy ? "APPLYING…" : "CONFIRM AND APPLY ALL"}
               </button>

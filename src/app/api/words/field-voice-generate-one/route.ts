@@ -7,8 +7,8 @@ import { getEnglishWordAudioPublicPath } from "@/lib/audio/englishWordAudioNamin
 import { generateEnglishWordAudio } from "@/lib/english/englishWordAudio.server";
 import { getSentenceAudioPublicPath, isSentenceAudioField } from "@/lib/audio/sentenceAudioNaming";
 import { generateSentenceAudio } from "@/lib/sentences/sentenceAudio.server";
-import { getWordConceptAudioPublicPath, isWordConceptAudioField } from "@/lib/audio/wordConceptAudioNaming";
-import { generateWordConceptAudio } from "@/lib/words/wordConceptAudio.server";
+import { getWordSenseConceptAudioPublicPath, isWordSenseConceptAudioField } from "@/lib/audio/wordSenseConceptAudioNaming";
+import { generateWordSenseConceptAudio } from "@/lib/words/wordSenseConceptAudio.server";
 
 export const runtime = "nodejs";
 
@@ -81,15 +81,15 @@ export async function POST(req: Request) {
     }
   }
 
-  if (isWordConceptAudioField(field)) {
+  if (isWordSenseConceptAudioField(field)) {
     const wordId = asPositiveIntString(audioKey);
-    if (!wordId) return NextResponse.json({ ok: false, error: "Invalid Word id" }, { status: 400 });
+    if (!wordId) return NextResponse.json({ ok: false, error: "Invalid WordSense id" }, { status: 400 });
     try {
-      const result = await generateWordConceptAudio(wordId, text);
+      const result = await generateWordSenseConceptAudio(wordId, text);
       return NextResponse.json({
         ok: true,
         filename: result.filename,
-        publicPath: result.filename ? getWordConceptAudioPublicPath(result.filename) : null,
+        publicPath: result.filename ? getWordSenseConceptAudioPublicPath(result.filename) : null,
         size: result.size,
       });
     } catch (e) {

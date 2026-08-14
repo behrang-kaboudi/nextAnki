@@ -5,8 +5,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { pickPictureSymbolsForWord } from "@/lib/ipa/setPictures/setForAny";
 import { normalizeJsonHintForCompare } from "@/lib/words/jsonHint";
-import { hydrateWordsWithPersianMeanings } from "@/lib/words/persianMeanings.server";
-import { flattenWordEnglishRelation, WORD_ENGLISH_FIELDS_SELECT } from "@/lib/english/wordEnglishFields.server";
+import { hydrateWordSensesWithPersianMeanings } from "@/lib/words/persianMeanings.server";
+import { flattenWordSenseEnglishRelation, WORD_SENSE_ENGLISH_FIELDS_SELECT } from "@/lib/english/wordSenseEnglishFields.server";
 
 export const runtime = "nodejs";
 
@@ -38,8 +38,8 @@ export async function GET(req: Request) {
       changed: boolean;
     }[] = [];
 
-    const total = includeTotal ? await prisma.word.count() : null;
-    const rows = await prisma.word.findMany({
+    const total = includeTotal ? await prisma.wordSense.count() : null;
+    const rows = await prisma.wordSense.findMany({
       where: { id: { gt: cursorId } },
       orderBy: { id: "asc" },
       take: scanBatch,
@@ -47,7 +47,7 @@ export async function GET(req: Request) {
         id: true,
         anki_link_id: true,
         englishId: true,
-        english: { select: WORD_ENGLISH_FIELDS_SELECT },
+        english: { select: WORD_SENSE_ENGLISH_FIELDS_SELECT },
         meaningId: true,
         otherMeaningIds: true,
       },
@@ -65,7 +65,7 @@ export async function GET(req: Request) {
       });
     }
 
-    const hydratedRows = await hydrateWordsWithPersianMeanings(rows.map(flattenWordEnglishRelation));
+    const hydratedRows = await hydrateWordSensesWithPersianMeanings(rows.map(flattenWordSenseEnglishRelation));
     let nextCursorId = cursorId;
     for (const row of hydratedRows) {
       nextCursorId = row.id;

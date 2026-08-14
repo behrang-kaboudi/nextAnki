@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
-import { hydrateWordsWithPersianMeanings } from "@/lib/words/persianMeanings.server";
+import { hydrateWordSensesWithPersianMeanings } from "@/lib/words/persianMeanings.server";
 import { hydrateMeaningReviewSentences } from "@/lib/words/meaningReviewSentences.server";
 
 export const runtime = "nodejs";
@@ -11,7 +11,7 @@ export async function GET(request: Request) {
   const take = Number.isSafeInteger(limit) && limit >= 0 ? limit : 50;
   const where = { meanings_confirmed: false };
   const [raw, totalUnconfirmed] = await Promise.all([
-    prisma.word.findMany({
+    prisma.wordSense.findMany({
       where,
       orderBy: { id: "asc" },
       take,
@@ -25,10 +25,10 @@ export async function GET(request: Request) {
         english: { select: { base_form: true, phonetic_us: true } },
       },
     }),
-    prisma.word.count({ where }),
+    prisma.wordSense.count({ where }),
   ]);
   const words = await hydrateMeaningReviewSentences(
-    await hydrateWordsWithPersianMeanings(raw),
+    await hydrateWordSensesWithPersianMeanings(raw),
   );
   return NextResponse.json({
     ok: true,

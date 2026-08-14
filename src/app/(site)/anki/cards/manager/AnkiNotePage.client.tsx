@@ -3519,7 +3519,7 @@ export default function AnkiNotePage() {
                   آرایه مستقیم کلمات یا خروجی <code>word-extraction</code> را
                   paste کن. اگر ورودی شامل <code>items</code> باشد، همه آیتم‌ها
                   flatten می‌شوند و بعد با <code>base_form</code> در جدول{" "}
-                  <code>Word</code> جستجو می‌شوند.
+                  <code>WordSense</code> جستجو می‌شوند.
                 </div>
               </div>
               <button

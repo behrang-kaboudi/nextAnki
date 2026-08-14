@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
 import { getWordEditorInitial } from "@/lib/words/editorPayload";
-import { updateWord } from "@/lib/words/wordRepo";
+import { updateWordSense } from "@/lib/words/wordSenseRepo";
 
 export const runtime = "nodejs";
 
@@ -122,7 +122,7 @@ export async function POST(req: Request) {
       }
     }
 
-    const updated = await updateWord({
+    const updated = await updateWordSense({
       where: { id },
       data: {
         pos: normalizeNullableString(d.pos),

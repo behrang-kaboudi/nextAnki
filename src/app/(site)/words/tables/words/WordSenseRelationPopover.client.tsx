@@ -13,7 +13,7 @@ export type RelationPopoverField = {
 
 type PopoverPosition = { top: number; left: number; maxHeight: number };
 
-export default function WordRelationPopover({
+export default function WordSenseRelationPopover({
   label,
   details,
   children,

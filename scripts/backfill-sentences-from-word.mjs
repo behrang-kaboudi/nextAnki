@@ -13,7 +13,7 @@ async function main() {
   let updated = 0;
 
   while (true) {
-    const rows = await prisma.word.findMany({
+    const rows = await prisma.wordSense.findMany({
       where: { id: { gt: cursorId } },
       orderBy: { id: "asc" },
       take: BATCH_SIZE,
@@ -58,7 +58,7 @@ async function main() {
 
     cursorId = rows[rows.length - 1].id;
     process.stdout.write(
-      `Processed up to Word.id=${cursorId} scanned=${scanned} created=${created} updated=${updated}\n`
+      `Processed up to WordSense.id=${cursorId} scanned=${scanned} created=${created} updated=${updated}\n`
     );
   }
 

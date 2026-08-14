@@ -9,7 +9,7 @@ export const runtime = "nodejs";
 
 export async function GET() {
   try {
-    const words = await prisma.word.findMany({
+    const words = await prisma.wordSense.findMany({
       orderBy: { id: "desc" },
       select: {
         id: true,

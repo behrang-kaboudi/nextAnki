@@ -21,6 +21,7 @@ function prettyJson(value: string | null) {
   }
 }
 
+
 export default function JsonHintPreviewModal({
   wordId,
   currentJsonHint,
@@ -87,7 +88,7 @@ export default function JsonHintPreviewModal({
           <div>
             <div className="text-base font-semibold">json_hint preview</div>
             <div className="mt-1 text-xs opacity-80">
-              Word #{wordId} • {preview ? (preview.changed ? "changed" : "no change") : "—"}
+              WordSense #{wordId} • {preview ? (preview.changed ? "changed" : "no change") : "—"}
               {loading ? " • loading…" : null}
             </div>
           </div>
@@ -135,4 +136,3 @@ export default function JsonHintPreviewModal({
     </div>
   );
 }
-

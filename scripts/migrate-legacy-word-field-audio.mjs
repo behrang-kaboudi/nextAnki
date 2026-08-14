@@ -69,7 +69,7 @@ async function copyVerified(source, destination) {
 async function main() {
   const [entries, words] = await Promise.all([
     fs.readdir(oldDir),
-    prisma.word.findMany({
+    prisma.wordSense.findMany({
       select: {
         id: true,
         anki_link_id: true,
@@ -110,7 +110,7 @@ async function main() {
     }
   }
   if (missingBaseReplacements.length) {
-    throw new Error(`Cannot remove base_form legacy files; ${missingBaseReplacements.length} active Word records have no valid EnglishWord audio replacement.`);
+    throw new Error(`Cannot remove base_form legacy files; ${missingBaseReplacements.length} active WordSense records have no valid EnglishWord audio replacement.`);
   }
 
   let migratedConcept = 0;
@@ -130,7 +130,7 @@ async function main() {
     const newFilename = `w__${wordId}__${field}__${selected.timestampMs}.mp3`;
     if (apply) {
       await copyVerified(path.join(oldDir, selected.filename), path.join(destinationDir, newFilename));
-      await prisma.word.update({
+      await prisma.wordSense.update({
         where: { id: wordId },
         data: {
           concept_explained_fa_audio_file_name: newFilename,

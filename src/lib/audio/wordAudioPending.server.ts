@@ -4,7 +4,7 @@ import { getEnglishWordAudioFileInfo } from "@/lib/english/englishWordAudio.serv
 import { prisma } from "@/lib/prisma";
 import { getPersianWordAudioFileInfo } from "@/lib/persian/persianWordAudio.server";
 import { getSentenceAudioFileInfo } from "@/lib/sentences/sentenceAudio.server";
-import { getWordConceptAudioFileInfo } from "@/lib/words/wordConceptAudio.server";
+import { getWordSenseConceptAudioFileInfo } from "@/lib/words/wordSenseConceptAudio.server";
 
 import { audioNeedsGeneration, getAudioGenerationReason } from "./audioSourceText";
 
@@ -36,8 +36,8 @@ export async function getPendingPersianWordAudioIds(): Promise<number[]> {
   })).map((row) => row.id);
 }
 
-export async function getPendingWordConceptAudioIds(): Promise<number[]> {
-  const rows = await prisma.word.findMany({
+export async function getPendingWordSenseConceptAudioIds(): Promise<number[]> {
+  const rows = await prisma.wordSense.findMany({
     select: {
       id: true,
       concept_explained_fa: true,
@@ -48,7 +48,7 @@ export async function getPendingWordConceptAudioIds(): Promise<number[]> {
   return rows.filter((row) => audioNeedsGeneration({
     text: row.concept_explained_fa,
     sourceText: row.concept_explained_fa_audio_source_text,
-    fileSize: getWordConceptAudioFileInfo(row.concept_explained_fa_audio_file_name).size,
+    fileSize: getWordSenseConceptAudioFileInfo(row.concept_explained_fa_audio_file_name).size,
   })).map((row) => row.id);
 }
 
@@ -87,7 +87,7 @@ export async function getPendingWordAudioTaskCounts(): Promise<PendingWordAudioT
     prisma.persianWord.findMany({
       select: { canonical_text: true, audio_file_name: true, audio_source_text: true },
     }),
-    prisma.word.findMany({
+    prisma.wordSense.findMany({
       select: {
         concept_explained_fa: true,
         concept_explained_fa_audio_file_name: true,
@@ -119,7 +119,7 @@ export async function getPendingWordAudioTaskCounts(): Promise<PendingWordAudioT
     ...concepts.map((row) => getAudioGenerationReason({
       text: row.concept_explained_fa,
       sourceText: row.concept_explained_fa_audio_source_text,
-      fileSize: getWordConceptAudioFileInfo(row.concept_explained_fa_audio_file_name).size,
+      fileSize: getWordSenseConceptAudioFileInfo(row.concept_explained_fa_audio_file_name).size,
     })),
     ...sentences.flatMap((row) => [
       getAudioGenerationReason({

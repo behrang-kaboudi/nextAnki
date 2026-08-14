@@ -94,7 +94,7 @@ async function importRow(row) {
       },
       select: { id: true },
     });
-    const word = await tx.word.create({
+    const word = await tx.wordSense.create({
       data: { ...row.wordData, englishId: english.id, meaningId: meaning.id },
       select: { id: true },
     });
@@ -119,7 +119,7 @@ async function main() {
   for (const doc of docs) {
     const row = prepare(doc);
     if (!row) { skipped += 1; continue; }
-    const exists = await prisma.word.findUnique({ where: { anki_link_id: row.wordData.anki_link_id }, select: { id: true } });
+    const exists = await prisma.wordSense.findUnique({ where: { anki_link_id: row.wordData.anki_link_id }, select: { id: true } });
     if (exists) { skipped += 1; continue; }
     await importRow(row);
     inserted += 1;

@@ -56,7 +56,7 @@ export async function findPictureWordsByIpaPrefix(
       pw.meaning_fa_IPA_normalize AS target_ipa,
       w.pos AS \`usage\`,
       w.imageability
-    FROM word w
+    FROM word_sense w
     INNER JOIN english_word ew ON ew.id = w.englishId
     INNER JOIN persian_word pw ON pw.id = w.meaningId
     WHERE pw.meaning_fa_IPA_normalize LIKE ${likePattern}
@@ -83,7 +83,7 @@ export async function findPictureWordsByIpaPrefix(
       ew.phonetic_us_normalized AS target_ipa,
       w.pos AS \`usage\`,
       w.imageability
-    FROM word w
+    FROM word_sense w
     INNER JOIN english_word ew ON ew.id = w.englishId
     INNER JOIN persian_word pw ON pw.id = w.meaningId
     WHERE ew.phonetic_us_normalized LIKE ${likePattern}

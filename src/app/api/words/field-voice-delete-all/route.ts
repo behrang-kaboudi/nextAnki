@@ -6,8 +6,8 @@ import { WORD_AUDIO_FIELDS } from "@/lib/audio/wordAudioFields";
 import { deleteEnglishWordAudio } from "@/lib/english/englishWordAudio.server";
 import { isSentenceAudioField } from "@/lib/audio/sentenceAudioNaming";
 import { deleteSentenceAudio } from "@/lib/sentences/sentenceAudio.server";
-import { isWordConceptAudioField } from "@/lib/audio/wordConceptAudioNaming";
-import { deleteWordConceptAudio } from "@/lib/words/wordConceptAudio.server";
+import { isWordSenseConceptAudioField } from "@/lib/audio/wordSenseConceptAudioNaming";
+import { deleteWordSenseConceptAudio } from "@/lib/words/wordSenseConceptAudio.server";
 
 export const runtime = "nodejs";
 
@@ -63,11 +63,11 @@ export async function POST(req: Request) {
     }
   }
 
-  if (isWordConceptAudioField(field)) {
+  if (isWordSenseConceptAudioField(field)) {
     const wordId = asPositiveIntString(audioKey);
-    if (!wordId) return NextResponse.json({ ok: false, error: "Invalid Word id" }, { status: 400 });
+    if (!wordId) return NextResponse.json({ ok: false, error: "Invalid WordSense id" }, { status: 400 });
     try {
-      return NextResponse.json({ ok: true, ...(await deleteWordConceptAudio(wordId)) });
+      return NextResponse.json({ ok: true, ...(await deleteWordSenseConceptAudio(wordId)) });
     } catch (e) {
       return NextResponse.json({ ok: false, error: e instanceof Error ? e.message : String(e) }, { status: 500 });
     }

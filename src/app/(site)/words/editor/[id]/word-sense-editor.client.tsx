@@ -431,7 +431,7 @@ export default function WordEditorClient({
         <div className="grid gap-3">
           <div className="grid grid-cols-2 gap-2 md:grid-cols-3 xl:grid-cols-5">
             <div className={relationCardClass}>
-              <RelationCardContent label="Word id" value={String(word.id)} detail="Current Word record" />
+              <RelationCardContent label="WordSense id" value={String(word.id)} detail="Current WordSense record" />
             </div>
             <div className={relationCardClass}>
               <RelationCardContent label="anki_link_id" value={word.anki_link_id} detail="External Anki identity" />

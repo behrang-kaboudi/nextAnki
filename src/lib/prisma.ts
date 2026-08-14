@@ -11,7 +11,7 @@ if (process.env.NODE_ENV !== "production") {
   const hasImageability =
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     Boolean((prisma as any)?._dmmf?.datamodel?.models
-      ?.find((m: { name?: string; fields?: Array<{ name?: string }> }) => m?.name === "Word")
+      ?.find((m: { name?: string; fields?: Array<{ name?: string }> }) => m?.name === "WordSense")
       ?.fields?.some((f: { name?: string }) => f?.name === "imageability"));
 
   if (!("ipaKeyword" in prisma) || !("ankiStructureSettings" in prisma) || !("aiModel" in prisma) || !("persianWord" in prisma) || !hasImageability) {

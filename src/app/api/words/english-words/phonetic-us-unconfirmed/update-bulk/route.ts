@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import { normalizeIpaForDb } from "@/lib/ipa/normalize";
 import { prisma } from "@/lib/prisma";
-import { touchWordsByEnglishIds } from "@/lib/words/wordRepo";
+import { touchWordSensesByEnglishIds } from "@/lib/words/wordSenseRepo";
 
 export const runtime = "nodejs";
 
@@ -48,6 +48,6 @@ export async function POST(request: Request) {
       results.push({ ok: false, id: item.id, error: error instanceof Error ? error.message : String(error) });
     }
   }
-  if (updatedIds.length) await touchWordsByEnglishIds(updatedIds);
+  if (updatedIds.length) await touchWordSensesByEnglishIds(updatedIds);
   return NextResponse.json({ ok: true, total: items.length, updated: updatedIds.length, results });
 }

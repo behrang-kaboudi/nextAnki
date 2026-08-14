@@ -28,7 +28,7 @@ export async function GET(req: Request) {
       SELECT w.id, ew.base_form, ew.phonetic_us, COALESCE(pw.canonical_text, '') AS meaning_fa,
         COALESCE(pw.meaning_fa_IPA, '') AS meaning_fa_IPA, ew.phonetic_us_normalized,
         COALESCE(pw.meaning_fa_IPA_normalize, '') AS meaning_fa_IPA_normalized
-      FROM word w
+      FROM word_sense w
       INNER JOIN english_word ew ON ew.id = w.englishId
       LEFT JOIN persian_word pw ON pw.id = w.meaningId
       ${whereSpecial}

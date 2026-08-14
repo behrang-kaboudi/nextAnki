@@ -9,29 +9,29 @@ import {
 import { TableColumnSelector } from "@/components/table-column-selector";
 import {
   getPendingWordAudioTaskCounts,
-  getPendingWordConceptAudioIds,
+  getPendingWordSenseConceptAudioIds,
 } from "@/lib/audio/wordAudioPending.server";
 import { prisma } from "@/lib/prisma";
-import { WORD_ENGLISH_FIELDS_SELECT } from "@/lib/english/wordEnglishFields.server";
+import { WORD_SENSE_ENGLISH_FIELDS_SELECT } from "@/lib/english/wordSenseEnglishFields.server";
 import { getWordColumnEmptyCounts } from "@/lib/words/tableColumnEmptyCounts.server";
 import { hydrateWordsWithPrimarySentence } from "@/lib/words/primarySentences.server";
 import { primarySentenceId } from "@/lib/words/sentenceIds";
-import { getPendingWordConceptMergeCount } from "@/lib/words/wordConceptMerge.server";
-import { getPendingWordInflectionMergeCount } from "@/lib/words/wordInflectionMerge.server";
-import { getPendingWordMeaningComparisonCount } from "@/lib/words/wordMeaningComparison.server";
+import { getPendingWordSenseConceptMergeCount } from "@/lib/words/wordSenseConceptMerge.server";
+import { getPendingWordSenseInflectionMergeCount } from "@/lib/words/wordSenseInflectionMerge.server";
+import { getPendingWordSenseMeaningComparisonCount } from "@/lib/words/wordSenseMeaningComparison.server";
 
-import OpenWordEditorModal from "../../editor/OpenWordEditorModal.client";
-import WordRelationPopover, {
+import OpenWordSenseEditorModal from "../../editor/OpenWordSenseEditorModal.client";
+import WordSenseRelationPopover, {
   type RelationPopoverField,
-} from "./WordRelationPopover.client";
-import WordArrayRelationModal, {
+} from "./WordSenseRelationPopover.client";
+import WordSenseArrayRelationModal, {
   type WordArrayRelationEntry,
-} from "./WordArrayRelationModal.client";
-import WordMeaningsReview from "./WordMeaningsReview.client";
-import WordConceptMerge from "./WordConceptMerge.client";
-import WordInflectionMerge from "./WordInflectionMerge.client";
-import WordMeaningComparison from "./WordMeaningComparison.client";
-import DeleteWordModalButton from "./DeleteWordModalButton.client";
+} from "./WordSenseArrayRelationModal.client";
+import WordSenseMeaningsReview from "./WordSenseMeaningsReview.client";
+import WordSenseConceptMerge from "./WordSenseConceptMerge.client";
+import WordSenseInflectionMerge from "./WordSenseInflectionMerge.client";
+import WordSenseMeaningComparison from "./WordSenseMeaningComparison.client";
+import DeleteWordSenseModalButton from "./DeleteWordSenseModalButton.client";
 import WordFieldVoiceCell from "../../hints/WordFieldVoiceCell.client";
 import BatchWordFieldVoiceGenerateAllFields from "../../hints/BatchWordFieldVoiceGenerateAllFields.client";
 import BatchEnglishWordJsonHintGenerate from "../../hints/BatchEnglishWordJsonHintGenerate.client";
@@ -39,7 +39,7 @@ import PersianWordMeaningIpaPhase2 from "../persian-words/PersianWordMeaningIpaP
 import EnglishWordPhoneticUsPrompt from "../english-words/EnglishWordPhoneticUsPrompt.client";
 import TableFieldMaintenance from "@/components/table-field-maintenance/TableFieldMaintenance.client";
 
-export const metadata = { title: "Words — Word Table" };
+export const metadata = { title: "Words — WordSense Table" };
 export const runtime = "nodejs";
 
 function parsePositiveInt(value: string | undefined, fallback: number) {
@@ -127,25 +127,25 @@ const COLUMN_INDICATORS: Partial<
   Record<TableColumnKey, readonly TableColumnIndicator[]>
 > = {
   id: [
-    { kind: "primary-key", text: "Primary key: Word.id" },
-    { kind: "unique", text: "Unique: Word.id (enforced by the primary key)" },
+    { kind: "primary-key", text: "Primary key: WordSense.id" },
+    { kind: "unique", text: "Unique: WordSense.id (enforced by the primary key)" },
   ],
   englishId: [
     {
       kind: "foreign-key",
-      text: "Foreign key: Word.englishId → EnglishWord.id",
+      text: "Foreign key: WordSense.englishId → EnglishWord.id",
     },
-    { kind: "index", text: "Index: Word_englishId_idx" },
+    { kind: "index", text: "Index: WordSense_englishId_idx" },
   ],
   meaningId: [
     {
       kind: "foreign-key",
-      text: "Foreign key: Word.meaningId → PersianWord.id",
+      text: "Foreign key: WordSense.meaningId → PersianWord.id",
     },
-    { kind: "index", text: "Index: Word_meaningId_idx" },
+    { kind: "index", text: "Index: WordSense_meaningId_idx" },
   ],
   anki_link_id: [
-    { kind: "unique", text: "Unique index: Word_anki_link_id_key" },
+    { kind: "unique", text: "Unique index: WordSense_anki_link_id_key" },
   ],
 };
 
@@ -341,7 +341,7 @@ export default async function WordsTablePage({
         })
       ).map((row) => row.id)
     : [];
-  const searchWhere: Prisma.WordWhereInput | undefined = q
+  const searchWhere: Prisma.WordSenseWhereInput | undefined = q
     ? {
         OR: [
           { english: { is: { base_form: { contains: q } } } },
@@ -353,27 +353,27 @@ export default async function WordsTablePage({
         ],
       }
     : undefined;
-  const reviewWhere: Prisma.WordWhereInput | undefined =
+  const reviewWhere: Prisma.WordSenseWhereInput | undefined =
     review === "pending"
       ? { meanings_confirmed: false }
       : review === "reviewed"
         ? { meanings_confirmed: true }
         : undefined;
-  const audioWhere: Prisma.WordWhereInput | undefined = missingConceptAudioOnly
-    ? { id: { in: await getPendingWordConceptAudioIds() } }
+  const audioWhere: Prisma.WordSenseWhereInput | undefined = missingConceptAudioOnly
+    ? { id: { in: await getPendingWordSenseConceptAudioIds() } }
     : undefined;
-  const where: Prisma.WordWhereInput | undefined =
+  const where: Prisma.WordSenseWhereInput | undefined =
     searchWhere || reviewWhere || audioWhere
       ? {
           AND: [searchWhere, reviewWhere, audioWhere].filter(
             Boolean,
-          ) as Prisma.WordWhereInput[],
+          ) as Prisma.WordSenseWhereInput[],
         }
       : undefined;
-  const pendingReviewWhere: Prisma.WordWhereInput = searchWhere
+  const pendingReviewWhere: Prisma.WordSenseWhereInput = searchWhere
     ? { AND: [searchWhere, { meanings_confirmed: false }] }
     : { meanings_confirmed: false };
-  const primaryOrderBy: Record<SortField, Prisma.WordOrderByWithRelationInput> =
+  const primaryOrderBy: Record<SortField, Prisma.WordSenseOrderByWithRelationInput> =
     {
       id: { id: dir },
       englishId: { englishId: dir },
@@ -418,9 +418,9 @@ export default async function WordsTablePage({
     missingMeaningIpaCount,
     phoneticCreateRemainingCount,
   ] = await Promise.all([
-    prisma.word.count({ where }),
-    prisma.word.count({ where: pendingReviewWhere }),
-    prisma.word.findMany({
+    prisma.wordSense.count({ where }),
+    prisma.wordSense.count({ where: pendingReviewWhere }),
+    prisma.wordSense.findMany({
       where,
       orderBy: [
         primaryOrderBy[sort],
@@ -432,7 +432,7 @@ export default async function WordsTablePage({
         id: true,
         anki_link_id: true,
         englishId: true,
-        english: { select: { id: true, ...WORD_ENGLISH_FIELDS_SELECT } },
+        english: { select: { id: true, ...WORD_SENSE_ENGLISH_FIELDS_SELECT } },
         meaningId: true,
         sentenceIds: true,
         conceptMergeReviewed: true,
@@ -456,10 +456,10 @@ export default async function WordsTablePage({
       },
     }),
     getWordColumnEmptyCounts(),
-    prisma.word.count({ where: { meanings_confirmed: false } }),
-    getPendingWordConceptMergeCount(),
-    getPendingWordInflectionMergeCount(),
-    getPendingWordMeaningComparisonCount(),
+    prisma.wordSense.count({ where: { meanings_confirmed: false } }),
+    getPendingWordSenseConceptMergeCount(),
+    getPendingWordSenseInflectionMergeCount(),
+    getPendingWordSenseMeaningComparisonCount(),
     getPendingWordAudioTaskCounts(),
     prisma.englishWord.count({
       where: { OR: [{ json_hint: null }, { json_hint: "" }] },
@@ -506,7 +506,7 @@ export default async function WordsTablePage({
     ),
   );
   const referencedWords = referencedWordIds.length
-    ? await prisma.word.findMany({
+    ? await prisma.wordSense.findMany({
         where: { id: { in: referencedWordIds } },
         select: {
           id: true,
@@ -569,8 +569,8 @@ export default async function WordsTablePage({
   return (
     <main className="mx-auto w-full max-w-7xl p-4">
       <PageHeader
-        title="Word Table"
-        subtitle={`Browse Word records (${total.toLocaleString()} total) and open any row in the detailed editor.`}
+        title="WordSense Table"
+        subtitle={`Browse WordSense records (${total.toLocaleString()} total) and open any row in the detailed editor.`}
       />
 
       <section className="mt-4 overflow-hidden rounded border">
@@ -642,12 +642,12 @@ export default async function WordsTablePage({
         <div className="grid gap-3 p-3 lg:grid-cols-2">
           <div>
             <div className="flex flex-wrap gap-2">
-              <WordMeaningsReview
+              <WordSenseMeaningsReview
                 pendingCount={meaningReviewRemainingCount}
               />
-              <WordConceptMerge remainingCount={conceptMergeRemainingCount} />
-              <WordInflectionMerge remainingCount={inflectionMergeRemainingCount} />
-              <WordMeaningComparison
+              <WordSenseConceptMerge remainingCount={conceptMergeRemainingCount} />
+              <WordSenseInflectionMerge remainingCount={inflectionMergeRemainingCount} />
+              <WordSenseMeaningComparison
                 remainingCount={meaningComparisonRemainingCount}
               />
               <PersianWordMeaningIpaPhase2
@@ -669,10 +669,10 @@ export default async function WordsTablePage({
               <div className="mb-2">
                 <div className="text-sm font-semibold">Data maintenance</div>
                 <div className="text-xs opacity-70">
-                  Preview and clear supported Word fields with dependency-aware recovery snapshots.
+                  Preview and clear supported WordSense fields with dependency-aware recovery snapshots.
                 </div>
               </div>
-              <TableFieldMaintenance modelLabel="Word" apiBase="/api/words/field-maintenance" />
+              <TableFieldMaintenance modelLabel="WordSense" apiBase="/api/words/field-maintenance" />
             </div>
           </div>
           <div className="space-y-3 border-t pt-3 lg:border-l lg:border-t-0 lg:pl-3 lg:pt-0">
@@ -940,12 +940,12 @@ export default async function WordsTablePage({
                   ) : null}
                   {hasColumn("englishId") ? (
                     <td className="max-w-64 px-3 py-2 font-mono">
-                      <WordRelationPopover
+                      <WordSenseRelationPopover
                         label={`EnglishWord ${row.englishId}`}
                         details={englishWordDetails(row.english)}
                       >
                         {row.englishId} — {row.english.base_form}
-                      </WordRelationPopover>
+                      </WordSenseRelationPopover>
                     </td>
                   ) : null}
                   {hasColumn("meaningId") ? (
@@ -954,12 +954,12 @@ export default async function WordsTablePage({
                         ? (() => {
                             const meaning = meaningsById.get(row.meaningId);
                             return meaning ? (
-                              <WordRelationPopover
+                              <WordSenseRelationPopover
                                 label={`PersianWord ${meaning.id}`}
                                 details={persianWordDetails(meaning)}
                               >
                                 {meaning.id} — {meaning.canonical_text}
-                              </WordRelationPopover>
+                              </WordSenseRelationPopover>
                             ) : (
                               <span className="block truncate">
                                 {row.meaningId} — missing
@@ -972,12 +972,12 @@ export default async function WordsTablePage({
                   {hasColumn("sentenceIds") ? (
                     <td className="max-w-72 px-3 py-2 font-mono">
                       {row.sentence ? (
-                        <WordRelationPopover
+                        <WordSenseRelationPopover
                           label={`Primary Sentence ${row.sentence.id}`}
                           details={sentenceDetails(row.sentence)}
                         >
                           [{meaningIds(row.sentenceIds).join(", ")}] · {row.sentence.sentence_en}
-                        </WordRelationPopover>
+                        </WordSenseRelationPopover>
                       ) : primarySentenceId(row.sentenceIds) ? (
                         <span>[{meaningIds(row.sentenceIds).join(", ")}] · primary missing</span>
                       ) : "—"}
@@ -996,13 +996,13 @@ export default async function WordsTablePage({
                           {meaningIds(row.otherMeaningIds).map((id) => {
                             const meaning = meaningsById.get(id);
                             return meaning ? (
-                              <WordRelationPopover
+                              <WordSenseRelationPopover
                                 key={id}
                                 label={`PersianWord ${meaning.id}`}
                                 details={persianWordDetails(meaning)}
                               >
                                 {meaning.id} — {meaning.canonical_text}
-                              </WordRelationPopover>
+                              </WordSenseRelationPopover>
                             ) : (
                               <span key={id}>{id} — missing</span>
                             );
@@ -1016,12 +1016,12 @@ export default async function WordsTablePage({
                   {hasColumn("comparedMeaningWordIds") ? (
                     <td className="max-w-64 px-3 py-2 font-mono">
                       {meaningIds(row.comparedMeaningWordIds).length ? (
-                        <WordArrayRelationModal
-                          label={`comparedMeaningWordIds for Word ${row.id}`}
+                        <WordSenseArrayRelationModal
+                          label={`comparedMeaningWordIds for WordSense ${row.id}`}
                           entries={wordArrayEntries(row.comparedMeaningWordIds)}
                         >
                           [{meaningIds(row.comparedMeaningWordIds).join(", ")}]
-                        </WordArrayRelationModal>
+                        </WordSenseArrayRelationModal>
                       ) : (
                         "—"
                       )}
@@ -1030,12 +1030,12 @@ export default async function WordsTablePage({
                   {hasColumn("synonymIds") ? (
                     <td className="max-w-64 px-3 py-2 font-mono">
                       {meaningIds(row.synonymIds).length ? (
-                        <WordArrayRelationModal
-                          label={`synonymIds for Word ${row.id}`}
+                        <WordSenseArrayRelationModal
+                          label={`synonymIds for WordSense ${row.id}`}
                           entries={wordArrayEntries(row.synonymIds)}
                         >
                           [{meaningIds(row.synonymIds).join(", ")}]
-                        </WordArrayRelationModal>
+                        </WordSenseArrayRelationModal>
                       ) : (
                         "—"
                       )}
@@ -1112,11 +1112,11 @@ export default async function WordsTablePage({
                   {hasColumn("actions") ? (
                     <td className="px-3 py-2">
                       <div className="flex items-center gap-1">
-                        <OpenWordEditorModal
+                        <OpenWordSenseEditorModal
                           id={row.id}
                           label={row.english.base_form}
                         />
-                        <DeleteWordModalButton
+                        <DeleteWordSenseModalButton
                           id={row.id}
                           label={row.english.base_form}
                         />

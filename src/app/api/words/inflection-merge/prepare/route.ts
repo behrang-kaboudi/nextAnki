@@ -2,7 +2,7 @@ import "server-only";
 
 import { NextResponse } from "next/server";
 
-import { prepareWordInflectionMerge } from "@/lib/words/wordInflectionMerge.server";
+import { prepareWordSenseInflectionMerge } from "@/lib/words/wordSenseInflectionMerge.server";
 
 export const runtime = "nodejs";
 
@@ -13,7 +13,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "limit must be a non-negative integer." }, { status: 400 });
   }
   try {
-    return NextResponse.json({ ok: true, ...(await prepareWordInflectionMerge(limit)) });
+    return NextResponse.json({ ok: true, ...(await prepareWordSenseInflectionMerge(limit)) });
   } catch (error) {
     return NextResponse.json(
       { ok: false, error: error instanceof Error ? error.message : String(error) },

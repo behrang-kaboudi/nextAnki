@@ -31,7 +31,7 @@ function bytesLabel(bytes: number) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-export default function DeleteWordModalButton({ id, label }: { id: number; label: string }) {
+export default function DeleteWordSenseModalButton({ id, label }: { id: number; label: string }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -72,7 +72,7 @@ export default function DeleteWordModalButton({ id, label }: { id: number; label
         body: JSON.stringify({ id }),
       });
       const result = (await response.json()) as { ok?: boolean; error?: string };
-      if (!response.ok || !result.ok) throw new Error(result.error || "Could not delete this Word.");
+      if (!response.ok || !result.ok) throw new Error(result.error || "Could not delete this WordSense.");
       setOpen(false);
       router.refresh();
     } catch (reason) {
@@ -92,8 +92,8 @@ export default function DeleteWordModalButton({ id, label }: { id: number; label
         type="button"
         onClick={() => void showPreview()}
         className={iconButtonClass}
-        aria-label={`Delete Word ${id} — ${label}`}
-        title="Delete Word"
+        aria-label={`Delete WordSense ${id} — ${label}`}
+        title="Delete WordSense"
       >
         <ActionIcon name="trash" />
       </button>
@@ -103,12 +103,12 @@ export default function DeleteWordModalButton({ id, label }: { id: number; label
           className="fixed inset-0 z-[70] bg-black/50 p-3 backdrop-blur-sm sm:p-6"
           role="dialog"
           aria-modal="true"
-          aria-label={`Confirm deletion of Word ${id}`}
+          aria-label={`Confirm deletion of WordSense ${id}`}
           onMouseDown={(event) => event.target === event.currentTarget && close()}
         >
           <div className="mx-auto mt-[6vh] w-full max-w-2xl rounded-2xl border border-card bg-background p-5 shadow-elevated">
             <div>
-              <h2 className="text-base font-semibold text-red-700 dark:text-red-300">Delete Word #{id} — {label}</h2>
+              <h2 className="text-base font-semibold text-red-700 dark:text-red-300">Delete WordSense #{id} — {label}</h2>
               <p className="mt-1 text-sm opacity-75">Review every related change before confirming. This operation cannot be undone from this page.</p>
             </div>
 
@@ -120,17 +120,17 @@ export default function DeleteWordModalButton({ id, label }: { id: number; label
                 <section className="rounded border border-red-500/30 bg-red-500/5 p-3">
                   <div className="font-semibold">Items that will be deleted</div>
                   <ul className="mt-2 list-disc space-y-1 pl-5">
-                    <li>Word #{preview.id} — {preview.word}</li>
+                    <li>WordSense #{preview.id} — {preview.word}</li>
                     {preview.totalAudioFiles > 0 ? (
                       <li>
-                        {preview.totalAudioFiles} Word audio file(s)
+                        {preview.totalAudioFiles} WordSense audio file(s)
                         <ul className="mt-1 list-disc pl-5 text-xs opacity-75">
                           {preview.audioFiles.map((field) => (
                             <li key={field.field}>{field.field}: {field.count} file(s), {bytesLabel(field.bytes)}</li>
                           ))}
                         </ul>
                       </li>
-                    ) : <li>No matching Word audio files</li>}
+                    ) : <li>No matching WordSense audio files</li>}
                     {preview.sentence?.willBeDeleted ? (
                       <li>Orphaned Sentence #{preview.sentence.id} — {preview.sentence.sentence_en}</li>
                     ) : null}
@@ -139,19 +139,19 @@ export default function DeleteWordModalButton({ id, label }: { id: number; label
 
                 {preview.sentence && !preview.sentence.willBeDeleted ? (
                   <section className="rounded border p-3">
-                    Sentence #{preview.sentence.id} will remain because it is linked to {preview.sentence.linkedWordCount} Word records.
+                    Sentence #{preview.sentence.id} will remain because it is linked to {preview.sentence.linkedWordCount} WordSense records.
                   </section>
                 ) : null}
 
                 <section className="rounded border p-3">
-                  <div className="font-semibold">References that will be removed (these Word records will not be deleted)</div>
+                  <div className="font-semibold">References that will be removed (these WordSense records will not be deleted)</div>
                   {preview.affectedWords.length ? (
                     <ul className="mt-2 list-disc space-y-1 pl-5">
                       {preview.affectedWords.map((word) => (
-                        <li key={word.id}>Word #{word.id} — {word.word}: {word.removeFrom.join(" + ")}</li>
+                        <li key={word.id}>WordSense #{word.id} — {word.word}: {word.removeFrom.join(" + ")}</li>
                       ))}
                     </ul>
-                  ) : <div className="mt-2 opacity-70">No Word relationship arrays reference this ID.</div>}
+                  ) : <div className="mt-2 opacity-70">No WordSense relationship arrays reference this ID.</div>}
                 </section>
               </div>
             ) : null}

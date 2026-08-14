@@ -73,7 +73,7 @@ async function writeJsonBackup(outputFile) {
   const snapshot = {
     createdAt: new Date().toISOString(),
     data: {
-      word: await prisma.word.findMany(),
+      word: await prisma.wordSense.findMany(),
       englishWord: await prisma.englishWord.findMany(),
       persianWord: await prisma.persianWord.findMany(),
       sentence: await prisma.sentence.findMany(),

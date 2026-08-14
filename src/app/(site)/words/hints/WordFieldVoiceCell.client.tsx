@@ -17,11 +17,11 @@ import {
   SENTENCE_AUDIO_PUBLIC_DIR_RELATIVE,
 } from "@/lib/audio/sentenceAudioNaming";
 import {
-  buildWordConceptAudioFilenameTemplate,
-  getWordConceptAudioPublicPath,
-  isWordConceptAudioField,
-  WORD_CONCEPT_AUDIO_PUBLIC_DIR_RELATIVE,
-} from "@/lib/audio/wordConceptAudioNaming";
+  buildWordSenseConceptAudioFilenameTemplate,
+  getWordSenseConceptAudioPublicPath,
+  isWordSenseConceptAudioField,
+  WORD_SENSE_CONCEPT_AUDIO_PUBLIC_DIR_RELATIVE,
+} from "@/lib/audio/wordSenseConceptAudioNaming";
 
 export default function WordFieldVoiceCell({
   field,
@@ -57,8 +57,8 @@ export default function WordFieldVoiceCell({
       ? buildSentenceAudioFilenameTemplate(Number(normalizedAudioKey), field)
       : field === "base_form" && normalizedAudioKey && Number.isSafeInteger(Number(normalizedAudioKey))
         ? buildEnglishWordAudioFilenameTemplate(Number(normalizedAudioKey))
-      : isWordConceptAudioField(field) && normalizedAudioKey && Number.isSafeInteger(Number(normalizedAudioKey))
-        ? buildWordConceptAudioFilenameTemplate(Number(normalizedAudioKey))
+      : isWordSenseConceptAudioField(field) && normalizedAudioKey && Number.isSafeInteger(Number(normalizedAudioKey))
+        ? buildWordSenseConceptAudioFilenameTemplate(Number(normalizedAudioKey))
       : "owned-record__field__Date.now().mp3",
     [normalizedAudioKey, field]
   );
@@ -68,8 +68,8 @@ export default function WordFieldVoiceCell({
       ? getSentenceAudioPublicPath(filename)
       : field === "base_form"
         ? getEnglishWordAudioPublicPath(filename)
-      : isWordConceptAudioField(field)
-        ? getWordConceptAudioPublicPath(filename)
+      : isWordSenseConceptAudioField(field)
+        ? getWordSenseConceptAudioPublicPath(filename)
       : null,
     [field],
   );
@@ -77,8 +77,8 @@ export default function WordFieldVoiceCell({
     ? SENTENCE_AUDIO_PUBLIC_DIR_RELATIVE
     : field === "base_form"
       ? ENGLISH_WORD_AUDIO_PUBLIC_DIR_RELATIVE
-    : isWordConceptAudioField(field)
-      ? WORD_CONCEPT_AUDIO_PUBLIC_DIR_RELATIVE
+    : isWordSenseConceptAudioField(field)
+      ? WORD_SENSE_CONCEPT_AUDIO_PUBLIC_DIR_RELATIVE
     : "audio";
 
   const fetchLatest = useCallback(async () => {

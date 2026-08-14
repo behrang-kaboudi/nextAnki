@@ -7,7 +7,7 @@ import { getEnglishWordAudioAbsoluteDir, getEnglishWordAudioAbsolutePath } from 
 import { DictionaryApiRequestError, getDictionaryApiUsPronunciation } from "@/lib/english/dictionaryApiUs.server";
 import { normalizeIpaForDb } from "@/lib/ipa/normalize";
 import { prisma } from "@/lib/prisma";
-import { touchWordsByEnglishId } from "@/lib/words/wordRepo";
+import { touchWordSensesByEnglishId } from "@/lib/words/wordSenseRepo";
 
 export const runtime = "nodejs";
 const BATCH_SIZE = 100;
@@ -44,7 +44,7 @@ export async function POST(request: Request) {
           ...(shouldUpdatePhonetic ? { phonetic_us: pronunciation.phonetic_us, phonetic_us_normalized: normalizeIpaForDb(pronunciation.phonetic_us, 2000) || null, json_hint: null } : {}),
           ...(filename ? { audio_file_name: filename, audio_source_text: row.base_form.trim() } : {}),
         } });
-        if (shouldUpdatePhonetic || filename) await touchWordsByEnglishId(row.id);
+        if (shouldUpdatePhonetic || filename) await touchWordSensesByEnglishId(row.id);
         if (shouldUpdatePhonetic) report.updatedPhonetic += 1;
         if (filename) report.downloadedAudio += 1;
       } catch (error) {

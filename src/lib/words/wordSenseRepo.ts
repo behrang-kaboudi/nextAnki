@@ -69,62 +69,62 @@ function resetInflectionMergeReview(data: unknown) {
   }
 }
 
-type WordWriteClient = Pick<PrismaClient, "word"> | Pick<Prisma.TransactionClient, "word">;
+type WordSenseWriteClient = Pick<PrismaClient, "wordSense"> | Pick<Prisma.TransactionClient, "wordSense">;
 
-export async function updateWord(
-  args: Prisma.WordUpdateArgs,
-  client: WordWriteClient = prisma,
+export async function updateWordSense(
+  args: Prisma.WordSenseUpdateArgs,
+  client: WordSenseWriteClient = prisma,
 ) {
   stripManualUpdatedAt(args);
   resetConceptMergeReview(args.data);
   resetMeaningReview(args.data);
   resetInflectionMergeReview(args.data);
-  return client.word.update(args);
+  return client.wordSense.update(args);
 }
 
-export async function updateManyWords(
-  args: Prisma.WordUpdateManyArgs,
-  client: WordWriteClient = prisma,
+export async function updateManyWordSenses(
+  args: Prisma.WordSenseUpdateManyArgs,
+  client: WordSenseWriteClient = prisma,
 ) {
   stripManualUpdatedAt(args);
   resetConceptMergeReview(args.data);
   resetMeaningReview(args.data);
   resetInflectionMergeReview(args.data);
-  return client.word.updateMany(args);
+  return client.wordSense.updateMany(args);
 }
 
-export async function touchWordByAnkiLinkId(ankiLinkId: string) {
-  return prisma.word.update({
+export async function touchWordSenseByAnkiLinkId(ankiLinkId: string) {
+  return prisma.wordSense.update({
     where: { anki_link_id: ankiLinkId },
     data: { anki_link_id: ankiLinkId },
   });
 }
 
-export async function touchWordsLinkedToSentenceId(sentenceId: number) {
-  const words = await prisma.word.findMany({ select: { id: true, sentenceIds: true } });
+export async function touchWordSensesLinkedToSentenceId(sentenceId: number) {
+  const words = await prisma.wordSense.findMany({ select: { id: true, sentenceIds: true } });
   const ids = words
     .filter((word) => wordSentenceIds(word.sentenceIds).includes(sentenceId))
     .map((word) => word.id);
   if (!ids.length) return { count: 0 };
-  return prisma.word.updateMany({
+  return prisma.wordSense.updateMany({
     where: { id: { in: ids } },
-    // Audio and Sentence edits are real sync-relevant changes even when no Word column changes.
+    // Audio and Sentence edits are real sync-relevant changes even when no WordSense column changes.
     data: { updatedAt: new Date() },
   });
 }
 
-/** Touch dependent Words when their relation-owned Persian meaning changes. */
-export async function touchWordsByIds(
+/** Touch dependent WordSenses when their relation-owned Persian meaning changes. */
+export async function touchWordSensesByIds(
   ids: readonly number[],
   options?: {
     resetConceptMergeReviewed?: boolean;
     resetMeaningsConfirmed?: boolean;
   },
-  client: WordWriteClient = prisma,
+  client: WordSenseWriteClient = prisma,
 ) {
   const uniqueIds = [...new Set(ids.filter((id) => Number.isSafeInteger(id) && id > 0))];
   if (!uniqueIds.length) return { count: 0 };
-  return client.word.updateMany({
+  return client.wordSense.updateMany({
     where: { id: { in: uniqueIds } },
     data: {
       updatedAt: new Date(),
@@ -134,15 +134,15 @@ export async function touchWordsByIds(
   });
 }
 
-/** Touch dependent Words when their relation-owned English fields change. */
-export async function touchWordsByEnglishId(
+/** Touch dependent WordSenses when their relation-owned English fields change. */
+export async function touchWordSensesByEnglishId(
   englishId: number,
   options?: {
     resetConceptMergeReviewed?: boolean;
     resetMeaningsConfirmed?: boolean;
   },
 ) {
-  return prisma.word.updateMany({
+  return prisma.wordSense.updateMany({
     where: { englishId },
     data: {
       updatedAt: new Date(),
@@ -152,27 +152,27 @@ export async function touchWordsByEnglishId(
   });
 }
 
-export async function touchWordsByEnglishIds(
+export async function touchWordSensesByEnglishIds(
   englishIds: readonly number[],
-  client: WordWriteClient = prisma,
+  client: WordSenseWriteClient = prisma,
 ) {
   const uniqueIds = [...new Set(englishIds.filter((id) => Number.isSafeInteger(id) && id > 0))];
   if (!uniqueIds.length) return { count: 0 };
-  return client.word.updateMany({ where: { englishId: { in: uniqueIds } }, data: { updatedAt: new Date() } });
+  return client.wordSense.updateMany({ where: { englishId: { in: uniqueIds } }, data: { updatedAt: new Date() } });
 }
 
-export async function deleteWord(
-  args: Prisma.WordDeleteArgs,
-  client?: WordWriteClient,
+export async function deleteWordSense(
+  args: Prisma.WordSenseDeleteArgs,
+  client?: WordSenseWriteClient,
 ) {
-  const deleteWithClient = async (writeClient: WordWriteClient) => {
-    const target = await writeClient.word.findUnique({
+  const deleteWithClient = async (writeClient: WordSenseWriteClient) => {
+    const target = await writeClient.wordSense.findUnique({
       where: args.where,
       select: { id: true },
     });
-    if (!target) return writeClient.word.delete(args);
+    if (!target) return writeClient.wordSense.delete(args);
 
-    const words = await writeClient.word.findMany({
+    const words = await writeClient.wordSense.findMany({
       where: { id: { not: target.id } },
       select: { id: true, comparedMeaningWordIds: true, synonymIds: true },
     });
@@ -190,13 +190,13 @@ export async function deleteWord(
         ...compared.filter((id) => id !== target.id),
         ...nextSynonyms,
       ])];
-      await updateWord({
+      await updateWordSense({
         where: { id: word.id },
         data: { comparedMeaningWordIds: nextCompared, synonymIds: nextSynonyms },
         select: { id: true },
       }, writeClient);
     }
-    return writeClient.word.delete(args);
+    return writeClient.wordSense.delete(args);
   };
 
   return client

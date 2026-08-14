@@ -5,7 +5,7 @@ import { WORD_AUDIO_BATCH_FIELDS, type WordAudioBatchFieldKey } from "@/lib/audi
 import {
   getWordFieldVoiceJobStatus,
   startWordFieldVoiceJobIfNeeded,
-} from "@/lib/words/wordFieldVoiceGenerateJob";
+} from "@/lib/words/wordSenseFieldVoiceGenerateJob";
 
 export const runtime = "nodejs";
 

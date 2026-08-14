@@ -17,7 +17,7 @@ export default function DeletePersianWordButton({ id, label }: { id: number; lab
       const payload = (await response.json().catch(() => null)) as { ok?: boolean; error?: string; referencingWordIds?: number[] } | null;
       if (!response.ok || !payload?.ok) {
         const references = payload?.referencingWordIds?.length
-          ? `\n\nReferenced by Word IDs: ${payload.referencingWordIds.join(", ")}`
+          ? `\n\nReferenced by WordSense IDs: ${payload.referencingWordIds.join(", ")}`
           : "";
         throw new Error(`${payload?.error || `Request failed (${response.status})`}${references}`);
       }

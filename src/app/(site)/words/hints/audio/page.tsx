@@ -2,8 +2,8 @@ import Link from "next/link";
 
 import { getPendingWordAudioTaskCount } from "@/lib/audio/wordAudioPending.server";
 import { prisma } from "@/lib/prisma";
-import { flattenWordEnglishRelation, WORD_ENGLISH_FIELDS_SELECT } from "@/lib/english/wordEnglishFields.server";
-import { hydrateWordsWithPersianMeanings } from "@/lib/words/persianMeanings.server";
+import { flattenWordSenseEnglishRelation, WORD_SENSE_ENGLISH_FIELDS_SELECT } from "@/lib/english/wordSenseEnglishFields.server";
+import { hydrateWordSensesWithPersianMeanings } from "@/lib/words/persianMeanings.server";
 import { hydrateWordsWithPrimarySentence } from "@/lib/words/primarySentences.server";
 import BatchWordFieldVoiceGenerate from "../BatchWordFieldVoiceGenerate.client";
 import BatchWordFieldVoiceGenerateAllFields from "../BatchWordFieldVoiceGenerateAllFields.client";
@@ -46,8 +46,8 @@ export default async function WordHintsAudioPage({
     : undefined;
 
   const [total, rows, audioRemainingCount] = await Promise.all([
-    prisma.word.count({ where }),
-    prisma.word.findMany({
+    prisma.wordSense.count({ where }),
+    prisma.wordSense.findMany({
       where,
       orderBy: [{ id: "desc" }],
       skip,
@@ -56,7 +56,7 @@ export default async function WordHintsAudioPage({
         id: true,
         anki_link_id: true,
         englishId: true,
-        english: { select: WORD_ENGLISH_FIELDS_SELECT },
+        english: { select: WORD_SENSE_ENGLISH_FIELDS_SELECT },
         meaningId: true,
         otherMeaningIds: true,
         sentenceIds: true,
@@ -67,8 +67,8 @@ export default async function WordHintsAudioPage({
     }),
     getPendingWordAudioTaskCount(),
   ]);
-  const rowsWithSentences = await hydrateWordsWithPrimarySentence(rows.map(flattenWordEnglishRelation));
-  const rowsWithMeanings = await hydrateWordsWithPersianMeanings(rowsWithSentences);
+  const rowsWithSentences = await hydrateWordsWithPrimarySentence(rows.map(flattenWordSenseEnglishRelation));
+  const rowsWithMeanings = await hydrateWordSensesWithPersianMeanings(rowsWithSentences);
   const mappedRows = rowsWithMeanings.map((r) => ({
     ...r,
     sentenceRecord: r.sentence ?? null,

@@ -5,7 +5,7 @@ import type { Prisma } from "@prisma/client";
 import type { WordAudioFieldKey } from "@/lib/audio/wordAudioFields";
 import { prisma } from "@/lib/prisma";
 import { getSentenceAudioFileInfo } from "@/lib/sentences/sentenceAudio.server";
-import { getWordConceptAudioFileInfo } from "@/lib/words/wordConceptAudio.server";
+import { getWordSenseConceptAudioFileInfo } from "@/lib/words/wordSenseConceptAudio.server";
 import { primarySentenceId, wordSentenceIds } from "@/lib/words/sentenceIds";
 
 function ids(value: Prisma.JsonValue | null) {
@@ -16,8 +16,8 @@ function ids(value: Prisma.JsonValue | null) {
   );
 }
 
-export async function getWordDeletePreview(id: number) {
-  const word = await prisma.word.findUnique({
+export async function getWordSenseDeletePreview(id: number) {
+  const word = await prisma.wordSense.findUnique({
     where: { id },
     select: {
       id: true,
@@ -27,9 +27,9 @@ export async function getWordDeletePreview(id: number) {
       english: { select: { base_form: true } },
     },
   });
-  if (!word) throw new Error("Word not found.");
+  if (!word) throw new Error("WordSense not found.");
 
-  const otherWords = await prisma.word.findMany({
+  const otherWords = await prisma.wordSense.findMany({
     where: { id: { not: id } },
     orderBy: { id: "asc" },
     select: {
@@ -69,7 +69,7 @@ export async function getWordDeletePreview(id: number) {
   const linkedWordCount = primaryId
     ? 1 + otherWords.filter((other) => wordSentenceIds(other.sentenceIds).includes(primaryId)).length
     : 0;
-  const conceptInfo = getWordConceptAudioFileInfo(word.concept_explained_fa_audio_file_name);
+  const conceptInfo = getWordSenseConceptAudioFileInfo(word.concept_explained_fa_audio_file_name);
   const audioFiles: Array<{ field: WordAudioFieldKey; count: number; bytes: number }> = [
     { field: "concept_explained_fa", count: conceptInfo.size > 0 ? 1 : 0, bytes: conceptInfo.size },
   ];

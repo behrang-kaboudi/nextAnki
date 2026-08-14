@@ -10,7 +10,7 @@ import { ActionIcon } from "@/components/icons";
 import { wordFieldVoiceProgressTopic } from "@/lib/progress/topics";
 import { useJobProgress } from "@/lib/progress/useJobProgress";
 import { isSentenceAudioField, SENTENCE_AUDIO_PUBLIC_DIR_RELATIVE } from "@/lib/audio/sentenceAudioNaming";
-import { isWordConceptAudioField, WORD_CONCEPT_AUDIO_PUBLIC_DIR_RELATIVE } from "@/lib/audio/wordConceptAudioNaming";
+import { isWordSenseConceptAudioField, WORD_SENSE_CONCEPT_AUDIO_PUBLIC_DIR_RELATIVE } from "@/lib/audio/wordSenseConceptAudioNaming";
 
 type WordFieldVoiceStatus = {
   jobId: string;
@@ -47,8 +47,8 @@ export default function BatchWordFieldVoiceGenerate({
       ? ENGLISH_WORD_AUDIO_PUBLIC_DIR_RELATIVE
       : field === "canonical_text"
         ? PERSIAN_WORD_AUDIO_PUBLIC_DIR_RELATIVE
-      : isWordConceptAudioField(field)
-        ? WORD_CONCEPT_AUDIO_PUBLIC_DIR_RELATIVE
+      : isWordSenseConceptAudioField(field)
+        ? WORD_SENSE_CONCEPT_AUDIO_PUBLIC_DIR_RELATIVE
         : "audio";
   const { status: streamedStatus } = useJobProgress<WordFieldVoiceStatus>(
     wordFieldVoiceProgressTopic(field),

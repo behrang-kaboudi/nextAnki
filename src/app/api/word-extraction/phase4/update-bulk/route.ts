@@ -6,7 +6,7 @@ import {
   findPrimarySentenceByAnkiLinkId,
   upsertPrimarySentenceByAnkiLinkId,
 } from "@/lib/sentences/sentenceRepo";
-import { updateWord } from "@/lib/words/wordRepo";
+import { updateWordSense } from "@/lib/words/wordSenseRepo";
 
 export const runtime = "nodejs";
 
@@ -121,7 +121,7 @@ export async function POST(req: Request) {
 
     for (const item of items) {
       try {
-        const row = await updateWord({
+        const row = await updateWordSense({
           where: { id: item.id },
           data: {
             pos: item.pos,

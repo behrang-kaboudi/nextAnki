@@ -60,7 +60,7 @@ function parseResponse(value: string, sourceGroups: SourceGroup[]): OutputGroup[
   });
 }
 
-export default function WordMeaningComparison({ remainingCount }: { remainingCount: number }) {
+export default function WordSenseMeaningComparison({ remainingCount }: { remainingCount: number }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [showWorkflowGuide, setShowWorkflowGuide] = useState(false);
@@ -181,7 +181,7 @@ export default function WordMeaningComparison({ remainingCount }: { remainingCou
     try {
       const updated = await applyGroup(source);
       setConfirmed((current) => new Set([...current, source.persianWordId]));
-      setNotice(`Confirmed PersianWord ${source.persianWordId}; updated ${updated} Word record(s) ✓`);
+      setNotice(`Confirmed PersianWord ${source.persianWordId}; updated ${updated} WordSense record(s) ✓`);
       router.refresh();
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : String(reason));
@@ -204,7 +204,7 @@ export default function WordMeaningComparison({ remainingCount }: { remainingCou
         confirmedCount += 1;
         setConfirmed((current) => new Set([...current, source.persianWordId]));
       }
-      setNotice(`Confirmed all ${confirmedCount} remaining group(s); updated ${updatedCount} Word record(s) ✓`);
+      setNotice(`Confirmed all ${confirmedCount} remaining group(s); updated ${updatedCount} WordSense record(s) ✓`);
       router.refresh();
     } catch (reason) {
       setError(
@@ -250,7 +250,7 @@ export default function WordMeaningComparison({ remainingCount }: { remainingCou
           <div className="flex h-[85vh] w-full max-w-7xl flex-col gap-4 rounded-2xl border border-card bg-background p-6 shadow-elevated">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <b>Compare word meanings — Word</b>
+                <b>Compare word meanings — WordSense</b>
                 <div className="text-xs opacity-70">
                   Groups share a PersianWord meaning. Database fields change only after each group is reviewed and confirmed.
                 </div>
@@ -279,21 +279,21 @@ export default function WordMeaningComparison({ remainingCount }: { remainingCou
                 <p>
                   رکوردهایی که حداقل یک معنی فارسی مشترک دارند با هم مقایسه
                   می‌شوند تا تفاوت مفهومشان روشن و رابطهٔ معنایی نزدیک میان آن‌ها ثبت شود.
-                  این مرحله برای ترکیب یا حذف Wordها نیست.
+                  این مرحله برای ترکیب یا حذف WordSenseها نیست.
                 </p>
                 <div className="mt-2 font-semibold">شرایط انتخاب رکوردها</div>
                 <ul className="list-disc pr-5">
                   <li>هر معنی موجود در <code>meaningId</code> یا <code>otherMeaningIds</code> یک گروه می‌سازد.</li>
-                  <li>فقط گروه‌هایی انتخاب می‌شوند که آن معنی فارسی را دست‌کم دو Word استفاده کرده باشند.</li>
+                  <li>فقط گروه‌هایی انتخاب می‌شوند که آن معنی فارسی را دست‌کم دو WordSense استفاده کرده باشند.</li>
                   <li>گروهی که تمام اعضایش قبلاً یکدیگر را در <code>comparedMeaningWordIds</code> ثبت کرده‌اند دوباره نمایش داده نمی‌شود.</li>
                   <li>شناسهٔ PersianWord مشترک باید هنوز در دیتابیس موجود باشد؛ <code>Count = 0</code> یعنی تمام گروه‌های واجد شرایط.</li>
                 </ul>
                 <div className="mt-2 font-semibold">پس از تأیید چه تغییری می‌کند؟</div>
                 <ul className="list-disc pr-5">
-                  <li><code>concept_explained_fa</code> هر Word با توضیح نهایی و متمایزکننده به‌روزرسانی می‌شود.</li>
-                  <li>Wordهای واقعاً نزدیک و قابل اشتباه به‌صورت دوطرفه در <code>synonymIds</code> ثبت می‌شوند.</li>
+                  <li><code>concept_explained_fa</code> هر WordSense با توضیح نهایی و متمایزکننده به‌روزرسانی می‌شود.</li>
+                  <li>WordSenseهای واقعاً نزدیک و قابل اشتباه به‌صورت دوطرفه در <code>synonymIds</code> ثبت می‌شوند.</li>
                   <li>تمام اعضای بررسی‌شده در <code>comparedMeaningWordIds</code> یکدیگر ثبت می‌شوند تا همان گروه دوباره پردازش نشود.</li>
-                  <li>هیچ Word، Sentence، PersianWord یا ستونی حذف نمی‌شود و فیلدهای معنی و جمله تغییر نمی‌کنند.</li>
+                  <li>هیچ WordSense، Sentence، PersianWord یا ستونی حذف نمی‌شود و فیلدهای معنی و جمله تغییر نمی‌کنند.</li>
                 </ul>
               </div>
             ) : null}

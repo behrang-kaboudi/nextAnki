@@ -12,7 +12,7 @@ import { getPersianWordAudioAbsolutePath } from "@/lib/audio/persianWordAudioPat
 import { getSentenceAudioAbsolutePath } from "@/lib/audio/sentenceAudioPaths.server";
 import { getJobProgressSnapshot } from "@/lib/progress/jobProgressCatalog";
 import { prisma } from "@/lib/prisma";
-import { touchWordsByEnglishIds, touchWordsByIds, updateManyWords } from "@/lib/words/wordRepo";
+import { touchWordSensesByEnglishIds, touchWordSensesByIds, updateManyWordSenses } from "@/lib/words/wordSenseRepo";
 import { wordSentenceIds } from "@/lib/words/sentenceIds";
 
 export const TABLE_MAINTENANCE_MODELS = ["EnglishWord", "PersianWord", "Sentence"] as const;
@@ -53,11 +53,11 @@ const CONFIG: Record<TableMaintenanceModel, { label: string; fields: FieldPolicy
     label: "EnglishWord",
     fields: [
       protectedField("id", "id", "Primary keys identify records and cannot be cleared."),
-      protectedField("base_form", "base_form", "Every EnglishWord requires a unique base form, and Word records depend on this relation."),
+      protectedField("base_form", "base_form", "Every EnglishWord requires a unique base form, and WordSense records depend on this relation."),
       action({
         key: "phonetic_us", label: "US phonetic (phonetic_us)",
         description: "Clears the source US phonetic plus its normalized and JSON-hint derivatives.",
-        consequences: ["Clears phonetic_us_normalized and json_hint because both are derived from the source pronunciation.", "Touches linked Word rows so Anki sync sees the change."],
+        consequences: ["Clears phonetic_us_normalized and json_hint because both are derived from the source pronunciation.", "Touches linked WordSense rows so Anki sync sees the change."],
         snapshotFields: ["phonetic_us", "phonetic_us_normalized", "json_hint"],
         clearData: { phonetic_us: null, phonetic_us_normalized: null, json_hint: null },
       }),
@@ -65,13 +65,13 @@ const CONFIG: Record<TableMaintenanceModel, { label: string; fields: FieldPolicy
       action({
         key: "json_hint", label: "JSON pronunciation hint (json_hint)",
         description: "Clears generated JSON pronunciation hints without changing the source phonetic.",
-        consequences: ["Touches linked Word rows so Anki sync sees the change."],
+        consequences: ["Touches linked WordSense rows so Anki sync sees the change."],
         snapshotFields: ["json_hint"], clearData: { json_hint: null },
       }),
       action({
         key: "audio", label: "EnglishWord audio",
         description: "Clears audio filename/source metadata as one owned-audio unit.",
-        consequences: ["Moves existing owned audio files to the recovery quarantine.", "Touches linked Word rows so Anki sync sees the change."],
+        consequences: ["Moves existing owned audio files to the recovery quarantine.", "Touches linked WordSense rows so Anki sync sees the change."],
         snapshotFields: ["audio_file_name", "audio_source_text"], clearData: { audio_file_name: null, audio_source_text: null },
         audioFilenameField: "audio_file_name", audioPath: getEnglishWordAudioAbsolutePath,
       }),
@@ -85,25 +85,25 @@ const CONFIG: Record<TableMaintenanceModel, { label: string; fields: FieldPolicy
     label: "PersianWord",
     fields: [
       protectedField("id", "id", "Primary keys identify records and cannot be cleared."),
-      protectedField("canonical_text", "canonical_text", "Every PersianWord requires canonical text; Word meaning links depend on this record."),
+      protectedField("canonical_text", "canonical_text", "Every PersianWord requires canonical text; WordSense meaning links depend on this record."),
       protectedField("normalized_text", "normalized_text", "This required lookup key is derived from canonical_text and cannot be blanked table-wide."),
       action({
         key: "not_normalized_texts", label: "Alternate spellings (not_normalized_texts)",
         description: "Replaces every populated alternate-spelling array with an empty array.",
-        consequences: ["Touches Word rows that reference the affected PersianWord records."],
+        consequences: ["Touches WordSense rows that reference the affected PersianWord records."],
         snapshotFields: ["not_normalized_texts"], clearData: { not_normalized_texts: [] },
       }),
       action({
         key: "meaning_fa_IPA", label: "Persian meaning IPA (meaning_fa_IPA)",
         description: "Clears source Persian IPA and its normalized derivative.",
-        consequences: ["Clears meaning_fa_IPA_normalize because it is derived from the source IPA.", "Touches Word rows that reference the affected PersianWord records."],
+        consequences: ["Clears meaning_fa_IPA_normalize because it is derived from the source IPA.", "Touches WordSense rows that reference the affected PersianWord records."],
         snapshotFields: ["meaning_fa_IPA", "meaning_fa_IPA_normalize"], clearData: { meaning_fa_IPA: null, meaning_fa_IPA_normalize: null },
       }),
       managed("meaning_fa_IPA_normalize", "meaning_fa_IPA_normalize", "meaning_fa_IPA", "Persian meaning IPA (meaning_fa_IPA)", "This normalized value is derived from meaning_fa_IPA and is cleared through its source-field policy."),
       action({
         key: "audio", label: "PersianWord audio",
         description: "Clears audio filename/source metadata as one owned-audio unit.",
-        consequences: ["Moves existing owned audio files to the recovery quarantine.", "Touches Word rows that reference the affected PersianWord records."],
+        consequences: ["Moves existing owned audio files to the recovery quarantine.", "Touches WordSense rows that reference the affected PersianWord records."],
         snapshotFields: ["audio_file_name", "audio_source_text"], clearData: { audio_file_name: null, audio_source_text: null },
         audioFilenameField: "audio_file_name", audioPath: getPersianWordAudioAbsolutePath,
       }),
@@ -117,11 +117,11 @@ const CONFIG: Record<TableMaintenanceModel, { label: string; fields: FieldPolicy
     label: "Sentence",
     fields: [
       protectedField("id", "id", "Primary keys identify records and cannot be cleared."),
-      protectedField("sentence_en", "sentence_en", "Every Sentence requires unique English text, and Word sentence links depend on it."),
+      protectedField("sentence_en", "sentence_en", "Every Sentence requires unique English text, and WordSense sentence links depend on it."),
       action({
         key: "sentence_en_meaning_fa", label: "Persian sentence meaning (sentence_en_meaning_fa)",
         description: "Clears only the Persian sentence translations while preserving their existing audio metadata and files for comparison.",
-        consequences: ["Keeps Persian meaning audio filename, source text, and physical files unchanged.", "Sets AI meaning review and concept merge review to pending on linked Word rows."],
+        consequences: ["Keeps Persian meaning audio filename, source text, and physical files unchanged.", "Sets AI meaning review and concept merge review to pending on linked WordSense rows."],
         snapshotFields: ["sentence_en_meaning_fa"],
         clearData: { sentence_en_meaning_fa: null },
         resetLinkedReviews: true,
@@ -129,7 +129,7 @@ const CONFIG: Record<TableMaintenanceModel, { label: string; fields: FieldPolicy
       action({
         key: "sentence_en_audio", label: "English sentence audio",
         description: "Clears English sentence audio filename/source metadata as one owned-audio unit.",
-        consequences: ["Moves existing owned audio files to the recovery quarantine.", "Touches linked Word rows so Anki sync sees the change."],
+        consequences: ["Moves existing owned audio files to the recovery quarantine.", "Touches linked WordSense rows so Anki sync sees the change."],
         snapshotFields: ["sentence_en_audio_file_name", "sentence_en_audio_source_text"],
         clearData: { sentence_en_audio_file_name: null, sentence_en_audio_source_text: null },
         audioFilenameField: "sentence_en_audio_file_name", audioPath: getSentenceAudioAbsolutePath,
@@ -139,7 +139,7 @@ const CONFIG: Record<TableMaintenanceModel, { label: string; fields: FieldPolicy
       action({
         key: "sentence_en_meaning_fa_audio", label: "Persian sentence-meaning audio",
         description: "Clears Persian sentence-meaning audio filename/source metadata as one owned-audio unit.",
-        consequences: ["Moves existing owned audio files to the recovery quarantine.", "Touches linked Word rows so Anki sync sees the change."],
+        consequences: ["Moves existing owned audio files to the recovery quarantine.", "Touches linked WordSense rows so Anki sync sees the change."],
         snapshotFields: ["sentence_en_meaning_fa_audio_file_name", "sentence_en_meaning_fa_audio_source_text"],
         clearData: { sentence_en_meaning_fa_audio_file_name: null, sentence_en_meaning_fa_audio_source_text: null },
         audioFilenameField: "sentence_en_meaning_fa_audio_file_name", audioPath: getSentenceAudioAbsolutePath,
@@ -193,9 +193,9 @@ async function loadAffectedRows(model: TableMaintenanceModel, policy: ActionPoli
 async function linkedWords(model: TableMaintenanceModel, recordIds: readonly number[]): Promise<LinkedWord[]> {
   if (!recordIds.length) return [];
   if (model === "EnglishWord") {
-    return prisma.word.findMany({ where: { englishId: { in: [...recordIds] } }, select: { id: true, meanings_confirmed: true, conceptMergeReviewed: true } });
+    return prisma.wordSense.findMany({ where: { englishId: { in: [...recordIds] } }, select: { id: true, meanings_confirmed: true, conceptMergeReviewed: true } });
   }
-  const records = await prisma.word.findMany({ select: { id: true, meaningId: true, otherMeaningIds: true, sentenceIds: true, meanings_confirmed: true, conceptMergeReviewed: true } });
+  const records = await prisma.wordSense.findMany({ select: { id: true, meaningId: true, otherMeaningIds: true, sentenceIds: true, meanings_confirmed: true, conceptMergeReviewed: true } });
   const ids = new Set(recordIds);
   return records.filter((word) => model === "PersianWord"
     ? (word.meaningId !== null && ids.has(word.meaningId)) || (Array.isArray(word.otherMeaningIds) && word.otherMeaningIds.some((id) => {
@@ -334,8 +334,8 @@ async function updateTargetRows(tx: Prisma.TransactionClient, model: TableMainte
 }
 
 async function touchRelatedWords(tx: Prisma.TransactionClient, model: TableMaintenanceModel, recordIds: number[], related: LinkedWord[], reset: boolean) {
-  if (model === "EnglishWord") return touchWordsByEnglishIds(recordIds, tx);
-  return touchWordsByIds(related.map((word) => word.id), reset ? { resetConceptMergeReviewed: true, resetMeaningsConfirmed: true } : undefined, tx);
+  if (model === "EnglishWord") return touchWordSensesByEnglishIds(recordIds, tx);
+  return touchWordSensesByIds(related.map((word) => word.id), reset ? { resetConceptMergeReviewed: true, resetMeaningsConfirmed: true } : undefined, tx);
 }
 
 export async function executeTableFieldMaintenance(args: { model: TableMaintenanceModel; field: string; expectedAffectedRows: number; confirmation: string }) {
@@ -392,7 +392,7 @@ export async function undoTableFieldMaintenance(model: TableMaintenanceModel, op
         const linked = new Map<number, LinkedWord>();
         for (const snapshot of snapshots) for (const word of snapshot.linked) linked.set(word.id, word);
         for (const word of linked.values()) {
-          await updateManyWords({ where: { id: word.id }, data: { meanings_confirmed: word.meanings_confirmed, conceptMergeReviewed: word.conceptMergeReviewed } }, tx);
+          await updateManyWordSenses({ where: { id: word.id }, data: { meanings_confirmed: word.meanings_confirmed, conceptMergeReviewed: word.conceptMergeReviewed } }, tx);
         }
         await tx.tableFieldMaintenanceOperation.update({ where: { id: operation.id }, data: { status: "undone", undoneAt: new Date() } });
       }, { maxWait: 10_000, timeout: 120_000 });

@@ -101,8 +101,8 @@ export async function POST(req: Request) {
     for (const item of items) {
       try {
         const meaning_fa_IPA_normalized = normalizeIpaForDb(item.meaning_fa_IPA, 2000);
-        const word = await prisma.word.findUnique({ where: { id: item.id }, select: { meaningId: true } });
-        if (!word?.meaningId) throw new Error("Word has no primary PersianWord.");
+        const word = await prisma.wordSense.findUnique({ where: { id: item.id }, select: { meaningId: true } });
+        if (!word?.meaningId) throw new Error("WordSense has no primary PersianWord.");
         const row = await prisma.persianWord.update({
           where: { id: word.meaningId },
           data: { meaning_fa_IPA: item.meaning_fa_IPA, meaning_fa_IPA_normalize: meaning_fa_IPA_normalized },

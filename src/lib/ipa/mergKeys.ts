@@ -1,5 +1,5 @@
 import { PictureWord, PictureWordType } from "@prisma/client";
-import Word from "@prisma/client";
+import WordSense from "@prisma/client";
 
 export function mergeKeysAndPictureWords(
   keys1: PictureWord[],

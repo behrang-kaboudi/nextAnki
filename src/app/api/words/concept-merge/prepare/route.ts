@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { prepareWordConceptMerge } from "@/lib/words/wordConceptMerge.server";
+import { prepareWordSenseConceptMerge } from "@/lib/words/wordSenseConceptMerge.server";
 
 export const runtime = "nodejs";
 
@@ -14,7 +14,7 @@ export async function POST(request: Request) {
     );
   }
   try {
-    return NextResponse.json({ ok: true, ...(await prepareWordConceptMerge(limit)) });
+    return NextResponse.json({ ok: true, ...(await prepareWordSenseConceptMerge(limit)) });
   } catch (error) {
     return NextResponse.json(
       { ok: false, error: error instanceof Error ? error.message : String(error) },

@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { pickPictureSymbolsForWord } from "@/lib/ipa/setPictures/setForAny";
 import { normalizeJsonHintForCompare, stringifyJsonHintWithTimestamp } from "@/lib/words/jsonHint";
-import { touchWordsByEnglishId } from "@/lib/words/wordRepo";
+import { touchWordSensesByEnglishId } from "@/lib/words/wordSenseRepo";
 
 const clampInt = (value: string | null, def: number, min: number, max: number) => {
   const n = value ? Number.parseInt(value, 10) : Number.NaN;
@@ -72,7 +72,7 @@ export async function POST(req: Request) {
           where: { id: row.id },
           data: { json_hint: match ? stringifyJsonHintWithTimestamp(match) : null },
         });
-        await touchWordsByEnglishId(row.id);
+        await touchWordSensesByEnglishId(row.id);
       }
       updated += 1;
     }

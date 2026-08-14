@@ -15,11 +15,11 @@
 
 ## Where To Look
 - Prisma + migrations + `schema.prisma`: `prisma/AGENTS.md`
-- `Word` write rules (including `updatedAt`): `src/lib/words/AGENTS.md`
+- `WordSense` write rules (including `updatedAt`): `src/lib/words/AGENTS.md`
 - API route conventions: `src/app/api/AGENTS.md`
 
 ## Hard Rules (Project-wide)
-- No raw SQL for `Word` writes in app code; use `src/lib/words/wordRepo.ts`.
+- No raw SQL for `WordSense` writes in app code; use `src/lib/words/wordSenseRepo.ts`.
 
 ### Strict preservation and no unrequested changes
 - Make only the exact changes explicitly requested by the user.

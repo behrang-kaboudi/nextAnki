@@ -3,9 +3,9 @@ import "server-only";
 import type { Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
-import { updateWord } from "@/lib/words/wordRepo";
+import { updateWordSense } from "@/lib/words/wordSenseRepo";
 
-type ComparisonSourceWord = {
+type ComparisonSourceWordSense = {
   id: number;
   meaningId: number | null;
   otherMeaningIds: Prisma.JsonValue | null;
@@ -34,7 +34,7 @@ const comparisonSelect = {
   pos: true,
   concept_explained_fa: true,
   english: { select: { base_form: true } },
-} satisfies Prisma.WordSelect;
+} satisfies Prisma.WordSenseSelect;
 
 export function positiveUniqueIds(value: Prisma.JsonValue | null): number[] {
   if (!Array.isArray(value)) return [];
@@ -44,22 +44,22 @@ export function positiveUniqueIds(value: Prisma.JsonValue | null): number[] {
   ))];
 }
 
-function persianMeaningIds(word: Pick<ComparisonSourceWord, "meaningId" | "otherMeaningIds">) {
+function persianMeaningIds(word: Pick<ComparisonSourceWordSense, "meaningId" | "otherMeaningIds">) {
   return [...new Set([
     ...(word.meaningId ? [word.meaningId] : []),
     ...positiveUniqueIds(word.otherMeaningIds),
   ])];
 }
 
-function isFullyCompared(group: ComparisonSourceWord[]) {
+function isFullyCompared(group: ComparisonSourceWordSense[]) {
   return group.every((word) => {
     const compared = new Set(positiveUniqueIds(word.comparedMeaningWordIds));
     return group.every((other) => other.id === word.id || compared.has(other.id));
   });
 }
 
-function buildGroups(words: ComparisonSourceWord[]) {
-  const groups = new Map<number, ComparisonSourceWord[]>();
+function buildGroups(words: ComparisonSourceWordSense[]) {
+  const groups = new Map<number, ComparisonSourceWordSense[]>();
   for (const word of words) {
     for (const persianWordId of persianMeaningIds(word)) {
       const group = groups.get(persianWordId) ?? [];
@@ -77,7 +77,7 @@ function buildGroups(words: ComparisonSourceWord[]) {
 }
 
 async function comparisonItemsForGroups(
-  groups: Array<{ persianWordId: number; words: ComparisonSourceWord[] }>,
+  groups: Array<{ persianWordId: number; words: ComparisonSourceWordSense[] }>,
 ) {
   const meaningIds = [...new Set(groups.flatMap(({ words: group }) =>
     group.flatMap(persianMeaningIds),
@@ -112,8 +112,8 @@ async function comparisonItemsForGroups(
   }));
 }
 
-export async function prepareWordMeaningComparison(limit: number) {
-  const words = await prisma.word.findMany({
+export async function prepareWordSenseMeaningComparison(limit: number) {
+  const words = await prisma.wordSense.findMany({
     orderBy: { id: "asc" },
     select: comparisonSelect,
   });
@@ -136,8 +136,8 @@ export async function prepareWordMeaningComparison(limit: number) {
   };
 }
 
-export async function getPendingWordMeaningComparisonCount() {
-  const words = await prisma.word.findMany({
+export async function getPendingWordSenseMeaningComparisonCount() {
+  const words = await prisma.wordSense.findMany({
     orderBy: { id: "asc" },
     select: comparisonSelect,
   });
@@ -208,10 +208,10 @@ function sameOrderedIds(left: readonly number[], right: readonly number[]) {
   return left.length === right.length && left.every((id, index) => id === right[index]);
 }
 
-export async function loadWordMeaningComparisonGroups(
+export async function loadWordSenseMeaningComparisonGroups(
   output: MeaningComparisonOutputGroup[],
 ) {
-  const words = await prisma.word.findMany({ orderBy: { id: "asc" }, select: comparisonSelect });
+  const words = await prisma.wordSense.findMany({ orderBy: { id: "asc" }, select: comparisonSelect });
   const currentByPersianWordId = new Map(
     buildGroups(words).map((group) => [group.persianWordId, group]),
   );
@@ -224,7 +224,7 @@ export async function loadWordMeaningComparisonGroups(
     const currentIds = current.words.map((word) => word.id);
     if (!sameOrderedIds(outputIds, currentIds)) {
       throw new Error(
-        `Members of PersianWord group ${outputGroup.persianWordId} changed; current Word ids are [${currentIds.join(", ")}].`,
+        `Members of PersianWord group ${outputGroup.persianWordId} changed; current WordSense ids are [${currentIds.join(", ")}].`,
       );
     }
     return current;
@@ -232,7 +232,7 @@ export async function loadWordMeaningComparisonGroups(
   return { items: await comparisonItemsForGroups(requestedGroups) };
 }
 
-export async function applyWordMeaningComparison(
+export async function applyWordSenseMeaningComparison(
   persianWordId: number,
   sourceWordIds: number[],
   output: MeaningComparisonOutputGroup,
@@ -243,7 +243,7 @@ export async function applyWordMeaningComparison(
         new Set(sourceWordIds).size !== sourceWordIds.length) {
       throw new Error("The source candidate group is invalid.");
     }
-    const allWords = await tx.word.findMany({ orderBy: { id: "asc" }, select: comparisonSelect });
+    const allWords = await tx.wordSense.findMany({ orderBy: { id: "asc" }, select: comparisonSelect });
     const currentGroup = buildGroups(allWords).find((group) => group.persianWordId === persianWordId);
     const currentIds = currentGroup?.words.map((word) => word.id) ?? [];
     if (!sameOrderedIds(sourceWordIds, currentIds)) {
@@ -251,7 +251,7 @@ export async function applyWordMeaningComparison(
     }
     if (!currentGroup) throw new Error("This candidate group no longer exists.");
     if (!sameOrderedIds(sourceWordIds, output.records.map((record) => record.id))) {
-      throw new Error("The output must contain every source Word id exactly once and in source order.");
+      throw new Error("The output must contain every source WordSense id exactly once and in source order.");
     }
 
     const validWordIds = new Set(allWords.map((word) => word.id));
@@ -268,7 +268,7 @@ export async function applyWordMeaningComparison(
         ...sourceWordIds.filter((id) => id !== record.id),
         ...nextSynonyms,
       ])].sort((a, b) => a - b);
-      await updateWord({
+      await updateWordSense({
         where: { id: record.id },
         data: {
           concept_explained_fa: record.concept_explained_fa,

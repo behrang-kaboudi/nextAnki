@@ -21,13 +21,13 @@ export type PrimarySentence = Prisma.SentenceGetPayload<{
   select: typeof primarySentenceSelect;
 }>;
 
-export type WordWithPrimarySentence<T extends { sentenceIds: Prisma.JsonValue | null }> = T & {
+export type WordSenseWithPrimarySentence<T extends { sentenceIds: Prisma.JsonValue | null }> = T & {
   sentence: PrimarySentence | null;
 };
 
 export async function hydrateWordsWithPrimarySentence<
   T extends { sentenceIds: Prisma.JsonValue | null },
->(words: readonly T[]): Promise<Array<WordWithPrimarySentence<T>>> {
+>(words: readonly T[]): Promise<Array<WordSenseWithPrimarySentence<T>>> {
   const ids = [...new Set(words.flatMap((word) => {
     const id = primarySentenceId(word.sentenceIds);
     return id ? [id] : [];
@@ -42,7 +42,7 @@ export async function hydrateWordsWithPrimarySentence<
   }));
 }
 
-export async function wordIdsWhosePrimarySentenceContains(query: string) {
+export async function wordSenseIdsWhosePrimarySentenceContains(query: string) {
   const matchingSentences = await prisma.sentence.findMany({
     where: {
       OR: [
@@ -54,7 +54,7 @@ export async function wordIdsWhosePrimarySentenceContains(query: string) {
   });
   const matchingIds = new Set(matchingSentences.map((sentence) => sentence.id));
   if (!matchingIds.size) return [];
-  const words = await prisma.word.findMany({ select: { id: true, sentenceIds: true } });
+  const words = await prisma.wordSense.findMany({ select: { id: true, sentenceIds: true } });
   return words
     .filter((word) => matchingIds.has(primarySentenceId(word.sentenceIds) ?? -1))
     .map((word) => word.id);

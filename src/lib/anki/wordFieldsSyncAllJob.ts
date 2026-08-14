@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { Word } from "@prisma/client";
+import type { WordSense } from "@prisma/client";
 
 import { createAnkiConnectClient, type AnkiMultiAction } from "@/lib/anki";
 import { AnkiNoteTypes } from "@/lib/anki";
@@ -14,10 +14,10 @@ import {
   getActiveWordSyncJob,
 } from "@/lib/anki/wordSyncJobLock";
 import { getAnkiStructureSettings } from "@/lib/anki/structureSettingsRepo";
-import { hydrateWordsWithEnglishFields } from "@/lib/english/wordEnglishFields.server";
+import { hydrateWordSensesWithEnglishFields } from "@/lib/english/wordSenseEnglishFields.server";
 import { prisma } from "@/lib/prisma";
-import { hydrateWordsWithEnglishSynonyms } from "@/lib/words/englishSynonyms.server";
-import { hydrateWordsWithPersianMeanings } from "@/lib/words/persianMeanings.server";
+import { hydrateWordSensesWithEnglishSynonyms } from "@/lib/words/englishSynonyms.server";
+import { hydrateWordSensesWithPersianMeanings } from "@/lib/words/persianMeanings.server";
 import { hydrateWordsWithPrimarySentence } from "@/lib/words/primarySentences.server";
 
 export type WordFieldsSyncFailure = {
@@ -120,11 +120,11 @@ function recordFailure(state: State, noteId: number | null, error: string) {
   }
 }
 
-async function hydrateWords(words: Word[]) {
+async function hydrateWords(words: WordSense[]) {
   return hydrateWordsWithPrimarySentence(
-    await hydrateWordsWithEnglishSynonyms(
-      await hydrateWordsWithPersianMeanings(
-        await hydrateWordsWithEnglishFields(words),
+    await hydrateWordSensesWithEnglishSynonyms(
+      await hydrateWordSensesWithPersianMeanings(
+        await hydrateWordSensesWithEnglishFields(words),
       ),
     ),
   );
@@ -208,7 +208,7 @@ async function runJob(state: State, options: JobOptions) {
     for (const group of chunk(ankiLinkIds, 500)) {
       if (state.stopRequested) break;
       const words = await hydrateWords(
-        await prisma.word.findMany({ where: { anki_link_id: { in: group } } }),
+        await prisma.wordSense.findMany({ where: { anki_link_id: { in: group } } }),
       );
       for (const word of words) wordByAnkiLinkId.set(word.anki_link_id, word);
     }

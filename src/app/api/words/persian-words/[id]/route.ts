@@ -82,8 +82,8 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
     if (!item) return NextResponse.json({ ok: false, error: "PersianWord not found." }, { status: 404 });
 
     const [primaryReferences, otherReferences] = await Promise.all([
-      prisma.word.findMany({ where: { meaningId: id }, select: { id: true } }),
-      prisma.word.findMany({
+      prisma.wordSense.findMany({ where: { meaningId: id }, select: { id: true } }),
+      prisma.wordSense.findMany({
         where: {
           OR: [
             { otherMeaningIds: { array_contains: id } },
@@ -99,7 +99,7 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
       return NextResponse.json(
         {
           ok: false,
-          error: `This PersianWord is referenced by ${referencingWordIds.length} Word record(s) and cannot be deleted.`,
+          error: `This PersianWord is referenced by ${referencingWordIds.length} WordSense record(s) and cannot be deleted.`,
           referencingWordIds,
         },
         { status: 409 },

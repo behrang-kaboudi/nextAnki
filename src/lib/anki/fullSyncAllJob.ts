@@ -15,9 +15,9 @@ import {
   getActiveWordSyncJob,
 } from "@/lib/anki/wordSyncJobLock";
 import { prisma } from "@/lib/prisma";
-import { hydrateWordsWithPersianMeanings } from "@/lib/words/persianMeanings.server";
-import { hydrateWordsWithEnglishFields } from "@/lib/english/wordEnglishFields.server";
-import { hydrateWordsWithEnglishSynonyms } from "@/lib/words/englishSynonyms.server";
+import { hydrateWordSensesWithPersianMeanings } from "@/lib/words/persianMeanings.server";
+import { hydrateWordSensesWithEnglishFields } from "@/lib/english/wordSenseEnglishFields.server";
+import { hydrateWordSensesWithEnglishSynonyms } from "@/lib/words/englishSynonyms.server";
 import { hydrateWordsWithPrimarySentence } from "@/lib/words/primarySentences.server";
 
 export type FullSyncAllStatus = {
@@ -245,7 +245,7 @@ async function runJob(state: State) {
     state.mediaDeleted = 0;
     state.currentNoteId = null;
 
-    state.total = await prisma.word.count();
+    state.total = await prisma.wordSense.count();
 
     const modelName = AnkiNoteTypes.META_LEX_VR9;
     const query = `note:"${modelName.replaceAll('"', '\\"')}"`;
@@ -299,7 +299,7 @@ async function runJob(state: State) {
     for (;;) {
       if (state.stopRequested) break;
 
-      const rows = await prisma.word.findMany({
+      const rows = await prisma.wordSense.findMany({
         where: { id: { gt: lastId } },
         orderBy: { id: "asc" },
         take: pageSize,
@@ -308,9 +308,9 @@ async function runJob(state: State) {
       lastId = rows[rows.length - 1]!.id;
 
       const hydratedRows = await hydrateWordsWithPrimarySentence(
-        await hydrateWordsWithEnglishSynonyms(
-          await hydrateWordsWithPersianMeanings(
-            await hydrateWordsWithEnglishFields(rows),
+        await hydrateWordSensesWithEnglishSynonyms(
+          await hydrateWordSensesWithPersianMeanings(
+            await hydrateWordSensesWithEnglishFields(rows),
           ),
         ),
       );

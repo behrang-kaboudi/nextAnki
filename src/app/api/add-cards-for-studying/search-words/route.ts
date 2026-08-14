@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
-import { hydrateWordsWithPersianMeanings } from "@/lib/words/persianMeanings.server";
-import { flattenWordEnglishRelation, WORD_ENGLISH_FIELDS_SELECT } from "@/lib/english/wordEnglishFields.server";
+import { hydrateWordSensesWithPersianMeanings } from "@/lib/words/persianMeanings.server";
+import { flattenWordSenseEnglishRelation, WORD_SENSE_ENGLISH_FIELDS_SELECT } from "@/lib/english/wordSenseEnglishFields.server";
 import { hydrateWordsWithPrimarySentence } from "@/lib/words/primarySentences.server";
 
 function asTrimmedString(value: unknown) {
@@ -20,7 +20,7 @@ export async function GET(req: Request) {
       return NextResponse.json({ ok: true, items: [] });
     }
 
-    const rows = await prisma.word.findMany({
+    const rows = await prisma.wordSense.findMany({
       where: {
         english: { is: { base_form: { contains: q } } },
       },
@@ -28,7 +28,7 @@ export async function GET(req: Request) {
         id: true,
         anki_link_id: true,
         englishId: true,
-        english: { select: WORD_ENGLISH_FIELDS_SELECT },
+        english: { select: WORD_SENSE_ENGLISH_FIELDS_SELECT },
         meaningId: true,
         otherMeaningIds: true,
         sentenceIds: true,
@@ -39,8 +39,8 @@ export async function GET(req: Request) {
 
     return NextResponse.json({
       ok: true,
-      items: (await hydrateWordsWithPersianMeanings(
-        await hydrateWordsWithPrimarySentence(rows.map(flattenWordEnglishRelation)),
+      items: (await hydrateWordSensesWithPersianMeanings(
+        await hydrateWordsWithPrimarySentence(rows.map(flattenWordSenseEnglishRelation)),
       )).map((row) => ({
         anki_link_id: row.anki_link_id,
         base_form: row.base_form,

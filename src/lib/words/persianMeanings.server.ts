@@ -3,7 +3,7 @@ import "server-only";
 import type { Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
-import { touchWordsByIds } from "@/lib/words/wordRepo";
+import { touchWordSensesByIds } from "@/lib/words/wordSenseRepo";
 
 export const PERSIAN_WORD_MEANING_SELECT = {
   id: true,
@@ -23,10 +23,10 @@ export type WordMeaningReference = {
   otherMeaningIds: Prisma.JsonValue | null;
 };
 
-export type WordWithPersianMeanings<T extends WordMeaningReference> = T & {
+export type WordSenseWithPersianMeanings<T extends WordMeaningReference> = T & {
   primaryPersianWord: PersianWordMeaning | null;
   otherPersianWords: PersianWordMeaning[];
-  // Compatibility values are derived only at read time; they are never stored on Word.
+  // Compatibility values are derived only at read time; they are never stored on WordSense.
   meaning_fa: string;
   meaning_fa_IPA: string;
   meaning_fa_IPA_normalized: string;
@@ -45,9 +45,9 @@ export function meaningIds(value: Prisma.JsonValue | null): number[] {
   return ids;
 }
 
-export async function hydrateWordsWithPersianMeanings<T extends WordMeaningReference>(
+export async function hydrateWordSensesWithPersianMeanings<T extends WordMeaningReference>(
   words: readonly T[],
-): Promise<Array<WordWithPersianMeanings<T>>> {
+): Promise<Array<WordSenseWithPersianMeanings<T>>> {
   if (!words.length) return [];
   const ids = Array.from(new Set(words.flatMap((word) => [word.meaningId, ...meaningIds(word.otherMeaningIds)]).filter((id): id is number => id !== null)));
   const meanings = ids.length
@@ -75,8 +75,8 @@ export async function hydrateWordsWithPersianMeanings<T extends WordMeaningRefer
   });
 }
 
-export async function hydrateWordWithPersianMeanings<T extends WordMeaningReference>(word: T) {
-  return (await hydrateWordsWithPersianMeanings([word]))[0]!;
+export async function hydrateWordSenseWithPersianMeanings<T extends WordMeaningReference>(word: T) {
+  return (await hydrateWordSensesWithPersianMeanings([word]))[0]!;
 }
 
 export async function touchWordsReferencingPersianWord(
@@ -86,7 +86,7 @@ export async function touchWordsReferencingPersianWord(
     resetMeaningsConfirmed?: boolean;
   },
 ) {
-  const references = await prisma.word.findMany({
+  const references = await prisma.wordSense.findMany({
     where: {
       OR: [
         { meaningId: persianWordId },
@@ -96,14 +96,14 @@ export async function touchWordsReferencingPersianWord(
     },
     select: { id: true },
   });
-  await touchWordsByIds(references.map((reference) => reference.id), options);
+  await touchWordSensesByIds(references.map((reference) => reference.id), options);
   return references.length;
 }
 
 export async function getPersianWordReferences(persianWordId: number) {
   const [primary, secondary] = await Promise.all([
-    prisma.word.findMany({ where: { meaningId: persianWordId }, select: { id: true, english: { select: { base_form: true } } } }),
-    prisma.word.findMany({
+    prisma.wordSense.findMany({ where: { meaningId: persianWordId }, select: { id: true, english: { select: { base_form: true } } } }),
+    prisma.wordSense.findMany({
       where: {
         OR: [
           { otherMeaningIds: { array_contains: persianWordId } },

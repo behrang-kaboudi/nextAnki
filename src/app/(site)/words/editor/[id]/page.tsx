@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/page-header";
 import { getWordEditorInitial } from "@/lib/words/editorPayload";
 
-import WordEditorClient from "./word-editor.client";
+import WordEditorClient from "./word-sense-editor.client";
 
 export const runtime = "nodejs";
 
@@ -24,7 +24,7 @@ export default async function WordEditorPage({
     <main className="mx-auto w-full max-w-6xl p-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <PageHeader
-          title={`Edit Word #${word.id}`}
+          title={`Edit WordSense #${word.id}`}
           subtitle="Edit fields and save. Audio controls support generate/record/upload/delete for supported fields."
         />
         <Link

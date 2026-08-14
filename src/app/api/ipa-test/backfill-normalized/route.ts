@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 
 import { normalizeIpaForDb } from "@/lib/ipa/normalize";
 import { prisma } from "@/lib/prisma";
-import { touchWordsByEnglishId } from "@/lib/words/wordRepo";
+import { touchWordSensesByEnglishId } from "@/lib/words/wordSenseRepo";
 
 const clampInt = (value: string | null, def: number, min: number, max: number) => {
   const n = value ? Number.parseInt(value, 10) : Number.NaN;
@@ -46,7 +46,7 @@ export async function POST(req: Request) {
         phonetic_us_normalized: phonNorm,
       },
     });
-    await touchWordsByEnglishId(r.id);
+    await touchWordSensesByEnglishId(r.id);
     updated++;
   }
 

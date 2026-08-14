@@ -11,7 +11,7 @@ import { getSentenceDeckSyncAllStatus } from "@/lib/anki/sentenceDeckSyncAllJob"
 import { getSentenceEnMeaningFaSyncAllStatus } from "@/lib/anki/sentenceEnMeaningFaSyncAllJob";
 import { getSentenceEnSyncAllStatus } from "@/lib/anki/sentenceEnSyncAllJob";
 import { WORD_AUDIO_BATCH_FIELDS } from "@/lib/audio/wordAudioFields";
-import { getWordFieldVoiceJobStatus } from "@/lib/words/wordFieldVoiceGenerateJob";
+import { getWordFieldVoiceJobStatus } from "@/lib/words/wordSenseFieldVoiceGenerateJob";
 import { getPersianWordAudioJobStatus } from "@/lib/persian/persianWordAudioGenerateJob";
 import { getEnglishWordAudioJobStatus } from "@/lib/english/englishWordAudioGenerateJob";
 import { getEnglishWordJsonHintJobStatus } from "@/lib/english/englishWordJsonHintGenerateJob";

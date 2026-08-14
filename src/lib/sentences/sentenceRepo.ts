@@ -6,7 +6,7 @@ import type { Prisma } from "@prisma/client";
 
 import { getSentenceAudioAbsolutePath } from "@/lib/audio/sentenceAudioPaths.server";
 import { prisma } from "@/lib/prisma";
-import { touchWordsLinkedToSentenceId, updateWord } from "@/lib/words/wordRepo";
+import { touchWordSensesLinkedToSentenceId, updateWordSense } from "@/lib/words/wordSenseRepo";
 import { primarySentenceId, wordSentenceIds } from "@/lib/words/sentenceIds";
 
 type PrimarySentenceRecord = {
@@ -42,7 +42,7 @@ async function deleteSentenceIfUnreferenced(
   sentence: PrimarySentenceRecord,
   filesToDelete: string[],
 ) {
-  const words = await tx.word.findMany({ select: { sentenceIds: true } });
+  const words = await tx.wordSense.findMany({ select: { sentenceIds: true } });
   if (words.some((word) => wordSentenceIds(word.sentenceIds).includes(sentence.id))) return;
   const deleted = await tx.sentence.deleteMany({ where: { id: sentence.id } });
   if (deleted.count) {
@@ -67,12 +67,12 @@ export async function upsertPrimarySentenceByAnkiLinkId(args: {
 
   const filesToDelete: string[] = [];
   const result = await prisma.$transaction(async (tx) => {
-    const word = await tx.word.findUnique({
+    const word = await tx.wordSense.findUnique({
       where: { anki_link_id: ankiLinkId },
       select: { id: true, sentenceIds: true },
     });
     if (!word) {
-      throw new Error(`Word not found for anki_link_id=${ankiLinkId}`);
+      throw new Error(`WordSense not found for anki_link_id=${ankiLinkId}`);
     }
 
     const currentIds = wordSentenceIds(word.sentenceIds);
@@ -91,13 +91,13 @@ export async function upsertPrimarySentenceByAnkiLinkId(args: {
         },
         select: sentenceSelect,
       });
-      await updateWord({ where: { id: word.id }, data: { sentenceIds: currentIds } }, tx);
+      await updateWordSense({ where: { id: word.id }, data: { sentenceIds: currentIds } }, tx);
       return updated;
     }
 
     if (matchedSentence) {
       const nextIds = [matchedSentence.id, ...currentIds.filter((id) => id !== matchedSentence.id && id !== existingSentence?.id)];
-      await updateWord(
+      await updateWordSense(
         { where: { id: word.id }, data: { sentenceIds: nextIds } },
         tx,
       );
@@ -134,7 +134,7 @@ export async function upsertPrimarySentenceByAnkiLinkId(args: {
         },
         select: sentenceSelect,
       });
-      await updateWord({ where: { id: word.id }, data: { sentenceIds: currentIds } }, tx);
+      await updateWordSense({ where: { id: word.id }, data: { sentenceIds: currentIds } }, tx);
       return updated;
     }
 
@@ -142,7 +142,7 @@ export async function upsertPrimarySentenceByAnkiLinkId(args: {
       data: { sentence_en: nextSentenceEn, sentence_en_meaning_fa },
       select: sentenceSelect,
     });
-    await updateWord(
+    await updateWordSense(
       { where: { id: word.id }, data: { sentenceIds: [createdSentence.id, ...currentIds] } },
       tx,
     );
@@ -170,14 +170,14 @@ export async function updatePrimarySentenceByAnkiLinkId(
       ...data,
     },
   });
-  await touchWordsLinkedToSentenceId(current.id);
+  await touchWordSensesLinkedToSentenceId(current.id);
   return updated;
 }
 
 export async function findPrimarySentenceByAnkiLinkId(
   ankiLinkId: string,
 ): Promise<PrimarySentenceRecord | null> {
-  const word = await prisma.word.findUnique({
+  const word = await prisma.wordSense.findUnique({
     where: { anki_link_id: ankiLinkId },
     select: { sentenceIds: true },
   });
@@ -187,7 +187,7 @@ export async function findPrimarySentenceByAnkiLinkId(
 export async function findPrimarySentenceByWordId(
   wordId: number,
 ): Promise<PrimarySentenceRecord | null> {
-  const word = await prisma.word.findUnique({
+  const word = await prisma.wordSense.findUnique({
     where: { id: wordId },
     select: { sentenceIds: true },
   });
@@ -197,7 +197,7 @@ export async function findPrimarySentenceByWordId(
 export async function listPrimarySentencesByAnkiLinkIds(ankiLinkIds: string[]) {
   if (!ankiLinkIds.length) return new Map<string, PrimarySentenceRecord>();
 
-  const rows = await prisma.word.findMany({
+  const rows = await prisma.wordSense.findMany({
     where: { anki_link_id: { in: ankiLinkIds } },
     select: {
       anki_link_id: true,

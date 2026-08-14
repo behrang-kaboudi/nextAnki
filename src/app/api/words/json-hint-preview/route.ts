@@ -27,7 +27,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, error: "No valid ids" }, { status: 400 });
     }
 
-    const rows = await prisma.word.findMany({
+    const rows = await prisma.wordSense.findMany({
       where: { id: { in: ids } },
       select: {
         id: true,

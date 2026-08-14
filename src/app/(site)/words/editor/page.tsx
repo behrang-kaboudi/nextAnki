@@ -2,11 +2,11 @@ import Link from "next/link";
 
 import { PageHeader } from "@/components/page-header";
 import { prisma } from "@/lib/prisma";
-import { flattenWordEnglishRelation, WORD_ENGLISH_FIELDS_SELECT } from "@/lib/english/wordEnglishFields.server";
-import { hydrateWordsWithPersianMeanings } from "@/lib/words/persianMeanings.server";
+import { flattenWordSenseEnglishRelation, WORD_SENSE_ENGLISH_FIELDS_SELECT } from "@/lib/english/wordSenseEnglishFields.server";
+import { hydrateWordSensesWithPersianMeanings } from "@/lib/words/persianMeanings.server";
 
-import DeleteWordButton from "./DeleteWordButton.client";
-import OpenWordEditorModal from "./OpenWordEditorModal.client";
+import DeleteWordSenseButton from "./DeleteWordSenseButton.client";
+import OpenWordSenseEditorModal from "./OpenWordSenseEditorModal.client";
 
 export const metadata = {
   title: "Words — Editor",
@@ -44,17 +44,17 @@ export default async function WordsEditorIndexPage({
     : undefined;
 
   const [total, rows] = await Promise.all([
-    prisma.word.count({ where }),
-    prisma.word.findMany({
+    prisma.wordSense.count({ where }),
+    prisma.wordSense.findMany({
       where,
       orderBy: [{ updatedAt: "desc" }, { id: "desc" }],
       skip,
       take: pageSize,
-      select: { id: true, anki_link_id: true, englishId: true, english: { select: WORD_ENGLISH_FIELDS_SELECT }, meaningId: true, otherMeaningIds: true, updatedAt: true },
+      select: { id: true, anki_link_id: true, englishId: true, english: { select: WORD_SENSE_ENGLISH_FIELDS_SELECT }, meaningId: true, otherMeaningIds: true, updatedAt: true },
     }),
   ]);
 
-  const rowsWithMeanings = await hydrateWordsWithPersianMeanings(rows.map(flattenWordEnglishRelation));
+  const rowsWithMeanings = await hydrateWordSensesWithPersianMeanings(rows.map(flattenWordSenseEnglishRelation));
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const prevPage = Math.max(1, page - 1);
   const nextPage = Math.min(totalPages, page + 1);
@@ -69,8 +69,8 @@ export default async function WordsEditorIndexPage({
     <main className="mx-auto w-full max-w-6xl p-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <PageHeader
-          title="Word Editor"
-          subtitle="Search and open a Word row to edit fields. Audio controls are available on the detail page."
+          title="WordSense Editor"
+          subtitle="Search and open a WordSense row to edit fields. Audio controls are available on the detail page."
         />
 
         <form className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
@@ -155,8 +155,8 @@ export default async function WordsEditorIndexPage({
                   <td className="whitespace-nowrap px-3 py-2 font-mono">{r.updatedAt.toISOString()}</td>
                   <td className="whitespace-nowrap px-3 py-2">
                     <div className="flex items-center gap-2">
-                      <OpenWordEditorModal id={r.id} label={r.base_form} />
-                      <DeleteWordButton id={r.id} label={r.base_form} />
+                      <OpenWordSenseEditorModal id={r.id} label={r.base_form} />
+                      <DeleteWordSenseButton id={r.id} label={r.base_form} />
                     </div>
                   </td>
                 </tr>

@@ -14,7 +14,7 @@ import {
 } from "@/lib/audio/sentenceAudioPaths.server";
 import { prisma } from "@/lib/prisma";
 import { generateSpeechFromMixedText } from "@/lib/tts/cloudTts";
-import { touchWordsLinkedToSentenceId } from "@/lib/words/wordRepo";
+import { touchWordSensesLinkedToSentenceId } from "@/lib/words/wordSenseRepo";
 
 const select = {
   id: true,
@@ -91,7 +91,7 @@ async function replaceFilename(
     where: { id: sentenceId },
     data: audioData(field, filename, sourceText),
   });
-  await touchWordsLinkedToSentenceId(sentenceId);
+  await touchWordSensesLinkedToSentenceId(sentenceId);
   if (previous && previous !== filename && isSafeOwnedFilename(previous)) {
     await fsp.rm(getSentenceAudioAbsolutePath(previous), { force: true });
   }
@@ -132,7 +132,7 @@ export async function deleteSentenceAudio(sentenceId: number, field: SentenceAud
     where: { id: sentenceId },
     data: audioData(field, null, null),
   });
-  await touchWordsLinkedToSentenceId(sentenceId);
+  await touchWordSensesLinkedToSentenceId(sentenceId);
   if (filename && isSafeOwnedFilename(filename)) {
     await fsp.rm(getSentenceAudioAbsolutePath(filename), { force: true });
   }

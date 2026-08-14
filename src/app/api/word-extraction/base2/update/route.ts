@@ -4,8 +4,8 @@ import { NextResponse } from "next/server";
 
 import { normalizeIpaForDb } from "@/lib/ipa/normalize";
 import { prisma } from "@/lib/prisma";
-import { updateWord } from "@/lib/words/wordRepo";
-import { touchWordsByEnglishId } from "@/lib/words/wordRepo";
+import { updateWordSense } from "@/lib/words/wordSenseRepo";
+import { touchWordSensesByEnglishId } from "@/lib/words/wordSenseRepo";
 
 export const runtime = "nodejs";
 
@@ -43,19 +43,19 @@ export async function POST(req: Request) {
 
     const phonetic_us_normalized = normalizeIpaForDb(phonetic_us, 2000);
 
-    const word = await prisma.word.findUnique({ where: { id }, select: { englishId: true } });
-    if (!word) return NextResponse.json({ ok: false, error: `Word ${id} not found.` }, { status: 404 });
+    const word = await prisma.wordSense.findUnique({ where: { id }, select: { englishId: true } });
+    if (!word) return NextResponse.json({ ok: false, error: `WordSense ${id} not found.` }, { status: 404 });
     const english = await prisma.englishWord.update({
       where: { id: word.englishId },
       data: { phonetic_us, phonetic_us_normalized, json_hint: null },
       select: { phonetic_us: true, phonetic_us_normalized: true },
     });
-    const updated = await updateWord({
+    const updated = await updateWordSense({
       where: { id },
       data: { imageability },
       select: { id: true, imageability: true },
     });
-    await touchWordsByEnglishId(word.englishId);
+    await touchWordSensesByEnglishId(word.englishId);
 
     return NextResponse.json({ ok: true, item: { ...updated, ...english } });
   } catch (e) {

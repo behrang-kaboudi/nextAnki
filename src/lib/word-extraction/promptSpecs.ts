@@ -2,7 +2,7 @@ export type WordExtractionPromptSpec = {
   id: string;
   label: string;
   /**
-   * Field in `Word` table that this prompt is about.
+   * Field in `WordSense` that this prompt is about.
    * `null` means "base prompt / not a field".
    */
   fieldKey: string | null;

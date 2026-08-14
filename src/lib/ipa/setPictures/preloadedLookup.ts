@@ -37,7 +37,7 @@ export async function createPreloadedPictureCandidateLookup(): Promise<PictureCa
         usage: true,
       },
     }),
-    prisma.word.findMany({
+    prisma.wordSense.findMany({
       where: {
         imageability: { gt: imageabilityBaseThreshold },
         pos: { in: ["noun", "adjective", "verb"] },

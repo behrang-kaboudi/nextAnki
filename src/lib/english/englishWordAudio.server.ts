@@ -8,7 +8,7 @@ import { buildEnglishWordAudioFilename } from "@/lib/audio/englishWordAudioNamin
 import { getEnglishWordAudioAbsoluteDir, getEnglishWordAudioAbsolutePath } from "@/lib/audio/englishWordAudioPaths.server";
 import { prisma } from "@/lib/prisma";
 import { generateSpeechFromMixedText } from "@/lib/tts/cloudTts";
-import { touchWordsByEnglishId } from "@/lib/words/wordRepo";
+import { touchWordSensesByEnglishId } from "@/lib/words/wordSenseRepo";
 
 function safeOwnedFilename(filename: string | null): string | null {
   return filename && path.basename(filename) === filename ? filename : null;
@@ -42,7 +42,7 @@ async function replaceEnglishWordAudioFilename(
     where: { id: englishWordId },
     data: { audio_file_name: filename, audio_source_text: sourceText },
   });
-  await touchWordsByEnglishId(englishWordId);
+  await touchWordSensesByEnglishId(englishWordId);
   const safePrevious = safeOwnedFilename(previous);
   if (safePrevious && safePrevious !== filename) {
     await rm(getEnglishWordAudioAbsolutePath(safePrevious), { force: true });
@@ -80,7 +80,7 @@ export async function deleteEnglishWordAudio(englishWordId: number) {
     where: { id: englishWordId },
     data: { audio_file_name: null, audio_source_text: null },
   });
-  await touchWordsByEnglishId(englishWordId);
+  await touchWordSensesByEnglishId(englishWordId);
   const safe = safeOwnedFilename(row.audio_file_name);
   const info = getEnglishWordAudioFileInfo(safe);
   if (safe) await rm(getEnglishWordAudioAbsolutePath(safe), { force: true });

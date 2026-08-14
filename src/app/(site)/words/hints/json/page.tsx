@@ -5,8 +5,8 @@ import JsonHintGenerateAllButton from "../JsonHintGenerateAllButton.client";
 import JsonHintHelpModal from "../JsonHintHelpModal.client";
 import WordHintsTable from "../WordHintsTable.client";
 import { getJsonHintGeneratedAtMs } from "@/lib/words/jsonHint";
-import { hydrateWordsWithPersianMeanings } from "@/lib/words/persianMeanings.server";
-import { flattenWordEnglishRelation, WORD_ENGLISH_FIELDS_SELECT } from "@/lib/english/wordEnglishFields.server";
+import { hydrateWordSensesWithPersianMeanings } from "@/lib/words/persianMeanings.server";
+import { flattenWordSenseEnglishRelation, WORD_SENSE_ENGLISH_FIELDS_SELECT } from "@/lib/english/wordSenseEnglishFields.server";
 import type { Prisma } from "@prisma/client";
 
 export const metadata = {
@@ -35,7 +35,7 @@ export default async function WordHintsJsonPage({
   const pageSize = Math.min(Math.max(pageSizeRaw, 10), 200);
   const skip = (page - 1) * pageSize;
 
-  const qWhere: Prisma.WordWhereInput | undefined = q
+  const qWhere: Prisma.WordSenseWhereInput | undefined = q
     ? {
         OR: [
           { english: { is: { base_form: { contains: q } } } },
@@ -45,7 +45,7 @@ export default async function WordHintsJsonPage({
       }
     : undefined;
 
-  const noEnWhere: Prisma.WordWhereInput | undefined = noEnOnly
+  const noEnWhere: Prisma.WordSenseWhereInput | undefined = noEnOnly
     ? {
         OR: [
           { english: { is: { json_hint: { contains: `"en": "noEn"` } } } },
@@ -57,8 +57,8 @@ export default async function WordHintsJsonPage({
   const where = qWhere && noEnWhere ? { AND: [qWhere, noEnWhere] } : (qWhere ?? noEnWhere);
 
   const [total, rows] = await Promise.all([
-    prisma.word.count({ where }),
-    prisma.word.findMany({
+    prisma.wordSense.count({ where }),
+    prisma.wordSense.findMany({
       where,
       orderBy: [{ id: "desc" }],
       skip,
@@ -67,14 +67,14 @@ export default async function WordHintsJsonPage({
         id: true,
         anki_link_id: true,
         englishId: true,
-        english: { select: WORD_ENGLISH_FIELDS_SELECT },
+        english: { select: WORD_SENSE_ENGLISH_FIELDS_SELECT },
         meaningId: true,
         otherMeaningIds: true,
       },
     }),
   ]);
 
-  const rowsWithMeta = (await hydrateWordsWithPersianMeanings(rows.map(flattenWordEnglishRelation))).map((r) => ({
+  const rowsWithMeta = (await hydrateWordSensesWithPersianMeanings(rows.map(flattenWordSenseEnglishRelation))).map((r) => ({
     ...r,
     json_hint_generated_at_ms: getJsonHintGeneratedAtMs(r.json_hint ?? null),
   }));

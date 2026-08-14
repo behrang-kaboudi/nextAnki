@@ -24,7 +24,7 @@ const wordSelect = {
   sentenceIds: true,
   english: { select: { base_form: true } },
   meaning: { select: { canonical_text: true } },
-} satisfies Prisma.WordSelect;
+} satisfies Prisma.WordSenseSelect;
 
 function parseLimit(value: string | null) {
   const n = value ? Number(value) : NaN;
@@ -38,7 +38,7 @@ function isAllowedField(value: string): value is AllowedField {
   return (allowedFields as readonly string[]).includes(value);
 }
 
-function missingWordWhere(field: Exclude<AllowedField, "sentence_en_meaning_fa">): Prisma.WordWhereInput {
+function missingWordWhere(field: Exclude<AllowedField, "sentence_en_meaning_fa">): Prisma.WordSenseWhereInput {
   if (field === "phonetic_us") {
     return { english: { OR: [{ phonetic_us: null }, { phonetic_us: "" }] } };
   }
@@ -72,7 +72,7 @@ export async function GET(req: Request) {
     let total: number;
     let hydrated;
     if (field === "sentence_en_meaning_fa") {
-      const allWords = await prisma.word.findMany({
+      const allWords = await prisma.wordSense.findMany({
         orderBy: { id: "desc" },
         select: wordSelect,
       });
@@ -85,8 +85,8 @@ export async function GET(req: Request) {
     } else {
       const where = missingWordWhere(field);
       const [count, words] = await Promise.all([
-        prisma.word.count({ where }),
-        prisma.word.findMany({ where, orderBy: { id: "desc" }, take: limit, select: wordSelect }),
+        prisma.wordSense.count({ where }),
+        prisma.wordSense.findMany({ where, orderBy: { id: "desc" }, take: limit, select: wordSelect }),
       ]);
       total = count;
       hydrated = await hydrateWordsWithPrimarySentence(words);

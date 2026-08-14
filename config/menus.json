@@ -14,7 +14,7 @@
         "label": "Words",
         "icon": "database",
         "items": [
-          { "type": "link", "label": "Word Editor", "href": "/words/editor", "icon": "database", "description": "Search and edit vocabulary records." },
+          { "type": "link", "label": "WordSense Editor", "href": "/words/editor", "icon": "database", "description": "Search and edit WordSense records." },
           { "type": "link", "label": "Word Extraction", "href": "/words/extraction", "icon": "sparkles", "description": "Choose between new-word intake and completion of existing vocabulary records." },
           {
             "type": "group",
@@ -33,9 +33,9 @@
         "label": "Word Tables",
         "icon": "database",
         "items": [
-          { "type": "link", "label": "Word Table", "href": "/words/tables/words", "icon": "database", "description": "Browse Word records with search, sorting, and direct editing." },
+          { "type": "link", "label": "WordSense Table", "href": "/words/tables/words", "icon": "database", "description": "Browse WordSense records with search, sorting, and direct editing." },
           { "type": "link", "label": "Persian Word Table", "href": "/words/tables/persian-words", "icon": "database", "description": "Browse and edit Persian word table records and their audio." },
-          { "type": "link", "label": "English Word Table", "href": "/words/tables/english-words", "icon": "database", "description": "Browse canonical English words, US IPA, JSON hints, audio, and Word links." },
+          { "type": "link", "label": "English Word Table", "href": "/words/tables/english-words", "icon": "database", "description": "Browse canonical English words, US IPA, JSON hints, audio, and WordSense links." },
           { "type": "link", "label": "Sentence Table", "href": "/words/tables/sentences", "icon": "database", "description": "Browse Sentence records and manage persisted English and Persian audio filenames." }
         ]
       },

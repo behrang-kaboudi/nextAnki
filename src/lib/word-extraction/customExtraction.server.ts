@@ -14,7 +14,7 @@ export async function listWordIdsMissingSentenceTranslation() {
   const missingIds = new Set(missingSentences.map((sentence) => sentence.id));
   if (!missingIds.size) return [];
 
-  const words = await prisma.word.findMany({
+  const words = await prisma.wordSense.findMany({
     select: { id: true, sentenceIds: true },
   });
   return words
@@ -22,7 +22,7 @@ export async function listWordIdsMissingSentenceTranslation() {
     .map((word) => word.id);
 }
 
-export function customExtractionMissingWhere(field: CustomExtractionFieldKey): Prisma.WordWhereInput {
+export function customExtractionMissingWhere(field: CustomExtractionFieldKey): Prisma.WordSenseWhereInput {
   switch (field) {
     case "base_form":
       return { english: { base_form: "" } };
@@ -44,7 +44,7 @@ export function customExtractionMissingWhere(field: CustomExtractionFieldKey): P
       };
     case "sentence_en_meaning_fa":
       // `sentenceIds` is JSON, so this cross-table condition is resolved by
-      // listWordIdsMissingSentenceTranslation() before building the Word query.
+      // listWordIdsMissingSentenceTranslation() before building the WordSense query.
       return { id: { lt: 0 } };
     case "imageability":
       return { OR: [{ imageability: null }, { imageability: { lte: 0 } }] };
@@ -72,7 +72,7 @@ export async function countCustomExtractionPendingWork(
     return (await listWordIdsMissingSentenceTranslation()).length;
   }
   if (field === "other_meanings_fa") {
-    return prisma.word.count({ where: { meanings_confirmed: false } });
+    return prisma.wordSense.count({ where: { meanings_confirmed: false } });
   }
-  return prisma.word.count({ where: customExtractionMissingWhere(field) });
+  return prisma.wordSense.count({ where: customExtractionMissingWhere(field) });
 }

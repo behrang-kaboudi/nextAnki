@@ -918,7 +918,7 @@ const AddCardsForStudyingClient = () => {
                   آرایه مستقیم کلمات یا خروجی <code>word-extraction</code> را
                   paste کن. اگر ورودی شامل <code>items</code> باشد، همه آیتم‌ها
                   flatten می‌شوند و بعد با <code>base_form</code> در جدول{" "}
-                  <code>Word</code> جستجو می‌شوند.
+                  <code>WordSense</code> جستجو می‌شوند.
                 </div>
               </div>
               <button
@@ -1113,7 +1113,7 @@ const AddCardsForStudyingClient = () => {
                         چند <code>anki_link_id</code> اولیه پیدا می‌کند.
                       </div>
                       <div className="mt-3 text-xs leading-6 text-muted">
-                        بعد برای هر رکوردِ پیدا شده در جدول <code>Word</code>، فیلد
+                        بعد برای هر رکوردِ پیدا شده در جدول <code>WordSense</code>، فیلد
                         <code>json_hint</code> بررسی می‌شود. اگر داخل
                         <code>json_hint</code> در بخش <code>person</code> یا
                         <code>job</code> یک آیتم انگلیسی وجود داشته باشد

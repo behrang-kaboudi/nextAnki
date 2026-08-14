@@ -4,9 +4,9 @@ import type { Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
 import { addPersianWordWithClient } from "@/lib/tables/persianWord";
-import { deleteWord, updateWord } from "@/lib/words/wordRepo";
+import { deleteWordSense, updateWordSense } from "@/lib/words/wordSenseRepo";
 
-type SourceWord = {
+type SourceWordSense = {
   id: number;
   englishId: number;
   meaningId: number | null;
@@ -42,7 +42,7 @@ const sourceSelect = {
   meanings_confirmed: true,
   conceptMergeReviewed: true,
   english: { select: { base_form: true } },
-} satisfies Prisma.WordSelect;
+} satisfies Prisma.WordSenseSelect;
 
 function positiveIds(value: Prisma.JsonValue | null): number[] {
   if (!Array.isArray(value)) return [];
@@ -52,8 +52,8 @@ function positiveIds(value: Prisma.JsonValue | null): number[] {
   ))];
 }
 
-function groupByEnglish(words: SourceWord[]) {
-  const groups = new Map<number, SourceWord[]>();
+function groupByEnglish(words: SourceWordSense[]) {
+  const groups = new Map<number, SourceWordSense[]>();
   for (const word of words) {
     const group = groups.get(word.englishId) ?? [];
     group.push(word);
@@ -62,8 +62,8 @@ function groupByEnglish(words: SourceWord[]) {
   return [...groups.values()];
 }
 
-export async function getPendingWordConceptMergeCount() {
-  const words = await prisma.word.findMany({
+export async function getPendingWordSenseConceptMergeCount() {
+  const words = await prisma.wordSense.findMany({
     orderBy: [{ englishId: "asc" }, { id: "asc" }],
     select: sourceSelect,
   });
@@ -74,13 +74,13 @@ export async function getPendingWordConceptMergeCount() {
   ).length;
 }
 
-function sentenceIdsFor(word: SourceWord) {
+function sentenceIdsFor(word: SourceWordSense) {
   return positiveIds(word.sentenceIds);
 }
 
-export async function prepareWordConceptMerge(limit: number) {
+export async function prepareWordSenseConceptMerge(limit: number) {
   return prisma.$transaction(async (tx) => {
-    const words = await tx.word.findMany({
+    const words = await tx.wordSense.findMany({
       orderBy: [{ englishId: "asc" }, { id: "asc" }],
       select: sourceSelect,
     });
@@ -90,7 +90,7 @@ export async function prepareWordConceptMerge(limit: number) {
     for (const group of allGroups) {
       if (group.length !== 1 || group[0].conceptMergeReviewed) continue;
       const word = group[0];
-      await updateWord(
+      await updateWordSense(
         {
           where: { id: word.id },
           data: { conceptMergeReviewed: true },
@@ -209,7 +209,7 @@ function sameIds(left: readonly number[], right: readonly number[]) {
   return left.length === right.length && left.every((id) => right.includes(id));
 }
 
-export async function applyWordConceptMerge(sourceGroups: number[][], output: MergeOutputRow[]) {
+export async function applyWordSenseConceptMerge(sourceGroups: number[][], output: MergeOutputRow[]) {
   return prisma.$transaction(async (tx) => {
     const sourceIds = sourceGroups.flat();
     if (!sourceGroups.length || sourceGroups.some((group) => group.length < 2) ||
@@ -229,7 +229,7 @@ export async function applyWordConceptMerge(sourceGroups: number[][], output: Me
       else if (deleteSeenByGroup.has(groupIndex)) throw new Error("Retained records must appear before deleted records inside each group.");
       priorGroupIndex = groupIndex;
     }
-    const words = await tx.word.findMany({ where: { id: { in: sourceIds } }, select: sourceSelect });
+    const words = await tx.wordSense.findMany({ where: { id: { in: sourceIds } }, select: sourceSelect });
     if (words.length !== sourceIds.length) throw new Error("One or more source records no longer exist.");
     const byId = new Map(words.map((word) => [word.id, word]));
 
@@ -240,7 +240,7 @@ export async function applyWordConceptMerge(sourceGroups: number[][], output: Me
       if (!group.some((word) => !word.conceptMergeReviewed)) {
         throw new Error(`The group for englishId ${englishId} is no longer eligible for concept merging.`);
       }
-      const currentIds = (await tx.word.findMany({ where: { englishId }, select: { id: true } })).map((word) => word.id);
+      const currentIds = (await tx.wordSense.findMany({ where: { englishId }, select: { id: true } })).map((word) => word.id);
       if (!sameIds(groupIds, currentIds)) throw new Error(`The records for englishId ${englishId} changed. Create the data again.`);
     }
 
@@ -250,7 +250,7 @@ export async function applyWordConceptMerge(sourceGroups: number[][], output: Me
 
     for (const row of retained) {
       const source = byId.get(row.id)!;
-      if (row.word !== source.english.base_form) throw new Error(`Word text for record ${row.id} does not match the database.`);
+      if (row.word !== source.english.base_form) throw new Error(`WordSense text for record ${row.id} does not match the database.`);
       const deletedIntoRow = removed.filter((item) => item.mergedIntoId === row.id).map((item) => item.id);
       if (!sameIds(row.mergedRecordIds, deletedIntoRow)) throw new Error(`Merge references for record ${row.id} are inconsistent.`);
       const clusterIds = [row.id, ...row.mergedRecordIds];
@@ -274,7 +274,7 @@ export async function applyWordConceptMerge(sourceGroups: number[][], output: Me
       const otherIds = await Promise.all(row.other_meanings_fa
         .filter((meaning) => meaning !== row.meaning_fa)
         .map(async (meaning) => (await addPersianWordWithClient(meaning, {}, tx)).item.id));
-      await updateWord({
+      await updateWordSense({
         where: { id: row.id },
         data: {
           meaningId: primary?.item.id ?? null,
@@ -287,7 +287,7 @@ export async function applyWordConceptMerge(sourceGroups: number[][], output: Me
         select: { id: true },
       }, tx);
     }
-    for (const row of removed) await deleteWord({ where: { id: row.id } }, tx);
+    for (const row of removed) await deleteWordSense({ where: { id: row.id } }, tx);
     return { updated: retained.length, deleted: removed.length };
   }, { maxWait: 10_000, timeout: 120_000 });
 }

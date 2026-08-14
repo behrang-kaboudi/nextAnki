@@ -52,7 +52,7 @@ export type WordEditorInitial = {
 };
 
 export async function getWordEditorInitial(id: number): Promise<WordEditorInitial | null> {
-  const word = await prisma.word.findUnique({
+  const word = await prisma.wordSense.findUnique({
     where: { id },
     include: {
       english: true,

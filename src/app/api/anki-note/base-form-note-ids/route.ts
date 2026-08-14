@@ -84,7 +84,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: true, noteIds: [] });
     }
 
-    const rows = await prisma.word.findMany({
+    const rows = await prisma.wordSense.findMany({
       where: { english: { is: { base_form: { in: Array.from(new Set(baseForms)) } } } },
       select: { id: true, anki_link_id: true, english: { select: { base_form: true } } },
       orderBy: [{ id: "asc" }],
@@ -128,7 +128,7 @@ export async function POST(req: Request) {
       const currentBatch = pendingAnkiLinkIds.splice(0, 200);
       const batchRows = [];
       for (const group of chunkArray(currentBatch, 200)) {
-        const groupRows = await prisma.word.findMany({
+        const groupRows = await prisma.wordSense.findMany({
           where: { anki_link_id: { in: group } },
           select: { anki_link_id: true, english: { select: { json_hint: true } } },
         });

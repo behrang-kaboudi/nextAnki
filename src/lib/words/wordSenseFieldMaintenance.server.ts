@@ -7,10 +7,10 @@ import path from "node:path";
 
 import { Prisma } from "@prisma/client";
 
-import { getWordConceptAudioAbsolutePath } from "@/lib/audio/wordConceptAudioPaths.server";
+import { getWordSenseConceptAudioAbsolutePath } from "@/lib/audio/wordSenseConceptAudioPaths.server";
 import { getJobProgressSnapshot } from "@/lib/progress/jobProgressCatalog";
 import { prisma } from "@/lib/prisma";
-import { updateManyWords, updateWord } from "@/lib/words/wordRepo";
+import { updateManyWordSenses, updateWordSense } from "@/lib/words/wordSenseRepo";
 
 const WORD_MAINTENANCE_SELECT = {
   id: true,
@@ -31,10 +31,10 @@ const WORD_MAINTENANCE_SELECT = {
   hint_to_select: true,
   imageability: true,
   productive_target: true,
-} satisfies Prisma.WordSelect;
+} satisfies Prisma.WordSenseSelect;
 
-type MaintenanceWord = Prisma.WordGetPayload<{ select: typeof WORD_MAINTENANCE_SELECT }>;
-type SnapshotField = Exclude<keyof MaintenanceWord, "id">;
+type MaintenanceWordSense = Prisma.WordSenseGetPayload<{ select: typeof WORD_MAINTENANCE_SELECT }>;
+type SnapshotField = Exclude<keyof MaintenanceWordSense, "id">;
 
 export type WordMaintenanceField =
   | "meaningId"
@@ -60,8 +60,8 @@ type Policy = {
   description: string;
   consequences: string[];
   snapshotFields: SnapshotField[];
-  clearData: Prisma.WordUncheckedUpdateManyInput;
-  isAffected: (row: MaintenanceWord) => boolean;
+  clearData: Prisma.WordSenseUncheckedUpdateManyInput;
+  isAffected: (row: MaintenanceWordSense) => boolean;
   quarantinesConceptAudio?: boolean;
 };
 
@@ -126,7 +126,7 @@ const POLICIES: Policy[] = [
   {
     key: "sentenceIds",
     label: "Sentence links (sentenceIds)",
-    description: "Unlinks every Word from its sentences without deleting shared Sentence rows.",
+    description: "Unlinks every WordSense from its sentences without deleting shared Sentence rows.",
     consequences: ["Sets AI meaning review and concept merge review to pending."],
     snapshotFields: ["sentenceIds", ...reviewFields],
     clearData: {
@@ -139,7 +139,7 @@ const POLICIES: Policy[] = [
   {
     key: "conceptMergeReviewed",
     label: "Concept merge review status",
-    description: "Marks every reviewed Word concept as pending again.",
+    description: "Marks every reviewed WordSense concept as pending again.",
     consequences: ["Does not remove meanings or concept text."],
     snapshotFields: ["conceptMergeReviewed"],
     clearData: { conceptMergeReviewed: false },
@@ -217,7 +217,7 @@ const POLICIES: Policy[] = [
   {
     key: "comparedMeaningWordIds",
     label: "Meaning comparison cache",
-    description: "Clears the record of Word pairs that have already been compared.",
+    description: "Clears the record of WordSense pairs that have already been compared.",
     consequences: ["Makes eligible meaning groups available to the comparison workflow again."],
     snapshotFields: ["comparedMeaningWordIds"],
     clearData: { comparedMeaningWordIds: Prisma.DbNull },
@@ -226,7 +226,7 @@ const POLICIES: Policy[] = [
   {
     key: "synonymIds",
     label: "Confirmed synonym relationships",
-    description: "Clears every confirmed Word synonym relationship.",
+    description: "Clears every confirmed WordSense synonym relationship.",
     consequences: ["Also clears the comparison cache so removed relationships can be reviewed again."],
     snapshotFields: ["synonymIds", "comparedMeaningWordIds"],
     clearData: { synonymIds: Prisma.DbNull, comparedMeaningWordIds: Prisma.DbNull },
@@ -328,36 +328,36 @@ const INFORMATIONAL_SELECTIONS: InformationalSelection[] = [
     key: "id",
     label: "id",
     kind: "protected",
-    description: "Word.id is the primary key and cannot be cleared.",
-    consequences: ["Other records and relationship arrays use this stable identity. Delete or merge a Word through its dedicated workflow instead."],
+    description: "WordSense.id is the primary key and cannot be cleared.",
+    consequences: ["Other records and relationship arrays use this stable identity. Delete or merge a WordSense through its dedicated workflow instead."],
   },
   {
     key: "englishId",
     label: "englishId",
     kind: "protected",
     description: "englishId is a required foreign key and cannot be cleared.",
-    consequences: ["A Word cannot exist without its EnglishWord. Use the Word delete/merge or EnglishWord management workflow instead."],
+    consequences: ["A WordSense cannot exist without its EnglishWord. Use the WordSense delete/merge or EnglishWord management workflow instead."],
   },
   {
     key: "anki_link_id",
     label: "anki_link_id",
     kind: "protected",
     description: "anki_link_id is the required unique sync identity and cannot be cleared.",
-    consequences: ["Clearing it would break Word-to-Anki synchronization and uniqueness guarantees. Repair it through the dedicated Anki-link workflow."],
+    consequences: ["Clearing it would break WordSense-to-Anki synchronization and uniqueness guarantees. Repair it through the dedicated Anki-link workflow."],
   },
   {
     key: "createdAt",
     label: "createdAt",
     kind: "protected",
     description: "createdAt is required audit metadata and cannot be cleared.",
-    consequences: ["It records when the Word was created and is not user-maintained content."],
+    consequences: ["It records when the WordSense was created and is not user-maintained content."],
   },
   {
     key: "updatedAt",
     label: "updatedAt",
     kind: "protected",
     description: "updatedAt is a required, system-managed synchronization timestamp and cannot be cleared.",
-    consequences: ["Prisma refreshes it automatically whenever Word data changes; manually clearing it would break change tracking."],
+    consequences: ["Prisma refreshes it automatically whenever WordSense data changes; manually clearing it would break change tracking."],
   },
 ];
 
@@ -407,20 +407,20 @@ export function listWordMaintenancePolicies() {
 
 function getPolicy(field: WordMaintenanceField) {
   const policy = policyByKey.get(field);
-  if (!policy) throw new Error(`Unsupported Word maintenance field: ${field}`);
+  if (!policy) throw new Error(`Unsupported WordSense maintenance field: ${field}`);
   return policy;
 }
 
 async function affectedRows(policy: Policy) {
-  const rows = await prisma.word.findMany({ select: WORD_MAINTENANCE_SELECT, orderBy: { id: "asc" } });
+  const rows = await prisma.wordSense.findMany({ select: WORD_MAINTENANCE_SELECT, orderBy: { id: "asc" } });
   return rows.filter(policy.isAffected);
 }
 
 function confirmationText(field: WordMaintenanceField, count: number) {
-  return `CLEAR Word.${field} ${count}`;
+  return `CLEAR WordSense.${field} ${count}`;
 }
 
-function audioStats(rows: MaintenanceWord[], policy: Policy) {
+function audioStats(rows: MaintenanceWordSense[], policy: Policy) {
   if (!policy.quarantinesConceptAudio) return { fileCount: 0, bytes: 0 };
   const seen = new Set<string>();
   let fileCount = 0;
@@ -431,7 +431,7 @@ function audioStats(rows: MaintenanceWord[], policy: Policy) {
     seen.add(filename);
     let size = 0;
     try {
-      size = statSync(getWordConceptAudioAbsolutePath(filename)).size;
+      size = statSync(getWordSenseConceptAudioAbsolutePath(filename)).size;
     } catch {
       size = 0;
     }
@@ -442,7 +442,7 @@ function audioStats(rows: MaintenanceWord[], policy: Policy) {
   return { fileCount, bytes };
 }
 
-export async function previewWordFieldMaintenance(field: WordMaintenanceField) {
+export async function previewWordSenseFieldMaintenance(field: WordMaintenanceField) {
   const policy = getPolicy(field);
   const rows = await affectedRows(policy);
   return {
@@ -464,9 +464,9 @@ export async function previewWordFieldMaintenance(field: WordMaintenanceField) {
 }
 
 export async function previewWordFieldSelection(field: WordMaintenanceSelectionKey) {
-  if (isWordMaintenanceField(field)) return previewWordFieldMaintenance(field);
+  if (isWordMaintenanceField(field)) return previewWordSenseFieldMaintenance(field);
   const selection = informationalSelectionByKey.get(field);
-  if (!selection) throw new Error(`Unsupported Word maintenance selection: ${field}`);
+  if (!selection) throw new Error(`Unsupported WordSense maintenance selection: ${field}`);
   const managedPolicy = selection.managedBy ? getPolicy(selection.managedBy) : null;
   return {
     mode: "guide" as const,
@@ -494,7 +494,7 @@ async function exists(filePath: string) {
 
 type MovedFile = { original: string; quarantined: string };
 
-async function quarantineConceptAudio(operationId: string, rows: MaintenanceWord[]) {
+async function quarantineConceptAudio(operationId: string, rows: MaintenanceWordSense[]) {
   const destinationDir = operationQuarantineDir(operationId);
   const moved: MovedFile[] = [];
   const seen = new Set<string>();
@@ -503,7 +503,7 @@ async function quarantineConceptAudio(operationId: string, rows: MaintenanceWord
       const filename = safeFilename(row.concept_explained_fa_audio_file_name);
       if (!filename || seen.has(filename)) continue;
       seen.add(filename);
-      const original = getWordConceptAudioAbsolutePath(filename);
+      const original = getWordSenseConceptAudioAbsolutePath(filename);
       if (!(await exists(original))) continue;
       await mkdir(destinationDir, { recursive: true });
       const quarantined = path.join(destinationDir, filename);
@@ -526,7 +526,7 @@ async function restoreMovedFiles(moved: MovedFile[]) {
   }
 }
 
-async function moveQuarantinedFilesBack(operationId: string, rows: MaintenanceWord[]) {
+async function moveQuarantinedFilesBack(operationId: string, rows: MaintenanceWordSense[]) {
   const moved: MovedFile[] = [];
   const seen = new Set<string>();
   try {
@@ -534,7 +534,7 @@ async function moveQuarantinedFilesBack(operationId: string, rows: MaintenanceWo
       const filename = safeFilename(row.concept_explained_fa_audio_file_name);
       if (!filename || seen.has(filename)) continue;
       seen.add(filename);
-      const original = getWordConceptAudioAbsolutePath(filename);
+      const original = getWordSenseConceptAudioAbsolutePath(filename);
       const quarantined = path.join(operationQuarantineDir(operationId), filename);
       if (!(await exists(quarantined))) continue;
       if (await exists(original)) throw new Error(`Cannot restore ${filename}; an active file already exists.`);
@@ -549,7 +549,7 @@ async function moveQuarantinedFilesBack(operationId: string, rows: MaintenanceWo
   }
 }
 
-function snapshotData(row: MaintenanceWord, fields: SnapshotField[]): Prisma.InputJsonObject {
+function snapshotData(row: MaintenanceWordSense, fields: SnapshotField[]): Prisma.InputJsonObject {
   return Object.fromEntries(fields.map((field) => [field, row[field]])) as Prisma.InputJsonObject;
 }
 
@@ -568,21 +568,21 @@ function assertNoRunningJobs() {
   }
 }
 
-const maintenanceState = globalThis as typeof globalThis & { __wordFieldMaintenanceRunning?: boolean };
+const maintenanceState = globalThis as typeof globalThis & { __wordSenseFieldMaintenanceRunning?: boolean };
 
 async function withMaintenanceLock<T>(work: () => Promise<T>) {
-  if (maintenanceState.__wordFieldMaintenanceRunning) {
-    throw new Error("Another Word field maintenance operation is already running.");
+  if (maintenanceState.__wordSenseFieldMaintenanceRunning) {
+    throw new Error("Another WordSense field maintenance operation is already running.");
   }
-  maintenanceState.__wordFieldMaintenanceRunning = true;
+  maintenanceState.__wordSenseFieldMaintenanceRunning = true;
   try {
     return await work();
   } finally {
-    maintenanceState.__wordFieldMaintenanceRunning = false;
+    maintenanceState.__wordSenseFieldMaintenanceRunning = false;
   }
 }
 
-export async function executeWordFieldMaintenance(args: {
+export async function executeWordSenseFieldMaintenance(args: {
   field: WordMaintenanceField;
   expectedAffectedRows: number;
   confirmation: string;
@@ -622,7 +622,7 @@ export async function executeWordFieldMaintenance(args: {
             data: snapshotData(row, policy.snapshotFields),
           })),
         });
-        await updateManyWords(
+        await updateManyWordSenses(
           { where: { id: { in: rows.map((row) => row.id) } }, data: policy.clearData },
           tx,
         );
@@ -635,25 +635,25 @@ export async function executeWordFieldMaintenance(args: {
   });
 }
 
-function snapshotToWord(row: { wordId: number; data: Prisma.JsonValue }): MaintenanceWord {
+function snapshotToWord(row: { wordId: number; data: Prisma.JsonValue }): MaintenanceWordSense {
   if (!row.data || typeof row.data !== "object" || Array.isArray(row.data)) {
-    throw new Error(`Invalid recovery snapshot for Word ${row.wordId}.`);
+    throw new Error(`Invalid recovery snapshot for WordSense ${row.wordId}.`);
   }
-  return { id: row.wordId, ...(row.data as Record<string, unknown>) } as MaintenanceWord;
+  return { id: row.wordId, ...(row.data as Record<string, unknown>) } as MaintenanceWordSense;
 }
 
-function restoreData(data: Prisma.JsonValue): Prisma.WordUncheckedUpdateInput {
+function restoreData(data: Prisma.JsonValue): Prisma.WordSenseUncheckedUpdateInput {
   if (!data || typeof data !== "object" || Array.isArray(data)) {
-    throw new Error("Invalid Word field maintenance snapshot data.");
+    throw new Error("Invalid WordSense field maintenance snapshot data.");
   }
   const jsonFields = new Set(["otherMeaningIds", "comparedMeaningWordIds", "synonymIds", "sentenceIds"]);
   return Object.fromEntries(Object.entries(data).map(([key, value]) => [
     key,
     jsonFields.has(key) && value === null ? Prisma.DbNull : value,
-  ])) as Prisma.WordUncheckedUpdateInput;
+  ])) as Prisma.WordSenseUncheckedUpdateInput;
 }
 
-export async function undoWordFieldMaintenance(operationId: string) {
+export async function undoWordSenseFieldMaintenance(operationId: string) {
   return withMaintenanceLock(async () => {
     assertNoRunningJobs();
     const latest = await prisma.wordFieldMaintenanceOperation.findFirst({
@@ -682,7 +682,7 @@ export async function undoWordFieldMaintenance(operationId: string) {
     try {
       await prisma.$transaction(async (tx) => {
         for (const snapshot of operation.snapshots) {
-          await updateWord(
+          await updateWordSense(
             { where: { id: snapshot.wordId }, data: restoreData(snapshot.data), select: { id: true } },
             tx,
           );
@@ -700,7 +700,7 @@ export async function undoWordFieldMaintenance(operationId: string) {
   });
 }
 
-export async function listWordFieldMaintenanceOperations(limit = 8) {
+export async function listWordSenseFieldMaintenanceOperations(limit = 8) {
   const operations = await prisma.wordFieldMaintenanceOperation.findMany({
     orderBy: { createdAt: "desc" },
     take: limit,

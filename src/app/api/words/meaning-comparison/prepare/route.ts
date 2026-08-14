@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { prepareWordMeaningComparison } from "@/lib/words/wordMeaningComparison.server";
+import { prepareWordSenseMeaningComparison } from "@/lib/words/wordSenseMeaningComparison.server";
 
 export const runtime = "nodejs";
 
@@ -11,7 +11,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "limit must be a non-negative integer." }, { status: 400 });
   }
   try {
-    return NextResponse.json({ ok: true, ...(await prepareWordMeaningComparison(limit)) });
+    return NextResponse.json({ ok: true, ...(await prepareWordSenseMeaningComparison(limit)) });
   } catch (error) {
     return NextResponse.json(
       { ok: false, error: error instanceof Error ? error.message : String(error) },

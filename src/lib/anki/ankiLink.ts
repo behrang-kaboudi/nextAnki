@@ -18,7 +18,7 @@ export async function getAnkiNoteAndDbWordByAnkiLinkId(noteId: number) {
   const ankiLinkId = getAnkiLinkIdFromNoteFields(note);
   if (!ankiLinkId) return { ok: false as const, error: "anki_link_id not found on Anki note fields" };
 
-  const word = await prisma.word.findUnique({
+  const word = await prisma.wordSense.findUnique({
     where: { anki_link_id: ankiLinkId },
     select: { id: true, anki_link_id: true },
   });
