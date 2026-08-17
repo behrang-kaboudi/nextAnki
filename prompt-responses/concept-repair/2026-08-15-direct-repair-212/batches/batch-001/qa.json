@@ -1,0 +1,356 @@
+{
+  "batchId": "batch-001",
+  "inputCount": 50,
+  "reviewedCount": 50,
+  "resultCount": 50,
+  "needsHumanReviewCount": 0,
+  "recordScores": [
+    {
+      "id": 131,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 373,
+      "score": 9.2,
+      "status": "pass"
+    },
+    {
+      "id": 437,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 549,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 641,
+      "score": 9.2,
+      "status": "pass"
+    },
+    {
+      "id": 755,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 887,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 1151,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 1479,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 1493,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 1568,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 1571,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 1600,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 1655,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 1785,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 1823,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 1843,
+      "score": 9.4,
+      "status": "pass"
+    },
+    {
+      "id": 1943,
+      "score": 9.2,
+      "status": "pass"
+    },
+    {
+      "id": 1955,
+      "score": 9.2,
+      "status": "pass"
+    },
+    {
+      "id": 2090,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 2103,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 2282,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 2294,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 2469,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 2523,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 2567,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 2713,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 2722,
+      "score": 9.2,
+      "status": "pass"
+    },
+    {
+      "id": 2766,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 3043,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 3089,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 3549,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 3550,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 3594,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 3600,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 3690,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 3752,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 3768,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 3775,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 3794,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 3817,
+      "score": 9.2,
+      "status": "pass"
+    },
+    {
+      "id": 3914,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 4253,
+      "score": 9.4,
+      "status": "pass"
+    },
+    {
+      "id": 4267,
+      "score": 9.2,
+      "status": "pass"
+    },
+    {
+      "id": 4293,
+      "score": 9.2,
+      "status": "pass"
+    },
+    {
+      "id": 4338,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 4378,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 4417,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 4487,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 4509,
+      "score": 9.6,
+      "status": "pass"
+    }
+  ],
+  "minimumScore": 9.2,
+  "batchScore": 9.5,
+  "checkedCriteria": [
+    "correctness",
+    "completeness for one primary target sense",
+    "relevance to meaning_fa as the primary anchor",
+    "preservation of valid target-sense content only",
+    "isolation from every independent sibling, alternate, figurative, and application sense",
+    "all 45 other_sense_reference results materially differ from their source concepts",
+    "all 6 serious_fluency results are complete and natural Persian",
+    "clarity and internal consistency",
+    "maximum 50 whitespace-delimited words per concept",
+    "exact schema, ordering, and complete non-overlapping ID coverage"
+  ],
+  "defectsFound": [
+    {
+      "scope": "all other_sense_reference inputs",
+      "finding": "All 45 source concepts were treated as confirmed sense-leak cases; direct comparison verified that none of their final results is identical to its source concept."
+    },
+    {
+      "ids": [
+        373,
+        641,
+        1843,
+        4253
+      ],
+      "finding": "The first independent pass had already removed sibling-sense leakage or repaired unnatural phrasing in these records."
+    },
+    {
+      "id": 1943,
+      "finding": "The prior corrected concept still combined literal physical torture with the independent figurative psychological application supported by a conflicting example."
+    },
+    {
+      "id": 1955,
+      "finding": "The prior corrected concept combined the discussion-topic use with a separate problem-needing-remedy use."
+    },
+    {
+      "id": 2722,
+      "finding": "The prior corrected concept combined the primary cotton-fiber substance with fabric as a separate referential use."
+    },
+    {
+      "id": 3817,
+      "finding": "The prior corrected concept combined the primary Gospel-book sense with Christian message and figurative certain-truth uses; one example independently concerns the sibling music genre."
+    },
+    {
+      "id": 4267,
+      "finding": "The prior corrected concept combined carried cargo with weight or imposed load; the second example supports the excluded use."
+    },
+    {
+      "id": 4293,
+      "finding": "The prior corrected concept enumerated distinct visual, auditory, and comprehension applications instead of stating one primary discernment concept."
+    },
+    {
+      "scope": "serious_fluency",
+      "finding": "All six final results are complete, grammatical, naturally punctuated Persian sentences; no remaining serious-fluency defect was found."
+    }
+  ],
+  "correctionsMade": [
+    {
+      "ids": [
+        373,
+        641,
+        1843,
+        4253
+      ],
+      "correction": "Retained the already narrowed and fluent corrections from the first independent pass."
+    },
+    {
+      "id": 1943,
+      "correction": "Restricted the concept to deliberate severe physical pain, excluding the figurative psychological use."
+    },
+    {
+      "id": 1955,
+      "correction": "Restricted the concept to an important topic for discussion, examination, or decision."
+    },
+    {
+      "id": 2722,
+      "correction": "Restricted the concept to natural cotton fiber; fabric appears only as what the fiber is used to produce."
+    },
+    {
+      "id": 3817,
+      "correction": "Restricted the concept to one of the four Gospel books and excluded message, figurative truth, and music uses."
+    },
+    {
+      "id": 4267,
+      "correction": "Restricted the concept to goods or supplies being carried and excluded weight or imposed-load use."
+    },
+    {
+      "id": 4293,
+      "correction": "Replaced the cross-application enumeration with a single abstract discernment concept."
+    },
+    {
+      "scope": "source preservation",
+      "correction": "Recorded conflicting examples and alternate translations only as QA inconsistencies; no input meaning or sentence was edited."
+    }
+  ],
+  "status": "pass"
+}

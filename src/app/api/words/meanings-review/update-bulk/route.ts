@@ -122,11 +122,20 @@ function parseResult(value: unknown): ReviewResult | null {
   };
 }
 
-function parse(value: unknown): { ids: number[]; results: ReviewResult[]; requestKey: string } | null {
+function parse(value: unknown): {
+  ids: number[];
+  results: ReviewResult[];
+  requestKey: string;
+  clearInvalidPrimary: boolean;
+} | null {
   if (!value || typeof value !== "object" || Array.isArray(value)) return null;
   const body = value as Record<string, unknown>;
+  const keys = Object.keys(body);
   if (
-    Object.keys(body).length !== 3 || !Array.isArray(body.ids) || !body.ids.length ||
+    (keys.length !== 3 && keys.length !== 4) ||
+    keys.some((key) => !["ids", "results", "requestKey", "invalidPrimaryAction"].includes(key)) ||
+    ("invalidPrimaryAction" in body && body.invalidPrimaryAction !== "clear_primary") ||
+    !Array.isArray(body.ids) || !body.ids.length ||
     body.ids.some((id) => !positiveInt(id)) || new Set(body.ids).size !== body.ids.length ||
     !Array.isArray(body.results) || typeof body.requestKey !== "string" || !body.requestKey
   ) return null;
@@ -138,7 +147,12 @@ function parse(value: unknown): { ids: number[]; results: ReviewResult[]; reques
     new Set(results.map((result) => result!.id)).size !== results.length ||
     results.some((result) => !ids.includes(result!.id))
   ) return null;
-  return { ids, results: results as ReviewResult[], requestKey: body.requestKey };
+  return {
+    ids,
+    results: results as ReviewResult[],
+    requestKey: body.requestKey,
+    clearInvalidPrimary: body.invalidPrimaryAction === "clear_primary",
+  };
 }
 
 function validateResultForRecord(record: MeaningReviewPromptRecord, result: ReviewResult | undefined) {
@@ -260,13 +274,18 @@ export async function POST(request: Request) {
         if (result?.invalid_primary_meaning) {
           await updateWordSense({
             where: { id },
-            data: { meaningReviewStatus: MeaningReviewStatus.NEEDS_ACTION_INVALID_PRIMARY },
+            data: body.clearInvalidPrimary
+              ? {
+                  meaningId: null,
+                  meaningReviewStatus: MeaningReviewStatus.NEEDS_ACTION_MISSING_PRIMARY,
+                }
+              : { meaningReviewStatus: MeaningReviewStatus.NEEDS_ACTION_INVALID_PRIMARY },
             select: { id: true },
           }, tx);
           outcomes.push({
             id,
             status: "attention_required",
-            contentChanged: false,
+            contentChanged: body.clearInvalidPrimary,
             reviewStatusChanged: true,
             attentionRequired: true,
           });

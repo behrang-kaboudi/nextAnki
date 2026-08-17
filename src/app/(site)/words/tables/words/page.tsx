@@ -16,10 +16,11 @@ import { WORD_SENSE_ENGLISH_FIELDS_SELECT } from "@/lib/english/wordSenseEnglish
 import { getWordColumnEmptyCounts } from "@/lib/words/tableColumnEmptyCounts.server";
 import { hydrateWordsWithPrimarySentence } from "@/lib/words/primarySentences.server";
 import { primarySentenceId } from "@/lib/words/sentenceIds";
-import { getPendingWordSenseConceptMergeCount } from "@/lib/words/wordSenseConceptMerge.server";
-import { getPendingWordSenseInflectionMergeCount } from "@/lib/words/wordSenseInflectionMerge.server";
-import { getPendingWordSenseMeaningComparisonCount } from "@/lib/words/wordSenseMeaningComparison.server";
+import { getPendingWordSenseConceptMergeStats } from "@/lib/words/wordSenseConceptMerge.server";
+import { getPendingWordSenseInflectionMergeStats } from "@/lib/words/wordSenseInflectionMerge.server";
+import { getPendingWordSenseMeaningComparisonStats } from "@/lib/words/wordSenseMeaningComparison.server";
 import { getMeaningReviewEligibilitySummary } from "@/lib/words/meaningReviewWorkflow.server";
+import { getCustomExtractionPendingSummary } from "@/lib/word-extraction/customExtraction.server";
 
 import OpenWordSenseEditorModal from "../../editor/OpenWordSenseEditorModal.client";
 import WordSenseRelationPopover, {
@@ -41,6 +42,7 @@ import EnglishWordPhoneticUsPrompt from "../english-words/EnglishWordPhoneticUsP
 import TableFieldMaintenance from "@/components/table-field-maintenance/TableFieldMaintenance.client";
 import WordSenseSelectVisibleRows from "./WordSenseSelectVisibleRows.client";
 import PersianMeaningIpaReview from "./PersianMeaningIpaReview.client";
+import WordSenseLearningScores from "./WordSenseLearningScores.client";
 
 export const metadata = { title: "Words — WordSense Table" };
 export const runtime = "nodejs";
@@ -414,9 +416,10 @@ export default async function WordsTablePage({
     rawRows,
     emptyCounts,
     meaningReviewSummary,
-    conceptMergeRemainingCount,
-    inflectionMergeRemainingCount,
-    meaningComparisonRemainingCount,
+    conceptMergeRemainingStats,
+    inflectionMergeRemainingStats,
+    meaningComparisonRemainingStats,
+    learningScoreSummary,
     audioRemainingCounts,
     jsonHintRemainingCount,
     jsonHintTotalCount,
@@ -463,9 +466,10 @@ export default async function WordsTablePage({
     }),
     getWordColumnEmptyCounts(),
     getMeaningReviewEligibilitySummary(),
-    getPendingWordSenseConceptMergeCount(),
-    getPendingWordSenseInflectionMergeCount(),
-    getPendingWordSenseMeaningComparisonCount(),
+    getPendingWordSenseConceptMergeStats(),
+    getPendingWordSenseInflectionMergeStats(),
+    getPendingWordSenseMeaningComparisonStats(),
+    getCustomExtractionPendingSummary(["imageability", "learning_depth", "productive_target"]),
     getPendingWordAudioTaskCounts(),
     prisma.englishWord.count({
       where: { OR: [{ json_hint: null }, { json_hint: "" }] },
@@ -659,10 +663,25 @@ export default async function WordsTablePage({
                 statusPendingCount={meaningReviewSummary.pendingReview}
                 initialSummary={meaningReviewSummary}
               />
-              <WordSenseConceptMerge remainingCount={conceptMergeRemainingCount} />
-              <WordSenseInflectionMerge remainingCount={inflectionMergeRemainingCount} />
+              <WordSenseConceptMerge
+                remainingGroupCount={conceptMergeRemainingStats.groupCount}
+                remainingRecordCount={conceptMergeRemainingStats.recordCount}
+              />
+              <WordSenseInflectionMerge
+                remainingGroupCount={inflectionMergeRemainingStats.groupCount}
+                remainingRecordCount={inflectionMergeRemainingStats.recordCount}
+              />
               <WordSenseMeaningComparison
-                remainingCount={meaningComparisonRemainingCount}
+                remainingGroupCount={meaningComparisonRemainingStats.groupCount}
+                remainingRecordCount={meaningComparisonRemainingStats.recordCount}
+              />
+              <WordSenseLearningScores
+                initialRemainingCount={learningScoreSummary.total}
+                initialFieldCounts={{
+                  imageability: learningScoreSummary.fieldCounts.imageability ?? 0,
+                  learning_depth: learningScoreSummary.fieldCounts.learning_depth ?? 0,
+                  productive_target: learningScoreSummary.fieldCounts.productive_target ?? 0,
+                }}
               />
               <div className="inline-flex flex-wrap items-start gap-2 rounded-xl border border-card bg-background p-1.5">
                 <PersianWordMeaningIpaPhase2

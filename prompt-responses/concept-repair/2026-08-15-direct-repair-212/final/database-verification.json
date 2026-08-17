@@ -1,0 +1,37 @@
+{
+  "status": "applied-status-corrected-and-verified",
+  "verifiedAt": "2026-08-16T00:28:31.787Z",
+  "appliedCount": 212,
+  "wordSenseCountBefore": 18513,
+  "wordSenseCountAfter": 18513,
+  "mergeCount": 0,
+  "deleteCount": 0,
+  "finalTargetState": {
+    "meaningReviewStatus": "CONFIRMED",
+    "conceptMergeReviewed": false,
+    "inflectionMergeReviewed": false
+  },
+  "targetCounts": {
+    "confirmed": 212,
+    "conceptMergeReviewedFalse": 212,
+    "inflectionMergeReviewedFalse": 212
+  },
+  "remainingAfterFinalCorrection": {
+    "conceptMerge": 923,
+    "inflectionMerge": 10,
+    "meaningComparison": 674,
+    "pendingMeaningReview": 0
+  },
+  "facade": {
+    "id": 2766,
+    "concept_explained_fa": "نمای بیرونی و معمولاً بخش جلویی ساختمان که ظاهر آن را شکل می‌دهد.",
+    "conceptMergeReviewed": false,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED"
+  },
+  "history": {
+    "initialSemanticApply": "apply-report.json",
+    "statusCorrection": "meaning-review-status-restoration.json",
+    "statusCorrectionVerification": "post-status-restoration-verification.json"
+  }
+}

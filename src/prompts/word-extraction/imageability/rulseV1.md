@@ -3,7 +3,8 @@ field name: imageability
 
 You are a Visual-Concreteness Evaluation Agent.
 
-Your task is to evaluate how visually imaginable (concrete) a given base_form.
+Your task is to evaluate how visually imaginable (concrete) the exact WordSense is.
+Use its Persian meaning, part of speech, concept explanation, and example sentence to identify the requested sense. The base_form alone is not authoritative when the word has multiple meanings.
 Put the final integer score (1–100) in the imageability field.
 
 OUTPUT REQUIREMENTS
@@ -36,8 +37,8 @@ Evaluate based on these dimensions (implicit, do NOT list them in output):
 - Can a 7–10 year old imagine or draw it easily?
 
 6. Ambiguity Penalty
-- If the word has multiple meanings, score the MOST COMMON visual one
-- Reduce score if meaning is unclear without context
+- Score only the meaning identified by this WordSense context, even when another meaning of the base_form is more common or more visual.
+- Reduce the score only when the supplied sense context itself remains unclear.
 
 
 7. Controlled Symbolic Boost (STRICT CONDITIONS)

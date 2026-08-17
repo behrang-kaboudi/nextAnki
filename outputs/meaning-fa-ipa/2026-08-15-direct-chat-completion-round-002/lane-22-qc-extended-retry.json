@@ -1,0 +1,22 @@
+{
+  "lane": 22,
+  "status": "failed_after_five_regenerations",
+  "count": 300,
+  "regenerations": 5,
+  "scoreQuestionsAsked": 6,
+  "responseFile": "lane-22-response-revision-05.raw.json",
+  "responseSha256": "c3c8e45827a8647a01a8f75e17bdc59644ec708c8b4aed9898c372ca28172879",
+  "scoreFile": "lane-22-score-06.raw.json",
+  "finalScore": {
+    "batchScore": 9.1,
+    "minimumItemScore": 7.6,
+    "belowOrEqual8Ids": [
+      70226
+    ],
+    "assessment": "revise"
+  },
+  "mechanicalValidation": {
+    "status": "passed",
+    "issues": []
+  }
+}

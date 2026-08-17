@@ -8,8 +8,8 @@ import {
   conceptMergePersianResolutionKey,
   preferredConceptMergePersianWordIds,
 } from "@/lib/words/conceptMergePersianIdentity";
+import { selectPromptBatch } from "@/lib/words/promptBatch";
 import { deleteWordSense, updateWordSense } from "@/lib/words/wordSenseRepo";
-import { selectParallelPromptLane, type ParallelPromptPartition } from "@/lib/words/parallelPromptPartition";
 import { resolvePersianWordOccurrences } from "@/lib/words/persianWordResolution.server";
 import type {
   PersianWordAmbiguity,
@@ -26,6 +26,7 @@ type SourceWordSense = {
   sentenceIds: Prisma.JsonValue | null;
   meaningReviewStatus: MeaningReviewStatus;
   conceptMergeReviewed: boolean;
+  inflectionMergeReviewed: boolean;
   english: { base_form: string };
 };
 
@@ -55,6 +56,7 @@ const sourceSelect = {
   sentenceIds: true,
   meaningReviewStatus: true,
   conceptMergeReviewed: true,
+  inflectionMergeReviewed: true,
   english: { select: { base_form: true } },
 } satisfies Prisma.WordSenseSelect;
 
@@ -83,17 +85,25 @@ function groupByEnglish(words: SourceWordSense[]) {
   return [...groups.values()];
 }
 
-export async function getPendingWordSenseConceptMergeCount() {
+export async function getPendingWordSenseConceptMergeStats() {
   const words = await prisma.wordSense.findMany({
     where: { meaningReviewStatus: MeaningReviewStatus.CONFIRMED },
     orderBy: [{ englishId: "asc" }, { id: "asc" }],
     select: sourceSelect,
   });
-  return groupByEnglish(words).filter(
+  const groups = groupByEnglish(words).filter(
     (group) =>
       group.length >= 2 &&
       group.some((word) => !word.conceptMergeReviewed),
-  ).length;
+  );
+  return {
+    groupCount: groups.length,
+    recordCount: new Set(groups.flatMap((group) => group.map((word) => word.id))).size,
+  };
+}
+
+export async function getPendingWordSenseConceptMergeCount() {
+  return (await getPendingWordSenseConceptMergeStats()).groupCount;
 }
 
 function sentenceIdsFor(word: SourceWordSense) {
@@ -152,7 +162,7 @@ async function conceptMergeItemsForGroups(
   );
 }
 
-export async function prepareWordSenseConceptMerge(partition: ParallelPromptPartition) {
+export async function prepareWordSenseConceptMerge(batchSize: number) {
   return prisma.$transaction(async (tx) => {
     const words = await tx.wordSense.findMany({
       where: { meaningReviewStatus: MeaningReviewStatus.CONFIRMED },
@@ -182,15 +192,10 @@ export async function prepareWordSenseConceptMerge(partition: ParallelPromptPart
         group.length >= 2 &&
         group.some((word) => !word.conceptMergeReviewed),
     );
-    const { items: selected, laneEligibleCount } = selectParallelPromptLane(
-      eligible,
-      (group) => group[0].englishId,
-      partition,
-    );
+    const selected = selectPromptBatch(eligible, batchSize);
     return {
       reviewedSingleRecords,
       totalEligibleGroups: eligible.length,
-      laneEligibleCount,
       sourceGroups: selected.map((group) => group.map((word) => word.id)),
       items: await conceptMergeItemsForGroups(selected, tx),
     };
@@ -312,10 +317,17 @@ function sameIds(left: readonly number[], right: readonly number[]) {
   return left.length === right.length && left.every((id) => right.includes(id));
 }
 
+function sameOrderedIds(left: readonly number[], right: readonly number[]) {
+  return left.length === right.length && left.every((id, index) => id === right[index]);
+}
+
 export async function applyWordSenseConceptMerge(
   sourceGroups: number[][],
   output: MergeOutputRow[],
   selections: PersianWordResolutionSelection[] = [],
+  reviewOnlySourceGroups: number[][] = [],
+  reviewOnlyRecordIds: number[] = [],
+  deferredRecordIds: number[] = [],
 ) {
   return prisma.$transaction(async (tx) => {
     const sourceIds = sourceGroups.flat();
@@ -326,6 +338,33 @@ export async function applyWordSenseConceptMerge(
     if (!sameIds(sourceIds, output.map((row) => row.id))) {
       throw new Error("The output must contain every input id exactly once and no other ids.");
     }
+    const sourceGroupKeys = new Set(sourceGroups.map((group) => group.join(":")));
+    const reviewOnlyGroupKeys = new Set(reviewOnlySourceGroups.map((group) => group.join(":")));
+    const sourceIdSet = new Set(sourceIds);
+    if (
+      reviewOnlySourceGroups.some((group) => group.length < 2 || !uniquePositiveIds(group)) ||
+      reviewOnlyGroupKeys.size !== reviewOnlySourceGroups.length ||
+      [...reviewOnlyGroupKeys].some((key) => !sourceGroupKeys.has(key))
+    ) {
+      throw new Error("The review-only source groups are invalid.");
+    }
+    if (
+      !uniquePositiveIds(reviewOnlyRecordIds) ||
+      reviewOnlyRecordIds.some((id) => !sourceIdSet.has(id))
+    ) {
+      throw new Error("The review-only record ids are invalid.");
+    }
+    const reviewOnlyIds = new Set([...reviewOnlySourceGroups.flat(), ...reviewOnlyRecordIds]);
+    if (
+      !uniquePositiveIds(deferredRecordIds) ||
+      deferredRecordIds.some((id) => !sourceIdSet.has(id) || reviewOnlyIds.has(id))
+    ) {
+      throw new Error("The deferred record ids are invalid.");
+    }
+    const deferredIds = new Set(deferredRecordIds);
+    const activeSourceGroups = sourceGroups.filter((group) =>
+      group.some((id) => !reviewOnlyIds.has(id) && !deferredIds.has(id)),
+    );
     const groupIndexById = new Map(sourceGroups.flatMap((group, index) => group.map((id) => [id, index] as const)));
     let priorGroupIndex = -1;
     const deleteSeenByGroup = new Set<number>();
@@ -357,9 +396,12 @@ export async function applyWordSenseConceptMerge(
       if (!sameIds(groupIds, currentIds)) throw new Error(`The records for englishId ${englishId} changed. Create the data again.`);
     }
 
-    const retained = output.filter((row): row is Extract<MergeOutputRow, { delete: false }> => !row.delete);
-    const removed = output.filter((row): row is Extract<MergeOutputRow, { delete: true }> => row.delete);
-    if (!retained.length) throw new Error("At least one record must remain in each source group.");
+    const activeOutput = output.filter((row) => !reviewOnlyIds.has(row.id) && !deferredIds.has(row.id));
+    const retained = activeOutput.filter((row): row is Extract<MergeOutputRow, { delete: false }> => !row.delete);
+    const removed = activeOutput.filter((row): row is Extract<MergeOutputRow, { delete: true }> => row.delete);
+    if (activeSourceGroups.length && !retained.length) {
+      throw new Error("At least one record must remain in each source group.");
+    }
 
     for (const row of retained) {
       const source = byId.get(row.id)!;
@@ -375,7 +417,7 @@ export async function applyWordSenseConceptMerge(
     for (const row of removed) {
       if (!retained.some((keeper) => keeper.id === row.mergedIntoId)) throw new Error(`Deleted record ${row.id} has no valid retained target.`);
     }
-    for (const groupIds of sourceGroups) {
+    for (const groupIds of activeSourceGroups) {
       if (!retained.some((row) => groupIds.includes(row.id))) throw new Error("Every source group must retain at least one record.");
     }
 
@@ -451,6 +493,7 @@ export async function applyWordSenseConceptMerge(
     }
 
     for (const row of retained) {
+      const source = byId.get(row.id)!;
       const primaryKey = conceptMergePersianResolutionKey(row.id, "meaning_fa");
       const resolvedPrimaryId = stableIds.get(primaryKey) ?? resolution.resolvedIds.get(primaryKey) ?? null;
       const primaryId = row.meaning_fa
@@ -463,20 +506,52 @@ export async function applyWordSenseConceptMerge(
           return stableIds.get(key) ?? resolution.resolvedIds.get(key) ??
             (await addPersianWordWithClient(meaning, {}, tx)).item.id;
         }));
+      const nextOtherMeaningIds = [...new Set(otherIds.filter((id) => id !== primaryId))];
+      const nextConcept = row.concept_explained_fa || null;
+      const semanticContentChanged = source.meaningId !== primaryId ||
+        !sameOrderedIds(positiveIds(source.otherMeaningIds), nextOtherMeaningIds) ||
+        source.concept_explained_fa !== nextConcept ||
+        !sameOrderedIds(sentenceIdsFor(source), row.sentenceIds);
       await updateWordSense({
         where: { id: row.id },
         data: {
           meaningId: primaryId,
-          otherMeaningIds: [...new Set(otherIds.filter((id) => id !== primaryId))],
-          concept_explained_fa: row.concept_explained_fa || null,
+          otherMeaningIds: nextOtherMeaningIds,
+          concept_explained_fa: nextConcept,
           sentenceIds: row.sentenceIds,
           meaningReviewStatus: MeaningReviewStatus.CONFIRMED,
           conceptMergeReviewed: true,
+          inflectionMergeReviewed: semanticContentChanged ? false : source.inflectionMergeReviewed,
         },
         select: { id: true },
       }, tx);
     }
+    let reviewedOnly = 0;
+    for (const id of reviewOnlyIds) {
+      const source = byId.get(id)!;
+      if (source.conceptMergeReviewed) continue;
+      await updateWordSense({
+        where: { id },
+        data: { conceptMergeReviewed: true },
+        select: { id: true },
+      }, tx);
+      reviewedOnly += 1;
+    }
+    let deferred = 0;
+    for (const id of deferredIds) {
+      const source = byId.get(id)!;
+      if (!source.conceptMergeReviewed) {
+        deferred += 1;
+        continue;
+      }
+      await updateWordSense({
+        where: { id },
+        data: { conceptMergeReviewed: false },
+        select: { id: true },
+      }, tx);
+      deferred += 1;
+    }
     for (const row of removed) await deleteWordSense({ where: { id: row.id } }, tx);
-    return { updated: retained.length, deleted: removed.length };
+    return { updated: retained.length, deleted: removed.length, reviewedOnly, deferred };
   }, { maxWait: 10_000, timeout: 120_000 });
 }

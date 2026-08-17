@@ -1,0 +1,4502 @@
+[
+  {
+    "id": 63628,
+    "canonical_text": "قاعده مند",
+    "meaning_fa_IPA": "ɣɑːʔede-mænd"
+  },
+  {
+    "id": 63629,
+    "canonical_text": "تشریفاتی",
+    "meaning_fa_IPA": "tæʃrifɑːti"
+  },
+  {
+    "id": 63630,
+    "canonical_text": "دارای آرایش منظم",
+    "meaning_fa_IPA": "dɑːrɑː-je ɑːrɑːjeʃ-e monæzzæm"
+  },
+  {
+    "id": 63631,
+    "canonical_text": "دیوارها یا سازه بیرونی",
+    "meaning_fa_IPA": "divɑːrhɑː jɑː sɑːze-je biruni"
+  },
+  {
+    "id": 63632,
+    "canonical_text": "ساییده",
+    "meaning_fa_IPA": "sɑːjide"
+  },
+  {
+    "id": 63633,
+    "canonical_text": "تغییر رنگ دادن",
+    "meaning_fa_IPA": "tæɣjir-e ræŋɡ dɑːdæn"
+  },
+  {
+    "id": 63634,
+    "canonical_text": "تیر باربر ساختمان",
+    "meaning_fa_IPA": "tir-e bɑːrbær-e sɑːxtemɑːn"
+  },
+  {
+    "id": 63635,
+    "canonical_text": "تیر سقف یا کف",
+    "meaning_fa_IPA": "tir-e sæɣf jɑː kæf"
+  },
+  {
+    "id": 63636,
+    "canonical_text": "تیر چوبی فولادی یا بتنی",
+    "meaning_fa_IPA": "tir-e tʃubi-je fulɑːdi jɑː betoni"
+  },
+  {
+    "id": 63637,
+    "canonical_text": "خانه تکانی کردن",
+    "meaning_fa_IPA": "xɑːne-tekɑːni kærdæn"
+  },
+  {
+    "id": 63638,
+    "canonical_text": "چیدمان یا طرح بندی فضا و اجزا",
+    "meaning_fa_IPA": "tʃidemɑːn jɑː tærh-bændi-je fæzɑː vo ʔædʒzɑː"
+  },
+  {
+    "id": 63639,
+    "canonical_text": "نقشه قرارگیری",
+    "meaning_fa_IPA": "næɣʃe-je ɣærɑːrɡiri"
+  },
+  {
+    "id": 63640,
+    "canonical_text": "آرایش بخش ها",
+    "meaning_fa_IPA": "ɑːrɑːjeʃ-e bæxʃhɑː"
+  },
+  {
+    "id": 63641,
+    "canonical_text": "سکوی بیرونی چوبی کنار ساختمان",
+    "meaning_fa_IPA": "sæku-je biruni-je tʃubi-je kenɑːr-e sɑːxtemɑːn"
+  },
+  {
+    "id": 63642,
+    "canonical_text": "ایوان بدون سقف",
+    "meaning_fa_IPA": "ʔejvɑːn-e bedun-e sæɣf"
+  },
+  {
+    "id": 63643,
+    "canonical_text": "تراس چوبی",
+    "meaning_fa_IPA": "terɑːs-e tʃubi"
+  },
+  {
+    "id": 63644,
+    "canonical_text": "آویز سبد گل",
+    "meaning_fa_IPA": "ɑːviz-e sæbæd-e ɡol"
+  },
+  {
+    "id": 63645,
+    "canonical_text": "سازه بازی و بالارفتن کودکان",
+    "meaning_fa_IPA": "sɑːze-je bɑːzi vo bɑːlɑː ræftæn-e kudækɑːn"
+  },
+  {
+    "id": 63646,
+    "canonical_text": "داربست بازی",
+    "meaning_fa_IPA": "dɑːrbæst-e bɑːzi"
+  },
+  {
+    "id": 63647,
+    "canonical_text": "آویزگاه جنگلی",
+    "meaning_fa_IPA": "ɑːvizɡɑːh-e dʒæŋɡæli"
+  },
+  {
+    "id": 63648,
+    "canonical_text": "عنصر تزیینی دارای آب",
+    "meaning_fa_IPA": "ʔonsor-e tæzʔini-je dɑːrɑː-je ɑːb"
+  },
+  {
+    "id": 63649,
+    "canonical_text": "فواره حوض یا آبشار مصنوعی",
+    "meaning_fa_IPA": "fovvɑːre-je houz jɑː ɑːbʃɑːr-e mæsnuʔi"
+  },
+  {
+    "id": 63650,
+    "canonical_text": "باغچه یا بستر کاشت گل",
+    "meaning_fa_IPA": "bɑːɣtʃe jɑː bestær-e kɑːʃt-e ɡol"
+  },
+  {
+    "id": 63651,
+    "canonical_text": "قطعه آماده شده برای گل ها",
+    "meaning_fa_IPA": "ɣetʔe-je ɑːmɑːde ʃode bærɑː-je ɡolhɑː"
+  },
+  {
+    "id": 63652,
+    "canonical_text": "گل کاری",
+    "meaning_fa_IPA": "ɡol-kɑːri"
+  },
+  {
+    "id": 63653,
+    "canonical_text": "دیرک",
+    "meaning_fa_IPA": "diræk"
+  },
+  {
+    "id": 63654,
+    "canonical_text": "چوبه",
+    "meaning_fa_IPA": "tʃube"
+  },
+  {
+    "id": 63655,
+    "canonical_text": "بام باغ",
+    "meaning_fa_IPA": "bɑːm-bɑːɣ"
+  },
+  {
+    "id": 63656,
+    "canonical_text": "وان آب گرم دارای جت یا جکوزی",
+    "meaning_fa_IPA": "vɑːn-e ɑːb-e ɡærm-e dɑːrɑː-je dʒet jɑː dʒɑːkuzi"
+  },
+  {
+    "id": 63657,
+    "canonical_text": "حوضچه آب گرم",
+    "meaning_fa_IPA": "houztʃe-je ɑːb-e ɡærm"
+  },
+  {
+    "id": 63658,
+    "canonical_text": "وان ماساژ آبی",
+    "meaning_fa_IPA": "vɑːn-e mɑːsɑːʒ-e ɑːbi"
+  },
+  {
+    "id": 63659,
+    "canonical_text": "بند رخت",
+    "meaning_fa_IPA": "bænd-e ræxt"
+  },
+  {
+    "id": 63660,
+    "canonical_text": "طناب خشک کردن لباس",
+    "meaning_fa_IPA": "tænɑːb-e xoʃk kærdæn-e lebɑːs"
+  },
+  {
+    "id": 63661,
+    "canonical_text": "املای رایج دیگر",
+    "meaning_fa_IPA": "ʔemlɑː-je rɑːjedʒ-e diɡær"
+  },
+  {
+    "id": 63662,
+    "canonical_text": "گلدان پنجره ای",
+    "meaning_fa_IPA": "ɡoldɑːn-e pændʒereʔi"
+  },
+  {
+    "id": 63663,
+    "canonical_text": "طشت",
+    "meaning_fa_IPA": "tæʃt"
+  },
+  {
+    "id": 63664,
+    "canonical_text": "خانه درختی",
+    "meaning_fa_IPA": "xɑːne-je deræxti"
+  },
+  {
+    "id": 63665,
+    "canonical_text": "گلدان یا ظرف کاشت گیاه",
+    "meaning_fa_IPA": "ɡoldɑːn jɑː zærf-e kɑːʃt-e ɡijɑːh"
+  },
+  {
+    "id": 63666,
+    "canonical_text": "ظرف نگهداری خاک و گیاه",
+    "meaning_fa_IPA": "zærf-e neɡæhdɑːri-je xɑːk o ɡijɑːh"
+  },
+  {
+    "id": 63667,
+    "canonical_text": "گلدان گیاه",
+    "meaning_fa_IPA": "ɡoldɑːn-e ɡijɑːh"
+  },
+  {
+    "id": 63668,
+    "canonical_text": "جزییات و ریزه کاری تزیینی",
+    "meaning_fa_IPA": "dʒozʔijjɑːt o rize-kɑːri-je tæzʔini"
+  },
+  {
+    "id": 63669,
+    "canonical_text": "ظریف کاری",
+    "meaning_fa_IPA": "zærif-kɑːri"
+  },
+  {
+    "id": 63670,
+    "canonical_text": "پرداخت جزییات",
+    "meaning_fa_IPA": "pærdɑːxt-e dʒozʔijjɑːt"
+  },
+  {
+    "id": 63671,
+    "canonical_text": "کاغذ دیواری",
+    "meaning_fa_IPA": "kɑːɣæz-divɑːri"
+  },
+  {
+    "id": 63672,
+    "canonical_text": "رول تزیینی دیوار",
+    "meaning_fa_IPA": "rul-e tæzʔini-je divɑːr"
+  },
+  {
+    "id": 63673,
+    "canonical_text": "پوشش کاغذی نقش دار دیوار",
+    "meaning_fa_IPA": "puʃeʃ-e kɑːɣæzi-je næɣʃdɑːr-e divɑːr"
+  },
+  {
+    "id": 63674,
+    "canonical_text": "کاغذ دیواری کردن",
+    "meaning_fa_IPA": "kɑːɣæz-divɑːri kærdæn"
+  },
+  {
+    "id": 63675,
+    "canonical_text": "پوشاندن دیوار با کاغذ دیواری",
+    "meaning_fa_IPA": "puʃɑːndæn-e divɑːr bɑː kɑːɣæz-divɑːri"
+  },
+  {
+    "id": 63676,
+    "canonical_text": "نصب کاغذ دیواری",
+    "meaning_fa_IPA": "næsb-e kɑːɣæz-divɑːri"
+  },
+  {
+    "id": 63677,
+    "canonical_text": "زیباسازی منازل",
+    "meaning_fa_IPA": "zibɑːsɑːzi-je mænɑːzel"
+  },
+  {
+    "id": 63678,
+    "canonical_text": "وسیله یا جز ثابت نصب شده",
+    "meaning_fa_IPA": "væsile jɑː dʒozʔ-e sɑːbet-e næsb ʃode"
+  },
+  {
+    "id": 63679,
+    "canonical_text": "اثاثیه ثابت",
+    "meaning_fa_IPA": "ʔæsɑːsije-je sɑːbet"
+  },
+  {
+    "id": 63680,
+    "canonical_text": "لوازم نصب کردنی ساختمان",
+    "meaning_fa_IPA": "lævɑːzem-e næsb-kærdæni-je sɑːxtemɑːn"
+  },
+  {
+    "id": 63681,
+    "canonical_text": "کار فنی یا تعمیراتی که شخص خودش انجام می دهد",
+    "meaning_fa_IPA": "kɑːr-e fænni jɑː tæʔmirɑːti ke ʃæxs xodæʃ ʔændʒɑːm midæhæd"
+  },
+  {
+    "id": 63682,
+    "canonical_text": "خودت انجام بده",
+    "meaning_fa_IPA": "xodæt ʔændʒɑːm bede"
+  },
+  {
+    "id": 63683,
+    "canonical_text": "کار دستی خانگی",
+    "meaning_fa_IPA": "kɑːr-e dæsti-je xɑːneɡi"
+  },
+  {
+    "id": 63684,
+    "canonical_text": "دکور و سبک چیدمان داخلی",
+    "meaning_fa_IPA": "dekor o sæbk-e tʃidemɑːn-e dɑːxeli"
+  },
+  {
+    "id": 63685,
+    "canonical_text": "دکوراسیون",
+    "meaning_fa_IPA": "dekorɑːsijon"
+  },
+  {
+    "id": 63686,
+    "canonical_text": "آرایش و تزیین فضا",
+    "meaning_fa_IPA": "ɑːrɑːjeʃ o tæzʔin-e fæzɑː"
+  },
+  {
+    "id": 63687,
+    "canonical_text": "در ورودی",
+    "meaning_fa_IPA": "dær-e vorudi"
+  },
+  {
+    "id": 63688,
+    "canonical_text": "برق گیر",
+    "meaning_fa_IPA": "bærɣ-ɡir"
+  },
+  {
+    "id": 63689,
+    "canonical_text": "بنای الحاقی",
+    "meaning_fa_IPA": "benɑː-je ʔelhɑːɣi"
+  },
+  {
+    "id": 63690,
+    "canonical_text": "ساختمان الحاقی",
+    "meaning_fa_IPA": "sɑːxtemɑːn-e ʔelhɑːɣi"
+  },
+  {
+    "id": 63691,
+    "canonical_text": "طبقه بالای ساختمان",
+    "meaning_fa_IPA": "tæbæɣe-je bɑːlɑː-je sɑːxtemɑːn"
+  },
+  {
+    "id": 63692,
+    "canonical_text": "بالاخانه",
+    "meaning_fa_IPA": "bɑːlɑːxɑːne"
+  },
+  {
+    "id": 63693,
+    "canonical_text": "بخش بالایی خانه",
+    "meaning_fa_IPA": "bæxʃ-e bɑːlɑːji-je xɑːne"
+  },
+  {
+    "id": 63694,
+    "canonical_text": "پنجره برجسته",
+    "meaning_fa_IPA": "pændʒere-je bordʒæste"
+  },
+  {
+    "id": 63695,
+    "canonical_text": "پنجره جلو آمده",
+    "meaning_fa_IPA": "pændʒere-je dʒelo ɑːmæde"
+  },
+  {
+    "id": 63696,
+    "canonical_text": "زنگ در",
+    "meaning_fa_IPA": "zæŋɡ-e dær"
+  },
+  {
+    "id": 63697,
+    "canonical_text": "زنگ درب",
+    "meaning_fa_IPA": "zæŋɡ-e dærb"
+  },
+  {
+    "id": 63698,
+    "canonical_text": "راه یا پلکان فرار اضطراری هنگام آتش سوزی",
+    "meaning_fa_IPA": "rɑːh jɑː pelekɑːn-e færɑːr-e ʔezterɑːri henɡɑːm-e ɑːtæʃ-suzi"
+  },
+  {
+    "id": 63699,
+    "canonical_text": "پلکان اضطراری",
+    "meaning_fa_IPA": "pelekɑːn-e ʔezterɑːri"
+  },
+  {
+    "id": 63700,
+    "canonical_text": "خروجی فرار از آتش",
+    "meaning_fa_IPA": "xorudʒi-je færɑːr ʔæz ɑːtæʃ"
+  },
+  {
+    "id": 63701,
+    "canonical_text": "پشت بام",
+    "meaning_fa_IPA": "poʃt-e bɑːm"
+  },
+  {
+    "id": 63702,
+    "canonical_text": "در پشتی",
+    "meaning_fa_IPA": "dær-e poʃti"
+  },
+  {
+    "id": 63703,
+    "canonical_text": "در عقب",
+    "meaning_fa_IPA": "dær-e ʔæɣæb"
+  },
+  {
+    "id": 63704,
+    "canonical_text": "موتورخانه",
+    "meaning_fa_IPA": "motorxɑːne"
+  },
+  {
+    "id": 63705,
+    "canonical_text": "اتاق استراحت و تفریح",
+    "meaning_fa_IPA": "ʔotɑːɣ-e ʔesterɑːhæt o tæfrih"
+  },
+  {
+    "id": 63706,
+    "canonical_text": "سرسرا یا سالن ورودی",
+    "meaning_fa_IPA": "sær-særɑː jɑː sɑːlon-e vorudi"
+  },
+  {
+    "id": 63707,
+    "canonical_text": "هال ورودی",
+    "meaning_fa_IPA": "hɑːl-e vorudi"
+  },
+  {
+    "id": 63708,
+    "canonical_text": "فضای پذیرش پس از در اصلی",
+    "meaning_fa_IPA": "fæzɑː-je pæzireʃ pæs ʔæz dær-e ʔæsli"
+  },
+  {
+    "id": 63709,
+    "canonical_text": "اتاق نوزاد یا کودک خردسال",
+    "meaning_fa_IPA": "ʔotɑːɣ-e nouzɑːd jɑː kudæk-e xordsɑːl"
+  },
+  {
+    "id": 63710,
+    "canonical_text": "اتاق کودک",
+    "meaning_fa_IPA": "ʔotɑːɣ-e kudæk"
+  },
+  {
+    "id": 63711,
+    "canonical_text": "محل خواب و مراقبت نوزاد",
+    "meaning_fa_IPA": "mæhæl-e xɑːb o morɑːɣebæt-e nouzɑːd"
+  },
+  {
+    "id": 63712,
+    "canonical_text": "آتشخانه",
+    "meaning_fa_IPA": "ɑːtæʃxɑːne"
+  },
+  {
+    "id": 63713,
+    "canonical_text": "چندسطحی با طبقات نیم طبقه ای",
+    "meaning_fa_IPA": "tʃændsæthi bɑː tæbæɣɑːt-e nim-tæbæɣeʔi"
+  },
+  {
+    "id": 63714,
+    "canonical_text": "اسپلیت لول",
+    "meaning_fa_IPA": "esplit level"
+  },
+  {
+    "id": 63715,
+    "canonical_text": "دارای کف هایی در ارتفاع های متفاوت",
+    "meaning_fa_IPA": "dɑːrɑː-je kæfhɑːji dær ʔertefɑːʔhɑː-je motefɑːvet"
+  },
+  {
+    "id": 63716,
+    "canonical_text": "محل اقامت یا مسکن",
+    "meaning_fa_IPA": "mæhæl-e ʔeɣɑːmæt jɑː mæskæn"
+  },
+  {
+    "id": 63717,
+    "canonical_text": "اقامتگاه",
+    "meaning_fa_IPA": "ʔeɣɑːmætɡɑːh"
+  },
+  {
+    "id": 63718,
+    "canonical_text": "امکانات سکونت",
+    "meaning_fa_IPA": "ʔemkɑːnɑːt-e sokunæt"
+  },
+  {
+    "id": 63719,
+    "canonical_text": "پناه یا پناهگاه امن",
+    "meaning_fa_IPA": "pænɑːh jɑː pænɑːhɡɑːh-e ʔæmn"
+  },
+  {
+    "id": 63720,
+    "canonical_text": "محل حمایت از افراد در خطر",
+    "meaning_fa_IPA": "mæhæl-e hemɑːjæt ʔæz ʔæfrɑːd dær xætær"
+  },
+  {
+    "id": 63721,
+    "canonical_text": "خانه شهری",
+    "meaning_fa_IPA": "xɑːne-je ʃæhri"
+  },
+  {
+    "id": 63722,
+    "canonical_text": "خانه چندطبقه در شهر",
+    "meaning_fa_IPA": "xɑːne-je tʃændtæbæɣe dær ʃæhr"
+  },
+  {
+    "id": 63723,
+    "canonical_text": "خانه ردیفی شهری در کاربرد آمریکایی",
+    "meaning_fa_IPA": "xɑːne-je rædifi-je ʃæhri dær kɑːrbord-e ʔɑːmrikɑːji"
+  },
+  {
+    "id": 63724,
+    "canonical_text": "کلبه چوبی",
+    "meaning_fa_IPA": "kolbe-je tʃubi"
+  },
+  {
+    "id": 63725,
+    "canonical_text": "پانسیون یا خانه اتاق اجاره ای همراه غذا",
+    "meaning_fa_IPA": "pɑːnsijon jɑː xɑːne-je ʔotɑːɣ-e ʔedʒɑːreʔi-je hæmrɑːh-e ɣæzɑː"
+  },
+  {
+    "id": 63726,
+    "canonical_text": "مهمانخانه شبانه روزی",
+    "meaning_fa_IPA": "mehmɑːnxɑːne-je ʃæbɑːne-ruzi"
+  },
+  {
+    "id": 63727,
+    "canonical_text": "خانه اقامت بلندمدت",
+    "meaning_fa_IPA": "xɑːne-je ʔeɣɑːmæt-e bolændmoddæt"
+  },
+  {
+    "id": 63728,
+    "canonical_text": "خانه سیار",
+    "meaning_fa_IPA": "xɑːne-je sæjjɑːr"
+  },
+  {
+    "id": 63729,
+    "canonical_text": "نیمه مستقل متصل به تنها یک خانه دیگر",
+    "meaning_fa_IPA": "nime-mostæɣel-e mottæsel be tænhɑː jek xɑːne-je diɡær"
+  },
+  {
+    "id": 63730,
+    "canonical_text": "نیمه جدا",
+    "meaning_fa_IPA": "nime-dʒodɑː"
+  },
+  {
+    "id": 63731,
+    "canonical_text": "دارای یک دیوار مشترک",
+    "meaning_fa_IPA": "dɑːrɑː-je jek divɑːr-e moʃtæræk"
+  },
+  {
+    "id": 63732,
+    "canonical_text": "خانه مجردی مرد عامیانه",
+    "meaning_fa_IPA": "xɑːne-je modʒærædi-je mærd ʔɑːmijɑːne"
+  },
+  {
+    "id": 63733,
+    "canonical_text": "محل زندگی شیک یک مرد تنها",
+    "meaning_fa_IPA": "mæhæl-e zendeɡi-je ʃik-e jek mærd-e tænhɑː"
+  },
+  {
+    "id": 63734,
+    "canonical_text": "آپارتمان مرد مجرد",
+    "meaning_fa_IPA": "ɑːpɑːrtemɑːn-e mærd-e modʒæræd"
+  },
+  {
+    "id": 63735,
+    "canonical_text": "منزل دادن",
+    "meaning_fa_IPA": "mænzel dɑːdæn"
+  },
+  {
+    "id": 63736,
+    "canonical_text": "جست وجو برای یافتن خانه",
+    "meaning_fa_IPA": "dʒost-o-dʒu bærɑː-je jɑːftæn-e xɑːne"
+  },
+  {
+    "id": 63737,
+    "canonical_text": "خانه گشتن",
+    "meaning_fa_IPA": "xɑːne ɡæʃtæn"
+  },
+  {
+    "id": 63738,
+    "canonical_text": "بررسی خانه ها برای خرید یا اجاره",
+    "meaning_fa_IPA": "bærresi-je xɑːnehɑː bærɑː-je xærid jɑː ʔedʒɑːre"
+  },
+  {
+    "id": 63739,
+    "canonical_text": "وام رهنی با وثیقه ملک",
+    "meaning_fa_IPA": "vɑːm-e ræhni bɑː væsiɣe-je melk"
+  },
+  {
+    "id": 63740,
+    "canonical_text": "وام مسکن",
+    "meaning_fa_IPA": "vɑːm-e mæskæn"
+  },
+  {
+    "id": 63741,
+    "canonical_text": "تسهیلات خرید ملک",
+    "meaning_fa_IPA": "tæshilɑːt-e xærid-e melk"
+  },
+  {
+    "id": 63742,
+    "canonical_text": "انجمن ساکنان",
+    "meaning_fa_IPA": "ʔændʒomæn-e sɑːkenɑːn"
+  },
+  {
+    "id": 63743,
+    "canonical_text": "شورای ساکنان محله یا ساختمان",
+    "meaning_fa_IPA": "ʃurɑː-je sɑːkenɑːn-e mæhælle jɑː sɑːxtemɑːn"
+  },
+  {
+    "id": 63744,
+    "canonical_text": "تشکل نمایندگی منافع ساکنان",
+    "meaning_fa_IPA": "tæʃækkol-e næmɑːjændeɡi-je mænɑːfeʔ-e sɑːkenɑːn"
+  },
+  {
+    "id": 63745,
+    "canonical_text": "وام کوتاه مدت",
+    "meaning_fa_IPA": "vɑːm-e kutɑːhmoddæt"
+  },
+  {
+    "id": 63746,
+    "canonical_text": "سند مالکیت ملک",
+    "meaning_fa_IPA": "sænd-e mɑːlekijjæt-e melk"
+  },
+  {
+    "id": 63747,
+    "canonical_text": "قباله ملک",
+    "meaning_fa_IPA": "ɣæbɑːle-je melk"
+  },
+  {
+    "id": 63748,
+    "canonical_text": "مدرک انتقال یا اثبات حق مالکیت",
+    "meaning_fa_IPA": "mædræk-e ʔenteɣɑːl jɑː ʔesbɑːt-e hæɣɣ-e mɑːlekijjæt"
+  },
+  {
+    "id": 63749,
+    "canonical_text": "دستگاه ها و تجهیزات الکترونیکی",
+    "meaning_fa_IPA": "dæstɡɑːhhɑː vo tædʒhizɑːt-e ʔelektroniki"
+  },
+  {
+    "id": 63750,
+    "canonical_text": "لوازم الکترونیکی",
+    "meaning_fa_IPA": "lævɑːzem-e ʔelektroniki"
+  },
+  {
+    "id": 63751,
+    "canonical_text": "وسایل دارای مدار الکترونیکی",
+    "meaning_fa_IPA": "væsɑːjel-e dɑːrɑː-je mædɑːr-e ʔelektroniki"
+  },
+  {
+    "id": 63752,
+    "canonical_text": "وثیقه قرار دادن",
+    "meaning_fa_IPA": "væsiɣe ɣærɑːr dɑːdæn"
+  },
+  {
+    "id": 63753,
+    "canonical_text": "رهن دادن",
+    "meaning_fa_IPA": "ræhn dɑːdæn"
+  },
+  {
+    "id": 63754,
+    "canonical_text": "مشاور یا کارگزار معاملات املاک",
+    "meaning_fa_IPA": "moʃɑːver jɑː kɑːrɡozɑːr-e moʔɑːmelɑːt-e ʔæmlɑːk"
+  },
+  {
+    "id": 63755,
+    "canonical_text": "بنگاهی",
+    "meaning_fa_IPA": "bongɑːhi"
+  },
+  {
+    "id": 63756,
+    "canonical_text": "نماینده خرید فروش یا اجاره ملک",
+    "meaning_fa_IPA": "næmɑːjænde-je xærid foruʃ jɑː ʔedʒɑːre-je melk"
+  },
+  {
+    "id": 63757,
+    "canonical_text": "مقیم محل کار یا سرخانه",
+    "meaning_fa_IPA": "moɣim-e mæhæl-e kɑːr jɑː særxɑːne"
+  },
+  {
+    "id": 63758,
+    "canonical_text": "دارای محل اقامت نزد کارفرما",
+    "meaning_fa_IPA": "dɑːrɑː-je mæhæl-e ʔeɣɑːmæt næzd-e kɑːrfærmɑː"
+  },
+  {
+    "id": 63759,
+    "canonical_text": "شبانه روزی",
+    "meaning_fa_IPA": "ʃæbɑːne-ruzi"
+  },
+  {
+    "id": 63760,
+    "canonical_text": "جشن ورود به خانه جدید",
+    "meaning_fa_IPA": "dʒæʃn-e vorud be xɑːne-je dʒædid"
+  },
+  {
+    "id": 63761,
+    "canonical_text": "جشن خانه نو",
+    "meaning_fa_IPA": "dʒæʃn-e xɑːne-je nou"
+  },
+  {
+    "id": 63762,
+    "canonical_text": "مهمانی خانه گرمی",
+    "meaning_fa_IPA": "mehmɑːni-je xɑːne-ɡærmi"
+  },
+  {
+    "id": 63763,
+    "canonical_text": "ون اسباب کشی",
+    "meaning_fa_IPA": "væn-e ʔæsbɑːb-keʃi"
+  },
+  {
+    "id": 63764,
+    "canonical_text": "قرض یا وام دادن",
+    "meaning_fa_IPA": "ɣærz jɑː vɑːm dɑːdæn"
+  },
+  {
+    "id": 63765,
+    "canonical_text": "برای مدتی در اختیار دیگری گذاشتن",
+    "meaning_fa_IPA": "bærɑː-je moddæti dær ʔextijɑːr-e diɡæri ɡozɑːʃtæn"
+  },
+  {
+    "id": 63766,
+    "canonical_text": "وام دادن پول",
+    "meaning_fa_IPA": "vɑːm dɑːdæn-e pul"
+  },
+  {
+    "id": 63767,
+    "canonical_text": "املاک و مستغلات",
+    "meaning_fa_IPA": "ʔæmlɑːk o mostæɣellɑːt"
+  },
+  {
+    "id": 63768,
+    "canonical_text": "زمین و ساختمان",
+    "meaning_fa_IPA": "zæmin o sɑːxtemɑːn"
+  },
+  {
+    "id": 63769,
+    "canonical_text": "کسب وکار خریدوفروش ملک",
+    "meaning_fa_IPA": "kæsb-o-kɑːr-e xærid-o-foruʃ-e melk"
+  },
+  {
+    "id": 63770,
+    "canonical_text": "اخطاریه تخلیه منزل یا استعفا از کار",
+    "meaning_fa_IPA": "ʔextɑːrije-je tæxlije-je mænzel jɑː ʔesteʔfɑː ʔæz kɑːr"
+  },
+  {
+    "id": 63771,
+    "canonical_text": "بدون نیاز به پرداخت اجاره بها",
+    "meaning_fa_IPA": "bedun-e nijɑːz be pærdɑːxt-e ʔedʒɑːre-bæhɑː"
+  },
+  {
+    "id": 63772,
+    "canonical_text": "معاف از اجاره",
+    "meaning_fa_IPA": "moʔɑːf ʔæz ʔedʒɑːre"
+  },
+  {
+    "id": 63773,
+    "canonical_text": "رایگان از نظر اجاره",
+    "meaning_fa_IPA": "rɑːjeɡɑːn ʔæz næzær-e ʔedʒɑːre"
+  },
+  {
+    "id": 63774,
+    "canonical_text": "مشترک یا مورد استفاده همگانی اعضای گروه",
+    "meaning_fa_IPA": "moʃtæræk jɑː mored-e ʔestefɑːde-je hæmeɡɑːni-je ʔæʔzɑː-je ɡoruh"
+  },
+  {
+    "id": 63775,
+    "canonical_text": "مشاع",
+    "meaning_fa_IPA": "moʃɑːʔ"
+  },
+  {
+    "id": 63776,
+    "canonical_text": "سهیم بودن",
+    "meaning_fa_IPA": "sæhim budæn"
+  },
+  {
+    "id": 63777,
+    "canonical_text": "به اشتراک داشتن",
+    "meaning_fa_IPA": "be ʔeʃterɑːk dɑːʃtæn"
+  },
+  {
+    "id": 63778,
+    "canonical_text": "شریک بودن",
+    "meaning_fa_IPA": "ʃærik budæn"
+  },
+  {
+    "id": 63779,
+    "canonical_text": "به کمال رساندن",
+    "meaning_fa_IPA": "be kæmɑːl resɑːndæn"
+  },
+  {
+    "id": 63780,
+    "canonical_text": "عالی کردن",
+    "meaning_fa_IPA": "ʔɑːli kærdæn"
+  },
+  {
+    "id": 63781,
+    "canonical_text": "به حد مطلوب رساندن",
+    "meaning_fa_IPA": "be hædd-e mætlub resɑːndæn"
+  },
+  {
+    "id": 63782,
+    "canonical_text": "در چیزی استاد شدن",
+    "meaning_fa_IPA": "dær tʃizi ʔostɑːd ʃodæn"
+  },
+  {
+    "id": 63783,
+    "canonical_text": "تسلط یافتن",
+    "meaning_fa_IPA": "tæsællot jɑːftæn"
+  },
+  {
+    "id": 63784,
+    "canonical_text": "خبره شدن",
+    "meaning_fa_IPA": "xebre ʃodæn"
+  },
+  {
+    "id": 63785,
+    "canonical_text": "ازیادرفته",
+    "meaning_fa_IPA": "ʔæz jɑːd ræfte"
+  },
+  {
+    "id": 63786,
+    "canonical_text": "فاقد تمرین و آمادگی",
+    "meaning_fa_IPA": "fɑːɣed-e tæmrin o ɑːmɑːdeɡi"
+  },
+  {
+    "id": 63787,
+    "canonical_text": "فراموش شده",
+    "meaning_fa_IPA": "færɑːmuʃ ʃode"
+  },
+  {
+    "id": 63788,
+    "canonical_text": "تعلیم دادن از راه تمرین و تکرار",
+    "meaning_fa_IPA": "tæʔlim dɑːdæn ʔæz rɑːh-e tæmrin o tekrɑːr"
+  },
+  {
+    "id": 63789,
+    "canonical_text": "ملکه ذهن کسی کردن",
+    "meaning_fa_IPA": "mæleke-je zehn-e kæsi kærdæn"
+  },
+  {
+    "id": 63790,
+    "canonical_text": "زبان عربی",
+    "meaning_fa_IPA": "zæbɑːn-e ʔæræbi"
+  },
+  {
+    "id": 63791,
+    "canonical_text": "عربی معیار و گونه های گفتاری",
+    "meaning_fa_IPA": "ʔæræbi-je meʔjɑːr o ɡunehɑː-je ɡoftɑːri"
+  },
+  {
+    "id": 63792,
+    "canonical_text": "زبان سامی عربی",
+    "meaning_fa_IPA": "zæbɑːn-e sɑːmi-je ʔæræbi"
+  },
+  {
+    "id": 63793,
+    "canonical_text": "زبان عبری",
+    "meaning_fa_IPA": "zæbɑːn-e ʔebri"
+  },
+  {
+    "id": 63794,
+    "canonical_text": "عبری باستان و نوین",
+    "meaning_fa_IPA": "ʔebri-je bɑːstɑːn o novin"
+  },
+  {
+    "id": 63795,
+    "canonical_text": "زبان سامی یهودیان",
+    "meaning_fa_IPA": "zæbɑːn-e sɑːmi-je jæhudijɑːn"
+  },
+  {
+    "id": 63796,
+    "canonical_text": "زبان چینی یا مجموعه گونه های چینی",
+    "meaning_fa_IPA": "zæbɑːn-e tʃini jɑː mædʒmuʔe-je ɡunehɑː-je tʃini"
+  },
+  {
+    "id": 63797,
+    "canonical_text": "زبان های سینیتی",
+    "meaning_fa_IPA": "zæbɑːnhɑː-je siniti"
+  },
+  {
+    "id": 63798,
+    "canonical_text": "چینی معیار یا ماندارین در کاربرد محدودتر",
+    "meaning_fa_IPA": "tʃini-je meʔjɑːr jɑː mɑːndɑːrin dær kɑːrbord-e mæhdudtær"
+  },
+  {
+    "id": 63799,
+    "canonical_text": "زبان پرتغالی",
+    "meaning_fa_IPA": "zæbɑːn-e porteɣɑːli"
+  },
+  {
+    "id": 63800,
+    "canonical_text": "پرتغالی",
+    "meaning_fa_IPA": "porteɣɑːli"
+  },
+  {
+    "id": 63801,
+    "canonical_text": "زبان رومی تبار پرتغال و برزیل",
+    "meaning_fa_IPA": "zæbɑːn-e rumi-tæbɑːr-e porteɣɑːl o berezil"
+  },
+  {
+    "id": 63802,
+    "canonical_text": "زبان لاتین",
+    "meaning_fa_IPA": "zæbɑːn-e lɑːtin"
+  },
+  {
+    "id": 63803,
+    "canonical_text": "زبان روم باستان",
+    "meaning_fa_IPA": "zæbɑːn-e rum-e bɑːstɑːn"
+  },
+  {
+    "id": 63804,
+    "canonical_text": "نیای زبان های رومی تبار",
+    "meaning_fa_IPA": "nijɑː-je zæbɑːnhɑː-je rumi-tæbɑːr"
+  },
+  {
+    "id": 63805,
+    "canonical_text": "زبان ترکی",
+    "meaning_fa_IPA": "zæbɑːn-e torki"
+  },
+  {
+    "id": 63806,
+    "canonical_text": "ترکی",
+    "meaning_fa_IPA": "torki"
+  },
+  {
+    "id": 63807,
+    "canonical_text": "زبان اسپانیایی",
+    "meaning_fa_IPA": "zæbɑːn-e ʔespɑːnijɑːji"
+  },
+  {
+    "id": 63808,
+    "canonical_text": "کاستیایی",
+    "meaning_fa_IPA": "kɑːstijɑːji"
+  },
+  {
+    "id": 63809,
+    "canonical_text": "زبان رومی تبار اسپانیا و آمریکای لاتین",
+    "meaning_fa_IPA": "zæbɑːn-e rumi-tæbɑːr-e ʔespɑːnijɑː vo ʔɑːmrikɑː-je lɑːtin"
+  },
+  {
+    "id": 63810,
+    "canonical_text": "زبان یونانی",
+    "meaning_fa_IPA": "zæbɑːn-e junɑːni"
+  },
+  {
+    "id": 63811,
+    "canonical_text": "زبان فیلیپینی",
+    "meaning_fa_IPA": "zæbɑːn-e filipini"
+  },
+  {
+    "id": 63812,
+    "canonical_text": "زبان ملی فیلیپین",
+    "meaning_fa_IPA": "zæbɑːn-e melli-je filipin"
+  },
+  {
+    "id": 63813,
+    "canonical_text": "گونه معیار مبتنی بر تاگالوگ",
+    "meaning_fa_IPA": "ɡune-je meʔjɑːr-e mobtæni bær tɑːɡɑːloɡ"
+  },
+  {
+    "id": 63814,
+    "canonical_text": "زبان روسی",
+    "meaning_fa_IPA": "zæbɑːn-e rusi"
+  },
+  {
+    "id": 63815,
+    "canonical_text": "روسی",
+    "meaning_fa_IPA": "rusi"
+  },
+  {
+    "id": 63816,
+    "canonical_text": "پارسی اهل پارس یا ایران",
+    "meaning_fa_IPA": "pɑːrsi-je ʔæhl-e pɑːrs jɑː ʔirɑːn"
+  },
+  {
+    "id": 63817,
+    "canonical_text": "ایرانی",
+    "meaning_fa_IPA": "ʔirɑːni"
+  },
+  {
+    "id": 63818,
+    "canonical_text": "پارسی",
+    "meaning_fa_IPA": "pɑːrsi"
+  },
+  {
+    "id": 63819,
+    "canonical_text": "عجم",
+    "meaning_fa_IPA": "ʔædʒæm"
+  },
+  {
+    "id": 63820,
+    "canonical_text": "زبان فرانسوی",
+    "meaning_fa_IPA": "zæbɑːn-e færɑːnsevi"
+  },
+  {
+    "id": 63821,
+    "canonical_text": "فرانسوی",
+    "meaning_fa_IPA": "færɑːnsevi"
+  },
+  {
+    "id": 63822,
+    "canonical_text": "زبان رومی تبار فرانسه و کشورهای دیگر",
+    "meaning_fa_IPA": "zæbɑːn-e rumi-tæbɑːr-e færɑːnse vo keʃværhɑː-je diɡær"
+  },
+  {
+    "id": 63823,
+    "canonical_text": "حرف تعریف معین دستور زبان",
+    "meaning_fa_IPA": "hærf-e tæʔrif-e moʔæjjæn-e dæstur-e zæbɑːn"
+  },
+  {
+    "id": 63824,
+    "canonical_text": "حرف معرفه",
+    "meaning_fa_IPA": "hærf-e moʔærrefe"
+  },
+  {
+    "id": 63825,
+    "canonical_text": "با کنارهم آمدن حروف واژه ای را ساختن یا خوانده شدن",
+    "meaning_fa_IPA": "bɑː kenɑːr-e hæm ɑːmædæn-e horuf vɑːʒeʔi rɑː sɑːxtæn jɑː xɑːnde ʃodæn"
+  },
+  {
+    "id": 63826,
+    "canonical_text": "حروف تشکیل دهنده واژه بودن",
+    "meaning_fa_IPA": "horuf-e tæʃkil-dæhænde-je vɑːʒe budæn"
+  },
+  {
+    "id": 63827,
+    "canonical_text": "ترکیب حروفی داشتن",
+    "meaning_fa_IPA": "tærkib-e horufi dɑːʃtæn"
+  },
+  {
+    "id": 63828,
+    "canonical_text": "استمراری در دستور زبان",
+    "meaning_fa_IPA": "ʔestemrɑːri dær dæstur-e zæbɑːn"
+  },
+  {
+    "id": 63829,
+    "canonical_text": "نمود استمراری",
+    "meaning_fa_IPA": "nomud-e ʔestemrɑːri"
+  },
+  {
+    "id": 63830,
+    "canonical_text": "نشان دهنده رویداد در حال جریان",
+    "meaning_fa_IPA": "neʃɑːn-dæhænde-je rujdɑːd dær hɑːl-e dʒæræjɑːn"
+  },
+  {
+    "id": 63831,
+    "canonical_text": "پسوند یا بخش پایانی واژه",
+    "meaning_fa_IPA": "pæsvænd jɑː bæxʃ-e pɑːjɑːni-je vɑːʒe"
+  },
+  {
+    "id": 63832,
+    "canonical_text": "پایانه صرفی",
+    "meaning_fa_IPA": "pɑːjɑːne-je særfi"
+  },
+  {
+    "id": 63833,
+    "canonical_text": "بخش افزوده شده به بن واژه",
+    "meaning_fa_IPA": "bæxʃ-e ʔæfzude ʃode be bon-e vɑːʒe"
+  },
+  {
+    "id": 63834,
+    "canonical_text": "مذکر دستور زبان",
+    "meaning_fa_IPA": "mozækkær-e dæstur-e zæbɑːn"
+  },
+  {
+    "id": 63835,
+    "canonical_text": "حرف تعریف",
+    "meaning_fa_IPA": "hærf-e tæʔrif"
+  },
+  {
+    "id": 63836,
+    "canonical_text": "حرف تعریف نامعین دستور زبان",
+    "meaning_fa_IPA": "hærf-e tæʔrif-e nɑːmoʔæjjæn-e dæstur-e zæbɑːn"
+  },
+  {
+    "id": 63837,
+    "canonical_text": "حرف نکره",
+    "meaning_fa_IPA": "hærf-e nækere"
+  },
+  {
+    "id": 63838,
+    "canonical_text": "معلوم دستور زبان",
+    "meaning_fa_IPA": "mæʔlum-e dæstur-e zæbɑːn"
+  },
+  {
+    "id": 63839,
+    "canonical_text": "مونث دستور زبان",
+    "meaning_fa_IPA": "moʔænnæs-e dæstur-e zæbɑːn"
+  },
+  {
+    "id": 63840,
+    "canonical_text": "مونث",
+    "meaning_fa_IPA": "moʔænnæs"
+  },
+  {
+    "id": 63841,
+    "canonical_text": "گذشته کامل دستور زبان",
+    "meaning_fa_IPA": "ɡozæʃte-je kɑːmel-e dæstur-e zæbɑːn"
+  },
+  {
+    "id": 63842,
+    "canonical_text": "ماضی بعید",
+    "meaning_fa_IPA": "mɑːzi-je bæʔid"
+  },
+  {
+    "id": 63843,
+    "canonical_text": "اسم عام",
+    "meaning_fa_IPA": "ʔesm-e ʔɑːm"
+  },
+  {
+    "id": 63844,
+    "canonical_text": "نام عمومی یک طبقه از افراد یا چیزها",
+    "meaning_fa_IPA": "nɑːm-e ʔomumi-je jek tæbæɣe ʔæz ʔæfrɑːd jɑː tʃizhɑː"
+  },
+  {
+    "id": 63845,
+    "canonical_text": "اسم غیرخاص",
+    "meaning_fa_IPA": "ʔesm-e ɣejr-e xɑːs"
+  },
+  {
+    "id": 63846,
+    "canonical_text": "نکته طعنه آمیز",
+    "meaning_fa_IPA": "nokte-je tæʔne-ɑːmiz"
+  },
+  {
+    "id": 63847,
+    "canonical_text": "نکته طعنه دار",
+    "meaning_fa_IPA": "nokte-je tæʔne-dɑːr"
+  },
+  {
+    "id": 63848,
+    "canonical_text": "نکته متناقض",
+    "meaning_fa_IPA": "nokte-je motenɑːɣez"
+  },
+  {
+    "id": 63849,
+    "canonical_text": "برهان",
+    "meaning_fa_IPA": "borhɑːn"
+  },
+  {
+    "id": 63850,
+    "canonical_text": "حجت",
+    "meaning_fa_IPA": "hodʒdʒæt"
+  },
+  {
+    "id": 63851,
+    "canonical_text": "محاجه",
+    "meaning_fa_IPA": "mohɑːdʒdʒe"
+  },
+  {
+    "id": 63852,
+    "canonical_text": "منفی در منفی دستور زبان",
+    "meaning_fa_IPA": "mænfi dær mænfi-je dæstur-e zæbɑːn"
+  },
+  {
+    "id": 63853,
+    "canonical_text": "نفی مضاعف",
+    "meaning_fa_IPA": "næfje mozɑːʔæf"
+  },
+  {
+    "id": 63854,
+    "canonical_text": "تمثیل یا قیاس بر پایه شباهت",
+    "meaning_fa_IPA": "tæmsil jɑː ɣijɑːs bær pɑːje-je ʃebɑːhæt"
+  },
+  {
+    "id": 63855,
+    "canonical_text": "مقایسه توضیحی",
+    "meaning_fa_IPA": "moɣɑːjese-je touzihi"
+  },
+  {
+    "id": 63856,
+    "canonical_text": "همانندی ساختاری",
+    "meaning_fa_IPA": "hæmɑːnændi-je sɑːxtɑːri"
+  },
+  {
+    "id": 63857,
+    "canonical_text": "طنز انتقادی یا هجو",
+    "meaning_fa_IPA": "tænz-e ʔenteɣɑːdi jɑː hædʒv"
+  },
+  {
+    "id": 63858,
+    "canonical_text": "انتقاد با شوخی اغراق یا کنایه",
+    "meaning_fa_IPA": "ʔenteɣɑːd bɑː ʃuxi ʔeɣrɑːɣ jɑː kenɑːje"
+  },
+  {
+    "id": 63859,
+    "canonical_text": "اثر طنزآمیز انتقادی",
+    "meaning_fa_IPA": "ʔæsær-e tænz-ɑːmiz-e ʔenteɣɑːdi"
+  },
+  {
+    "id": 63860,
+    "canonical_text": "را لرزشی تلفظ کردن",
+    "meaning_fa_IPA": "rɑː lærzeʃi tælæffoz kærdæn"
+  },
+  {
+    "id": 63861,
+    "canonical_text": "ر را غلتاندن",
+    "meaning_fa_IPA": "re rɑː ɣæltɑːndæn"
+  },
+  {
+    "id": 63862,
+    "canonical_text": "با چند تماس سریع زبان ساختن",
+    "meaning_fa_IPA": "bɑː tʃænd tæmɑːs-e særiʔ-e zæbɑːn sɑːxtæn"
+  },
+  {
+    "id": 63863,
+    "canonical_text": "قلاب چهارگوش",
+    "meaning_fa_IPA": "ɣollɑːb-e tʃɑːrɡuʃ"
+  },
+  {
+    "id": 63864,
+    "canonical_text": "علامت یا",
+    "meaning_fa_IPA": "ʔælɑːmæt-e jɑː"
+  },
+  {
+    "id": 63865,
+    "canonical_text": "نشانه گلوله ای",
+    "meaning_fa_IPA": "neʃɑːne-je ɡoluleʔi"
+  },
+  {
+    "id": 63866,
+    "canonical_text": "بولت",
+    "meaning_fa_IPA": "bulet"
+  },
+  {
+    "id": 63867,
+    "canonical_text": "نقطه فهرست",
+    "meaning_fa_IPA": "noɣte-je fehrest"
+  },
+  {
+    "id": 63868,
+    "canonical_text": "علامت هش",
+    "meaning_fa_IPA": "ʔælɑːmæt-e hæʃ"
+  },
+  {
+    "id": 63869,
+    "canonical_text": "علامت پوند",
+    "meaning_fa_IPA": "ʔælɑːmæt-e pond"
+  },
+  {
+    "id": 63870,
+    "canonical_text": "فوتبال آمریکایی",
+    "meaning_fa_IPA": "futbɑːl-e ʔɑːmrikɑːji"
+  },
+  {
+    "id": 63871,
+    "canonical_text": "فوتبال گریدیرون",
+    "meaning_fa_IPA": "futbɑːl-e ɡeridiron"
+  },
+  {
+    "id": 63872,
+    "canonical_text": "تیم دفاعی",
+    "meaning_fa_IPA": "tim-e defɑːʔi"
+  },
+  {
+    "id": 63873,
+    "canonical_text": "بازیکنان مدافع",
+    "meaning_fa_IPA": "bɑːzikonɑːn-e modɑːfeʔ"
+  },
+  {
+    "id": 63874,
+    "canonical_text": "فرصت حمله",
+    "meaning_fa_IPA": "forsæt-e hæmle"
+  },
+  {
+    "id": 63875,
+    "canonical_text": "داون",
+    "meaning_fa_IPA": "dɑːun"
+  },
+  {
+    "id": 63876,
+    "canonical_text": "یکی از چهار فرصت پیشروی ده یاردی",
+    "meaning_fa_IPA": "jeki ʔæz tʃæhɑːr forsæt-e piʃrævi-je dæh jɑːrdi"
+  },
+  {
+    "id": 63877,
+    "canonical_text": "منطقه امتیاز",
+    "meaning_fa_IPA": "mæntæɣe-je ʔemtijɑːz"
+  },
+  {
+    "id": 63878,
+    "canonical_text": "ناحیه پایانی",
+    "meaning_fa_IPA": "nɑːhije-je pɑːjɑːni"
+  },
+  {
+    "id": 63879,
+    "canonical_text": "اند زون",
+    "meaning_fa_IPA": "end zon"
+  },
+  {
+    "id": 63880,
+    "canonical_text": "گل ضربه ای",
+    "meaning_fa_IPA": "ɡol-e zærbeʔi"
+  },
+  {
+    "id": 63881,
+    "canonical_text": "فیلد گل",
+    "meaning_fa_IPA": "fild ɡol"
+  },
+  {
+    "id": 63882,
+    "canonical_text": "امتیاز حاصل از شوت میان تیرها",
+    "meaning_fa_IPA": "ʔemtijɑːz-e hɑːsel ʔæz ʃut-e mijɑːn-e tirhɑː"
+  },
+  {
+    "id": 63883,
+    "canonical_text": "فرصت اول",
+    "meaning_fa_IPA": "forsæt-e ʔævvæl"
+  },
+  {
+    "id": 63884,
+    "canonical_text": "فرست داون",
+    "meaning_fa_IPA": "ferst dɑːun"
+  },
+  {
+    "id": 63885,
+    "canonical_text": "مجموعه تازه فرصت های حمله",
+    "meaning_fa_IPA": "mædʒmuʔe-je tɑːze-je forsæthɑː-je hæmle"
+  },
+  {
+    "id": 63886,
+    "canonical_text": "فوتبال پرچمی",
+    "meaning_fa_IPA": "futbɑːl-e pærtʃæmi"
+  },
+  {
+    "id": 63887,
+    "canonical_text": "فلگ فوتبال",
+    "meaning_fa_IPA": "felæɡ futbɑːl"
+  },
+  {
+    "id": 63888,
+    "canonical_text": "نوع کم برخورد فوتبال آمریکایی",
+    "meaning_fa_IPA": "nouʔ-e kæm-bærxord-e futbɑːl-e ʔɑːmrikɑːji"
+  },
+  {
+    "id": 63889,
+    "canonical_text": "گارد خط حمله",
+    "meaning_fa_IPA": "ɡɑːrd-e xætt-e hæmle"
+  },
+  {
+    "id": 63890,
+    "canonical_text": "بازیکن کنار سنتر",
+    "meaning_fa_IPA": "bɑːzikon-e kenɑːr-e sentær"
+  },
+  {
+    "id": 63891,
+    "canonical_text": "گارد",
+    "meaning_fa_IPA": "ɡɑːrd"
+  },
+  {
+    "id": 63892,
+    "canonical_text": "یک چهارم در مسابقات چهار قسمتی",
+    "meaning_fa_IPA": "jek tʃæhɑːrom dær mosɑːbeɣɑːt-e tʃɑːr-ɣesmæti"
+  },
+  {
+    "id": 63893,
+    "canonical_text": "کوارتربک",
+    "meaning_fa_IPA": "kuɑːrtærbæk"
+  },
+  {
+    "id": 63894,
+    "canonical_text": "بازی ساز",
+    "meaning_fa_IPA": "bɑːzi-sɑːz"
+  },
+  {
+    "id": 63895,
+    "canonical_text": "پاس دهنده اصلی",
+    "meaning_fa_IPA": "pɑːs-dæhænde-je ʔæsli"
+  },
+  {
+    "id": 63896,
+    "canonical_text": "دریافت کننده پاس",
+    "meaning_fa_IPA": "dærjɑːft-konænde-je pɑːs"
+  },
+  {
+    "id": 63897,
+    "canonical_text": "توپ گیر",
+    "meaning_fa_IPA": "tup-ɡir"
+  },
+  {
+    "id": 63898,
+    "canonical_text": "منطقه قرمز",
+    "meaning_fa_IPA": "mæntæɣe-je ɣermez"
+  },
+  {
+    "id": 63899,
+    "canonical_text": "ناحیه بیست یاردی نزدیک خط گل",
+    "meaning_fa_IPA": "nɑːhije-je bist-jɑːrdi-je næzdik-e xætt-e ɡol"
+  },
+  {
+    "id": 63900,
+    "canonical_text": "رد زون",
+    "meaning_fa_IPA": "red zon"
+  },
+  {
+    "id": 63901,
+    "canonical_text": "مهاجم توپ بر",
+    "meaning_fa_IPA": "mohɑːdʒem-e tup-bær"
+  },
+  {
+    "id": 63902,
+    "canonical_text": "رانینگ بک",
+    "meaning_fa_IPA": "ræniŋ bæk"
+  },
+  {
+    "id": 63903,
+    "canonical_text": "دونده پشت خط",
+    "meaning_fa_IPA": "dævænde-je poʃt-e xætt"
+  },
+  {
+    "id": 63904,
+    "canonical_text": "کوارتربک را پشت خط زمین زدن",
+    "meaning_fa_IPA": "kuɑːrtærbæk rɑː poʃt-e xætt zæmin zædæn"
+  },
+  {
+    "id": 63905,
+    "canonical_text": "پیش از پاس کوارتربک را متوقف کردن",
+    "meaning_fa_IPA": "piʃ ʔæz pɑːs kuɑːrtærbæk rɑː motevæɣɣef kærdæn"
+  },
+  {
+    "id": 63906,
+    "canonical_text": "سک کردن",
+    "meaning_fa_IPA": "sæk kærdæn"
+  },
+  {
+    "id": 63907,
+    "canonical_text": "مدافع عمقی",
+    "meaning_fa_IPA": "modɑːfeʔ-e ʔomɣi"
+  },
+  {
+    "id": 63908,
+    "canonical_text": "سیفتی",
+    "meaning_fa_IPA": "sejfti"
+  },
+  {
+    "id": 63909,
+    "canonical_text": "آخرین مدافع پشت خط",
+    "meaning_fa_IPA": "ɑːxærin modɑːfeʔ-e poʃt-e xætt"
+  },
+  {
+    "id": 63910,
+    "canonical_text": "پاس پرده ای",
+    "meaning_fa_IPA": "pɑːs-e pærdeʔi"
+  },
+  {
+    "id": 63911,
+    "canonical_text": "اسکرین پس",
+    "meaning_fa_IPA": "eskrin pæs"
+  },
+  {
+    "id": 63912,
+    "canonical_text": "پاس کوتاه پشت بلاکرها",
+    "meaning_fa_IPA": "pɑːs-e kutɑːh-e poʃt-e belɑːkerhɑː"
+  },
+  {
+    "id": 63913,
+    "canonical_text": "محافظ شانه",
+    "meaning_fa_IPA": "mohɑːfez-e ʃɑːne"
+  },
+  {
+    "id": 63914,
+    "canonical_text": "پد شانه",
+    "meaning_fa_IPA": "pæd-e ʃɑːne"
+  },
+  {
+    "id": 63915,
+    "canonical_text": "بالشتک محافظ شانه",
+    "meaning_fa_IPA": "bɑːleʃtæk-e mohɑːfez-e ʃɑːne"
+  },
+  {
+    "id": 63916,
+    "canonical_text": "سوپربول",
+    "meaning_fa_IPA": "superbol"
+  },
+  {
+    "id": 63917,
+    "canonical_text": "دیدار قهرمانی",
+    "meaning_fa_IPA": "didɑːr-e ɣæhremɑːni"
+  },
+  {
+    "id": 63918,
+    "canonical_text": "بازی نهایی فوتبال حرفه ای آمریکا",
+    "meaning_fa_IPA": "bɑːzi-je nehɑːji-je futbɑːl-e herfeʔi-je ʔɑːmrikɑː"
+  },
+  {
+    "id": 63919,
+    "canonical_text": "تکل فوتبال و",
+    "meaning_fa_IPA": "tækel-e futbɑːl o"
+  },
+  {
+    "id": 63920,
+    "canonical_text": "تایت اند",
+    "meaning_fa_IPA": "tɑːjt end"
+  },
+  {
+    "id": 63921,
+    "canonical_text": "مهاجم کنار تکل",
+    "meaning_fa_IPA": "mohɑːdʒem-e kenɑːr-e tækel"
+  },
+  {
+    "id": 63922,
+    "canonical_text": "گیرنده و بلاکر کناری",
+    "meaning_fa_IPA": "ɡirænde vo belɑːker-e kenɑːri"
+  },
+  {
+    "id": 63923,
+    "canonical_text": "فوتبال لمسی",
+    "meaning_fa_IPA": "futbɑːl-e læmsi"
+  },
+  {
+    "id": 63924,
+    "canonical_text": "تاچ فوتبال",
+    "meaning_fa_IPA": "tɑːtʃ futbɑːl"
+  },
+  {
+    "id": 63925,
+    "canonical_text": "نوع بدون تکل فوتبال آمریکایی",
+    "meaning_fa_IPA": "nouʔ-e bedun-e tækel-e futbɑːl-e ʔɑːmrikɑːji"
+  },
+  {
+    "id": 63926,
+    "canonical_text": "بازی بیسبال",
+    "meaning_fa_IPA": "bɑːzi-je bejsbɑːl"
+  },
+  {
+    "id": 63927,
+    "canonical_text": "بیس",
+    "meaning_fa_IPA": "bejs"
+  },
+  {
+    "id": 67896,
+    "canonical_text": "چهرک (تصویر کاربران)",
+    "meaning_fa_IPA": "tʃehæræk tæsvire kɑːrbærɑːn"
+  },
+  {
+    "id": 67897,
+    "canonical_text": "پیغام مخفی (بازی کامپیوتری)",
+    "meaning_fa_IPA": "pejɣɑːme mæxfi bɑːzije kɑːmpjuteri"
+  },
+  {
+    "id": 67898,
+    "canonical_text": "نکته پنهان",
+    "meaning_fa_IPA": "nokteje penhɑːn"
+  },
+  {
+    "id": 67899,
+    "canonical_text": "تیراندازی اول شخص (ژانر بازی کامپیوتری)",
+    "meaning_fa_IPA": "tirændɑːzije ævæle ʃæxs ʒɑːnre bɑːzije kɑːmpjuteri"
+  },
+  {
+    "id": 67900,
+    "canonical_text": "دسته بازی",
+    "meaning_fa_IPA": "dæsteje bɑːzi"
+  },
+  {
+    "id": 67901,
+    "canonical_text": "کنترل‌کننده بازی",
+    "meaning_fa_IPA": "kontrolkonændeje bɑːzi"
+  },
+  {
+    "id": 67902,
+    "canonical_text": "خط داخلی",
+    "meaning_fa_IPA": "xætte dɑːxeli"
+  },
+  {
+    "id": 67903,
+    "canonical_text": "دکمه قطع صدا",
+    "meaning_fa_IPA": "dokmeje ɣætʔe sedɑː"
+  },
+  {
+    "id": 67904,
+    "canonical_text": "تلفن کننده",
+    "meaning_fa_IPA": "telefonkonænde"
+  },
+  {
+    "id": 67905,
+    "canonical_text": "تماس گیرنده",
+    "meaning_fa_IPA": "tæmɑːsgirænde"
+  },
+  {
+    "id": 67906,
+    "canonical_text": "دستگاه شماره انداز تلفن",
+    "meaning_fa_IPA": "dæstgɑːhe ʃomɑːreændɑːze telefon"
+  },
+  {
+    "id": 67907,
+    "canonical_text": "برنامه تلفنی (رادیو و تلویزیون)",
+    "meaning_fa_IPA": "bærnɑːmeje telefoni rɑːdijo væ televizijon"
+  },
+  {
+    "id": 67908,
+    "canonical_text": "انتظار تماس",
+    "meaning_fa_IPA": "entezɑːre tæmɑːs"
+  },
+  {
+    "id": 67909,
+    "canonical_text": "پشت خطی",
+    "meaning_fa_IPA": "poʃte xætti"
+  },
+  {
+    "id": 67910,
+    "canonical_text": "کنفرانس تلفنی",
+    "meaning_fa_IPA": "konferɑːnse telefoni"
+  },
+  {
+    "id": 67912,
+    "canonical_text": "تماس با مشتری (برای نظرسنجی درباره میزان رضایت از محصول)",
+    "meaning_fa_IPA": "tæmɑːs bɑː moʃtæri bærɑːje næzærsændʒi dærbɑːreje mizɑːne rezɑːjæt æz mæhsul"
+  },
+  {
+    "id": 67913,
+    "canonical_text": "تماس داخلی",
+    "meaning_fa_IPA": "tæmɑːse dɑːxeli"
+  },
+  {
+    "id": 67914,
+    "canonical_text": "تماس محلی",
+    "meaning_fa_IPA": "tæmɑːse mæhælli"
+  },
+  {
+    "id": 67915,
+    "canonical_text": "برنامه تلفنی رادیویی",
+    "meaning_fa_IPA": "bærnɑːmeje telefonije rɑːdijoji"
+  },
+  {
+    "id": 67916,
+    "canonical_text": "صفحات آگهی دفترچه تلفن",
+    "meaning_fa_IPA": "sæfæhɑːte ɑːgæhije dæftærtʃeje telefon"
+  },
+  {
+    "id": 67917,
+    "canonical_text": "دفترچه تلفن شرکت‌های خدماتی",
+    "meaning_fa_IPA": "dæftærtʃeje telefone ʃerkæthɑːje xædæmɑːti"
+  },
+  {
+    "id": 67918,
+    "canonical_text": "دوست دختر (در پیام کوتاه)",
+    "meaning_fa_IPA": "duste doxtær dær pejɑːme kutɑːh"
+  },
+  {
+    "id": 67919,
+    "canonical_text": "اوه خدای من (در پیام کوتاه)",
+    "meaning_fa_IPA": "oh xodɑːje mæn dær pejɑːme kutɑːh"
+  },
+  {
+    "id": 67920,
+    "canonical_text": "سانتی متر مکعب",
+    "meaning_fa_IPA": "sɑːntimetr mokæʔæb"
+  },
+  {
+    "id": 67921,
+    "canonical_text": "فیلتر (اینترنت)",
+    "meaning_fa_IPA": "filter internet"
+  },
+  {
+    "id": 67922,
+    "canonical_text": "فیسبوک",
+    "meaning_fa_IPA": "fejsbuk"
+  },
+  {
+    "id": 67923,
+    "canonical_text": "خوراک وب",
+    "meaning_fa_IPA": "xorɑːke væb"
+  },
+  {
+    "id": 67924,
+    "canonical_text": "فید",
+    "meaning_fa_IPA": "fid"
+  },
+  {
+    "id": 67925,
+    "canonical_text": "هشتگ (با نماد #)",
+    "meaning_fa_IPA": "hæʃtæg bɑː næmɑːde hæʃtæg"
+  },
+  {
+    "id": 67926,
+    "canonical_text": "نوار آدرس (فیلد متنی)",
+    "meaning_fa_IPA": "nævɑːre ɑːdres filde mætni"
+  },
+  {
+    "id": 67927,
+    "canonical_text": "پهنای باند",
+    "meaning_fa_IPA": "pæhnɑːje bɑːnd"
+  },
+  {
+    "id": 67928,
+    "canonical_text": "پیام رسانی فوری",
+    "meaning_fa_IPA": "pejɑːmresɑːnije fævri"
+  },
+  {
+    "id": 67929,
+    "canonical_text": "نشانی آی پی",
+    "meaning_fa_IPA": "neʃɑːnije ɑːjpi"
+  },
+  {
+    "id": 67930,
+    "canonical_text": "نشانی پروتکل اینترنت",
+    "meaning_fa_IPA": "neʃɑːnije protokole internet"
+  },
+  {
+    "id": 67931,
+    "canonical_text": "ناوبری کردن (وبسایت)",
+    "meaning_fa_IPA": "nɑːvbæri kærdæn væbsɑːjt"
+  },
+  {
+    "id": 67932,
+    "canonical_text": "برون خط",
+    "meaning_fa_IPA": "borunxæt"
+  },
+  {
+    "id": 67933,
+    "canonical_text": "آفلاین",
+    "meaning_fa_IPA": "ɑːflɑːjn"
+  },
+  {
+    "id": 67934,
+    "canonical_text": "استفاده کردن از دستور پینگ (کامپیوتر)",
+    "meaning_fa_IPA": "estefɑːde kærdæn æz dæsture ping kɑːmpjuter"
+  },
+  {
+    "id": 67935,
+    "canonical_text": "جستجو در اینترنت",
+    "meaning_fa_IPA": "dʒostodʒu dær internet"
+  },
+  {
+    "id": 67937,
+    "canonical_text": "تبلیغات اینترنتی (در بالا و گوشه صفحه)",
+    "meaning_fa_IPA": "tæbliɣɑːte interneti dær bɑːlɑː vo guʃeje sæfhe"
+  },
+  {
+    "id": 67938,
+    "canonical_text": "نام دامنه اینترنتی",
+    "meaning_fa_IPA": "nɑːme dɑːmæneje interneti"
+  },
+  {
+    "id": 67939,
+    "canonical_text": "ای بی (وب گاه مزایده اینترنتی)",
+    "meaning_fa_IPA": "i bej væbgɑːhe mozɑːjedeje interneti"
+  },
+  {
+    "id": 67940,
+    "canonical_text": "اچ تی ام ال",
+    "meaning_fa_IPA": "ætʃ ti em el"
+  },
+  {
+    "id": 67941,
+    "canonical_text": "زبان نشانه‌گذاری ابرمتنی",
+    "meaning_fa_IPA": "zæbɑːne neʃɑːnegozɑːrije æbærmætni"
+  },
+  {
+    "id": 67942,
+    "canonical_text": "صفحه هدف (وب)",
+    "meaning_fa_IPA": "sæfheje hædæf væb"
+  },
+  {
+    "id": 67943,
+    "canonical_text": "صفحه مقصد",
+    "meaning_fa_IPA": "sæfheje mæɣsæd"
+  },
+  {
+    "id": 67944,
+    "canonical_text": "فهرست الف (مشهورترین و محبوب ترین افراد)",
+    "meaning_fa_IPA": "fehreste ælef mæʃhurtærin vo mæhbubtærin æfrɑːd"
+  },
+  {
+    "id": 67945,
+    "canonical_text": "آدم از دور خارج شده",
+    "meaning_fa_IPA": "ɑːdæme æz dur xɑːredʒ ʃode"
+  },
+  {
+    "id": 67948,
+    "canonical_text": "نام بردن اسم افراد مشهور (برای تحت تاثیر قرار دادن مخاطب)",
+    "meaning_fa_IPA": "nɑːm bordæne esme æfrɑːde mæʃhur bærɑːje tæhte tæʔsir ɣærɑːr dɑːdæne moxɑːtæb"
+  },
+  {
+    "id": 67949,
+    "canonical_text": "لاف‌زنی",
+    "meaning_fa_IPA": "lɑːfzæni"
+  },
+  {
+    "id": 67950,
+    "canonical_text": "شیفته افراد مشهور (هنرپیشه، خواننده و ...)",
+    "meaning_fa_IPA": "ʃifteje æfrɑːde mæʃhur honærpiʃe xɑːnænde væ"
+  },
+  {
+    "id": 67951,
+    "canonical_text": "استعدادیاب",
+    "meaning_fa_IPA": "esteʔdɑːdjɑːb"
+  },
+  {
+    "id": 67956,
+    "canonical_text": "گوینده (خبر)",
+    "meaning_fa_IPA": "gujænde xæbær"
+  },
+  {
+    "id": 67958,
+    "canonical_text": "سانسور",
+    "meaning_fa_IPA": "sɑːnsur"
+  },
+  {
+    "id": 67961,
+    "canonical_text": "مطلب مورد توجه مردم (در روزنامه و ...)",
+    "meaning_fa_IPA": "mætlæbe morede tævædʒdʒohe mærdom dær ruznɑːme væ"
+  },
+  {
+    "id": 67962,
+    "canonical_text": "داستان اصلی (روزنامه و ...)",
+    "meaning_fa_IPA": "dɑːstɑːne æsli ruznɑːme væ"
+  },
+  {
+    "id": 67964,
+    "canonical_text": "میز خبر (مسیول گردآوری و گزارش خبر)",
+    "meaning_fa_IPA": "mize xæbær mæsʔule gerdɑːværi vo gozɑːreʃe xæbær"
+  },
+  {
+    "id": 67965,
+    "canonical_text": "بخش نظرات و مقاله های ویژه (روزنامه)",
+    "meaning_fa_IPA": "bæxʃe næzærɑːt o mæɣɑːlehɑːje viʒe ruznɑːme"
+  },
+  {
+    "id": 67967,
+    "canonical_text": "نامه سرگشاده",
+    "meaning_fa_IPA": "nɑːmeje særgoʃɑːde"
+  },
+  {
+    "id": 67968,
+    "canonical_text": "خلاصه (اخبار، وقایع مهم و ...)",
+    "meaning_fa_IPA": "xolɑːse æxbɑːr væɣɑːjeʔe mohem væ"
+  },
+  {
+    "id": 67969,
+    "canonical_text": "گزارش هواشناسی",
+    "meaning_fa_IPA": "gozɑːreʃe hævɑːʃenɑːsi"
+  },
+  {
+    "id": 67970,
+    "canonical_text": "نقد (روزنامه)",
+    "meaning_fa_IPA": "næɣd ruznɑːme"
+  },
+  {
+    "id": 67971,
+    "canonical_text": "روزنامه نگاری زرد",
+    "meaning_fa_IPA": "ruznɑːmenegɑːrije zærd"
+  },
+  {
+    "id": 67973,
+    "canonical_text": "نسخه قدیمی (روزنامه و مجله)",
+    "meaning_fa_IPA": "nosxeje ɣædimi ruznɑːme væ mædʒælle"
+  },
+  {
+    "id": 67974,
+    "canonical_text": "هفته نامه",
+    "meaning_fa_IPA": "hæftenɑːme"
+  },
+  {
+    "id": 67975,
+    "canonical_text": "نشریه هفتگی",
+    "meaning_fa_IPA": "næʃrijeje hæftegi"
+  },
+  {
+    "id": 67977,
+    "canonical_text": "نویسنده (روزنامه و مجله)",
+    "meaning_fa_IPA": "nevisænde ruznɑːme væ mædʒælle"
+  },
+  {
+    "id": 67978,
+    "canonical_text": "مقاله‌نویس",
+    "meaning_fa_IPA": "mæɣɑːlenevis"
+  },
+  {
+    "id": 67979,
+    "canonical_text": "مجری (تلویزیون یا رادیو)",
+    "meaning_fa_IPA": "modʒri televizijon jɑː rɑːdijo"
+  },
+  {
+    "id": 67980,
+    "canonical_text": "راهنما (آتش، نور و ...)",
+    "meaning_fa_IPA": "rɑːhnæmɑː ɑːtæʃ nur væ"
+  },
+  {
+    "id": 67983,
+    "canonical_text": "پخش برنامه (تلویزیونی و رادیویی)",
+    "meaning_fa_IPA": "pæxʃe bærnɑːme televizijoni vo rɑːdijoji"
+  },
+  {
+    "id": 67985,
+    "canonical_text": "حروف معرف شبکه (رادیویی یا تلویزیونی)",
+    "meaning_fa_IPA": "horufe moʔærrefe ʃæbæke rɑːdijoji jɑː televizijoni"
+  },
+  {
+    "id": 67986,
+    "canonical_text": "ویرایش",
+    "meaning_fa_IPA": "virɑːjeʃ"
+  },
+  {
+    "id": 67987,
+    "canonical_text": "ویراستاری",
+    "meaning_fa_IPA": "virɑːstɑːri"
+  },
+  {
+    "id": 67988,
+    "canonical_text": "سرمقاله (روزنامه)",
+    "meaning_fa_IPA": "særmæɣɑːle ruznɑːme"
+  },
+  {
+    "id": 67992,
+    "canonical_text": "گزاره برگ",
+    "meaning_fa_IPA": "gozɑːrebærg"
+  },
+  {
+    "id": 67993,
+    "canonical_text": "خبرگزاری",
+    "meaning_fa_IPA": "xæbærgozɑːri"
+  },
+  {
+    "id": 67994,
+    "canonical_text": "ساعت پربیننده (تلویزیون)",
+    "meaning_fa_IPA": "sɑːʔæte porbinænde televizijon"
+  },
+  {
+    "id": 67995,
+    "canonical_text": "ساعت پرشنونده (رادیو)",
+    "meaning_fa_IPA": "sɑːʔæte porʃenævænde rɑːdijo"
+  },
+  {
+    "id": 67996,
+    "canonical_text": "زمان بندی (برنامه های تلویزیونی یا رادیویی)",
+    "meaning_fa_IPA": "zæmɑːnbændi bærnɑːmehɑːje televizijoni jɑː rɑːdijoji"
+  },
+  {
+    "id": 67997,
+    "canonical_text": "آمار بینندگان (برنامه رادیویی یا تلویزیونی)",
+    "meaning_fa_IPA": "ɑːmɑːre binændegɑːn bærnɑːmeje rɑːdijoji jɑː televizijoni"
+  },
+  {
+    "id": 67998,
+    "canonical_text": "آمار شنوندگان",
+    "meaning_fa_IPA": "ɑːmɑːre ʃenævændegɑːn"
+  },
+  {
+    "id": 67999,
+    "canonical_text": "گزارش نویسی",
+    "meaning_fa_IPA": "gozɑːreʃnevisi"
+  },
+  {
+    "id": 68001,
+    "canonical_text": "رادیو ساعت دار",
+    "meaning_fa_IPA": "rɑːdijoje sɑːʔætdɑːr"
+  },
+  {
+    "id": 68002,
+    "canonical_text": "رادیو ساعت",
+    "meaning_fa_IPA": "rɑːdijo sɑːʔæt"
+  },
+  {
+    "id": 68003,
+    "canonical_text": "پارازیت",
+    "meaning_fa_IPA": "pɑːrɑːzit"
+  },
+  {
+    "id": 68004,
+    "canonical_text": "تداخل",
+    "meaning_fa_IPA": "tædɑːxol"
+  },
+  {
+    "id": 68005,
+    "canonical_text": "اختلال در امواج رادیویی",
+    "meaning_fa_IPA": "extelɑːl dær æmvɑːdʒe rɑːdijoji"
+  },
+  {
+    "id": 68006,
+    "canonical_text": "دکل مخابراتی",
+    "meaning_fa_IPA": "dækæle moxɑːbærɑːti"
+  },
+  {
+    "id": 68007,
+    "canonical_text": "فرستنده",
+    "meaning_fa_IPA": "ferestænde"
+  },
+  {
+    "id": 68008,
+    "canonical_text": "صدای سفید (فیزیک)",
+    "meaning_fa_IPA": "sedɑːje sefid fizik"
+  },
+  {
+    "id": 68010,
+    "canonical_text": "کارت یادآوری",
+    "meaning_fa_IPA": "kɑːrte jɑːdɑːværi"
+  },
+  {
+    "id": 68011,
+    "canonical_text": "برنامه های ارسالی از ایستگاه مرکزی",
+    "meaning_fa_IPA": "bærnɑːmehɑːje ersɑːli æz istgɑːhe mærkæzi"
+  },
+  {
+    "id": 68012,
+    "canonical_text": "صحنه آهسته (مسابقات ورزشی و ...)",
+    "meaning_fa_IPA": "sæhneje ɑːheste mosɑːbeɣɑːte værzeʃi væ"
+  },
+  {
+    "id": 68013,
+    "canonical_text": "از پیش ضبط کردن (موسیقی و ...)",
+    "meaning_fa_IPA": "æz piʃ zæbt kærdæn musiqi væ"
+  },
+  {
+    "id": 68014,
+    "canonical_text": "دسترسی عمومی (تلویزیون و رادیو)",
+    "meaning_fa_IPA": "dæstræsije omumi televizijon væ rɑːdijo"
+  },
+  {
+    "id": 68017,
+    "canonical_text": "صنعت سرگرمی (فیلم، سینما و ...)",
+    "meaning_fa_IPA": "sænʔæte særgærmi film sinæmɑː væ"
+  },
+  {
+    "id": 68018,
+    "canonical_text": "قسمت آزمایشی (برنامه تلویزیونی)",
+    "meaning_fa_IPA": "ɣesmæte ɑːzmɑːjeʃi bærnɑːmeje televizijoni"
+  },
+  {
+    "id": 68019,
+    "canonical_text": "تلویزیون واقع نما",
+    "meaning_fa_IPA": "televizijone vɑːɣeʔnæmɑː"
+  },
+  {
+    "id": 68020,
+    "canonical_text": "تلویزیون دیجیتال",
+    "meaning_fa_IPA": "televizijone didʒitɑːl"
+  },
+  {
+    "id": 68021,
+    "canonical_text": "صفحه مسطح",
+    "meaning_fa_IPA": "sæfheje mosættæh"
+  },
+  {
+    "id": 68022,
+    "canonical_text": "صفحه تخت",
+    "meaning_fa_IPA": "sæfheje tæxt"
+  },
+  {
+    "id": 68023,
+    "canonical_text": "کنترل والدین",
+    "meaning_fa_IPA": "kontrole vɑːledejn"
+  },
+  {
+    "id": 68024,
+    "canonical_text": "دستگاه گیرنده دیجیتال تلویزیون",
+    "meaning_fa_IPA": "dæstgɑːhe girændeje didʒitɑːle televizijon"
+  },
+  {
+    "id": 68025,
+    "canonical_text": "هواپیمای بمب افکن",
+    "meaning_fa_IPA": "hævɑːpejmɑːje bombæfkæn"
+  },
+  {
+    "id": 68026,
+    "canonical_text": "بمب‌افکن",
+    "meaning_fa_IPA": "bombæfkæn"
+  },
+  {
+    "id": 68027,
+    "canonical_text": "جنگنده (هواپیما)",
+    "meaning_fa_IPA": "dʒængænde hævɑːpejmɑː"
+  },
+  {
+    "id": 68029,
+    "canonical_text": "هواپیمای شکاری",
+    "meaning_fa_IPA": "hævɑːpejmɑːje ʃekɑːri"
+  },
+  {
+    "id": 68030,
+    "canonical_text": "پرواز آزمایشی",
+    "meaning_fa_IPA": "pærvɑːze ɑːzmɑːjeʃi"
+  },
+  {
+    "id": 68031,
+    "canonical_text": "مراقبت پرواز",
+    "meaning_fa_IPA": "morɑːɣebæte pærvɑːz"
+  },
+  {
+    "id": 68032,
+    "canonical_text": "فروشگاه معاف از عوارض گمرکی",
+    "meaning_fa_IPA": "foruʃgɑːhe moʔɑːf æz ævɑːreze gomroki"
+  },
+  {
+    "id": 68033,
+    "canonical_text": "محل بررسی روادید",
+    "meaning_fa_IPA": "mæhælle bærresije roʔɑːdid"
+  },
+  {
+    "id": 68034,
+    "canonical_text": "درخواست نهایی (از مسافران برای سوار هواپیما شدن)",
+    "meaning_fa_IPA": "dærxɑːste nehɑːji æz mosɑːferɑːn bærɑːje sævɑːre hævɑːpejmɑː ʃodæn"
+  },
+  {
+    "id": 68035,
+    "canonical_text": "فلزیاب",
+    "meaning_fa_IPA": "felezjɑːb"
+  },
+  {
+    "id": 68036,
+    "canonical_text": "گنج‌یاب",
+    "meaning_fa_IPA": "gændʒjɑːb"
+  },
+  {
+    "id": 68037,
+    "canonical_text": "جعبه سیاه",
+    "meaning_fa_IPA": "dʒæʔbeje sijɑːh"
+  },
+  {
+    "id": 68038,
+    "canonical_text": "محموله (کشتی و هواپیما و ...)",
+    "meaning_fa_IPA": "mæhmule keʃti vo hævɑːpejmɑː væ"
+  },
+  {
+    "id": 68040,
+    "canonical_text": "اتاقک خلبان",
+    "meaning_fa_IPA": "otɑːɣæke xælbɑːn"
+  },
+  {
+    "id": 68042,
+    "canonical_text": "موتور جت",
+    "meaning_fa_IPA": "motore dʒet"
+  },
+  {
+    "id": 68043,
+    "canonical_text": "دماغه (کشتی، هواپیما و ...)",
+    "meaning_fa_IPA": "dæmɑːɣe keʃti hævɑːpejmɑː væ"
+  },
+  {
+    "id": 68044,
+    "canonical_text": "کمربند ایمنی (اتومبیل، هواپیما و ...)",
+    "meaning_fa_IPA": "kæmærbænde imeni otomobil hævɑːpejmɑː væ"
+  },
+  {
+    "id": 68046,
+    "canonical_text": "دم (هواپیما)",
+    "meaning_fa_IPA": "dom hævɑːpejmɑː"
+  },
+  {
+    "id": 68047,
+    "canonical_text": "امنیت پرواز",
+    "meaning_fa_IPA": "æmnijæte pærvɑːz"
+  },
+  {
+    "id": 68048,
+    "canonical_text": "افسر امنیت پرواز",
+    "meaning_fa_IPA": "æfsære æmnijæte pærvɑːz"
+  },
+  {
+    "id": 68050,
+    "canonical_text": "امتیاز خرید بلیط هواپیما",
+    "meaning_fa_IPA": "emtijɑːze xæride belite hævɑːpejmɑː"
+  },
+  {
+    "id": 68051,
+    "canonical_text": "چاله هوایی",
+    "meaning_fa_IPA": "tʃɑːleje hævɑːji"
+  },
+  {
+    "id": 68053,
+    "canonical_text": "برخورد پرنده با هواپیما",
+    "meaning_fa_IPA": "bærxorde pærænde bɑː hævɑːpejmɑː"
+  },
+  {
+    "id": 68054,
+    "canonical_text": "اجاره کردن (هواپیما)",
+    "meaning_fa_IPA": "edʒɑːre kærdæn hævɑːpejmɑː"
+  },
+  {
+    "id": 68055,
+    "canonical_text": "دربست کرایه کردن",
+    "meaning_fa_IPA": "dærbæst kerɑːje kærdæn"
+  },
+  {
+    "id": 68056,
+    "canonical_text": "چارتر کردن",
+    "meaning_fa_IPA": "tʃɑːrter kærdæn"
+  },
+  {
+    "id": 68057,
+    "canonical_text": "پرواز چارتر",
+    "meaning_fa_IPA": "pærvɑːze tʃɑːrter"
+  },
+  {
+    "id": 68058,
+    "canonical_text": "به اجبار فرود آمدن (هواپیما)",
+    "meaning_fa_IPA": "be edʒbɑːr forud ɑːmædæn hævɑːpejmɑː"
+  },
+  {
+    "id": 68059,
+    "canonical_text": "فرود اضطراری کردن",
+    "meaning_fa_IPA": "forude ezterɑːri kærdæn"
+  },
+  {
+    "id": 68060,
+    "canonical_text": "به اجبار نشاندن",
+    "meaning_fa_IPA": "be edʒbɑːr neʃɑːndæn"
+  },
+  {
+    "id": 68061,
+    "canonical_text": "(صندلی) درجه یک (هواپیما، قطار و ...)",
+    "meaning_fa_IPA": "sændælije dæredʒe jek hævɑːpejmɑː ɣætɑːr væ"
+  },
+  {
+    "id": 68062,
+    "canonical_text": "مسیر پرواز",
+    "meaning_fa_IPA": "mæsire pærvɑːz"
+  },
+  {
+    "id": 68063,
+    "canonical_text": "فرود اجباری",
+    "meaning_fa_IPA": "forude edʒbɑːri"
+  },
+  {
+    "id": 68064,
+    "canonical_text": "فرود اضطراری",
+    "meaning_fa_IPA": "forude ezterɑːri"
+  },
+  {
+    "id": 68065,
+    "canonical_text": "هنگام پرواز (با هواپیما)",
+    "meaning_fa_IPA": "hengɑːme pærvɑːz bɑː hævɑːpejmɑː"
+  },
+  {
+    "id": 68066,
+    "canonical_text": "در هواپیما",
+    "meaning_fa_IPA": "dær hævɑːpejmɑː"
+  },
+  {
+    "id": 68067,
+    "canonical_text": "منطقه پروازممنوع",
+    "meaning_fa_IPA": "mæntæɣeje pærvɑːzmæmnuʔ"
+  },
+  {
+    "id": 68071,
+    "canonical_text": "ترکش صوتی",
+    "meaning_fa_IPA": "tærkeʃe sowti"
+  },
+  {
+    "id": 68072,
+    "canonical_text": "ترکش آوایی",
+    "meaning_fa_IPA": "tærkeʃe ɑːvɑːji"
+  },
+  {
+    "id": 68073,
+    "canonical_text": "عبور",
+    "meaning_fa_IPA": "obur"
+  },
+  {
+    "id": 68076,
+    "canonical_text": "کارت اتوبوس",
+    "meaning_fa_IPA": "kɑːrte otobus"
+  },
+  {
+    "id": 68077,
+    "canonical_text": "بلیت مدت‌دار اتوبوس",
+    "meaning_fa_IPA": "belite modætdɑːre otobus"
+  },
+  {
+    "id": 68078,
+    "canonical_text": "یک طرفه",
+    "meaning_fa_IPA": "jek tæræfe"
+  },
+  {
+    "id": 68079,
+    "canonical_text": "حرکت کردن (وسایل نقلیه)",
+    "meaning_fa_IPA": "hærækæt kærdæn væsɑːjele næɣlije"
+  },
+  {
+    "id": 68080,
+    "canonical_text": "بلیط فصلی (مسابقات و ...)",
+    "meaning_fa_IPA": "belite fæsli mosɑːbeɣɑːt o væ"
+  },
+  {
+    "id": 68081,
+    "canonical_text": "بلیط مدت‌دار",
+    "meaning_fa_IPA": "belite modætdɑːr"
+  },
+  {
+    "id": 68082,
+    "canonical_text": "تختخواب تاشو (قطار یا کشتی)",
+    "meaning_fa_IPA": "tæxtxɑːbe tɑːʃo ɣætɑːr jɑː keʃti"
+  },
+  {
+    "id": 68083,
+    "canonical_text": "اتاقک راننده (کامیون، اتوبوس و قطار)",
+    "meaning_fa_IPA": "otɑːɣæke rɑːnænde kɑːmijun otobus o ɣætɑːr"
+  },
+  {
+    "id": 68084,
+    "canonical_text": "کابین",
+    "meaning_fa_IPA": "kɑːbin"
+  },
+  {
+    "id": 68085,
+    "canonical_text": "ترمز دستی اضطراری (قطار)",
+    "meaning_fa_IPA": "tormoze dæstije ezterɑːri ɣætɑːr"
+  },
+  {
+    "id": 68087,
+    "canonical_text": "واگن باربری (قطار)",
+    "meaning_fa_IPA": "vɑːgone bɑːrbæri ɣætɑːr"
+  },
+  {
+    "id": 68088,
+    "canonical_text": "واگن مخصوص بار",
+    "meaning_fa_IPA": "vɑːgone mæxsuse bɑːr"
+  },
+  {
+    "id": 68089,
+    "canonical_text": "واگن باری",
+    "meaning_fa_IPA": "vɑːgone bɑːri"
+  },
+  {
+    "id": 68090,
+    "canonical_text": "قطار باربری",
+    "meaning_fa_IPA": "ɣætɑːre bɑːrbæri"
+  },
+  {
+    "id": 68091,
+    "canonical_text": "قطار باری",
+    "meaning_fa_IPA": "ɣætɑːre bɑːri"
+  },
+  {
+    "id": 68092,
+    "canonical_text": "جای بار (بالای صندلی قطار و ...)",
+    "meaning_fa_IPA": "dʒɑːje bɑːr bɑːlɑːje sændælije ɣætɑːr væ"
+  },
+  {
+    "id": 68093,
+    "canonical_text": "جای چمدان",
+    "meaning_fa_IPA": "dʒɑːje tʃæmedɑːn"
+  },
+  {
+    "id": 68094,
+    "canonical_text": "راه‌آهن زیرزمینی",
+    "meaning_fa_IPA": "rɑːhe ɑːhæne zirzæmini"
+  },
+  {
+    "id": 68095,
+    "canonical_text": "واگن تختخواب دار (قطار)",
+    "meaning_fa_IPA": "vɑːgone tæxtxɑːbdɑːr ɣætɑːr"
+  },
+  {
+    "id": 68096,
+    "canonical_text": "کوپه تختخواب‌دار",
+    "meaning_fa_IPA": "kupeje tæxtxɑːbdɑːr"
+  },
+  {
+    "id": 68097,
+    "canonical_text": "پارکومتر",
+    "meaning_fa_IPA": "pɑːrkometr"
+  },
+  {
+    "id": 68098,
+    "canonical_text": "پارک‌سنج",
+    "meaning_fa_IPA": "pɑːrksændʒ"
+  },
+  {
+    "id": 68101,
+    "canonical_text": "جریمه پارک غیر قانونی (اتومبیل)",
+    "meaning_fa_IPA": "dʒærimeje pɑːrke ɣejre ɣɑːnuni otomobil"
+  },
+  {
+    "id": 68102,
+    "canonical_text": "چراغ قرمز (راهنمایی و رانندگی)",
+    "meaning_fa_IPA": "tʃerɑːɣe ɣermez rɑːhnæmɑːji vo rɑːnændegi"
+  },
+  {
+    "id": 68103,
+    "canonical_text": "حق تقدم (رانندگی)",
+    "meaning_fa_IPA": "hæɣɣe tæɣæddom rɑːnændegi"
+  },
+  {
+    "id": 68104,
+    "canonical_text": "اولویت عبور",
+    "meaning_fa_IPA": "olævijæte obur"
+  },
+  {
+    "id": 68105,
+    "canonical_text": "حق تقدم",
+    "meaning_fa_IPA": "hæɣɣe tæɣæddom"
+  },
+  {
+    "id": 68106,
+    "canonical_text": "دوربین کنترل سرعت",
+    "meaning_fa_IPA": "durbine kontrole sorʔæt"
+  },
+  {
+    "id": 68107,
+    "canonical_text": "سرعت مجاز",
+    "meaning_fa_IPA": "sorʔæte modʒɑːz"
+  },
+  {
+    "id": 68108,
+    "canonical_text": "حداکثر سرعت",
+    "meaning_fa_IPA": "hæddæksære sorʔæt"
+  },
+  {
+    "id": 68109,
+    "canonical_text": "محدودیت سرعت",
+    "meaning_fa_IPA": "mæhdudijæte sorʔæt"
+  },
+  {
+    "id": 68110,
+    "canonical_text": "حداکثر سرعت مجاز",
+    "meaning_fa_IPA": "hæddæksære sorʔæte modʒɑːz"
+  },
+  {
+    "id": 68111,
+    "canonical_text": "ردیف باجه های عوارضی",
+    "meaning_fa_IPA": "rædife bɑːdʒehɑːje ævɑːrezi"
+  },
+  {
+    "id": 68112,
+    "canonical_text": "ردیف باجه‌های اخذ عوارض",
+    "meaning_fa_IPA": "rædife bɑːdʒehɑːje æxze ævɑːrez"
+  },
+  {
+    "id": 68113,
+    "canonical_text": "فلکه",
+    "meaning_fa_IPA": "fælæke"
+  },
+  {
+    "id": 68114,
+    "canonical_text": "دنده خلاص رفتن (اتومبیل و ...)",
+    "meaning_fa_IPA": "dænde xolɑːs ræftæn otomobil væ"
+  },
+  {
+    "id": 68115,
+    "canonical_text": "به رانندگی ادامه دادن",
+    "meaning_fa_IPA": "be rɑːnændegi edɑːme dɑːdæn"
+  },
+  {
+    "id": 68116,
+    "canonical_text": "به حرکت (با اتومبیل) ادامه دادن",
+    "meaning_fa_IPA": "be hærækæt bɑː otomobil edɑːme dɑːdæn"
+  },
+  {
+    "id": 68117,
+    "canonical_text": "آموزشگاه رانندگی",
+    "meaning_fa_IPA": "ɑːmuzeʃgɑːhe rɑːnændegi"
+  },
+  {
+    "id": 68118,
+    "canonical_text": "نوربالا (چراغ اتومبیل)",
+    "meaning_fa_IPA": "nure bɑːlɑː tʃerɑːɣe otomobil"
+  },
+  {
+    "id": 68119,
+    "canonical_text": "(عمدا) کوبیدن (به وسیله نقلیه و ...)",
+    "meaning_fa_IPA": "æmdæn kubidæn be væsileje næɣlije væ"
+  },
+  {
+    "id": 68120,
+    "canonical_text": "با سرعت و سروصدا حرکت کردن (وسیله نقلیه موتوری)",
+    "meaning_fa_IPA": "bɑː sorʔæt o særo sedɑː hærækæt kærdæn væsileje næɣlijeje motori"
+  },
+  {
+    "id": 68121,
+    "canonical_text": "سرعت غیرمجاز",
+    "meaning_fa_IPA": "sorʔæte ɣejremodʒɑːz"
+  },
+  {
+    "id": 68123,
+    "canonical_text": "رانندگی با سرعت غیرمجاز",
+    "meaning_fa_IPA": "rɑːnændegi bɑː sorʔæte ɣejremodʒɑːz"
+  },
+  {
+    "id": 68125,
+    "canonical_text": "دور سه حرکته",
+    "meaning_fa_IPA": "dore se hærækæte"
+  },
+  {
+    "id": 68126,
+    "canonical_text": "توقفگاه کامیون",
+    "meaning_fa_IPA": "tævæɣɣofgɑːhe kɑːmijun"
+  },
+  {
+    "id": 68127,
+    "canonical_text": "استراحتگاه کامیون‌داران",
+    "meaning_fa_IPA": "esterɑːhætgɑːhe kɑːmijundɑːrɑːn"
+  },
+  {
+    "id": 68128,
+    "canonical_text": "دور برگردان",
+    "meaning_fa_IPA": "dorbærgardɑːn"
+  },
+  {
+    "id": 68129,
+    "canonical_text": "دور 180 درجه",
+    "meaning_fa_IPA": "dore sæd o hæʃtɑːd dæredʒe"
+  },
+  {
+    "id": 68130,
+    "canonical_text": "پیچ تند (جاده)",
+    "meaning_fa_IPA": "pitʃe tond dʒɑːde"
+  },
+  {
+    "id": 68131,
+    "canonical_text": "استراحتگاه جاده ای",
+    "meaning_fa_IPA": "esterɑːhætgɑːhe dʒɑːdeji"
+  },
+  {
+    "id": 68132,
+    "canonical_text": "استراحتگاه",
+    "meaning_fa_IPA": "esterɑːhætgɑːh"
+  },
+  {
+    "id": 68133,
+    "canonical_text": "یخ شفاف (روی جاده)",
+    "meaning_fa_IPA": "jæxe ʃæffɑːf ruje dʒɑːde"
+  },
+  {
+    "id": 68134,
+    "canonical_text": "یخ سیاه",
+    "meaning_fa_IPA": "jæxe sijɑːh"
+  },
+  {
+    "id": 68135,
+    "canonical_text": "راه اتومبیل دیگری را مسدود کردن",
+    "meaning_fa_IPA": "rɑːhe otomobile digæri rɑː mæsdud kærdæn"
+  },
+  {
+    "id": 68136,
+    "canonical_text": "اتومبیل خود را جلوی اتومبیل دیگری پارک کردن",
+    "meaning_fa_IPA": "otomobile xod rɑː dʒelowe otomobile digæri pɑːrk kærdæn"
+  },
+  {
+    "id": 68137,
+    "canonical_text": "شانه راه",
+    "meaning_fa_IPA": "ʃɑːneje rɑːh"
+  },
+  {
+    "id": 68138,
+    "canonical_text": "باند اضطراری (جاده)",
+    "meaning_fa_IPA": "bɑːnde ezterɑːri dʒɑːde"
+  },
+  {
+    "id": 68139,
+    "canonical_text": "هم سفری",
+    "meaning_fa_IPA": "hæmsæfæri"
+  },
+  {
+    "id": 68141,
+    "canonical_text": "(عمل) بستن",
+    "meaning_fa_IPA": "æmæle bæstæn"
+  },
+  {
+    "id": 68142,
+    "canonical_text": "بسته شدن",
+    "meaning_fa_IPA": "bæste ʃodæn"
+  },
+  {
+    "id": 68144,
+    "canonical_text": "پارک دوبل کردن",
+    "meaning_fa_IPA": "pɑːrke dobl kærdæn"
+  },
+  {
+    "id": 68146,
+    "canonical_text": "دوبله پارک کردن",
+    "meaning_fa_IPA": "duble pɑːrk kærdæn"
+  },
+  {
+    "id": 68149,
+    "canonical_text": "بزن و در رو (تصادف جاده ای)",
+    "meaning_fa_IPA": "bezæn o dærro tæsɑːdofe dʒɑːdeji"
+  },
+  {
+    "id": 68151,
+    "canonical_text": "بدون کلید روشن کردن",
+    "meaning_fa_IPA": "bedune kelid rowʃæn kærdæn"
+  },
+  {
+    "id": 68152,
+    "canonical_text": "جک (اتومبیل و ...)",
+    "meaning_fa_IPA": "dʒæk otomobil væ"
+  },
+  {
+    "id": 68154,
+    "canonical_text": "جک زدن (اتومبیل)",
+    "meaning_fa_IPA": "dʒæk zædæn otomobil"
+  },
+  {
+    "id": 68155,
+    "canonical_text": "با جک بالا بردن",
+    "meaning_fa_IPA": "bɑː dʒæk bɑːlɑː bordæn"
+  },
+  {
+    "id": 68159,
+    "canonical_text": "خارج از خیابان عمومی (پارکینگ)",
+    "meaning_fa_IPA": "xɑːredʒ æz xijɑːbɑːne omumi pɑːrking"
+  },
+  {
+    "id": 68160,
+    "canonical_text": "در خیابان",
+    "meaning_fa_IPA": "dær xijɑːbɑːn"
+  },
+  {
+    "id": 68161,
+    "canonical_text": "کنار خیابان",
+    "meaning_fa_IPA": "kenɑːre xijɑːbɑːn"
+  },
+  {
+    "id": 68162,
+    "canonical_text": "از پشت (به اتومبیل و ...) زدن",
+    "meaning_fa_IPA": "æz poʃt be otomobil væ zædæn"
+  },
+  {
+    "id": 68163,
+    "canonical_text": "خشم جاده ای",
+    "meaning_fa_IPA": "xæʃme dʒɑːdeji"
+  },
+  {
+    "id": 68164,
+    "canonical_text": "خشونت جاده‌ای",
+    "meaning_fa_IPA": "xoʃunæte dʒɑːdeji"
+  },
+  {
+    "id": 68165,
+    "canonical_text": "محکم به چیزی کوبیدن",
+    "meaning_fa_IPA": "mohkæm be tʃizi kubidæn"
+  },
+  {
+    "id": 68166,
+    "canonical_text": "محکم با چیزی برخورد کردن",
+    "meaning_fa_IPA": "mohkæm bɑː tʃizi bærxord kærdæn"
+  },
+  {
+    "id": 68167,
+    "canonical_text": "جعبه دنده خودکار",
+    "meaning_fa_IPA": "dʒæʔbeje dændeje xodkɑːr"
+  },
+  {
+    "id": 68168,
+    "canonical_text": "دنده اتوماتیک",
+    "meaning_fa_IPA": "dændeje otomɑːtik"
+  },
+  {
+    "id": 68169,
+    "canonical_text": "میله چرخ فرمان",
+    "meaning_fa_IPA": "mileje tʃærxe færmɑːn"
+  },
+  {
+    "id": 68170,
+    "canonical_text": "اکسل",
+    "meaning_fa_IPA": "æksel"
+  },
+  {
+    "id": 68171,
+    "canonical_text": "محور چرخ",
+    "meaning_fa_IPA": "mæhvære tʃærx"
+  },
+  {
+    "id": 68172,
+    "canonical_text": "صندلی کودک (مخصوص اتومبیل)",
+    "meaning_fa_IPA": "sændælije kudæk mæxsuse otomobil"
+  },
+  {
+    "id": 68173,
+    "canonical_text": "چراغ ترمز (در عقب خودرو)",
+    "meaning_fa_IPA": "tʃerɑːɣe tormoz dær æɣæbe xodro"
+  },
+  {
+    "id": 68176,
+    "canonical_text": "لنت ترمز (اتومبیل و ...)",
+    "meaning_fa_IPA": "lente tormoz otomobil væ"
+  },
+  {
+    "id": 68178,
+    "canonical_text": "صندلی اتومبیل",
+    "meaning_fa_IPA": "sændælije otomobil"
+  },
+  {
+    "id": 68179,
+    "canonical_text": "شاسی خودرو",
+    "meaning_fa_IPA": "ʃɑːsije xodro"
+  },
+  {
+    "id": 68181,
+    "canonical_text": "صندلی کودک (اتومبیل)",
+    "meaning_fa_IPA": "sændælije kudæk otomobil"
+  },
+  {
+    "id": 68182,
+    "canonical_text": "کمربند کودک",
+    "meaning_fa_IPA": "kæmærbænde kudæk"
+  },
+  {
+    "id": 68183,
+    "canonical_text": "سامانه بازدارنده سرعت (خودرو)",
+    "meaning_fa_IPA": "sɑːmɑːneje bɑːzdɑːrændeje sorʔæt xodro"
+  },
+  {
+    "id": 68184,
+    "canonical_text": "کروز کنترل",
+    "meaning_fa_IPA": "kruz kontrol"
+  },
+  {
+    "id": 68186,
+    "canonical_text": "سیستم سوخت رسانی انژکتوری",
+    "meaning_fa_IPA": "sisteme suxtresɑːnije ænʒektori"
+  },
+  {
+    "id": 68187,
+    "canonical_text": "سیستم اشتعال (خودرو)",
+    "meaning_fa_IPA": "sisteme eʃteʔɑːl xodro"
+  },
+  {
+    "id": 68188,
+    "canonical_text": "سامانه جرقه‌زنی",
+    "meaning_fa_IPA": "sɑːmɑːneje dʒæræɣezæni"
+  },
+  {
+    "id": 68189,
+    "canonical_text": "موتور درون سوز",
+    "meaning_fa_IPA": "motore dærunsuz"
+  },
+  {
+    "id": 68190,
+    "canonical_text": "موتور احتراق داخلی",
+    "meaning_fa_IPA": "motore ehterɑːɣe dɑːxeli"
+  },
+  {
+    "id": 68191,
+    "canonical_text": "صندلی مسافر (کنار صندلی راننده)",
+    "meaning_fa_IPA": "sændælije mosɑːfer kenɑːre sændælije rɑːnænde"
+  },
+  {
+    "id": 68192,
+    "canonical_text": "صندلی بغل‌دست راننده",
+    "meaning_fa_IPA": "sændælije bæɣældæste rɑːnænde"
+  },
+  {
+    "id": 68193,
+    "canonical_text": "فرمان هیدرولیک (اتومبیل)",
+    "meaning_fa_IPA": "færmɑːne hidrolik otomobil"
+  },
+  {
+    "id": 68196,
+    "canonical_text": "باربند سقفی",
+    "meaning_fa_IPA": "bɑːrbænde sæɣfi"
+  },
+  {
+    "id": 68197,
+    "canonical_text": "باربند",
+    "meaning_fa_IPA": "bɑːrbænd"
+  },
+  {
+    "id": 68198,
+    "canonical_text": "لاستیک زاپاس",
+    "meaning_fa_IPA": "lɑːstike zɑːpɑːs"
+  },
+  {
+    "id": 68199,
+    "canonical_text": "لاستیک یدکی",
+    "meaning_fa_IPA": "lɑːstike jædæki"
+  },
+  {
+    "id": 68200,
+    "canonical_text": "شمع (اتومبیل و ...)",
+    "meaning_fa_IPA": "ʃæmʔ otomobil væ"
+  },
+  {
+    "id": 68201,
+    "canonical_text": "باله (خودرو)",
+    "meaning_fa_IPA": "bɑːle xodro"
+  },
+  {
+    "id": 68202,
+    "canonical_text": "دسته دنده (خودرو)",
+    "meaning_fa_IPA": "dæste dænde xodro"
+  },
+  {
+    "id": 68203,
+    "canonical_text": "سیستم تعلیق (خودرو)",
+    "meaning_fa_IPA": "sisteme tæʔliɣ xodro"
+  },
+  {
+    "id": 68204,
+    "canonical_text": "فنربندی",
+    "meaning_fa_IPA": "fænærbændi"
+  },
+  {
+    "id": 68205,
+    "canonical_text": "مسافر مداخله گر",
+    "meaning_fa_IPA": "mosɑːfere modɑːxelegær"
+  },
+  {
+    "id": 68207,
+    "canonical_text": "راننده برگزیده",
+    "meaning_fa_IPA": "rɑːnændeje bærgozide"
+  },
+  {
+    "id": 68209,
+    "canonical_text": "کارگاه صافکاری بدنه خودرو",
+    "meaning_fa_IPA": "kɑːrgɑːhe sɑːfkɑːrije bædæneje xodro"
+  },
+  {
+    "id": 68210,
+    "canonical_text": "صافکاری",
+    "meaning_fa_IPA": "sɑːfkɑːri"
+  },
+  {
+    "id": 68211,
+    "canonical_text": "آدمک آزمایش تصادف",
+    "meaning_fa_IPA": "ɑːdæmæke ɑːzmɑːjeʃe tæsɑːdof"
+  },
+  {
+    "id": 68212,
+    "canonical_text": "به دقت تمیز کردن (خودرو)",
+    "meaning_fa_IPA": "be deɣɣæt tæmiz kærdæn xodro"
+  },
+  {
+    "id": 68213,
+    "canonical_text": "شماره پلاک (اتومبیل)",
+    "meaning_fa_IPA": "ʃomɑːreje pelɑːk otomobil"
+  },
+  {
+    "id": 68214,
+    "canonical_text": "گورستان خودرو",
+    "meaning_fa_IPA": "gurestɑːne xodro"
+  },
+  {
+    "id": 68215,
+    "canonical_text": "آهن قراضه",
+    "meaning_fa_IPA": "ɑːhæne ɣorɑːze"
+  },
+  {
+    "id": 68217,
+    "canonical_text": "آهن‌پاره",
+    "meaning_fa_IPA": "ɑːhænpɑːre"
+  },
+  {
+    "id": 68219,
+    "canonical_text": "راه دسترسی",
+    "meaning_fa_IPA": "rɑːhe dæstræsi"
+  },
+  {
+    "id": 68220,
+    "canonical_text": "مسیر ورودی",
+    "meaning_fa_IPA": "mæsire vorudi"
+  },
+  {
+    "id": 68221,
+    "canonical_text": "راه اصلی",
+    "meaning_fa_IPA": "rɑːhe æsli"
+  },
+  {
+    "id": 68222,
+    "canonical_text": "خیابان متقاطع",
+    "meaning_fa_IPA": "xijɑːbɑːne motæɣɑːteʔ"
+  },
+  {
+    "id": 68223,
+    "canonical_text": "جاده خاکی",
+    "meaning_fa_IPA": "dʒɑːdeje xɑːki"
+  },
+  {
+    "id": 68224,
+    "canonical_text": "بزرگراه (دوطرفه)",
+    "meaning_fa_IPA": "bozorgrɑːhe dotæræfe"
+  },
+  {
+    "id": 68225,
+    "canonical_text": "باند سرعت",
+    "meaning_fa_IPA": "bɑːnde sorʔæt"
+  },
+  {
+    "id": 68226,
+    "canonical_text": "تقاطع غیرهمسطح (بزرگراه و ...)",
+    "meaning_fa_IPA": "tæɣɑːteʔe ɣejre hæmsæth bozorgrɑːh væ"
+  },
+  {
+    "id": 68227,
+    "canonical_text": "اصلی ترین خیابان شهر",
+    "meaning_fa_IPA": "æslitærin xijɑːbɑːne ʃæhr"
+  },
+  {
+    "id": 68228,
+    "canonical_text": "مهم‌ترین خیابان شهر",
+    "meaning_fa_IPA": "mohemtærin xijɑːbɑːne ʃæhr"
+  },
+  {
+    "id": 68229,
+    "canonical_text": "خیابان اصلی (شهر)",
+    "meaning_fa_IPA": "xijɑːbɑːne æsli ʃæhr"
+  },
+  {
+    "id": 68230,
+    "canonical_text": "نوار میانی دو جاده",
+    "meaning_fa_IPA": "nævɑːre mijɑːnije do dʒɑːde"
+  },
+  {
+    "id": 68231,
+    "canonical_text": "جاده ارتباطی خروجی",
+    "meaning_fa_IPA": "dʒɑːdeje ertebɑːtije xorudʒi"
+  },
+  {
+    "id": 68232,
+    "canonical_text": "رمپ خروجی",
+    "meaning_fa_IPA": "ræmpe xorudʒi"
+  },
+  {
+    "id": 68233,
+    "canonical_text": "خارج جاده ای (خودرو و ...)",
+    "meaning_fa_IPA": "xɑːredʒe dʒɑːdeji xodro væ"
+  },
+  {
+    "id": 68234,
+    "canonical_text": "جاده ارتباطی ورودی",
+    "meaning_fa_IPA": "dʒɑːdeje ertebɑːtije vorudi"
+  },
+  {
+    "id": 68235,
+    "canonical_text": "رمپ ورودی",
+    "meaning_fa_IPA": "ræmpe vorudi"
+  },
+  {
+    "id": 68236,
+    "canonical_text": "باند سبقت",
+    "meaning_fa_IPA": "bɑːnde sebɣæt"
+  },
+  {
+    "id": 68237,
+    "canonical_text": "کنارگذر",
+    "meaning_fa_IPA": "kenɑːrgozær"
+  },
+  {
+    "id": 68238,
+    "canonical_text": "باند کندرو",
+    "meaning_fa_IPA": "bɑːnde kondrow"
+  },
+  {
+    "id": 68239,
+    "canonical_text": "شانه خاکی",
+    "meaning_fa_IPA": "ʃɑːneje xɑːki"
+  },
+  {
+    "id": 68240,
+    "canonical_text": "خیابان اصلی (دارای مغازه و ...)",
+    "meaning_fa_IPA": "xijɑːbɑːne æsli dɑːrɑːje mæɣɑːze væ"
+  },
+  {
+    "id": 68243,
+    "canonical_text": "سه راه",
+    "meaning_fa_IPA": "se rɑːh"
+  },
+  {
+    "id": 68244,
+    "canonical_text": "خودروی دنده خودکار",
+    "meaning_fa_IPA": "xodroje dændeje xodkɑːr"
+  },
+  {
+    "id": 68245,
+    "canonical_text": "خودروی اتومات",
+    "meaning_fa_IPA": "xodroje otomɑːt"
+  },
+  {
+    "id": 68246,
+    "canonical_text": "کادیلاک (شرکت خودروسازی امریکایی)",
+    "meaning_fa_IPA": "kɑːdilɑːk ʃerkæte xodrosɑːzije ɑːmrikɑːji"
+  },
+  {
+    "id": 68248,
+    "canonical_text": "خودروی کروکی",
+    "meaning_fa_IPA": "xodroje koroki"
+  },
+  {
+    "id": 68249,
+    "canonical_text": "خودرو با سقف جمع‌شونده",
+    "meaning_fa_IPA": "xodro bɑː sæɣfe dʒæmʃævænde"
+  },
+  {
+    "id": 68250,
+    "canonical_text": "کانورتیبل",
+    "meaning_fa_IPA": "kɑːnvertibel"
+  },
+  {
+    "id": 68251,
+    "canonical_text": "بدون هزینه",
+    "meaning_fa_IPA": "bedune hæzine"
+  },
+  {
+    "id": 68252,
+    "canonical_text": "خودروی چهارچرخ محرک",
+    "meaning_fa_IPA": "xodroje tʃɑːrtʃærxe mohærrek"
+  },
+  {
+    "id": 68253,
+    "canonical_text": "خودروی دودیفرانسیل",
+    "meaning_fa_IPA": "xodroje dodiferɑːnsijel"
+  },
+  {
+    "id": 68254,
+    "canonical_text": "خودروی مسابقه ای",
+    "meaning_fa_IPA": "xodroje mosɑːbeɣeji"
+  },
+  {
+    "id": 68255,
+    "canonical_text": "خودروی تقویت‌شده",
+    "meaning_fa_IPA": "xodroje tæɣvijætʃode"
+  },
+  {
+    "id": 68256,
+    "canonical_text": "ماشین مسابقه",
+    "meaning_fa_IPA": "mɑːʃine mosɑːbeɣe"
+  },
+  {
+    "id": 68257,
+    "canonical_text": "اتومبیل مسابقه",
+    "meaning_fa_IPA": "otomobile mosɑːbeɣe"
+  },
+  {
+    "id": 68258,
+    "canonical_text": "اتومبیل کورسی",
+    "meaning_fa_IPA": "otomobile korsi"
+  },
+  {
+    "id": 68259,
+    "canonical_text": "کامیون نمک پاش",
+    "meaning_fa_IPA": "kɑːmijune næmækpɑːʃ"
+  },
+  {
+    "id": 68261,
+    "canonical_text": "سدان",
+    "meaning_fa_IPA": "sedɑːn"
+  },
+  {
+    "id": 69763,
+    "canonical_text": "کویین سایز (تختخواب و ...)",
+    "meaning_fa_IPA": "kuˈiːn sɑːjz tæxtˈxɑːb o"
+  },
+  {
+    "id": 69764,
+    "canonical_text": "بزرگ (به ویژه اتومبیل)",
+    "meaning_fa_IPA": "boˈzorg be viːˈʒe otoˈmobiːl"
+  },
+  {
+    "id": 69765,
+    "canonical_text": "سبقت ممنوع",
+    "meaning_fa_IPA": "seˈbeɣæt mæmˈnuːʔ"
+  },
+  {
+    "id": 69767,
+    "canonical_text": "خودروی کامپکت",
+    "meaning_fa_IPA": "xodˈro-je kɑːmˈpækt"
+  },
+  {
+    "id": 69769,
+    "canonical_text": "آینه بغل",
+    "meaning_fa_IPA": "ɑːjeˈne-je bæˈɣæl"
+  },
+  {
+    "id": 69770,
+    "canonical_text": "رسوب",
+    "meaning_fa_IPA": "roˈsuːb"
+  },
+  {
+    "id": 69775,
+    "canonical_text": "ریزش مو",
+    "meaning_fa_IPA": "riːˈzeʃ-e muː"
+  },
+  {
+    "id": 69777,
+    "canonical_text": "سطح جهانی",
+    "meaning_fa_IPA": "sæth-e ʤæhɑːˈniː"
+  },
+  {
+    "id": 69778,
+    "canonical_text": "کلسیم",
+    "meaning_fa_IPA": "kælsiːˈjom"
+  },
+  {
+    "id": 69779,
+    "canonical_text": "کار یکنواخت و سخت",
+    "meaning_fa_IPA": "kɑːr-e jeknæˈvɑːxt o sæxt"
+  },
+  {
+    "id": 69780,
+    "canonical_text": "زمردین",
+    "meaning_fa_IPA": "zomorˈrodiːn"
+  },
+  {
+    "id": 69781,
+    "canonical_text": "خود انتقادگر",
+    "meaning_fa_IPA": "xod-enteɣɑːdˈgær"
+  },
+  {
+    "id": 69782,
+    "canonical_text": "کسی را سر کار گذاشتن",
+    "meaning_fa_IPA": "kæsiː rɑː sær-e kɑːr gozɑːʃˈtæn"
+  },
+  {
+    "id": 69784,
+    "canonical_text": "سلفی (عکاسی)",
+    "meaning_fa_IPA": "selˈfiː ʔækːɑːˈsiː"
+  },
+  {
+    "id": 69786,
+    "canonical_text": "ری استارت کردن (کامپیوتر)",
+    "meaning_fa_IPA": "riː esˈtɑːrt kærˈdæn kɑːmˈpjuːter"
+  },
+  {
+    "id": 69787,
+    "canonical_text": "جایی را (ناگهانی) ترک کردن",
+    "meaning_fa_IPA": "ʤɑːˈjiː rɑː nɑːgeˈhɑːniː tærk kærˈdæn"
+  },
+  {
+    "id": 69788,
+    "canonical_text": "یک بام و دو هوا",
+    "meaning_fa_IPA": "jek bɑːm o duː hæˈvɑː"
+  },
+  {
+    "id": 69789,
+    "canonical_text": "استاندارد دوگانه",
+    "meaning_fa_IPA": "estɑːnˈdɑːrd-e doˈgɑːne"
+  },
+  {
+    "id": 69790,
+    "canonical_text": "لحظه ای",
+    "meaning_fa_IPA": "læhˈzeʔiː"
+  },
+  {
+    "id": 69793,
+    "canonical_text": "منطقه ای",
+    "meaning_fa_IPA": "mænˈteɣeʔiː"
+  },
+  {
+    "id": 69794,
+    "canonical_text": "ناحیه‌ای",
+    "meaning_fa_IPA": "nɑːhiˈjeʔiː"
+  },
+  {
+    "id": 69795,
+    "canonical_text": "نمودار زمانی",
+    "meaning_fa_IPA": "nemuːˈdɑːr-e zæmɑːˈniː"
+  },
+  {
+    "id": 69797,
+    "canonical_text": "آداب غذاخوری",
+    "meaning_fa_IPA": "ɑːˈdɑːb-e ɣæzɑːˈxoriː"
+  },
+  {
+    "id": 69798,
+    "canonical_text": "گرد هم آمدن",
+    "meaning_fa_IPA": "gerd-e hæm ɑːmæˈdæn"
+  },
+  {
+    "id": 69799,
+    "canonical_text": "کم‌خرج",
+    "meaning_fa_IPA": "kæmˈxærʤ"
+  },
+  {
+    "id": 69800,
+    "canonical_text": "از نفس افتادن",
+    "meaning_fa_IPA": "æz næˈfæs oftɑːˈdæn"
+  },
+  {
+    "id": 69801,
+    "canonical_text": "قرص سرماخوردگی",
+    "meaning_fa_IPA": "ɣors-e særmɑːxorˈdegiː"
+  },
+  {
+    "id": 69802,
+    "canonical_text": "میکروفون",
+    "meaning_fa_IPA": "miːkroˈfon"
+  },
+  {
+    "id": 69803,
+    "canonical_text": "خشک شویی کردن",
+    "meaning_fa_IPA": "xoʃkʃuˈjiː kærˈdæn"
+  },
+  {
+    "id": 69806,
+    "canonical_text": "موجود (زنده)",
+    "meaning_fa_IPA": "mowˈʤuːd zenˈde"
+  },
+  {
+    "id": 69807,
+    "canonical_text": "خدای من!",
+    "meaning_fa_IPA": "xodɑːˈje mæn"
+  },
+  {
+    "id": 69808,
+    "canonical_text": "نظر کسی را پرسیدن",
+    "meaning_fa_IPA": "næˈzær-e kæsiː rɑː porsˈiːdæn"
+  },
+  {
+    "id": 69810,
+    "canonical_text": "فهرست (اموال، کالا و ...)",
+    "meaning_fa_IPA": "fehˈrest æmˈvɑːl kɑːˈlɑː vo"
+  },
+  {
+    "id": 69811,
+    "canonical_text": "دور کردن",
+    "meaning_fa_IPA": "duːr kærˈdæn"
+  },
+  {
+    "id": 69812,
+    "canonical_text": "اکوادور (کشوری در آمریکای جنوبی)",
+    "meaning_fa_IPA": "ʔekvɑːˈdor keʃvæˈriː dær ɑːmriːkɑːˈje ʤonuːˈbiː"
+  },
+  {
+    "id": 69813,
+    "canonical_text": "(با) فناوری سطح پایین",
+    "meaning_fa_IPA": "bɑː fænnɑːvæˈriː-je sæth-e pɑːˈjiːn"
+  },
+  {
+    "id": 69814,
+    "canonical_text": "متحول کننده",
+    "meaning_fa_IPA": "motæhævˈvel konænˈde"
+  },
+  {
+    "id": 69816,
+    "canonical_text": "به میزان انبوه تولید کردن",
+    "meaning_fa_IPA": "be miːˈzɑːn-e ænˈbuːh towˈliːd kærˈdæn"
+  },
+  {
+    "id": 69817,
+    "canonical_text": "ویروسی",
+    "meaning_fa_IPA": "viːruːˈsiː"
+  },
+  {
+    "id": 69820,
+    "canonical_text": "تنفسی",
+    "meaning_fa_IPA": "tænæfˈfosiː"
+  },
+  {
+    "id": 69821,
+    "canonical_text": "غیردولتی",
+    "meaning_fa_IPA": "ɣejr-e dowlæˈtiː"
+  },
+  {
+    "id": 69823,
+    "canonical_text": "کشتار جمعی",
+    "meaning_fa_IPA": "koʃˈtɑːr-e ʤæmˈʔiː"
+  },
+  {
+    "id": 69824,
+    "canonical_text": "مطابق قانون اساسی",
+    "meaning_fa_IPA": "motɑːˈbeɣ-e ɣɑːˈnuːn-e æsɑːˈsiː"
+  },
+  {
+    "id": 69828,
+    "canonical_text": "پهنه آبی",
+    "meaning_fa_IPA": "pæhˈne-je ɑːˈbiː"
+  },
+  {
+    "id": 69829,
+    "canonical_text": "به امید دیدار",
+    "meaning_fa_IPA": "be omiːd-e diːˈdɑːr"
+  },
+  {
+    "id": 69830,
+    "canonical_text": "کار گروهی",
+    "meaning_fa_IPA": "kɑːr-e guruːˈhiː"
+  },
+  {
+    "id": 69831,
+    "canonical_text": "نقش آفرینی کردن",
+    "meaning_fa_IPA": "næɣʃ-ɑːfæriːˈniː kærˈdæn"
+  },
+  {
+    "id": 69832,
+    "canonical_text": "فرد چینی",
+    "meaning_fa_IPA": "færˈd-e ʧiːˈniː"
+  },
+  {
+    "id": 69833,
+    "canonical_text": "اهل چین",
+    "meaning_fa_IPA": "æhl-e ʧiːn"
+  },
+  {
+    "id": 69834,
+    "canonical_text": "چینی",
+    "meaning_fa_IPA": "ʧiːˈniː"
+  },
+  {
+    "id": 69835,
+    "canonical_text": "اهل کره جنوبی",
+    "meaning_fa_IPA": "æhl-e koˈre-je ʤonuːˈbiː"
+  },
+  {
+    "id": 69836,
+    "canonical_text": "اهل کلمبیا",
+    "meaning_fa_IPA": "æhl-e koˈlombiːjɑː"
+  },
+  {
+    "id": 69837,
+    "canonical_text": "اهل ژاپن",
+    "meaning_fa_IPA": "æhl-e ʒɑːˈpon"
+  },
+  {
+    "id": 69838,
+    "canonical_text": "قهوه نوشیدن",
+    "meaning_fa_IPA": "ɣæhˈve nuːʃiːˈdæn"
+  },
+  {
+    "id": 69839,
+    "canonical_text": "با دوستان گپ زدن",
+    "meaning_fa_IPA": "bɑː duːsˈtɑːn gæp zæˈdæn"
+  },
+  {
+    "id": 69840,
+    "canonical_text": "با دوستان چت کردن",
+    "meaning_fa_IPA": "bɑː duːsˈtɑːn ʧæt kærˈdæn"
+  },
+  {
+    "id": 69841,
+    "canonical_text": "آهنگ دانلود کردن",
+    "meaning_fa_IPA": "ɑːˈhæŋ dɑːnˈlod kærˈdæn"
+  },
+  {
+    "id": 69842,
+    "canonical_text": "موسیقی دانلود کردن",
+    "meaning_fa_IPA": "muːsiːˈɣiː dɑːnˈlod kærˈdæn"
+  },
+  {
+    "id": 69843,
+    "canonical_text": "نظر گذاشتن (اینترنت)",
+    "meaning_fa_IPA": "næˈzær gozɑːʃˈtæn iːntærˈnet"
+  },
+  {
+    "id": 69845,
+    "canonical_text": "در اینترنت جستجو کردن",
+    "meaning_fa_IPA": "dær iːntærˈnet ʤost-o-ʤuː kærˈdæn"
+  },
+  {
+    "id": 69846,
+    "canonical_text": "ویدیو آپلود کردن",
+    "meaning_fa_IPA": "viːˈdiːo ɑːpˈlod kærˈdæn"
+  },
+  {
+    "id": 69847,
+    "canonical_text": "کامپیوتر تعمیر کردن",
+    "meaning_fa_IPA": "kɑːmˈpjuːter tæʔˈmiːr kærˈdæn"
+  },
+  {
+    "id": 69848,
+    "canonical_text": "گیتار نواختن",
+    "meaning_fa_IPA": "giːˈtɑːr nævɑːxˈtæn"
+  },
+  {
+    "id": 69849,
+    "canonical_text": "به زبان فرانسوی صحبت کردن",
+    "meaning_fa_IPA": "be zæˈbɑːn-e færɑːnˈseviː sohˈbæt kærˈdæn"
+  },
+  {
+    "id": 69850,
+    "canonical_text": "کاوشکده",
+    "meaning_fa_IPA": "kɑːvoʃˈkæde"
+  },
+  {
+    "id": 69851,
+    "canonical_text": "مرکز علمی",
+    "meaning_fa_IPA": "mærˈkæz-e ʔelˈmiː"
+  },
+  {
+    "id": 69852,
+    "canonical_text": "پارک آبی",
+    "meaning_fa_IPA": "pɑːrk-e ɑːˈbiː"
+  },
+  {
+    "id": 69853,
+    "canonical_text": "وبسایت ساختن",
+    "meaning_fa_IPA": "webˈsɑːjt sɑːxˈtæn"
+  },
+  {
+    "id": 69855,
+    "canonical_text": "رانندگی یاد گرفتن",
+    "meaning_fa_IPA": "rɑːnænˈdegiː jɑːd gerefˈtæn"
+  },
+  {
+    "id": 69856,
+    "canonical_text": "دنبال کار گشتن",
+    "meaning_fa_IPA": "donˈbɑːl-e kɑːr gæʃˈtæn"
+  },
+  {
+    "id": 69857,
+    "canonical_text": "برای امتحان درس خواندن",
+    "meaning_fa_IPA": "bærɑːˈje emteˈhɑːn dærs xɑːnˈdæn"
+  },
+  {
+    "id": 69858,
+    "canonical_text": "زبان ایتالیایی خواندن",
+    "meaning_fa_IPA": "zæˈbɑːn-e iːtɑːliːjɑːˈjiː xɑːnˈdæn"
+  },
+  {
+    "id": 69859,
+    "canonical_text": "زبان ایتالیایی یاد گرفتن",
+    "meaning_fa_IPA": "zæˈbɑːn-e iːtɑːliːjɑːˈjiː jɑːd gerefˈtæn"
+  },
+  {
+    "id": 69860,
+    "canonical_text": "به کلاس رقص رفتن",
+    "meaning_fa_IPA": "be keˈlɑːs-e ræɣs ræfˈtæn"
+  },
+  {
+    "id": 69861,
+    "canonical_text": "کلاس تنیس رفتن",
+    "meaning_fa_IPA": "keˈlɑːs-e teˈniːs ræfˈtæn"
+  },
+  {
+    "id": 69862,
+    "canonical_text": "در گروه موسیقی (ساز) نواختن",
+    "meaning_fa_IPA": "dær guˈruːh-e muːsiːˈɣiː sɑːz nævɑːxˈtæn"
+  },
+  {
+    "id": 69863,
+    "canonical_text": "لباس های جدید خریدن",
+    "meaning_fa_IPA": "leˈbɑːs-hɑː-je ʤæˈdiːd xæriːˈdæn"
+  },
+  {
+    "id": 69864,
+    "canonical_text": "تا دیروقت بیرون ماندن",
+    "meaning_fa_IPA": "tɑː diːrˈvæɣt biːˈruːn mɑːnˈdæn"
+  },
+  {
+    "id": 69865,
+    "canonical_text": "خواروبار خریدن",
+    "meaning_fa_IPA": "xɑːroˈbɑːr xæriːˈdæn"
+  },
+  {
+    "id": 69866,
+    "canonical_text": "مایحتاج خریدن",
+    "meaning_fa_IPA": "mɑːjæhˈtɑːʤ xæriːˈdæn"
+  },
+  {
+    "id": 69867,
+    "canonical_text": "نمایش دیدن",
+    "meaning_fa_IPA": "næmɑːˈjeʃ diːˈdæn"
+  },
+  {
+    "id": 69869,
+    "canonical_text": "به دیدن دوستان رفتن",
+    "meaning_fa_IPA": "be diːˈdæn-e duːsˈtɑːn ræfˈtæn"
+  },
+  {
+    "id": 69870,
+    "canonical_text": "با دوستان ملاقات کردن",
+    "meaning_fa_IPA": "bɑː duːsˈtɑːn molɑːˈɣɑːt kærˈdæn"
+  },
+  {
+    "id": 69871,
+    "canonical_text": "به جشنواره رفتن",
+    "meaning_fa_IPA": "be ʤæʃnˈvɑːre ræfˈtæn"
+  },
+  {
+    "id": 69872,
+    "canonical_text": "به ساحل رفتن",
+    "meaning_fa_IPA": "be sɑːˈhel ræfˈtæn"
+  },
+  {
+    "id": 69873,
+    "canonical_text": "در تور گردشگری شرکت کردن",
+    "meaning_fa_IPA": "dær tuːr-e gærdæʃˈgæriː ʃerˈkæt kærˈdæn"
+  },
+  {
+    "id": 69875,
+    "canonical_text": "بیست و هشتم",
+    "meaning_fa_IPA": "bist-o hæʃˈtom"
+  },
+  {
+    "id": 69877,
+    "canonical_text": "فهرست بازبینی",
+    "meaning_fa_IPA": "fehˈrest-e bɑːzbiːˈniː"
+  },
+  {
+    "id": 69879,
+    "canonical_text": "کادو خریدن",
+    "meaning_fa_IPA": "kɑːˈdo xæriːˈdæn"
+  },
+  {
+    "id": 69880,
+    "canonical_text": "لیست مهمانان را نوشتن",
+    "meaning_fa_IPA": "liːst-e mehˈmɑːnɑːn rɑː neveʃˈtæn"
+  },
+  {
+    "id": 69881,
+    "canonical_text": "منوی غذایی انتخاب کردن (برای مهمانی)",
+    "meaning_fa_IPA": "menoˈje ɣæzɑːˈjiː entexɑːb kærˈdæn bærɑːˈje mehˈmɑːniː"
+  },
+  {
+    "id": 69882,
+    "canonical_text": "فرهنگ عامه",
+    "meaning_fa_IPA": "færˈhæŋ-e ʔɑːmˈme"
+  },
+  {
+    "id": 69885,
+    "canonical_text": "به قدر کافی خوابیدن",
+    "meaning_fa_IPA": "be ɣædr-e kɑːˈfiː xɑːbiːˈdæn"
+  },
+  {
+    "id": 69886,
+    "canonical_text": "برنامه تلویزیونی واقع نما",
+    "meaning_fa_IPA": "bærnɑːˈme-je televiːziːjoˈniː-je vɑːɣeʔ-næˈmɑː"
+  },
+  {
+    "id": 69888,
+    "canonical_text": "جلو زدن (صوت، ویدیو)",
+    "meaning_fa_IPA": "ʤeˈlo zæˈdæn sowt viːˈdiːo"
+  },
+  {
+    "id": 69889,
+    "canonical_text": "تلویزیون دولتی",
+    "meaning_fa_IPA": "televiːziːˈjon-e dowlæˈtiː"
+  },
+  {
+    "id": 69892,
+    "canonical_text": "غذای اصلی",
+    "meaning_fa_IPA": "ɣæzɑːˈje æsˈliː"
+  },
+  {
+    "id": 69893,
+    "canonical_text": "سوپ گوجه",
+    "meaning_fa_IPA": "suːp-e goˈʤe"
+  },
+  {
+    "id": 69894,
+    "canonical_text": "نان سیر",
+    "meaning_fa_IPA": "nɑːn-e siːr"
+  },
+  {
+    "id": 69895,
+    "canonical_text": "پیاز حلقه ای سوخاری",
+    "meaning_fa_IPA": "piːˈjɑːz-e hælɣeˈʔiː-je suːxɑːˈriː"
+  },
+  {
+    "id": 69896,
+    "canonical_text": "مخلوط سبزیجات",
+    "meaning_fa_IPA": "mæxˈluːt-e sæbziːˈʤɑːt"
+  },
+  {
+    "id": 69897,
+    "canonical_text": "مرغ سرخ شده",
+    "meaning_fa_IPA": "morɣ-e sorx-ʃoˈde"
+  },
+  {
+    "id": 69898,
+    "canonical_text": "موسیقی محلی",
+    "meaning_fa_IPA": "muːsiːˈɣiː-je mæhælˈliː"
+  },
+  {
+    "id": 69899,
+    "canonical_text": "موسیقی فولکلور",
+    "meaning_fa_IPA": "muːsiːˈɣiː-je folˈklor"
+  },
+  {
+    "id": 69900,
+    "canonical_text": "جلب توجه",
+    "meaning_fa_IPA": "ʤælb-e tævæʤˈʤoh"
+  },
+  {
+    "id": 69901,
+    "canonical_text": "ابراز هویت",
+    "meaning_fa_IPA": "ebˈrɑːz-e hovijˈjæt"
+  },
+  {
+    "id": 69902,
+    "canonical_text": "کاپشن چرم",
+    "meaning_fa_IPA": "kɑːpˈʃen-e ʧærm"
+  },
+  {
+    "id": 69903,
+    "canonical_text": "در برنامه تلویزیونی حضور پیدا کردن",
+    "meaning_fa_IPA": "dær bærnɑːˈme-je televiːziːjoˈniː hoˈzuːr pejdɑː kærˈdæn"
+  },
+  {
+    "id": 69904,
+    "canonical_text": "دست ساز بشر",
+    "meaning_fa_IPA": "dæstˈsɑːz-e bæˈʃær"
+  },
+  {
+    "id": 69905,
+    "canonical_text": "مشغله",
+    "meaning_fa_IPA": "mæʃˈɣæle"
+  },
+  {
+    "id": 69906,
+    "canonical_text": "قرار کور",
+    "meaning_fa_IPA": "ɣæˈrɑːr-e kuːr"
+  },
+  {
+    "id": 69909,
+    "canonical_text": "جلسه کاری",
+    "meaning_fa_IPA": "ʤælæˈse-je kɑːˈriː"
+  },
+  {
+    "id": 69910,
+    "canonical_text": "نوبت دکتر",
+    "meaning_fa_IPA": "nowˈbæt-e dokˈtor"
+  },
+  {
+    "id": 69911,
+    "canonical_text": "مصاحبه کاری",
+    "meaning_fa_IPA": "mosɑːheˈbe-je kɑːˈriː"
+  },
+  {
+    "id": 69912,
+    "canonical_text": "مصاحبه شغلی",
+    "meaning_fa_IPA": "mosɑːheˈbe-je ʃoɣˈliː"
+  },
+  {
+    "id": 69913,
+    "canonical_text": "تمرین فوتبال",
+    "meaning_fa_IPA": "tæmˈriːn-e fuːtˈbɑːl"
+  },
+  {
+    "id": 69914,
+    "canonical_text": "پیغام دریافت کردن",
+    "meaning_fa_IPA": "pejˈɣɑːm dærjɑːft kærˈdæn"
+  },
+  {
+    "id": 69916,
+    "canonical_text": "مومن",
+    "meaning_fa_IPA": "moʔˈmen"
+  },
+  {
+    "id": 69917,
+    "canonical_text": "معتقد",
+    "meaning_fa_IPA": "moʔtæˈɣed"
+  },
+  {
+    "id": 69920,
+    "canonical_text": "زباله الکترونیکی",
+    "meaning_fa_IPA": "zobɑːˈle-je elektronˈiːkiː"
+  },
+  {
+    "id": 69921,
+    "canonical_text": "خودرو هیبریدی",
+    "meaning_fa_IPA": "xodˈro-je hiːbriːˈdiː"
+  },
+  {
+    "id": 69923,
+    "canonical_text": "کیسه پلاستیک",
+    "meaning_fa_IPA": "kiːˈse-je pelɑːsˈtiːk"
+  },
+  {
+    "id": 69924,
+    "canonical_text": "نایلکس",
+    "meaning_fa_IPA": "nɑːjˈleks"
+  },
+  {
+    "id": 69925,
+    "canonical_text": "سطل زباله بازیافت",
+    "meaning_fa_IPA": "sætl-e zobɑːˈle-je bɑːzjɑːft"
+  },
+  {
+    "id": 69927,
+    "canonical_text": "جایزه برده",
+    "meaning_fa_IPA": "ʤɑːjeˈze borˈde"
+  },
+  {
+    "id": 69928,
+    "canonical_text": "برنده جایزه",
+    "meaning_fa_IPA": "bærænˈde-je ʤɑːjeˈze"
+  },
+  {
+    "id": 69929,
+    "canonical_text": "پرفروش",
+    "meaning_fa_IPA": "porfoˈruːʃ"
+  },
+  {
+    "id": 69930,
+    "canonical_text": "خوش صدا",
+    "meaning_fa_IPA": "xoʃˈsedɑː"
+  },
+  {
+    "id": 69931,
+    "canonical_text": "رکوردشکن",
+    "meaning_fa_IPA": "reˈkordʃekæn"
+  },
+  {
+    "id": 69933,
+    "canonical_text": "آموزش زبان",
+    "meaning_fa_IPA": "ɑːmuːˈzeʃ-e zæˈbɑːn"
+  },
+  {
+    "id": 69934,
+    "canonical_text": "یادگیری زبان",
+    "meaning_fa_IPA": "jɑːdgiːˈriː-je zæˈbɑːn"
+  },
+  {
+    "id": 69935,
+    "canonical_text": "درک مطلب (آموزشی)",
+    "meaning_fa_IPA": "dærk-e mætˈlæb ɑːmuːzeˈʃiː"
+  },
+  {
+    "id": 69936,
+    "canonical_text": "بی نوبت وارد صف شدن",
+    "meaning_fa_IPA": "biː nowˈbæt vɑːred-e sæf ʃoˈdæn"
+  },
+  {
+    "id": 69938,
+    "canonical_text": "از کسی تعریف کردن",
+    "meaning_fa_IPA": "æz kæˈsiː tæʔˈriːf kærˈdæn"
+  },
+  {
+    "id": 69939,
+    "canonical_text": "جای خود را به کسی دادن",
+    "meaning_fa_IPA": "ʤɑːˈje xod rɑː be kæˈsiː dɑːˈdæn"
+  },
+  {
+    "id": 69940,
+    "canonical_text": "عذرخواهی (کسی را) پذیرفتن",
+    "meaning_fa_IPA": "ozrxɑːˈhiː kæˈsiː rɑː pæziːrofˈtæn"
+  },
+  {
+    "id": 69941,
+    "canonical_text": "توضیح خواستن (از کسی)",
+    "meaning_fa_IPA": "towˈziːh xɑːsˈtæn æz kæˈsiː"
+  },
+  {
+    "id": 69942,
+    "canonical_text": "توضیح دادن (بابت کاری به کسی)",
+    "meaning_fa_IPA": "towˈziːh dɑːˈdæn bɑːˈbæt-e kɑːˈriː be kæˈsiː"
+  },
+  {
+    "id": 69943,
+    "canonical_text": "با نظر کسی موافق بودن",
+    "meaning_fa_IPA": "bɑː næˈzær-e kæˈsiː movɑːˈfeɣ buːˈdæn"
+  },
+  {
+    "id": 69944,
+    "canonical_text": "با نظر کسی مخالف بودن",
+    "meaning_fa_IPA": "bɑː næˈzær-e kæˈsiː moxɑːˈlef buːˈdæn"
+  },
+  {
+    "id": 69945,
+    "canonical_text": "درخواست کسی را رد کردن",
+    "meaning_fa_IPA": "dærxɑːst-e kæˈsiː rɑː ræd kærˈdæn"
+  },
+  {
+    "id": 69946,
+    "canonical_text": "پاسخ تعریف کسی (از خود) را دادن",
+    "meaning_fa_IPA": "pɑːˈsox-e tæʔˈriːf-e kæˈsiː æz xod rɑː dɑːˈdæn"
+  },
+  {
+    "id": 69947,
+    "canonical_text": "تقاضای انجام کاری از کسی کردن",
+    "meaning_fa_IPA": "tæɣɑːzɑːˈje ænˈʤɑːm-e kɑːˈriː æz kæˈsiː kærˈdæn"
+  },
+  {
+    "id": 69948,
+    "canonical_text": "لطف کسی را جبران کردن",
+    "meaning_fa_IPA": "lotf-e kæˈsiː rɑː ʤobˈrɑːn kærˈdæn"
+  },
+  {
+    "id": 69950,
+    "canonical_text": "پیشنهاد توافق دادن",
+    "meaning_fa_IPA": "piːʃneˈhɑːd-e tævɑːˈfoɣ dɑːˈdæn"
+  },
+  {
+    "id": 69951,
+    "canonical_text": "دعوت (کسی را) قبول کردن",
+    "meaning_fa_IPA": "dæʔˈvæt-e kæˈsiː rɑː ɣæˈbuːl kærˈdæn"
+  },
+  {
+    "id": 69952,
+    "canonical_text": "دعوت (کسی را) رد کردن",
+    "meaning_fa_IPA": "dæʔˈvæt-e kæˈsiː rɑː ræd kærˈdæn"
+  },
+  {
+    "id": 69953,
+    "canonical_text": "عاشق خوش گذرانی",
+    "meaning_fa_IPA": "ɑːˈʃeɣ-e xoʃ-gozærɑːˈniː"
+  },
+  {
+    "id": 69954,
+    "canonical_text": "خوش‌گذران",
+    "meaning_fa_IPA": "xoʃgozæˈrɑːn"
+  },
+  {
+    "id": 69955,
+    "canonical_text": "با تحصیلات بالا",
+    "meaning_fa_IPA": "bɑː tæhsiːˈlɑːt-e bɑːˈlɑː"
+  },
+  {
+    "id": 69956,
+    "canonical_text": "خوب برنامه ریزی شده",
+    "meaning_fa_IPA": "xuːb bærnɑːme-riːˈziː ʃoˈde"
+  },
+  {
+    "id": 69957,
+    "canonical_text": "دوباره ساختن",
+    "meaning_fa_IPA": "doˈbɑːre sɑːxˈtæn"
+  },
+  {
+    "id": 69958,
+    "canonical_text": "چیزی را بیش از حد مهم جلوه دادن",
+    "meaning_fa_IPA": "ʧiːˈziː rɑː biːʃ æz hæd moˈhem ʤelˈve dɑːˈdæn"
+  },
+  {
+    "id": 69960,
+    "canonical_text": "بی‌مفهوم",
+    "meaning_fa_IPA": "biːmæfˈhuːm"
+  },
+  {
+    "id": 69962,
+    "canonical_text": "صفحه آرایی کردن",
+    "meaning_fa_IPA": "sæfhe-ɑːrɑːˈjiː kærˈdæn"
+  },
+  {
+    "id": 69963,
+    "canonical_text": "صفحه‌چینی کردن",
+    "meaning_fa_IPA": "sæfhe-ʧiːˈniː kærˈdæn"
+  },
+  {
+    "id": 69964,
+    "canonical_text": "نامه تشکر",
+    "meaning_fa_IPA": "nɑːˈme-je tæʃækˈkor"
+  },
+  {
+    "id": 69966,
+    "canonical_text": "روغن موتور",
+    "meaning_fa_IPA": "rowˈɣæn-e moˈtor"
+  },
+  {
+    "id": 69967,
+    "canonical_text": "کلینیک درمانی",
+    "meaning_fa_IPA": "keliːˈniːk-e dærmɑːˈniː"
+  },
+  {
+    "id": 69968,
+    "canonical_text": "نگهبانی محله",
+    "meaning_fa_IPA": "negæhˈbɑːniː-je mæhælˈle"
+  },
+  {
+    "id": 69969,
+    "canonical_text": "کتابخانه عمومی",
+    "meaning_fa_IPA": "ketɑːbxɑːˈne-je ʔomuːˈmiː"
+  },
+  {
+    "id": 69970,
+    "canonical_text": "شب خوبی داشته باشی.",
+    "meaning_fa_IPA": "ʃæb-e xuːˈbiː dɑːʃˈte bɑːˈʃiː"
+  },
+  {
+    "id": 69971,
+    "canonical_text": "قمقمه آب",
+    "meaning_fa_IPA": "ɣomɣoˈme-je ɑːb"
+  },
+  {
+    "id": 69972,
+    "canonical_text": "بطری آب",
+    "meaning_fa_IPA": "botˈriː-je ɑːb"
+  },
+  {
+    "id": 69973,
+    "canonical_text": "تماس تلفنی گرفتن (با کسی)",
+    "meaning_fa_IPA": "tæˈmɑːs-e teleˈfoniː gerefˈtæn bɑː kæˈsiː"
+  },
+  {
+    "id": 69974,
+    "canonical_text": "اینترنت رفتن",
+    "meaning_fa_IPA": "iːntærˈnet ræfˈtæn"
+  },
+  {
+    "id": 69975,
+    "canonical_text": "فصل بارانی",
+    "meaning_fa_IPA": "fæsl-e bɑːrɑːˈniː"
+  },
+  {
+    "id": 69976,
+    "canonical_text": "فصل خشک (دوره کم باران)",
+    "meaning_fa_IPA": "fæsl-e xoʃk dowˈre-je kæm-bɑːˈrɑːn"
+  },
+  {
+    "id": 69977,
+    "canonical_text": "تمرین با وزنه",
+    "meaning_fa_IPA": "tæmˈriːn bɑː væzˈne"
+  },
+  {
+    "id": 69979,
+    "canonical_text": "لباس برند",
+    "meaning_fa_IPA": "leˈbɑːs-e berænd"
+  },
+  {
+    "id": 69981,
+    "canonical_text": "تور گردشگری رفتن",
+    "meaning_fa_IPA": "tuːr-e gærdæʃˈgæriː ræfˈtæn"
+  },
+  {
+    "id": 69982,
+    "canonical_text": "هندوراس",
+    "meaning_fa_IPA": "honduˈrɑːs"
+  },
+  {
+    "id": 69983,
+    "canonical_text": "مراکش",
+    "meaning_fa_IPA": "mærɑːˈkeʃ"
+  },
+  {
+    "id": 69984,
+    "canonical_text": "زبان هندی",
+    "meaning_fa_IPA": "zæˈbɑːn-e henˈdiː"
+  },
+  {
+    "id": 69985,
+    "canonical_text": "عراق",
+    "meaning_fa_IPA": "ʔeˈrɑːɣ"
+  },
+  {
+    "id": 69986,
+    "canonical_text": "به سفر رفتن",
+    "meaning_fa_IPA": "be sæˈfær ræfˈtæn"
+  },
+  {
+    "id": 69987,
+    "canonical_text": "خورنده",
+    "meaning_fa_IPA": "xorænˈde"
+  },
+  {
+    "id": 69989,
+    "canonical_text": "دوستدار حیوانات",
+    "meaning_fa_IPA": "duːstˈdɑːr-e hejvɑːˈnɑːt"
+  },
+  {
+    "id": 69990,
+    "canonical_text": "حیوان‌دوست",
+    "meaning_fa_IPA": "hejvɑːnˈduːst"
+  },
+  {
+    "id": 69991,
+    "canonical_text": "نگارش خلاق",
+    "meaning_fa_IPA": "negɑːˈreʃ-e xælˈlɑːɣ"
+  },
+  {
+    "id": 69992,
+    "canonical_text": "موسیقی پاپ",
+    "meaning_fa_IPA": "muːsiːˈɣiː-je pɑːp"
+  },
+  {
+    "id": 69993,
+    "canonical_text": "ژانر موسیقی کانتری",
+    "meaning_fa_IPA": "ʒɑːnr-e muːsiːˈɣiː-je kɑːnˈtriː"
+  },
+  {
+    "id": 69994,
+    "canonical_text": "شماره تلفن اشتباه",
+    "meaning_fa_IPA": "ʃomɑːˈre-je teleˈfon-e eʃteˈbɑːh"
+  },
+  {
+    "id": 69995,
+    "canonical_text": "مدیر کارآفرین",
+    "meaning_fa_IPA": "moˈdiːr-e kɑːrɑːfæˈriːn"
+  },
+  {
+    "id": 69997,
+    "canonical_text": "نامه رسان",
+    "meaning_fa_IPA": "nɑːme-ræˈsɑːn"
+  },
+  {
+    "id": 69998,
+    "canonical_text": "نامه‌بر",
+    "meaning_fa_IPA": "nɑːmeˈbær"
+  },
+  {
+    "id": 69999,
+    "canonical_text": "مادر جد (مادر مادربزرگ)",
+    "meaning_fa_IPA": "mɑːˈdær-e ʤæd mɑːˈdær-e mɑːdærboˈzorg"
+  },
+  {
+    "id": 70000,
+    "canonical_text": "فهرست درست کردن",
+    "meaning_fa_IPA": "fehˈrest dorost kærˈdæn"
+  },
+  {
+    "id": 70002,
+    "canonical_text": "(با هواپیما) برگشتن",
+    "meaning_fa_IPA": "bɑː hævɑːpejˈmɑː bærgæʃˈtæn"
+  },
+  {
+    "id": 70003,
+    "canonical_text": "شخصیت کارتونی",
+    "meaning_fa_IPA": "ʃæxsiːˈjæt-e kɑːrtuːˈniː"
+  },
+  {
+    "id": 70004,
+    "canonical_text": "منتخبات",
+    "meaning_fa_IPA": "montæxæˈbɑːt"
+  },
+  {
+    "id": 70005,
+    "canonical_text": "گزیده",
+    "meaning_fa_IPA": "goziːˈde"
+  },
+  {
+    "id": 70006,
+    "canonical_text": "سبز فسفری",
+    "meaning_fa_IPA": "sæbz-e fosfoˈriː"
+  },
+  {
+    "id": 70007,
+    "canonical_text": "سبز شبرنگ",
+    "meaning_fa_IPA": "sæbz-e ʃæbˈræŋ"
+  },
+  {
+    "id": 70008,
+    "canonical_text": "با طرح گلدار (پارچه)",
+    "meaning_fa_IPA": "bɑː tærh-e golˈdɑːr pɑːrˈʧe"
+  },
+  {
+    "id": 70009,
+    "canonical_text": "خوش یمن",
+    "meaning_fa_IPA": "xoʃˈjomn"
+  },
+  {
+    "id": 70011,
+    "canonical_text": "دچار شوک الکتریکی شدن",
+    "meaning_fa_IPA": "doˈʧɑːr-e ʃok-e elektriːˈkiː ʃoˈdæn"
+  },
+  {
+    "id": 70012,
+    "canonical_text": "دچار برق گرفتگی شدن",
+    "meaning_fa_IPA": "doˈʧɑːr-e bærɣgerefˈtegiː ʃoˈdæn"
+  },
+  {
+    "id": 70013,
+    "canonical_text": "آخ",
+    "meaning_fa_IPA": "ɑːx"
+  },
+  {
+    "id": 70014,
+    "canonical_text": "اوف",
+    "meaning_fa_IPA": "uːf"
+  },
+  {
+    "id": 70015,
+    "canonical_text": "هوش احساسی",
+    "meaning_fa_IPA": "huːʃ-e ehˈsɑːsiː"
+  },
+  {
+    "id": 70016,
+    "canonical_text": "هوش هیجانی",
+    "meaning_fa_IPA": "huːʃ-e hejeˈʤɑːniː"
+  },
+  {
+    "id": 70017,
+    "canonical_text": "بدهکار شدن",
+    "meaning_fa_IPA": "bedehˈkɑːr ʃoˈdæn"
+  },
+  {
+    "id": 70018,
+    "canonical_text": "ستاره راک",
+    "meaning_fa_IPA": "setɑːˈre-je rɑːk"
+  },
+  {
+    "id": 70021,
+    "canonical_text": "پارتی داشتن",
+    "meaning_fa_IPA": "pɑːrˈtiː dɑːʃˈtæn"
+  },
+  {
+    "id": 70022,
+    "canonical_text": "آشنا داشتن",
+    "meaning_fa_IPA": "ɑːʃˈnɑː dɑːʃˈtæn"
+  },
+  {
+    "id": 70023,
+    "canonical_text": "با افراد مهم و برجسته آشنا بودن",
+    "meaning_fa_IPA": "bɑː æfˈrɑːd-e moˈhem o borʤæsˈte ɑːʃˈnɑː buːˈdæn"
+  },
+  {
+    "id": 70025,
+    "canonical_text": "شاغل",
+    "meaning_fa_IPA": "ʃɑːˈɣel"
+  },
+  {
+    "id": 70026,
+    "canonical_text": "آلودگی هوا",
+    "meaning_fa_IPA": "ɑːluːdeˈgiː-je hæˈvɑː"
+  },
+  {
+    "id": 70027,
+    "canonical_text": "مددکاری اجتماعی",
+    "meaning_fa_IPA": "mædædˈkɑːriː-je eʤtemɑːˈʔiː"
+  },
+  {
+    "id": 70028,
+    "canonical_text": "مددکاری",
+    "meaning_fa_IPA": "mædædˈkɑːriː"
+  },
+  {
+    "id": 70029,
+    "canonical_text": "تحلیلگر مالی",
+    "meaning_fa_IPA": "tæhliːlˈgær-e mɑːˈliː"
+  },
+  {
+    "id": 70030,
+    "canonical_text": "مشاور مالیاتی",
+    "meaning_fa_IPA": "moʃɑːˈver-e mɑːliːjɑːˈtiː"
+  },
+  {
+    "id": 70031,
+    "canonical_text": "مدیریت اجرایی کسب و کار",
+    "meaning_fa_IPA": "modiːriˈjæt-e eʤrɑːˈjiː-je kæsb-o-kɑːr"
+  },
+  {
+    "id": 70032,
+    "canonical_text": "مهندس عمران",
+    "meaning_fa_IPA": "mohænˈdes-e omˈrɑːn"
+  },
+  {
+    "id": 70033,
+    "canonical_text": "پیمانکار",
+    "meaning_fa_IPA": "pejmɑːnˈkɑːr"
+  },
+  {
+    "id": 70035,
+    "canonical_text": "کنتراتچی",
+    "meaning_fa_IPA": "konterɑːtˈʧiː"
+  },
+  {
+    "id": 70036,
+    "canonical_text": "تحلیل مالی",
+    "meaning_fa_IPA": "tæhˈliːl-e mɑːˈliː"
+  },
+  {
+    "id": 70037,
+    "canonical_text": "واحد فروش",
+    "meaning_fa_IPA": "vɑːˈhed-e foˈruːʃ"
+  },
+  {
+    "id": 70038,
+    "canonical_text": "بخش فروش",
+    "meaning_fa_IPA": "bæxʃ-e foˈruːʃ"
+  },
+  {
+    "id": 70039,
+    "canonical_text": "قایم شدن",
+    "meaning_fa_IPA": "ɣɑːˈjem ʃoˈdæn"
+  },
+  {
+    "id": 70040,
+    "canonical_text": "مرد محترم",
+    "meaning_fa_IPA": "mærˈd-e mohtæˈræm"
+  },
+  {
+    "id": 70041,
+    "canonical_text": "مرد باادب",
+    "meaning_fa_IPA": "mærˈd-e bɑːˈʔædæb"
+  },
+  {
+    "id": 70042,
+    "canonical_text": "آدم حسابی",
+    "meaning_fa_IPA": "ɑːˈdæm-e hesɑːˈbiː"
+  },
+  {
+    "id": 70043,
+    "canonical_text": "جنتلمن",
+    "meaning_fa_IPA": "ʤentelˈmen"
+  },
+  {
+    "id": 70044,
+    "canonical_text": "منزوی",
+    "meaning_fa_IPA": "monzæˈviː"
+  },
+  {
+    "id": 70046,
+    "canonical_text": "تیرک",
+    "meaning_fa_IPA": "tiːˈræk"
+  },
+  {
+    "id": 70047,
+    "canonical_text": "مرجان (زیست شناسی)",
+    "meaning_fa_IPA": "mærˈʤɑːn ziːstʃenɑːˈsiː"
+  },
+  {
+    "id": 70050,
+    "canonical_text": "فنلاند",
+    "meaning_fa_IPA": "fenˈlɑːnd"
+  },
+  {
+    "id": 70051,
+    "canonical_text": "نروژ",
+    "meaning_fa_IPA": "noˈrveʒ"
+  },
+  {
+    "id": 70052,
+    "canonical_text": "مکعب (هندسه)",
+    "meaning_fa_IPA": "moˈkæʔæb hendeˈse"
+  },
+  {
+    "id": 70054,
+    "canonical_text": "گوی",
+    "meaning_fa_IPA": "guːj"
+  },
+  {
+    "id": 70055,
+    "canonical_text": "استوانه (هندسه)",
+    "meaning_fa_IPA": "ostoˈvɑːne hendeˈse"
+  },
+  {
+    "id": 70057,
+    "canonical_text": "گالن (واحد اندازه گیری مایعات)",
+    "meaning_fa_IPA": "gɑːˈlon vɑːˈhed-e ændɑːze-giːˈriː-je mɑːjeˈʔɑːt"
+  },
+  {
+    "id": 70059,
+    "canonical_text": "شکوفه کردن",
+    "meaning_fa_IPA": "ʃoˈkuːfe kærˈdæn"
+  },
+  {
+    "id": 70060,
+    "canonical_text": "شکفتن",
+    "meaning_fa_IPA": "ʃekofˈtæn"
+  },
+  {
+    "id": 70061,
+    "canonical_text": "پری",
+    "meaning_fa_IPA": "pæˈriː"
+  },
+  {
+    "id": 70062,
+    "canonical_text": "مناطق کوهستانی",
+    "meaning_fa_IPA": "mænɑːˈteɣ-e kuːhestɑːˈniː"
+  },
+  {
+    "id": 70063,
+    "canonical_text": "ارتفاعات",
+    "meaning_fa_IPA": "ertefɑːˈʔɑːt"
+  },
+  {
+    "id": 70065,
+    "canonical_text": "جوشن",
+    "meaning_fa_IPA": "ʤowˈʃæn"
+  },
+  {
+    "id": 70067,
+    "canonical_text": "شوالیه",
+    "meaning_fa_IPA": "ʃovɑːliːˈje"
+  },
+  {
+    "id": 70069,
+    "canonical_text": "بنچه",
+    "meaning_fa_IPA": "bonˈʧe"
+  },
+  {
+    "id": 70070,
+    "canonical_text": "فتیله (مواد منفجره)",
+    "meaning_fa_IPA": "fætiːˈle mævɑːd-e monfæʤeˈre"
+  },
+  {
+    "id": 70072,
+    "canonical_text": "معصیت",
+    "meaning_fa_IPA": "mæʔsiːˈjæt"
+  },
+  {
+    "id": 70074,
+    "canonical_text": "کنگره",
+    "meaning_fa_IPA": "kongeˈre"
+  },
+  {
+    "id": 70076,
+    "canonical_text": "بستنی قیفی",
+    "meaning_fa_IPA": "bæstæˈniː-je ɣejˈfiː"
+  },
+  {
+    "id": 70077,
+    "canonical_text": "دانه کاج",
+    "meaning_fa_IPA": "dɑːˈne-je kɑːʤ"
+  },
+  {
+    "id": 70078,
+    "canonical_text": "سوسن (گیاه شناسی)",
+    "meaning_fa_IPA": "suːˈsæn giːjɑːhʃenɑːˈsiː"
+  },
+  {
+    "id": 70080,
+    "canonical_text": "لاله مردابی",
+    "meaning_fa_IPA": "lɑːˈle-je mordɑːˈbiː"
+  },
+  {
+    "id": 70082,
+    "canonical_text": "نخل",
+    "meaning_fa_IPA": "næxl"
+  },
+  {
+    "id": 70083,
+    "canonical_text": "قوس (ریاضی)",
+    "meaning_fa_IPA": "ɣows riːjɑːˈziː"
+  },
+  {
+    "id": 70084,
+    "canonical_text": "آتشین",
+    "meaning_fa_IPA": "ɑːtæˈʃiːn"
+  },
+  {
+    "id": 70085,
+    "canonical_text": "آتش‌گون",
+    "meaning_fa_IPA": "ɑːtæʃˈguːn"
+  },
+  {
+    "id": 70087,
+    "canonical_text": "برای مدتی (کوتاه)",
+    "meaning_fa_IPA": "bærɑːˈje modˈdætiː kuːˈtɑːh"
+  },
+  {
+    "id": 70088,
+    "canonical_text": "مدتی",
+    "meaning_fa_IPA": "modˈdætiː"
+  },
+  {
+    "id": 70089,
+    "canonical_text": "بی دانش",
+    "meaning_fa_IPA": "biːˈdɑːneʃ"
+  },
+  {
+    "id": 70090,
+    "canonical_text": "کوره",
+    "meaning_fa_IPA": "kuːˈre"
+  },
+  {
+    "id": 70092,
+    "canonical_text": "عبوس",
+    "meaning_fa_IPA": "ʔæˈbuːs"
+  },
+  {
+    "id": 70093,
+    "canonical_text": "حیوان (وحشی، بزرگ و چهارپا)",
+    "meaning_fa_IPA": "hejˈvɑːn væhˈʃiː boˈzorg o ʧɑːhɑːrˈpɑː"
+  },
+  {
+    "id": 70094,
+    "canonical_text": "جانور",
+    "meaning_fa_IPA": "ʤɑːnæˈvær"
+  },
+  {
+    "id": 70096,
+    "canonical_text": "وابسته به تولید مثل",
+    "meaning_fa_IPA": "vɑːbæsˈte be towˈliːd-e mesl"
+  },
+  {
+    "id": 70097,
+    "canonical_text": "تناسلی",
+    "meaning_fa_IPA": "tænɑːsoˈliː"
+  },
+  {
+    "id": 70099,
+    "canonical_text": "خطوط شطرنجی",
+    "meaning_fa_IPA": "xoˈtuːt-e ʃætˈrænʤiː"
+  },
+  {
+    "id": 70101,
+    "canonical_text": "زنگ (فلزات)",
+    "meaning_fa_IPA": "zæŋ felezˈzɑːt"
+  },
+  {
+    "id": 70102,
+    "canonical_text": "وسیله مارپیچ",
+    "meaning_fa_IPA": "væsiːˈle-je mɑːrˈpiːʧ"
+  },
+  {
+    "id": 70103,
+    "canonical_text": "معصومیت",
+    "meaning_fa_IPA": "mæʔsuːmiːˈjæt"
+  },
+  {
+    "id": 70104,
+    "canonical_text": "پاکی",
+    "meaning_fa_IPA": "pɑːˈkiː"
+  },
+  {
+    "id": 70106,
+    "canonical_text": "قابل ارتجاع",
+    "meaning_fa_IPA": "ɣɑːˈbel-e erteˈʤɑːʔ"
+  },
+  {
+    "id": 70107,
+    "canonical_text": "قابل‌باور",
+    "meaning_fa_IPA": "ɣɑːbel-e bɑːˈvær"
+  },
+  {
+    "id": 70108,
+    "canonical_text": "آفت",
+    "meaning_fa_IPA": "ɑːˈfæt"
+  },
+  {
+    "id": 70109,
+    "canonical_text": "حشره موذی",
+    "meaning_fa_IPA": "hæʃæˈre-je muːˈziː"
+  },
+  {
+    "id": 70112,
+    "canonical_text": "وابسته به سوخت وساز (بدن)",
+    "meaning_fa_IPA": "vɑːbæsˈte be suːxt-o-ˈsɑːz bæˈdæn"
+  },
+  {
+    "id": 70114,
+    "canonical_text": "زیپ بستن",
+    "meaning_fa_IPA": "ziːp bæsˈtæn"
+  },
+  {
+    "id": 70116,
+    "canonical_text": "معتبر و جامع (کتاب)",
+    "meaning_fa_IPA": "moʔtæˈbær o ʤɑːˈmeʔ ketɑːb"
+  },
+  {
+    "id": 70119,
+    "canonical_text": "خفا",
+    "meaning_fa_IPA": "xæˈfɑː"
+  },
+  {
+    "id": 70121,
+    "canonical_text": "شاهنشاهی",
+    "meaning_fa_IPA": "ʃɑːhænʃɑːˈhiː"
+  },
+  {
+    "id": 70123,
+    "canonical_text": "نفتی",
+    "meaning_fa_IPA": "næfˈtiː"
+  },
+  {
+    "id": 70124,
+    "canonical_text": "حسی",
+    "meaning_fa_IPA": "hesˈsiː"
+  },
+  {
+    "id": 70126,
+    "canonical_text": "فرد کارکشته",
+    "meaning_fa_IPA": "færˈd-e kɑːrkoʃˈte"
+  },
+  {
+    "id": 70127,
+    "canonical_text": "آدم باتجربه",
+    "meaning_fa_IPA": "ɑːˈdæm-e bɑːtæʤroˈbe"
+  },
+  {
+    "id": 70129,
+    "canonical_text": "کار نمایشی",
+    "meaning_fa_IPA": "kɑːr-e næmɑːjeˈʃiː"
+  },
+  {
+    "id": 70130,
+    "canonical_text": "شیرین‌کاری",
+    "meaning_fa_IPA": "ʃiːriːnˈkɑːriː"
+  },
+  {
+    "id": 70131,
+    "canonical_text": "حرکت دسته جمعی",
+    "meaning_fa_IPA": "hæræˈkæt-e dæste-ʤæmˈʔiː"
+  },
+  {
+    "id": 70132,
+    "canonical_text": "صف اتومبیل‌ها و مردم (در مراسم رسمی)",
+    "meaning_fa_IPA": "sæf-e otomobiːlˈhɑː vo mærˈdom dær mærɑːˈsem-e ræsˈmiː"
+  },
+  {
+    "id": 70133,
+    "canonical_text": "گروه مشایعین",
+    "meaning_fa_IPA": "guˈruːh-e moʃɑːjeˈʔiːn"
+  },
+  {
+    "id": 70135,
+    "canonical_text": "اندازه کامل",
+    "meaning_fa_IPA": "ændɑːˈze-je kɑːˈmel"
+  },
+  {
+    "id": 70136,
+    "canonical_text": "فرد باتجربه",
+    "meaning_fa_IPA": "færˈd-e bɑːtæʤroˈbe"
+  },
+  {
+    "id": 70137,
+    "canonical_text": "فرد کارآزموده",
+    "meaning_fa_IPA": "færˈd-e kɑːrɑːzmuːˈde"
+  },
+  {
+    "id": 70138,
+    "canonical_text": "زیپ را بالا کشیدن",
+    "meaning_fa_IPA": "ziːp rɑː bɑːˈlɑː keʃiːˈdæn"
+  },
+  {
+    "id": 70139,
+    "canonical_text": "متابولیک",
+    "meaning_fa_IPA": "metɑːboˈliːk"
+  },
+  {
+    "id": 70140,
+    "canonical_text": "سوخت وسازی",
+    "meaning_fa_IPA": "suːxt-o-sɑːˈziː"
+  },
+  {
+    "id": 70141,
+    "canonical_text": "فنر مارپیچ",
+    "meaning_fa_IPA": "fæˈnær-e mɑːrˈpiːʧ"
+  },
+  {
+    "id": 70142,
+    "canonical_text": "سیم مارپیچ",
+    "meaning_fa_IPA": "siːm-e mɑːrˈpiːʧ"
+  },
+  {
+    "id": 70143,
+    "canonical_text": "محوطه بسته",
+    "meaning_fa_IPA": "mæhævˈvæte-je bæsˈte"
+  },
+  {
+    "id": 70144,
+    "canonical_text": "مهارت تخصصی",
+    "meaning_fa_IPA": "mæhɑːˈræt-e tæxæssoˈsiː"
+  },
+  {
+    "id": 70145,
+    "canonical_text": "خبرگی",
+    "meaning_fa_IPA": "xobˈregiː"
+  },
+  {
+    "id": 70146,
+    "canonical_text": "طنزآمیز",
+    "meaning_fa_IPA": "tænzɑːˈmiːz"
+  },
+  {
+    "id": 70147,
+    "canonical_text": "کوره گرمایشی",
+    "meaning_fa_IPA": "kuːˈre-je gærmɑːˈjeʃiː"
+  },
+  {
+    "id": 70148,
+    "canonical_text": "شعله گون",
+    "meaning_fa_IPA": "ʃoʔleˈguːn"
+  },
+  {
+    "id": 70149,
+    "canonical_text": "مزرعه بزرگ",
+    "meaning_fa_IPA": "mæzræˈʔe-je boˈzorg"
+  }
+]

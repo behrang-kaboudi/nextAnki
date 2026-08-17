@@ -1,0 +1,31 @@
+{
+  "status": "completed",
+  "appliedAt": "2026-08-15T05:58:07Z",
+  "dryRun": {
+    "total": 5813,
+    "eligible": 5813,
+    "stale": []
+  },
+  "execute": {
+    "total": 5813,
+    "updated": 5813,
+    "skipped": [],
+    "verified": 5813,
+    "verificationFailures": []
+  },
+  "postWriteVerification": {
+    "acceptedRowsFound": 5813,
+    "acceptedExactValueFailures": 0,
+    "acceptedConfirmedTrue": 5813,
+    "acceptedMeaningFaIpaNormalizeNonNull": 0,
+    "failedRowsFound": 1200,
+    "failedRowsStillMissingIpa": 1200,
+    "remainingMissingIpaAfter": 1200
+  },
+  "writeContract": {
+    "matchedOn": ["id", "canonical_text", "meaning_fa_IPA still null or empty"],
+    "updatedFields": ["meaning_fa_IPA", "meaning_fa_IPA_confirmed"],
+    "meaning_fa_IPA_confirmed": true,
+    "meaning_fa_IPA_normalize": "untouched"
+  }
+}

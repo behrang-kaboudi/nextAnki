@@ -1,9 +1,9 @@
 "use client";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ActionIcon } from "@/components/icons/ActionIcon";
 import { PromptSourcesButton } from "@/components/prompts/PromptSourcesButton";
-import { ParallelPromptBatchControls } from "@/components/prompts/ParallelPromptBatchControls.client";
+import { PromptBatchControls } from "@/components/prompts/PromptBatchControls.client";
 import { RemainingCountBadge, RemainingCountButton } from "@/components/remaining-count";
 import { BulkReviewStatusActions } from "@/components/review-status/BulkReviewStatusActions.client";
 import DeleteWordSenseModalButton from "./DeleteWordSenseModalButton.client";
@@ -17,11 +17,15 @@ import {
 
 const PROMPT_PATHS = [
   "src/prompts/word-extraction/meaning_fa_review/rulseV1.md",
-  "src/prompts/word-extraction/other_meanings_fa/rulseV1.md",
   "src/prompts/word-extraction/pos/rulseV1.md",
   "src/prompts/word-extraction/concept_explained_fa/rulseV1.md",
   "src/prompts/word-extraction/sentence_en/rulseV1.md",
   "src/prompts/word-extraction/sentence_meaning_fa/rulseV1.md",
+] as const;
+const PROMPT_SOURCE_PATHS = [
+  ...PROMPT_PATHS,
+  "src/prompts/word-extraction/other_meanings_fa/rulseV1.md",
+  "src/prompts/word-extraction/_shared/other_meanings_fa_core_v1.md",
 ] as const;
 const ATTENTION_PROMPT_PATH = "src/prompts/word-extraction/meaning_fa_attention/rulseV1.md";
 
@@ -72,7 +76,7 @@ export default function WordSenseMeaningsReview({
 }) {
   const r = useRouter(),
     [o, setO] = useState(false),
-    [l, setL] = useState("50"),
+    [l, setL] = useState(String(initialSummary.totalEligible)),
     [d, setD] = useState(""),
     [prompt, setPrompt] = useState(""),
     [a, setA] = useState(""),
@@ -80,9 +84,6 @@ export default function WordSenseMeaningsReview({
     [e, setE] = useState<string | null>(null),
     [remaining, setRemaining] = useState<number | null>(null),
     [notice, setNotice] = useState<string | null>(null);
-  const [laneCount, setLaneCount] = useState(1);
-  const [laneNumber, setLaneNumber] = useState(1);
-  const [laneEligibleCount, setLaneEligibleCount] = useState<number | null>(null);
   const [loadedCount, setLoadedCount] = useState(0);
   const [summary, setSummary] = useState(initialSummary);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -104,6 +105,7 @@ export default function WordSenseMeaningsReview({
   const [attentionCopied, setAttentionCopied] = useState(false);
   const [attentionDrafts, setAttentionDrafts] = useState<Record<number, string>>({});
   const [attentionLoading, setAttentionLoading] = useState(false);
+  useEffect(() => setL(String(initialSummary.totalEligible)), [initialSummary.totalEligible]);
   const loadAttention = async () => {
     setAttentionLoading(true);
     setE(null);
@@ -168,10 +170,9 @@ export default function WordSenseMeaningsReview({
     }
   };
   const requestGate = useRef(new MeaningReviewSingleFlight());
-  const clearLoadedLane = () => {
+  const clearLoadedBatch = () => {
     setD("");
     setA("");
-    setLaneEligibleCount(null);
     setLoadedCount(0);
     setCorrections([]);
     setConfirmedIds(new Set());
@@ -188,12 +189,12 @@ export default function WordSenseMeaningsReview({
     try {
       const [promptResponses, x] = await Promise.all([
           Promise.all(PROMPT_PATHS.map(async (path) => {
-            const response = await fetch(`/api/ai/prompt-file?path=${encodeURIComponent(path)}`);
+            const response = await fetch(`/api/ai/prompt-file?path=${encodeURIComponent(path)}&render=1`);
             const json = (await response.json()) as { text?: string; error?: string };
             if (!response.ok || !json.text) throw new Error(json.error || `Could not load ${path}.`);
             return json.text;
           })),
-          fetch(`/api/words/meanings-review?batchSize=${encodeURIComponent(l)}&laneCount=${laneCount}&laneNumber=${laneNumber}`),
+          fetch(`/api/words/meanings-review?batchSize=${encodeURIComponent(l)}`),
         ]),
         j = (await x.json()) as {
           ok?: boolean;
@@ -201,7 +202,6 @@ export default function WordSenseMeaningsReview({
           totalEligible?: number;
           totalUnconfirmed?: number;
           summary?: EligibilitySummary;
-          laneEligibleCount?: number;
           error?: string;
         };
       if (!x.ok || !j.ok) throw Error(j.error || "Could not create data.");
@@ -213,8 +213,7 @@ export default function WordSenseMeaningsReview({
       if (j.summary) setSummary(j.summary);
       const items = Array.isArray(j.items) ? j.items : [];
       setLoadedCount(items.length);
-      setLaneEligibleCount(typeof j.laneEligibleCount === "number" ? j.laneEligibleCount : null);
-      setNotice(finalNotice ?? `Lane ${laneNumber}/${laneCount} data created ✓`);
+      setNotice(finalNotice ?? `Data created with ${items.length} record(s) ✓`);
     } catch (x) {
       setE(x instanceof Error ? x.message : String(x));
     } finally {
@@ -571,7 +570,7 @@ export default function WordSenseMeaningsReview({
                   <li>رکورد بدون معنی برای data entry آینده کنار گذاشته می‌شود و مدل برای آن معنی حدس نمی‌زند.</li>
                   <li>فقط رکورد دارای <code>meaningReviewStatus=PENDING</code> وارد صف AI می‌شود.</li>
                   <li><code>otherMeaningIds=null</code> یعنی هنوز تعیین نشده و ناقص است؛ <code>[]</code> یعنی بررسی شده ولی معادل جایگزین مفیدی وجود ندارد.</li>
-                  <li>رکوردها به laneهای پایدار و بدون هم‌پوشانی تقسیم می‌شوند؛ هر lane را می‌توان هم‌زمان به یک مدل جدا داد.</li>
+                  <li>Count تعداد رکوردهایی را تعیین می‌کند که در دادهٔ پرامپت قرار می‌گیرند.</li>
                   <li>همهٔ جمله‌های موجود در آرایهٔ <code>sentenceIds</code> برای بررسی به مدل نشان داده می‌شوند.</li>
                 </ul>
                 <div className="mt-2 font-semibold">اولویت قطعی معنی و concept</div>
@@ -651,17 +650,12 @@ export default function WordSenseMeaningsReview({
             <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-2">
               <section className="flex min-h-0 flex-col gap-2">
                 <div className="flex flex-col gap-2">
-                  <ParallelPromptBatchControls
+                  <PromptBatchControls
                     batchSize={l}
                     disabled={b}
-                    laneCount={laneCount}
-                    laneNumber={laneNumber}
-                    laneEligibleCount={laneEligibleCount}
                     loadedCount={loadedCount}
                     totalEligibleCount={remaining}
-                    onBatchSizeChange={(value) => { clearLoadedLane(); setL(value); }}
-                    onLaneCountChange={(value) => { clearLoadedLane(); setLaneCount(value); }}
-                    onLaneNumberChange={(value) => { clearLoadedLane(); setLaneNumber(value); }}
+                    onBatchSizeChange={(value) => { clearLoadedBatch(); setL(value); }}
                   />
                   <div className="flex flex-wrap items-center gap-2">
                   <button
@@ -672,14 +666,14 @@ export default function WordSenseMeaningsReview({
                   >
                     {b ? "Loading…" : "Create data"}
                   </button>
-                  <PromptSourcesButton paths={PROMPT_PATHS} />
+                  <PromptSourcesButton paths={PROMPT_SOURCE_PATHS} />
                   <button
                     type="button"
                     onClick={copyAll}
                     disabled={b || !d}
                     className="rounded border px-2 py-1 text-xs transition active:scale-90 hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5"
                   >
-                    Copy lane {laneNumber}
+                    Copy prompt + data
                   </button>
                   {remaining !== null ? (
                     <RemainingCountButton

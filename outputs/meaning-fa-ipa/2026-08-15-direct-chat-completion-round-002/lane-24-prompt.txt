@@ -1,0 +1,80 @@
+HIGH-QUALITY PRODUCTION OUTPUT REQUIRED:
+
+- This is production vocabulary data. Return the highest-quality Persian pronunciation output you can produce.
+- Linguistic correctness for every individual record is more important than speed.
+- Do not let a high batch average hide a weak item; silently correct every doubtful item before returning the JSON.
+
+به تو آرای ای از اشیا داده میشه. در خرجی باید آرایه ای از اشیا درست کنی با فیلد هایی که نحوه تولید اونها گفته شده و از فیلد های قبلی فقط فیلد آی دی رو در آرایه جدید بزاری
+پس خروجی یعنی فیلد های جدید که نحوه تولید اونها گفته شده و فیلد آید متناظر.
+خروجی به صورت فشرده در متن قابل کپی پیست باشه/
+══════════════════════════════════════
+
+=============================================
+fieldName: meaning_fa_IPA
+
+CORE PRINCIPLE:
+Assume an implicit Phinglish form for every Persian word.
+Phinglish strictly controls vowel eligibility.
+
+A-VOWEL CONSTRAINT (CRITICAL):
+
+- If the inferred Phinglish vowel is "a",
+  the corresponding IPA vowel MUST be either [æ] or [ɑː].
+- In this case, the vowel [e] is STRICTLY FORBIDDEN.
+
+A-CHOICE LOGIC:
+
+- Use [æ] for short Persian "a"
+- Use [ɑː] ONLY for clear and undeniable long "â / آ"
+- Do NOT upgrade to [ɑː] unless vowel length is certain
+
+ANTI-E FAILSAFE:
+
+- If Phinglish = "a", NEVER output [e]
+- If ambiguity exists, choose between [æ] and [ɑː] only
+
+EXPLICIT NON-A RULE:
+
+- The vowel [e] is allowed ONLY when Phinglish explicitly contains "e"
+- [e] must never appear as a fallback or approximation for "a"
+
+LANGUAGE STANDARD:
+
+- Standard Modern Persian (Tehrani)
+
+PRONUNCIATION ACCURACY PRIORITY:
+
+- Transcribe the exact Persian canonical_text as it is pronounced in Standard Modern Tehrani Persian.
+- Pronounce every written word in the same order; never omit, merge, replace, translate, or reinterpret any word.
+- Silently read the complete Persian phrase aloud before transcribing it.
+- Carefully verify short vowels, long vowels, ezafe, conjunctions, clitics, compounds, word boundaries, and loanword pronunciation.
+- Loanwords must follow their common Persian pronunciation, not their pronunciation in the source language.
+- If a pronunciation is ambiguous, use the most common neutral Tehrani pronunciation.
+- Equivalent IPA notation styles will be normalized downstream; prioritize linguistic correctness over notation-style consistency.
+- Before returning the output, compare every IPA string word-by-word against canonical_text and regenerate any item whose pronunciation accuracy is below 8/10.
+
+IPA OUTPUT RULES:
+
+- Output IPA only
+- No slashes /
+- No explanations or comments
+
+  ========================================================================
+
+
+TASK CONTRACT
+
+- Act only as a prompt-response engine for the data included below.
+- Do not inspect files, repositories, databases, browser pages, tools, memory, or external sources.
+- Do not modify anything and do not call any tool. The coordinating task will persist your response.
+- Produce exactly one compact JSON array and nothing else: no Markdown fence, explanation, score report, heading, or trailing text.
+- Return exactly one item per input item, in the identical order.
+- Every output item must contain exactly two keys: {"id": <same integer>, "meaning_fa_IPA": "<non-empty IPA>"}.
+- Never add slashes around IPA and never include Persian script in meaning_fa_IPA.
+- Before emitting the final JSON, review every item individually for Persian pronunciation, short/long vowels, consonants, ezafe, conjunctions, clitics, compounds, word boundaries, loanwords, clarity, and schema compliance.
+- Assign every item and the batch an internal quality score. Correct every item at or below 8.0/10 and re-review it. Do not expose scores in this response.
+- Aim for the highest score you can reach; a passing batch average cannot hide an individual item at or below 8.0/10.
+
+INPUT DATA — BATCH 24/24
+
+[{"id":70762,"canonical_text":"توانا بودن در"},{"id":70763,"canonical_text":"کارشناس فروش"},{"id":70764,"canonical_text":"سالاد سبز"},{"id":70765,"canonical_text":"بفرمایید بنشینید"},{"id":70766,"canonical_text":"پیست کردن"},{"id":70767,"canonical_text":"هنرها"},{"id":70768,"canonical_text":"با سرعت حرکت کردن"},{"id":70769,"canonical_text":"دارای موی بلند"},{"id":70770,"canonical_text":"فناوری رایانه"},{"id":70771,"canonical_text":"فناوری کامپیوتری"},{"id":70772,"canonical_text":"ژانر علمی تخیلی"},{"id":70773,"canonical_text":"حمله تشنج"},{"id":70774,"canonical_text":"رکورد را شکستن"},{"id":70775,"canonical_text":"تالار گفت وگو"},{"id":70776,"canonical_text":"انجمن گفت وگو"},{"id":70777,"canonical_text":"در سال های اخیر"},{"id":70778,"canonical_text":"استراحت میان دو نیمه"},{"id":70779,"canonical_text":"هفته آینده"},{"id":70780,"canonical_text":"والدین سرپرست"},{"id":70781,"canonical_text":"جگر خوراکی"},{"id":70782,"canonical_text":"ورزشکار مبارز"},{"id":70783,"canonical_text":"رزمی کار"},{"id":70784,"canonical_text":"چشم انداز شغلی"},{"id":70785,"canonical_text":"فرصت های آینده"},{"id":70786,"canonical_text":"وابسته به دستگاه متریک"},{"id":70787,"canonical_text":"واق واق"},{"id":70788,"canonical_text":"در آستانه گریه"},{"id":70789,"canonical_text":"نزدیک به اشک ریختن"},{"id":70790,"canonical_text":"خشک شده"},{"id":70791,"canonical_text":"دارای تمرکز"},{"id":70792,"canonical_text":"صرفه جو در انرژی"},{"id":70793,"canonical_text":"بازتوانی"},{"id":70794,"canonical_text":"فرصت برابر"},{"id":70795,"canonical_text":"میدان رقابت برابر"},{"id":70796,"canonical_text":"حد تحمل"},{"id":70797,"canonical_text":"نقطه فروپاشی"},{"id":70798,"canonical_text":"به صورت آزادکاری"},{"id":70799,"canonical_text":"گزارش جلسه"},{"id":70800,"canonical_text":"یادداشت چسبنده"},{"id":70801,"canonical_text":"برگه یادداشت چسب دار"},{"id":70802,"canonical_text":"قضاوت درست"},{"id":70803,"canonical_text":"گشاده دل"},{"id":70804,"canonical_text":"بهانه تراشی"},{"id":70805,"canonical_text":"از نظر اصالت یا زادگاه"},{"id":70806,"canonical_text":"چای سرد"},{"id":70807,"canonical_text":"جامعه گرایانه"},{"id":70808,"canonical_text":"وابسته به اعراب"},{"id":70809,"canonical_text":"نخ ماهیگیری"},{"id":70810,"canonical_text":"نخ قلاب"},{"id":70811,"canonical_text":"پیش از جنگ"},{"id":70812,"canonical_text":"هر سه ماه یک بار"},{"id":70813,"canonical_text":"هزینه های اجرایی"},{"id":70814,"canonical_text":"هزینه های عملیاتی"},{"id":70815,"canonical_text":"بدون سود"},{"id":70816,"canonical_text":"مسابقه تسلیحاتی"},{"id":70817,"canonical_text":"هیبریدی"},{"id":70818,"canonical_text":"به دنبال اجناس ارزان گشتن"},{"id":70819,"canonical_text":"شکار تخفیف"},{"id":70820,"canonical_text":"دقیق و سخت گیرانه"},{"id":70821,"canonical_text":"یک مدرک"},{"id":70822,"canonical_text":"مدرکی"},{"id":70823,"canonical_text":"یکی از شواهد"},{"id":70824,"canonical_text":"نخ پنبه ای"},{"id":70825,"canonical_text":"پیش از دوران کسی بودن"},{"id":70826,"canonical_text":"به سن کسی قد ندادن"},{"id":70827,"canonical_text":"کنسول معماری"},{"id":70828,"canonical_text":"پایبند ماندن به"},{"id":70829,"canonical_text":"متاسفانه نه"},{"id":70831,"canonical_text":"غذای بیرونی"},{"id":70832,"canonical_text":"وسواس زده"},{"id":70833,"canonical_text":"به ورزش پرداختن"},{"id":70834,"canonical_text":"کنشگر"},{"id":70835,"canonical_text":"در فیلم بازی کردن"},{"id":70836,"canonical_text":"تصویر کشیدن"},{"id":70837,"canonical_text":"تب دار بودن"},{"id":70838,"canonical_text":"آیا رودخانه ای وجود دارد"},{"id":70839,"canonical_text":"آیا رودخانه ای هست"},{"id":70840,"canonical_text":"نماز به جا آوردن"},{"id":70841,"canonical_text":"قفل کشویی"},{"id":70842,"canonical_text":"اهل یا مربوط به آمریکای جنوبی"},{"id":70843,"canonical_text":"دستگاه های الکترونیکی"},{"id":70844,"canonical_text":"به مدرسه ما خوش آمدی"},{"id":70845,"canonical_text":"به دندانپزشکی رفتن"},{"id":70846,"canonical_text":"آیا مزرعه ای وجود دارد"},{"id":70847,"canonical_text":"از دست در رفتن"},{"id":70848,"canonical_text":"به چیزی مربوط بودن"},{"id":70849,"canonical_text":"هزار و پانصد"},{"id":70850,"canonical_text":"با کسی ازدواج کرده بودن"},{"id":70851,"canonical_text":"همسر کسی بودن"},{"id":70852,"canonical_text":"تعویذ خوش یمن"},{"id":70853,"canonical_text":"کمدی عاشقانه"},{"id":70854,"canonical_text":"موسسه کاریابی"},{"id":70855,"canonical_text":"حکومت داری"},{"id":70856,"canonical_text":"گردهمایی خانوادگی"},{"id":70857,"canonical_text":"بیش از درآمد خود خرج کردن"},{"id":70858,"canonical_text":"به چیزی وابسته شدن"},{"id":70859,"canonical_text":"شکم پر"},{"id":70860,"canonical_text":"مناسب به نظر می رسد"},{"id":70861,"canonical_text":"پازل حل کردن"},{"id":70862,"canonical_text":"جورچین حل کردن"},{"id":70863,"canonical_text":"لطفا تکرار کن"},{"id":70864,"canonical_text":"بازی های کامپیوتری انجام دادن"},{"id":70865,"canonical_text":"بازی های رایانه ای انجام دادن"},{"id":70866,"canonical_text":"گذرنامه را بررسی کردن"},{"id":70867,"canonical_text":"پاسپورت را چک کردن"},{"id":70868,"canonical_text":"محل بررسی گذرنامه"},{"id":70869,"canonical_text":"باشگاه فوتبال"},{"id":70870,"canonical_text":"باشگاه فوتبالی"},{"id":70871,"canonical_text":"دادستانی"},{"id":70872,"canonical_text":"درمان های جایگزین"},{"id":70873,"canonical_text":"روش های درمانی جایگزین"},{"id":70874,"canonical_text":"درمان های مکمل"},{"id":70875,"canonical_text":"رابط"}]

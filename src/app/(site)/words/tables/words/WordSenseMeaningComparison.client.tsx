@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { PromptSourcesButton } from "@/components/prompts/PromptSourcesButton";
-import { ParallelPromptBatchControls } from "@/components/prompts/ParallelPromptBatchControls.client";
-import { RemainingCountBadge, RemainingCountButton } from "@/components/remaining-count";
+import { PromptBatchControls } from "@/components/prompts/PromptBatchControls.client";
+import { RemainingCountButton, RemainingGroupRecordBadge } from "@/components/remaining-count";
 
 const PROMPT_PATH = "src/prompts/word-extraction/compare_word_meanings/rulseV1.md";
 
@@ -61,7 +61,13 @@ function parseResponse(value: string, sourceGroups: SourceGroup[]): OutputGroup[
   });
 }
 
-export default function WordSenseMeaningComparison({ remainingCount }: { remainingCount: number }) {
+export default function WordSenseMeaningComparison({
+  remainingGroupCount,
+  remainingRecordCount,
+}: {
+  remainingGroupCount: number;
+  remainingRecordCount: number;
+}) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [showWorkflowGuide, setShowWorkflowGuide] = useState(false);
@@ -69,10 +75,7 @@ export default function WordSenseMeaningComparison({ remainingCount }: { remaini
   const [busyGroupId, setBusyGroupId] = useState<number | null>(null);
   const [applyingAll, setApplyingAll] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [limit, setLimit] = useState("50");
-  const [laneCount, setLaneCount] = useState(1);
-  const [laneNumber, setLaneNumber] = useState(1);
-  const [laneEligibleCount, setLaneEligibleCount] = useState<number | null>(null);
+  const [limit, setLimit] = useState(String(remainingGroupCount));
   const [prompt, setPrompt] = useState("");
   const [groups, setGroups] = useState<SourceGroup[]>([]);
   const [totalGroups, setTotalGroups] = useState(0);
@@ -82,9 +85,9 @@ export default function WordSenseMeaningComparison({ remainingCount }: { remaini
   const [confirmed, setConfirmed] = useState<Set<number>>(new Set());
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
-  const clearLoadedLane = () => {
+  useEffect(() => setLimit(String(remainingGroupCount)), [remainingGroupCount]);
+  const clearLoadedBatch = () => {
     setGroups([]);
-    setLaneEligibleCount(null);
     setResponse("");
     setOutputs([]);
     setDrafts({});
@@ -94,8 +97,8 @@ export default function WordSenseMeaningComparison({ remainingCount }: { remaini
 
   const createData = async (showModal: boolean) => {
     const parsedLimit = Number(limit);
-    if (!Number.isSafeInteger(parsedLimit) || parsedLimit < 1) {
-      setError("Batch size must be a positive integer.");
+    if (!Number.isSafeInteger(parsedLimit) || parsedLimit < 0) {
+      setError("Count must be a non-negative integer.");
       return;
     }
     setLoading(true);
@@ -107,7 +110,7 @@ export default function WordSenseMeaningComparison({ remainingCount }: { remaini
         fetch("/api/words/meaning-comparison/prepare", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ batchSize: parsedLimit, laneCount, laneNumber }),
+          body: JSON.stringify({ batchSize: parsedLimit }),
         }),
       ]);
       const promptJson = (await promptResponse.json()) as { text?: string; error?: string };
@@ -115,7 +118,6 @@ export default function WordSenseMeaningComparison({ remainingCount }: { remaini
         ok?: boolean;
         items?: SourceGroup[];
         totalEligibleGroups?: number;
-        laneEligibleCount?: number;
         error?: string;
       };
       if (!promptResponse.ok || typeof promptJson.text !== "string") {
@@ -127,12 +129,11 @@ export default function WordSenseMeaningComparison({ remainingCount }: { remaini
       setPrompt(promptJson.text);
       setGroups(dataJson.items);
       setTotalGroups(dataJson.totalEligibleGroups ?? dataJson.items.length);
-      setLaneEligibleCount(typeof dataJson.laneEligibleCount === "number" ? dataJson.laneEligibleCount : null);
       setResponse("");
       setOutputs([]);
       setDrafts({});
       setConfirmed(new Set());
-      setNotice(`Created lane ${laneNumber}/${laneCount} with ${dataJson.items.length} candidate group(s) ✓`);
+      setNotice(`Created data with ${dataJson.items.length} candidate group(s) ✓`);
       if (showModal) setOpen(true);
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : String(reason));
@@ -259,7 +260,7 @@ export default function WordSenseMeaningComparison({ remainingCount }: { remaini
         onClick={() => void createData(true)}
         className="relative rounded border px-3 py-2 text-sm hover:bg-black/5 disabled:opacity-100 dark:hover:bg-white/5"
       >
-        4. COMPARE WORD MEANINGS <RemainingCountBadge count={remainingCount} />
+        4. COMPARE WORD MEANINGS <RemainingGroupRecordBadge groupCount={remainingGroupCount} recordCount={remainingRecordCount} />
         {loading && !open ? (
           <span className="absolute inset-0 flex items-center justify-center gap-1 rounded bg-background/85" aria-hidden="true">
             <span className="size-1.5 animate-bounce rounded-full bg-current [animation-delay:-0.3s]" />
@@ -316,7 +317,7 @@ export default function WordSenseMeaningComparison({ remainingCount }: { remaini
                   <li>هر معنی موجود در <code>meaningId</code> یا <code>otherMeaningIds</code> یک گروه می‌سازد.</li>
                   <li>فقط گروه‌هایی انتخاب می‌شوند که آن معنی فارسی را دست‌کم دو WordSense استفاده کرده باشند.</li>
                   <li>گروهی که تمام اعضایش قبلاً یکدیگر را در <code>comparedMeaningWordIds</code> ثبت کرده‌اند دوباره نمایش داده نمی‌شود.</li>
-                  <li>شناسهٔ PersianWord مشترک باید هنوز در دیتابیس موجود باشد؛ گروه‌ها میان laneهای پایدار و بدون هم‌پوشانی تقسیم می‌شوند.</li>
+                  <li>شناسهٔ PersianWord مشترک باید هنوز در دیتابیس موجود باشد و گروه در پاسخ دقیقاً با دادهٔ ورودی تطبیق کند.</li>
                 </ul>
                 <div className="mt-2 font-semibold">پس از تأیید چه تغییری می‌کند؟</div>
                 <ul className="list-disc pr-5">
@@ -332,17 +333,12 @@ export default function WordSenseMeaningComparison({ remainingCount }: { remaini
             <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-2">
               <section className="flex min-h-0 flex-col gap-2">
                 <div className="flex flex-col gap-2">
-                  <ParallelPromptBatchControls
+                  <PromptBatchControls
                     batchSize={limit}
                     disabled={loading}
-                    laneCount={laneCount}
-                    laneNumber={laneNumber}
-                    laneEligibleCount={laneEligibleCount}
                     loadedCount={groups.length}
                     totalEligibleCount={totalGroups}
-                    onBatchSizeChange={(value) => { clearLoadedLane(); setLimit(value); }}
-                    onLaneCountChange={(value) => { clearLoadedLane(); setLaneCount(value); }}
-                    onLaneNumberChange={(value) => { clearLoadedLane(); setLaneNumber(value); }}
+                    onBatchSizeChange={(value) => { clearLoadedBatch(); setLimit(value); }}
                   />
                   <div className="flex flex-wrap items-center gap-2">
                   <button type="button" disabled={loading} onClick={() => void createData(false)} className={buttonClass}>
@@ -353,7 +349,7 @@ export default function WordSenseMeaningComparison({ remainingCount }: { remaini
                     disabled={loading || groups.length === 0}
                     onClick={() => void navigator.clipboard.writeText(copyText).then(() => setNotice("Prompt and grouped data copied ✓")).catch((reason) => setError(reason instanceof Error ? reason.message : String(reason)))}
                     className={buttonClass}
-                  >Copy lane {laneNumber}</button>
+                  >Copy prompt + data</button>
                   <RemainingCountButton
                     count={totalGroups}
                     disabled={loading}

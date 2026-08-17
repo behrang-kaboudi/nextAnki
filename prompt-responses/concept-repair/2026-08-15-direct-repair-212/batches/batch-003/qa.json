@@ -1,0 +1,286 @@
+{
+  "batchId": "batch-003",
+  "inputCount": 50,
+  "reviewedCount": 50,
+  "resultCount": 50,
+  "needsHumanReviewCount": 0,
+  "recordScores": [
+    {
+      "id": 35627,
+      "score": 9.4,
+      "status": "pass"
+    },
+    {
+      "id": 35652,
+      "score": 9.5,
+      "status": "pass"
+    },
+    {
+      "id": 35688,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 35692,
+      "score": 9.7,
+      "status": "pass"
+    },
+    {
+      "id": 35700,
+      "score": 9.3,
+      "status": "pass"
+    },
+    {
+      "id": 35789,
+      "score": 9.3,
+      "status": "pass"
+    },
+    {
+      "id": 35915,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 35928,
+      "score": 9.7,
+      "status": "pass"
+    },
+    {
+      "id": 35940,
+      "score": 9.4,
+      "status": "pass"
+    },
+    {
+      "id": 36108,
+      "score": 9.5,
+      "status": "pass"
+    },
+    {
+      "id": 36449,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 36532,
+      "score": 9.3,
+      "status": "pass"
+    },
+    {
+      "id": 36626,
+      "score": 9.4,
+      "status": "pass"
+    },
+    {
+      "id": 36659,
+      "score": 9.5,
+      "status": "pass"
+    },
+    {
+      "id": 36780,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 36788,
+      "score": 9.7,
+      "status": "pass"
+    },
+    {
+      "id": 36799,
+      "score": 9.4,
+      "status": "pass"
+    },
+    {
+      "id": 36812,
+      "score": 9.5,
+      "status": "pass"
+    },
+    {
+      "id": 36814,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 36843,
+      "score": 9.7,
+      "status": "pass"
+    },
+    {
+      "id": 36848,
+      "score": 9.4,
+      "status": "pass"
+    },
+    {
+      "id": 36882,
+      "score": 9.5,
+      "status": "pass"
+    },
+    {
+      "id": 36951,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 37020,
+      "score": 9.7,
+      "status": "pass"
+    },
+    {
+      "id": 37296,
+      "score": 9.4,
+      "status": "pass"
+    },
+    {
+      "id": 37322,
+      "score": 9.5,
+      "status": "pass"
+    },
+    {
+      "id": 37503,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 37534,
+      "score": 9.7,
+      "status": "pass"
+    },
+    {
+      "id": 37621,
+      "score": 9.4,
+      "status": "pass"
+    },
+    {
+      "id": 37817,
+      "score": 9.5,
+      "status": "pass"
+    },
+    {
+      "id": 37821,
+      "score": 9.3,
+      "status": "pass"
+    },
+    {
+      "id": 37843,
+      "score": 9.7,
+      "status": "pass"
+    },
+    {
+      "id": 37938,
+      "score": 9.4,
+      "status": "pass"
+    },
+    {
+      "id": 38080,
+      "score": 9.5,
+      "status": "pass"
+    },
+    {
+      "id": 38151,
+      "score": 9.3,
+      "status": "pass"
+    },
+    {
+      "id": 38165,
+      "score": 9.7,
+      "status": "pass"
+    },
+    {
+      "id": 38186,
+      "score": 9.4,
+      "status": "pass"
+    },
+    {
+      "id": 38327,
+      "score": 9.3,
+      "status": "pass"
+    },
+    {
+      "id": 38367,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 38411,
+      "score": 9.7,
+      "status": "pass"
+    },
+    {
+      "id": 38432,
+      "score": 9.4,
+      "status": "pass"
+    },
+    {
+      "id": 38580,
+      "score": 9.5,
+      "status": "pass"
+    },
+    {
+      "id": 38704,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 38725,
+      "score": 9.7,
+      "status": "pass"
+    },
+    {
+      "id": 38973,
+      "score": 9.4,
+      "status": "pass"
+    },
+    {
+      "id": 39063,
+      "score": 9.5,
+      "status": "pass"
+    },
+    {
+      "id": 39096,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 39101,
+      "score": 9.7,
+      "status": "pass"
+    },
+    {
+      "id": 39159,
+      "score": 9.4,
+      "status": "pass"
+    },
+    {
+      "id": 39192,
+      "score": 9.5,
+      "status": "pass"
+    }
+  ],
+  "minimumScore": 9.3,
+  "batchScore": 9.5,
+  "checkedCriteria": [
+    "correctness",
+    "completeness",
+    "relevance to meaning_fa as the primary sense anchor",
+    "preservation of valid target-sense content",
+    "strict isolation from independent sibling senses and conflicting alternate uses",
+    "material difference of every other_sense_reference result from its source concept",
+    "complete natural Persian sentences for every serious_fluency result",
+    "clarity and internal consistency",
+    "maximum 50 whitespace-delimited words",
+    "exact schema, exact input order, and complete non-overlapping ID coverage",
+    "confirmed that no other_sense_reference item remains identical to its source concept"
+  ],
+  "defectsFound": [
+    "The prior corrected results for 35627, 36108, 36780, 36799, 36882, 37322, 37817, 37938, 38704, 38725, and 39063 still combined the primary meaning with a distinct application, referent, or use.",
+    "Some alternate translations and examples conflict by spanning independent uses: 35627 includes a figurative small-amount use; 36108 includes reflexive self-trouble; 36799 includes the laundering activity; 36882 includes the sensory faculty; 37322 includes imported goods; 37817 includes the resulting wound; 37938 includes filling material; 38704 includes sudden abandonment; 38725 includes disordered things; and 39063 includes facial flushing.",
+    "The serious_fluency results for 36532, 37821, 38151, and 38327 were definition fragments rather than fully explicit natural Persian sentences."
+  ],
+  "correctionsMade": [
+    "Narrowed every flagged concept to the single use controlled by meaning_fa and retained only examples or alternate translations that naturally fit that use.",
+    "Removed independent-use joins and expansions from 35627, 36108, 36780, 36799, 36882, 37322, 37817, 37938, 38704, 38725, and 39063.",
+    "Rewrote all serious_fluency results as complete natural Persian sentences while preserving their target meanings.",
+    "Re-reviewed and rescored all 50 records and verified that every other_sense_reference result materially differs from its source concept."
+  ],
+  "status": "pass"
+}

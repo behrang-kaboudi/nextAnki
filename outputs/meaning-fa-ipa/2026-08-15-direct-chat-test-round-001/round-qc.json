@@ -1,0 +1,212 @@
+{
+  "status": "passed",
+  "score": 9,
+  "minimumLaneScore": 9,
+  "minimumItemScore": 10,
+  "recordCount": 2400,
+  "uniqueIdCount": 2400,
+  "firstId": 60928,
+  "lastId": 63327,
+  "combinedFile": "round-001-combined-2400.json",
+  "combinedSha256": "aae927e0ddaec7f408e5150075e1f3f2760b7129706378bf943741330f49bf92",
+  "correctionHistory": [
+    {
+      "lane": 2,
+      "id": 61251,
+      "issue": "Persian character in initial response",
+      "result": "Full lane corrected, then the same chat reran the explicit item-and-batch 8/10 quality gate and returned the final full response."
+    }
+  ],
+  "lanes": [
+    {
+      "lane": 1,
+      "status": "passed",
+      "count": 300,
+      "score": 10,
+      "minimumItemScore": 10,
+      "criteria": [
+        "correct record coverage",
+        "complete output",
+        "prompt relevance",
+        "internal consistency",
+        "clarity",
+        "exact schema",
+        "task constraints"
+      ],
+      "generatorSelfQA": "The lane prompt required every item and the whole batch to be reviewed and corrected until scoring at least 8/10 before return.",
+      "parentValidation": "Every record passed exact count, schema, ID, order, non-empty IPA, no slash, and no Persian-character checks.",
+      "defects": [],
+      "sourceResponseFile": "lane-01-response.raw.json",
+      "validatedFile": "lane-01-response.validated.json",
+      "responseSha256": "d6ea9a41710daa4c42f66cfa4401b9814e75c03f0efccaeb5807ee2102b54fb1",
+      "qcFile": "lane-01-qc.json"
+    },
+    {
+      "lane": 2,
+      "status": "passed",
+      "count": 300,
+      "score": 9,
+      "minimumItemScore": 10,
+      "criteria": [
+        "correct record coverage",
+        "complete output",
+        "prompt relevance",
+        "internal consistency",
+        "clarity",
+        "exact schema",
+        "task constraints"
+      ],
+      "generatorSelfQA": "The same lane task was explicitly rerun to score every item and the whole batch, regenerate anything below 8/10, and return only the final full response.",
+      "parentValidation": "Every record passed exact count, schema, ID, order, non-empty IPA, no slash, and no Persian-character checks.",
+      "defects": [
+        {
+          "id": 61251,
+          "issue": "Persian character in initial IPA",
+          "correction": "Same task returned a complete corrected response and then reran the explicit item-and-batch 8/10 quality gate; final response passed all mechanical checks."
+        }
+      ],
+      "sourceResponseFile": "lane-02-response-revision-02-qc-final.raw.json",
+      "validatedFile": "lane-02-response.validated.json",
+      "responseSha256": "d42888c3baaed9a4b656c46a2f3b5d96eac33bae0226bff9a9376bdf7f1d8ce6",
+      "qcFile": "lane-02-qc.json"
+    },
+    {
+      "lane": 3,
+      "status": "passed",
+      "count": 300,
+      "score": 10,
+      "minimumItemScore": 10,
+      "criteria": [
+        "correct record coverage",
+        "complete output",
+        "prompt relevance",
+        "internal consistency",
+        "clarity",
+        "exact schema",
+        "task constraints"
+      ],
+      "generatorSelfQA": "The lane prompt required every item and the whole batch to be reviewed and corrected until scoring at least 8/10 before return.",
+      "parentValidation": "Every record passed exact count, schema, ID, order, non-empty IPA, no slash, and no Persian-character checks.",
+      "defects": [],
+      "sourceResponseFile": "lane-03-response.raw.json",
+      "validatedFile": "lane-03-response.validated.json",
+      "responseSha256": "24c89245e8844f3087e1133c8a4f09cd746f6d9b6793144cbd7c1b66ee4ab7f6",
+      "qcFile": "lane-03-qc.json"
+    },
+    {
+      "lane": 4,
+      "status": "passed",
+      "count": 300,
+      "score": 10,
+      "minimumItemScore": 10,
+      "criteria": [
+        "correct record coverage",
+        "complete output",
+        "prompt relevance",
+        "internal consistency",
+        "clarity",
+        "exact schema",
+        "task constraints"
+      ],
+      "generatorSelfQA": "The lane prompt required every item and the whole batch to be reviewed and corrected until scoring at least 8/10 before return.",
+      "parentValidation": "Every record passed exact count, schema, ID, order, non-empty IPA, no slash, and no Persian-character checks.",
+      "defects": [],
+      "sourceResponseFile": "lane-04-response.raw.json",
+      "validatedFile": "lane-04-response.validated.json",
+      "responseSha256": "00a623e4bcf54c0d41c80e34321a201e7f3cf104ec8b2a414dcea1a12f72e840",
+      "qcFile": "lane-04-qc.json"
+    },
+    {
+      "lane": 5,
+      "status": "passed",
+      "count": 300,
+      "score": 10,
+      "minimumItemScore": 10,
+      "criteria": [
+        "correct record coverage",
+        "complete output",
+        "prompt relevance",
+        "internal consistency",
+        "clarity",
+        "exact schema",
+        "task constraints"
+      ],
+      "generatorSelfQA": "The lane prompt required every item and the whole batch to be reviewed and corrected until scoring at least 8/10 before return.",
+      "parentValidation": "Every record passed exact count, schema, ID, order, non-empty IPA, no slash, and no Persian-character checks.",
+      "defects": [],
+      "sourceResponseFile": "lane-05-response.raw.json",
+      "validatedFile": "lane-05-response.validated.json",
+      "responseSha256": "f40015713eedc5606d525426234492fd4063084739d2b449eb1e9dedb67c5f4f",
+      "qcFile": "lane-05-qc.json"
+    },
+    {
+      "lane": 6,
+      "status": "passed",
+      "count": 300,
+      "score": 10,
+      "minimumItemScore": 10,
+      "criteria": [
+        "correct record coverage",
+        "complete output",
+        "prompt relevance",
+        "internal consistency",
+        "clarity",
+        "exact schema",
+        "task constraints"
+      ],
+      "generatorSelfQA": "The lane prompt required every item and the whole batch to be reviewed and corrected until scoring at least 8/10 before return.",
+      "parentValidation": "Every record passed exact count, schema, ID, order, non-empty IPA, no slash, and no Persian-character checks.",
+      "defects": [],
+      "sourceResponseFile": "lane-06-response.raw.json",
+      "validatedFile": "lane-06-response.validated.json",
+      "responseSha256": "49d6e46753d1e7c23486954c39e5b5df13561fa1e20f131a8134c4bc90ac2a46",
+      "qcFile": "lane-06-qc.json"
+    },
+    {
+      "lane": 7,
+      "status": "passed",
+      "count": 300,
+      "score": 10,
+      "minimumItemScore": 10,
+      "criteria": [
+        "correct record coverage",
+        "complete output",
+        "prompt relevance",
+        "internal consistency",
+        "clarity",
+        "exact schema",
+        "task constraints"
+      ],
+      "generatorSelfQA": "The lane prompt required every item and the whole batch to be reviewed and corrected until scoring at least 8/10 before return.",
+      "parentValidation": "Every record passed exact count, schema, ID, order, non-empty IPA, no slash, and no Persian-character checks.",
+      "defects": [],
+      "sourceResponseFile": "lane-07-response.raw.json",
+      "validatedFile": "lane-07-response.validated.json",
+      "responseSha256": "1f4a5590a734fb1358fc636e1bdb82814e7175d93b88cd049a8cddfcf9625ed1",
+      "qcFile": "lane-07-qc.json"
+    },
+    {
+      "lane": 8,
+      "status": "passed",
+      "count": 300,
+      "score": 10,
+      "minimumItemScore": 10,
+      "criteria": [
+        "correct record coverage",
+        "complete output",
+        "prompt relevance",
+        "internal consistency",
+        "clarity",
+        "exact schema",
+        "task constraints"
+      ],
+      "generatorSelfQA": "The lane prompt required every item and the whole batch to be reviewed and corrected until scoring at least 8/10 before return.",
+      "parentValidation": "Every record passed exact count, schema, ID, order, non-empty IPA, no slash, and no Persian-character checks.",
+      "defects": [],
+      "sourceResponseFile": "lane-08-response.raw.json",
+      "validatedFile": "lane-08-response.validated.json",
+      "responseSha256": "2cc6d177b7c3bed2ca9950516fb444b604b33d47cd306b9828ffb2f13383a21f",
+      "qcFile": "lane-08-qc.json"
+    }
+  ]
+}

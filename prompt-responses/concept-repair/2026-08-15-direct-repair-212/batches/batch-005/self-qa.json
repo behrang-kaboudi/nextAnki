@@ -1,0 +1,46 @@
+{
+  "batchId": "batch-005",
+  "inputCount": 12,
+  "reviewedCount": 12,
+  "resultCount": 12,
+  "needsHumanReviewCount": 0,
+  "recordScores": [
+    { "id": 42253, "score": 9.4, "status": "pass" },
+    { "id": 42786, "score": 9.7, "status": "pass" },
+    { "id": 43884, "score": 9.5, "status": "pass" },
+    { "id": 43975, "score": 9.7, "status": "pass" },
+    { "id": 44265, "score": 9.5, "status": "pass" },
+    { "id": 44423, "score": 9.6, "status": "pass" },
+    { "id": 44485, "score": 9.4, "status": "pass" },
+    { "id": 44500, "score": 9.3, "status": "pass" },
+    { "id": 44778, "score": 9.7, "status": "pass" },
+    { "id": 44910, "score": 9.5, "status": "pass" },
+    { "id": 44938, "score": 9.3, "status": "pass" },
+    { "id": 45014, "score": 9.5, "status": "pass" }
+  ],
+  "minimumScore": 9.3,
+  "batchScore": 9.5,
+  "checkedCriteria": [
+    "target-sense correctness",
+    "preservation of valid content",
+    "removal of independent senses",
+    "Persian fluency and punctuation",
+    "clarity and completeness",
+    "internal consistency",
+    "50-word limit",
+    "exact response schema",
+    "complete ID coverage",
+    "exact input ordering"
+  ],
+  "defectsFound": [
+    "Six source concepts were flagged for references to, or wording that risked importing, independent sibling senses.",
+    "Six source concepts were flagged for incomplete or unnatural Persian sentence structure."
+  ],
+  "correctionsMade": [
+    "Removed independent references to a nature cottage, instrumental sound quality, a romantic partner, and blacksmithing; kept maple focused on its wood or sap products rather than the tree sense.",
+    "Rewrote every serious-fluency item as a complete, natural Persian concept.",
+    "Restricted tone to vocal manner, debut to a first released or presented work, and devastated to physical destruction.",
+    "Verified every concept against all supplied meanings, sentences, and sibling exclusions; all are within 50 whitespace-delimited words."
+  ],
+  "status": "pass"
+}

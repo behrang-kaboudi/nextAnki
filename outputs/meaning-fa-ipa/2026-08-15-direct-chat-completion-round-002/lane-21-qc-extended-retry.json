@@ -1,0 +1,20 @@
+{
+  "lane": 21,
+  "status": "accepted_after_extended_retry",
+  "count": 300,
+  "regenerations": 5,
+  "scoreQuestionsAsked": 6,
+  "responseFile": "lane-21-response-revision-05.raw.json",
+  "responseSha256": "8bdfad06d601319a7296d5f388f5a2c6efbf5a2fe87b43d1d1bb7334a017853d",
+  "scoreFile": "lane-21-score-06.raw.json",
+  "finalScore": {
+    "batchScore": 9.4,
+    "minimumItemScore": 8.4,
+    "belowOrEqual8Ids": [],
+    "assessment": "pass"
+  },
+  "mechanicalValidation": {
+    "status": "passed",
+    "issues": []
+  }
+}

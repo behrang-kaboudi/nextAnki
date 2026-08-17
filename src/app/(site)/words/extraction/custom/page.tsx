@@ -15,6 +15,7 @@ import { PromptSourcesButton } from "@/components/prompts/PromptSourcesButton";
 
 const REQUESTED_OUTPUTS_PROMPT_PATH = "custom-extraction/requested_outputs_v1.md";
 const INPUT_RECORDS_PROMPT_PATH = "custom-extraction/input_records_v1.md";
+const OTHER_MEANINGS_CORE_PROMPT_PATH = "src/prompts/word-extraction/_shared/other_meanings_fa_core_v1.md";
 
 type PromptTexts = Record<string, string>;
 type RecordsResponse = {
@@ -200,6 +201,7 @@ export default function CustomWordExtractionPage() {
     () => CUSTOM_EXTRACTION_OUTPUT_FIELDS.filter((field) => outputFields.includes(field.key)),
     [outputFields],
   );
+  const usesOtherMeaningsCore = outputFields.includes("other_meanings_fa");
 
   useEffect(() => {
     let canceled = false;
@@ -233,7 +235,7 @@ export default function CustomWordExtractionPage() {
     setPromptError("");
     Promise.all(
       paths.map(async (path) => {
-        const response = await fetch(`/api/ai/prompt-file?path=${encodeURIComponent(path)}`, { cache: "no-store" });
+        const response = await fetch(`/api/ai/prompt-file?path=${encodeURIComponent(path)}&render=1`, { cache: "no-store" });
         const json = (await response.json().catch(() => null)) as { text?: string; error?: string } | null;
         if (!response.ok) throw new Error(json?.error ?? `Could not load ${path}`);
         return [path, String(json?.text ?? "")] as const;
@@ -660,6 +662,7 @@ export default function CustomWordExtractionPage() {
                   paths={[
                     CUSTOM_EXTRACTION_BASE_PROMPT_PATH,
                     ...selectedOutputSpecs.map((field) => field.promptPath),
+                    ...(usesOtherMeaningsCore ? [OTHER_MEANINGS_CORE_PROMPT_PATH] : []),
                     REQUESTED_OUTPUTS_PROMPT_PATH,
                     INPUT_RECORDS_PROMPT_PATH,
                   ]}
@@ -691,7 +694,7 @@ export default function CustomWordExtractionPage() {
                 className={`rounded-xl px-3 py-2.5 text-sm font-semibold transition ${activeWorkspaceTab === "prompts" ? "bg-[var(--primary)] text-[var(--primary-foreground)] shadow-elevated" : "text-muted hover:bg-card hover:text-foreground"}`}
               >
                 Prompts
-                <span className={`ml-2 rounded-full px-2 py-0.5 text-[10px] ${activeWorkspaceTab === "prompts" ? "bg-white/20" : "bg-card"}`}>{selectedOutputSpecs.length + 3}</span>
+                <span className={`ml-2 rounded-full px-2 py-0.5 text-[10px] ${activeWorkspaceTab === "prompts" ? "bg-white/20" : "bg-card"}`}>{selectedOutputSpecs.length + 3 + (usesOtherMeaningsCore ? 1 : 0)}</span>
               </button>
             </div>
 

@@ -1,0 +1,88 @@
+{
+  "workflow": "direct-word-sense-concept-repair",
+  "snapshotDate": "2026-08-15",
+  "targetCount": 212,
+  "sourceCounts": {
+    "otherSenseReferences": 187,
+    "seriousFluencyIssues": 27,
+    "overlap": 2
+  },
+  "batchSize": 50,
+  "batchCount": 5,
+  "mutationContract": {
+    "onlyField": "concept_explained_fa",
+    "dependentReviewReset": {
+      "conceptMergeReviewed": false,
+      "inflectionMergeReviewed": false,
+      "meaningReviewStatus": "wordSenseRepo semantic-change policy"
+    },
+    "preserveComparedMeaningWordIdsAndSynonymIds": true,
+    "merge": false,
+    "delete": false
+  },
+  "inputs": {
+    "records": {
+      "path": "inputs/records.json",
+      "sha256": "01ae625429ac60c9434b3a3508531c8c7c2692eca0503bdf83d9bbe6926d1917"
+    },
+    "applySource": {
+      "path": "inputs/apply-source.json",
+      "sha256": "73e2598e550cfcdd589a129c00bc29bd01965c2c63c45ec359d7b3681959142c"
+    }
+  },
+  "batches": [
+    {
+      "batchId": "batch-001",
+      "inputCount": 50,
+      "firstId": 131,
+      "lastId": 4509,
+      "inputPath": "batches/batch-001/input.json",
+      "inputSha256": "d124e63d94c63c05bc56f918249ac21538d34dcaa9ba74fe0d2dfaa62a90108b"
+    },
+    {
+      "batchId": "batch-002",
+      "inputCount": 50,
+      "firstId": 4517,
+      "lastId": 35626,
+      "inputPath": "batches/batch-002/input.json",
+      "inputSha256": "62fdce38c47e1a41dfa88c5e38bc297da03f701043e084e078c0ccf96cdebc5c"
+    },
+    {
+      "batchId": "batch-003",
+      "inputCount": 50,
+      "firstId": 35627,
+      "lastId": 39192,
+      "inputPath": "batches/batch-003/input.json",
+      "inputSha256": "aa18677ab5f041590c5882235a5fa37aa6358879454c1858b9919b0c78e52713"
+    },
+    {
+      "batchId": "batch-004",
+      "inputCount": 50,
+      "firstId": 39223,
+      "lastId": 42233,
+      "inputPath": "batches/batch-004/input.json",
+      "inputSha256": "5bb0606d01641d44540ee406240d53cce35781d11aefe204c7c4f1016ee67503"
+    },
+    {
+      "batchId": "batch-005",
+      "inputCount": 12,
+      "firstId": 42253,
+      "lastId": 45014,
+      "inputPath": "batches/batch-005/input.json",
+      "inputSha256": "7f7cfd281b96efddce8255bbede0935b9877baa539d59600bd573e2b48dbd501"
+    }
+  ],
+  "databaseMutation": true,
+  "final": {
+    "status": "applied-status-corrected-and-verified",
+    "response": "final/response.json",
+    "changes": "final/changes.json",
+    "qa": "final/qa.json",
+    "minimumRecordScore": 9,
+    "minimumBatchScore": 9.3,
+    "applyReport": "final/apply-report.json",
+    "databaseVerification": "final/database-verification.json",
+    "statusRestoration": "final/meaning-review-status-restoration.json",
+    "statusRestorationVerification": "final/post-status-restoration-verification.json"
+  }
+}

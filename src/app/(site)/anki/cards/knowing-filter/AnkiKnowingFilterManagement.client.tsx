@@ -24,6 +24,8 @@ const REVIEW_CARD = "WordsForNewStudy-Review" as const;
 const REVIEW_DECK = "WordsForNewStudy::Review" as const;
 const PRONUNCIATION_CARD = "WordsForNewStudy-Pronunciation" as const;
 const PRONUNCIATION_DECK = "WordsForNewStudy::Pronunciation" as const;
+const PRONUNCIATION_DUE_OFFSET_MIN_DAYS = 60;
+const PRONUNCIATION_DUE_OFFSET_MAX_DAYS = 120;
 const REVIEW_PRONUNCIATION_CARD = "WordsForNewStudy-ReviewPronunciation" as const;
 const REVIEW_PRONUNCIATION_DECK = "WordsForNewStudy::ReviewPronunciation" as const;
 const FA_TO_EN_WITH_HELP_CARD = "WordsForNewStudy-FaToEnWithHelp" as const;
@@ -186,7 +188,7 @@ function answerInstructions(action: KnowledgeAction): AnswerInstruction[] {
         { target: "enToFa", ease: 1, repetitions: 1 },
         { target: "faToEn", ease: 1, repetitions: 1 },
         { target: "review", ease: 4, repetitions: 1 },
-        { target: "pronunciation", ease: 1, repetitions: 1 },
+        { target: "pronunciation", ease: 4, repetitions: 1 },
         { target: "reviewPronunciation", ease: 4, repetitions: 1 },
         { target: "faToEnWithHelp", ease: 1, repetitions: 1 },
       ];
@@ -194,6 +196,7 @@ function answerInstructions(action: KnowledgeAction): AnswerInstruction[] {
       return [
         { target: "enToFa", ease: 3, repetitions: 1 },
         { target: "review", ease: 4, repetitions: 1 },
+        { target: "pronunciation", ease: 4, repetitions: 1 },
         { target: "reviewPronunciation", ease: 4, repetitions: 1 },
       ];
     case "good":
@@ -210,7 +213,7 @@ function answerInstructions(action: KnowledgeAction): AnswerInstruction[] {
         { target: "enToFa", ease: 4, repetitions: 2 },
         { target: "faToEn", ease: 4, repetitions: 1 },
         { target: "review", ease: 4, repetitions: 1 },
-        { target: "pronunciation", ease: 4, repetitions: 2 },
+        { target: "pronunciation", ease: 4, repetitions: 1 },
         { target: "reviewPronunciation", ease: 4, repetitions: 1 },
         {
           target: "faToEnWithHelp",
@@ -219,6 +222,17 @@ function answerInstructions(action: KnowledgeAction): AnswerInstruction[] {
         },
       ];
   }
+}
+
+function randomPronunciationDueOffsetDays() {
+  return (
+    Math.floor(
+      Math.random() *
+        (PRONUNCIATION_DUE_OFFSET_MAX_DAYS -
+          PRONUNCIATION_DUE_OFFSET_MIN_DAYS +
+          1),
+    ) + PRONUNCIATION_DUE_OFFSET_MIN_DAYS
+  );
 }
 
 function buildQuery(
@@ -245,7 +259,7 @@ function buildHelpSummaries(): HelpActionSummary[] {
         `${WordAnkiConstants.cardTypes.EnToFa} → ${WordAnkiConstants.decks.EnToFa}: یک بار Again (ease=1).`,
         `${WordAnkiConstants.cardTypes.FaToEn} → ${WordAnkiConstants.decks.FaToEn}: یک بار Again (ease=1).`,
         `${REVIEW_CARD} → ${REVIEW_DECK}: یک بار Easy (ease=4).`,
-        `${PRONUNCIATION_CARD} → ${PRONUNCIATION_DECK}: یک بار Again (ease=1).`,
+        `${PRONUNCIATION_CARD} → ${PRONUNCIATION_DECK}: یک بار Easy (ease=4)، سپس افزودن رندم ۶۰ تا ۱۲۰ روز به تاریخ حاصل از Easy.`,
         `${REVIEW_PRONUNCIATION_CARD} → ${REVIEW_PRONUNCIATION_DECK}: یک بار Easy (ease=4).`,
         `${FA_TO_EN_WITH_HELP_CARD} → ${FA_TO_EN_WITH_HELP_DECK}: یک بار Again (ease=1).`,
       ],
@@ -258,7 +272,7 @@ function buildHelpSummaries(): HelpActionSummary[] {
         `${WordAnkiConstants.cardTypes.EnToFa} → ${WordAnkiConstants.decks.EnToFa}: یک بار Good (ease=3).`,
         `${WordAnkiConstants.cardTypes.FaToEn} → ${WordAnkiConstants.decks.FaToEn}: فقط انتقال؛ بدون پاسخ یا ریست.`,
         `${REVIEW_CARD} → ${REVIEW_DECK}: یک بار Easy (ease=4).`,
-        `${PRONUNCIATION_CARD} → ${PRONUNCIATION_DECK}: فقط انتقال؛ بدون پاسخ یا ریست.`,
+        `${PRONUNCIATION_CARD} → ${PRONUNCIATION_DECK}: یک بار Easy (ease=4)، سپس افزودن رندم ۶۰ تا ۱۲۰ روز به تاریخ حاصل از Easy.`,
         `${REVIEW_PRONUNCIATION_CARD} → ${REVIEW_PRONUNCIATION_DECK}: یک بار Easy (ease=4).`,
         `${FA_TO_EN_WITH_HELP_CARD} → ${FA_TO_EN_WITH_HELP_DECK}: فقط انتقال؛ بدون پاسخ یا ریست.`,
       ],
@@ -271,7 +285,7 @@ function buildHelpSummaries(): HelpActionSummary[] {
         `${WordAnkiConstants.cardTypes.EnToFa} → ${WordAnkiConstants.decks.EnToFa}: دو بار Easy (ease=4).`,
         `${WordAnkiConstants.cardTypes.FaToEn} → ${WordAnkiConstants.decks.FaToEn}: یک بار Good (ease=3).`,
         `${REVIEW_CARD} → ${REVIEW_DECK}: یک بار Easy (ease=4).`,
-        `${PRONUNCIATION_CARD} → ${PRONUNCIATION_DECK}: یک بار Easy (ease=4).`,
+        `${PRONUNCIATION_CARD} → ${PRONUNCIATION_DECK}: یک بار Easy (ease=4)، سپس افزودن رندم ۶۰ تا ۱۲۰ روز به تاریخ حاصل از Easy.`,
         `${REVIEW_PRONUNCIATION_CARD} → ${REVIEW_PRONUNCIATION_DECK}: یک بار Easy (ease=4).`,
         `${FA_TO_EN_WITH_HELP_CARD} → ${FA_TO_EN_WITH_HELP_DECK}: یک بار Good (ease=3).`,
       ],
@@ -284,7 +298,7 @@ function buildHelpSummaries(): HelpActionSummary[] {
         `${WordAnkiConstants.cardTypes.EnToFa} → ${WordAnkiConstants.decks.EnToFa}: دو بار Easy (ease=4).`,
         `${WordAnkiConstants.cardTypes.FaToEn} → ${WordAnkiConstants.decks.FaToEn}: یک بار Easy (ease=4).`,
         `${REVIEW_CARD} → ${REVIEW_DECK}: یک بار Easy (ease=4).`,
-        `${PRONUNCIATION_CARD} → ${PRONUNCIATION_DECK}: دو بار Easy (ease=4).`,
+        `${PRONUNCIATION_CARD} → ${PRONUNCIATION_DECK}: یک بار Easy (ease=4)، سپس افزودن رندم ۶۰ تا ۱۲۰ روز به تاریخ حاصل از Easy.`,
         `${REVIEW_PRONUNCIATION_CARD} → ${REVIEW_PRONUNCIATION_DECK}: یک بار Easy (ease=4).`,
         `${FA_TO_EN_WITH_HELP_CARD} → ${FA_TO_EN_WITH_HELP_DECK}: رندم بین یک تا سه بار Easy (ease=4).`,
       ],
@@ -643,6 +657,64 @@ export default function AnkiKnowingFilterManagementClient() {
     }
   }
 
+  async function postponePronunciationCardsFromEasyDue(cardIds: number[]) {
+    const infoResponse = await ankiOperations.cardsInfo({ cards: cardIds });
+    if (!infoResponse.ok) throw new Error(infoResponse.error);
+    if (
+      !Array.isArray(infoResponse.result) ||
+      infoResponse.result.length !== cardIds.length
+    ) {
+      throw new Error("تاریخ حاصل از Easy برای کارت Pronunciation دریافت نشد.");
+    }
+
+    const expectedDueByCardId = new Map<number, number>();
+    for (const card of infoResponse.result) {
+      if (
+        card.deckName !== PRONUNCIATION_DECK ||
+        card.type !== 2 ||
+        card.queue !== 2 ||
+        !Number.isInteger(card.due)
+      ) {
+        throw new Error(
+          `کارت Pronunciation شمارهٔ ${card.cardId} پس از Easy در صف مرور استاندارد قرار نگرفت.`,
+        );
+      }
+
+      const nextDue = card.due + randomPronunciationDueOffsetDays();
+      const updateResponse = await ankiOperations.setSpecificValueOfCard({
+        card: card.cardId,
+        keys: ["due"],
+        newValues: [nextDue],
+        warning_check: true,
+      });
+      if (
+        !updateResponse.ok ||
+        !Array.isArray(updateResponse.result) ||
+        updateResponse.result.length !== 1 ||
+        updateResponse.result[0] !== true
+      ) {
+        throw new Error(
+          updateResponse.ok
+            ? `تاریخ جدید کارت Pronunciation شمارهٔ ${card.cardId} ذخیره نشد.`
+            : updateResponse.error,
+        );
+      }
+      expectedDueByCardId.set(card.cardId, nextDue);
+    }
+
+    const confirmResponse = await ankiOperations.cardsInfo({ cards: cardIds });
+    if (!confirmResponse.ok) throw new Error(confirmResponse.error);
+    if (
+      !Array.isArray(confirmResponse.result) ||
+      confirmResponse.result.length !== cardIds.length ||
+      confirmResponse.result.some(
+        (card) => expectedDueByCardId.get(card.cardId) !== card.due,
+      )
+    ) {
+      throw new Error("ذخیرهٔ تاریخ جدید کارت Pronunciation تأیید نشد.");
+    }
+  }
+
   async function runRowAction(row: CardRow, action: (typeof ACTIONS)[number]) {
     if (busyCardId !== null || completedActions[row.cardId]) return;
 
@@ -722,6 +794,9 @@ export default function AnkiKnowingFilterManagementClient() {
             })),
           });
           if (!answerResponse.ok) throw new Error(answerResponse.error);
+        }
+        if (instruction.target === "pronunciation") {
+          await postponePronunciationCardsFromEasyDue(answerCardIds);
         }
       }
 
@@ -1260,6 +1335,13 @@ export default function AnkiKnowingFilterManagementClient() {
                           <span dir="ltr">Easy (ease=4)</span> می‌گیرند.
                         </li>
                         <li>
+                          کارت <span dir="ltr">{PRONUNCIATION_CARD}</span> نیز در
+                          هر چهار دکمه دقیقاً یک بار{" "}
+                          <span dir="ltr">Easy (ease=4)</span> می‌گیرد؛ سپس به
+                          تاریخی که Easy ساخته است، برای همان کارت یک عدد تصادفی
+                          بین ۶۰ تا ۱۲۰ روز اضافه می‌شود.
+                        </li>
+                        <li>
                           در شروع هر عملیات تگ{" "}
                           <span dir="ltr">{AnkiTag.Filtered}</span> روی Note اضافه
                           می‌شود و باقی می‌ماند؛ این تگ در انتقال کارت‌ها نقشی ندارد.
@@ -1310,6 +1392,7 @@ export default function AnkiKnowingFilterManagementClient() {
                     <h3 className="font-bold">نکات مهم</h3>
                     <ul className="mt-2 list-inside list-disc">
                       <li>در هر چهار دکمه، شش کارت متناظر همان Note به دک‌های اصلی منتقل می‌شوند.</li>
+                      <li>{PRONUNCIATION_CARD} در هر چهار دکمه، پس از انتقال به {PRONUNCIATION_DECK} دقیقاً یک بار Easy با <span dir="ltr">ease=4</span> می‌گیرد و سپس تاریخ مرورش ۶۰ تا ۱۲۰ روز تصادفی بعد از تاریخ حاصل از Easy قرار می‌گیرد.</li>
                       <li>{REVIEW_PRONUNCIATION_CARD} در هر چهار دکمه، پس از انتقال به {REVIEW_PRONUNCIATION_DECK} یک بار Easy با <span dir="ltr">ease=4</span> می‌گیرد.</li>
                       <li>اگر عملیات موفق شود، همان ردیف تا زمان بارگذاری دوباره «فیلتر شده» نشان داده می‌شود و دکمه‌ها دوباره فعال نمی‌شوند.</li>
                       <li>اگر خطا دیدی، ابتدا وضعیت Deck و اتصال AnkiConnect را بررسی کن و سپس فهرست را دوباره بارگذاری کن.</li>

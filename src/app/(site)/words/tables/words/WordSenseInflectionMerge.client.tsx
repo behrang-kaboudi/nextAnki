@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { PromptSourcesButton } from "@/components/prompts/PromptSourcesButton";
-import { ParallelPromptBatchControls } from "@/components/prompts/ParallelPromptBatchControls.client";
-import { RemainingCountBadge, RemainingCountButton } from "@/components/remaining-count";
+import { PromptBatchControls } from "@/components/prompts/PromptBatchControls.client";
+import { RemainingCountButton, RemainingGroupRecordBadge } from "@/components/remaining-count";
 
 const PROMPT_PATH = "src/prompts/word-extraction/merge_inflected_forms/rulseV1.md";
 
@@ -89,16 +89,19 @@ function parsePreview(value: string, groups: SourceGroup[]): OutputGroup[] {
   });
 }
 
-export default function WordSenseInflectionMerge({ remainingCount }: { remainingCount: number }) {
+export default function WordSenseInflectionMerge({
+  remainingGroupCount,
+  remainingRecordCount,
+}: {
+  remainingGroupCount: number;
+  remainingRecordCount: number;
+}) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [limit, setLimit] = useState("50");
-  const [laneCount, setLaneCount] = useState(1);
-  const [laneNumber, setLaneNumber] = useState(1);
-  const [laneEligibleCount, setLaneEligibleCount] = useState<number | null>(null);
+  const [limit, setLimit] = useState(String(remainingGroupCount));
   const [prompt, setPrompt] = useState("");
   const [groups, setGroups] = useState<SourceGroup[]>([]);
   const [sourceGroups, setSourceGroups] = useState<SourceFingerprint[]>([]);
@@ -107,10 +110,10 @@ export default function WordSenseInflectionMerge({ remainingCount }: { remaining
   const [preview, setPreview] = useState<OutputGroup[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
-  const clearLoadedLane = () => {
+  useEffect(() => setLimit(String(remainingGroupCount)), [remainingGroupCount]);
+  const clearLoadedBatch = () => {
     setGroups([]);
     setSourceGroups([]);
-    setLaneEligibleCount(null);
     setResponse("");
     setPreview([]);
     setNotice(null);
@@ -118,8 +121,8 @@ export default function WordSenseInflectionMerge({ remainingCount }: { remaining
 
   const createData = async (showModal: boolean, successNotice?: string) => {
     const parsedLimit = Number(limit);
-    if (!Number.isSafeInteger(parsedLimit) || parsedLimit < 1) {
-      setError("Batch size must be a positive integer.");
+    if (!Number.isSafeInteger(parsedLimit) || parsedLimit < 0) {
+      setError("Count must be a non-negative integer.");
       return;
     }
     setBusy(true);
@@ -131,7 +134,7 @@ export default function WordSenseInflectionMerge({ remainingCount }: { remaining
         fetch("/api/words/inflection-merge/prepare", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ batchSize: parsedLimit, laneCount, laneNumber }),
+          body: JSON.stringify({ batchSize: parsedLimit }),
         }),
       ]);
       const promptJson = (await promptResponse.json()) as { text?: string; error?: string };
@@ -140,7 +143,6 @@ export default function WordSenseInflectionMerge({ remainingCount }: { remaining
         items?: SourceGroup[];
         sourceGroups?: SourceFingerprint[];
         totalEligibleGroups?: number;
-        laneEligibleCount?: number;
         error?: string;
       };
       if (!promptResponse.ok || typeof promptJson.text !== "string") {
@@ -153,10 +155,9 @@ export default function WordSenseInflectionMerge({ remainingCount }: { remaining
       setGroups(dataJson.items);
       setSourceGroups(dataJson.sourceGroups);
       setTotalGroups(dataJson.totalEligibleGroups ?? dataJson.items.length);
-      setLaneEligibleCount(typeof dataJson.laneEligibleCount === "number" ? dataJson.laneEligibleCount : null);
       setResponse("");
       setPreview([]);
-      setNotice(successNotice ?? `Created lane ${laneNumber}/${laneCount} with ${dataJson.items.length} POS-separated inflection group(s) ✓`);
+      setNotice(successNotice ?? `Created data with ${dataJson.items.length} POS-separated inflection group(s) ✓`);
       if (showModal) setOpen(true);
       router.refresh();
     } catch (reason) {
@@ -249,7 +250,7 @@ export default function WordSenseInflectionMerge({ remainingCount }: { remaining
         onClick={() => void createData(true)}
         className="relative rounded border px-3 py-2 text-sm hover:bg-black/5 disabled:opacity-100 dark:hover:bg-white/5"
       >
-        3. MERGE INFLECTED FORMS <RemainingCountBadge count={remainingCount} />
+        3. MERGE INFLECTED FORMS <RemainingGroupRecordBadge groupCount={remainingGroupCount} recordCount={remainingRecordCount} />
         {busy && !open ? (
           <span className="absolute inset-0 flex items-center justify-center gap-1 rounded bg-background/85" aria-hidden="true">
             <span className="size-1.5 animate-bounce rounded-full bg-current [animation-delay:-0.3s]" />
@@ -306,7 +307,7 @@ export default function WordSenseInflectionMerge({ remainingCount }: { remaining
                   <li>برنامه قواعد جمع <span dir="ltr">s/es/ies</span> را فقط برای WordSenseهای اسم و قواعد <span dir="ltr">ing/ed</span> را فقط برای WordSenseهای فعل اجرا می‌کند؛ تصمیم نهایی با پاسخ AI بیرونی است.</li>
                   <li>گروه‌ها از ابتدا بر اساس <code>pos</code> ساخته می‌شوند و معنی فارسی، توضیح مفهوم و متن جمله‌ها نیز برای جلوگیری از حذف اشتباه فرستاده می‌شوند.</li>
                   <li>افعال و جمع‌های بی‌قاعده، comparative/superlative و خانواده‌های اشتقاقی در این مرحله بررسی نمی‌شوند.</li>
-                  <li>گروه‌ها به laneهای پایدار و بدون هم‌پوشانی تقسیم می‌شوند و Batch size سقف تعداد گروه در هر lane است.</li>
+                  <li>Count تعداد گروه‌هایی را تعیین می‌کند که در دادهٔ پرامپت قرار می‌گیرند.</li>
                 </ul>
                 <div className="mt-2 font-semibold">پاسخ AI چه چیزی تعیین می‌کند؟</div>
                 <ul className="list-disc pr-5">
@@ -334,17 +335,12 @@ export default function WordSenseInflectionMerge({ remainingCount }: { remaining
             <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-2">
               <section className="flex min-h-0 flex-col gap-2">
                 <div className="flex flex-col gap-2">
-                  <ParallelPromptBatchControls
+                  <PromptBatchControls
                     batchSize={limit}
                     disabled={busy}
-                    laneCount={laneCount}
-                    laneNumber={laneNumber}
-                    laneEligibleCount={laneEligibleCount}
                     loadedCount={groups.length}
                     totalEligibleCount={totalGroups}
-                    onBatchSizeChange={(value) => { clearLoadedLane(); setLimit(value); }}
-                    onLaneCountChange={(value) => { clearLoadedLane(); setLaneCount(value); }}
-                    onLaneNumberChange={(value) => { clearLoadedLane(); setLaneNumber(value); }}
+                    onBatchSizeChange={(value) => { clearLoadedBatch(); setLimit(value); }}
                   />
                   <div className="flex flex-wrap items-center gap-2">
                   <button type="button" disabled={busy} onClick={() => void createData(false)} className={buttonClass}>
@@ -355,7 +351,7 @@ export default function WordSenseInflectionMerge({ remainingCount }: { remaining
                     disabled={busy || groups.length === 0}
                     onClick={() => void navigator.clipboard.writeText(copyText).then(() => setNotice("Prompt and grouped data copied ✓")).catch((reason) => setError(reason instanceof Error ? reason.message : String(reason)))}
                     className={buttonClass}
-                  >Copy lane {laneNumber}</button>
+                  >Copy prompt + data</button>
                   <RemainingCountButton count={totalGroups} disabled={busy} onClick={() => setLimit(String(totalGroups))} />
                   </div>
                 </div>

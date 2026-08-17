@@ -1,11 +1,11 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { SpecialCharactersBar } from "@/components/ipa/SpecialCharactersBar";
 import { PromptSourcesButton } from "@/components/prompts/PromptSourcesButton";
-import { ParallelPromptBatchControls } from "@/components/prompts/ParallelPromptBatchControls.client";
+import { PromptBatchControls } from "@/components/prompts/PromptBatchControls.client";
 import { RemainingCountBadge, RemainingCountButton } from "@/components/remaining-count";
 
 const PROMPT_PATHS = [
@@ -38,10 +38,7 @@ export default function PersianWordMeaningIpaPhase2({ initialMissingCount }: { i
   const [open, setOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [limit, setLimit] = useState("100");
-  const [laneCount, setLaneCount] = useState(3);
-  const [laneNumber, setLaneNumber] = useState(1);
-  const [laneEligibleCount, setLaneEligibleCount] = useState<number | null>(null);
+  const [limit, setLimit] = useState(String(initialMissingCount));
   const [loadedCount, setLoadedCount] = useState(0);
   const [prompt, setPrompt] = useState("");
   const [data, setData] = useState("");
@@ -51,12 +48,12 @@ export default function PersianWordMeaningIpaPhase2({ initialMissingCount }: { i
   const [error, setError] = useState<string | null>(null);
   const [copyNotice, setCopyNotice] = useState<string | null>(null);
   const [report, setReport] = useState<Report | null>(null);
+  useEffect(() => setLimit(String(initialMissingCount)), [initialMissingCount]);
   const lastInputRef = useRef<HTMLInputElement | null>(null);
   const lastIdRef = useRef<number | null>(null);
-  const clearLoadedLane = () => {
+  const clearLoadedBatch = () => {
     setData("");
     setResponse("");
-    setLaneEligibleCount(null);
     setLoadedCount(0);
     setRows([]);
     setReport(null);
@@ -72,26 +69,25 @@ export default function PersianWordMeaningIpaPhase2({ initialMissingCount }: { i
   const refreshData = useCallback(async () => {
     setLoading(true); setError(null);
     try {
-      const res = await fetch(`/api/words/persian-words/meaning-fa-ipa/missing?batchSize=${encodeURIComponent(limit)}&laneCount=${laneCount}&laneNumber=${laneNumber}`);
-      const json = (await res.json()) as { ok?: boolean; items?: unknown; totalMissing?: number; laneEligibleCount?: number; error?: string };
+      const res = await fetch(`/api/words/persian-words/meaning-fa-ipa/missing?batchSize=${encodeURIComponent(limit)}`);
+      const json = (await res.json()) as { ok?: boolean; items?: unknown; totalMissing?: number; error?: string };
       if (!res.ok || !json.ok) throw new Error(json.error || "Could not load missing rows.");
       setData(JSON.stringify(json.items ?? [], null, 2));
       setRemainingCount(typeof json.totalMissing === "number" ? json.totalMissing : initialMissingCount);
-      setLaneEligibleCount(typeof json.laneEligibleCount === "number" ? json.laneEligibleCount : null);
       setLoadedCount(Array.isArray(json.items) ? json.items.length : 0);
-      setCopyNotice(`Lane ${laneNumber}/${laneCount} data refreshed ✓`);
+      setCopyNotice(`Data refreshed with ${Array.isArray(json.items) ? json.items.length : 0} record(s) ✓`);
     } catch (reason) { setError(reason instanceof Error ? reason.message : String(reason)); } finally { setLoading(false); }
-  }, [initialMissingCount, laneCount, laneNumber, limit]);
+  }, [initialMissingCount, limit]);
   const openPrompt = useCallback(async () => {
     setOpen(true); setLoading(true); setError(null); setCopyNotice(null); setResponse(""); setRows([]); setReport(null);
     try {
       const [files, missing] = await Promise.all([
         Promise.all(PROMPT_PATHS.map(async (path) => { const res = await fetch(`/api/ai/prompt-file?path=${encodeURIComponent(path)}`); const json = (await res.json()) as { text?: string; error?: string }; if (!res.ok || !json.text) throw new Error(json.error || "Could not load prompt."); return json.text; })),
-        fetch(`/api/words/persian-words/meaning-fa-ipa/missing?batchSize=${encodeURIComponent(limit)}&laneCount=${laneCount}&laneNumber=${laneNumber}`).then(async (res) => { const json = (await res.json()) as { ok?: boolean; items?: unknown; totalMissing?: number; laneEligibleCount?: number; error?: string }; if (!res.ok || !json.ok) throw new Error(json.error || "Could not load missing rows."); return json; }),
+        fetch(`/api/words/persian-words/meaning-fa-ipa/missing?batchSize=${encodeURIComponent(limit)}`).then(async (res) => { const json = (await res.json()) as { ok?: boolean; items?: unknown; totalMissing?: number; error?: string }; if (!res.ok || !json.ok) throw new Error(json.error || "Could not load missing rows."); return json; }),
       ]);
-      setPrompt(files.join("\n\n")); setData(JSON.stringify(missing.items ?? [], null, 2)); setRemainingCount(typeof missing.totalMissing === "number" ? missing.totalMissing : initialMissingCount); setLaneEligibleCount(typeof missing.laneEligibleCount === "number" ? missing.laneEligibleCount : null); setLoadedCount(Array.isArray(missing.items) ? missing.items.length : 0);
+      setPrompt(files.join("\n\n")); setData(JSON.stringify(missing.items ?? [], null, 2)); setRemainingCount(typeof missing.totalMissing === "number" ? missing.totalMissing : initialMissingCount); setLoadedCount(Array.isArray(missing.items) ? missing.items.length : 0);
     } catch (reason) { setError(reason instanceof Error ? reason.message : String(reason)); } finally { setLoading(false); }
-  }, [initialMissingCount, laneCount, laneNumber, limit]);
+  }, [initialMissingCount, limit]);
 
   const prepareApply = useCallback(async () => {
     setError(null);
@@ -154,12 +150,12 @@ export default function PersianWordMeaningIpaPhase2({ initialMissingCount }: { i
           {error ? <div className="rounded border border-red-500/30 bg-red-600/10 p-3 text-sm text-red-700">{error}</div> : null}
           <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-2">
             <section className="flex min-h-0 flex-col gap-2">
-              <ParallelPromptBatchControls batchSize={limit} disabled={loading} laneCount={laneCount} laneNumber={laneNumber} laneEligibleCount={laneEligibleCount} loadedCount={loadedCount} totalEligibleCount={remainingCount} onBatchSizeChange={(value) => { clearLoadedLane(); setLimit(value); }} onLaneCountChange={(value) => { clearLoadedLane(); setLaneCount(value); }} onLaneNumberChange={(value) => { clearLoadedLane(); setLaneNumber(value); }} />
+              <PromptBatchControls batchSize={limit} disabled={loading} loadedCount={loadedCount} totalEligibleCount={remainingCount} onBatchSizeChange={(value) => { clearLoadedBatch(); setLimit(value); }} />
               <div className="flex flex-wrap items-center gap-2">
                 <button type="button" onClick={() => copy(prompt)} className="rounded border px-2 py-1 text-xs">Copy prompt</button>
                 <button type="button" onClick={() => copy(data)} className="rounded border px-2 py-1 text-xs">Copy data</button>
-                <button type="button" onClick={() => copy(`${prompt}\n\n${data}`)} disabled={!data} className="rounded border px-2 py-1 text-xs disabled:opacity-50">Copy lane {laneNumber}</button>
-                <button type="button" onClick={() => void refreshData()} disabled={loading} className="rounded border px-2 py-1 text-xs disabled:opacity-50">{loading ? "Loading…" : "Create lane data"}</button>
+                <button type="button" onClick={() => copy(`${prompt}\n\n${data}`)} disabled={!data} className="rounded border px-2 py-1 text-xs disabled:opacity-50">Copy prompt + data</button>
+                <button type="button" onClick={() => void refreshData()} disabled={loading} className="rounded border px-2 py-1 text-xs disabled:opacity-50">{loading ? "Loading…" : "Create data"}</button>
                 <RemainingCountButton count={remainingCount} disabled={loading} onClick={() => setLimit(String(remainingCount))} />
               </div>
               <textarea readOnly value={`${prompt}${data ? `\n\n${data}` : ""}`} className="min-h-0 flex-1 resize-none rounded border p-3 font-mono text-xs" />

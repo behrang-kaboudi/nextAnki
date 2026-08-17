@@ -1,12 +1,13 @@
 # Field rules: `other_meanings_fa`
 
+Preserve reasonable existing alternatives. Apply a small benefit of the doubt to values already present in other_meanings_fa: do not remove an existing alternative merely because it is slightly less exact, more contextual, more colloquial, or differs mildly in tone from meaning_fa. Keep it when it still naturally expresses the same central sense in at least one supplied sentence and does not contradict the intended sense in the others. Remove an existing alternative only when it clearly belongs to a different sense or grammatical role, is misleading or unnatural for this WordSense, or is a duplicate, spelling variant, explanation, or rare/unhelpful expression. This preservation rule applies only to existing alternatives; newly added alternatives must still satisfy the stricter rules below.
+This benefit of the doubt never permits preserving an item that violates the core rules, including a mere non-established transliteration.
+
 Actively check whether the exact sense of the record has useful alternative Persian equivalents, even when the current value is empty.
 
-- Include only natural, common Persian words or short phrases for the same sense and grammatical role as `meaning_fa`.
-- Test every proposed alternative in the Persian translation of every supplied sentence, at the position where the meaning of `base_form` is expressed. Include the alternative only if it can replace `meaning_fa` in all of those translations, or if the replacement creates only a very slight difference in tone without changing the central meaning. If it fails in even one translation, requires the sentence concept to be rewritten, or merely expresses a related, nearby, or more general meaning of `base_form`, do not include it.
-- Do not include `meaning_fa` itself, duplicates, spelling variants, explanations, rare words, or meanings that belong to another sense.
+{{> word-extraction/_shared/other_meanings_fa_core_v1.md}}
+
 - Usually return no more than three alternatives.
-- If no useful alternative exists, return an empty array.
 
 The value of `other_meanings_fa` must always be a JSON array of strings:
 

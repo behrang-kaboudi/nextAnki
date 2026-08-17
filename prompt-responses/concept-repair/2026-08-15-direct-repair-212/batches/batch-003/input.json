@@ -1,0 +1,1968 @@
+[
+  {
+    "id": 35627,
+    "word": "drop",
+    "pos": "noun",
+    "meaning_fa": "قطره",
+    "other_meanings_fa": [
+      "چکه",
+      "اندکی",
+      "مقدار کم"
+    ],
+    "concept_explained_fa": "یک قطره مایع یا، در کاربرد مجازی، مقدار بسیار کمی از چیزی.",
+    "sentences": [
+      {
+        "id": 14515,
+        "sentence_en": "The first drops of rain fell.",
+        "sentence_en_meaning_fa": "اولین قطرات باران باریدند."
+      },
+      {
+        "id": 25555,
+        "sentence_en": "Could I have just a drop more milk in my coffee, please?",
+        "sentence_en_meaning_fa": "می‌شود اندکی بیشتر در قهوه‌ام شیر بریزید لطفاً؟"
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 4765,
+        "pos": "verb",
+        "meaning_fa": "انداختن",
+        "other_meanings_fa": [
+          "رها کردن"
+        ]
+      },
+      {
+        "id": 36163,
+        "pos": "noun",
+        "meaning_fa": "کاهش",
+        "other_meanings_fa": [
+          "افت",
+          "نزول",
+          "سقوط"
+        ]
+      },
+      {
+        "id": 36164,
+        "pos": "verb",
+        "meaning_fa": "رها کردن",
+        "other_meanings_fa": [
+          "ترک کردن",
+          "دست کشیدن",
+          "کنار گذاشتن"
+        ]
+      },
+      {
+        "id": 37606,
+        "pos": "verb",
+        "meaning_fa": "پیاده کردن",
+        "other_meanings_fa": [
+          "رساندن"
+        ]
+      },
+      {
+        "id": 37607,
+        "pos": "noun",
+        "meaning_fa": "ارتفاع",
+        "other_meanings_fa": [
+          "فاصله سقوط"
+        ]
+      },
+      {
+        "id": 38907,
+        "pos": "noun",
+        "meaning_fa": "آبنبات",
+        "other_meanings_fa": []
+      },
+      {
+        "id": 40220,
+        "pos": "noun",
+        "meaning_fa": "تحویل",
+        "other_meanings_fa": []
+      },
+      {
+        "id": 40652,
+        "pos": "verb",
+        "meaning_fa": "کاهش یافتن",
+        "other_meanings_fa": [
+          "سقوط کردن",
+          "پایین آمدن",
+          "ارزان شدن"
+        ]
+      },
+      {
+        "id": 41239,
+        "pos": "verb",
+        "meaning_fa": "کاهش دادن",
+        "other_meanings_fa": [
+          "پایین آوردن",
+          "کم کردن"
+        ]
+      },
+      {
+        "id": 42139,
+        "pos": "verb",
+        "meaning_fa": "افتادن",
+        "other_meanings_fa": []
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 35652,
+    "word": "complete",
+    "pos": "adjective",
+    "meaning_fa": "کامل",
+    "other_meanings_fa": [
+      "تمام عیار مطلق",
+      "تمام وکمال",
+      "کامل از نظر شدت یا ماهیت",
+      "تمام",
+      "آزگار",
+      "تام"
+    ],
+    "concept_explained_fa": "کامل و مطلق از نظر درجه یا ویژگی، یا دارای همه اجزای لازم؛ معنای دقیق به اسم و بافت بستگی دارد.",
+    "sentences": [
+      {
+        "id": 14541,
+        "sentence_en": "A complete stranger offered to carry my bag.",
+        "sentence_en_meaning_fa": "فردی کاملاً غریبه پیشنهاد کرد کیفم را حمل کند."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 2292,
+        "pos": "verb",
+        "meaning_fa": "تکمیل کردن",
+        "other_meanings_fa": [
+          "تمام کردن",
+          "به پایان رساندن",
+          "به اتمام رسانیدن"
+        ]
+      },
+      {
+        "id": 44452,
+        "pos": "verb",
+        "meaning_fa": "کامل کردن",
+        "other_meanings_fa": []
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 35688,
+    "word": "speech",
+    "pos": "noun",
+    "meaning_fa": "گفتار",
+    "other_meanings_fa": [
+      "تکلم",
+      "بیان",
+      "لفظ"
+    ],
+    "concept_explained_fa": "توانایی و عمل سخن گفتن، یا سخنرانی رسمی برای مخاطبان، است.",
+    "sentences": [
+      {
+        "id": 14578,
+        "sentence_en": "Some expressions are used more in speech than in writing.",
+        "sentence_en_meaning_fa": "برخی اصطلاحات در گفتار به نسبت نوشتار، بیشتر استفاده می‌شوند."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 36393,
+        "pos": "noun",
+        "meaning_fa": "سخنرانی",
+        "other_meanings_fa": [
+          "نطق",
+          "خطابه",
+          "سخن"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 35692,
+    "word": "cross",
+    "pos": "noun",
+    "meaning_fa": "صلیب",
+    "other_meanings_fa": [
+      "چلیپا",
+      "خاج"
+    ],
+    "concept_explained_fa": "شکلی از دو خط متقاطع است که نماد اصلی دین مسیحیت نیز محسوب می‌شود.",
+    "sentences": [
+      {
+        "id": 14582,
+        "sentence_en": "He was wearing a gold cross.",
+        "sentence_en_meaning_fa": "او یک صلیب طلا پوشیده [انداخته] بود."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 32320,
+        "pos": "verb",
+        "meaning_fa": "عبور کردن",
+        "other_meanings_fa": [
+          "رد شدن",
+          "گذشتن",
+          "پیمودن"
+        ]
+      },
+      {
+        "id": 34439,
+        "pos": "noun",
+        "meaning_fa": "علامت ضربدر",
+        "other_meanings_fa": []
+      },
+      {
+        "id": 39554,
+        "pos": "noun",
+        "meaning_fa": "سانتر فوتبال",
+        "other_meanings_fa": [
+          "ضربه یا پاس عرضی"
+        ]
+      },
+      {
+        "id": 39555,
+        "pos": "verb",
+        "meaning_fa": "سانتر کردن فوتبال",
+        "other_meanings_fa": [
+          "پاس عرضی دادن"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 35700,
+    "word": "need",
+    "pos": "verb",
+    "meaning_fa": "بایستن",
+    "other_meanings_fa": [
+      "باید"
+    ],
+    "concept_explained_fa": "در کاربرد وجهی، بیشتر در پرسش و منفی برای ضرورت یا نبود ضرورت؛ رسمی‌تر و از نظر ساخت محدودتر.",
+    "sentences": [
+      {
+        "id": 14590,
+        "sentence_en": "All you need to do is complete this form.",
+        "sentence_en_meaning_fa": "همه [تنها] کاری که باید انجام دهید، پر کردن این فرم است."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 4508,
+        "pos": "verb",
+        "meaning_fa": "نیاز داشتن",
+        "other_meanings_fa": [
+          "لازم داشتن"
+        ]
+      },
+      {
+        "id": 36348,
+        "pos": "noun",
+        "meaning_fa": "نیاز",
+        "other_meanings_fa": [
+          "احتیاج",
+          "لزوم",
+          "اقتضا"
+        ]
+      }
+    ],
+    "issue_types": [
+      "serious_fluency"
+    ]
+  },
+  {
+    "id": 35789,
+    "word": "set",
+    "pos": "verb",
+    "meaning_fa": "رخ دادن",
+    "other_meanings_fa": [
+      "روی دادن"
+    ],
+    "concept_explained_fa": "داستان یا فیلم در زمان و مکانی مشخص رخ دادن.",
+    "sentences": [
+      {
+        "id": 14683,
+        "sentence_en": "The movie is set in Los Angeles in the year 2019.",
+        "sentence_en_meaning_fa": "فیلم در لس‌آنجلس در سال 2019 رخ می‌دهد."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 4755,
+        "pos": "verb",
+        "meaning_fa": "غروب کردن",
+        "other_meanings_fa": [
+          "فرو رفتن"
+        ]
+      },
+      {
+        "id": 5101,
+        "pos": "adjective",
+        "meaning_fa": "در آستانه بودن",
+        "other_meanings_fa": []
+      },
+      {
+        "id": 32300,
+        "pos": "verb",
+        "meaning_fa": "معین کردن",
+        "other_meanings_fa": [
+          "تعیین کردن"
+        ]
+      },
+      {
+        "id": 36470,
+        "pos": "noun",
+        "meaning_fa": "صحنه",
+        "other_meanings_fa": [
+          "محل فیلمبرداری",
+          "دکور",
+          "آرایه"
+        ]
+      },
+      {
+        "id": 39588,
+        "pos": "noun",
+        "meaning_fa": "ست",
+        "other_meanings_fa": [
+          "دست بازی",
+          "مجموعه ای از گیم ها"
+        ]
+      },
+      {
+        "id": 40201,
+        "pos": "noun",
+        "meaning_fa": "دستگاه رادیو تلویزیون و",
+        "other_meanings_fa": [
+          "گیرنده"
+        ]
+      },
+      {
+        "id": 40629,
+        "pos": "verb",
+        "meaning_fa": "کوک کردن",
+        "other_meanings_fa": [
+          "تنظیم کردن"
+        ]
+      },
+      {
+        "id": 40736,
+        "pos": "verb",
+        "meaning_fa": "زدن",
+        "other_meanings_fa": []
+      },
+      {
+        "id": 42136,
+        "pos": "verb",
+        "meaning_fa": "قرار دادن",
+        "other_meanings_fa": [
+          "گذاشتن"
+        ]
+      },
+      {
+        "id": 44850,
+        "pos": "verb",
+        "meaning_fa": "قرار داشتن",
+        "other_meanings_fa": []
+      }
+    ],
+    "issue_types": [
+      "serious_fluency"
+    ]
+  },
+  {
+    "id": 35915,
+    "word": "slight",
+    "pos": "adjective",
+    "meaning_fa": "ناچیز",
+    "other_meanings_fa": [
+      "کوچک",
+      "کم",
+      "جزیی"
+    ],
+    "concept_explained_fa": "اندک و جزئی از نظر مقدار، درجه یا تفاوت؛ گاهی دربارهٔ اندام باریک نیز به‌کار می‌رود.",
+    "sentences": [
+      {
+        "id": 14824,
+        "sentence_en": "We're having a slight problem with our computer system.",
+        "sentence_en_meaning_fa": "ما مشکل کوچکی با سیستم رایانه‌ای‌مان داریم."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 37959,
+        "pos": "adjective",
+        "meaning_fa": "ریزه اندام",
+        "other_meanings_fa": [
+          "ریز",
+          "ظریف و لاغر"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 35928,
+    "word": "weigh",
+    "pos": "verb",
+    "meaning_fa": "سبک سنگین کردن",
+    "other_meanings_fa": [
+      "سنجیدن",
+      "ارزیابی کردن"
+    ],
+    "concept_explained_fa": "به اندازه‌گیری وزن شخص یا چیزی با ترازو، یا سنجیدن اهمیت گزینه‌ها، اشاره دارد.",
+    "sentences": [
+      {
+        "id": 14838,
+        "sentence_en": "He needs to weigh up the pros and cons of going to college.",
+        "sentence_en_meaning_fa": "او باید نکات مثبت و نکات منفی رفتن به کالج را سبک سنگین کند."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 1178,
+        "pos": "verb",
+        "meaning_fa": "وزن داشتن",
+        "other_meanings_fa": []
+      },
+      {
+        "id": 40605,
+        "pos": "verb",
+        "meaning_fa": "وزن کردن",
+        "other_meanings_fa": [
+          "کشیدن"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 35940,
+    "word": "knock down",
+    "pos": "verb",
+    "meaning_fa": "تخریب کردن ساختمان و",
+    "other_meanings_fa": [
+      "تخریب کردن"
+    ],
+    "concept_explained_fa": "به تخریب ساختمان یا ساختار تا افتادن آن، یا زمین زدن شخص، اشاره دارد.",
+    "sentences": [
+      {
+        "id": 14850,
+        "sentence_en": "They've knocked down the old cinema.",
+        "sentence_en_meaning_fa": "آنها (آن) سینمای قدیمی را تخریب کرده‌اند."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 31989,
+        "pos": "verb",
+        "meaning_fa": "به زمین انداختن",
+        "other_meanings_fa": [
+          "نقش بر زمین کردن"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 36108,
+    "word": "bother",
+    "pos": "verb",
+    "meaning_fa": "نگران کردن",
+    "other_meanings_fa": [
+      "زحمت دادن به خود",
+      "ناراحت کردن"
+    ],
+    "concept_explained_fa": "به ایجاد نگرانی یا مزاحمت برای شخص، یا زحمت انجام کاری، اشاره دارد.",
+    "sentences": [
+      {
+        "id": 15027,
+        "sentence_en": "I don't care if he doesn't come, it doesn't bother me.",
+        "sentence_en_meaning_fa": "برایم مهم نیست اگر او نیاید، مرا ناراحت نمی‌کند."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 32059,
+        "pos": "verb",
+        "meaning_fa": "مزاحم شدن",
+        "other_meanings_fa": [
+          "زحمت دادن",
+          "آویزان شدن"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 36449,
+    "word": "government",
+    "pos": "noun",
+    "meaning_fa": "حکمرانی یا اداره کشور",
+    "other_meanings_fa": [
+      "فرایند حکومت کردن",
+      "شیوه اداره"
+    ],
+    "concept_explained_fa": "فرایند، شیوه یا نظام اداره و کنترل یک کشور یا جامعه و اجرای تصمیم‌های عمومی؛ می‌تواند به خود نهاد حاکم نیز اشاره کند.",
+    "sentences": [
+      {
+        "id": 15435,
+        "sentence_en": "Effective government requires transparency and public accountability.",
+        "sentence_en_meaning_fa": "حکمرانی مؤثر به شفافیت و پاسخ‌گویی عمومی نیاز دارد."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 5124,
+        "pos": "noun",
+        "meaning_fa": "دولت",
+        "other_meanings_fa": [
+          "حکومت"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 36532,
+    "word": "divided",
+    "pos": "adjective",
+    "meaning_fa": "مجزا",
+    "other_meanings_fa": [],
+    "concept_explained_fa": "چیزی از نظر فیزیکی به بخش‌های مجزا تقسیم شده باشد.",
+    "sentences": [
+      {
+        "id": 30710,
+        "sentence_en": "The room is divided into two separate work areas.",
+        "sentence_en_meaning_fa": "اتاق به دو فضای کاری مجزا تقسیم شده است."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 44888,
+        "pos": "adjective",
+        "meaning_fa": "دارای اختلاف عقیده",
+        "other_meanings_fa": [
+          "متشتت"
+        ]
+      }
+    ],
+    "issue_types": [
+      "serious_fluency"
+    ]
+  },
+  {
+    "id": 36626,
+    "word": "wing",
+    "pos": "noun",
+    "meaning_fa": "بال پرنده و هواپیما و",
+    "other_meanings_fa": [
+      "بال"
+    ],
+    "concept_explained_fa": "به اندام پرواز پرندگان و حشرات یا بخش مشابه در دو سوی هواپیما اشاره دارد.",
+    "sentences": [
+      {
+        "id": 15627,
+        "sentence_en": "The swan flapped its wings noisily.",
+        "sentence_en_meaning_fa": "قو بال‌هایش را با صدا به‌هم زد."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 3199,
+        "pos": "noun",
+        "meaning_fa": "بال",
+        "other_meanings_fa": []
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 36659,
+    "word": "receipt",
+    "pos": "noun",
+    "meaning_fa": "دریافت",
+    "other_meanings_fa": [
+      "وصول"
+    ],
+    "concept_explained_fa": "به عمل دریافت پول، کالا یا پیام اشاره دارد؛ همچنین می‌تواند مدرک پرداخت باشد.",
+    "sentences": [
+      {
+        "id": 15660,
+        "sentence_en": "The booking will be made on receipt of a deposit.",
+        "sentence_en_meaning_fa": "رزرو به محض دریافت وجه انجام خواهد شد."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 3147,
+        "pos": "noun",
+        "meaning_fa": "رسید",
+        "other_meanings_fa": [
+          "رسید خرید",
+          "فیش",
+          "فاکتور"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 36780,
+    "word": "leak",
+    "pos": "noun",
+    "meaning_fa": "نشتی یا نشت",
+    "other_meanings_fa": [
+      "سوراخ یا محل خروج ناخواسته",
+      "فرار مایع یا گاز"
+    ],
+    "concept_explained_fa": "خروج ناخواستهٔ مایع یا گاز از سوراخ یا شکاف، یا خود محل این خروج است.",
+    "sentences": [
+      {
+        "id": 15788,
+        "sentence_en": "A plumber repaired the leak beneath the sink.",
+        "sentence_en_meaning_fa": "لوله‌کش نشتی زیر ظرف‌شویی را تعمیر کرد."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 4717,
+        "pos": "verb",
+        "meaning_fa": "نشت کردن",
+        "other_meanings_fa": [
+          "چکه کردن آب",
+          "نشت کردن آب و گاز",
+          "تراویدن"
+        ]
+      },
+      {
+        "id": 41432,
+        "pos": "noun",
+        "meaning_fa": "درز خبر سری",
+        "other_meanings_fa": [
+          "درز"
+        ]
+      },
+      {
+        "id": 41433,
+        "pos": "verb",
+        "meaning_fa": "درز کردن خبر سری",
+        "other_meanings_fa": [
+          "افشا کردن خبر محرمانه",
+          "آشکار شدن",
+          "برملا شدن"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 36788,
+    "word": "colorful",
+    "pos": "adjective",
+    "meaning_fa": "جالب",
+    "other_meanings_fa": [
+      "جذاب"
+    ],
+    "concept_explained_fa": "پر از جزئیات زنده، غیرمعمول و جالب؛ برای شخصیت، روایت یا زبان و گاهی رنگ‌های متنوع.",
+    "sentences": [
+      {
+        "id": 15796,
+        "sentence_en": "Our guide shared colorful stories about the town's early settlers.",
+        "sentence_en_meaning_fa": "راهنمای ما داستان‌های جالبی دربارهٔ ساکنان اولیهٔ شهر تعریف کرد."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 30118,
+        "pos": "adjective",
+        "meaning_fa": "رنگارنگ",
+        "other_meanings_fa": [
+          "چندرنگ"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 36799,
+    "word": "laundry",
+    "pos": "noun",
+    "meaning_fa": "لباس های شستنی یا شسته شده",
+    "other_meanings_fa": [
+      "رخت چرک",
+      "کار شستن لباس"
+    ],
+    "concept_explained_fa": "لباس‌ها و پارچه‌هایی است که باید شسته شوند یا تازه شسته شده‌اند؛ همچنین به کار شستن آن‌ها اشاره می‌کند.",
+    "sentences": [
+      {
+        "id": 15809,
+        "sentence_en": "He folded the clean laundry before dinner.",
+        "sentence_en_meaning_fa": "او پیش از شام لباس‌های تمیز شسته‌شده را تا کرد."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 3043,
+        "pos": "noun",
+        "meaning_fa": "رختشویخانه",
+        "other_meanings_fa": [
+          "خشکشویی",
+          "لباسشویی"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 36812,
+    "word": "most",
+    "pos": "determiner",
+    "meaning_fa": "بیشترین",
+    "other_meanings_fa": [
+      "بیش از همه",
+      "بیشتر از همه"
+    ],
+    "concept_explained_fa": "در این نقش دستوری بزرگ‌ترین مقدار یا بخش را پیش از اسم نشان می‌دهد؛ به کیفیت «بهترین» اشاره ندارد.",
+    "sentences": [
+      {
+        "id": 15822,
+        "sentence_en": "How can we get the most power from the engine?",
+        "sentence_en_meaning_fa": "چطور می‌توانیم بیشترین توان را از آن موتور بگیریم؟"
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 34610,
+        "pos": "adverb",
+        "meaning_fa": "ترین نشانه صفت یا قید عالی",
+        "other_meanings_fa": [
+          "بیشترین میزان"
+        ]
+      },
+      {
+        "id": 34611,
+        "pos": "pronoun",
+        "meaning_fa": "بیشتر افراد یا چیزها",
+        "other_meanings_fa": [
+          "اکثریت",
+          "بخش عمده"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 36814,
+    "word": "story",
+    "pos": "noun",
+    "meaning_fa": "طبقه ساختمان",
+    "other_meanings_fa": [
+      "اشکوب",
+      "سطح میان کف و سقف"
+    ],
+    "concept_explained_fa": "یکی از طبقات افقی ساختمان که اتاق‌ها در آن قرار دارند؛ املای آن در کاربرد بریتانیایی با معنای روایت متفاوت است.",
+    "sentences": [
+      {
+        "id": 15824,
+        "sentence_en": "They live on the fifth story of the building.",
+        "sentence_en_meaning_fa": "آن‌ها در طبقهٔ پنجم ساختمان زندگی می‌کنند."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 3765,
+        "pos": "noun",
+        "meaning_fa": "داستان",
+        "other_meanings_fa": [
+          "قصه",
+          "حکایت"
+        ]
+      },
+      {
+        "id": 36489,
+        "pos": "noun",
+        "meaning_fa": "گزارش یا روایت خبری",
+        "other_meanings_fa": [
+          "خبر",
+          "شرح یک رویداد"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 36843,
+    "word": "lazy",
+    "pos": "adjective",
+    "meaning_fa": "آرام و کم تحرک",
+    "other_meanings_fa": [
+      "رخوت آور",
+      "بی شتاب"
+    ],
+    "concept_explained_fa": "زمان، حرکت یا فضایی را توصیف می‌کند که آرام، بی‌شتاب و کم‌فعالیت است؛ در این sense به تنبلی شخص اشاره ندارد.",
+    "sentences": [
+      {
+        "id": 15854,
+        "sentence_en": "We enjoyed a lazy afternoon beside the lake.",
+        "sentence_en_meaning_fa": "ما بعدازظهری آرام و بی‌شتاب کنار دریاچه گذراندیم."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 34593,
+        "pos": "adjective",
+        "meaning_fa": "تنبل",
+        "other_meanings_fa": []
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 36848,
+    "word": "total",
+    "pos": "adjective",
+    "meaning_fa": "کامل و محض",
+    "other_meanings_fa": [
+      "تمام عیار",
+      "مطلق"
+    ],
+    "concept_explained_fa": "برای تأکید بر کامل‌بودن یک ویژگی یا وضعیت به کار می‌رود و معنای جمع عددی ندارد.",
+    "sentences": [
+      {
+        "id": 15859,
+        "sentence_en": "The entire proposal was a total disaster.",
+        "sentence_en_meaning_fa": "کل پیشنهاد یک فاجعهٔ تمام‌عیار بود."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 4903,
+        "pos": "noun",
+        "meaning_fa": "مجموع",
+        "other_meanings_fa": []
+      },
+      {
+        "id": 31010,
+        "pos": "verb",
+        "meaning_fa": "داغون کردن",
+        "other_meanings_fa": [
+          "کاملا نابود کردن",
+          "داغان کردن"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 36882,
+    "word": "touch",
+    "pos": "noun",
+    "meaning_fa": "لمس",
+    "other_meanings_fa": [
+      "لامسه",
+      "بساوایی",
+      "تماس"
+    ],
+    "concept_explained_fa": "به تماس فیزیکی با پوست و نیز توانایی احساس آن از راه لامسه اشاره دارد.",
+    "sentences": [
+      {
+        "id": 15892,
+        "sentence_en": "At the touch of a button, the door opened.",
+        "sentence_en_meaning_fa": "با لمس یک دکمه، در باز شد."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 35619,
+        "pos": "verb",
+        "meaning_fa": "لمس کردن",
+        "other_meanings_fa": [
+          "دست زدن"
+        ]
+      },
+      {
+        "id": 36881,
+        "pos": "verb",
+        "meaning_fa": "تحت تاثیر قرار دادن",
+        "other_meanings_fa": []
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 36951,
+    "word": "weak",
+    "pos": "adjective",
+    "meaning_fa": "ناتوان",
+    "other_meanings_fa": [
+      "ضعیف"
+    ],
+    "concept_explained_fa": "دارای مهارت، توانایی یا عملکرد ناکافی در زمینه‌ای مشخص؛ درباره کیفیت انجام کار است، نه نیروی بدنی.",
+    "sentences": [
+      {
+        "id": 15964,
+        "sentence_en": "I've always been weak in math.",
+        "sentence_en_meaning_fa": "من همیشه در ریاضی ناتوان بوده‌ام."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 30418,
+        "pos": "adjective",
+        "meaning_fa": "سست",
+        "other_meanings_fa": [
+          "بی حال",
+          "ضعیف"
+        ]
+      },
+      {
+        "id": 36324,
+        "pos": "adjective",
+        "meaning_fa": "رقیق",
+        "other_meanings_fa": [
+          "آبکی"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 37020,
+    "word": "humanity",
+    "pos": "noun",
+    "meaning_fa": "بشریت",
+    "other_meanings_fa": [
+      "همه انسان ها",
+      "نوع بشر"
+    ],
+    "concept_explained_fa": "به همهٔ انسان‌ها در مجموع اشاره می‌کند و در این sense به مهربانی یا ویژگی انسان‌دوستی اشاره ندارد.",
+    "sentences": [
+      {
+        "id": 16055,
+        "sentence_en": "Climate change presents a challenge for all humanity.",
+        "sentence_en_meaning_fa": "تغییرات اقلیمی برای تمام بشریت چالشی ایجاد می‌کند."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 40401,
+        "pos": "noun",
+        "meaning_fa": "انسانیت",
+        "other_meanings_fa": [
+          "دلسوزی",
+          "محبت",
+          "وابسته به صفات خوب انسانی"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 37296,
+    "word": "dump",
+    "pos": "noun",
+    "meaning_fa": "محل تخلیه زباله",
+    "other_meanings_fa": [
+      "آشغالدانی"
+    ],
+    "concept_explained_fa": "فضایی مشخص برای انباشتن یا دفع پسماندهاست، نه هر مکان کثیف و نامرتب.",
+    "sentences": [
+      {
+        "id": 16438,
+        "sentence_en": "The city closed the old dump after residents complained.",
+        "sentence_en_meaning_fa": "شهرداری پس از شکایت ساکنان، محل تخلیه زباله قدیمی را تعطیل کرد."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 421,
+        "pos": "verb",
+        "meaning_fa": "دور انداختن",
+        "other_meanings_fa": []
+      },
+      {
+        "id": 5818,
+        "pos": "verb",
+        "meaning_fa": "خالی کردن",
+        "other_meanings_fa": [
+          "ریختن"
+        ]
+      },
+      {
+        "id": 31082,
+        "pos": "verb",
+        "meaning_fa": "ول کردن",
+        "other_meanings_fa": [
+          "به هم زدن رابطه با"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 37322,
+    "word": "import",
+    "pos": "noun",
+    "meaning_fa": "واردات",
+    "other_meanings_fa": [
+      "عمل واردکردن کالا",
+      "کالای وارداتی"
+    ],
+    "concept_explained_fa": "عمل آوردن کالا یا خدمت از کشور دیگر برای فروش یا استفاده، یا خود کالای واردشده است.",
+    "sentences": [
+      {
+        "id": 16470,
+        "sentence_en": "The government introduced new rules for food imports.",
+        "sentence_en_meaning_fa": "دولت مقررات تازه‌ای برای واردات مواد غذایی وضع کرد."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 36649,
+        "pos": "verb",
+        "meaning_fa": "وارد کردن",
+        "other_meanings_fa": []
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 37503,
+    "word": "membership",
+    "pos": "noun",
+    "meaning_fa": "اعضا",
+    "other_meanings_fa": [],
+    "concept_explained_fa": "به وضعیت عضو بودن و نیز مجموع اعضای یک گروه، سازمان یا باشگاه اشاره دارد.",
+    "sentences": [
+      {
+        "id": 16684,
+        "sentence_en": "Membership is now over three million and rising.",
+        "sentence_en_meaning_fa": "اعضا اکنون بالای سه میلیون و در حال افزایش هستند."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 35451,
+        "pos": "noun",
+        "meaning_fa": "عضویت",
+        "other_meanings_fa": []
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 37534,
+    "word": "stress",
+    "pos": "noun",
+    "meaning_fa": "تاکید",
+    "other_meanings_fa": [],
+    "concept_explained_fa": "توجه یا اهمیت ویژه‌ای که بر نکته‌ای گذاشته می‌شود؛ همچنین در زبان‌شناسی برای برجستگی هجای واژه به‌کار می‌رود.",
+    "sentences": [
+      {
+        "id": 16719,
+        "sentence_en": "At school, they laid great stress on academic achievement.",
+        "sentence_en_meaning_fa": "در مدرسه، آنها تأکید زیادی روی دستاوردهای آکادمیک داشتند."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 35831,
+        "pos": "noun",
+        "meaning_fa": "فشار عصبی",
+        "other_meanings_fa": [
+          "استرس",
+          "اضطراب",
+          "تنش"
+        ]
+      },
+      {
+        "id": 36090,
+        "pos": "verb",
+        "meaning_fa": "تاکید کردن",
+        "other_meanings_fa": []
+      },
+      {
+        "id": 36241,
+        "pos": "noun",
+        "meaning_fa": "تکیه آواشناسی",
+        "other_meanings_fa": [
+          "فشار",
+          "تکیه"
+        ]
+      },
+      {
+        "id": 36242,
+        "pos": "verb",
+        "meaning_fa": "با تکیه بیان کردن",
+        "other_meanings_fa": []
+      },
+      {
+        "id": 40078,
+        "pos": "noun",
+        "meaning_fa": "فشار",
+        "other_meanings_fa": []
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 37621,
+    "word": "gray",
+    "pos": "adjective",
+    "meaning_fa": "ابری و گرفته",
+    "other_meanings_fa": [
+      "تیره",
+      "بی آفتاب"
+    ],
+    "concept_explained_fa": "درباره آسمان و هوا، ابری، گرفته و کم‌نور بودن را توصیف می‌کند؛ به رنگ خاص اشیا اشاره ندارد.",
+    "sentences": [
+      {
+        "id": 16835,
+        "sentence_en": "The morning remained gray and cloudy until noon.",
+        "sentence_en_meaning_fa": "صبح تا ظهر ابری و گرفته باقی ماند."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 34410,
+        "pos": "adjective",
+        "meaning_fa": "خاکستری",
+        "other_meanings_fa": [
+          "به رنگ میان سیاه و سفید",
+          "دارای رنگ خاکستری"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 37817,
+    "word": "sting",
+    "pos": "noun",
+    "meaning_fa": "نیش",
+    "other_meanings_fa": [
+      "گزیدگی"
+    ],
+    "concept_explained_fa": "به اندام نوک‌تیز برخی حشرات و جانوران یا زخمی که با آن ایجاد می‌شود اشاره دارد.",
+    "sentences": [
+      {
+        "id": 17106,
+        "sentence_en": "The scorpion has a sting in its tail.",
+        "sentence_en_meaning_fa": "عقرب در دمش نیش دارد."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 34058,
+        "pos": "noun",
+        "meaning_fa": "سوزش و رنج ناگهانی",
+        "other_meanings_fa": [
+          "تلخی گزنده",
+          "درد عاطفی تیز"
+        ]
+      },
+      {
+        "id": 41173,
+        "pos": "verb",
+        "meaning_fa": "نیش زدن",
+        "other_meanings_fa": [
+          "زدن",
+          "گزیدن"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 37821,
+    "word": "bill",
+    "pos": "noun",
+    "meaning_fa": "منقار",
+    "other_meanings_fa": [
+      "نوک"
+    ],
+    "concept_explained_fa": "نوع یا نام دیگر منقار پرنده، به‌ویژه برای منقار پهن یا تخت پرندگان آبزی؛ در برخی گونه‌ها طبیعی‌تر است.",
+    "sentences": [
+      {
+        "id": 17129,
+        "sentence_en": "Bills are designed to allow efficient foraging in birds.",
+        "sentence_en_meaning_fa": "منقار در پرندگان برای این طراحی شده است که شکار موثر را ممکن سازد."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 2058,
+        "pos": "noun",
+        "meaning_fa": "صورتحساب",
+        "other_meanings_fa": [
+          "فاکتور"
+        ]
+      },
+      {
+        "id": 35071,
+        "pos": "noun",
+        "meaning_fa": "اسکناس",
+        "other_meanings_fa": [
+          "پول کاغذی"
+        ]
+      },
+      {
+        "id": 40026,
+        "pos": "noun",
+        "meaning_fa": "لایحه",
+        "other_meanings_fa": [
+          "طرح"
+        ]
+      },
+      {
+        "id": 44432,
+        "pos": "noun",
+        "meaning_fa": "قبض",
+        "other_meanings_fa": []
+      }
+    ],
+    "issue_types": [
+      "serious_fluency"
+    ]
+  },
+  {
+    "id": 37843,
+    "word": "kid",
+    "pos": "noun",
+    "meaning_fa": "بزغاله",
+    "other_meanings_fa": [
+      "بچه بز",
+      "بز جوان"
+    ],
+    "concept_explained_fa": "بز جوان و نابالغ است؛ این واژه برای انسان به معنی کودک نیز کاربرد غیررسمی دارد.",
+    "sentences": [
+      {
+        "id": 17372,
+        "sentence_en": "The kid followed its mother up the hill.",
+        "sentence_en_meaning_fa": "بزغاله مادرش را تا بالای تپه دنبال کرد."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 4531,
+        "pos": "noun",
+        "meaning_fa": "بچه",
+        "other_meanings_fa": []
+      },
+      {
+        "id": 35470,
+        "pos": "verb",
+        "meaning_fa": "شوخی کردن",
+        "other_meanings_fa": []
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 37938,
+    "word": "filling",
+    "pos": "noun",
+    "meaning_fa": "پر کردن دندان",
+    "other_meanings_fa": [
+      "فیلینگ"
+    ],
+    "concept_explained_fa": "به ماده و فرایندی اشاره دارد که دندان‌پزشک برای پر کردن بخش پوسیده یا سوراخ دندان استفاده می‌کند.",
+    "sentences": [
+      {
+        "id": 17807,
+        "sentence_en": "I had to have two fillings at the dentist's today.",
+        "sentence_en_meaning_fa": "من امروز مجبور شدم دو تا از دندان‌هایم را در دندانپزشکی پر کنم."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 39036,
+        "pos": "adjective",
+        "meaning_fa": "شکم پر کن",
+        "other_meanings_fa": [
+          "حجیم",
+          "سنگین"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 38080,
+    "word": "liquid",
+    "pos": "adjective",
+    "meaning_fa": "نقدشونده",
+    "other_meanings_fa": [
+      "به آسانی قابل تبدیل به پول نقد",
+      "نقد"
+    ],
+    "concept_explained_fa": "دارایی یا بازاری که بتوان آن را سریع و با افت ارزش اندک به پول نقد تبدیل کرد؛ معنایی مالی و کاملاً متفاوت دارد.",
+    "sentences": [
+      {
+        "id": 18178,
+        "sentence_en": "Government bonds are generally considered liquid assets.",
+        "sentence_en_meaning_fa": "اوراق دولتی معمولاً دارایی‌های نقدشونده محسوب می‌شوند."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 32176,
+        "pos": "noun",
+        "meaning_fa": "مایع",
+        "other_meanings_fa": [
+          "ماده مایع",
+          "سیال غیرگازی"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 38151,
+    "word": "cut off",
+    "pos": "adjective",
+    "meaning_fa": "بریده و کوتاه شده",
+    "other_meanings_fa": [
+      "دم بریده",
+      "قطع شده"
+    ],
+    "concept_explained_fa": "با بریدن کوتاه یا جداشده، به‌ویژه دربارهٔ لبهٔ لباس.",
+    "sentences": [
+      {
+        "id": 18329,
+        "sentence_en": "He made cut-off shorts from his old jeans.",
+        "sentence_en_meaning_fa": "او از شلوار جین قدیمی‌اش شلوارک دم‌بریده ساخت."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 2022,
+        "pos": "phrasal verb",
+        "meaning_fa": "قطع کردن",
+        "other_meanings_fa": [
+          "بریدن",
+          "جدا کردن"
+        ]
+      },
+      {
+        "id": 31644,
+        "pos": "verb",
+        "meaning_fa": "دور افتادن از خانواده و دوستان",
+        "other_meanings_fa": []
+      },
+      {
+        "id": 41985,
+        "pos": "verb",
+        "meaning_fa": "ناگهان جلوی کسی پیچیدن حین رانندگی",
+        "other_meanings_fa": []
+      }
+    ],
+    "issue_types": [
+      "serious_fluency"
+    ]
+  },
+  {
+    "id": 38165,
+    "word": "piercing",
+    "pos": "noun",
+    "meaning_fa": "نگین",
+    "other_meanings_fa": [],
+    "concept_explained_fa": "در این کاربرد، زیور قرارگرفته در سوراخ بدن؛ به خود سوراخ‌کاری یا کل زیور اشاره دارد، نه هر نوع نگین.",
+    "sentences": [
+      {
+        "id": 18390,
+        "sentence_en": "She has a small silver tongue piercing.",
+        "sentence_en_meaning_fa": "او یک نگین کوچک نقره‌ای روی زبانش دارد."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 29858,
+        "pos": "adjective",
+        "meaning_fa": "گوش خراش",
+        "other_meanings_fa": [
+          "آزاردهنده"
+        ]
+      },
+      {
+        "id": 37930,
+        "pos": "adjective",
+        "meaning_fa": "نافذ",
+        "other_meanings_fa": [
+          "گیرا"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 38186,
+    "word": "wear",
+    "pos": "noun",
+    "meaning_fa": "پوشاک",
+    "other_meanings_fa": [
+      "لباس"
+    ],
+    "concept_explained_fa": "به لباس‌های طراحی‌شده برای کاربرد یا موقعیت مشخص و نیز عمل پوشیدن آن‌ها اشاره دارد.",
+    "sentences": [
+      {
+        "id": 18457,
+        "sentence_en": "I need to buy some casual wear.",
+        "sentence_en_meaning_fa": "باید کمی لباس راحتی بخرم."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 4925,
+        "pos": "verb",
+        "meaning_fa": "پوشیدن",
+        "other_meanings_fa": [
+          "به تن داشتن"
+        ]
+      },
+      {
+        "id": 36802,
+        "pos": "verb",
+        "meaning_fa": "موی کوتاه بلند و داشتن",
+        "other_meanings_fa": [
+          "موی خود را به مدل خاصی درست کردن"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 38327,
+    "word": "defense",
+    "pos": "noun",
+    "meaning_fa": "وکیل مدافع",
+    "other_meanings_fa": [],
+    "concept_explained_fa": "در دادگاه، نمایندگی حقوقی متهم را بر عهده دارد و در برابر ادعاهای دادستان استدلال می‌کند.",
+    "sentences": [
+      {
+        "id": 18800,
+        "sentence_en": "The defense called only one witness.",
+        "sentence_en_meaning_fa": "وکیل مدافع فقط یک شاهد را فراخواند."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 30000,
+        "pos": "noun",
+        "meaning_fa": "دفاع",
+        "other_meanings_fa": [
+          "محافظت"
+        ]
+      }
+    ],
+    "issue_types": [
+      "serious_fluency"
+    ]
+  },
+  {
+    "id": 38367,
+    "word": "dance",
+    "pos": "noun",
+    "meaning_fa": "موسیقی رقص",
+    "other_meanings_fa": [],
+    "concept_explained_fa": "به موسیقی دارای ضرب منظم و مناسب برای رقص، یا سبک موسیقی الکترونیک رقص، اشاره دارد.",
+    "sentences": [
+      {
+        "id": 18933,
+        "sentence_en": "The band finished with a few slow dances.",
+        "sentence_en_meaning_fa": "گروه موسیقی اجرایش را با چند موسیقی رقص آهسته تمام کرد."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 34461,
+        "pos": "verb",
+        "meaning_fa": "رقصیدن",
+        "other_meanings_fa": [
+          "حرکت موزون با موسیقی",
+          "بدن را با ریتم حرکت دادن"
+        ]
+      },
+      {
+        "id": 34505,
+        "pos": "noun",
+        "meaning_fa": "رقص",
+        "other_meanings_fa": []
+      },
+      {
+        "id": 44756,
+        "pos": "noun",
+        "meaning_fa": "مراسم رقص",
+        "other_meanings_fa": [
+          "مهمانی رقص"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 38411,
+    "word": "wardrobe",
+    "pos": "noun",
+    "meaning_fa": "بخش یا اتاق لباس های نمایشی",
+    "other_meanings_fa": [
+      "مجموعه لباس های تولید",
+      "واحد لباس"
+    ],
+    "concept_explained_fa": "در تئاتر و فیلم به مجموعه، بخش یا اتاق نگهداری لباس‌های بازیگران گفته می‌شود؛ معنای کمد لباس نیز رایج است.",
+    "sentences": [
+      {
+        "id": 19032,
+        "sentence_en": "Wardrobe prepared three costumes for each principal actor.",
+        "sentence_en_meaning_fa": "بخش لباس برای هر بازیگر اصلی سه دست لباس آماده کرد."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 2578,
+        "pos": "noun",
+        "meaning_fa": "کمد",
+        "other_meanings_fa": [
+          "گنجه",
+          "کمد لباس",
+          "گنجه لباس",
+          "جالباسی کمددار"
+        ]
+      },
+      {
+        "id": 34136,
+        "pos": "noun",
+        "meaning_fa": "پوشاک",
+        "other_meanings_fa": [
+          "رخت و لباس"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 38432,
+    "word": "oil",
+    "pos": "noun",
+    "meaning_fa": "رنگ روغن یا نقاشی با آن",
+    "other_meanings_fa": [
+      "رنگ های روغنی",
+      "اثر نقاشی روغنی"
+    ],
+    "concept_explained_fa": "در هنر به رنگ روغن، معمولاً در ساخت جمع oils، یا به اثری گفته می‌شود که با این رنگ نقاشی شده است.",
+    "sentences": [
+      {
+        "id": 19087,
+        "sentence_en": "The artist prefers to paint landscapes in oil.",
+        "sentence_en_meaning_fa": "هنرمند ترجیح می‌دهد منظره‌ها را با رنگ روغن نقاشی کند."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 2744,
+        "pos": "noun",
+        "meaning_fa": "روغن",
+        "other_meanings_fa": []
+      },
+      {
+        "id": 3768,
+        "pos": "noun",
+        "meaning_fa": "نفت",
+        "other_meanings_fa": []
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 38580,
+    "word": "note",
+    "pos": "noun",
+    "meaning_fa": "نت",
+    "other_meanings_fa": [],
+    "concept_explained_fa": "در موسیقی به یک صدای مشخص یا نشانه نوشته‌شده‌ای اشاره دارد که ارتفاع و مدت صدا را نشان می‌دهد.",
+    "sentences": [
+      {
+        "id": 19508,
+        "sentence_en": "He played the first few notes of the tune.",
+        "sentence_en_meaning_fa": "او چندتا از اولین نت‌های آهنگ را نواخت."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 4486,
+        "pos": "noun",
+        "meaning_fa": "یادداشت",
+        "other_meanings_fa": [
+          "توضیح",
+          "نکته"
+        ]
+      },
+      {
+        "id": 35420,
+        "pos": "verb",
+        "meaning_fa": "ملاحظه کردن",
+        "other_meanings_fa": [
+          "توجه کردن",
+          "متوجه چیزی شدن",
+          "اعتنا کردن"
+        ]
+      },
+      {
+        "id": 37708,
+        "pos": "noun",
+        "meaning_fa": "لحن",
+        "other_meanings_fa": [
+          "تن صدا"
+        ]
+      },
+      {
+        "id": 41065,
+        "pos": "verb",
+        "meaning_fa": "ذکر کردن",
+        "other_meanings_fa": [
+          "متذکر شدن",
+          "بیان کردن"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 38704,
+    "word": "ditch",
+    "pos": "verb",
+    "meaning_fa": "از زیر چیزی دررفتن یا نرفتن",
+    "other_meanings_fa": [
+      "پیچاندن کلاس",
+      "رهاکردن ناگهانی"
+    ],
+    "concept_explained_fa": "در کاربرد غیررسمی یعنی عمداً به کلاس یا قرار نرفتن یا چیزی و کسی را ناگهانی ترک‌کردن.",
+    "sentences": [
+      {
+        "id": 19844,
+        "sentence_en": "They decided to ditch class after lunch.",
+        "sentence_en_meaning_fa": "آن‌ها تصمیم گرفتند بعد از ناهار کلاس را بپیچانند."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 40258,
+        "pos": "noun",
+        "meaning_fa": "جوی آب",
+        "other_meanings_fa": [
+          "نهر",
+          "گودال"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 38725,
+    "word": "mixed up",
+    "pos": "adjective",
+    "meaning_fa": "گیج و سردرگم",
+    "other_meanings_fa": [
+      "آشفته",
+      "درهم وبرهم"
+    ],
+    "concept_explained_fa": "فردی را توصیف می‌کند که نمی‌تواند روشن فکر کند یا چیزهایی را توصیف می‌کند که نامنظم و اشتباه ترکیب شده‌اند.",
+    "sentences": [
+      {
+        "id": 19910,
+        "sentence_en": "He felt mixed up after receiving conflicting advice.",
+        "sentence_en_meaning_fa": "او پس از دریافت توصیه‌های متناقض احساس سردرگمی کرد."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 32039,
+        "pos": "adjective",
+        "meaning_fa": "درگیر کار بد یا غیرقانونی",
+        "other_meanings_fa": []
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 38973,
+    "word": "vanilla",
+    "pos": "noun",
+    "meaning_fa": "وانیل غلاف یا طعم دهنده معطر آن",
+    "other_meanings_fa": [
+      "غلاف وانیل",
+      "عصاره وانیل",
+      "طعم وانیل"
+    ],
+    "concept_explained_fa": "غلاف معطر گونه‌هایی از ارکیدهٔ Vanilla و عصاره یا طعم‌دهندهٔ حاصل از آن است که در خوراکی‌های شیرین کاربرد دارد.",
+    "sentences": [
+      {
+        "id": 20887,
+        "sentence_en": "The vanilla gave the custard a warm aroma.",
+        "sentence_en_meaning_fa": "وانیل به کاستارد عطری گرم داد."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 43083,
+        "pos": "adjective",
+        "meaning_fa": "وانیلی",
+        "other_meanings_fa": []
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 39063,
+    "word": "glow",
+    "pos": "verb",
+    "meaning_fa": "درخشیدن",
+    "other_meanings_fa": [
+      "درخشیدن یا گل انداختن چهره",
+      "تابیدن",
+      "سرخ و شاداب شدن",
+      "نور دادن",
+      "افروختن"
+    ],
+    "concept_explained_fa": "یعنی نور نرم و پیوسته‌ای تاباندن، یا چهره بر اثر گرما، سلامت، شادی یا احساس، رنگ و درخشندگی پیدا کند.",
+    "sentences": [
+      {
+        "id": 21124,
+        "sentence_en": "Her cheeks glow after exercise in the cold.",
+        "sentence_en_meaning_fa": "گونه‌های او پس از ورزش در سرما گل می‌اندازند."
+      },
+      {
+        "id": 25578,
+        "sentence_en": "The tips of their cigarettes glowed in the dark.",
+        "sentence_en_meaning_fa": "نوک سیگارهای آن‌ها در تاریکی نور می‌داد."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 39940,
+        "pos": "noun",
+        "meaning_fa": "درخشش و سرخی چهره",
+        "other_meanings_fa": [
+          "گل انداختگی",
+          "تابش سلامت"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 39096,
+    "word": "complaint",
+    "pos": "noun",
+    "meaning_fa": "بیماری یا ناراحتی جسمی",
+    "other_meanings_fa": [
+      "عارضه",
+      "اختلال",
+      "درد و کسالت"
+    ],
+    "concept_explained_fa": "در کاربرد پزشکی یا قدیمی، به بیماری یا مشکل جسمی خاص اشاره دارد؛ معنای اعتراض در اینجا منظور نیست.",
+    "sentences": [
+      {
+        "id": 21201,
+        "sentence_en": "The clinic treated a minor stomach complaint.",
+        "sentence_en_meaning_fa": "درمانگاه یک ناراحتی جزئی معده را درمان کرد."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 1846,
+        "pos": "noun",
+        "meaning_fa": "شکایت",
+        "other_meanings_fa": [
+          "گله",
+          "اعتراض"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 39101,
+    "word": "rotten",
+    "pos": "adjective",
+    "meaning_fa": "بسیار ناخوش یا بدحال در زبان غیررسمی",
+    "other_meanings_fa": [
+      "حال بد",
+      "مریض"
+    ],
+    "concept_explained_fa": "در کاربرد غیررسمی یعنی فرد احساس بیماری یا حال بسیار بدی دارد؛ معنای اصلی واژه فاسد یا پوسیده است.",
+    "sentences": [
+      {
+        "id": 21212,
+        "sentence_en": "She felt rotten after the overnight journey.",
+        "sentence_en_meaning_fa": "او پس از سفر شبانه حال بسیار بدی داشت."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 1785,
+        "pos": "adjective",
+        "meaning_fa": "گندیده",
+        "other_meanings_fa": [
+          "فاسد",
+          "خراب"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 39159,
+    "word": "remedy",
+    "pos": "verb",
+    "meaning_fa": "مشکل یا نقص را برطرف کردن",
+    "other_meanings_fa": [
+      "چاره کردن",
+      "اصلاح کردن",
+      "رفع کردن"
+    ],
+    "concept_explained_fa": "یعنی مشکل، نقص یا وضعیت نامطلوبی را اصلاح یا برطرف‌کردن؛ در کاربرد قدیمی‌تر می‌تواند به درمان بیماری نیز اشاره کند.",
+    "sentences": [
+      {
+        "id": 21362,
+        "sentence_en": "The revised procedure should remedy the problem.",
+        "sentence_en_meaning_fa": "روش اصلاح‌شده باید مشکل را برطرف کند."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 34085,
+        "pos": "noun",
+        "meaning_fa": "درمان یا چاره",
+        "other_meanings_fa": [
+          "داروی درمانی",
+          "راه رفع یک مشکل"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 39192,
+    "word": "transplant",
+    "pos": "noun",
+    "meaning_fa": "پیوند عضو یا بافت",
+    "other_meanings_fa": [
+      "عمل پیوند"
+    ],
+    "concept_explained_fa": "عمل پیوند عضو یا بافت و نیز عضو یا بافت پیوندی.",
+    "sentences": [
+      {
+        "id": 21438,
+        "sentence_en": "The patient received a kidney transplant last year.",
+        "sentence_en_meaning_fa": "بیمار سال گذشته تحت عمل پیوند کلیه قرار گرفت."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 39200,
+        "pos": "verb",
+        "meaning_fa": "پیوند زدن",
+        "other_meanings_fa": []
+      },
+      {
+        "id": 44998,
+        "pos": "noun",
+        "meaning_fa": "عضو یا بافت پیوندی",
+        "other_meanings_fa": []
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  }
+]

@@ -1,0 +1,34 @@
+{
+  "status": "completed",
+  "appliedAt": "2026-08-15T06:17:09Z",
+  "scope": {
+    "lane": 22,
+    "acceptedRecords": 299,
+    "excludedRecords": 1,
+    "excludedIds": [70226]
+  },
+  "dryRun": {
+    "total": 299,
+    "eligible": 299,
+    "stale": []
+  },
+  "execute": {
+    "total": 299,
+    "updated": 299,
+    "skipped": [],
+    "verified": 299,
+    "verificationFailures": []
+  },
+  "postWriteVerification": {
+    "partialRowsFound": 299,
+    "partialExactValueFailures": 0,
+    "partialConfirmedTrue": 299,
+    "partialMeaningFaIpaNormalizeNonNull": 0,
+    "excludedId": 70226,
+    "excludedMeaningFaIpa": null,
+    "excludedMeaningFaIpaConfirmed": false,
+    "excludedMeaningFaIpaNormalize": null,
+    "remainingMissingIpaAfter": 1,
+    "cumulativeUpdated": 7012
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "lane": 19,
+  "status": "accepted",
+  "count": 300,
+  "threadId": "01a003ea-8951-7ef3-85a8-320c7387880b",
+  "responseFile": "lane-19-response-revision-02.raw.json",
+  "responseSha256": "7edd8d938f7251e30d2419a64464efd7eb31a9e3fe76d6fb8216bd1f05315aad",
+  "scoreQuestionsAsked": 3,
+  "scoreHistory": [
+    {
+      "cycle": 1,
+      "batchScore": 7.8,
+      "minimumItemScore": 5.4,
+      "belowOrEqual8Ids": [
+        69132,
+        69133,
+        69134,
+        69146,
+        69156,
+        69180,
+        69200,
+        69216,
+        69290,
+        69313,
+        69360,
+        69373,
+        69389
+      ],
+      "assessment": "revise"
+    },
+    {
+      "cycle": 2,
+      "batchScore": 9.1,
+      "minimumItemScore": 7.6,
+      "belowOrEqual8Ids": [
+        69360
+      ],
+      "assessment": "revise"
+    },
+    {
+      "cycle": 3,
+      "batchScore": 9.2,
+      "minimumItemScore": 8.2,
+      "belowOrEqual8Ids": [],
+      "assessment": "pass"
+    }
+  ],
+  "finalScore": {
+    "cycle": 3,
+    "batchScore": 9.2,
+    "minimumItemScore": 8.2,
+    "belowOrEqual8Ids": [],
+    "assessment": "pass"
+  },
+  "mechanicalValidation": {
+    "status": "passed",
+    "issues": []
+  },
+  "itemQualityGate": "The same chat reported every item above 8/10; minimumItemScore is the minimum across all items."
+}

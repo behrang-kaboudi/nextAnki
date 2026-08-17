@@ -9,8 +9,8 @@ import { getEnglishWordAudioAbsolutePath } from "@/lib/audio/englishWordAudioPat
 import { getWordSenseConceptAudioAbsolutePath } from "@/lib/audio/wordSenseConceptAudioPaths.server";
 import { normalizeEnglishWordText } from "@/lib/english/normalize";
 import { prisma } from "@/lib/prisma";
+import { selectPromptBatch } from "@/lib/words/promptBatch";
 import { deleteWordSense, updateWordSense } from "@/lib/words/wordSenseRepo";
-import { selectParallelPromptLane, type ParallelPromptPartition } from "@/lib/words/parallelPromptPartition";
 
 const sourceWordSenseSelect = {
   id: true,
@@ -279,20 +279,25 @@ export function sourceFingerprint(group: InflectionSourceGroup): InflectionSourc
   };
 }
 
-export async function getPendingWordSenseInflectionMergeCount() {
-  return (await buildInflectionSourceGroups(prisma)).length;
+export async function getPendingWordSenseInflectionMergeStats() {
+  const groups = await buildInflectionSourceGroups(prisma);
+  return {
+    groupCount: groups.length,
+    recordCount: new Set(groups.flatMap((group) =>
+      group.englishWords.flatMap((word) => word.words.map((row) => row.wordId)),
+    )).size,
+  };
 }
 
-export async function prepareWordSenseInflectionMerge(partition: ParallelPromptPartition) {
+export async function getPendingWordSenseInflectionMergeCount() {
+  return (await getPendingWordSenseInflectionMergeStats()).groupCount;
+}
+
+export async function prepareWordSenseInflectionMerge(batchSize: number) {
   const eligible = await buildInflectionSourceGroups(prisma);
-  const { items: selected, laneEligibleCount } = selectParallelPromptLane(
-    eligible,
-    (group) => group.groupKey,
-    partition,
-  );
+  const selected = selectPromptBatch(eligible, batchSize);
   return {
     totalEligibleGroups: eligible.length,
-    laneEligibleCount,
     sourceGroups: selected.map(sourceFingerprint),
     items: selected,
   };

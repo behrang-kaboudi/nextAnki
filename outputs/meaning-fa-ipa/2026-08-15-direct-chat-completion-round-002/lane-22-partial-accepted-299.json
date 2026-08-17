@@ -1,0 +1,1497 @@
+[
+  {
+    "id": 70150,
+    "canonical_text": "نیلوفر آبی",
+    "meaning_fa_IPA": "niːluːfær-e ɑːbiː"
+  },
+  {
+    "id": 70151,
+    "canonical_text": "مغز کاج",
+    "meaning_fa_IPA": "mæɣz-e kɑːj"
+  },
+  {
+    "id": 70152,
+    "canonical_text": "چسب مایع",
+    "meaning_fa_IPA": "tʃæsb-e mɑːjeʔ"
+  },
+  {
+    "id": 70153,
+    "canonical_text": "از سر استیصال",
+    "meaning_fa_IPA": "æz sær-e estiːsɑːl"
+  },
+  {
+    "id": 70154,
+    "canonical_text": "نواحی مرتفع",
+    "meaning_fa_IPA": "nævɑːhiː-je mortæfeʔ"
+  },
+  {
+    "id": 70155,
+    "canonical_text": "مهمان خانه کوهستانی",
+    "meaning_fa_IPA": "mehmɑːn-xɑːne-je kuːhestɑːniː"
+  },
+  {
+    "id": 70156,
+    "canonical_text": "نوار حاشیه",
+    "meaning_fa_IPA": "nævɑːr-e hɑːʃije"
+  },
+  {
+    "id": 70157,
+    "canonical_text": "اداره فروش",
+    "meaning_fa_IPA": "edɑːre-je foruːʃ"
+  },
+  {
+    "id": 70158,
+    "canonical_text": "تجزیه وتحلیل مالی",
+    "meaning_fa_IPA": "tædzije vo tæhliːl-e mɑːliː"
+  },
+  {
+    "id": 70159,
+    "canonical_text": "مدیریت کسب وکار",
+    "meaning_fa_IPA": "modiːrijæt-e kæsb-o-kɑːr"
+  },
+  {
+    "id": 70160,
+    "canonical_text": "مشاور امور مالیاتی",
+    "meaning_fa_IPA": "moʃɑːver-e omuːr-e mɑːlijɑːtiː"
+  },
+  {
+    "id": 70161,
+    "canonical_text": "کارشناس تحلیل مالی",
+    "meaning_fa_IPA": "kɑːrʃenɑːs-e tæhliːl-e mɑːliː"
+  },
+  {
+    "id": 70162,
+    "canonical_text": "آشناهای بانفوذ داشتن",
+    "meaning_fa_IPA": "ɑːʃenɑːhɑː-je bɑːnofuːz dɑːʃtæn"
+  },
+  {
+    "id": 70163,
+    "canonical_text": "با افراد بانفوذ آشنا بودن",
+    "meaning_fa_IPA": "bɑː æfrɑːd-e bɑːnofuːz ɑːʃenɑː buːdæn"
+  },
+  {
+    "id": 70164,
+    "canonical_text": "رابط داشتن",
+    "meaning_fa_IPA": "rɑːbet dɑːʃtæn"
+  },
+  {
+    "id": 70165,
+    "canonical_text": "نوظهور",
+    "meaning_fa_IPA": "nowzohuːr"
+  },
+  {
+    "id": 70166,
+    "canonical_text": "چهره مشهور موسیقی راک",
+    "meaning_fa_IPA": "tʃehre-je mæʃhuːr-e muːsiːɣiː-je rɑːk"
+  },
+  {
+    "id": 70167,
+    "canonical_text": "زیر بار بدهی رفتن",
+    "meaning_fa_IPA": "ziːr-e bɑːr-e bedehiː ræftæn"
+  },
+  {
+    "id": 70168,
+    "canonical_text": "مقروض شدن",
+    "meaning_fa_IPA": "mæɣruːz ʃodæn"
+  },
+  {
+    "id": 70169,
+    "canonical_text": "به به",
+    "meaning_fa_IPA": "bæh bæh"
+  },
+  {
+    "id": 70170,
+    "canonical_text": "تاکسی ران",
+    "meaning_fa_IPA": "tɑːksiːrɑːn"
+  },
+  {
+    "id": 70171,
+    "canonical_text": "سبز نیونی",
+    "meaning_fa_IPA": "sæbz-e neʔoniː"
+  },
+  {
+    "id": 70172,
+    "canonical_text": "کاراکتر کارتونی",
+    "meaning_fa_IPA": "kɑːrɑːkter-e kɑːrtuːniː"
+  },
+  {
+    "id": 70173,
+    "canonical_text": "با پرواز برگشتن",
+    "meaning_fa_IPA": "bɑː pærvɑːz bærgæʃtæn"
+  },
+  {
+    "id": 70174,
+    "canonical_text": "فهرست تهیه کردن",
+    "meaning_fa_IPA": "fehrest tæhije kærdæn"
+  },
+  {
+    "id": 70175,
+    "canonical_text": "لیست تهیه کردن",
+    "meaning_fa_IPA": "liːst tæhije kærdæn"
+  },
+  {
+    "id": 70176,
+    "canonical_text": "داوطلبانه کار کردن",
+    "meaning_fa_IPA": "dɑːwtælæbɑːne kɑːr kærdæn"
+  },
+  {
+    "id": 70177,
+    "canonical_text": "فعالیت داوطلبانه انجام دادن",
+    "meaning_fa_IPA": "fæʔɑːlijæt-e dɑːwtælæbɑːne ændʒɑːm dɑːdæn"
+  },
+  {
+    "id": 70178,
+    "canonical_text": "ترش شدن",
+    "meaning_fa_IPA": "torʃ ʃodæn"
+  },
+  {
+    "id": 70179,
+    "canonical_text": "مسافرت رفتن",
+    "meaning_fa_IPA": "mosɑːferæt ræftæn"
+  },
+  {
+    "id": 70180,
+    "canonical_text": "کارشناس کامپیوتر",
+    "meaning_fa_IPA": "kɑːrʃenɑːs-e kɑːmpjuːter"
+  },
+  {
+    "id": 70181,
+    "canonical_text": "متخصص رایانه",
+    "meaning_fa_IPA": "motæxæsses-e rɑːjɑːne"
+  },
+  {
+    "id": 70182,
+    "canonical_text": "مدیر ارشد شرکت",
+    "meaning_fa_IPA": "modiːr-e ærʃæd-e ʃerkæt"
+  },
+  {
+    "id": 70183,
+    "canonical_text": "شماره اشتباه",
+    "meaning_fa_IPA": "ʃomɑːre-je eʃtebɑːh"
+  },
+  {
+    "id": 70184,
+    "canonical_text": "نویسندگی خلاق",
+    "meaning_fa_IPA": "neviːsændegiː-je xællɑːɣ"
+  },
+  {
+    "id": 70185,
+    "canonical_text": "در تور شرکت کردن",
+    "meaning_fa_IPA": "dær tuːr ʃerkæt kærdæn"
+  },
+  {
+    "id": 70186,
+    "canonical_text": "لباس های طراحان مشهور",
+    "meaning_fa_IPA": "lebɑːs-hɑː-je tærrɑːhɑːn-e mæʃhuːr"
+  },
+  {
+    "id": 70187,
+    "canonical_text": "تمرین قدرتی با وزنه",
+    "meaning_fa_IPA": "tæmriːn-e ɣodrætiː bɑː væzne"
+  },
+  {
+    "id": 70188,
+    "canonical_text": "فصل کم باران",
+    "meaning_fa_IPA": "fæsl-e kæmbɑːrɑːn"
+  },
+  {
+    "id": 70189,
+    "canonical_text": "موسم بارندگی",
+    "meaning_fa_IPA": "mowsem-e bɑːrændegiː"
+  },
+  {
+    "id": 70190,
+    "canonical_text": "فصل بارش",
+    "meaning_fa_IPA": "fæsl-e bɑːreʃ"
+  },
+  {
+    "id": 70191,
+    "canonical_text": "درس گرفتن",
+    "meaning_fa_IPA": "dærs gereftæn"
+  },
+  {
+    "id": 70192,
+    "canonical_text": "در کلاس شرکت کردن",
+    "meaning_fa_IPA": "dær kelɑːs ʃerkæt kærdæn"
+  },
+  {
+    "id": 70193,
+    "canonical_text": "از اینترنت استفاده کردن",
+    "meaning_fa_IPA": "æz iːnternet estefɑːde kærdæn"
+  },
+  {
+    "id": 70194,
+    "canonical_text": "عصر خوبی داشته باشید",
+    "meaning_fa_IPA": "ʔæsr-e xuːbiː dɑːʃte bɑːʃiːd"
+  },
+  {
+    "id": 70195,
+    "canonical_text": "اوقات خوشی داشته باشید",
+    "meaning_fa_IPA": "owɣɑːt-e xoʃiː dɑːʃte bɑːʃiːd"
+  },
+  {
+    "id": 70196,
+    "canonical_text": "کتابخانه همگانی",
+    "meaning_fa_IPA": "ketɑːbxɑːne-je hæmgɑːniː"
+  },
+  {
+    "id": 70197,
+    "canonical_text": "گروه دیده بانی محله",
+    "meaning_fa_IPA": "goruːh-e diːdebɑːniː-je mæhælle"
+  },
+  {
+    "id": 70198,
+    "canonical_text": "گروه نگهبانی محله",
+    "meaning_fa_IPA": "goruːh-e negæhbɑːniː-je mæhælle"
+  },
+  {
+    "id": 70199,
+    "canonical_text": "مرکز بهداشت",
+    "meaning_fa_IPA": "mærkæz-e behdɑːʃt"
+  },
+  {
+    "id": 70200,
+    "canonical_text": "یادداشت تشکر",
+    "meaning_fa_IPA": "jɑːddɑːʃt-e tæʃækkor"
+  },
+  {
+    "id": 70201,
+    "canonical_text": "کارت تشکر",
+    "meaning_fa_IPA": "kɑːrt-e tæʃækkor"
+  },
+  {
+    "id": 70202,
+    "canonical_text": "صفحه بندی کردن",
+    "meaning_fa_IPA": "sæfhe-bændiː kærdæn"
+  },
+  {
+    "id": 70203,
+    "canonical_text": "فاقد معنا",
+    "meaning_fa_IPA": "fɑːɣed-e mæʔnɑː"
+  },
+  {
+    "id": 70204,
+    "canonical_text": "بزرگش کردن",
+    "meaning_fa_IPA": "bozorgeʃ kærdæn"
+  },
+  {
+    "id": 70205,
+    "canonical_text": "موضوع را گنده کردن",
+    "meaning_fa_IPA": "mowzuːʔ rɑː gonde kærdæn"
+  },
+  {
+    "id": 70206,
+    "canonical_text": "راه اندازی",
+    "meaning_fa_IPA": "rɑːh-ændɑːziː"
+  },
+  {
+    "id": 70207,
+    "canonical_text": "با برنامه ریزی خوب",
+    "meaning_fa_IPA": "bɑː bærnɑːme-riːziː-je xuːb"
+  },
+  {
+    "id": 70208,
+    "canonical_text": "حساب شده",
+    "meaning_fa_IPA": "hesɑːb-ʃode"
+  },
+  {
+    "id": 70209,
+    "canonical_text": "دارای تحصیلات عالی",
+    "meaning_fa_IPA": "dɑːrɑː-je tæhsiːlɑːt-e ʔɑːliː"
+  },
+  {
+    "id": 70210,
+    "canonical_text": "اهل تفریح",
+    "meaning_fa_IPA": "æhl-e tæfriːh"
+  },
+  {
+    "id": 70211,
+    "canonical_text": "دعوت را نپذیرفتن",
+    "meaning_fa_IPA": "dæʔvæt rɑː næpæziːroftæn"
+  },
+  {
+    "id": 70212,
+    "canonical_text": "دعوت را پذیرفتن",
+    "meaning_fa_IPA": "dæʔvæt rɑː pæziːroftæn"
+  },
+  {
+    "id": 70213,
+    "canonical_text": "پیشنهاد مصالحه دادن",
+    "meaning_fa_IPA": "piːʃnehɑːd-e mosɑːlehe dɑːdæn"
+  },
+  {
+    "id": 70214,
+    "canonical_text": "راه حلی میانه پیشنهاد کردن",
+    "meaning_fa_IPA": "rɑːh-hælliː-je mijɑːne piːʃnehɑːd kærdæn"
+  },
+  {
+    "id": 70215,
+    "canonical_text": "محبت کسی را جبران کردن",
+    "meaning_fa_IPA": "mohæbbæt-e kæsiː rɑː dʒobrɑːn kærdæn"
+  },
+  {
+    "id": 70216,
+    "canonical_text": "لطف را تلافی کردن",
+    "meaning_fa_IPA": "lotf rɑː telɑːfiː kærdæn"
+  },
+  {
+    "id": 70217,
+    "canonical_text": "از کسی خواهشی کردن",
+    "meaning_fa_IPA": "æz kæsiː xɑːheʃiː kærdæn"
+  },
+  {
+    "id": 70218,
+    "canonical_text": "درخواست لطف کردن",
+    "meaning_fa_IPA": "dærxɑːst-e lotf kærdæn"
+  },
+  {
+    "id": 70219,
+    "canonical_text": "تعریف را پذیرفتن",
+    "meaning_fa_IPA": "tæʔriːf rɑː pæziːroftæn"
+  },
+  {
+    "id": 70220,
+    "canonical_text": "درخواست را نپذیرفتن",
+    "meaning_fa_IPA": "dærxɑːst rɑː næpæziːroftæn"
+  },
+  {
+    "id": 70221,
+    "canonical_text": "با نظری موافق نبودن",
+    "meaning_fa_IPA": "bɑː næzæriː movɑːfeɣ næbuːdæn"
+  },
+  {
+    "id": 70222,
+    "canonical_text": "نظر کسی را قبول نداشتن",
+    "meaning_fa_IPA": "næzær-e kæsiː rɑː ɣæbuːl nædɑːʃtæn"
+  },
+  {
+    "id": 70223,
+    "canonical_text": "با نظری هم عقیده بودن",
+    "meaning_fa_IPA": "bɑː næzæriː hæm-ʔæɣiːde buːdæn"
+  },
+  {
+    "id": 70224,
+    "canonical_text": "نظری را تایید کردن",
+    "meaning_fa_IPA": "næzæriː rɑː tæʔjiːd kærdæn"
+  },
+  {
+    "id": 70225,
+    "canonical_text": "علت را توضیح دادن",
+    "meaning_fa_IPA": "ʔellæt rɑː towziːh dɑːdæn"
+  },
+  {
+    "id": 70227,
+    "canonical_text": "علت را پرسیدن",
+    "meaning_fa_IPA": "ʔellæt rɑː porsiːdæn"
+  },
+  {
+    "id": 70228,
+    "canonical_text": "درخواست توضیح کردن",
+    "meaning_fa_IPA": "dærxɑːst-e towziːh kærdæn"
+  },
+  {
+    "id": 70229,
+    "canonical_text": "پوزش کسی را پذیرفتن",
+    "meaning_fa_IPA": "puːzeʃ-e kæsiː rɑː pæziːroftæn"
+  },
+  {
+    "id": 70230,
+    "canonical_text": "صندلی خود را به کسی دادن",
+    "meaning_fa_IPA": "sændæliː-je xod rɑː be kæsiː dɑːdæn"
+  },
+  {
+    "id": 70231,
+    "canonical_text": "از کسی تمجید کردن",
+    "meaning_fa_IPA": "æz kæsiː tæmdʒiːd kærdæn"
+  },
+  {
+    "id": 70232,
+    "canonical_text": "در صف زدن",
+    "meaning_fa_IPA": "dær sæf zædæn"
+  },
+  {
+    "id": 70233,
+    "canonical_text": "جلوی صف رفتن",
+    "meaning_fa_IPA": "dʒelo-je sæf ræftæn"
+  },
+  {
+    "id": 70234,
+    "canonical_text": "فهم مطلب",
+    "meaning_fa_IPA": "fæhm-e mætlæb"
+  },
+  {
+    "id": 70235,
+    "canonical_text": "زبان آموزی",
+    "meaning_fa_IPA": "zæbɑːn-ɑːmuːziː"
+  },
+  {
+    "id": 70236,
+    "canonical_text": "خوش آوا",
+    "meaning_fa_IPA": "xoʃ-ɑːvɑː"
+  },
+  {
+    "id": 70237,
+    "canonical_text": "گوش نواز",
+    "meaning_fa_IPA": "guːʃ-nævɑːz"
+  },
+  {
+    "id": 70238,
+    "canonical_text": "جایزه گرفته",
+    "meaning_fa_IPA": "dʒɑːjeze gerefte"
+  },
+  {
+    "id": 70239,
+    "canonical_text": "از نو انجام دادن",
+    "meaning_fa_IPA": "æz now ændʒɑːm dɑːdæn"
+  },
+  {
+    "id": 70240,
+    "canonical_text": "کیسه نایلونی",
+    "meaning_fa_IPA": "kiːse-je nɑːjloniː"
+  },
+  {
+    "id": 70241,
+    "canonical_text": "پسماند الکترونیکی",
+    "meaning_fa_IPA": "pæsmɑːnd-e ʔelektroniːkiː"
+  },
+  {
+    "id": 70242,
+    "canonical_text": "دین دار",
+    "meaning_fa_IPA": "diːndɑːr"
+  },
+  {
+    "id": 70243,
+    "canonical_text": "باایمان",
+    "meaning_fa_IPA": "bɑːʔiːmɑːn"
+  },
+  {
+    "id": 70244,
+    "canonical_text": "پیغام را یادداشت کردن",
+    "meaning_fa_IPA": "pejɣɑːm rɑː jɑːddɑːʃt kærdæn"
+  },
+  {
+    "id": 70245,
+    "canonical_text": "پیغام گرفتن",
+    "meaning_fa_IPA": "pejɣɑːm gereftæn"
+  },
+  {
+    "id": 70246,
+    "canonical_text": "وقت دکتر",
+    "meaning_fa_IPA": "væɣt-e doktor"
+  },
+  {
+    "id": 70247,
+    "canonical_text": "قرار پزشک",
+    "meaning_fa_IPA": "ɣærɑːr-e pezeʃk"
+  },
+  {
+    "id": 70248,
+    "canonical_text": "نشست کاری",
+    "meaning_fa_IPA": "neʃæst-e kɑːriː"
+  },
+  {
+    "id": 70249,
+    "canonical_text": "جلسه تجاری",
+    "meaning_fa_IPA": "dʒælæse-je tedʒɑːriː"
+  },
+  {
+    "id": 70250,
+    "canonical_text": "قرار ملاقات بدون آشنایی قبلی",
+    "meaning_fa_IPA": "ɣærɑːr-e molɑːɣɑːt beduːn-e ɑːʃenɑːjiː-je ɣæbliː"
+  },
+  {
+    "id": 70251,
+    "canonical_text": "در تلویزیون ظاهر شدن",
+    "meaning_fa_IPA": "dær televiːziːjon zɑːher ʃodæn"
+  },
+  {
+    "id": 70252,
+    "canonical_text": "کت چرم",
+    "meaning_fa_IPA": "kot-e tʃærm"
+  },
+  {
+    "id": 70253,
+    "canonical_text": "کاپشن چرمی",
+    "meaning_fa_IPA": "kɑːpʃen-e tʃærmiː"
+  },
+  {
+    "id": 70254,
+    "canonical_text": "ابراز سبک شخصی",
+    "meaning_fa_IPA": "ʔebrɑːz-e sæbk-e ʃæxsiː"
+  },
+  {
+    "id": 70255,
+    "canonical_text": "خوراک مرغ تفت داده",
+    "meaning_fa_IPA": "xorɑːk-e morɣ-e tæft-dɑːde"
+  },
+  {
+    "id": 70256,
+    "canonical_text": "سبزیجات مخلوط",
+    "meaning_fa_IPA": "sæbziːdʒɑːt-e mæxluːt"
+  },
+  {
+    "id": 70257,
+    "canonical_text": "حلقه پیاز سوخاری",
+    "meaning_fa_IPA": "hælɣe-je pijɑːz-e suːxɑːriː"
+  },
+  {
+    "id": 70258,
+    "canonical_text": "نان سیردار",
+    "meaning_fa_IPA": "nɑːn-e siːrdɑːr"
+  },
+  {
+    "id": 70259,
+    "canonical_text": "سوپ گوجه فرنگی",
+    "meaning_fa_IPA": "suːp-e gudʒe-færæŋgiː"
+  },
+  {
+    "id": 70260,
+    "canonical_text": "خوراک اصلی",
+    "meaning_fa_IPA": "xorɑːk-e ʔæsliː"
+  },
+  {
+    "id": 70261,
+    "canonical_text": "چک وچانه زدن",
+    "meaning_fa_IPA": "tʃæk-o-tʃɑːne zædæn"
+  },
+  {
+    "id": 70262,
+    "canonical_text": "تلویزیون عمومی",
+    "meaning_fa_IPA": "televiːziːjon-e ʔomuːmiː"
+  },
+  {
+    "id": 70263,
+    "canonical_text": "شبکه عمومی",
+    "meaning_fa_IPA": "ʃæbæke-je ʔomuːmiː"
+  },
+  {
+    "id": 70264,
+    "canonical_text": "سریع جلو بردن",
+    "meaning_fa_IPA": "særiːʔ dʒelo bordæn"
+  },
+  {
+    "id": 70265,
+    "canonical_text": "ریالیتی شو",
+    "meaning_fa_IPA": "riːʔælitiː ʃow"
+  },
+  {
+    "id": 70266,
+    "canonical_text": "به اندازه خوابیدن",
+    "meaning_fa_IPA": "be ændɑːze xɑːbiːdæn"
+  },
+  {
+    "id": 70267,
+    "canonical_text": "بولینگ کردن",
+    "meaning_fa_IPA": "boliŋ kærdæn"
+  },
+  {
+    "id": 70268,
+    "canonical_text": "فرهنگ پاپ",
+    "meaning_fa_IPA": "færhæng-e pɑːp"
+  },
+  {
+    "id": 70269,
+    "canonical_text": "فرهنگ عامه پسند",
+    "meaning_fa_IPA": "færhæng-e ʔɑːmme-pæsænd"
+  },
+  {
+    "id": 70270,
+    "canonical_text": "فهرست غذا را تعیین کردن",
+    "meaning_fa_IPA": "fehrest-e ɣæzɑː rɑː tæʔjiːn kærdæn"
+  },
+  {
+    "id": 70271,
+    "canonical_text": "فهرست مهمانان تهیه کردن",
+    "meaning_fa_IPA": "fehrest-e mehmɑːnɑːn tæhije kærdæn"
+  },
+  {
+    "id": 70272,
+    "canonical_text": "اسامی مهمانان را نوشتن",
+    "meaning_fa_IPA": "ʔæsɑːmiː-je mehmɑːnɑːn rɑː neveʃtæn"
+  },
+  {
+    "id": 70273,
+    "canonical_text": "هدیه خریدن",
+    "meaning_fa_IPA": "hedije xæriːdæn"
+  },
+  {
+    "id": 70274,
+    "canonical_text": "چک لیست",
+    "meaning_fa_IPA": "tʃek-liːst"
+  },
+  {
+    "id": 70275,
+    "canonical_text": "فهرست کنترل",
+    "meaning_fa_IPA": "fehrest-e kontrol"
+  },
+  {
+    "id": 70276,
+    "canonical_text": "در گشت شرکت کردن",
+    "meaning_fa_IPA": "dær gæʃt ʃerkæt kærdæn"
+  },
+  {
+    "id": 70277,
+    "canonical_text": "راهی ساحل شدن",
+    "meaning_fa_IPA": "rɑːhiː-je sɑːhel ʃodæn"
+  },
+  {
+    "id": 70278,
+    "canonical_text": "در جشنواره شرکت کردن",
+    "meaning_fa_IPA": "dær dʒæʃnvɑːre ʃerkæt kærdæn"
+  },
+  {
+    "id": 70279,
+    "canonical_text": "دوستان را دیدن",
+    "meaning_fa_IPA": "duːstɑːn rɑː diːdæn"
+  },
+  {
+    "id": 70280,
+    "canonical_text": "تیاتر دیدن",
+    "meaning_fa_IPA": "teʔɑːtr diːdæn"
+  },
+  {
+    "id": 70281,
+    "canonical_text": "نمایش تماشا کردن",
+    "meaning_fa_IPA": "næmɑːjeʃ tæmɑːʃɑː kærdæn"
+  },
+  {
+    "id": 70282,
+    "canonical_text": "برای خرید خواربار رفتن",
+    "meaning_fa_IPA": "bærɑː-je xæriːd-e xɑːrobɑːr ræftæn"
+  },
+  {
+    "id": 70284,
+    "canonical_text": "تا دیروقت بیرون بودن",
+    "meaning_fa_IPA": "tɑː diːrvæɣt biːruːn buːdæn"
+  },
+  {
+    "id": 70285,
+    "canonical_text": "لباس نو خریدن",
+    "meaning_fa_IPA": "lebɑːs-e now xæriːdæn"
+  },
+  {
+    "id": 70286,
+    "canonical_text": "عضو یک گروه موسیقی بودن",
+    "meaning_fa_IPA": "ʔozv-e jek goruːh-e muːsiːɣiː buːdæn"
+  },
+  {
+    "id": 70287,
+    "canonical_text": "در یک گروه ساز زدن",
+    "meaning_fa_IPA": "dær jek goruːh sɑːz zædæn"
+  },
+  {
+    "id": 70288,
+    "canonical_text": "موها را کوتاه کردن",
+    "meaning_fa_IPA": "muːhɑː rɑː kuːtɑːh kærdæn"
+  },
+  {
+    "id": 70289,
+    "canonical_text": "درس تنیس گرفتن",
+    "meaning_fa_IPA": "dærs-e teniːs gereftæn"
+  },
+  {
+    "id": 70290,
+    "canonical_text": "در کلاس تنیس شرکت کردن",
+    "meaning_fa_IPA": "dær kelɑːs-e teniːs ʃerkæt kærdæn"
+  },
+  {
+    "id": 70291,
+    "canonical_text": "در کلاس رقص شرکت کردن",
+    "meaning_fa_IPA": "dær kelɑːs-e ræɣs ʃerkæt kærdæn"
+  },
+  {
+    "id": 70292,
+    "canonical_text": "ایتالیایی خواندن",
+    "meaning_fa_IPA": "iːtɑːlijɑːjiː xɑːndæn"
+  },
+  {
+    "id": 70293,
+    "canonical_text": "برای آزمون درس خواندن",
+    "meaning_fa_IPA": "bærɑː-je ɑːzmuːn dærs xɑːndæn"
+  },
+  {
+    "id": 70294,
+    "canonical_text": "برای امتحان مطالعه کردن",
+    "meaning_fa_IPA": "bærɑː-je emtehɑːn motɑːleʔe kærdæn"
+  },
+  {
+    "id": 70295,
+    "canonical_text": "جویای کار بودن",
+    "meaning_fa_IPA": "dʒuːjɑː-je kɑːr buːdæn"
+  },
+  {
+    "id": 70296,
+    "canonical_text": "رانندگی آموختن",
+    "meaning_fa_IPA": "rɑːnændegiː ɑːmuːxtæn"
+  },
+  {
+    "id": 70297,
+    "canonical_text": "وب سایت طراحی کردن",
+    "meaning_fa_IPA": "web-sɑːjt tærrɑːhiː kærdæn"
+  },
+  {
+    "id": 70298,
+    "canonical_text": "سایت ساختن",
+    "meaning_fa_IPA": "sɑːjt sɑːxtæn"
+  },
+  {
+    "id": 70299,
+    "canonical_text": "فرانسوی صحبت کردن",
+    "meaning_fa_IPA": "færɑːnseviː sohbæt kærdæn"
+  },
+  {
+    "id": 70300,
+    "canonical_text": "گیتار زدن",
+    "meaning_fa_IPA": "giːtɑːr zædæn"
+  },
+  {
+    "id": 70301,
+    "canonical_text": "رایانه تعمیر کردن",
+    "meaning_fa_IPA": "rɑːjɑːne tæʔmiːr kærdæn"
+  },
+  {
+    "id": 70302,
+    "canonical_text": "فیلم دیدن",
+    "meaning_fa_IPA": "fiːlm diːdæn"
+  },
+  {
+    "id": 70303,
+    "canonical_text": "ویدیو بارگذاری کردن",
+    "meaning_fa_IPA": "viːdiːjo bɑːrgozɑːriː kærdæn"
+  },
+  {
+    "id": 70304,
+    "canonical_text": "در وب جست وجو کردن",
+    "meaning_fa_IPA": "dær web dʒost-o-dʒuː kærdæn"
+  },
+  {
+    "id": 70305,
+    "canonical_text": "دیدگاه گذاشتن",
+    "meaning_fa_IPA": "diːdgɑːh gozɑːʃtæn"
+  },
+  {
+    "id": 70306,
+    "canonical_text": "کامنت گذاشتن",
+    "meaning_fa_IPA": "kɑːment gozɑːʃtæn"
+  },
+  {
+    "id": 70307,
+    "canonical_text": "آهنگ بارگیری کردن",
+    "meaning_fa_IPA": "ɑːhæŋ bɑːrgiːriː kærdæn"
+  },
+  {
+    "id": 70308,
+    "canonical_text": "با دوستان صحبت کردن",
+    "meaning_fa_IPA": "bɑː duːstɑːn sohbæt kærdæn"
+  },
+  {
+    "id": 70309,
+    "canonical_text": "دوچرخه راندن",
+    "meaning_fa_IPA": "duːtʃærxe rɑːndæn"
+  },
+  {
+    "id": 70310,
+    "canonical_text": "سوار تاکسی شدن",
+    "meaning_fa_IPA": "sævɑːr-e tɑːksiː ʃodæn"
+  },
+  {
+    "id": 70311,
+    "canonical_text": "نقش پردازی کردن",
+    "meaning_fa_IPA": "næɣʃ-pærdɑːziː kærdæn"
+  },
+  {
+    "id": 70312,
+    "canonical_text": "فعالیت گروهی",
+    "meaning_fa_IPA": "fæʔɑːlijæt-e goruːhiː"
+  },
+  {
+    "id": 70313,
+    "canonical_text": "کار تیمی",
+    "meaning_fa_IPA": "kɑːr-e tiːmiː"
+  },
+  {
+    "id": 70314,
+    "canonical_text": "بهینه از نظر مصرف انرژی",
+    "meaning_fa_IPA": "behiːne æz næzær-e mæsræf-e ʔenerʒiː"
+  },
+  {
+    "id": 70315,
+    "canonical_text": "کمک رسانی در بحران",
+    "meaning_fa_IPA": "komæk-resɑːniː dær bohrɑːn"
+  },
+  {
+    "id": 70316,
+    "canonical_text": "امداد در بلایا",
+    "meaning_fa_IPA": "emdɑːd dær bælɑːjɑː"
+  },
+  {
+    "id": 70317,
+    "canonical_text": "مبتنی بر قانون اساسی",
+    "meaning_fa_IPA": "mobtæniː bær ɣɑːnuːn-e ʔæsɑːsiː"
+  },
+  {
+    "id": 70318,
+    "canonical_text": "مردم نهاد",
+    "meaning_fa_IPA": "mærdom-nehɑːd"
+  },
+  {
+    "id": 70319,
+    "canonical_text": "وابسته به تنفس",
+    "meaning_fa_IPA": "vɑːbæste be tænæffos"
+  },
+  {
+    "id": 70320,
+    "canonical_text": "ریوی",
+    "meaning_fa_IPA": "riːjæviː"
+  },
+  {
+    "id": 70321,
+    "canonical_text": "بهترین موجود",
+    "meaning_fa_IPA": "behtæriːn-e mowdʒuːd"
+  },
+  {
+    "id": 70322,
+    "canonical_text": "ناشی از ویروس",
+    "meaning_fa_IPA": "nɑːʃiː æz viːruːs"
+  },
+  {
+    "id": 70323,
+    "canonical_text": "تولید انبوه کردن",
+    "meaning_fa_IPA": "towliːd-e ænbuːh kærdæn"
+  },
+  {
+    "id": 70324,
+    "canonical_text": "انبوه سازی کردن",
+    "meaning_fa_IPA": "ænbuːh-sɑːziː kærdæn"
+  },
+  {
+    "id": 70325,
+    "canonical_text": "با فناوری ابتدایی",
+    "meaning_fa_IPA": "bɑː fænɑːværiː-je ebtedɑːjiː"
+  },
+  {
+    "id": 70326,
+    "canonical_text": "با خود بردن",
+    "meaning_fa_IPA": "bɑː xod bordæn"
+  },
+  {
+    "id": 70327,
+    "canonical_text": "از کسی همفکری گرفتن",
+    "meaning_fa_IPA": "æz kæsiː hæmfekriː gereftæn"
+  },
+  {
+    "id": 70328,
+    "canonical_text": "نظر کارشناسی کسی را پرسیدن",
+    "meaning_fa_IPA": "næzær-e kɑːrʃenɑːsiː-je kæsiː rɑː porsiːdæn"
+  },
+  {
+    "id": 70329,
+    "canonical_text": "بنیادا",
+    "meaning_fa_IPA": "bonyɑːdɑː"
+  },
+  {
+    "id": 70330,
+    "canonical_text": "سکوی اهدای جوایز",
+    "meaning_fa_IPA": "sækuː-je ehdɑː-je dʒævɑːjez"
+  },
+  {
+    "id": 70331,
+    "canonical_text": "سکوی افتخار",
+    "meaning_fa_IPA": "sækuː-je eftexɑːr"
+  },
+  {
+    "id": 70332,
+    "canonical_text": "به خشک شویی دادن",
+    "meaning_fa_IPA": "be xoʃkʃuːjiː dɑːdæn"
+  },
+  {
+    "id": 70333,
+    "canonical_text": "قرص ضدسرماخوردگی",
+    "meaning_fa_IPA": "ɣors-e zedd-e særmɑːxordegiː"
+  },
+  {
+    "id": 70334,
+    "canonical_text": "نفس تنگی داشتن",
+    "meaning_fa_IPA": "næfæs-tængiː dɑːʃtæn"
+  },
+  {
+    "id": 70335,
+    "canonical_text": "کم آوردن نفس",
+    "meaning_fa_IPA": "kæm ɑːværdæn-e næfæs"
+  },
+  {
+    "id": 70336,
+    "canonical_text": "پیش خریدشده",
+    "meaning_fa_IPA": "piːʃ-xæriːd-ʃode"
+  },
+  {
+    "id": 70337,
+    "canonical_text": "آداب سر میز",
+    "meaning_fa_IPA": "ɑːdɑːb-e sær-e miːz"
+  },
+  {
+    "id": 70338,
+    "canonical_text": "آداب غذا خوردن",
+    "meaning_fa_IPA": "ɑːdɑːb-e ɣæzɑː xordæn"
+  },
+  {
+    "id": 70339,
+    "canonical_text": "خط زمانی",
+    "meaning_fa_IPA": "xætt-e zæmɑːniː"
+  },
+  {
+    "id": 70340,
+    "canonical_text": "گاه شمار",
+    "meaning_fa_IPA": "gɑːh-ʃomɑːr"
+  },
+  {
+    "id": 70341,
+    "canonical_text": "ادغام شده",
+    "meaning_fa_IPA": "edɣɑːm-ʃode"
+  },
+  {
+    "id": 70342,
+    "canonical_text": "مرتبط با رژیم غذایی",
+    "meaning_fa_IPA": "mortæbet bɑː reʒiːm-e ɣæzɑːjiː"
+  },
+  {
+    "id": 70343,
+    "canonical_text": "یک چشم به هم زدن",
+    "meaning_fa_IPA": "jek tʃeʃm-be-hæm-zædæn"
+  },
+  {
+    "id": 70344,
+    "canonical_text": "لحظه ای بسیار کوتاه",
+    "meaning_fa_IPA": "læhzeʔiː besjɑːr kuːtɑːh"
+  },
+  {
+    "id": 70345,
+    "canonical_text": "معیار دوگانه",
+    "meaning_fa_IPA": "meʔjɑːr-e dogɑːne"
+  },
+  {
+    "id": 70346,
+    "canonical_text": "زدن به چاک",
+    "meaning_fa_IPA": "zædæn be tʃɑːk"
+  },
+  {
+    "id": 70347,
+    "canonical_text": "راه اندازی مجدد کردن",
+    "meaning_fa_IPA": "rɑːh-ændɑːziː-je moddʒæddæd kærdæn"
+  },
+  {
+    "id": 70348,
+    "canonical_text": "دوباره روشن کردن",
+    "meaning_fa_IPA": "dobɑːre rowʃæn kærdæn"
+  },
+  {
+    "id": 70349,
+    "canonical_text": "سخت گیر نسبت به خود",
+    "meaning_fa_IPA": "sæxtgiːr nesbæt be xod"
+  },
+  {
+    "id": 70350,
+    "canonical_text": "منتقد خود",
+    "meaning_fa_IPA": "montæɣed-e xod"
+  },
+  {
+    "id": 70351,
+    "canonical_text": "روزمرگی طاقت فرسا",
+    "meaning_fa_IPA": "ruːzmærregiː-je tɑːɣæt-færsɑː"
+  },
+  {
+    "id": 70352,
+    "canonical_text": "کار فرساینده",
+    "meaning_fa_IPA": "kɑːr-e færsɑːjænde"
+  },
+  {
+    "id": 70353,
+    "canonical_text": "در کلاس جهانی",
+    "meaning_fa_IPA": "dær kelɑːs-e dʒæhɑːniː"
+  },
+  {
+    "id": 70354,
+    "canonical_text": "تراز اول جهانی",
+    "meaning_fa_IPA": "tærɑːz-e ʔævvæl-e dʒæhɑːniː"
+  },
+  {
+    "id": 70355,
+    "canonical_text": "ریختن مو",
+    "meaning_fa_IPA": "riːxtæn-e muː"
+  },
+  {
+    "id": 70356,
+    "canonical_text": "خون گرمی",
+    "meaning_fa_IPA": "xuːngærmiː"
+  },
+  {
+    "id": 70357,
+    "canonical_text": "ته نشست",
+    "meaning_fa_IPA": "tæh-neʃæst"
+  },
+  {
+    "id": 70358,
+    "canonical_text": "انباشت رسوبی",
+    "meaning_fa_IPA": "ænbɑːʃt-e rosuːbiː"
+  },
+  {
+    "id": 70359,
+    "canonical_text": "آینه جانبی",
+    "meaning_fa_IPA": "ɑːjiːne-je dʒɑːnebiː"
+  },
+  {
+    "id": 70360,
+    "canonical_text": "آینه کنار",
+    "meaning_fa_IPA": "ɑːjiːne-je kenɑːr"
+  },
+  {
+    "id": 70361,
+    "canonical_text": "خودروی جمع وجور",
+    "meaning_fa_IPA": "xodro-je dʒæmʔ-o-dʒuːr"
+  },
+  {
+    "id": 70362,
+    "canonical_text": "ممنوعیت سبقت",
+    "meaning_fa_IPA": "mæmnuːʔijæt-e sebɣæt"
+  },
+  {
+    "id": 70363,
+    "canonical_text": "سایز کویین",
+    "meaning_fa_IPA": "sɑːjz-e kwiːn"
+  },
+  {
+    "id": 70364,
+    "canonical_text": "دونفره بزرگ",
+    "meaning_fa_IPA": "do-næfære-je bozorg"
+  },
+  {
+    "id": 70365,
+    "canonical_text": "مربوط به واقعیت",
+    "meaning_fa_IPA": "mærbuːt be vɑːɣeʔijæt"
+  },
+  {
+    "id": 70366,
+    "canonical_text": "سایز کینگ",
+    "meaning_fa_IPA": "sɑːjz-e kiŋ"
+  },
+  {
+    "id": 70367,
+    "canonical_text": "دونفره بسیار بزرگ",
+    "meaning_fa_IPA": "do-næfære-je besjɑːr bozorg"
+  },
+  {
+    "id": 70368,
+    "canonical_text": "بی کلام",
+    "meaning_fa_IPA": "biː-kælɑːm"
+  },
+  {
+    "id": 70369,
+    "canonical_text": "اجاره بها",
+    "meaning_fa_IPA": "edʒɑːre-bæhɑː"
+  },
+  {
+    "id": 70370,
+    "canonical_text": "بهای اجاره",
+    "meaning_fa_IPA": "bæhɑː-je edʒɑːre"
+  },
+  {
+    "id": 70371,
+    "canonical_text": "شکر خدا",
+    "meaning_fa_IPA": "ʃokr-e xodɑː"
+  },
+  {
+    "id": 70372,
+    "canonical_text": "پیراهن پولو",
+    "meaning_fa_IPA": "piːrɑːhæn-e polo"
+  },
+  {
+    "id": 70373,
+    "canonical_text": "جای گذاری",
+    "meaning_fa_IPA": "dʒɑːj-gozɑːriː"
+  },
+  {
+    "id": 70374,
+    "canonical_text": "دل به چیزی بستن",
+    "meaning_fa_IPA": "del be tʃiːziː bæstæn"
+  },
+  {
+    "id": 70375,
+    "canonical_text": "چیزی را از ته دل خواستن",
+    "meaning_fa_IPA": "tʃiːziː rɑː æz tæh-e del xɑːstæn"
+  },
+  {
+    "id": 70376,
+    "canonical_text": "درست کار نمی کند",
+    "meaning_fa_IPA": "dorost kɑːr nemikonæd"
+  },
+  {
+    "id": 70377,
+    "canonical_text": "نوری",
+    "meaning_fa_IPA": "nuːriː"
+  },
+  {
+    "id": 70378,
+    "canonical_text": "کیف حمل",
+    "meaning_fa_IPA": "kiːf-e hæml"
+  },
+  {
+    "id": 70379,
+    "canonical_text": "چیز منفور",
+    "meaning_fa_IPA": "tʃiːz-e mænfuːr"
+  },
+  {
+    "id": 70380,
+    "canonical_text": "گسترش یافته",
+    "meaning_fa_IPA": "gostæreʃ-jɑːfte"
+  },
+  {
+    "id": 70381,
+    "canonical_text": "خودرویی",
+    "meaning_fa_IPA": "xodrojiː"
+  },
+  {
+    "id": 70382,
+    "canonical_text": "وابسته به خودرو",
+    "meaning_fa_IPA": "vɑːbæste be xodro"
+  },
+  {
+    "id": 70383,
+    "canonical_text": "همین نزدیکی",
+    "meaning_fa_IPA": "hæmiːn næzdiːkiː"
+  },
+  {
+    "id": 70384,
+    "canonical_text": "اتومبیل رو",
+    "meaning_fa_IPA": "ʔotomobiːl-row"
+  },
+  {
+    "id": 70385,
+    "canonical_text": "مجموعه ورزشی",
+    "meaning_fa_IPA": "mædʒmuːʔe-je værzeʃiː"
+  },
+  {
+    "id": 70386,
+    "canonical_text": "خدمات همسریابی",
+    "meaning_fa_IPA": "xædæmɑːt-e hæmsærjɑːbiː"
+  },
+  {
+    "id": 70387,
+    "canonical_text": "آموزش موسیقی",
+    "meaning_fa_IPA": "ɑːmuːzeʃ-e muːsiːɣiː"
+  },
+  {
+    "id": 70388,
+    "canonical_text": "پشتیبانی رایانه ای",
+    "meaning_fa_IPA": "poʃtiːbɑːniː-je rɑːjɑːneʔiː"
+  },
+  {
+    "id": 70389,
+    "canonical_text": "ویروس نقص ایمنی انسانی",
+    "meaning_fa_IPA": "viːruːs-e næɣs-e iːmeniː-je ensɑːniː"
+  },
+  {
+    "id": 70390,
+    "canonical_text": "با انرژی خورشیدی",
+    "meaning_fa_IPA": "bɑː ʔenerʒiː-je xorʃiːdiː"
+  },
+  {
+    "id": 70391,
+    "canonical_text": "کلاهک چراغ",
+    "meaning_fa_IPA": "kolɑːhæk-e tʃerɑːɣ"
+  },
+  {
+    "id": 70392,
+    "canonical_text": "شید چراغ",
+    "meaning_fa_IPA": "ʃejd-e tʃerɑːɣ"
+  },
+  {
+    "id": 70393,
+    "canonical_text": "وصل شده",
+    "meaning_fa_IPA": "væsl-ʃode"
+  },
+  {
+    "id": 70394,
+    "canonical_text": "افشاگرانه",
+    "meaning_fa_IPA": "æfʃɑːgærɑːne"
+  },
+  {
+    "id": 70395,
+    "canonical_text": "کلافه شدن",
+    "meaning_fa_IPA": "kælɑːfe ʃodæn"
+  },
+  {
+    "id": 70396,
+    "canonical_text": "بالدار",
+    "meaning_fa_IPA": "bɑːldɑːr"
+  },
+  {
+    "id": 70397,
+    "canonical_text": "زباله ریختن",
+    "meaning_fa_IPA": "zobɑːle riːxtæn"
+  },
+  {
+    "id": 70398,
+    "canonical_text": "خوره کامپیوتر",
+    "meaning_fa_IPA": "xore-je kɑːmpjuːter"
+  },
+  {
+    "id": 70399,
+    "canonical_text": "رایانه باز",
+    "meaning_fa_IPA": "rɑːjɑːne-bɑːz"
+  },
+  {
+    "id": 70400,
+    "canonical_text": "صحرانوردی",
+    "meaning_fa_IPA": "sæhrɑːnævardiː"
+  },
+  {
+    "id": 70401,
+    "canonical_text": "در دل طبیعت",
+    "meaning_fa_IPA": "dær del-e tæbiːʔæt"
+  },
+  {
+    "id": 70402,
+    "canonical_text": "هوس انگیز",
+    "meaning_fa_IPA": "hævæs-ængiːz"
+  },
+  {
+    "id": 70403,
+    "canonical_text": "اسب کش",
+    "meaning_fa_IPA": "æsb-keʃ"
+  },
+  {
+    "id": 70404,
+    "canonical_text": "پد گرم کن",
+    "meaning_fa_IPA": "pæd-e gærm-kon"
+  },
+  {
+    "id": 70405,
+    "canonical_text": "پد حرارتی",
+    "meaning_fa_IPA": "pæd-e hærɑːrætiː"
+  },
+  {
+    "id": 70406,
+    "canonical_text": "دمای انجماد",
+    "meaning_fa_IPA": "dæmɑː-je endʒemɑːd"
+  },
+  {
+    "id": 70407,
+    "canonical_text": "مقدار بسیار کمی",
+    "meaning_fa_IPA": "meɣdɑːr-e besjɑːr kæmiː"
+  },
+  {
+    "id": 70408,
+    "canonical_text": "سرمایش",
+    "meaning_fa_IPA": "særmɑːjeʃ"
+  },
+  {
+    "id": 70409,
+    "canonical_text": "خنک سازی",
+    "meaning_fa_IPA": "xonæk-sɑːziː"
+  },
+  {
+    "id": 70410,
+    "canonical_text": "کاهش شنوایی",
+    "meaning_fa_IPA": "kɑːheʃ-e ʃenævɑːjiː"
+  },
+  {
+    "id": 70411,
+    "canonical_text": "کم شنوایی",
+    "meaning_fa_IPA": "kæm-ʃenævɑːjiː"
+  },
+  {
+    "id": 70412,
+    "canonical_text": "عجولانه تصمیم گرفتن",
+    "meaning_fa_IPA": "ʔædʒuːlɑːne tæsmiːm gereftæn"
+  },
+  {
+    "id": 70413,
+    "canonical_text": "شتاب زده تصمیم گرفتن",
+    "meaning_fa_IPA": "ʃetɑːb-zæde tæsmiːm gereftæn"
+  },
+  {
+    "id": 70414,
+    "canonical_text": "تب کسی را گرفتن",
+    "meaning_fa_IPA": "tæb-e kæsiː rɑː gereftæn"
+  },
+  {
+    "id": 70415,
+    "canonical_text": "دمای بدن را سنجیدن",
+    "meaning_fa_IPA": "dæmɑː-je bædæn rɑː sændʒiːdæn"
+  },
+  {
+    "id": 70416,
+    "canonical_text": "سلامت کلی",
+    "meaning_fa_IPA": "sælɑːmæt-e kolliː"
+  },
+  {
+    "id": 70417,
+    "canonical_text": "از تماست ممنونم",
+    "meaning_fa_IPA": "æz tæmɑːsæt mæmnuːnæm"
+  },
+  {
+    "id": 70418,
+    "canonical_text": "تکلیف پژوهشی مدرسه",
+    "meaning_fa_IPA": "tækliːf-e peʒuːheʃiː-je mædrese"
+  },
+  {
+    "id": 70419,
+    "canonical_text": "با خارجی ها صحبت کردن",
+    "meaning_fa_IPA": "bɑː xɑːredʒiː-hɑː sohbæt kærdæn"
+  },
+  {
+    "id": 70420,
+    "canonical_text": "با اتباع خارجی گفت وگو کردن",
+    "meaning_fa_IPA": "bɑː ʔætbɑːʔ-e xɑːredʒiː goft-o-guː kærdæn"
+  },
+  {
+    "id": 70421,
+    "canonical_text": "جالبه",
+    "meaning_fa_IPA": "dʒɑːlebe"
+  },
+  {
+    "id": 70422,
+    "canonical_text": "ناحیه کشاورزی",
+    "meaning_fa_IPA": "nɑːhije-je keʃɑːværziː"
+  },
+  {
+    "id": 70423,
+    "canonical_text": "حرفم را باور کن",
+    "meaning_fa_IPA": "hærfæm rɑː bɑːvær kon"
+  },
+  {
+    "id": 70424,
+    "canonical_text": "صبر کن",
+    "meaning_fa_IPA": "sæbr kon"
+  },
+  {
+    "id": 70425,
+    "canonical_text": "یک لحظه صبر کن",
+    "meaning_fa_IPA": "jek læhze sæbr kon"
+  },
+  {
+    "id": 70426,
+    "canonical_text": "چه روز فوق العاده ای",
+    "meaning_fa_IPA": "tʃe ruːz-e foɣolʔɑːdeʔiː"
+  },
+  {
+    "id": 70427,
+    "canonical_text": "از خودپرداز پول گرفتن",
+    "meaning_fa_IPA": "æz xod-pærdɑːz puːl gereftæn"
+  },
+  {
+    "id": 70428,
+    "canonical_text": "مراسم برگزار کردن",
+    "meaning_fa_IPA": "mærɑːsem bærgozɑːr kærdæn"
+  },
+  {
+    "id": 70429,
+    "canonical_text": "مناسبت مذهبی را جشن گرفتن",
+    "meaning_fa_IPA": "monɑːsebæt-e mæzhæbiː rɑː dʒæʃn gereftæn"
+  },
+  {
+    "id": 70430,
+    "canonical_text": "وسایل سفر را جمع کردن",
+    "meaning_fa_IPA": "væsɑːjel-e sæfær rɑː dʒæmʔ kærdæn"
+  },
+  {
+    "id": 70431,
+    "canonical_text": "برای سفر چمدان بستن",
+    "meaning_fa_IPA": "bærɑː-je sæfær tʃæmedɑːn bæstæn"
+  },
+  {
+    "id": 70432,
+    "canonical_text": "عوارض پرداخت کردن",
+    "meaning_fa_IPA": "ʔævɑːrez pærdɑːxt kærdæn"
+  },
+  {
+    "id": 70433,
+    "canonical_text": "ایالت رقابتی",
+    "meaning_fa_IPA": "ijɑːlæt-e reɣɑːbætiː"
+  },
+  {
+    "id": 70434,
+    "canonical_text": "صدور صورتحساب",
+    "meaning_fa_IPA": "soduːr-e suːræt-hesɑːb"
+  },
+  {
+    "id": 70435,
+    "canonical_text": "دستگاه قابل حمل",
+    "meaning_fa_IPA": "dæstgɑːh-e ɣɑːbel-e hæml"
+  },
+  {
+    "id": 70436,
+    "canonical_text": "اثر افشاگر کتاب شرح حال و",
+    "meaning_fa_IPA": "æsær-e æfʃɑːgær-e ketɑːb-e ʃærh-e hɑːl-o"
+  },
+  {
+    "id": 70437,
+    "canonical_text": "کتاب افشاگر",
+    "meaning_fa_IPA": "ketɑːb-e æfʃɑːgær"
+  },
+  {
+    "id": 70438,
+    "canonical_text": "روایت افشاگر",
+    "meaning_fa_IPA": "revɑːjæt-e æfʃɑːgær"
+  },
+  {
+    "id": 70439,
+    "canonical_text": "علامت راهنما",
+    "meaning_fa_IPA": "ʔælɑːmæt-e rɑːhnæmɑː"
+  },
+  {
+    "id": 70440,
+    "canonical_text": "خودروی انفجاری",
+    "meaning_fa_IPA": "xodro-je enfedʒɑːriː"
+  },
+  {
+    "id": 70441,
+    "canonical_text": "خودروی بمب گذاری شده",
+    "meaning_fa_IPA": "xodro-je bomb-gozɑːriː-ʃode"
+  },
+  {
+    "id": 70442,
+    "canonical_text": "خوداشتغال",
+    "meaning_fa_IPA": "xod-eʃteɣɑːl"
+  },
+  {
+    "id": 70443,
+    "canonical_text": "امتحان پس داده",
+    "meaning_fa_IPA": "emtehɑːn-pæs-dɑːde"
+  },
+  {
+    "id": 70444,
+    "canonical_text": "حقه بازی",
+    "meaning_fa_IPA": "hoɣɣe-bɑːziː"
+  },
+  {
+    "id": 70445,
+    "canonical_text": "تقوا",
+    "meaning_fa_IPA": "tæɣvɑː"
+  },
+  {
+    "id": 70446,
+    "canonical_text": "پارسایی",
+    "meaning_fa_IPA": "pɑːrsɑːjiː"
+  },
+  {
+    "id": 70447,
+    "canonical_text": "کیف اداری",
+    "meaning_fa_IPA": "kiːf-e edɑːriː"
+  },
+  {
+    "id": 70448,
+    "canonical_text": "نشانی ایمیل",
+    "meaning_fa_IPA": "neʃɑːniː-je iːmejl"
+  },
+  {
+    "id": 70449,
+    "canonical_text": "نشانی پست الکترونیکی",
+    "meaning_fa_IPA": "neʃɑːniː-je post-e ʔelektroniːkiː"
+  },
+  {
+    "id": 70450,
+    "canonical_text": "خارج از ساعات اوج",
+    "meaning_fa_IPA": "xɑːredʒ æz sɑːʔɑːt-e ʔowdʒ"
+  }
+]

@@ -1,0 +1,86 @@
+{
+  "lane": 16,
+  "status": "failed_after_four_score_questions",
+  "count": 300,
+  "threadId": "01a003ea-7810-7e53-99a6-f71f1acd22c1",
+  "responseFile": "lane-16-response-revision-03.raw.json",
+  "responseSha256": "87d2c6f0270ae32ed607812389e5a53a4bb4775f224be309b363f9f4847bb4ec",
+  "scoreQuestionsAsked": 4,
+  "scoreHistory": [
+    {
+      "cycle": 1,
+      "batchScore": 8.9,
+      "minimumItemScore": 6.8,
+      "belowOrEqual8Ids": [
+        67923,
+        67931,
+        67940,
+        68113,
+        68120,
+        68146,
+        68186,
+        68188
+      ],
+      "assessment": "revise"
+    },
+    {
+      "cycle": 2,
+      "batchScore": 8.9,
+      "minimumItemScore": 6.7,
+      "belowOrEqual8Ids": [
+        67964,
+        68006,
+        68104,
+        68117,
+        68168,
+        68170,
+        68248,
+        68258
+      ],
+      "assessment": "revise"
+    },
+    {
+      "cycle": 3,
+      "batchScore": 8.9,
+      "minimumItemScore": 7.2,
+      "belowOrEqual8Ids": [
+        67916,
+        67944,
+        67948,
+        67950,
+        68061,
+        68108,
+        68110,
+        68149,
+        68211,
+        68244
+      ],
+      "assessment": "revise"
+    },
+    {
+      "cycle": 4,
+      "batchScore": 9.2,
+      "minimumItemScore": 7.8,
+      "belowOrEqual8Ids": [
+        68188,
+        68250
+      ],
+      "assessment": "revise"
+    }
+  ],
+  "finalScore": {
+    "cycle": 4,
+    "batchScore": 9.2,
+    "minimumItemScore": 7.8,
+    "belowOrEqual8Ids": [
+      68188,
+      68250
+    ],
+    "assessment": "revise"
+  },
+  "mechanicalValidation": {
+    "status": "passed",
+    "issues": []
+  },
+  "itemQualityGate": "The same chat still reported one or more items at or below 8/10 after the fourth and final score question."
+}

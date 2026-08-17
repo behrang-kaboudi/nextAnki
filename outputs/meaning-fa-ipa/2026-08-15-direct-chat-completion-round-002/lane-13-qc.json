@@ -1,0 +1,115 @@
+{
+  "lane": 13,
+  "status": "accepted",
+  "count": 300,
+  "threadId": "01a003ea-7466-7f12-8824-245e090caf6e",
+  "responseFile": "lane-13-response-revision-03.raw.json",
+  "responseSha256": "e7fec89fb1a6a9fde76f17431260a3853ecae88bd597b83256338edb9164a5bb",
+  "scoreQuestionsAsked": 4,
+  "scoreHistory": [
+    {
+      "cycle": 1,
+      "batchScore": 7.6,
+      "minimumItemScore": 3,
+      "belowOrEqual8Ids": [
+        66935,
+        66936,
+        66937,
+        66951,
+        66972,
+        66979,
+        67019,
+        67044,
+        67088,
+        67090,
+        67093,
+        67134,
+        67143,
+        67153,
+        67154,
+        67166,
+        67175,
+        67201,
+        67203,
+        67227
+      ],
+      "assessment": "revise"
+    },
+    {
+      "cycle": 2,
+      "batchScore": 7.8,
+      "minimumItemScore": 7.4,
+      "belowOrEqual8Ids": [
+        66929,
+        66930,
+        66931,
+        66932,
+        66933,
+        66937,
+        66938,
+        66939,
+        66940,
+        66951,
+        66961,
+        66962,
+        66969,
+        66970,
+        66971,
+        66972,
+        66975,
+        66992,
+        66994,
+        66995,
+        67002,
+        67003,
+        67042,
+        67050,
+        67065,
+        67069,
+        67078,
+        67081,
+        67144,
+        67147,
+        67173,
+        67176,
+        67187,
+        67193,
+        67194,
+        67197
+      ],
+      "assessment": "revise"
+    },
+    {
+      "cycle": 3,
+      "batchScore": 9.2,
+      "minimumItemScore": 7.2,
+      "belowOrEqual8Ids": [
+        66977,
+        67044,
+        67049,
+        67143,
+        67154
+      ],
+      "assessment": "revise"
+    },
+    {
+      "cycle": 4,
+      "batchScore": 9.2,
+      "minimumItemScore": 8.2,
+      "belowOrEqual8Ids": [],
+      "assessment": "pass"
+    }
+  ],
+  "finalScore": {
+    "cycle": 4,
+    "batchScore": 9.2,
+    "minimumItemScore": 8.2,
+    "belowOrEqual8Ids": [],
+    "assessment": "pass"
+  },
+  "mechanicalValidation": {
+    "status": "passed",
+    "issues": []
+  },
+  "itemQualityGate": "The same chat reported every item above 8/10; minimumItemScore is the minimum across all items."
+}

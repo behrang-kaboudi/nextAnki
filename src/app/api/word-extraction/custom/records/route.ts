@@ -27,8 +27,8 @@ function parseFields(value: string | null, allowed: Set<string>) {
 
 function parseLimit(value: string | null) {
   const parsed = Number(value);
-  if (!Number.isFinite(parsed) || parsed <= 0) return 20;
-  return Math.min(Math.floor(parsed), 500);
+  if (!Number.isFinite(parsed) || parsed < 0) return 20;
+  return Math.floor(parsed);
 }
 
 function positiveJsonIds(value: Prisma.JsonValue | null) {

@@ -15,6 +15,27 @@ export function RemainingCountBadge({ count }: RemainingCountProps) {
   );
 }
 
+export function RemainingGroupRecordBadge({
+  groupCount,
+  recordCount,
+}: {
+  groupCount: number;
+  recordCount: number;
+}) {
+  return (
+    <span className="ml-1 inline-flex items-center gap-1 whitespace-nowrap">
+      <span>Remaining</span>
+      <span className="inline-flex items-center justify-center rounded border border-amber-500/40 bg-amber-500/10 px-1.5 py-0.5 text-xs font-semibold tabular-nums text-amber-800 dark:text-amber-300">
+        {recordCount.toLocaleString()} records
+      </span>
+      <span>in</span>
+      <span className="inline-flex items-center justify-center rounded border border-amber-500/40 bg-amber-500/10 px-1.5 py-0.5 text-xs font-semibold tabular-nums text-amber-800 dark:text-amber-300">
+        {groupCount.toLocaleString()} groups
+      </span>
+    </span>
+  );
+}
+
 export function RemainingCountButton({
   count,
   onClick,

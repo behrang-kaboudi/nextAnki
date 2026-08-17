@@ -1,19 +1,18 @@
 import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
-import { parseParallelPromptPartition, selectParallelPromptLane } from "@/lib/words/parallelPromptPartition";
+import { parsePromptBatchSize, selectPromptBatch } from "@/lib/words/promptBatch";
 
 export const runtime = "nodejs";
 
 export async function GET(request: Request) {
   const params = new URL(request.url).searchParams;
-  const partition = parseParallelPromptPartition({
-    laneCount: Number(params.get("laneCount") ?? "1"),
-    laneNumber: Number(params.get("laneNumber") ?? "1"),
-    batchSize: Number(params.get("batchSize") ?? params.get("limit") ?? "50"),
-  }, 50);
-  if (!partition) {
-    return NextResponse.json({ ok: false, error: "Invalid parallel lane or batch size." }, { status: 400 });
+  const batchSize = parsePromptBatchSize(
+    Number(params.get("batchSize") ?? params.get("limit") ?? "50"),
+    50,
+  );
+  if (batchSize === null) {
+    return NextResponse.json({ ok: false, error: "Invalid batch size." }, { status: 400 });
   }
   const where = {
     OR: [{ phonetic_us: null }, { phonetic_us: "" }],
@@ -22,8 +21,8 @@ export async function GET(request: Request) {
     prisma.englishWord.findMany({ where, orderBy: { id: "asc" }, select: { id: true, base_form: true } }),
     prisma.englishWord.count({ where }),
   ]);
-  const { items, laneEligibleCount } = selectParallelPromptLane(eligible, (item) => item.id, partition);
-  return NextResponse.json({ ok: true, items, laneEligibleCount, totalUnconfirmed });
+  const items = selectPromptBatch(eligible, batchSize);
+  return NextResponse.json({ ok: true, items, totalUnconfirmed });
 }
 
 export async function POST(request: Request) {

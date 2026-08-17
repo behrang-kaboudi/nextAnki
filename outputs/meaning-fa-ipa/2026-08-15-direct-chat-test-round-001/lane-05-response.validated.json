@@ -1,0 +1,1202 @@
+[
+  {
+    "id": 62128,
+    "meaning_fa_IPA": "eŋɡelisi"
+  },
+  {
+    "id": 62129,
+    "meaning_fa_IPA": "honærhɑːje næmɑːjeʃi"
+  },
+  {
+    "id": 62130,
+    "meaning_fa_IPA": "honærhɑːje edʒrɑːji"
+  },
+  {
+    "id": 62131,
+    "meaning_fa_IPA": "rijɑːzijɑːt"
+  },
+  {
+    "id": 62132,
+    "meaning_fa_IPA": "zæbɑːne ɑːlmɑːni"
+  },
+  {
+    "id": 62133,
+    "meaning_fa_IPA": "ɑːlmɑːni"
+  },
+  {
+    "id": 62134,
+    "meaning_fa_IPA": "sɑːʔæte ɑːzɑːd mijɑːne kelɑːshɑː"
+  },
+  {
+    "id": 62135,
+    "meaning_fa_IPA": "zæŋɡe ɑːzɑːd"
+  },
+  {
+    "id": 62136,
+    "meaning_fa_IPA": "væɣte xɑːli dær bærnɑːmeje dærsi"
+  },
+  {
+    "id": 62137,
+    "meaning_fa_IPA": "motɑːleʔɑːte kæsbokɑːr"
+  },
+  {
+    "id": 62138,
+    "meaning_fa_IPA": "olume bɑːzerɡɑːni"
+  },
+  {
+    "id": 62139,
+    "meaning_fa_IPA": "reʃteje modirijæte kæsbokɑːr"
+  },
+  {
+    "id": 62140,
+    "meaning_fa_IPA": "hæɣɣe ozvijæt"
+  },
+  {
+    "id": 62141,
+    "meaning_fa_IPA": "kelɑːse ʔæsːr jɑː ʃæb"
+  },
+  {
+    "id": 62142,
+    "meaning_fa_IPA": "kelɑːse ʃæbɑːne"
+  },
+  {
+    "id": 62143,
+    "meaning_fa_IPA": "dowreje ʔæsːrɡɑːhi"
+  },
+  {
+    "id": 62144,
+    "meaning_fa_IPA": "ɑːmuzeʃe ræsmije mædreseʔi"
+  },
+  {
+    "id": 62145,
+    "meaning_fa_IPA": "dowreje mædrese"
+  },
+  {
+    "id": 62146,
+    "meaning_fa_IPA": "esmnevisi"
+  },
+  {
+    "id": 62147,
+    "meaning_fa_IPA": "mædreseje ʃæbɑːneruzi"
+  },
+  {
+    "id": 62148,
+    "meaning_fa_IPA": "mædreseje eɣɑːmæti"
+  },
+  {
+    "id": 62149,
+    "meaning_fa_IPA": "ɑːmuzeʃe ʔɑːli"
+  },
+  {
+    "id": 62150,
+    "meaning_fa_IPA": "tæhsilɑːte dɑːneʃɡɑːhi"
+  },
+  {
+    "id": 62151,
+    "meaning_fa_IPA": "ɑːmuzeʃe bozorɡsɑːlɑːn"
+  },
+  {
+    "id": 62152,
+    "meaning_fa_IPA": "tæʔlime bozorɡsɑːlɑːn"
+  },
+  {
+    "id": 62153,
+    "meaning_fa_IPA": "dowrehɑːje ɑːmuzeʃije bozorɡsɑːlɑːn"
+  },
+  {
+    "id": 62154,
+    "meaning_fa_IPA": "bɑːsævɑːd"
+  },
+  {
+    "id": 62155,
+    "meaning_fa_IPA": "ɑːmuzeʃdide"
+  },
+  {
+    "id": 62156,
+    "meaning_fa_IPA": "xosusi dærs dɑːdæn"
+  },
+  {
+    "id": 62157,
+    "meaning_fa_IPA": "xosusi ɑːmuzeʃ dɑːdæn"
+  },
+  {
+    "id": 62158,
+    "meaning_fa_IPA": "xosusi jɑːd dɑːdæn"
+  },
+  {
+    "id": 62159,
+    "meaning_fa_IPA": "sɑːle tæhsili"
+  },
+  {
+    "id": 62160,
+    "meaning_fa_IPA": "sɑːle ɑːmuzeʃi"
+  },
+  {
+    "id": 62161,
+    "meaning_fa_IPA": "sɑːle dɑːneʃɡɑːhi"
+  },
+  {
+    "id": 62162,
+    "meaning_fa_IPA": "hɑːzer budæn"
+  },
+  {
+    "id": 62163,
+    "meaning_fa_IPA": "mædrese jɑː kelɑːshɑːje ʃæbɑːne"
+  },
+  {
+    "id": 62164,
+    "meaning_fa_IPA": "ɑːmuzeʃɡɑːhe ʔæsːrɡɑːhi"
+  },
+  {
+    "id": 62165,
+    "meaning_fa_IPA": "mædreseje ʃæbɑːne"
+  },
+  {
+    "id": 62166,
+    "meaning_fa_IPA": "extelɑːle jɑːdɡiri"
+  },
+  {
+    "id": 62167,
+    "meaning_fa_IPA": "nɑːtævɑːnije jɑːdɡiri"
+  },
+  {
+    "id": 62168,
+    "meaning_fa_IPA": "moʃkele pɑːjdɑːr dær jɑːdɡiri"
+  },
+  {
+    "id": 62169,
+    "meaning_fa_IPA": "ɑːmuzeʃ ʔæz rɑːhe dur"
+  },
+  {
+    "id": 62170,
+    "meaning_fa_IPA": "tærbijæte moʔællem"
+  },
+  {
+    "id": 62171,
+    "meaning_fa_IPA": "ɑːmuzeʃe moʔællemɑːn"
+  },
+  {
+    "id": 62172,
+    "meaning_fa_IPA": "dowreje ɑːmɑːdesɑːzije moʔællem"
+  },
+  {
+    "id": 62173,
+    "meaning_fa_IPA": "mædreseje dowlæti"
+  },
+  {
+    "id": 62174,
+    "meaning_fa_IPA": "honærestɑːn"
+  },
+  {
+    "id": 62175,
+    "meaning_fa_IPA": "mædreseje fænni o herfeʔi"
+  },
+  {
+    "id": 62176,
+    "meaning_fa_IPA": "dɑːneʃkædeje fænni"
+  },
+  {
+    "id": 62177,
+    "meaning_fa_IPA": "mædreseje ebtedɑːji"
+  },
+  {
+    "id": 62178,
+    "meaning_fa_IPA": "dowre jɑː mædreseje tɑːbestɑːni"
+  },
+  {
+    "id": 62179,
+    "meaning_fa_IPA": "kelɑːshɑːje tɑːbestɑːni"
+  },
+  {
+    "id": 62180,
+    "meaning_fa_IPA": "terme tɑːbestɑːn"
+  },
+  {
+    "id": 62181,
+    "meaning_fa_IPA": "nɑːhijeje ɑːmuzeʃopærværeʃ"
+  },
+  {
+    "id": 62182,
+    "meaning_fa_IPA": "howzeje mædɑːrese dowlæti"
+  },
+  {
+    "id": 62183,
+    "meaning_fa_IPA": "mæntæɣeje ɑːmuzeʃi"
+  },
+  {
+    "id": 62184,
+    "meaning_fa_IPA": "mædreseje dowlætije tæxæsːosmæhvær"
+  },
+  {
+    "id": 62185,
+    "meaning_fa_IPA": "mædreseje mæɡnet"
+  },
+  {
+    "id": 62186,
+    "meaning_fa_IPA": "mædreseje dʒɑːzebe dɑːneʃɑːmuz"
+  },
+  {
+    "id": 62187,
+    "meaning_fa_IPA": "mædreseje mostæɣelle ɣejredowlæti"
+  },
+  {
+    "id": 62188,
+    "meaning_fa_IPA": "mædreseje xosusi"
+  },
+  {
+    "id": 62189,
+    "meaning_fa_IPA": "mædreseje mostæɣel"
+  },
+  {
+    "id": 62190,
+    "meaning_fa_IPA": "mædreseje viʒeje dɑːneʃɑːmuzɑːne bɑː nijɑːzhɑːje ɑːmuzeʃije xɑːsː"
+  },
+  {
+    "id": 62191,
+    "meaning_fa_IPA": "mædreseje ɑːmuzeʃe viʒe"
+  },
+  {
+    "id": 62192,
+    "meaning_fa_IPA": "mædreseje tæxæsːosije hemɑːjæti"
+  },
+  {
+    "id": 62193,
+    "meaning_fa_IPA": "mædreseje moxtælæt"
+  },
+  {
+    "id": 62194,
+    "meaning_fa_IPA": "moxtælæt"
+  },
+  {
+    "id": 62195,
+    "meaning_fa_IPA": "ɑːkɑːdemi jɑː moʔæsːeseje tæxæsːosi"
+  },
+  {
+    "id": 62196,
+    "meaning_fa_IPA": "ɑːmuzeʃɡɑːhe tæxæsːosi"
+  },
+  {
+    "id": 62197,
+    "meaning_fa_IPA": "færhæŋɡestɑːn"
+  },
+  {
+    "id": 62198,
+    "meaning_fa_IPA": "ændʒomæne ʔelmi jɑː honæri"
+  },
+  {
+    "id": 62199,
+    "meaning_fa_IPA": "moʔædːæle kol"
+  },
+  {
+    "id": 62200,
+    "meaning_fa_IPA": "mædreseje ɣejredowlæti"
+  },
+  {
+    "id": 62201,
+    "meaning_fa_IPA": "mædreseje ʃæhrijeʔi"
+  },
+  {
+    "id": 62202,
+    "meaning_fa_IPA": "dæbirestɑːne dowreje dovvom"
+  },
+  {
+    "id": 62203,
+    "meaning_fa_IPA": "dæbirestɑːne ʔærʃæd"
+  },
+  {
+    "id": 62204,
+    "meaning_fa_IPA": "sɑːlhɑːje pɑːjɑːnije dæbirestɑːn"
+  },
+  {
+    "id": 62205,
+    "meaning_fa_IPA": "piʃdæbirestɑːn"
+  },
+  {
+    "id": 62206,
+    "meaning_fa_IPA": "ɑːmuzeʃe motævæsːete"
+  },
+  {
+    "id": 62207,
+    "meaning_fa_IPA": "tæhsilɑːte dæbirestɑːni"
+  },
+  {
+    "id": 62208,
+    "meaning_fa_IPA": "dowreje motævæsːete"
+  },
+  {
+    "id": 62209,
+    "meaning_fa_IPA": "honærestɑːne fænni o herfeʔi"
+  },
+  {
+    "id": 62210,
+    "meaning_fa_IPA": "mædreseje fænni"
+  },
+  {
+    "id": 62211,
+    "meaning_fa_IPA": "ɑːmuzeʃɡɑːhe herfeʔi"
+  },
+  {
+    "id": 62212,
+    "meaning_fa_IPA": "ɑːmuzeʃe viʒe"
+  },
+  {
+    "id": 62213,
+    "meaning_fa_IPA": "ɑːmuzeʃe nijɑːzhɑːje xɑːsː"
+  },
+  {
+    "id": 62214,
+    "meaning_fa_IPA": "tæʔlimotærbijæte estesnɑːji"
+  },
+  {
+    "id": 62215,
+    "meaning_fa_IPA": "kɑːledʒe mæhælːije dosɑːle"
+  },
+  {
+    "id": 62216,
+    "meaning_fa_IPA": "kɑːledʒe mæntæɣeʔi"
+  },
+  {
+    "id": 62217,
+    "meaning_fa_IPA": "kɑːledʒe dʒɑːmeʔemæhvær"
+  },
+  {
+    "id": 62218,
+    "meaning_fa_IPA": "reʃteje færʔije dɑːneʃɡɑːhi"
+  },
+  {
+    "id": 62219,
+    "meaning_fa_IPA": "ɡerɑːjeʃe færʔi"
+  },
+  {
+    "id": 62220,
+    "meaning_fa_IPA": "reʃteje dovvom bɑː vɑːhedhɑːje kæmtær"
+  },
+  {
+    "id": 62221,
+    "meaning_fa_IPA": "mædræke kɑːrʃenɑːsije ʔærʃæde reʃtehɑːje ʔolume ensɑːni"
+  },
+  {
+    "id": 62222,
+    "meaning_fa_IPA": "redɑːje ræsmije dɑːneʃɡɑːhi"
+  },
+  {
+    "id": 62223,
+    "meaning_fa_IPA": "redɑːje fɑːreɣottæhsili"
+  },
+  {
+    "id": 62224,
+    "meaning_fa_IPA": "lebɑːse bolænde ræsmi"
+  },
+  {
+    "id": 62225,
+    "meaning_fa_IPA": "olum o honærhɑːje ɑːzɑːd"
+  },
+  {
+    "id": 62226,
+    "meaning_fa_IPA": "ɑːmuzeʃe ʔomumije dɑːneʃɡɑːhi"
+  },
+  {
+    "id": 62227,
+    "meaning_fa_IPA": "olume ensɑːni o pɑːje"
+  },
+  {
+    "id": 62228,
+    "meaning_fa_IPA": "dɑːneʃɡɑːhe dowlætije ijɑːlæti"
+  },
+  {
+    "id": 62229,
+    "meaning_fa_IPA": "dɑːneʃɡɑːhe ijɑːlæti"
+  },
+  {
+    "id": 62230,
+    "meaning_fa_IPA": "dɑːneʃɡɑːhe ʔomumije jek ijɑːlæt"
+  },
+  {
+    "id": 62231,
+    "meaning_fa_IPA": "dɑːneʃkædeje kæsbokɑːr"
+  },
+  {
+    "id": 62232,
+    "meaning_fa_IPA": "dɑːneʃkædeje bɑːzerɡɑːni"
+  },
+  {
+    "id": 62233,
+    "meaning_fa_IPA": "mædreseje modirijæt"
+  },
+  {
+    "id": 62234,
+    "meaning_fa_IPA": "dɑːneʃkædeje pezeʃki"
+  },
+  {
+    "id": 62235,
+    "meaning_fa_IPA": "mædreseje pezeʃki"
+  },
+  {
+    "id": 62236,
+    "meaning_fa_IPA": "mærkæze ɑːmuzeʃe pezeʃki"
+  },
+  {
+    "id": 62237,
+    "meaning_fa_IPA": "ɑːjvi liɡ"
+  },
+  {
+    "id": 62238,
+    "meaning_fa_IPA": "ɡoruhe hæʃt dɑːneʃɡɑːhe xosusije mæʃhure ɑːmrikɑː"
+  },
+  {
+    "id": 62239,
+    "meaning_fa_IPA": "etːehɑːdijeje værzeʃije ɑːjvi"
+  },
+  {
+    "id": 62240,
+    "meaning_fa_IPA": "dɑːneʃkædeje tæhsilɑːte tækmili"
+  },
+  {
+    "id": 62241,
+    "meaning_fa_IPA": "bæxʃe tæhsilɑːte ʔɑːlije dɑːneʃɡɑːh"
+  },
+  {
+    "id": 62242,
+    "meaning_fa_IPA": "mædreseje tæhsilɑːte tækmili"
+  },
+  {
+    "id": 62243,
+    "meaning_fa_IPA": "reʃteje dɑːneʃɡɑːhi"
+  },
+  {
+    "id": 62244,
+    "meaning_fa_IPA": "sɑːlhɑːje poʃte konkur"
+  },
+  {
+    "id": 62245,
+    "meaning_fa_IPA": "sɑːlhɑːje fɑːsele"
+  },
+  {
+    "id": 62246,
+    "meaning_fa_IPA": "sɑːzmɑːn jɑː ʔozve vɑːbæste"
+  },
+  {
+    "id": 62247,
+    "meaning_fa_IPA": "næhɑːde vɑːbæste"
+  },
+  {
+    "id": 62248,
+    "meaning_fa_IPA": "ʃoʔbeje hæmkɑːr"
+  },
+  {
+    "id": 62249,
+    "meaning_fa_IPA": "dɑːneʃdʒu dɑːneʃɑːmuze sɑːle dovvomi"
+  },
+  {
+    "id": 62250,
+    "meaning_fa_IPA": "dʒælæseje ɑːmuzeʃi bɑː ostɑːde rɑːhnæmɑː"
+  },
+  {
+    "id": 62251,
+    "meaning_fa_IPA": "kelɑːse ræfʔe eʃkɑːl"
+  },
+  {
+    "id": 62252,
+    "meaning_fa_IPA": "dʒælæseje tædrise xosusi jɑː ɡoruhe kutʃæk"
+  },
+  {
+    "id": 62253,
+    "meaning_fa_IPA": "dʒɑːjɡɑːhe hæjʔæte ʔelmi"
+  },
+  {
+    "id": 62254,
+    "meaning_fa_IPA": "ostɑːde momtɑːz"
+  },
+  {
+    "id": 62255,
+    "meaning_fa_IPA": "ostɑːde dɑːʔem"
+  },
+  {
+    "id": 62256,
+    "meaning_fa_IPA": "dɑːneʃdʒuje lisɑːns"
+  },
+  {
+    "id": 62257,
+    "meaning_fa_IPA": "dɑːneʃdʒuje mæʃɣul be tæhsil"
+  },
+  {
+    "id": 62258,
+    "meaning_fa_IPA": "time ʔæslije værzeʃije mædrese jɑː dɑːneʃɡɑːh"
+  },
+  {
+    "id": 62259,
+    "meaning_fa_IPA": "time dɑːneʃɡɑːh"
+  },
+  {
+    "id": 62260,
+    "meaning_fa_IPA": "time montæxæbe ʔæsli"
+  },
+  {
+    "id": 62261,
+    "meaning_fa_IPA": "dærs dɑːdæn dær dɑːneʃɡɑːh"
+  },
+  {
+    "id": 62262,
+    "meaning_fa_IPA": "dɑːneʃdʒuje sɑːle ʔævvæl"
+  },
+  {
+    "id": 62263,
+    "meaning_fa_IPA": "dɑːneʃdʒuje dʒædidolvorud"
+  },
+  {
+    "id": 62264,
+    "meaning_fa_IPA": "færde sɑːle ʔævvæli"
+  },
+  {
+    "id": 62265,
+    "meaning_fa_IPA": "modire ɡoruhe dɑːneʃɡɑːh"
+  },
+  {
+    "id": 62266,
+    "meaning_fa_IPA": "hæjʔæte ʔelmije dɑːneʃɡɑːh o"
+  },
+  {
+    "id": 62267,
+    "meaning_fa_IPA": "ræʔise dɑːneʃkæde"
+  },
+  {
+    "id": 62268,
+    "meaning_fa_IPA": "ræʔise dɑːneʃɡɑːh jɑː sɑːzmɑːn"
+  },
+  {
+    "id": 62269,
+    "meaning_fa_IPA": "modire ʔɑːli"
+  },
+  {
+    "id": 62270,
+    "meaning_fa_IPA": "modærːese dɑːneʃɡɑːh"
+  },
+  {
+    "id": 62271,
+    "meaning_fa_IPA": "soxænrɑːne dɑːneʃɡɑːhi"
+  },
+  {
+    "id": 62272,
+    "meaning_fa_IPA": "lektʃerər"
+  },
+  {
+    "id": 62273,
+    "meaning_fa_IPA": "dɑːneʃɑːmuxteɡɑːn"
+  },
+  {
+    "id": 62274,
+    "meaning_fa_IPA": "fɑːreɣottæhsilɑːn"
+  },
+  {
+    "id": 62275,
+    "meaning_fa_IPA": "dɑːneʃdʒujɑːne sɑːbeɣ"
+  },
+  {
+    "id": 62276,
+    "meaning_fa_IPA": "moteɣɑːzi"
+  },
+  {
+    "id": 62277,
+    "meaning_fa_IPA": "xɑːstɑːr"
+  },
+  {
+    "id": 62278,
+    "meaning_fa_IPA": "ʔæz zire tʃizi dær ræftæn jɑː næræftæn"
+  },
+  {
+    "id": 62279,
+    "meaning_fa_IPA": "pitʃɑːndæne kelɑːs"
+  },
+  {
+    "id": 62280,
+    "meaning_fa_IPA": "ræhɑː kærdæne nɑːɡæhɑːni"
+  },
+  {
+    "id": 62281,
+    "meaning_fa_IPA": "xɑːkestæriræŋɡ"
+  },
+  {
+    "id": 62282,
+    "meaning_fa_IPA": "tusi"
+  },
+  {
+    "id": 62283,
+    "meaning_fa_IPA": "mijɑːnsɑːli"
+  },
+  {
+    "id": 62284,
+    "meaning_fa_IPA": "dowreje mijɑːnije ʔomr"
+  },
+  {
+    "id": 62285,
+    "meaning_fa_IPA": "xɑːkestæri ʃodæn"
+  },
+  {
+    "id": 62286,
+    "meaning_fa_IPA": "dʒowɡændomi ʃodæn"
+  },
+  {
+    "id": 62287,
+    "meaning_fa_IPA": "vɑːled budæn"
+  },
+  {
+    "id": 62288,
+    "meaning_fa_IPA": "pedæromɑːdæri"
+  },
+  {
+    "id": 62289,
+    "meaning_fa_IPA": "tædʒrobeje færzændpærværi"
+  },
+  {
+    "id": 62290,
+    "meaning_fa_IPA": "piri"
+  },
+  {
+    "id": 62291,
+    "meaning_fa_IPA": "sɑːlmændi"
+  },
+  {
+    "id": 62292,
+    "meaning_fa_IPA": "sɑːlxordeɡi"
+  },
+  {
+    "id": 62293,
+    "meaning_fa_IPA": "kebær"
+  },
+  {
+    "id": 62294,
+    "meaning_fa_IPA": "riʃsefid"
+  },
+  {
+    "id": 62295,
+    "meaning_fa_IPA": "mosen"
+  },
+  {
+    "id": 62296,
+    "meaning_fa_IPA": "bɑːzneʃæste ʃodæn"
+  },
+  {
+    "id": 62297,
+    "meaning_fa_IPA": "bɑːzneʃæste kærdæn"
+  },
+  {
+    "id": 62298,
+    "meaning_fa_IPA": "xɑːneje sɑːlmændɑːn"
+  },
+  {
+    "id": 62299,
+    "meaning_fa_IPA": "ɑːsɑːjeʃɡɑːh"
+  },
+  {
+    "id": 62300,
+    "meaning_fa_IPA": "ɑːsɑːjeʃɡɑːhe sɑːlmændɑːn"
+  },
+  {
+    "id": 62301,
+    "meaning_fa_IPA": "kælɑːnsɑːl"
+  },
+  {
+    "id": 62302,
+    "meaning_fa_IPA": "xɑːneje sɑːlmændɑːne mostæɣel jɑː komæki"
+  },
+  {
+    "id": 62303,
+    "meaning_fa_IPA": "modʒtæmæʔe bɑːzneʃæsteɡɑːn"
+  },
+  {
+    "id": 62304,
+    "meaning_fa_IPA": "eɣɑːmætɡɑːhe sɑːlmændɑːn"
+  },
+  {
+    "id": 62305,
+    "meaning_fa_IPA": "bimɑːrije ɑːlzɑːjmer"
+  },
+  {
+    "id": 62306,
+    "meaning_fa_IPA": "ɑːlzɑːjmer"
+  },
+  {
+    "id": 62307,
+    "meaning_fa_IPA": "eltehɑːbe mæfsæl"
+  },
+  {
+    "id": 62308,
+    "meaning_fa_IPA": "ɑːrtoruz"
+  },
+  {
+    "id": 62309,
+    "meaning_fa_IPA": "bɑːde mæfɑːsel"
+  },
+  {
+    "id": 62310,
+    "meaning_fa_IPA": "væræme mæfɑːsel"
+  },
+  {
+    "id": 62311,
+    "meaning_fa_IPA": "ʃæhrvænd-e sɑːlmænd"
+  },
+  {
+    "id": 62312,
+    "meaning_fa_IPA": "færde sɑːlxorde"
+  },
+  {
+    "id": 62313,
+    "meaning_fa_IPA": "færɑːmuʃkɑːri"
+  },
+  {
+    "id": 62314,
+    "meaning_fa_IPA": "ʔævɑːreze piri"
+  },
+  {
+    "id": 62315,
+    "meaning_fa_IPA": "koloft ʃodæne sedɑːje pesærɑːn henɡɑːme boluɣ"
+  },
+  {
+    "id": 62316,
+    "meaning_fa_IPA": "færde zire sene ɣɑːnuni"
+  },
+  {
+    "id": 62317,
+    "meaning_fa_IPA": "xordsɑːl"
+  },
+  {
+    "id": 62318,
+    "meaning_fa_IPA": "sæɣir"
+  },
+  {
+    "id": 62319,
+    "meaning_fa_IPA": "dʒævɑːn jɑː dʒævɑːnnæmɑː"
+  },
+  {
+    "id": 62320,
+    "meaning_fa_IPA": "bɑːneʃɑːte dʒævɑːni"
+  },
+  {
+    "id": 62321,
+    "meaning_fa_IPA": "dʒævɑːnɑːne"
+  },
+  {
+    "id": 62322,
+    "meaning_fa_IPA": "ɡidʒ o særdærɡom"
+  },
+  {
+    "id": 62323,
+    "meaning_fa_IPA": "nɑːbɑːleɣ jɑː nɑːpoxte"
+  },
+  {
+    "id": 62324,
+    "meaning_fa_IPA": "bætʃːeɡɑːne"
+  },
+  {
+    "id": 62325,
+    "meaning_fa_IPA": "nowdʒævɑːni"
+  },
+  {
+    "id": 62326,
+    "meaning_fa_IPA": "tæbdil ʃodæn be"
+  },
+  {
+    "id": 62327,
+    "meaning_fa_IPA": "dɑːrɑːje tʃehreje kudækɑːne"
+  },
+  {
+    "id": 62328,
+    "meaning_fa_IPA": "bætʃːesuræt"
+  },
+  {
+    "id": 62329,
+    "meaning_fa_IPA": "dʒævɑːntʃehre"
+  },
+  {
+    "id": 62330,
+    "meaning_fa_IPA": "be boluɣ residæn"
+  },
+  {
+    "id": 62331,
+    "meaning_fa_IPA": "dowrɑːne nowdʒævɑːni"
+  },
+  {
+    "id": 62332,
+    "meaning_fa_IPA": "kudæke piʃnowdʒævɑːn"
+  },
+  {
+    "id": 62333,
+    "meaning_fa_IPA": "kudæke zire sizdæh sɑːl"
+  },
+  {
+    "id": 62334,
+    "meaning_fa_IPA": "piʃnowdʒævɑːn"
+  },
+  {
+    "id": 62335,
+    "meaning_fa_IPA": "kutʃæk ʃodæne lebɑːs bærɑːje ɑːdæm"
+  },
+  {
+    "id": 62336,
+    "meaning_fa_IPA": "dærdhɑːje roʃd"
+  },
+  {
+    "id": 62337,
+    "meaning_fa_IPA": "dærde ændɑːm dær kudækɑːn"
+  },
+  {
+    "id": 62338,
+    "meaning_fa_IPA": "moʃkelɑːte ɑːɣɑːzine roʃd"
+  },
+  {
+    "id": 62339,
+    "meaning_fa_IPA": "xoʃbero-boru"
+  },
+  {
+    "id": 62340,
+    "meaning_fa_IPA": "dʒæʃne hedije dɑːdæne piʃ ʔæz ʔærusi jɑː tævælːode nowzɑːd"
+  },
+  {
+    "id": 62341,
+    "meaning_fa_IPA": "bejbi ʃɑːvər"
+  },
+  {
+    "id": 62342,
+    "meaning_fa_IPA": "dʒæʃne piʃ ʔæz ʔærusi"
+  },
+  {
+    "id": 62343,
+    "meaning_fa_IPA": "puʃæke bætʃːe"
+  },
+  {
+    "id": 62344,
+    "meaning_fa_IPA": "tæxte nærdedɑːre nowzɑːd"
+  },
+  {
+    "id": 62345,
+    "meaning_fa_IPA": "tæxte kudæk"
+  },
+  {
+    "id": 62346,
+    "meaning_fa_IPA": "gæhvɑːreje nærdeʔi"
+  },
+  {
+    "id": 62347,
+    "meaning_fa_IPA": "bɑː ɣɑːʃoɣ be kæsi ɣæzɑː dɑːdæn"
+  },
+  {
+    "id": 62348,
+    "meaning_fa_IPA": "tɑːzemotævælːedʃode"
+  },
+  {
+    "id": 62349,
+    "meaning_fa_IPA": "tɑːze be donjɑː ɑːmæde"
+  },
+  {
+    "id": 62350,
+    "meaning_fa_IPA": "ʃiʃeʃir"
+  },
+  {
+    "id": 62351,
+    "meaning_fa_IPA": "botrije ʃire nowzɑːd"
+  },
+  {
+    "id": 62352,
+    "meaning_fa_IPA": "ʃiʃeje tæɣzije"
+  },
+  {
+    "id": 62353,
+    "meaning_fa_IPA": "rorove nowzɑːd"
+  },
+  {
+    "id": 62354,
+    "meaning_fa_IPA": "vɑːkere kudæk"
+  },
+  {
+    "id": 62355,
+    "meaning_fa_IPA": "væsileje komækhærækatije kudæk"
+  },
+  {
+    "id": 62356,
+    "meaning_fa_IPA": "bɑː ʃiʃeʃir tæɣzije kærdæn"
+  },
+  {
+    "id": 62357,
+    "meaning_fa_IPA": "ʃiʃeʃir dɑːdæn"
+  },
+  {
+    "id": 62358,
+    "meaning_fa_IPA": "tæɣzijeje nowzɑːd bɑː botri"
+  },
+  {
+    "id": 62359,
+    "meaning_fa_IPA": "væzʔe hæml"
+  },
+  {
+    "id": 62360,
+    "meaning_fa_IPA": "zudræs"
+  },
+  {
+    "id": 62361,
+    "meaning_fa_IPA": "nɑːres"
+  },
+  {
+    "id": 62362,
+    "meaning_fa_IPA": "piʃ ʔæz henɡɑːm"
+  },
+  {
+    "id": 62363,
+    "meaning_fa_IPA": "ænduh o nowɑːsɑːne xolɣe kutɑːhmodːæt pæs ʔæz zɑːjimɑːn"
+  },
+  {
+    "id": 62364,
+    "meaning_fa_IPA": "ɣæme pæs ʔæz zɑːjimɑːn"
+  },
+  {
+    "id": 62365,
+    "meaning_fa_IPA": "bejbi bluz"
+  },
+  {
+    "id": 62366,
+    "meaning_fa_IPA": "mɑːjeʔeje ɑːmniotik jɑː kiseje ɑːb"
+  },
+  {
+    "id": 62367,
+    "meaning_fa_IPA": "ɑːbe dʒænin"
+  },
+  {
+    "id": 62368,
+    "meaning_fa_IPA": "mɑːjeʔeje ʔætrɑːfe dʒænin"
+  },
+  {
+    "id": 62369,
+    "meaning_fa_IPA": "reside be dowreje kɑːmele bɑːrdɑːri"
+  },
+  {
+    "id": 62370,
+    "meaning_fa_IPA": "kɑːmelmodːæt"
+  },
+  {
+    "id": 62371,
+    "meaning_fa_IPA": "be mowɣeʔ motævælːedʃode"
+  },
+  {
+    "id": 62372,
+    "meaning_fa_IPA": "zɑːjimɑːn rɑː be tore pezeʃki ɑːɣɑːz kærdæn"
+  },
+  {
+    "id": 62373,
+    "meaning_fa_IPA": "elɣɑːje zɑːjimɑːn kærdæn"
+  },
+  {
+    "id": 62374,
+    "meaning_fa_IPA": "dærde zɑːjimɑːn rɑː tæhrik kærdæn"
+  },
+  {
+    "id": 62375,
+    "meaning_fa_IPA": "elɣɑːje zɑːjimɑːn"
+  },
+  {
+    "id": 62376,
+    "meaning_fa_IPA": "tæhrike zɑːjimɑːn"
+  },
+  {
+    "id": 62377,
+    "meaning_fa_IPA": "ɑːɣɑːze pezeʃkije dærde zɑːjimɑːn"
+  },
+  {
+    "id": 62378,
+    "meaning_fa_IPA": "leɣɑːh"
+  },
+  {
+    "id": 62379,
+    "meaning_fa_IPA": "bɑːrværsɑːzi"
+  },
+  {
+    "id": 62380,
+    "meaning_fa_IPA": "bæste ʃodæne notfe"
+  },
+  {
+    "id": 62381,
+    "meaning_fa_IPA": "dær entezɑːre tævælːode færzænd budæn"
+  },
+  {
+    "id": 62382,
+    "meaning_fa_IPA": "bɑːrdɑːr budæn"
+  },
+  {
+    "id": 62383,
+    "meaning_fa_IPA": "montæzere bætʃːe budæn"
+  },
+  {
+    "id": 62384,
+    "meaning_fa_IPA": "moræxːæsije zɑːjimɑːn"
+  },
+  {
+    "id": 62385,
+    "meaning_fa_IPA": "tæhævvoʔ o esterɑːɣe bɑːrdɑːri"
+  },
+  {
+    "id": 62386,
+    "meaning_fa_IPA": "tæhævvoʔe sobhɡɑːhi"
+  },
+  {
+    "id": 62387,
+    "meaning_fa_IPA": "vijɑːre bɑːrdɑːri"
+  },
+  {
+    "id": 62388,
+    "meaning_fa_IPA": "toxmak"
+  },
+  {
+    "id": 62389,
+    "meaning_fa_IPA": "zæne bɑːrdɑːr jɑː mɑːdære ɑːjænde"
+  },
+  {
+    "id": 62390,
+    "meaning_fa_IPA": "mɑːdær dær entezɑːre tævælːode færzænd"
+  },
+  {
+    "id": 62391,
+    "meaning_fa_IPA": "xɑːnome bɑːrdɑːr"
+  },
+  {
+    "id": 62392,
+    "meaning_fa_IPA": "bɑːŋke espərm"
+  },
+  {
+    "id": 62393,
+    "meaning_fa_IPA": "mærkæze zæxireje mɑːjeʔeje mæni"
+  },
+  {
+    "id": 62394,
+    "meaning_fa_IPA": "mærkæze neɡæhdɑːrije espərme ehdɑːʃode"
+  },
+  {
+    "id": 62395,
+    "meaning_fa_IPA": "bɑːrdɑːri rɑː dɑːʃtæn o edɑːme dɑːdæn"
+  },
+  {
+    "id": 62396,
+    "meaning_fa_IPA": "hɑːmele budæn"
+  },
+  {
+    "id": 62397,
+    "meaning_fa_IPA": "dʒænin rɑː dær ræhem dɑːʃtæn"
+  },
+  {
+    "id": 62398,
+    "meaning_fa_IPA": "espərm"
+  },
+  {
+    "id": 62399,
+    "meaning_fa_IPA": "nærjɑːxte"
+  },
+  {
+    "id": 62400,
+    "meaning_fa_IPA": "notfe"
+  },
+  {
+    "id": 62401,
+    "meaning_fa_IPA": "mænidɑːne"
+  },
+  {
+    "id": 62402,
+    "meaning_fa_IPA": "tærkhɑːje pustije nɑːʃi ʔæz keʃideɡi"
+  },
+  {
+    "id": 62403,
+    "meaning_fa_IPA": "xotute keʃeʃe pust"
+  },
+  {
+    "id": 62404,
+    "meaning_fa_IPA": "esterijɑː"
+  },
+  {
+    "id": 62405,
+    "meaning_fa_IPA": "xɑːtemeje bɑːrdɑːri jɑː sæɣte dʒænin"
+  },
+  {
+    "id": 62406,
+    "meaning_fa_IPA": "sæɣte elɣɑːji"
+  },
+  {
+    "id": 62407,
+    "meaning_fa_IPA": "mɑːnde dær xɑːne bærɑːje morɑːɣebæt ʔæz xɑːnevɑːde"
+  },
+  {
+    "id": 62408,
+    "meaning_fa_IPA": "xɑːnedɑːr"
+  },
+  {
+    "id": 62409,
+    "meaning_fa_IPA": "tæmɑːmvæɣt dær xɑːne"
+  },
+  {
+    "id": 62410,
+    "meaning_fa_IPA": "færde tæhte særpæræstije ɣɑːnuni"
+  },
+  {
+    "id": 62411,
+    "meaning_fa_IPA": "mæhdʒur"
+  },
+  {
+    "id": 62412,
+    "meaning_fa_IPA": "sæɣire tæhte ɣejmumæt"
+  },
+  {
+    "id": 62413,
+    "meaning_fa_IPA": "mærbut be pedær jɑː mɑːdær"
+  },
+  {
+    "id": 62414,
+    "meaning_fa_IPA": "pedærɑːne jɑː mɑːdærɑːne"
+  },
+  {
+    "id": 62415,
+    "meaning_fa_IPA": "vɑːledejni"
+  },
+  {
+    "id": 62416,
+    "meaning_fa_IPA": "vɑːledɡæri o pærværeʃe færzænd"
+  },
+  {
+    "id": 62417,
+    "meaning_fa_IPA": "færzændpærværi"
+  },
+  {
+    "id": 62418,
+    "meaning_fa_IPA": "bætʃːedɑːri"
+  },
+  {
+    "id": 62419,
+    "meaning_fa_IPA": "be færzændxɑːndeɡi ɡereftæn"
+  },
+  {
+    "id": 62420,
+    "meaning_fa_IPA": "xɑːnevɑːdeje hæsteʔi"
+  },
+  {
+    "id": 62421,
+    "meaning_fa_IPA": "dær xɑːne neɡæh dɑːʃtæne nowdʒævɑːnɑːn be mænsure tænbih"
+  },
+  {
+    "id": 62422,
+    "meaning_fa_IPA": "vɑːlede tænɡhɑː"
+  },
+  {
+    "id": 62423,
+    "meaning_fa_IPA": "pedær jɑː mɑːdære tæksærpæræst"
+  },
+  {
+    "id": 62424,
+    "meaning_fa_IPA": "vɑːlede bedune ʃærike hæmxɑːne"
+  },
+  {
+    "id": 62425,
+    "meaning_fa_IPA": "ɑːslonæsæb"
+  },
+  {
+    "id": 62426,
+    "meaning_fa_IPA": "selseleje xɑːnevɑːdeɡi"
+  },
+  {
+    "id": 62427,
+    "meaning_fa_IPA": "xɑːndɑːne bɑːnofuz"
+  }
+]

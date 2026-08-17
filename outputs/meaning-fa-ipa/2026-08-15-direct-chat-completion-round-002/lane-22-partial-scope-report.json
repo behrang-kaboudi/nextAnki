@@ -1,0 +1,32 @@
+{
+  "status": "completed_database_verified",
+  "authorization": "User explicitly approved applying all lane 22 records except the single below-threshold record.",
+  "sourceResponseFile": "lane-22-response-revision-05.raw.json",
+  "sourceScoreFile": "lane-22-score-06.raw.json",
+  "sourceResponseSha256": "c3c8e45827a8647a01a8f75e17bdc59644ec708c8b4aed9898c372ca28172879",
+  "finalScore": {
+    "batchScore": 9.1,
+    "minimumItemScore": 7.6,
+    "belowOrEqual8Ids": [
+      70226
+    ],
+    "assessment": "revise"
+  },
+  "acceptedRecords": 299,
+  "excludedRecords": 1,
+  "excludedIds": [
+    70226
+  ],
+  "mechanicalValidation": {
+    "status": "passed",
+    "issues": []
+  },
+  "acceptedFile": "lane-22-partial-accepted-299.json",
+  "excludedFile": "lane-22-partial-excluded-1.json",
+  "appliedAt": "2026-08-15T06:17:09Z",
+  "updated": 299,
+  "verified": 299,
+  "skipped": [],
+  "verificationFailures": [],
+  "remainingAfter": 1
+}

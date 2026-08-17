@@ -1,0 +1,82 @@
+{
+  "status": "pass",
+  "targetCount": 212,
+  "reviewedCount": 212,
+  "resultCount": 212,
+  "needsHumanReviewCount": 0,
+  "allConceptsChanged": true,
+  "minimumRecordScore": 9,
+  "minimumBatchScore": 9.3,
+  "validations": {
+    "exactIdOrderAndCoverage": true,
+    "uniqueResults": true,
+    "exactResultSchema": true,
+    "maximumWords": 50,
+    "allWithinWordLimit": true,
+    "allOtherSenseReferencesChanged": true,
+    "noSuspiciousMultiSenseMarkers": true,
+    "noMerge": true,
+    "noDelete": true,
+    "databaseMutation": true,
+    "appliedAndPersisted": true,
+    "wordSenseRowCountPreserved": true,
+    "dependentReviewResetVerified": true,
+    "finalMeaningReviewStatusConfirmed": true,
+    "finalConceptMergeReviewedFalse": true,
+    "finalInflectionMergeReviewedFalse": true
+  },
+  "outputs": {
+    "response.json": {
+      "sha256": "871253efc0b285b7cb4c5b973dff2a87cd98a400c9122783a6205293a164ff39"
+    },
+    "changes.json": {
+      "sha256": "1a6f5c777f712a9d9791cc8f2efa6a93d21ca8ac91422828e0729e4e9a5005aa"
+    }
+  },
+  "batchQa": [
+    {
+      "batchId": "batch-001",
+      "inputCount": 50,
+      "resultCount": 50,
+      "minimumScore": 9.2,
+      "batchScore": 9.5,
+      "status": "pass"
+    },
+    {
+      "batchId": "batch-002",
+      "inputCount": 50,
+      "resultCount": 50,
+      "minimumScore": 9,
+      "batchScore": 9.3,
+      "status": "pass"
+    },
+    {
+      "batchId": "batch-003",
+      "inputCount": 50,
+      "resultCount": 50,
+      "minimumScore": 9.3,
+      "batchScore": 9.5,
+      "status": "pass"
+    },
+    {
+      "batchId": "batch-004",
+      "inputCount": 50,
+      "resultCount": 50,
+      "minimumScore": 9.3,
+      "batchScore": 9.7,
+      "status": "pass"
+    },
+    {
+      "batchId": "batch-005",
+      "inputCount": 12,
+      "resultCount": 12,
+      "minimumScore": 9.7,
+      "batchScore": 9.8,
+      "status": "pass"
+    }
+  ],
+  "databaseVerification": "database-verification.json",
+  "applyReport": "apply-report.json",
+  "statusRestoration": "meaning-review-status-restoration.json",
+  "statusRestorationVerification": "post-status-restoration-verification.json"
+}

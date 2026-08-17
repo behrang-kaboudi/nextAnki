@@ -1,0 +1,64 @@
+{
+  "lane": 2,
+  "status": "failed_after_four_score_questions",
+  "count": 300,
+  "threadId": "01a003ea-4786-7062-b4ee-068d6fada6bb",
+  "responseFile": "lane-02-response-revision-03.raw.json",
+  "responseSha256": "b8f3b5417830888d0dfa2511891d13e863205d6f8d430566067f1e4e1f121e86",
+  "scoreQuestionsAsked": 4,
+  "scoreHistory": [
+    {
+      "cycle": 1,
+      "batchScore": 9,
+      "minimumItemScore": 7.7,
+      "belowOrEqual8Ids": [
+        63681,
+        63858
+      ],
+      "assessment": "revise"
+    },
+    {
+      "cycle": 2,
+      "batchScore": 9.1,
+      "minimumItemScore": 7.6,
+      "belowOrEqual8Ids": [
+        63706,
+        63861
+      ],
+      "assessment": "revise"
+    },
+    {
+      "cycle": 3,
+      "batchScore": 9.2,
+      "minimumItemScore": 7.3,
+      "belowOrEqual8Ids": [
+        63808,
+        63887
+      ],
+      "assessment": "revise"
+    },
+    {
+      "cycle": 4,
+      "batchScore": 9.3,
+      "minimumItemScore": 7.9,
+      "belowOrEqual8Ids": [
+        63756
+      ],
+      "assessment": "revise"
+    }
+  ],
+  "finalScore": {
+    "cycle": 4,
+    "batchScore": 9.3,
+    "minimumItemScore": 7.9,
+    "belowOrEqual8Ids": [
+      63756
+    ],
+    "assessment": "revise"
+  },
+  "mechanicalValidation": {
+    "status": "passed",
+    "issues": []
+  },
+  "itemQualityGate": "The same chat still reported one or more items at or below 8/10 after the fourth and final score question."
+}

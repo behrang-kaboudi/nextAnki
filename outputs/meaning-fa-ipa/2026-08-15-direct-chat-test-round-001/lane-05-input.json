@@ -1,0 +1,1202 @@
+[
+  {
+    "id": 62128,
+    "canonical_text": "انگلیسی"
+  },
+  {
+    "id": 62129,
+    "canonical_text": "هنرهای نمایشی"
+  },
+  {
+    "id": 62130,
+    "canonical_text": "هنرهای اجرایی"
+  },
+  {
+    "id": 62131,
+    "canonical_text": "ریاضیات"
+  },
+  {
+    "id": 62132,
+    "canonical_text": "زبان آلمانی"
+  },
+  {
+    "id": 62133,
+    "canonical_text": "آلمانی"
+  },
+  {
+    "id": 62134,
+    "canonical_text": "ساعت آزاد میان کلاس ها"
+  },
+  {
+    "id": 62135,
+    "canonical_text": "زنگ آزاد"
+  },
+  {
+    "id": 62136,
+    "canonical_text": "وقت خالی در برنامه درسی"
+  },
+  {
+    "id": 62137,
+    "canonical_text": "مطالعات کسب وکار"
+  },
+  {
+    "id": 62138,
+    "canonical_text": "علوم بازرگانی"
+  },
+  {
+    "id": 62139,
+    "canonical_text": "رشته مدیریت کسب وکار"
+  },
+  {
+    "id": 62140,
+    "canonical_text": "حق عضویت"
+  },
+  {
+    "id": 62141,
+    "canonical_text": "کلاس عصر یا شب"
+  },
+  {
+    "id": 62142,
+    "canonical_text": "کلاس شبانه"
+  },
+  {
+    "id": 62143,
+    "canonical_text": "دوره عصرگاهی"
+  },
+  {
+    "id": 62144,
+    "canonical_text": "آموزش رسمی مدرسه ای"
+  },
+  {
+    "id": 62145,
+    "canonical_text": "دوره مدرسه"
+  },
+  {
+    "id": 62146,
+    "canonical_text": "اسم نویسی"
+  },
+  {
+    "id": 62147,
+    "canonical_text": "مدرسه شبانه روزی"
+  },
+  {
+    "id": 62148,
+    "canonical_text": "مدرسه اقامتی"
+  },
+  {
+    "id": 62149,
+    "canonical_text": "آموزش عالی"
+  },
+  {
+    "id": 62150,
+    "canonical_text": "تحصیلات دانشگاهی"
+  },
+  {
+    "id": 62151,
+    "canonical_text": "آموزش بزرگسالان"
+  },
+  {
+    "id": 62152,
+    "canonical_text": "تعلیم بزرگسالان"
+  },
+  {
+    "id": 62153,
+    "canonical_text": "دوره های آموزشی بزرگسالان"
+  },
+  {
+    "id": 62154,
+    "canonical_text": "باسواد"
+  },
+  {
+    "id": 62155,
+    "canonical_text": "آموزش دیده"
+  },
+  {
+    "id": 62156,
+    "canonical_text": "خصوصی درس دادن"
+  },
+  {
+    "id": 62157,
+    "canonical_text": "خصوصی آموزش دادن"
+  },
+  {
+    "id": 62158,
+    "canonical_text": "خصوصی یاد دادن"
+  },
+  {
+    "id": 62159,
+    "canonical_text": "سال تحصیلی"
+  },
+  {
+    "id": 62160,
+    "canonical_text": "سال آموزشی"
+  },
+  {
+    "id": 62161,
+    "canonical_text": "سال دانشگاهی"
+  },
+  {
+    "id": 62162,
+    "canonical_text": "حاضر بودن"
+  },
+  {
+    "id": 62163,
+    "canonical_text": "مدرسه یا کلاس های شبانه"
+  },
+  {
+    "id": 62164,
+    "canonical_text": "آموزشگاه عصرگاهی"
+  },
+  {
+    "id": 62165,
+    "canonical_text": "مدرسه شبانه"
+  },
+  {
+    "id": 62166,
+    "canonical_text": "اختلال یادگیری"
+  },
+  {
+    "id": 62167,
+    "canonical_text": "ناتوانی یادگیری"
+  },
+  {
+    "id": 62168,
+    "canonical_text": "مشکل پایدار در یادگیری"
+  },
+  {
+    "id": 62169,
+    "canonical_text": "آموزش از راه دور"
+  },
+  {
+    "id": 62170,
+    "canonical_text": "تربیت معلم"
+  },
+  {
+    "id": 62171,
+    "canonical_text": "آموزش معلمان"
+  },
+  {
+    "id": 62172,
+    "canonical_text": "دوره آماده سازی معلم"
+  },
+  {
+    "id": 62173,
+    "canonical_text": "مدرسه دولتی"
+  },
+  {
+    "id": 62174,
+    "canonical_text": "هنرستان"
+  },
+  {
+    "id": 62175,
+    "canonical_text": "مدرسه فنی و حرفه ای"
+  },
+  {
+    "id": 62176,
+    "canonical_text": "دانشکده فنی"
+  },
+  {
+    "id": 62177,
+    "canonical_text": "مدرسه ابتدایی"
+  },
+  {
+    "id": 62178,
+    "canonical_text": "دوره یا مدرسه تابستانی"
+  },
+  {
+    "id": 62179,
+    "canonical_text": "کلاس های تابستانی"
+  },
+  {
+    "id": 62180,
+    "canonical_text": "ترم تابستان"
+  },
+  {
+    "id": 62181,
+    "canonical_text": "ناحیه آموزش وپرورش"
+  },
+  {
+    "id": 62182,
+    "canonical_text": "حوزه مدارس دولتی"
+  },
+  {
+    "id": 62183,
+    "canonical_text": "منطقه آموزشی"
+  },
+  {
+    "id": 62184,
+    "canonical_text": "مدرسه دولتی تخصص محور"
+  },
+  {
+    "id": 62185,
+    "canonical_text": "مدرسه مگنت"
+  },
+  {
+    "id": 62186,
+    "canonical_text": "مدرسه جاذب دانش آموز"
+  },
+  {
+    "id": 62187,
+    "canonical_text": "مدرسه مستقل غیردولتی"
+  },
+  {
+    "id": 62188,
+    "canonical_text": "مدرسه خصوصی"
+  },
+  {
+    "id": 62189,
+    "canonical_text": "مدرسه مستقل"
+  },
+  {
+    "id": 62190,
+    "canonical_text": "مدرسه ویژه دانش آموزان با نیازهای آموزشی خاص"
+  },
+  {
+    "id": 62191,
+    "canonical_text": "مدرسه آموزش ویژه"
+  },
+  {
+    "id": 62192,
+    "canonical_text": "مدرسه تخصصی حمایتی"
+  },
+  {
+    "id": 62193,
+    "canonical_text": "مدرسه مختلط"
+  },
+  {
+    "id": 62194,
+    "canonical_text": "مختلط"
+  },
+  {
+    "id": 62195,
+    "canonical_text": "آکادمی یا موسسه تخصصی"
+  },
+  {
+    "id": 62196,
+    "canonical_text": "آموزشگاه تخصصی"
+  },
+  {
+    "id": 62197,
+    "canonical_text": "فرهنگستان"
+  },
+  {
+    "id": 62198,
+    "canonical_text": "انجمن علمی یا هنری"
+  },
+  {
+    "id": 62199,
+    "canonical_text": "معدل کل"
+  },
+  {
+    "id": 62200,
+    "canonical_text": "مدرسه غیردولتی"
+  },
+  {
+    "id": 62201,
+    "canonical_text": "مدرسه شهریه ای"
+  },
+  {
+    "id": 62202,
+    "canonical_text": "دبیرستان دوره دوم"
+  },
+  {
+    "id": 62203,
+    "canonical_text": "دبیرستان ارشد"
+  },
+  {
+    "id": 62204,
+    "canonical_text": "سال های پایانی دبیرستان"
+  },
+  {
+    "id": 62205,
+    "canonical_text": "پیش دبیرستان"
+  },
+  {
+    "id": 62206,
+    "canonical_text": "آموزش متوسطه"
+  },
+  {
+    "id": 62207,
+    "canonical_text": "تحصیلات دبیرستانی"
+  },
+  {
+    "id": 62208,
+    "canonical_text": "دوره متوسطه"
+  },
+  {
+    "id": 62209,
+    "canonical_text": "هنرستان فنی وحرفه ای"
+  },
+  {
+    "id": 62210,
+    "canonical_text": "مدرسه فنی"
+  },
+  {
+    "id": 62211,
+    "canonical_text": "آموزشگاه حرفه ای"
+  },
+  {
+    "id": 62212,
+    "canonical_text": "آموزش ویژه"
+  },
+  {
+    "id": 62213,
+    "canonical_text": "آموزش نیازهای خاص"
+  },
+  {
+    "id": 62214,
+    "canonical_text": "تعلیم وتربیت استثنایی"
+  },
+  {
+    "id": 62215,
+    "canonical_text": "کالج محلی دوساله"
+  },
+  {
+    "id": 62216,
+    "canonical_text": "کالج منطقه ای"
+  },
+  {
+    "id": 62217,
+    "canonical_text": "کالج جامعه محور"
+  },
+  {
+    "id": 62218,
+    "canonical_text": "رشته فرعی دانشگاهی"
+  },
+  {
+    "id": 62219,
+    "canonical_text": "گرایش فرعی"
+  },
+  {
+    "id": 62220,
+    "canonical_text": "رشته دوم با واحدهای کمتر"
+  },
+  {
+    "id": 62221,
+    "canonical_text": "مدرک کارشناسی ارشد رشته های علوم انسانی"
+  },
+  {
+    "id": 62222,
+    "canonical_text": "ردای رسمی دانشگاهی"
+  },
+  {
+    "id": 62223,
+    "canonical_text": "ردای فارغ التحصیلی"
+  },
+  {
+    "id": 62224,
+    "canonical_text": "لباس بلند رسمی"
+  },
+  {
+    "id": 62225,
+    "canonical_text": "علوم و هنرهای آزاد"
+  },
+  {
+    "id": 62226,
+    "canonical_text": "آموزش عمومی دانشگاهی"
+  },
+  {
+    "id": 62227,
+    "canonical_text": "علوم انسانی و پایه"
+  },
+  {
+    "id": 62228,
+    "canonical_text": "دانشگاه دولتی ایالتی"
+  },
+  {
+    "id": 62229,
+    "canonical_text": "دانشگاه ایالتی"
+  },
+  {
+    "id": 62230,
+    "canonical_text": "دانشگاه عمومی یک ایالت"
+  },
+  {
+    "id": 62231,
+    "canonical_text": "دانشکده کسب وکار"
+  },
+  {
+    "id": 62232,
+    "canonical_text": "دانشکده بازرگانی"
+  },
+  {
+    "id": 62233,
+    "canonical_text": "مدرسه مدیریت"
+  },
+  {
+    "id": 62234,
+    "canonical_text": "دانشکده پزشکی"
+  },
+  {
+    "id": 62235,
+    "canonical_text": "مدرسه پزشکی"
+  },
+  {
+    "id": 62236,
+    "canonical_text": "مرکز آموزش پزشکی"
+  },
+  {
+    "id": 62237,
+    "canonical_text": "آیوی لیگ"
+  },
+  {
+    "id": 62238,
+    "canonical_text": "گروه هشت دانشگاه خصوصی مشهور آمریکا"
+  },
+  {
+    "id": 62239,
+    "canonical_text": "اتحادیه ورزشی آیوی"
+  },
+  {
+    "id": 62240,
+    "canonical_text": "دانشکده تحصیلات تکمیلی"
+  },
+  {
+    "id": 62241,
+    "canonical_text": "بخش تحصیلات عالی دانشگاه"
+  },
+  {
+    "id": 62242,
+    "canonical_text": "مدرسه تحصیلات تکمیلی"
+  },
+  {
+    "id": 62243,
+    "canonical_text": "رشته دانشگاهی"
+  },
+  {
+    "id": 62244,
+    "canonical_text": "سال های پشت کنکور"
+  },
+  {
+    "id": 62245,
+    "canonical_text": "سالهای فاصله"
+  },
+  {
+    "id": 62246,
+    "canonical_text": "سازمان یا عضو وابسته"
+  },
+  {
+    "id": 62247,
+    "canonical_text": "نهاد وابسته"
+  },
+  {
+    "id": 62248,
+    "canonical_text": "شعبه همکار"
+  },
+  {
+    "id": 62249,
+    "canonical_text": "دانشجودانش آموز سال دومی"
+  },
+  {
+    "id": 62250,
+    "canonical_text": "جلسه آموزشی با استاد راهنما"
+  },
+  {
+    "id": 62251,
+    "canonical_text": "کلاس رفع اشکال"
+  },
+  {
+    "id": 62252,
+    "canonical_text": "جلسه تدریس خصوصی یا گروه کوچک"
+  },
+  {
+    "id": 62253,
+    "canonical_text": "جایگاه هییت علمی"
+  },
+  {
+    "id": 62254,
+    "canonical_text": "استاد ممتاز"
+  },
+  {
+    "id": 62255,
+    "canonical_text": "استاد دایم"
+  },
+  {
+    "id": 62256,
+    "canonical_text": "دانشجوی لیسانس"
+  },
+  {
+    "id": 62257,
+    "canonical_text": "دانشجوی مشغول به تحصیل"
+  },
+  {
+    "id": 62258,
+    "canonical_text": "تیم اصلی ورزشی مدرسه یا دانشگاه"
+  },
+  {
+    "id": 62259,
+    "canonical_text": "تیم دانشگاه"
+  },
+  {
+    "id": 62260,
+    "canonical_text": "تیم منتخب اصلی"
+  },
+  {
+    "id": 62261,
+    "canonical_text": "درس دادن در دانشگاه"
+  },
+  {
+    "id": 62262,
+    "canonical_text": "دانشجوی سال اول"
+  },
+  {
+    "id": 62263,
+    "canonical_text": "دانشجوی جدیدالورود"
+  },
+  {
+    "id": 62264,
+    "canonical_text": "فرد سال اولی"
+  },
+  {
+    "id": 62265,
+    "canonical_text": "مدیر گروه دانشگاه"
+  },
+  {
+    "id": 62266,
+    "canonical_text": "هییت علمی دانشگاه و"
+  },
+  {
+    "id": 62267,
+    "canonical_text": "رییس دانشکده"
+  },
+  {
+    "id": 62268,
+    "canonical_text": "رییس دانشگاه یا سازمان"
+  },
+  {
+    "id": 62269,
+    "canonical_text": "مدیر عالی"
+  },
+  {
+    "id": 62270,
+    "canonical_text": "مدرس دانشگاه"
+  },
+  {
+    "id": 62271,
+    "canonical_text": "سخنران دانشگاهی"
+  },
+  {
+    "id": 62272,
+    "canonical_text": "لکچرر"
+  },
+  {
+    "id": 62273,
+    "canonical_text": "دانش آموختگان"
+  },
+  {
+    "id": 62274,
+    "canonical_text": "فارغ التحصیلان"
+  },
+  {
+    "id": 62275,
+    "canonical_text": "دانشجویان سابق"
+  },
+  {
+    "id": 62276,
+    "canonical_text": "متقاضی"
+  },
+  {
+    "id": 62277,
+    "canonical_text": "خواستار"
+  },
+  {
+    "id": 62278,
+    "canonical_text": "از زیر چیزی دررفتن یا نرفتن"
+  },
+  {
+    "id": 62279,
+    "canonical_text": "پیچاندن کلاس"
+  },
+  {
+    "id": 62280,
+    "canonical_text": "رهاکردن ناگهانی"
+  },
+  {
+    "id": 62281,
+    "canonical_text": "خاکستری رنگ"
+  },
+  {
+    "id": 62282,
+    "canonical_text": "طوسی"
+  },
+  {
+    "id": 62283,
+    "canonical_text": "میانسالی"
+  },
+  {
+    "id": 62284,
+    "canonical_text": "دوره میانی عمر"
+  },
+  {
+    "id": 62285,
+    "canonical_text": "خاکستری شدن"
+  },
+  {
+    "id": 62286,
+    "canonical_text": "جوگندمی شدن"
+  },
+  {
+    "id": 62287,
+    "canonical_text": "والد بودن"
+  },
+  {
+    "id": 62288,
+    "canonical_text": "پدرومادری"
+  },
+  {
+    "id": 62289,
+    "canonical_text": "تجربه فرزندپروری"
+  },
+  {
+    "id": 62290,
+    "canonical_text": "پیری"
+  },
+  {
+    "id": 62291,
+    "canonical_text": "سالمندی"
+  },
+  {
+    "id": 62292,
+    "canonical_text": "سالخوردگی"
+  },
+  {
+    "id": 62293,
+    "canonical_text": "کبر"
+  },
+  {
+    "id": 62294,
+    "canonical_text": "ریش سفید"
+  },
+  {
+    "id": 62295,
+    "canonical_text": "مسن"
+  },
+  {
+    "id": 62296,
+    "canonical_text": "بازنشسته شدن"
+  },
+  {
+    "id": 62297,
+    "canonical_text": "بازنشسته کردن"
+  },
+  {
+    "id": 62298,
+    "canonical_text": "خانه سالمندان"
+  },
+  {
+    "id": 62299,
+    "canonical_text": "آسایشگاه"
+  },
+  {
+    "id": 62300,
+    "canonical_text": "آسایشگاه سالمندان"
+  },
+  {
+    "id": 62301,
+    "canonical_text": "کلانسال"
+  },
+  {
+    "id": 62302,
+    "canonical_text": "خانه سالمندان مستقل یا کمکی"
+  },
+  {
+    "id": 62303,
+    "canonical_text": "مجتمع بازنشستگان"
+  },
+  {
+    "id": 62304,
+    "canonical_text": "اقامتگاه سالمندان"
+  },
+  {
+    "id": 62305,
+    "canonical_text": "بیماری آلزایمر"
+  },
+  {
+    "id": 62306,
+    "canonical_text": "آلزایمر"
+  },
+  {
+    "id": 62307,
+    "canonical_text": "التهاب مفصل"
+  },
+  {
+    "id": 62308,
+    "canonical_text": "آرتروز"
+  },
+  {
+    "id": 62309,
+    "canonical_text": "باد مفاصل"
+  },
+  {
+    "id": 62310,
+    "canonical_text": "ورم مفاصل"
+  },
+  {
+    "id": 62311,
+    "canonical_text": "شهروند سالمند"
+  },
+  {
+    "id": 62312,
+    "canonical_text": "فرد سالخورده"
+  },
+  {
+    "id": 62313,
+    "canonical_text": "فراموش کاری"
+  },
+  {
+    "id": 62314,
+    "canonical_text": "عوارض پیری"
+  },
+  {
+    "id": 62315,
+    "canonical_text": "کلفت شدن صدای پسران هنگام بلوغ"
+  },
+  {
+    "id": 62316,
+    "canonical_text": "فرد زیر سن قانونی"
+  },
+  {
+    "id": 62317,
+    "canonical_text": "خردسال"
+  },
+  {
+    "id": 62318,
+    "canonical_text": "صغیر"
+  },
+  {
+    "id": 62319,
+    "canonical_text": "جوان یا جوان نما"
+  },
+  {
+    "id": 62320,
+    "canonical_text": "با نشاط جوانی"
+  },
+  {
+    "id": 62321,
+    "canonical_text": "جوانانه"
+  },
+  {
+    "id": 62322,
+    "canonical_text": "گیج و سردرگم"
+  },
+  {
+    "id": 62323,
+    "canonical_text": "نابالغ یا ناپخته"
+  },
+  {
+    "id": 62324,
+    "canonical_text": "بچگانه"
+  },
+  {
+    "id": 62325,
+    "canonical_text": "نوجوانی"
+  },
+  {
+    "id": 62326,
+    "canonical_text": "تبدیل شدن به"
+  },
+  {
+    "id": 62327,
+    "canonical_text": "دارای چهره کودکانه"
+  },
+  {
+    "id": 62328,
+    "canonical_text": "بچه صورت"
+  },
+  {
+    "id": 62329,
+    "canonical_text": "جوان چهره"
+  },
+  {
+    "id": 62330,
+    "canonical_text": "به بلوغ رسیدن"
+  },
+  {
+    "id": 62331,
+    "canonical_text": "دوران نوجوانی"
+  },
+  {
+    "id": 62332,
+    "canonical_text": "کودک پیش نوجوان"
+  },
+  {
+    "id": 62333,
+    "canonical_text": "کودک زیر سیزده سال"
+  },
+  {
+    "id": 62334,
+    "canonical_text": "پیش نوجوان"
+  },
+  {
+    "id": 62335,
+    "canonical_text": "کوچک شدن لباس برای آدم"
+  },
+  {
+    "id": 62336,
+    "canonical_text": "دردهای رشد"
+  },
+  {
+    "id": 62337,
+    "canonical_text": "درد اندام در کودکان"
+  },
+  {
+    "id": 62338,
+    "canonical_text": "مشکلات آغازین رشد"
+  },
+  {
+    "id": 62339,
+    "canonical_text": "خوش بر و برو"
+  },
+  {
+    "id": 62340,
+    "canonical_text": "جشن هدیه دادن پیش از عروسی یا تولد نوزاد"
+  },
+  {
+    "id": 62341,
+    "canonical_text": "بیبی شاور"
+  },
+  {
+    "id": 62342,
+    "canonical_text": "جشن پیش از عروسی"
+  },
+  {
+    "id": 62343,
+    "canonical_text": "پوشک بچه"
+  },
+  {
+    "id": 62344,
+    "canonical_text": "تخت نرده دار نوزاد"
+  },
+  {
+    "id": 62345,
+    "canonical_text": "تخت کودک"
+  },
+  {
+    "id": 62346,
+    "canonical_text": "گهواره نرده ای"
+  },
+  {
+    "id": 62347,
+    "canonical_text": "با قاشق به کسی غذا دادن"
+  },
+  {
+    "id": 62348,
+    "canonical_text": "تازه متولدشده"
+  },
+  {
+    "id": 62349,
+    "canonical_text": "تازه به دنیا آمده"
+  },
+  {
+    "id": 62350,
+    "canonical_text": "شیشه شیر"
+  },
+  {
+    "id": 62351,
+    "canonical_text": "بطری شیر نوزاد"
+  },
+  {
+    "id": 62352,
+    "canonical_text": "شیشه تغذیه"
+  },
+  {
+    "id": 62353,
+    "canonical_text": "روروک نوزاد"
+  },
+  {
+    "id": 62354,
+    "canonical_text": "واکر کودک"
+  },
+  {
+    "id": 62355,
+    "canonical_text": "وسیله کمک حرکتی کودک"
+  },
+  {
+    "id": 62356,
+    "canonical_text": "با شیشه شیر تغذیه کردن"
+  },
+  {
+    "id": 62357,
+    "canonical_text": "شیشه شیر دادن"
+  },
+  {
+    "id": 62358,
+    "canonical_text": "تغذیه نوزاد با بطری"
+  },
+  {
+    "id": 62359,
+    "canonical_text": "وضع حمل"
+  },
+  {
+    "id": 62360,
+    "canonical_text": "زودرس"
+  },
+  {
+    "id": 62361,
+    "canonical_text": "نارس"
+  },
+  {
+    "id": 62362,
+    "canonical_text": "پیش از هنگام"
+  },
+  {
+    "id": 62363,
+    "canonical_text": "اندوه و نوسان خلق کوتاه مدت پس از زایمان"
+  },
+  {
+    "id": 62364,
+    "canonical_text": "غم پس از زایمان"
+  },
+  {
+    "id": 62365,
+    "canonical_text": "بیبی بلوز"
+  },
+  {
+    "id": 62366,
+    "canonical_text": "مایع آمنیوتیک یا کیسه آب"
+  },
+  {
+    "id": 62367,
+    "canonical_text": "آب جنین"
+  },
+  {
+    "id": 62368,
+    "canonical_text": "مایع اطراف جنین"
+  },
+  {
+    "id": 62369,
+    "canonical_text": "رسیده به دوره کامل بارداری"
+  },
+  {
+    "id": 62370,
+    "canonical_text": "کامل مدت"
+  },
+  {
+    "id": 62371,
+    "canonical_text": "به موقع متولدشده"
+  },
+  {
+    "id": 62372,
+    "canonical_text": "زایمان را به طور پزشکی آغاز کردن"
+  },
+  {
+    "id": 62373,
+    "canonical_text": "القای زایمان کردن"
+  },
+  {
+    "id": 62374,
+    "canonical_text": "درد زایمان را تحریک کردن"
+  },
+  {
+    "id": 62375,
+    "canonical_text": "القای زایمان"
+  },
+  {
+    "id": 62376,
+    "canonical_text": "تحریک زایمان"
+  },
+  {
+    "id": 62377,
+    "canonical_text": "آغاز پزشکی درد زایمان"
+  },
+  {
+    "id": 62378,
+    "canonical_text": "لقاح"
+  },
+  {
+    "id": 62379,
+    "canonical_text": "بارورسازی"
+  },
+  {
+    "id": 62380,
+    "canonical_text": "بسته شدن نطفه"
+  },
+  {
+    "id": 62381,
+    "canonical_text": "در انتظار تولد فرزند بودن"
+  },
+  {
+    "id": 62382,
+    "canonical_text": "باردار بودن"
+  },
+  {
+    "id": 62383,
+    "canonical_text": "منتظر بچه بودن"
+  },
+  {
+    "id": 62384,
+    "canonical_text": "مرخصی زایمان"
+  },
+  {
+    "id": 62385,
+    "canonical_text": "تهوع و استفراغ بارداری"
+  },
+  {
+    "id": 62386,
+    "canonical_text": "تهوع صبحگاهی"
+  },
+  {
+    "id": 62387,
+    "canonical_text": "ویار بارداری"
+  },
+  {
+    "id": 62388,
+    "canonical_text": "تخمک"
+  },
+  {
+    "id": 62389,
+    "canonical_text": "زن باردار یا مادر آینده"
+  },
+  {
+    "id": 62390,
+    "canonical_text": "مادر در انتظار تولد فرزند"
+  },
+  {
+    "id": 62391,
+    "canonical_text": "خانم باردار"
+  },
+  {
+    "id": 62392,
+    "canonical_text": "بانک اسپرم"
+  },
+  {
+    "id": 62393,
+    "canonical_text": "مرکز ذخیره مایع منی"
+  },
+  {
+    "id": 62394,
+    "canonical_text": "مرکز نگهداری اسپرم اهداشده"
+  },
+  {
+    "id": 62395,
+    "canonical_text": "بارداری را داشتن و ادامه دادن"
+  },
+  {
+    "id": 62396,
+    "canonical_text": "حامله بودن"
+  },
+  {
+    "id": 62397,
+    "canonical_text": "جنین را در رحم داشتن"
+  },
+  {
+    "id": 62398,
+    "canonical_text": "اسپرم"
+  },
+  {
+    "id": 62399,
+    "canonical_text": "نر یاخته"
+  },
+  {
+    "id": 62400,
+    "canonical_text": "نطفه"
+  },
+  {
+    "id": 62401,
+    "canonical_text": "منی دانه"
+  },
+  {
+    "id": 62402,
+    "canonical_text": "ترک های پوستی ناشی از کشیدگی"
+  },
+  {
+    "id": 62403,
+    "canonical_text": "خطوط کشش پوست"
+  },
+  {
+    "id": 62404,
+    "canonical_text": "استریا"
+  },
+  {
+    "id": 62405,
+    "canonical_text": "خاتمه بارداری یا سقط جنین"
+  },
+  {
+    "id": 62406,
+    "canonical_text": "سقط القایی"
+  },
+  {
+    "id": 62407,
+    "canonical_text": "مانده در خانه برای مراقبت از خانواده"
+  },
+  {
+    "id": 62408,
+    "canonical_text": "خانه دار"
+  },
+  {
+    "id": 62409,
+    "canonical_text": "تمام وقت در خانه"
+  },
+  {
+    "id": 62410,
+    "canonical_text": "فرد تحت سرپرستی قانونی"
+  },
+  {
+    "id": 62411,
+    "canonical_text": "محجور"
+  },
+  {
+    "id": 62412,
+    "canonical_text": "صغیر تحت قیمومت"
+  },
+  {
+    "id": 62413,
+    "canonical_text": "مربوط به پدر یا مادر"
+  },
+  {
+    "id": 62414,
+    "canonical_text": "پدرانه یا مادرانه"
+  },
+  {
+    "id": 62415,
+    "canonical_text": "والدینی"
+  },
+  {
+    "id": 62416,
+    "canonical_text": "والدگری و پرورش فرزند"
+  },
+  {
+    "id": 62417,
+    "canonical_text": "فرزندپروری"
+  },
+  {
+    "id": 62418,
+    "canonical_text": "بچه داری"
+  },
+  {
+    "id": 62419,
+    "canonical_text": "به فرزندخواندگی گرفتن"
+  },
+  {
+    "id": 62420,
+    "canonical_text": "خانواده هسته ای"
+  },
+  {
+    "id": 62421,
+    "canonical_text": "در خانه نگه داشتن نوجوانان به منظور تنبیه"
+  },
+  {
+    "id": 62422,
+    "canonical_text": "والد تنها"
+  },
+  {
+    "id": 62423,
+    "canonical_text": "پدر یا مادر تک سرپرست"
+  },
+  {
+    "id": 62424,
+    "canonical_text": "والد بدون شریک هم خانه"
+  },
+  {
+    "id": 62425,
+    "canonical_text": "اصل ونسب"
+  },
+  {
+    "id": 62426,
+    "canonical_text": "سلسله خانوادگی"
+  },
+  {
+    "id": 62427,
+    "canonical_text": "خاندان بانفوذ"
+  }
+]

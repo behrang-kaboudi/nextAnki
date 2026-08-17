@@ -1,0 +1,44 @@
+{
+  "projectId": "8fb394cb-9f70-4afc-bf64-fe7a8771b8d7",
+  "projectLabel": "PromptAnswers",
+  "model": "gpt-5.6-sol",
+  "thinking": "low",
+  "tasks": [
+    {
+      "batchId": "batch-001",
+      "title": "Concept repair batch-001 generation",
+      "promptPath": "/Users/seyedbehrangkaboudi/Personal-Local/Projects/NextJS/Anki/prompt-responses/concept-repair/2026-08-15-direct-repair-212/batches/batch-001/prompt.md",
+      "threadId": "01a007e8-cb94-7193-85a9-905e377eaeec",
+      "hostId": "local"
+    },
+    {
+      "batchId": "batch-002",
+      "title": "Concept repair batch-002 generation",
+      "promptPath": "/Users/seyedbehrangkaboudi/Personal-Local/Projects/NextJS/Anki/prompt-responses/concept-repair/2026-08-15-direct-repair-212/batches/batch-002/prompt.md",
+      "threadId": "01a007e8-c854-73b1-bed7-50b54aee74f3",
+      "hostId": "local"
+    },
+    {
+      "batchId": "batch-003",
+      "title": "Concept repair batch-003 generation",
+      "promptPath": "/Users/seyedbehrangkaboudi/Personal-Local/Projects/NextJS/Anki/prompt-responses/concept-repair/2026-08-15-direct-repair-212/batches/batch-003/prompt.md",
+      "threadId": "01a007e8-cf3a-7b22-a9a9-852520aafe53",
+      "hostId": "local"
+    },
+    {
+      "batchId": "batch-004",
+      "title": "Concept repair batch-004 generation",
+      "promptPath": "/Users/seyedbehrangkaboudi/Personal-Local/Projects/NextJS/Anki/prompt-responses/concept-repair/2026-08-15-direct-repair-212/batches/batch-004/prompt.md",
+      "threadId": "01a007e8-c61c-7282-8425-a3c85ba1d914",
+      "hostId": "local"
+    },
+    {
+      "batchId": "batch-005",
+      "title": "Concept repair batch-005 generation",
+      "promptPath": "/Users/seyedbehrangkaboudi/Personal-Local/Projects/NextJS/Anki/prompt-responses/concept-repair/2026-08-15-direct-repair-212/batches/batch-005/prompt.md",
+      "threadId": "01a007e8-d30d-76f0-8976-b1c1c3cc83d8",
+      "hostId": "local"
+    }
+  ]
+}
+

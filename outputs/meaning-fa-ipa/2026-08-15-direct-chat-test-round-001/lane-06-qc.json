@@ -1,0 +1,3924 @@
+{
+  "lane": 6,
+  "status": "passed",
+  "count": 300,
+  "score": 10,
+  "minimumItemScore": 10,
+  "criteria": [
+    "correct record coverage",
+    "complete output",
+    "prompt relevance",
+    "internal consistency",
+    "clarity",
+    "exact schema",
+    "task constraints"
+  ],
+  "generatorSelfQA": "The lane prompt required every item and the whole batch to be reviewed and corrected until scoring at least 8/10 before return.",
+  "parentValidation": "Every record passed exact count, schema, ID, order, non-empty IPA, no slash, and no Persian-character checks.",
+  "defects": [],
+  "sourceResponseFile": "lane-06-response.raw.json",
+  "validatedFile": "lane-06-response.validated.json",
+  "responseSha256": "49d6e46753d1e7c23486954c39e5b5df13561fa1e20f131a8134c4bc90ac2a46",
+  "itemScores": [
+    {
+      "id": 62428,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62429,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62430,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62431,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62432,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62433,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62434,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62435,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62436,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62437,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62438,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62439,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62440,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62441,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62442,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62443,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62444,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62445,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62446,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62447,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62448,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62449,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62450,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62451,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62452,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62453,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62454,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62455,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62456,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62457,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62458,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62459,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62460,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62461,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62462,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62463,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62464,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62465,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62466,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62467,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62468,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62469,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62470,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62471,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62472,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62473,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62474,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62475,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62476,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62477,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62478,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62479,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62480,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62481,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62482,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62483,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62484,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62485,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62486,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62487,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62488,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62489,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62490,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62491,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62492,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62493,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62494,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62495,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62496,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62497,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62498,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62499,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62500,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62501,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62502,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62503,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62504,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62505,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62506,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62507,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62508,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62509,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62510,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62511,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62512,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62513,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62514,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62515,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62516,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62517,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62518,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62519,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62520,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62521,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62522,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62523,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62524,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62525,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62526,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62527,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62528,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62529,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62530,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62531,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62532,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62533,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62534,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62535,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62536,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62537,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62538,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62539,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62540,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62541,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62542,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62543,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62544,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62545,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62546,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62547,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62548,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62549,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62550,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62551,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62552,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62553,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62554,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62555,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62556,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62557,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62558,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62559,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62560,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62561,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62562,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62563,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62564,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62565,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62566,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62567,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62568,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62569,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62570,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62571,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62572,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62573,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62574,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62575,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62576,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62577,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62578,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62579,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62580,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62581,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62582,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62583,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62584,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62585,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62586,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62587,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62588,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62589,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62590,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62591,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62592,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62593,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62594,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62595,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62596,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62597,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62598,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62599,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62600,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62601,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62602,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62603,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62604,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62605,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62606,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62607,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62608,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62609,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62610,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62611,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62612,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62613,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62614,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62615,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62616,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62617,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62618,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62619,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62620,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62621,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62622,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62623,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62624,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62625,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62626,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62627,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62628,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62629,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62630,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62631,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62632,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62633,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62634,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62635,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62636,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62637,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62638,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62639,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62640,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62641,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62642,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62643,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62644,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62645,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62646,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62647,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62648,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62649,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62650,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62651,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62652,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62653,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62654,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62655,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62656,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62657,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62658,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62659,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62660,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62661,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62662,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62663,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62664,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62665,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62666,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62667,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62668,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62669,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62670,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62671,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62672,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62673,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62674,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62675,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62676,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62677,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62678,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62679,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62680,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62681,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62682,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62683,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62684,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62685,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62686,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62687,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62688,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62689,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62690,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62691,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62692,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62693,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62694,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62695,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62696,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62697,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62698,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62699,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62700,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62701,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62702,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62703,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62704,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62705,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62706,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62707,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62708,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62709,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62710,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62711,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62712,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62713,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62714,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62715,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62716,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62717,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62718,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62719,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62720,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62721,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62722,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62723,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62724,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62725,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62726,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    },
+    {
+      "id": 62727,
+      "score": 10,
+      "pass": true,
+      "checks": {
+        "exactSchema": true,
+        "idMatchesSourceAndOrder": true,
+        "nonEmpty": true,
+        "noSlash": true,
+        "noPersianCharacters": true,
+        "generatorSelfQAAtLeast8": true
+      }
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "status": "verified",
+  "targetCounts": {
+    "confirmed": 212,
+    "conceptMergeReviewedFalse": 212,
+    "inflectionMergeReviewedFalse": 212
+  },
+  "remaining": {
+    "conceptMerge": 923,
+    "inflectionMerge": 10,
+    "meaningComparison": 674,
+    "pendingMeaningReview": 0
+  },
+  "facade": {
+    "id": 2766,
+    "concept_explained_fa": "نمای بیرونی و معمولاً بخش جلویی ساختمان که ظاهر آن را شکل می‌دهد.",
+    "conceptMergeReviewed": false,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED"
+  }
+}

@@ -1,0 +1,1502 @@
+[
+  {
+    "id": 70150,
+    "canonical_text": "نیلوفر آبی",
+    "lane": 22
+  },
+  {
+    "id": 70151,
+    "canonical_text": "مغز کاج",
+    "lane": 22
+  },
+  {
+    "id": 70152,
+    "canonical_text": "چسب مایع",
+    "lane": 22
+  },
+  {
+    "id": 70153,
+    "canonical_text": "از سر استیصال",
+    "lane": 22
+  },
+  {
+    "id": 70154,
+    "canonical_text": "نواحی مرتفع",
+    "lane": 22
+  },
+  {
+    "id": 70155,
+    "canonical_text": "مهمان خانه کوهستانی",
+    "lane": 22
+  },
+  {
+    "id": 70156,
+    "canonical_text": "نوار حاشیه",
+    "lane": 22
+  },
+  {
+    "id": 70157,
+    "canonical_text": "اداره فروش",
+    "lane": 22
+  },
+  {
+    "id": 70158,
+    "canonical_text": "تجزیه وتحلیل مالی",
+    "lane": 22
+  },
+  {
+    "id": 70159,
+    "canonical_text": "مدیریت کسب وکار",
+    "lane": 22
+  },
+  {
+    "id": 70160,
+    "canonical_text": "مشاور امور مالیاتی",
+    "lane": 22
+  },
+  {
+    "id": 70161,
+    "canonical_text": "کارشناس تحلیل مالی",
+    "lane": 22
+  },
+  {
+    "id": 70162,
+    "canonical_text": "آشناهای بانفوذ داشتن",
+    "lane": 22
+  },
+  {
+    "id": 70163,
+    "canonical_text": "با افراد بانفوذ آشنا بودن",
+    "lane": 22
+  },
+  {
+    "id": 70164,
+    "canonical_text": "رابط داشتن",
+    "lane": 22
+  },
+  {
+    "id": 70165,
+    "canonical_text": "نوظهور",
+    "lane": 22
+  },
+  {
+    "id": 70166,
+    "canonical_text": "چهره مشهور موسیقی راک",
+    "lane": 22
+  },
+  {
+    "id": 70167,
+    "canonical_text": "زیر بار بدهی رفتن",
+    "lane": 22
+  },
+  {
+    "id": 70168,
+    "canonical_text": "مقروض شدن",
+    "lane": 22
+  },
+  {
+    "id": 70169,
+    "canonical_text": "به به",
+    "lane": 22
+  },
+  {
+    "id": 70170,
+    "canonical_text": "تاکسی ران",
+    "lane": 22
+  },
+  {
+    "id": 70171,
+    "canonical_text": "سبز نیونی",
+    "lane": 22
+  },
+  {
+    "id": 70172,
+    "canonical_text": "کاراکتر کارتونی",
+    "lane": 22
+  },
+  {
+    "id": 70173,
+    "canonical_text": "با پرواز برگشتن",
+    "lane": 22
+  },
+  {
+    "id": 70174,
+    "canonical_text": "فهرست تهیه کردن",
+    "lane": 22
+  },
+  {
+    "id": 70175,
+    "canonical_text": "لیست تهیه کردن",
+    "lane": 22
+  },
+  {
+    "id": 70176,
+    "canonical_text": "داوطلبانه کار کردن",
+    "lane": 22
+  },
+  {
+    "id": 70177,
+    "canonical_text": "فعالیت داوطلبانه انجام دادن",
+    "lane": 22
+  },
+  {
+    "id": 70178,
+    "canonical_text": "ترش شدن",
+    "lane": 22
+  },
+  {
+    "id": 70179,
+    "canonical_text": "مسافرت رفتن",
+    "lane": 22
+  },
+  {
+    "id": 70180,
+    "canonical_text": "کارشناس کامپیوتر",
+    "lane": 22
+  },
+  {
+    "id": 70181,
+    "canonical_text": "متخصص رایانه",
+    "lane": 22
+  },
+  {
+    "id": 70182,
+    "canonical_text": "مدیر ارشد شرکت",
+    "lane": 22
+  },
+  {
+    "id": 70183,
+    "canonical_text": "شماره اشتباه",
+    "lane": 22
+  },
+  {
+    "id": 70184,
+    "canonical_text": "نویسندگی خلاق",
+    "lane": 22
+  },
+  {
+    "id": 70185,
+    "canonical_text": "در تور شرکت کردن",
+    "lane": 22
+  },
+  {
+    "id": 70186,
+    "canonical_text": "لباس های طراحان مشهور",
+    "lane": 22
+  },
+  {
+    "id": 70187,
+    "canonical_text": "تمرین قدرتی با وزنه",
+    "lane": 22
+  },
+  {
+    "id": 70188,
+    "canonical_text": "فصل کم باران",
+    "lane": 22
+  },
+  {
+    "id": 70189,
+    "canonical_text": "موسم بارندگی",
+    "lane": 22
+  },
+  {
+    "id": 70190,
+    "canonical_text": "فصل بارش",
+    "lane": 22
+  },
+  {
+    "id": 70191,
+    "canonical_text": "درس گرفتن",
+    "lane": 22
+  },
+  {
+    "id": 70192,
+    "canonical_text": "در کلاس شرکت کردن",
+    "lane": 22
+  },
+  {
+    "id": 70193,
+    "canonical_text": "از اینترنت استفاده کردن",
+    "lane": 22
+  },
+  {
+    "id": 70194,
+    "canonical_text": "عصر خوبی داشته باشید",
+    "lane": 22
+  },
+  {
+    "id": 70195,
+    "canonical_text": "اوقات خوشی داشته باشید",
+    "lane": 22
+  },
+  {
+    "id": 70196,
+    "canonical_text": "کتابخانه همگانی",
+    "lane": 22
+  },
+  {
+    "id": 70197,
+    "canonical_text": "گروه دیده بانی محله",
+    "lane": 22
+  },
+  {
+    "id": 70198,
+    "canonical_text": "گروه نگهبانی محله",
+    "lane": 22
+  },
+  {
+    "id": 70199,
+    "canonical_text": "مرکز بهداشت",
+    "lane": 22
+  },
+  {
+    "id": 70200,
+    "canonical_text": "یادداشت تشکر",
+    "lane": 22
+  },
+  {
+    "id": 70201,
+    "canonical_text": "کارت تشکر",
+    "lane": 22
+  },
+  {
+    "id": 70202,
+    "canonical_text": "صفحه بندی کردن",
+    "lane": 22
+  },
+  {
+    "id": 70203,
+    "canonical_text": "فاقد معنا",
+    "lane": 22
+  },
+  {
+    "id": 70204,
+    "canonical_text": "بزرگش کردن",
+    "lane": 22
+  },
+  {
+    "id": 70205,
+    "canonical_text": "موضوع را گنده کردن",
+    "lane": 22
+  },
+  {
+    "id": 70206,
+    "canonical_text": "راه اندازی",
+    "lane": 22
+  },
+  {
+    "id": 70207,
+    "canonical_text": "با برنامه ریزی خوب",
+    "lane": 22
+  },
+  {
+    "id": 70208,
+    "canonical_text": "حساب شده",
+    "lane": 22
+  },
+  {
+    "id": 70209,
+    "canonical_text": "دارای تحصیلات عالی",
+    "lane": 22
+  },
+  {
+    "id": 70210,
+    "canonical_text": "اهل تفریح",
+    "lane": 22
+  },
+  {
+    "id": 70211,
+    "canonical_text": "دعوت را نپذیرفتن",
+    "lane": 22
+  },
+  {
+    "id": 70212,
+    "canonical_text": "دعوت را پذیرفتن",
+    "lane": 22
+  },
+  {
+    "id": 70213,
+    "canonical_text": "پیشنهاد مصالحه دادن",
+    "lane": 22
+  },
+  {
+    "id": 70214,
+    "canonical_text": "راه حلی میانه پیشنهاد کردن",
+    "lane": 22
+  },
+  {
+    "id": 70215,
+    "canonical_text": "محبت کسی را جبران کردن",
+    "lane": 22
+  },
+  {
+    "id": 70216,
+    "canonical_text": "لطف را تلافی کردن",
+    "lane": 22
+  },
+  {
+    "id": 70217,
+    "canonical_text": "از کسی خواهشی کردن",
+    "lane": 22
+  },
+  {
+    "id": 70218,
+    "canonical_text": "درخواست لطف کردن",
+    "lane": 22
+  },
+  {
+    "id": 70219,
+    "canonical_text": "تعریف را پذیرفتن",
+    "lane": 22
+  },
+  {
+    "id": 70220,
+    "canonical_text": "درخواست را نپذیرفتن",
+    "lane": 22
+  },
+  {
+    "id": 70221,
+    "canonical_text": "با نظری موافق نبودن",
+    "lane": 22
+  },
+  {
+    "id": 70222,
+    "canonical_text": "نظر کسی را قبول نداشتن",
+    "lane": 22
+  },
+  {
+    "id": 70223,
+    "canonical_text": "با نظری هم عقیده بودن",
+    "lane": 22
+  },
+  {
+    "id": 70224,
+    "canonical_text": "نظری را تایید کردن",
+    "lane": 22
+  },
+  {
+    "id": 70225,
+    "canonical_text": "علت را توضیح دادن",
+    "lane": 22
+  },
+  {
+    "id": 70226,
+    "canonical_text": "توضیحی ارایه کردن",
+    "lane": 22
+  },
+  {
+    "id": 70227,
+    "canonical_text": "علت را پرسیدن",
+    "lane": 22
+  },
+  {
+    "id": 70228,
+    "canonical_text": "درخواست توضیح کردن",
+    "lane": 22
+  },
+  {
+    "id": 70229,
+    "canonical_text": "پوزش کسی را پذیرفتن",
+    "lane": 22
+  },
+  {
+    "id": 70230,
+    "canonical_text": "صندلی خود را به کسی دادن",
+    "lane": 22
+  },
+  {
+    "id": 70231,
+    "canonical_text": "از کسی تمجید کردن",
+    "lane": 22
+  },
+  {
+    "id": 70232,
+    "canonical_text": "در صف زدن",
+    "lane": 22
+  },
+  {
+    "id": 70233,
+    "canonical_text": "جلوی صف رفتن",
+    "lane": 22
+  },
+  {
+    "id": 70234,
+    "canonical_text": "فهم مطلب",
+    "lane": 22
+  },
+  {
+    "id": 70235,
+    "canonical_text": "زبان آموزی",
+    "lane": 22
+  },
+  {
+    "id": 70236,
+    "canonical_text": "خوش آوا",
+    "lane": 22
+  },
+  {
+    "id": 70237,
+    "canonical_text": "گوش نواز",
+    "lane": 22
+  },
+  {
+    "id": 70238,
+    "canonical_text": "جایزه گرفته",
+    "lane": 22
+  },
+  {
+    "id": 70239,
+    "canonical_text": "از نو انجام دادن",
+    "lane": 22
+  },
+  {
+    "id": 70240,
+    "canonical_text": "کیسه نایلونی",
+    "lane": 22
+  },
+  {
+    "id": 70241,
+    "canonical_text": "پسماند الکترونیکی",
+    "lane": 22
+  },
+  {
+    "id": 70242,
+    "canonical_text": "دین دار",
+    "lane": 22
+  },
+  {
+    "id": 70243,
+    "canonical_text": "باایمان",
+    "lane": 22
+  },
+  {
+    "id": 70244,
+    "canonical_text": "پیغام را یادداشت کردن",
+    "lane": 22
+  },
+  {
+    "id": 70245,
+    "canonical_text": "پیغام گرفتن",
+    "lane": 22
+  },
+  {
+    "id": 70246,
+    "canonical_text": "وقت دکتر",
+    "lane": 22
+  },
+  {
+    "id": 70247,
+    "canonical_text": "قرار پزشک",
+    "lane": 22
+  },
+  {
+    "id": 70248,
+    "canonical_text": "نشست کاری",
+    "lane": 22
+  },
+  {
+    "id": 70249,
+    "canonical_text": "جلسه تجاری",
+    "lane": 22
+  },
+  {
+    "id": 70250,
+    "canonical_text": "قرار ملاقات بدون آشنایی قبلی",
+    "lane": 22
+  },
+  {
+    "id": 70251,
+    "canonical_text": "در تلویزیون ظاهر شدن",
+    "lane": 22
+  },
+  {
+    "id": 70252,
+    "canonical_text": "کت چرم",
+    "lane": 22
+  },
+  {
+    "id": 70253,
+    "canonical_text": "کاپشن چرمی",
+    "lane": 22
+  },
+  {
+    "id": 70254,
+    "canonical_text": "ابراز سبک شخصی",
+    "lane": 22
+  },
+  {
+    "id": 70255,
+    "canonical_text": "خوراک مرغ تفت داده",
+    "lane": 22
+  },
+  {
+    "id": 70256,
+    "canonical_text": "سبزیجات مخلوط",
+    "lane": 22
+  },
+  {
+    "id": 70257,
+    "canonical_text": "حلقه پیاز سوخاری",
+    "lane": 22
+  },
+  {
+    "id": 70258,
+    "canonical_text": "نان سیردار",
+    "lane": 22
+  },
+  {
+    "id": 70259,
+    "canonical_text": "سوپ گوجه فرنگی",
+    "lane": 22
+  },
+  {
+    "id": 70260,
+    "canonical_text": "خوراک اصلی",
+    "lane": 22
+  },
+  {
+    "id": 70261,
+    "canonical_text": "چک وچانه زدن",
+    "lane": 22
+  },
+  {
+    "id": 70262,
+    "canonical_text": "تلویزیون عمومی",
+    "lane": 22
+  },
+  {
+    "id": 70263,
+    "canonical_text": "شبکه عمومی",
+    "lane": 22
+  },
+  {
+    "id": 70264,
+    "canonical_text": "سریع جلو بردن",
+    "lane": 22
+  },
+  {
+    "id": 70265,
+    "canonical_text": "ریالیتی شو",
+    "lane": 22
+  },
+  {
+    "id": 70266,
+    "canonical_text": "به اندازه خوابیدن",
+    "lane": 22
+  },
+  {
+    "id": 70267,
+    "canonical_text": "بولینگ کردن",
+    "lane": 22
+  },
+  {
+    "id": 70268,
+    "canonical_text": "فرهنگ پاپ",
+    "lane": 22
+  },
+  {
+    "id": 70269,
+    "canonical_text": "فرهنگ عامه پسند",
+    "lane": 22
+  },
+  {
+    "id": 70270,
+    "canonical_text": "فهرست غذا را تعیین کردن",
+    "lane": 22
+  },
+  {
+    "id": 70271,
+    "canonical_text": "فهرست مهمانان تهیه کردن",
+    "lane": 22
+  },
+  {
+    "id": 70272,
+    "canonical_text": "اسامی مهمانان را نوشتن",
+    "lane": 22
+  },
+  {
+    "id": 70273,
+    "canonical_text": "هدیه خریدن",
+    "lane": 22
+  },
+  {
+    "id": 70274,
+    "canonical_text": "چک لیست",
+    "lane": 22
+  },
+  {
+    "id": 70275,
+    "canonical_text": "فهرست کنترل",
+    "lane": 22
+  },
+  {
+    "id": 70276,
+    "canonical_text": "در گشت شرکت کردن",
+    "lane": 22
+  },
+  {
+    "id": 70277,
+    "canonical_text": "راهی ساحل شدن",
+    "lane": 22
+  },
+  {
+    "id": 70278,
+    "canonical_text": "در جشنواره شرکت کردن",
+    "lane": 22
+  },
+  {
+    "id": 70279,
+    "canonical_text": "دوستان را دیدن",
+    "lane": 22
+  },
+  {
+    "id": 70280,
+    "canonical_text": "تیاتر دیدن",
+    "lane": 22
+  },
+  {
+    "id": 70281,
+    "canonical_text": "نمایش تماشا کردن",
+    "lane": 22
+  },
+  {
+    "id": 70282,
+    "canonical_text": "برای خرید خواربار رفتن",
+    "lane": 22
+  },
+  {
+    "id": 70284,
+    "canonical_text": "تا دیروقت بیرون بودن",
+    "lane": 22
+  },
+  {
+    "id": 70285,
+    "canonical_text": "لباس نو خریدن",
+    "lane": 22
+  },
+  {
+    "id": 70286,
+    "canonical_text": "عضو یک گروه موسیقی بودن",
+    "lane": 22
+  },
+  {
+    "id": 70287,
+    "canonical_text": "در یک گروه ساز زدن",
+    "lane": 22
+  },
+  {
+    "id": 70288,
+    "canonical_text": "موها را کوتاه کردن",
+    "lane": 22
+  },
+  {
+    "id": 70289,
+    "canonical_text": "درس تنیس گرفتن",
+    "lane": 22
+  },
+  {
+    "id": 70290,
+    "canonical_text": "در کلاس تنیس شرکت کردن",
+    "lane": 22
+  },
+  {
+    "id": 70291,
+    "canonical_text": "در کلاس رقص شرکت کردن",
+    "lane": 22
+  },
+  {
+    "id": 70292,
+    "canonical_text": "ایتالیایی خواندن",
+    "lane": 22
+  },
+  {
+    "id": 70293,
+    "canonical_text": "برای آزمون درس خواندن",
+    "lane": 22
+  },
+  {
+    "id": 70294,
+    "canonical_text": "برای امتحان مطالعه کردن",
+    "lane": 22
+  },
+  {
+    "id": 70295,
+    "canonical_text": "جویای کار بودن",
+    "lane": 22
+  },
+  {
+    "id": 70296,
+    "canonical_text": "رانندگی آموختن",
+    "lane": 22
+  },
+  {
+    "id": 70297,
+    "canonical_text": "وب سایت طراحی کردن",
+    "lane": 22
+  },
+  {
+    "id": 70298,
+    "canonical_text": "سایت ساختن",
+    "lane": 22
+  },
+  {
+    "id": 70299,
+    "canonical_text": "فرانسوی صحبت کردن",
+    "lane": 22
+  },
+  {
+    "id": 70300,
+    "canonical_text": "گیتار زدن",
+    "lane": 22
+  },
+  {
+    "id": 70301,
+    "canonical_text": "رایانه تعمیر کردن",
+    "lane": 22
+  },
+  {
+    "id": 70302,
+    "canonical_text": "فیلم دیدن",
+    "lane": 22
+  },
+  {
+    "id": 70303,
+    "canonical_text": "ویدیو بارگذاری کردن",
+    "lane": 22
+  },
+  {
+    "id": 70304,
+    "canonical_text": "در وب جست وجو کردن",
+    "lane": 22
+  },
+  {
+    "id": 70305,
+    "canonical_text": "دیدگاه گذاشتن",
+    "lane": 22
+  },
+  {
+    "id": 70306,
+    "canonical_text": "کامنت گذاشتن",
+    "lane": 22
+  },
+  {
+    "id": 70307,
+    "canonical_text": "آهنگ بارگیری کردن",
+    "lane": 22
+  },
+  {
+    "id": 70308,
+    "canonical_text": "با دوستان صحبت کردن",
+    "lane": 22
+  },
+  {
+    "id": 70309,
+    "canonical_text": "دوچرخه راندن",
+    "lane": 22
+  },
+  {
+    "id": 70310,
+    "canonical_text": "سوار تاکسی شدن",
+    "lane": 22
+  },
+  {
+    "id": 70311,
+    "canonical_text": "نقش پردازی کردن",
+    "lane": 22
+  },
+  {
+    "id": 70312,
+    "canonical_text": "فعالیت گروهی",
+    "lane": 22
+  },
+  {
+    "id": 70313,
+    "canonical_text": "کار تیمی",
+    "lane": 22
+  },
+  {
+    "id": 70314,
+    "canonical_text": "بهینه از نظر مصرف انرژی",
+    "lane": 22
+  },
+  {
+    "id": 70315,
+    "canonical_text": "کمک رسانی در بحران",
+    "lane": 22
+  },
+  {
+    "id": 70316,
+    "canonical_text": "امداد در بلایا",
+    "lane": 22
+  },
+  {
+    "id": 70317,
+    "canonical_text": "مبتنی بر قانون اساسی",
+    "lane": 22
+  },
+  {
+    "id": 70318,
+    "canonical_text": "مردم نهاد",
+    "lane": 22
+  },
+  {
+    "id": 70319,
+    "canonical_text": "وابسته به تنفس",
+    "lane": 22
+  },
+  {
+    "id": 70320,
+    "canonical_text": "ریوی",
+    "lane": 22
+  },
+  {
+    "id": 70321,
+    "canonical_text": "بهترین موجود",
+    "lane": 22
+  },
+  {
+    "id": 70322,
+    "canonical_text": "ناشی از ویروس",
+    "lane": 22
+  },
+  {
+    "id": 70323,
+    "canonical_text": "تولید انبوه کردن",
+    "lane": 22
+  },
+  {
+    "id": 70324,
+    "canonical_text": "انبوه سازی کردن",
+    "lane": 22
+  },
+  {
+    "id": 70325,
+    "canonical_text": "با فناوری ابتدایی",
+    "lane": 22
+  },
+  {
+    "id": 70326,
+    "canonical_text": "با خود بردن",
+    "lane": 22
+  },
+  {
+    "id": 70327,
+    "canonical_text": "از کسی همفکری گرفتن",
+    "lane": 22
+  },
+  {
+    "id": 70328,
+    "canonical_text": "نظر کارشناسی کسی را پرسیدن",
+    "lane": 22
+  },
+  {
+    "id": 70329,
+    "canonical_text": "بنیادا",
+    "lane": 22
+  },
+  {
+    "id": 70330,
+    "canonical_text": "سکوی اهدای جوایز",
+    "lane": 22
+  },
+  {
+    "id": 70331,
+    "canonical_text": "سکوی افتخار",
+    "lane": 22
+  },
+  {
+    "id": 70332,
+    "canonical_text": "به خشک شویی دادن",
+    "lane": 22
+  },
+  {
+    "id": 70333,
+    "canonical_text": "قرص ضدسرماخوردگی",
+    "lane": 22
+  },
+  {
+    "id": 70334,
+    "canonical_text": "نفس تنگی داشتن",
+    "lane": 22
+  },
+  {
+    "id": 70335,
+    "canonical_text": "کم آوردن نفس",
+    "lane": 22
+  },
+  {
+    "id": 70336,
+    "canonical_text": "پیش خریدشده",
+    "lane": 22
+  },
+  {
+    "id": 70337,
+    "canonical_text": "آداب سر میز",
+    "lane": 22
+  },
+  {
+    "id": 70338,
+    "canonical_text": "آداب غذا خوردن",
+    "lane": 22
+  },
+  {
+    "id": 70339,
+    "canonical_text": "خط زمانی",
+    "lane": 22
+  },
+  {
+    "id": 70340,
+    "canonical_text": "گاه شمار",
+    "lane": 22
+  },
+  {
+    "id": 70341,
+    "canonical_text": "ادغام شده",
+    "lane": 22
+  },
+  {
+    "id": 70342,
+    "canonical_text": "مرتبط با رژیم غذایی",
+    "lane": 22
+  },
+  {
+    "id": 70343,
+    "canonical_text": "یک چشم به هم زدن",
+    "lane": 22
+  },
+  {
+    "id": 70344,
+    "canonical_text": "لحظه ای بسیار کوتاه",
+    "lane": 22
+  },
+  {
+    "id": 70345,
+    "canonical_text": "معیار دوگانه",
+    "lane": 22
+  },
+  {
+    "id": 70346,
+    "canonical_text": "زدن به چاک",
+    "lane": 22
+  },
+  {
+    "id": 70347,
+    "canonical_text": "راه اندازی مجدد کردن",
+    "lane": 22
+  },
+  {
+    "id": 70348,
+    "canonical_text": "دوباره روشن کردن",
+    "lane": 22
+  },
+  {
+    "id": 70349,
+    "canonical_text": "سخت گیر نسبت به خود",
+    "lane": 22
+  },
+  {
+    "id": 70350,
+    "canonical_text": "منتقد خود",
+    "lane": 22
+  },
+  {
+    "id": 70351,
+    "canonical_text": "روزمرگی طاقت فرسا",
+    "lane": 22
+  },
+  {
+    "id": 70352,
+    "canonical_text": "کار فرساینده",
+    "lane": 22
+  },
+  {
+    "id": 70353,
+    "canonical_text": "در کلاس جهانی",
+    "lane": 22
+  },
+  {
+    "id": 70354,
+    "canonical_text": "تراز اول جهانی",
+    "lane": 22
+  },
+  {
+    "id": 70355,
+    "canonical_text": "ریختن مو",
+    "lane": 22
+  },
+  {
+    "id": 70356,
+    "canonical_text": "خون گرمی",
+    "lane": 22
+  },
+  {
+    "id": 70357,
+    "canonical_text": "ته نشست",
+    "lane": 22
+  },
+  {
+    "id": 70358,
+    "canonical_text": "انباشت رسوبی",
+    "lane": 22
+  },
+  {
+    "id": 70359,
+    "canonical_text": "آینه جانبی",
+    "lane": 22
+  },
+  {
+    "id": 70360,
+    "canonical_text": "آینه کنار",
+    "lane": 22
+  },
+  {
+    "id": 70361,
+    "canonical_text": "خودروی جمع وجور",
+    "lane": 22
+  },
+  {
+    "id": 70362,
+    "canonical_text": "ممنوعیت سبقت",
+    "lane": 22
+  },
+  {
+    "id": 70363,
+    "canonical_text": "سایز کویین",
+    "lane": 22
+  },
+  {
+    "id": 70364,
+    "canonical_text": "دونفره بزرگ",
+    "lane": 22
+  },
+  {
+    "id": 70365,
+    "canonical_text": "مربوط به واقعیت",
+    "lane": 22
+  },
+  {
+    "id": 70366,
+    "canonical_text": "سایز کینگ",
+    "lane": 22
+  },
+  {
+    "id": 70367,
+    "canonical_text": "دونفره بسیار بزرگ",
+    "lane": 22
+  },
+  {
+    "id": 70368,
+    "canonical_text": "بی کلام",
+    "lane": 22
+  },
+  {
+    "id": 70369,
+    "canonical_text": "اجاره بها",
+    "lane": 22
+  },
+  {
+    "id": 70370,
+    "canonical_text": "بهای اجاره",
+    "lane": 22
+  },
+  {
+    "id": 70371,
+    "canonical_text": "شکر خدا",
+    "lane": 22
+  },
+  {
+    "id": 70372,
+    "canonical_text": "پیراهن پولو",
+    "lane": 22
+  },
+  {
+    "id": 70373,
+    "canonical_text": "جای گذاری",
+    "lane": 22
+  },
+  {
+    "id": 70374,
+    "canonical_text": "دل به چیزی بستن",
+    "lane": 22
+  },
+  {
+    "id": 70375,
+    "canonical_text": "چیزی را از ته دل خواستن",
+    "lane": 22
+  },
+  {
+    "id": 70376,
+    "canonical_text": "درست کار نمی کند",
+    "lane": 22
+  },
+  {
+    "id": 70377,
+    "canonical_text": "نوری",
+    "lane": 22
+  },
+  {
+    "id": 70378,
+    "canonical_text": "کیف حمل",
+    "lane": 22
+  },
+  {
+    "id": 70379,
+    "canonical_text": "چیز منفور",
+    "lane": 22
+  },
+  {
+    "id": 70380,
+    "canonical_text": "گسترش یافته",
+    "lane": 22
+  },
+  {
+    "id": 70381,
+    "canonical_text": "خودرویی",
+    "lane": 22
+  },
+  {
+    "id": 70382,
+    "canonical_text": "وابسته به خودرو",
+    "lane": 22
+  },
+  {
+    "id": 70383,
+    "canonical_text": "همین نزدیکی",
+    "lane": 22
+  },
+  {
+    "id": 70384,
+    "canonical_text": "اتومبیل رو",
+    "lane": 22
+  },
+  {
+    "id": 70385,
+    "canonical_text": "مجموعه ورزشی",
+    "lane": 22
+  },
+  {
+    "id": 70386,
+    "canonical_text": "خدمات همسریابی",
+    "lane": 22
+  },
+  {
+    "id": 70387,
+    "canonical_text": "آموزش موسیقی",
+    "lane": 22
+  },
+  {
+    "id": 70388,
+    "canonical_text": "پشتیبانی رایانه ای",
+    "lane": 22
+  },
+  {
+    "id": 70389,
+    "canonical_text": "ویروس نقص ایمنی انسانی",
+    "lane": 22
+  },
+  {
+    "id": 70390,
+    "canonical_text": "با انرژی خورشیدی",
+    "lane": 22
+  },
+  {
+    "id": 70391,
+    "canonical_text": "کلاهک چراغ",
+    "lane": 22
+  },
+  {
+    "id": 70392,
+    "canonical_text": "شید چراغ",
+    "lane": 22
+  },
+  {
+    "id": 70393,
+    "canonical_text": "وصل شده",
+    "lane": 22
+  },
+  {
+    "id": 70394,
+    "canonical_text": "افشاگرانه",
+    "lane": 22
+  },
+  {
+    "id": 70395,
+    "canonical_text": "کلافه شدن",
+    "lane": 22
+  },
+  {
+    "id": 70396,
+    "canonical_text": "بالدار",
+    "lane": 22
+  },
+  {
+    "id": 70397,
+    "canonical_text": "زباله ریختن",
+    "lane": 22
+  },
+  {
+    "id": 70398,
+    "canonical_text": "خوره کامپیوتر",
+    "lane": 22
+  },
+  {
+    "id": 70399,
+    "canonical_text": "رایانه باز",
+    "lane": 22
+  },
+  {
+    "id": 70400,
+    "canonical_text": "صحرانوردی",
+    "lane": 22
+  },
+  {
+    "id": 70401,
+    "canonical_text": "در دل طبیعت",
+    "lane": 22
+  },
+  {
+    "id": 70402,
+    "canonical_text": "هوس انگیز",
+    "lane": 22
+  },
+  {
+    "id": 70403,
+    "canonical_text": "اسب کش",
+    "lane": 22
+  },
+  {
+    "id": 70404,
+    "canonical_text": "پد گرم کن",
+    "lane": 22
+  },
+  {
+    "id": 70405,
+    "canonical_text": "پد حرارتی",
+    "lane": 22
+  },
+  {
+    "id": 70406,
+    "canonical_text": "دمای انجماد",
+    "lane": 22
+  },
+  {
+    "id": 70407,
+    "canonical_text": "مقدار بسیار کمی",
+    "lane": 22
+  },
+  {
+    "id": 70408,
+    "canonical_text": "سرمایش",
+    "lane": 22
+  },
+  {
+    "id": 70409,
+    "canonical_text": "خنک سازی",
+    "lane": 22
+  },
+  {
+    "id": 70410,
+    "canonical_text": "کاهش شنوایی",
+    "lane": 22
+  },
+  {
+    "id": 70411,
+    "canonical_text": "کم شنوایی",
+    "lane": 22
+  },
+  {
+    "id": 70412,
+    "canonical_text": "عجولانه تصمیم گرفتن",
+    "lane": 22
+  },
+  {
+    "id": 70413,
+    "canonical_text": "شتاب زده تصمیم گرفتن",
+    "lane": 22
+  },
+  {
+    "id": 70414,
+    "canonical_text": "تب کسی را گرفتن",
+    "lane": 22
+  },
+  {
+    "id": 70415,
+    "canonical_text": "دمای بدن را سنجیدن",
+    "lane": 22
+  },
+  {
+    "id": 70416,
+    "canonical_text": "سلامت کلی",
+    "lane": 22
+  },
+  {
+    "id": 70417,
+    "canonical_text": "از تماست ممنونم",
+    "lane": 22
+  },
+  {
+    "id": 70418,
+    "canonical_text": "تکلیف پژوهشی مدرسه",
+    "lane": 22
+  },
+  {
+    "id": 70419,
+    "canonical_text": "با خارجی ها صحبت کردن",
+    "lane": 22
+  },
+  {
+    "id": 70420,
+    "canonical_text": "با اتباع خارجی گفت وگو کردن",
+    "lane": 22
+  },
+  {
+    "id": 70421,
+    "canonical_text": "جالبه",
+    "lane": 22
+  },
+  {
+    "id": 70422,
+    "canonical_text": "ناحیه کشاورزی",
+    "lane": 22
+  },
+  {
+    "id": 70423,
+    "canonical_text": "حرفم را باور کن",
+    "lane": 22
+  },
+  {
+    "id": 70424,
+    "canonical_text": "صبر کن",
+    "lane": 22
+  },
+  {
+    "id": 70425,
+    "canonical_text": "یک لحظه صبر کن",
+    "lane": 22
+  },
+  {
+    "id": 70426,
+    "canonical_text": "چه روز فوق العاده ای",
+    "lane": 22
+  },
+  {
+    "id": 70427,
+    "canonical_text": "از خودپرداز پول گرفتن",
+    "lane": 22
+  },
+  {
+    "id": 70428,
+    "canonical_text": "مراسم برگزار کردن",
+    "lane": 22
+  },
+  {
+    "id": 70429,
+    "canonical_text": "مناسبت مذهبی را جشن گرفتن",
+    "lane": 22
+  },
+  {
+    "id": 70430,
+    "canonical_text": "وسایل سفر را جمع کردن",
+    "lane": 22
+  },
+  {
+    "id": 70431,
+    "canonical_text": "برای سفر چمدان بستن",
+    "lane": 22
+  },
+  {
+    "id": 70432,
+    "canonical_text": "عوارض پرداخت کردن",
+    "lane": 22
+  },
+  {
+    "id": 70433,
+    "canonical_text": "ایالت رقابتی",
+    "lane": 22
+  },
+  {
+    "id": 70434,
+    "canonical_text": "صدور صورتحساب",
+    "lane": 22
+  },
+  {
+    "id": 70435,
+    "canonical_text": "دستگاه قابل حمل",
+    "lane": 22
+  },
+  {
+    "id": 70436,
+    "canonical_text": "اثر افشاگر کتاب شرح حال و",
+    "lane": 22
+  },
+  {
+    "id": 70437,
+    "canonical_text": "کتاب افشاگر",
+    "lane": 22
+  },
+  {
+    "id": 70438,
+    "canonical_text": "روایت افشاگر",
+    "lane": 22
+  },
+  {
+    "id": 70439,
+    "canonical_text": "علامت راهنما",
+    "lane": 22
+  },
+  {
+    "id": 70440,
+    "canonical_text": "خودروی انفجاری",
+    "lane": 22
+  },
+  {
+    "id": 70441,
+    "canonical_text": "خودروی بمب گذاری شده",
+    "lane": 22
+  },
+  {
+    "id": 70442,
+    "canonical_text": "خوداشتغال",
+    "lane": 22
+  },
+  {
+    "id": 70443,
+    "canonical_text": "امتحان پس داده",
+    "lane": 22
+  },
+  {
+    "id": 70444,
+    "canonical_text": "حقه بازی",
+    "lane": 22
+  },
+  {
+    "id": 70445,
+    "canonical_text": "تقوا",
+    "lane": 22
+  },
+  {
+    "id": 70446,
+    "canonical_text": "پارسایی",
+    "lane": 22
+  },
+  {
+    "id": 70447,
+    "canonical_text": "کیف اداری",
+    "lane": 22
+  },
+  {
+    "id": 70448,
+    "canonical_text": "نشانی ایمیل",
+    "lane": 22
+  },
+  {
+    "id": 70449,
+    "canonical_text": "نشانی پست الکترونیکی",
+    "lane": 22
+  },
+  {
+    "id": 70450,
+    "canonical_text": "خارج از ساعات اوج",
+    "lane": 22
+  }
+]

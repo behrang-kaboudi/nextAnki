@@ -88,3 +88,37 @@ export async function countCustomExtractionPendingWork(
     where: { AND: [meaningReviewNotNeedsActionWhere, customExtractionMissingWhere(field)] },
   });
 }
+
+export async function getCustomExtractionPendingSummary(
+  fields: CustomExtractionFieldKey[],
+) {
+  const uniqueFields = [...new Set(fields)];
+  if (!uniqueFields.length) return { total: 0, fieldCounts: {} };
+  const needsSentenceTranslation = uniqueFields.includes("sentence_en_meaning_fa");
+  const translationMissingWordIds = needsSentenceTranslation
+    ? await listWordIdsMissingSentenceTranslation()
+    : [];
+  const missingConditions = uniqueFields
+    .filter((field) => field !== "sentence_en_meaning_fa")
+    .map(customExtractionMissingWhere);
+  if (translationMissingWordIds.length) {
+    missingConditions.push({ id: { in: translationMissingWordIds } });
+  }
+  const [total, fieldCounts] = await Promise.all([
+    missingConditions.length
+      ? prisma.wordSense.count({
+          where: {
+            AND: [meaningReviewNotNeedsActionWhere, { OR: missingConditions }],
+          },
+        })
+      : Promise.resolve(0),
+    Promise.all(
+      uniqueFields.map(async (field) => [
+        field,
+        await countCustomExtractionPendingWork(field),
+      ] as const),
+    ),
+  ]);
+
+  return { total, fieldCounts: Object.fromEntries(fieldCounts) };
+}

@@ -1,0 +1,51 @@
+{
+  "batchId": "batch-005",
+  "inputCount": 12,
+  "reviewedCount": 12,
+  "resultCount": 12,
+  "needsHumanReviewCount": 0,
+  "recordScores": [
+    { "id": 42253, "score": 9.8, "status": "pass" },
+    { "id": 42786, "score": 9.8, "status": "pass" },
+    { "id": 43884, "score": 9.8, "status": "pass" },
+    { "id": 43975, "score": 9.8, "status": "pass" },
+    { "id": 44265, "score": 9.7, "status": "pass" },
+    { "id": 44423, "score": 9.7, "status": "pass" },
+    { "id": 44485, "score": 9.8, "status": "pass" },
+    { "id": 44500, "score": 9.7, "status": "pass" },
+    { "id": 44778, "score": 9.8, "status": "pass" },
+    { "id": 44910, "score": 9.8, "status": "pass" },
+    { "id": 44938, "score": 9.8, "status": "pass" },
+    { "id": 45014, "score": 9.8, "status": "pass" }
+  ],
+  "minimumScore": 9.7,
+  "batchScore": 9.8,
+  "checkedCriteria": [
+    "correctness",
+    "completeness",
+    "relevance to target-sense anchors",
+    "preservation of correct target-sense content",
+    "isolation from independent sibling senses",
+    "natural Persian fluency and punctuation",
+    "clarity",
+    "internal consistency",
+    "maximum 50 whitespace-delimited words",
+    "exact schema, order, and complete non-overlapping ID coverage"
+  ],
+  "defectsFound": [
+    "ID 42253's previous corrected response still joined the target movement sense to the independent flexible-situation or schedule application.",
+    "ID 43884's source concept included the independent instrumental sound-quality application beyond the authoritative vocal-tone target.",
+    "ID 43975's prior wording unnecessarily enumerated alternate translations and could evoke the independent romantic-partner sense.",
+    "ID 45014's prior wording combined both product readings despite sentence 30816 specifically anchoring the wood reading.",
+    "All six serious-fluency results were definition fragments rather than complete natural Persian sentences."
+  ],
+  "correctionsMade": [
+    "Restricted ID 42253 to smooth, flowing, flexible movement supported by sentence 27870 and removed the separate situation or schedule application.",
+    "Restricted ID 43884 to the speaker's vocal tone established by meaning_fa, other_meanings_fa, and sentence 28571; treated sibling 32119 as duplicative overlap rather than an independent conflicting sense.",
+    "Restricted IDs 42786, 43975, 44265, and 45014 respectively to a ship's room, an enthusiast, abstract creation, and maple wood; removed cottage, romantic-partner, blacksmithing, and tree or sap expansions.",
+    "Rewrote every serious-fluency result as a complete natural Persian sentence while preserving its target meaning.",
+    "Confirmed that every other_sense_reference result materially differs from its source concept and contains only its selected target sense.",
+    "Verified all 12 IDs in exact input order, complete once-only coverage, empty needsHumanReview, exact result keys, and the 50-word limit."
+  ],
+  "status": "pass"
+}

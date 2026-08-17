@@ -1,0 +1,96 @@
+{
+  "status": "completed_database_verified_with_one_failed_batch",
+  "rule": {
+    "acceptedWhen": "batchScore > 8 and minimumItemScore > 8",
+    "maximumRegenerations": 5
+  },
+  "retriedBatches": 4,
+  "acceptedBatches": 3,
+  "failedBatches": 1,
+  "acceptedRecords": 900,
+  "failedRecords": 300,
+  "reports": [
+    {
+      "lane": 2,
+      "status": "accepted_after_extended_retry",
+      "count": 300,
+      "regenerations": 5,
+      "scoreQuestionsAsked": 6,
+      "responseFile": "lane-02-response-revision-05.raw.json",
+      "responseSha256": "83ed1638bfb01f8903b986991a8d71678daf38b02dee1a41be6e0561bdc7a7fa",
+      "scoreFile": "lane-02-score-06.raw.json",
+      "finalScore": {
+        "batchScore": 9.3,
+        "minimumItemScore": 8.3,
+        "belowOrEqual8Ids": [],
+        "assessment": "pass"
+      },
+      "mechanicalValidation": {
+        "status": "passed",
+        "issues": []
+      }
+    },
+    {
+      "lane": 16,
+      "status": "accepted_after_extended_retry",
+      "count": 300,
+      "regenerations": 4,
+      "scoreQuestionsAsked": 5,
+      "responseFile": "lane-16-response-revision-04.raw.json",
+      "responseSha256": "706b6d20eb9af6eaa8bc335f370c29844b0e9b74cfaeaf7249fdf9d25c19d23c",
+      "scoreFile": "lane-16-score-05.raw.json",
+      "finalScore": {
+        "batchScore": 9.3,
+        "minimumItemScore": 8.4,
+        "belowOrEqual8Ids": [],
+        "assessment": "pass"
+      },
+      "mechanicalValidation": {
+        "status": "passed",
+        "issues": []
+      }
+    },
+    {
+      "lane": 21,
+      "status": "accepted_after_extended_retry",
+      "count": 300,
+      "regenerations": 5,
+      "scoreQuestionsAsked": 6,
+      "responseFile": "lane-21-response-revision-05.raw.json",
+      "responseSha256": "8bdfad06d601319a7296d5f388f5a2c6efbf5a2fe87b43d1d1bb7334a017853d",
+      "scoreFile": "lane-21-score-06.raw.json",
+      "finalScore": {
+        "batchScore": 9.4,
+        "minimumItemScore": 8.4,
+        "belowOrEqual8Ids": [],
+        "assessment": "pass"
+      },
+      "mechanicalValidation": {
+        "status": "passed",
+        "issues": []
+      }
+    },
+    {
+      "lane": 22,
+      "status": "failed_after_five_regenerations",
+      "count": 300,
+      "regenerations": 5,
+      "scoreQuestionsAsked": 6,
+      "responseFile": "lane-22-response-revision-05.raw.json",
+      "responseSha256": "c3c8e45827a8647a01a8f75e17bdc59644ec708c8b4aed9898c372ca28172879",
+      "scoreFile": "lane-22-score-06.raw.json",
+      "finalScore": {
+        "batchScore": 9.1,
+        "minimumItemScore": 7.6,
+        "belowOrEqual8Ids": [
+          70226
+        ],
+        "assessment": "revise"
+      },
+      "mechanicalValidation": {
+        "status": "passed",
+        "issues": []
+      }
+    }
+  ]
+}

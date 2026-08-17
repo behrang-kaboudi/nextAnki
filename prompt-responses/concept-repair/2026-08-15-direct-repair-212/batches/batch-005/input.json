@@ -1,0 +1,466 @@
+[
+  {
+    "id": 42253,
+    "word": "fluid",
+    "pos": "adjective",
+    "meaning_fa": "سیال",
+    "other_meanings_fa": [
+      "مانند آب",
+      "روان",
+      "دارای نرمش و انعطاف"
+    ],
+    "concept_explained_fa": "می‌تواند یعنی مانند مایع روان و جاری است، یا وضعیت و برنامه‌ای انعطاف‌پذیر و در حال تغییر دارد.",
+    "sentences": [
+      {
+        "id": 27870,
+        "sentence_en": "Boris was a famous ballet dancer because people admired his fluid movements.",
+        "sentence_en_meaning_fa": "\"بوریس\" یک رقاص باله مشهور بود چون مردم عاشق حرکات نرمش‌دار و انعطاف‌پذیر او بودند."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 679,
+        "pos": "noun",
+        "meaning_fa": "مایع",
+        "other_meanings_fa": []
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 42786,
+    "word": "cabin",
+    "pos": "noun",
+    "meaning_fa": "اتاقک (کشتی)",
+    "other_meanings_fa": [
+      "اتاق",
+      "کابین"
+    ],
+    "concept_explained_fa": "اتاقک کوچک و محصور در کشتی یا وسیله سفر برای خواب، اقامت یا کار؛ همچنین کلبه‌ای ساده در طبیعت.",
+    "sentences": [
+      {
+        "id": 29612,
+        "sentence_en": "We shared a small cabin below deck.",
+        "sentence_en_meaning_fa": "در اتاقک کوچکی زیر عرشه با هم بودیم."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 3879,
+        "pos": "noun",
+        "meaning_fa": "کلبه",
+        "other_meanings_fa": []
+      },
+      {
+        "id": 35215,
+        "pos": "noun",
+        "meaning_fa": "کابین مسافر",
+        "other_meanings_fa": [
+          "بخش داخلی هواپیما یا وسیله",
+          "فضای بسته سرنشینان"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 43884,
+    "word": "tone",
+    "pos": "noun",
+    "meaning_fa": "آهنگ",
+    "other_meanings_fa": [
+      "لحن"
+    ],
+    "concept_explained_fa": "کیفیت، زیر و بمی یا رنگ ویژه یک صدا یا ساز؛ همچنین می‌تواند حال‌وهوای عاطفی گفتار را برساند.",
+    "sentences": [
+      {
+        "id": 28571,
+        "sentence_en": "His friendly tone made the message feel personal.",
+        "sentence_en_meaning_fa": "آهنگ دوستانهٔ صدایش پیام را شخصی جلوه داد."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 32119,
+        "pos": "noun",
+        "meaning_fa": "کیفیت و حالت بیان صدا",
+        "other_meanings_fa": [
+          "لحن",
+          "آهنگ صدا"
+        ]
+      },
+      {
+        "id": 37953,
+        "pos": "noun",
+        "meaning_fa": "قوام طبیعی عضله یا پوست",
+        "other_meanings_fa": [
+          "سفتی طبیعی",
+          "تون عضلانی"
+        ]
+      },
+      {
+        "id": 39049,
+        "pos": "verb",
+        "meaning_fa": "خوش فرم کردن",
+        "other_meanings_fa": [
+          "رو فرم آوردن"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 43975,
+    "word": "lover",
+    "pos": "noun",
+    "meaning_fa": "دوستدار",
+    "other_meanings_fa": [
+      "عاشق",
+      "محب"
+    ],
+    "concept_explained_fa": "شخصی که علاقهٔ بسیار به فرد، فعالیت یا چیزی دارد؛ در بافت عاطفی نیز شریک جنسی یا عاشق را می‌رساند.",
+    "sentences": [
+      {
+        "id": 28485,
+        "sentence_en": "She's a lifelong lover of classical music.",
+        "sentence_en_meaning_fa": "او دوستدار همیشگی موسیقی کلاسیک است."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 35716,
+        "pos": "noun",
+        "meaning_fa": "معشوق یا شریک عاشقانه",
+        "other_meanings_fa": [
+          "یار عاشقانه",
+          "شریک عاطفی یا جنسی"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 44265,
+    "word": "forge",
+    "pos": "verb",
+    "meaning_fa": "به وجود آوردن",
+    "other_meanings_fa": [
+      "ایجاد کردن",
+      "شکل دادن",
+      "ساختن"
+    ],
+    "concept_explained_fa": "با فشار، گرما یا تلاش تدریجی چیزی را شکل‌دادن؛ همچنین رابطه، هویت یا مسیر تازه‌ای پدیدآوردن.",
+    "sentences": [
+      {
+        "id": 28210,
+        "sentence_en": "The crisis helped forge a strong bond between them.",
+        "sentence_en_meaning_fa": "بحران کمک کرد پیوندی قوی میان آن‌ها به وجود آید."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 38201,
+        "pos": "verb",
+        "meaning_fa": "جعل کردن",
+        "other_meanings_fa": []
+      },
+      {
+        "id": 44955,
+        "pos": "verb",
+        "meaning_fa": "با آهنگری شکل دادن",
+        "other_meanings_fa": []
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 44423,
+    "word": "scratch",
+    "pos": "verb",
+    "meaning_fa": "پنجه کشیدن",
+    "other_meanings_fa": [
+      "چنگ زدن"
+    ],
+    "concept_explained_fa": "جانور با پنجه یا چنگ خود به سطحی کشیدن یا ضربه زدن.",
+    "sentences": [
+      {
+        "id": 27145,
+        "sentence_en": "The dog's scratching at the door - he wants to be let in.",
+        "sentence_en_meaning_fa": "سگ به در پنجه می‌کشد؛ می‌خواهد او را به داخل راه بدهند."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 1940,
+        "pos": "verb",
+        "meaning_fa": "خاراندن",
+        "other_meanings_fa": []
+      },
+      {
+        "id": 36635,
+        "pos": "noun",
+        "meaning_fa": "خط و خش",
+        "other_meanings_fa": [
+          "خراش",
+          "خدشه",
+          "خش"
+        ]
+      },
+      {
+        "id": 44422,
+        "pos": "verb",
+        "meaning_fa": "خراشیدن",
+        "other_meanings_fa": [
+          "زخم کردن",
+          "خراش دادن",
+          "خش انداختن",
+          "خط انداختن"
+        ]
+      }
+    ],
+    "issue_types": [
+      "serious_fluency"
+    ]
+  },
+  {
+    "id": 44485,
+    "word": "mean",
+    "pos": "verb",
+    "meaning_fa": "منظور داشتن",
+    "other_meanings_fa": [],
+    "concept_explained_fa": "برای اصلاح یا روشن‌کردن گفته، منظور مشخصی داشتن.",
+    "sentences": [
+      {
+        "id": 27229,
+        "sentence_en": "We went there in May - I mean June.",
+        "sentence_en_meaning_fa": "ما ماه مه به آنجا رفتیم؛ منظورم ژوئن بود."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 4183,
+        "pos": "verb",
+        "meaning_fa": "معنی دادن",
+        "other_meanings_fa": [
+          "دلالت داشتن",
+          "به معنی چیزی بودن",
+          "معنا داشتن"
+        ]
+      },
+      {
+        "id": 4184,
+        "pos": "verb",
+        "meaning_fa": "قصد داشتن",
+        "other_meanings_fa": [
+          "نیت داشتن"
+        ]
+      },
+      {
+        "id": 4185,
+        "pos": "adjective",
+        "meaning_fa": "بدجنس",
+        "other_meanings_fa": [
+          "بی رحم"
+        ]
+      },
+      {
+        "id": 4186,
+        "pos": "noun",
+        "meaning_fa": "میانگین",
+        "other_meanings_fa": [
+          "میانگین حسابی",
+          "حد وسط",
+          "میانگین ریاضی",
+          "معدل"
+        ]
+      },
+      {
+        "id": 5652,
+        "pos": "adjective",
+        "meaning_fa": "متوسط",
+        "other_meanings_fa": [
+          "میانگین"
+        ]
+      },
+      {
+        "id": 35402,
+        "pos": "verb",
+        "meaning_fa": "اهمیت داشتن",
+        "other_meanings_fa": [
+          "ارزش داشتن"
+        ]
+      }
+    ],
+    "issue_types": [
+      "serious_fluency"
+    ]
+  },
+  {
+    "id": 44500,
+    "word": "feel",
+    "pos": "verb",
+    "meaning_fa": "به نظر رسیدن",
+    "other_meanings_fa": [],
+    "concept_explained_fa": "فضا یا موقعیتی برداشت و حال‌وهوایی مشخص ایجاد کند.",
+    "sentences": [
+      {
+        "id": 25,
+        "sentence_en": "The bedroom felt quiet and comfortable.",
+        "sentence_en_meaning_fa": "اتاق‌خواب آرام و راحت به نظر رسید."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 4495,
+        "pos": "verb",
+        "meaning_fa": "حس شدن",
+        "other_meanings_fa": [
+          "حس دادن"
+        ]
+      },
+      {
+        "id": 34462,
+        "pos": "verb",
+        "meaning_fa": "احساس کردن",
+        "other_meanings_fa": [
+          "حس کردن",
+          "حس داشتن"
+        ]
+      }
+    ],
+    "issue_types": [
+      "serious_fluency"
+    ]
+  },
+  {
+    "id": 44778,
+    "word": "end",
+    "pos": "verb",
+    "meaning_fa": "تمام کردن",
+    "other_meanings_fa": [],
+    "concept_explained_fa": "شخصی کاری، گفتگو یا فعالیتی را تمام کردن.",
+    "sentences": [
+      {
+        "id": 30657,
+        "sentence_en": "She ended the meeting with a brief announcement.",
+        "sentence_en_meaning_fa": "او جلسه را با اعلام یک خبر کوتاه به پایان رساند."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 34829,
+        "pos": "verb",
+        "meaning_fa": "به پایان رسیدن",
+        "other_meanings_fa": [
+          "تمام شدن",
+          "به آخر رسیدن"
+        ]
+      },
+      {
+        "id": 38544,
+        "pos": "noun",
+        "meaning_fa": "پایان",
+        "other_meanings_fa": [
+          "آخر",
+          "آخر خط",
+          "انتها"
+        ]
+      }
+    ],
+    "issue_types": [
+      "serious_fluency"
+    ]
+  },
+  {
+    "id": 44910,
+    "word": "devastated",
+    "pos": "adjective",
+    "meaning_fa": "نابود",
+    "other_meanings_fa": [
+      "ویران"
+    ],
+    "concept_explained_fa": "مکان یا منطقه‌ای از نظر فیزیکی نابود و ویران شده باشد.",
+    "sentences": [
+      {
+        "id": 30720,
+        "sentence_en": "The devastated town struggled to rebuild after the flood.",
+        "sentence_en_meaning_fa": "شهر ویران پس از سیل برای بازسازی تلاش کرد."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 36961,
+        "pos": "adjective",
+        "meaning_fa": "بسیار ناراحت",
+        "other_meanings_fa": []
+      }
+    ],
+    "issue_types": [
+      "serious_fluency"
+    ]
+  },
+  {
+    "id": 44938,
+    "word": "debut",
+    "pos": "adjective",
+    "meaning_fa": "اولین",
+    "other_meanings_fa": [],
+    "concept_explained_fa": "برای نخستین آلبوم منتشرشدهٔ یک هنرمند یا گروه.",
+    "sentences": [
+      {
+        "id": 30740,
+        "sentence_en": "Her debut album reached number one within a week.",
+        "sentence_en_meaning_fa": "اولین آلبوم موسیقی او ظرف یک هفته به رتبهٔ اول رسید."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 37706,
+        "pos": "noun",
+        "meaning_fa": "اولین حضور هنرمند",
+        "other_meanings_fa": []
+      }
+    ],
+    "issue_types": [
+      "serious_fluency"
+    ]
+  },
+  {
+    "id": 45014,
+    "word": "maple",
+    "pos": "noun",
+    "meaning_fa": "چوب یا شیره افرا",
+    "other_meanings_fa": [],
+    "concept_explained_fa": "چوب یا شیره‌ای که از درخت افرا به دست می‌آید.",
+    "sentences": [
+      {
+        "id": 30816,
+        "sentence_en": "The cabinet is made of solid maple.",
+        "sentence_en_meaning_fa": "کابینت از چوب افرای یکپارچه ساخته شده است."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 39800,
+        "pos": "noun",
+        "meaning_fa": "درخت افرا",
+        "other_meanings_fa": [
+          "افرا"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  }
+]

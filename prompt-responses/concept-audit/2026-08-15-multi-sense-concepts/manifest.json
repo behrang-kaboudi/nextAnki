@@ -1,0 +1,48 @@
+{
+  "workflow": "multi-sense-concept-audit",
+  "snapshotDate": "2026-08-15",
+  "databaseQueryCount": 1,
+  "selection": {
+    "qualifyingEnglishWord": "EnglishWord has at least two WordSense records, including senses with empty concepts",
+    "exportedWordSense": "concept_explained_fa is non-empty",
+    "ignoredStatuses": true
+  },
+  "counts": {
+    "totalWordSenses": 18513,
+    "multiSenseEnglishWords": 2714,
+    "wordSensesUnderMultiSenseWords": 7167,
+    "exportedNonEmptyConcepts": 7167,
+    "excludedEmptyConcepts": 0,
+    "batchesOf500": 15,
+    "lastBatchSize": 167
+  },
+  "recordRange": {
+    "firstId": 15,
+    "lastId": 45072
+  },
+  "inputs": [
+    "inputs/other-sense-records.json",
+    "inputs/serious-fluency-records.json"
+  ],
+  "sha256": "6267a2f1e86d9847af3d3850a83e2e01434e2d988e731c7fb4beb2978d1ff0b7",
+  "databaseMutation": false,
+  "futureAuditSource": "snapshot-files-only",
+  "audit": {
+    "status": "complete",
+    "model": "gpt-5.6-sol",
+    "thinking": "low",
+    "taskCount": 30,
+    "classificationDecisionCount": 14334,
+    "results": {
+      "otherSenseReferences": 187,
+      "seriousFluencyIssues": 27
+    },
+    "minimumRecordScore": 8.8,
+    "minimumBatchScore": 9,
+    "finalOutputs": [
+      "final/other-sense-references.json",
+      "final/serious-fluency-issues.json"
+    ],
+    "finalQa": "final/qa.json"
+  }
+}

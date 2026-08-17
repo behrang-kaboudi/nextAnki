@@ -1,0 +1,66 @@
+{
+  "lane": 23,
+  "status": "accepted",
+  "count": 300,
+  "threadId": "01a003ea-99a2-7650-8fd9-cf5841f9d40f",
+  "responseFile": "lane-23-response-revision-03.raw.json",
+  "responseSha256": "581e0227a05767cc413b838edd02064d82c69a511e4a999cac2466eff1f33bc0",
+  "scoreQuestionsAsked": 4,
+  "scoreHistory": [
+    {
+      "cycle": 1,
+      "batchScore": 8.7,
+      "minimumItemScore": 5.2,
+      "belowOrEqual8Ids": [
+        70460,
+        70583,
+        70629,
+        70653,
+        70722,
+        70729
+      ],
+      "assessment": "revise"
+    },
+    {
+      "cycle": 2,
+      "batchScore": 9,
+      "minimumItemScore": 5.6,
+      "belowOrEqual8Ids": [
+        70640,
+        70657,
+        70694,
+        70731
+      ],
+      "assessment": "revise"
+    },
+    {
+      "cycle": 3,
+      "batchScore": 9.2,
+      "minimumItemScore": 7.4,
+      "belowOrEqual8Ids": [
+        70574,
+        70644
+      ],
+      "assessment": "revise"
+    },
+    {
+      "cycle": 4,
+      "batchScore": 9.3,
+      "minimumItemScore": 8.2,
+      "belowOrEqual8Ids": [],
+      "assessment": "pass"
+    }
+  ],
+  "finalScore": {
+    "cycle": 4,
+    "batchScore": 9.3,
+    "minimumItemScore": 8.2,
+    "belowOrEqual8Ids": [],
+    "assessment": "pass"
+  },
+  "mechanicalValidation": {
+    "status": "passed",
+    "issues": []
+  },
+  "itemQualityGate": "The same chat reported every item above 8/10; minimumItemScore is the minimum across all items."
+}

@@ -3,8 +3,8 @@ import "server-only";
 import { MeaningReviewStatus, type Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
+import { selectPromptBatch } from "@/lib/words/promptBatch";
 import { updateWordSense } from "@/lib/words/wordSenseRepo";
-import { selectParallelPromptLane, type ParallelPromptPartition } from "@/lib/words/parallelPromptPartition";
 
 type ComparisonSourceWordSense = {
   id: number;
@@ -88,36 +88,6 @@ function buildGroups(words: ComparisonSourceWordSense[]) {
     }));
 }
 
-function comparisonLaneKeys(
-  groups: Array<{ persianWordId: number; words: ComparisonSourceWordSense[] }>,
-) {
-  const parent = new Map(groups.map((group) => [group.persianWordId, group.persianWordId]));
-  const find = (id: number): number => {
-    const current = parent.get(id) ?? id;
-    if (current === id) return id;
-    const root = find(current);
-    parent.set(id, root);
-    return root;
-  };
-  const union = (left: number, right: number) => {
-    const leftRoot = find(left);
-    const rightRoot = find(right);
-    if (leftRoot === rightRoot) return;
-    const smallest = Math.min(leftRoot, rightRoot);
-    parent.set(leftRoot, smallest);
-    parent.set(rightRoot, smallest);
-  };
-  const firstGroupByWordSenseId = new Map<number, number>();
-  for (const group of groups) {
-    for (const word of group.words) {
-      const firstGroup = firstGroupByWordSenseId.get(word.id);
-      if (firstGroup === undefined) firstGroupByWordSenseId.set(word.id, group.persianWordId);
-      else union(group.persianWordId, firstGroup);
-    }
-  }
-  return new Map(groups.map((group) => [group.persianWordId, find(group.persianWordId)]));
-}
-
 async function comparisonItemsForGroups(
   groups: Array<{ persianWordId: number; words: ComparisonSourceWordSense[] }>,
 ) {
@@ -154,7 +124,7 @@ async function comparisonItemsForGroups(
   }));
 }
 
-export async function prepareWordSenseMeaningComparison(partition: ParallelPromptPartition) {
+export async function prepareWordSenseMeaningComparison(batchSize: number) {
   const words = await prisma.wordSense.findMany({
     where: { meaningReviewStatus: MeaningReviewStatus.CONFIRMED },
     orderBy: { id: "asc" },
@@ -169,25 +139,17 @@ export async function prepareWordSenseMeaningComparison(partition: ParallelPromp
     : [];
   const existingSharedMeaningIds = new Set(existingSharedMeanings.map((meaning) => meaning.id));
   const eligible = candidateGroups.filter((group) => existingSharedMeaningIds.has(group.persianWordId));
-  // Comparison groups may share WordSense rows. Keep every connected set in one
-  // lane so separate models never update the same WordSense concurrently.
-  const laneKeyByPersianWordId = comparisonLaneKeys(eligible);
-  const { items: selected, laneEligibleCount } = selectParallelPromptLane(
-    eligible,
-    (group) => laneKeyByPersianWordId.get(group.persianWordId) ?? group.persianWordId,
-    partition,
-  );
+  const selected = selectPromptBatch(eligible, batchSize);
 
   // Ignore stale PersianWord ids in JSON when building prompt data; primary meaning ids
   // are protected by their foreign key. The existing otherMeaningIds field is not changed.
   return {
     totalEligibleGroups: eligible.length,
-    laneEligibleCount,
     items: await comparisonItemsForGroups(selected),
   };
 }
 
-export async function getPendingWordSenseMeaningComparisonCount() {
+export async function getPendingWordSenseMeaningComparisonStats() {
   const words = await prisma.wordSense.findMany({
     where: { meaningReviewStatus: MeaningReviewStatus.CONFIRMED },
     orderBy: { id: "asc" },
@@ -196,12 +158,23 @@ export async function getPendingWordSenseMeaningComparisonCount() {
   const candidateGroups = buildGroups(words).filter(
     ({ words: group }) => !isFullyCompared(group),
   );
-  if (!candidateGroups.length) return 0;
-  return prisma.persianWord.count({
+  if (!candidateGroups.length) return { groupCount: 0, recordCount: 0 };
+  const existingSharedMeanings = await prisma.persianWord.findMany({
     where: {
       id: { in: candidateGroups.map((group) => group.persianWordId) },
     },
+    select: { id: true },
   });
+  const existingSharedMeaningIds = new Set(existingSharedMeanings.map((meaning) => meaning.id));
+  const groups = candidateGroups.filter((group) => existingSharedMeaningIds.has(group.persianWordId));
+  return {
+    groupCount: groups.length,
+    recordCount: new Set(groups.flatMap((group) => group.words.map((word) => word.id))).size,
+  };
+}
+
+export async function getPendingWordSenseMeaningComparisonCount() {
+  return (await getPendingWordSenseMeaningComparisonStats()).groupCount;
 }
 
 function isPositiveId(value: unknown): value is number {
@@ -232,7 +205,7 @@ export function parseMeaningComparisonOutput(value: unknown): MeaningComparisonO
       const concept = typeof record.concept_explained_fa === "string"
         ? record.concept_explained_fa.trim()
         : "";
-      if (!isPositiveId(record.id) || seenRecords.has(record.id) || !concept || concept.split(/\s+/u).length > 30 ||
+      if (!isPositiveId(record.id) || seenRecords.has(record.id) || !concept || concept.split(/\s+/u).length > 50 ||
           !hasOnlyKeys(record, ["id", "concept_explained_fa", "synonymIds"]) || !Array.isArray(record.synonymIds) ||
           !record.synonymIds.every(isPositiveId) || new Set(record.synonymIds).size !== record.synonymIds.length ||
           record.synonymIds.includes(record.id)) {

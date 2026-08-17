@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
+import { renderPromptFromFile } from "@/prompts/_core/promptStore";
+
 export const runtime = "nodejs";
 
 function isSafePromptPath(rel: string): boolean {
@@ -29,6 +31,7 @@ function isSafePromptPath(rel: string): boolean {
 export async function GET(req: Request) {
   const url = new URL(req.url);
   const rel = String(url.searchParams.get("path") ?? "");
+  const render = url.searchParams.get("render") === "1";
   if (!isSafePromptPath(rel)) {
     return NextResponse.json({ error: "Invalid path" }, { status: 400 });
   }
@@ -38,7 +41,13 @@ export async function GET(req: Request) {
     const abs = rel.replaceAll("\\", "/").startsWith("src/prompts/word-extraction/")
       ? path.join(process.cwd(), rel)
       : path.join(base, rel);
-    const text = await readFile(abs, "utf8");
+    const text = render
+      ? await renderPromptFromFile({
+          file: rel.replaceAll("\\", "/").startsWith("src/prompts/word-extraction/")
+            ? rel.slice("src/prompts/".length)
+            : `word-extraction/${rel.replaceAll("\\", "/")}`,
+        })
+      : await readFile(abs, "utf8");
     return NextResponse.json({ path: rel, text });
   } catch (e) {
     return NextResponse.json(

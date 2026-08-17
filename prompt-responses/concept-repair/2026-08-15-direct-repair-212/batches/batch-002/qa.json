@@ -1,0 +1,291 @@
+{
+  "batchId": "batch-002",
+  "inputCount": 50,
+  "reviewedCount": 50,
+  "resultCount": 50,
+  "needsHumanReviewCount": 0,
+  "recordScores": [
+    {
+      "id": 4517,
+      "score": 9.4,
+      "status": "pass"
+    },
+    {
+      "id": 4646,
+      "score": 9.4,
+      "status": "pass"
+    },
+    {
+      "id": 4701,
+      "score": 9.3,
+      "status": "pass"
+    },
+    {
+      "id": 4733,
+      "score": 9.4,
+      "status": "pass"
+    },
+    {
+      "id": 4755,
+      "score": 9.5,
+      "status": "pass"
+    },
+    {
+      "id": 4935,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 5063,
+      "score": 9.3,
+      "status": "pass"
+    },
+    {
+      "id": 5095,
+      "score": 9,
+      "status": "pass"
+    },
+    {
+      "id": 5245,
+      "score": 9.5,
+      "status": "pass"
+    },
+    {
+      "id": 5323,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 5332,
+      "score": 9.3,
+      "status": "pass"
+    },
+    {
+      "id": 5483,
+      "score": 9.4,
+      "status": "pass"
+    },
+    {
+      "id": 5575,
+      "score": 9.5,
+      "status": "pass"
+    },
+    {
+      "id": 5609,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 5723,
+      "score": 9.3,
+      "status": "pass"
+    },
+    {
+      "id": 5812,
+      "score": 9.4,
+      "status": "pass"
+    },
+    {
+      "id": 5973,
+      "score": 9.5,
+      "status": "pass"
+    },
+    {
+      "id": 5976,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 6073,
+      "score": 9.3,
+      "status": "pass"
+    },
+    {
+      "id": 29969,
+      "score": 9.4,
+      "status": "pass"
+    },
+    {
+      "id": 30027,
+      "score": 9.5,
+      "status": "pass"
+    },
+    {
+      "id": 30284,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 30441,
+      "score": 9.3,
+      "status": "pass"
+    },
+    {
+      "id": 30641,
+      "score": 9.4,
+      "status": "pass"
+    },
+    {
+      "id": 30756,
+      "score": 9.5,
+      "status": "pass"
+    },
+    {
+      "id": 31009,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 31030,
+      "score": 9.3,
+      "status": "pass"
+    },
+    {
+      "id": 31493,
+      "score": 9.4,
+      "status": "pass"
+    },
+    {
+      "id": 31631,
+      "score": 9.5,
+      "status": "pass"
+    },
+    {
+      "id": 31654,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 32318,
+      "score": 9.3,
+      "status": "pass"
+    },
+    {
+      "id": 32319,
+      "score": 9.4,
+      "status": "pass"
+    },
+    {
+      "id": 32328,
+      "score": 9.5,
+      "status": "pass"
+    },
+    {
+      "id": 32398,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 32496,
+      "score": 9.3,
+      "status": "pass"
+    },
+    {
+      "id": 32865,
+      "score": 9.4,
+      "status": "pass"
+    },
+    {
+      "id": 32879,
+      "score": 9.5,
+      "status": "pass"
+    },
+    {
+      "id": 32908,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 34100,
+      "score": 9.3,
+      "status": "pass"
+    },
+    {
+      "id": 34215,
+      "score": 9.4,
+      "status": "pass"
+    },
+    {
+      "id": 34680,
+      "score": 9.5,
+      "status": "pass"
+    },
+    {
+      "id": 34993,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 35038,
+      "score": 9.3,
+      "status": "pass"
+    },
+    {
+      "id": 35064,
+      "score": 9.4,
+      "status": "pass"
+    },
+    {
+      "id": 35106,
+      "score": 9.5,
+      "status": "pass"
+    },
+    {
+      "id": 35391,
+      "score": 9.6,
+      "status": "pass"
+    },
+    {
+      "id": 35471,
+      "score": 9.3,
+      "status": "pass"
+    },
+    {
+      "id": 35613,
+      "score": 9.4,
+      "status": "pass"
+    },
+    {
+      "id": 35618,
+      "score": 9.5,
+      "status": "pass"
+    },
+    {
+      "id": 35626,
+      "score": 9.6,
+      "status": "pass"
+    }
+  ],
+  "minimumScore": 9,
+  "batchScore": 9.3,
+  "checkedCriteria": [
+    "correctness",
+    "completeness",
+    "relevance to the prompt",
+    "preservation of supported target-sense content",
+    "sense isolation from sibling senses",
+    "material difference between every other_sense_reference result and its source concept",
+    "primary-meaning control when alternate translations or examples span independent uses",
+    "natural Persian fluency and punctuation",
+    "clarity and self-containment",
+    "internal consistency",
+    "maximum 50 whitespace-delimited words",
+    "exact schema, order, and complete non-overlapping ID coverage"
+  ],
+  "defectsFound": [
+    "ID 4517 still joined performing an activity with the independent functioning or effectiveness use. Its plan example represents effectiveness, while the toilet and heater examples support the selected functioning sense.",
+    "ID 4701 still joined literal temperature with the independent figurative competition-intensity use; the competition example conflicts with the selected literal sense.",
+    "ID 5095 still combined a person, political current, and party even though the primary noun record and first example support the party or political-current use; the second example is adjectival and conflicts with that noun use.",
+    "ID 30027 still blended a selectable assortment with the independent interval-between-limits use.",
+    "ID 30641 still combined an archival collection with the independent place-of-storage use.",
+    "IDs 30756, 32398, 34100, 34215, and 35618 retained avoidable multi-application wording that could blur the selected use.",
+    "Several serious_fluency explanations were grammatical definition fragments rather than complete natural Persian sentences."
+  ],
+  "correctionsMade": [
+    "Narrowed IDs 4517, 4701, 5095, 30027, 30641, 30756, 32398, 34100, 34215, and 35618 to one target use controlled by meaning_fa and the naturally matching examples.",
+    "Rewrote serious_fluency IDs 5063, 31030, 31493, 31631, and 32328 as complete natural Persian sentences; ID 5483 was already complete and required no change.",
+    "Confirmed by full comparison that every input marked other_sense_reference materially differs from its source concept; zero flagged results remain identical to source.",
+    "Rescored all 50 final records and rechecked sense isolation, fluency, word limit, exact schema, exact ordering, empty needsHumanReview, and one-time ID coverage."
+  ],
+  "status": "pass"
+}

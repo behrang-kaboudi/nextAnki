@@ -6,6 +6,7 @@ for each meaning, create a separate object in the output array.
 The meaning_fa must have one meaning only.
 Meanings must be the meaning of the base_form. Do not use meanings of other forms like plurals, past tense, etc.So Meanings must match the base_form.
 If there are multiple meanings for different forms, only use those that match the base_form.
+Use the natural, common Persian equivalent instead of merely transliterating the English word. Keep a loanword only when it is genuinely established and natural in standard Persian.
 
 1. The meaning must have same grammatical category as the base_form.
 2. If meanings are corrupted or noisy, correct them.

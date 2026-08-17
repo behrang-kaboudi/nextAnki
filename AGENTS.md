@@ -14,6 +14,13 @@
 - Keep the human-readable route inventory in `src/config/siteMap.ts` synchronized whenever any UI page is added, moved, renamed, or removed. Write or update its plain-English summary, and update `config/menus.json` when the page should be directly navigable. Test pages must live under `/tests`; the Tests hub reads its categories from this site map.
 - Wrap every rendered Persian UI string in an element with `dir="rtl"`. Mixed-language UI copy whose base language is Persian must also use `dir="rtl"`; use right alignment where the text is displayed as a block.
 
+## Prompt Response Artifacts
+- Never create prompt inputs, model responses, JSON answers, reviewed IDs, QA reports, manifests, or related intermediate artifacts in the project root.
+- Store every prompt run under `prompt-responses/<workflow-slug>/<YYYY-MM-DD>-<run-slug>/`; keep that run's prompt, response, corrections, reviewed-ID files, and QA evidence together in the same run folder.
+- For parallel or batched work, create a stable subfolder per lane or batch (for example `lane-01/` or `batch-001/`) and keep its prompt, raw response, corrected response, and QA result together there.
+- Use clear deterministic filenames such as `prompt.md`, `response.json`, `corrected-response.json`, `reviewed-ids.json`, `qa.md`, and `manifest.json`; do not create new root-level names such as `promptAns*.json`, `promptQ.json`, or `response*.json`.
+- Do not move or delete existing prompt artifacts unless the user explicitly authorizes that cleanup; this rule governs all newly created artifacts.
+
 ## Where To Look
 - Prisma + migrations + `schema.prisma`: `prisma/AGENTS.md`
 - `WordSense` write rules (including `updatedAt`): `src/lib/words/AGENTS.md`

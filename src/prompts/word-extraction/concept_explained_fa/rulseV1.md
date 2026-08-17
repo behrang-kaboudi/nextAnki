@@ -15,6 +15,9 @@ CRITICAL RULES:
    If multiple English words share the same Persian meaning,
    the explanation must clearly distinguish this word from other words with the same meaning_fa.
    Use contextual, functional, or domain-based clues to create separation.
+   The final explanation must remain a complete, standalone description of this exact sense.
+   Include only intrinsic and stable distinguishing traits, such as referent, usage context, register, intensity, connotation, domain, or grammatical pattern.
+   Do not mention other English words, directly compare against them, or mention any other sense of the same base_form.
    sample: gate or goal
    که معنی دروازه میدهند ولی به 2 دروازه متفاوت اشاره دارند
 
@@ -26,8 +29,9 @@ CRITICAL RULES:
 4. Structural Constraints
 
 - Exactly one sentence.
-- max 22 Persian words.
+- Maximum 50 Persian words. This is a ceiling, not a target; use only the words needed for a complete and natural explanation.
 - Clear, natural, educational tone.
+- Write one fluent, self-contained sentence whose ideas are joined with natural connectors and punctuation; avoid fragments, comma chains, or wording that becomes unclear when read aloud.
 - Do NOT use the English word in the explanation.
 - No circular definitions.
 - Do NOT use examples introduced by "مثلاً".

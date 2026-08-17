@@ -260,7 +260,7 @@ export function PromptBuilderClient() {
 
                           if (e.target.checked) {
                             fetch(
-                              `/api/ai/prompt-file?path=${encodeURIComponent(f.path)}`,
+                              `/api/ai/prompt-file?path=${encodeURIComponent(f.path)}&render=1`,
                               { cache: "no-store" }
                             )
                               .then(async (res) => {

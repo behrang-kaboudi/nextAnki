@@ -1,9 +1,9 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { PromptSourcesButton } from "@/components/prompts/PromptSourcesButton";
-import { ParallelPromptBatchControls } from "@/components/prompts/ParallelPromptBatchControls.client";
+import { PromptBatchControls } from "@/components/prompts/PromptBatchControls.client";
 import { RemainingCountBadge, RemainingCountButton } from "@/components/remaining-count";
 
 type ResponseItem = { id: number; phonetic_us: string };
@@ -54,10 +54,7 @@ export default function EnglishWordPhoneticUsPrompt({
     applyLabel: "APPLY PHONETIC_US",
   };
   const [open, setOpen] = useState(false);
-  const [limit, setLimit] = useState("50");
-  const [laneCount, setLaneCount] = useState(3);
-  const [laneNumber, setLaneNumber] = useState(1);
-  const [laneEligibleCount, setLaneEligibleCount] = useState<number | null>(null);
+  const [limit, setLimit] = useState(String(initialRemainingCount));
   const [loadedCount, setLoadedCount] = useState(0);
   const [prompt, setPrompt] = useState("");
   const [data, setData] = useState("");
@@ -67,10 +64,10 @@ export default function EnglishWordPhoneticUsPrompt({
   const [applying, setApplying] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
-  const clearLoadedLane = () => {
+  useEffect(() => setLimit(String(initialRemainingCount)), [initialRemainingCount]);
+  const clearLoadedBatch = () => {
     setData("");
     setResponse("");
-    setLaneEligibleCount(null);
     setLoadedCount(0);
     setNotice(null);
   };
@@ -87,18 +84,17 @@ export default function EnglishWordPhoneticUsPrompt({
               return json.text;
             });
         })),
-        fetch(`${config.recordsUrl}?batchSize=${encodeURIComponent(limit)}&laneCount=${laneCount}&laneNumber=${laneNumber}`),
+        fetch(`${config.recordsUrl}?batchSize=${encodeURIComponent(limit)}`),
       ]);
-      const rowsJson = await readJson<{ ok?: boolean; items?: unknown; totalUnconfirmed?: number; laneEligibleCount?: number; error?: string }>(rowsResponse, "Could not load unconfirmed rows");
+      const rowsJson = await readJson<{ ok?: boolean; items?: unknown; totalUnconfirmed?: number; error?: string }>(rowsResponse, "Could not load unconfirmed rows");
       if (!rowsResponse.ok || !rowsJson.ok) throw new Error(rowsJson.error || "Could not load unconfirmed rows.");
       setPrompt(promptResponses.join("\n\n"));
       setData(JSON.stringify(rowsJson.items ?? [], null, 2));
       setRemaining(typeof rowsJson.totalUnconfirmed === "number" ? rowsJson.totalUnconfirmed : initialRemainingCount);
-      setLaneEligibleCount(typeof rowsJson.laneEligibleCount === "number" ? rowsJson.laneEligibleCount : null);
       setLoadedCount(Array.isArray(rowsJson.items) ? rowsJson.items.length : 0);
-      setNotice(`Lane ${laneNumber}/${laneCount} data created ✓`);
+      setNotice(`Data created with ${Array.isArray(rowsJson.items) ? rowsJson.items.length : 0} record(s) ✓`);
     } catch (reason) { setError(reason instanceof Error ? reason.message : String(reason)); } finally { setLoading(false); }
-  }, [config.batchPromptPath, config.recordsUrl, initialRemainingCount, laneCount, laneNumber, limit]);
+  }, [config.batchPromptPath, config.recordsUrl, initialRemainingCount, limit]);
 
   const openModal = async () => {
     setOpen(true); setResponse(""); setNotice(null); await loadData();
@@ -138,12 +134,12 @@ export default function EnglishWordPhoneticUsPrompt({
           {notice ? <div className="rounded border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-800">{notice}</div> : null}
           <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-2">
             <section className="flex min-h-0 flex-col gap-2">
-              <ParallelPromptBatchControls batchSize={limit} disabled={loading || applying} laneCount={laneCount} laneNumber={laneNumber} laneEligibleCount={laneEligibleCount} loadedCount={loadedCount} totalEligibleCount={remaining} onBatchSizeChange={(value) => { clearLoadedLane(); setLimit(value); }} onLaneCountChange={(value) => { clearLoadedLane(); setLaneCount(value); }} onLaneNumberChange={(value) => { clearLoadedLane(); setLaneNumber(value); }} />
+              <PromptBatchControls batchSize={limit} disabled={loading || applying} loadedCount={loadedCount} totalEligibleCount={remaining} onBatchSizeChange={(value) => { clearLoadedBatch(); setLimit(value); }} />
               <div className="flex flex-wrap items-center gap-2">
                 <button type="button" onClick={() => copy(prompt, "Prompt")} className="rounded border px-2 py-1 text-xs">Copy prompt</button>
                 <button type="button" onClick={() => copy(data, "Data")} className="rounded border px-2 py-1 text-xs">Copy data</button>
-                <button type="button" onClick={() => copy(`${prompt}\n\n${data}`, "Prompt and lane data")} disabled={!data} className="rounded border px-2 py-1 text-xs disabled:opacity-50">Copy lane {laneNumber}</button>
-                <button type="button" onClick={() => void loadData()} disabled={loading || applying} className="rounded border px-2 py-1 text-xs disabled:opacity-50">{loading ? "Creating…" : "Create lane data"}</button>
+                <button type="button" onClick={() => copy(`${prompt}\n\n${data}`, "Prompt and data")} disabled={!data} className="rounded border px-2 py-1 text-xs disabled:opacity-50">Copy prompt + data</button>
+                <button type="button" onClick={() => void loadData()} disabled={loading || applying} className="rounded border px-2 py-1 text-xs disabled:opacity-50">{loading ? "Creating…" : "Create data"}</button>
                 <RemainingCountButton count={remaining} disabled={loading || applying} onClick={() => setLimit(String(remaining))} />
               </div>
               <textarea readOnly value={`${prompt}${data ? `\n\n${data}` : ""}`} className="min-h-0 flex-1 resize-none rounded border p-3 font-mono text-xs" />

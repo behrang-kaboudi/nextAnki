@@ -1,0 +1,303 @@
+{
+  "status": "pass",
+  "reviewedRecordCount": 7167,
+  "classificationDecisionCount": 14334,
+  "taskCount": 30,
+  "passedTaskCount": 30,
+  "minimumRecordScore": 8.8,
+  "minimumBatchScore": 9,
+  "results": {
+    "otherSenseReferences": 187,
+    "seriousFluencyIssues": 27
+  },
+  "validations": {
+    "allInputsCoveredExactlyOncePerLane": true,
+    "reviewedIdsMatchInputOrder": true,
+    "resultIdsAreUniqueOrderedSubsets": true,
+    "resultConceptsMatchSnapshotExactly": true,
+    "exactResultSchema": true,
+    "allRecordScoresAtLeast8": true,
+    "allBatchScoresAtLeast8": true,
+    "databaseMutation": false
+  },
+  "outputs": {
+    "other-sense-references.json": {
+      "sha256": "6da31bb357e7f0da3cc874c909b77abd1bb51ac52511e9a76a831a2894385400"
+    },
+    "serious-fluency-issues.json": {
+      "sha256": "5bcb9b91181da63480ec370abbc6b780ad89d8aad9f9ec148d0dc3485b0c1571"
+    }
+  },
+  "batchQa": [
+    {
+      "batchId": "batch-001",
+      "issueType": "other-sense",
+      "inputCount": 500,
+      "resultCount": 21,
+      "minimumScore": 9.4,
+      "batchScore": 9.4,
+      "status": "pass"
+    },
+    {
+      "batchId": "batch-001",
+      "issueType": "serious-fluency",
+      "inputCount": 500,
+      "resultCount": 5,
+      "minimumScore": 9.2,
+      "batchScore": 9.5,
+      "status": "pass"
+    },
+    {
+      "batchId": "batch-002",
+      "issueType": "other-sense",
+      "inputCount": 500,
+      "resultCount": 22,
+      "minimumScore": 9.2,
+      "batchScore": 9.3,
+      "status": "pass"
+    },
+    {
+      "batchId": "batch-002",
+      "issueType": "serious-fluency",
+      "inputCount": 500,
+      "resultCount": 1,
+      "minimumScore": 9.5,
+      "batchScore": 9.8,
+      "status": "pass"
+    },
+    {
+      "batchId": "batch-003",
+      "issueType": "other-sense",
+      "inputCount": 500,
+      "resultCount": 13,
+      "minimumScore": 9.5,
+      "batchScore": 9.5,
+      "status": "pass"
+    },
+    {
+      "batchId": "batch-003",
+      "issueType": "serious-fluency",
+      "inputCount": 500,
+      "resultCount": 2,
+      "minimumScore": 9.4,
+      "batchScore": 9.5,
+      "status": "pass"
+    },
+    {
+      "batchId": "batch-004",
+      "issueType": "other-sense",
+      "inputCount": 500,
+      "resultCount": 13,
+      "minimumScore": 9,
+      "batchScore": 9.2,
+      "status": "pass"
+    },
+    {
+      "batchId": "batch-004",
+      "issueType": "serious-fluency",
+      "inputCount": 500,
+      "resultCount": 0,
+      "minimumScore": 8.8,
+      "batchScore": 9.4,
+      "status": "pass"
+    },
+    {
+      "batchId": "batch-005",
+      "issueType": "other-sense",
+      "inputCount": 500,
+      "resultCount": 4,
+      "minimumScore": 9.5,
+      "batchScore": 9.5,
+      "status": "pass"
+    },
+    {
+      "batchId": "batch-005",
+      "issueType": "serious-fluency",
+      "inputCount": 500,
+      "resultCount": 4,
+      "minimumScore": 9.5,
+      "batchScore": 9.6,
+      "status": "pass"
+    },
+    {
+      "batchId": "batch-006",
+      "issueType": "other-sense",
+      "inputCount": 500,
+      "resultCount": 7,
+      "minimumScore": 9,
+      "batchScore": 9,
+      "status": "pass"
+    },
+    {
+      "batchId": "batch-006",
+      "issueType": "serious-fluency",
+      "inputCount": 500,
+      "resultCount": 0,
+      "minimumScore": 9,
+      "batchScore": 9.2,
+      "status": "pass"
+    },
+    {
+      "batchId": "batch-007",
+      "issueType": "other-sense",
+      "inputCount": 500,
+      "resultCount": 8,
+      "minimumScore": 9.5,
+      "batchScore": 9.5,
+      "status": "pass"
+    },
+    {
+      "batchId": "batch-007",
+      "issueType": "serious-fluency",
+      "inputCount": 500,
+      "resultCount": 0,
+      "minimumScore": 9.4,
+      "batchScore": 9.4,
+      "status": "pass"
+    },
+    {
+      "batchId": "batch-008",
+      "issueType": "other-sense",
+      "inputCount": 500,
+      "resultCount": 13,
+      "minimumScore": 9.2,
+      "batchScore": 9.3,
+      "status": "pass"
+    },
+    {
+      "batchId": "batch-008",
+      "issueType": "serious-fluency",
+      "inputCount": 500,
+      "resultCount": 3,
+      "minimumScore": 9,
+      "batchScore": 9.4,
+      "status": "pass"
+    },
+    {
+      "batchId": "batch-009",
+      "issueType": "other-sense",
+      "inputCount": 500,
+      "resultCount": 15,
+      "minimumScore": 9.4,
+      "batchScore": 9.4,
+      "status": "pass"
+    },
+    {
+      "batchId": "batch-009",
+      "issueType": "serious-fluency",
+      "inputCount": 500,
+      "resultCount": 0,
+      "minimumScore": 9.5,
+      "batchScore": 9.5,
+      "status": "pass"
+    },
+    {
+      "batchId": "batch-010",
+      "issueType": "other-sense",
+      "inputCount": 500,
+      "resultCount": 18,
+      "minimumScore": 9,
+      "batchScore": 9.1,
+      "status": "pass"
+    },
+    {
+      "batchId": "batch-010",
+      "issueType": "serious-fluency",
+      "inputCount": 500,
+      "resultCount": 3,
+      "minimumScore": 9.6,
+      "batchScore": 9.7,
+      "status": "pass"
+    },
+    {
+      "batchId": "batch-011",
+      "issueType": "other-sense",
+      "inputCount": 500,
+      "resultCount": 15,
+      "minimumScore": 9.5,
+      "batchScore": 9.5,
+      "status": "pass"
+    },
+    {
+      "batchId": "batch-011",
+      "issueType": "serious-fluency",
+      "inputCount": 500,
+      "resultCount": 0,
+      "minimumScore": 9.4,
+      "batchScore": 9.4,
+      "status": "pass"
+    },
+    {
+      "batchId": "batch-012",
+      "issueType": "other-sense",
+      "inputCount": 500,
+      "resultCount": 21,
+      "minimumScore": 9.2,
+      "batchScore": 9.3,
+      "status": "pass"
+    },
+    {
+      "batchId": "batch-012",
+      "issueType": "serious-fluency",
+      "inputCount": 500,
+      "resultCount": 3,
+      "minimumScore": 8.8,
+      "batchScore": 9.5,
+      "status": "pass"
+    },
+    {
+      "batchId": "batch-013",
+      "issueType": "other-sense",
+      "inputCount": 500,
+      "resultCount": 16,
+      "minimumScore": 9.2,
+      "batchScore": 9.2,
+      "status": "pass"
+    },
+    {
+      "batchId": "batch-013",
+      "issueType": "serious-fluency",
+      "inputCount": 500,
+      "resultCount": 0,
+      "minimumScore": 9.4,
+      "batchScore": 9.4,
+      "status": "pass"
+    },
+    {
+      "batchId": "batch-014",
+      "issueType": "other-sense",
+      "inputCount": 500,
+      "resultCount": 0,
+      "minimumScore": 10,
+      "batchScore": 10,
+      "status": "pass"
+    },
+    {
+      "batchId": "batch-014",
+      "issueType": "serious-fluency",
+      "inputCount": 500,
+      "resultCount": 4,
+      "minimumScore": 9.2,
+      "batchScore": 9.3,
+      "status": "pass"
+    },
+    {
+      "batchId": "batch-015",
+      "issueType": "other-sense",
+      "inputCount": 167,
+      "resultCount": 1,
+      "minimumScore": 9.1,
+      "batchScore": 9.6,
+      "status": "pass"
+    },
+    {
+      "batchId": "batch-015",
+      "issueType": "serious-fluency",
+      "inputCount": 167,
+      "resultCount": 2,
+      "minimumScore": 8.9,
+      "batchScore": 9.4,
+      "status": "pass"
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "status": "completed",
+  "appliedAt": "2026-08-15T06:12:20Z",
+  "dryRun": {
+    "total": 900,
+    "eligible": 900,
+    "stale": []
+  },
+  "execute": {
+    "total": 900,
+    "updated": 900,
+    "skipped": [],
+    "verified": 900,
+    "verificationFailures": []
+  },
+  "postWriteVerification": {
+    "retryRowsFound": 900,
+    "retryExactValueFailures": 0,
+    "retryConfirmedTrue": 900,
+    "retryMeaningFaIpaNormalizeNonNull": 0,
+    "cumulativeAcceptedRowsFound": 6713,
+    "cumulativeAcceptedPopulatedAndConfirmed": 6713,
+    "failedRowsFound": 300,
+    "failedRowsStillMissingIpa": 300,
+    "remainingMissingIpaAfter": 300
+  }
+}

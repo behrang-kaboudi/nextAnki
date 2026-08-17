@@ -1,0 +1,1698 @@
+[
+  {
+    "id": 131,
+    "concept_explained_fa": "بخشش رسمی جرم یا مجازات از سوی مقام دارای اختیار؛ خود جرم لزوماً بی‌اعتبار یا بی‌گناهی ثابت نمی‌شود.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:00:48.080Z"
+  },
+  {
+    "id": 373,
+    "concept_explained_fa": "روش هوشمندانه یا فریبکارانه برای رسیدن به نتیجه، یا کاری برای گول‌زدن و سرگرم‌کردن دیگران.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:01:34.141Z"
+  },
+  {
+    "id": 437,
+    "concept_explained_fa": "به‌تدریج پوسیده، تجزیه یا فاسد شدن؛ برای مواد آلی، دندان، ساختمان یا وضعیت نیز",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T08:59:51.950Z"
+  },
+  {
+    "id": 549,
+    "concept_explained_fa": "با وجود دشواری یا مخالفت به کاری ادامه دادن؛ همچنین برای باقی ماندن طولانی یک وضعیت",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:00:48.080Z"
+  },
+  {
+    "id": 641,
+    "concept_explained_fa": "احساس دل آشوبه و نزدیک بودن حالت تهوع؛ گاهی برای احساس ناراحتی یا بی‌قراری نیز به کار می‌رود.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:02:31.842Z"
+  },
+  {
+    "id": 755,
+    "concept_explained_fa": "نظر، ادعا یا پیشنهادی را جدی ندانستن و رد کردن؛ همچنین می‌تواند کسی را مرخص کند.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T08:59:55.665Z"
+  },
+  {
+    "id": 887,
+    "concept_explained_fa": "دشوار و نیازمند تلاش یا مقاومت؛ همچنین برای شخص یا چیز نیرومند و مقاوم.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:01:09.601Z"
+  },
+  {
+    "id": 1151,
+    "concept_explained_fa": "لطف، بخشش یا عنایت الهی؛ همچنین مهلت یا بزرگواری در رفتار، بیشتر در بافت رسمی یا دینی",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:00:16.063Z"
+  },
+  {
+    "id": 1479,
+    "concept_explained_fa": "به شکلی کلی و بدون ورود به جزئیات؛ همچنین در دامنه یا محدوده‌ای گسترده",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T08:59:39.609Z"
+  },
+  {
+    "id": 1493,
+    "concept_explained_fa": "مخالفت فعال با فرد، سیاست، طرح یا گروه؛ همچنین گروه مخالف",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:00:46.481Z"
+  },
+  {
+    "id": 1568,
+    "concept_explained_fa": "برای دستور کاملاً ضروری",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:00:27.036Z"
+  },
+  {
+    "id": 1571,
+    "concept_explained_fa": "فردی را به مقام شغلی بالاتر بردن؛ همچنین از ایده، محصول یا فعالیتی حمایت و تبلیغ کردن",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:00:52.128Z"
+  },
+  {
+    "id": 1600,
+    "concept_explained_fa": "گردوغبار یا زباله را با حرکت جارو از سطح جمع و پاک کردن؛ گاهی برای حرکت گسترده و سریع نیز می‌آید.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:04:29.249Z"
+  },
+  {
+    "id": 1655,
+    "concept_explained_fa": "سازمان یا گروهی از افراد با هدف، حرفه یا علاقه مشترک؛ همچنین رابطه و ارتباط",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T08:59:28.042Z"
+  },
+  {
+    "id": 1785,
+    "concept_explained_fa": "فاسد یا گندیده بر اثر ماندگی و تجزیه، به‌ویژه دربارهٔ غذا و چوب؛ مجازی نیز برای وضعیت بسیار بد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:05:01.328Z"
+  },
+  {
+    "id": 1823,
+    "concept_explained_fa": "سلامت، امنیت، آسایش و وضعیت مطلوب فرد یا گروه؛ همچنین حمایت‌های اجتماعی برای تأمین این وضعیت.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:05:06.458Z"
+  },
+  {
+    "id": 1843,
+    "concept_explained_fa": "محدود به فرد یا گروهی خاص و در دسترس نبودن برای دیگران؛ همچنین ویژه، انحصاری یا گران‌قیمت.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:05:10.464Z"
+  },
+  {
+    "id": 1943,
+    "concept_explained_fa": "وارد کردن عمدی درد بسیار شدید جسمی یا روانی، اغلب برای تنبیه یا گرفتن اطلاعات؛ مجازاً ایجاد رنج روحی طاقت‌فرسا.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:07:39.954Z"
+  },
+  {
+    "id": 1955,
+    "concept_explained_fa": "موضوعی مهم برای بحث یا تصمیم‌گیری؛ همچنین مشکلی که نیازمند توجه و رسیدگی است.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:05:26.681Z"
+  },
+  {
+    "id": 2090,
+    "concept_explained_fa": "اتاق رسمی برای تصمیم‌گیری. اتاق خواب یا فضای خصوصی (سبک قدیمی/ادبی)",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T08:59:42.058Z"
+  },
+  {
+    "id": 2103,
+    "concept_explained_fa": "پس از بررسی شواهد یا اطلاعات به نتیجه رسیدن؛ همچنین می‌تواند به پایان رساندن چیزی باشد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T08:59:46.929Z"
+  },
+  {
+    "id": 2282,
+    "concept_explained_fa": "دادن اطلاعات یا توضیح در پاسخ به پرسش؛ همچنین واکنش به تماس، در یا درخواست مشخص.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:06:24.646Z"
+  },
+  {
+    "id": 2294,
+    "concept_explained_fa": "ابزار دندانه دار برای باز و بسته کردن قفل؛ همچنین وسیله یا عامل دسترسی",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:00:32.073Z"
+  },
+  {
+    "id": 2469,
+    "concept_explained_fa": "بخش گیاه در خاک برای جذب و نگهداری؛ همچنین مجازاً علت یا منشأ اصلی یک مسئله.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:00:58.996Z"
+  },
+  {
+    "id": 2523,
+    "concept_explained_fa": "نام کوتاه و روزمره دوچرخه؛ گاهی می تواند به موتورسیکلت هم اشاره کند",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T08:59:36.158Z"
+  },
+  {
+    "id": 2567,
+    "concept_explained_fa": "نقش یا اثر چاپ‌شده با مهر، یا خود ابزار ایجاد آن؛ همچنین تمبر پستی.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:01:04.605Z"
+  },
+  {
+    "id": 2713,
+    "concept_explained_fa": "زباله و مواد دورریختنی به‌طور کلی در آمریکای شمالی؛ مجازاً برای چیز یا محتوای بی‌ارزش نیز به کار می‌رود.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:06:49.784Z"
+  },
+  {
+    "id": 2722,
+    "concept_explained_fa": "الیاف نرم طبیعی گیاه پنبه یا پارچه و منسوجی که از این الیاف ساخته می‌شود.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:41:49.863Z"
+  },
+  {
+    "id": 2766,
+    "concept_explained_fa": "نمای اصلی و معمولاً جلویی ساختمان؛ همچنین ظاهر ظاهری پنهان‌کنندهٔ واقعیت",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:00:06.104Z"
+  },
+  {
+    "id": 3043,
+    "concept_explained_fa": "کار شستن لباس ها یا محل خدمات شستشو؛ نام دستگاه نیست",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:00:35.366Z"
+  },
+  {
+    "id": 3089,
+    "concept_explained_fa": "وقتی منظورت یک ساختمان مذهبی کامل است که مردم برای عبادت می روند:",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:01:08.409Z"
+  },
+  {
+    "id": 3549,
+    "concept_explained_fa": "نشان رسمی برای تأیید یا بستن، یا وسیله‌ای که از بازشدن و نفوذ جلوگیری می‌کند.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:01:00.454Z"
+  },
+  {
+    "id": 3550,
+    "concept_explained_fa": "واحد استاندارد اندازه‌گیری طول؛ همچنین نام برخی دستگاه‌های اندازه‌گیری، نه خود نوار اندازه‌گیری.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:00:41.196Z"
+  },
+  {
+    "id": 3594,
+    "concept_explained_fa": "ماده سخت غیرفلزی ساخته شده با پخت خاک رس؛ همچنین شیء ساخته شده از آن",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T08:59:42.058Z"
+  },
+  {
+    "id": 3600,
+    "concept_explained_fa": "ابزار یا صدای تیز و کوتاهی است که برای هشدار یا اعلام استفاده می‌شود.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:01:15.042Z"
+  },
+  {
+    "id": 3690,
+    "concept_explained_fa": "قطعه کوچک روی لباس برای بستن آن یا روی دستگاه و رابط برای فعال‌کردن یک فرمان؛ معنای عمومی دکمه.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:41:47.991Z"
+  },
+  {
+    "id": 3752,
+    "concept_explained_fa": "در آمریکای شمالی به پریز دیواری برق گفته می‌شود؛ بدون بافت می‌تواند معانی دیگری مانند محل فروش نیز داشته باشد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:49:02.480Z"
+  },
+  {
+    "id": 3768,
+    "concept_explained_fa": "مایع روغنی؛ بسته به زمینه می‌تواند نفت، روغن خوراکی، روان‌کننده یا ماده نفتی باشد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:00:46.481Z"
+  },
+  {
+    "id": 3775,
+    "concept_explained_fa": "مبلغ پرداختی دوره ای برای استفاده از ملک یا وسیله؛ همچنین عمل اجاره کردن",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:00:57.166Z"
+  },
+  {
+    "id": 3794,
+    "concept_explained_fa": "ماده‌ای در حالت گازی؛ همچنین به سوخت گازی مانند گاز طبیعی برای گرمایش یا پخت‌وپز اشاره می‌کند.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:21:07.949Z"
+  },
+  {
+    "id": 3817,
+    "concept_explained_fa": "به پیام مسیحیت دربارهٔ زندگی و تعالیم عیسی یا یکی از چهار کتاب نخست عهد جدید اشاره دارد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:03:20.050Z"
+  },
+  {
+    "id": 3914,
+    "concept_explained_fa": "چارچوب استخوانی بدن انسان یا جانور؛ همچنین ساختار اصلی و بدون پوشش",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:01:02.574Z"
+  },
+  {
+    "id": 4253,
+    "concept_explained_fa": "کسی را با مراسم، خداحافظی یا آرزوی خوب راهی کردن؛ همچنین چیزی را ارسال کردن",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:01:00.454Z"
+  },
+  {
+    "id": 4267,
+    "concept_explained_fa": "مقدار یا مجموعه چیزی که شخص، وسیله یا سازه حمل یا تحمل می‌کند؛ می‌تواند جسمی، کاری یا فنی باشد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:17:47.908Z"
+  },
+  {
+    "id": 4293,
+    "concept_explained_fa": "یعنی با وجود ابهام، فاصله، نور کم یا دشواری، چیزی را دید، تشخیص داد یا مفهوم آن را فهمید.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:13:24.418Z"
+  },
+  {
+    "id": 4338,
+    "concept_explained_fa": "برای نسبت دادن منشأ یا اختیار چیزی به خدا یا نیرویی فرابشری استفاده می‌شود؛ مرتبط با خدا یا نیروهای ماورایی فراتر از انسان.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T08:59:58.192Z"
+  },
+  {
+    "id": 4378,
+    "concept_explained_fa": "رد، نقش یا اثری که تماس، فشار یا حضور چیزی روی سطح یا ذهن باقی می‌گذارد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:00:27.036Z"
+  },
+  {
+    "id": 4417,
+    "concept_explained_fa": "قرارداد رسمی اجاره برای مدت و شرایط مشخص؛ همچنین مدت تصرف قراردادی",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:00:35.366Z"
+  },
+  {
+    "id": 4487,
+    "concept_explained_fa": "گروه یادگیرندگان، جلسه آموزشی یا یک درس؛ نه لزوما اتاق",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T08:59:44.277Z"
+  },
+  {
+    "id": 4509,
+    "concept_explained_fa": "فضای ورودی یا راهروی داخلی ساختمان؛ همچنین می‌تواند به سالن بزرگ یا فضای تجمع اشاره کند.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:09:19.913Z"
+  },
+  {
+    "id": 4517,
+    "concept_explained_fa": "فعالیت یا وظیفه‌ای را انجام دادن، یا دربارهٔ دستگاه، روش و دارو درست عمل کردن و نتیجهٔ موردنظر را ایجاد کردن.",
+    "conceptMergeReviewed": false,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-15T06:25:06.657Z"
+  },
+  {
+    "id": 4646,
+    "concept_explained_fa": "چیز در حال حرکت را گرفتن یا دریافت کردن؛ همچنین نور، توجه یا بیماری",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T08:59:42.058Z"
+  },
+  {
+    "id": 4701,
+    "concept_explained_fa": "دارای دمای بالا، یا در کاربرد مجازی دارای شدت و هیجان زیاد.",
+    "conceptMergeReviewed": false,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-15T06:25:07.223Z"
+  },
+  {
+    "id": 4733,
+    "concept_explained_fa": "هر مایعی که برای نوشیدن آماده است؛ اسم عمومی و بسیار رایج که در بعضی بافت‌ها می‌تواند به طور خاص به نوشیدنی الکلی اشاره کند.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T08:59:58.192Z"
+  },
+  {
+    "id": 4755,
+    "concept_explained_fa": "دربارهٔ خورشید یعنی پایین‌رفتن زیر افق؛ در کاربردهای دیگر به قرارگرفتن یا سفت‌شدن نیز اشاره دارد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:09:48.039Z"
+  },
+  {
+    "id": 4935,
+    "concept_explained_fa": "دارای فاصله زیاد از سطح تا پایین یا از جلو تا داخل؛ همچنین می‌تواند مجازی برای شدت یا پیچیدگی زیاد باشد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:10:13.067Z"
+  },
+  {
+    "id": 5063,
+    "concept_explained_fa": "زدن سریع و پی در پی، یا ناگهان آماده کردن غذا",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:01:15.042Z"
+  },
+  {
+    "id": 5095,
+    "concept_explained_fa": "نام یک جریان سیاسی که معمولاً از آزادی‌های فردی و سیاست‌های میانه‌رو حمایت می‌کند؛ به دیدگاهی اشاره دارد که از آزادی‌های فردی و تغییرات اجتماعی حمایت می‌کند.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:00:35.366Z"
+  },
+  {
+    "id": 5245,
+    "concept_explained_fa": "مقدار پول باقی مانده در حساب، یا تفاوت میان دو مقدار",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T08:59:31.746Z"
+  },
+  {
+    "id": 5323,
+    "concept_explained_fa": "درباره غذا یا نوشیدنی، خراب و فاسد شدن؛ همچنین برای خاموش یا منفجر شدن کاربردهای دیگری دارد",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:00:16.063Z"
+  },
+  {
+    "id": 5332,
+    "concept_explained_fa": "احساس یا بیان قدردانی از لطف، کمک، ارزش یا کیفیت چیزی؛ همچنین می‌تواند به درک و ارزش‌گذاری آن اشاره کند.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:47:44.567Z"
+  },
+  {
+    "id": 5483,
+    "concept_explained_fa": "عنوان یا توصیفی که معمولاً با فاصله یا تردید به آن اشاره می‌شود.",
+    "conceptMergeReviewed": false,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-15T06:25:09.027Z"
+  },
+  {
+    "id": 5575,
+    "concept_explained_fa": "برای نشان‌دادن جهت یا نزدیکی تقریبی به مکانی استفاده می‌شود، نه نقطه دقیق؛ در زمان، به نزدیکی یک نقطه یا دوره اشاره می‌کند، بدون تعیین لحظه دقیق.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:01:09.601Z"
+  },
+  {
+    "id": 5609,
+    "concept_explained_fa": "عمل ثبت و ارائه رسمی سند یا درخواست؛ اسم و مرتبط با تشکیل دادن اجزا نیست",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": true,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:07:32.024Z"
+  },
+  {
+    "id": 5723,
+    "concept_explained_fa": "بلا یا مشکل فراگیر و مداومی که افراد زیادی را آزار می‌دهد؛ همچنین نام بیماری همه‌گیر تاریخی",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:00:50.006Z"
+  },
+  {
+    "id": 5812,
+    "concept_explained_fa": "مربوط به خدا یا نیروی الهی؛ همچنین برای چیزی بسیار عالی یا آسمانی به‌صورت مجازی",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T08:59:58.192Z"
+  },
+  {
+    "id": 5973,
+    "concept_explained_fa": "راه یا خیابانی معمولاً آرام و مسکونی، به‌ویژه در نام مکان‌ها؛ گاهی نیز مسیر خصوصی ورود خودرو به خانه را می‌رساند.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:11:55.417Z"
+  },
+  {
+    "id": 5976,
+    "concept_explained_fa": "در نشانی های شهری، به مسیر کوتاه و آرام محله ای گفته می شود، نه تراس ساختمان.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:01:09.601Z"
+  },
+  {
+    "id": 6073,
+    "concept_explained_fa": "دارای فاصله کم مکانی، زمانی یا عاطفی؛ صفت",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T08:59:44.277Z"
+  },
+  {
+    "id": 29969,
+    "concept_explained_fa": "چیزی که از راه گفتار و دهان منتقل یا انجام می‌شود، در برابر نوشتاری؛ در پزشکی نیز معنی مربوط به دهان دارد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:12:37.789Z"
+  },
+  {
+    "id": 30027,
+    "concept_explained_fa": "به تنوع گزینه‌ها یا فاصلهٔ میان دو حد در یک مجموعه اشاره دارد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:13:00.886Z"
+  },
+  {
+    "id": 30284,
+    "concept_explained_fa": "به جداکردن یا رهاکردن پوشش، مو، برگ یا اشک از بدن یا سطح اشاره دارد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:14:36.527Z"
+  },
+  {
+    "id": 30441,
+    "concept_explained_fa": "گروه انسان‌هایی با دوره تولد نزدیک یا مرحله مشابه در توالی خانوادگی؛ همچنین برای نسل فناوری و محصولات به‌کار می‌رود.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:15:36.967Z"
+  },
+  {
+    "id": 30641,
+    "concept_explained_fa": "مجموعه سازمان‌یافته اسناد و داده‌های تاریخی، یا محل و سامانه نگهداری و دسترسی به آنها است.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:16:55.999Z"
+  },
+  {
+    "id": 30756,
+    "concept_explained_fa": "به پایان رسمی خدمت نظامی یا اقامت درمانی و اجازه خروج فرد از آن نهاد اشاره دارد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:17:41.243Z"
+  },
+  {
+    "id": 31009,
+    "concept_explained_fa": "در کاربرد عامیانه، به تخریب شدید مکان یا وسیله، یا بدگویی تند از چیزی اشاره دارد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:19:20.793Z"
+  },
+  {
+    "id": 31030,
+    "concept_explained_fa": "در گفتار غیررسمی، برای فردی از نظر ظاهری بسیار جذاب و دارای کشش جنسی.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:19:28.179Z"
+  },
+  {
+    "id": 31493,
+    "concept_explained_fa": "دو پدیده معمولاً همراه باشند و با هم ارتباط داشته باشند.",
+    "conceptMergeReviewed": false,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-15T06:25:10.364Z"
+  },
+  {
+    "id": 31631,
+    "concept_explained_fa": "در این کاربرد، رسیدن مدت اعتبار مجوز، قرارداد یا مهلت به پایان؛ بیشتر بر تمام شدن زمان تأکید دارد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:23:16.362Z"
+  },
+  {
+    "id": 31654,
+    "concept_explained_fa": "در این کاربرد، به آغاز سفر، حرکت یا رویدادی که واکنش‌ها را شروع می‌کند اشاره دارد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:23:25.361Z"
+  },
+  {
+    "id": 32318,
+    "concept_explained_fa": "مخالفت، رقابت، تماس یا تکیه در برابر شخص یا چیز را نشان می‌دهد؛ معنایی گسترده‌تر از رقابت ساده دارد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:27:35.831Z"
+  },
+  {
+    "id": 32319,
+    "concept_explained_fa": "در این کاربرد، به تماس تلفنی با شخص یا به‌صدا درآوردن زنگ اشاره دارد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:27:36.207Z"
+  },
+  {
+    "id": 32328,
+    "concept_explained_fa": "برای نشان دادن درجه یا شدت زیادِ یک ویژگی.",
+    "conceptMergeReviewed": false,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-15T06:25:11.051Z"
+  },
+  {
+    "id": 32398,
+    "concept_explained_fa": "به‌صورت روشن و بدون ابهام؛ در مورد فکر کردن، به‌درستی و با تمرکز.",
+    "conceptMergeReviewed": false,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-15T06:25:11.280Z"
+  },
+  {
+    "id": 32496,
+    "concept_explained_fa": "در کاربرد معمول، عدد حاصل از جمع چند مقدار و تقسیم بر تعداد آن‌ها؛ در گفتار می‌تواند مفهوم متوسط را گسترده‌تر بیان کند.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:31:39.574Z"
+  },
+  {
+    "id": 32865,
+    "concept_explained_fa": "به تمایل فعال برای دانستن یا کشف موضوعی اشاره دارد، نه نامعمول‌بودن آن.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:30:58.097Z"
+  },
+  {
+    "id": 32879,
+    "concept_explained_fa": "به شکل‌دادن ماده در قالب یا پرورش شخصیت و رفتار به شکلی خاص اشاره دارد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:31:03.906Z"
+  },
+  {
+    "id": 32908,
+    "concept_explained_fa": "مربوط به امور درون مرزهای یک کشور، یا خانه و خانواده؛ در این معنی در برابر خارجی است.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:31:17.184Z"
+  },
+  {
+    "id": 34100,
+    "concept_explained_fa": "مایع، هوا یا اطلاعات را از صافی یا معیار عبور دادن تا بخش‌های نامطلوب جدا یا حذف شوند.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:39:35.719Z"
+  },
+  {
+    "id": 34215,
+    "concept_explained_fa": "آن‌قدر نزدیک به حالت کامل که تفاوت اندک باقی‌مانده اهمیت عملی ندارد؛ در این معنی ربطی به فضای دیجیتال ندارد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:40:21.598Z"
+  },
+  {
+    "id": 34680,
+    "concept_explained_fa": "در عبارت گفتاری برای ابراز تأسف از اتفاق یا فرصت ناخوشایند؛ همچنین در معنای دیگر به ترحم اشاره دارد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:43:10.362Z"
+  },
+  {
+    "id": 34993,
+    "concept_explained_fa": "چیزی را توصیف می‌کند که رنگ خاکستری روشن و براق شبیه فلز نقره دارد یا از نقره ساخته شده است.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:44:56.326Z"
+  },
+  {
+    "id": 35038,
+    "concept_explained_fa": "تجربه‌ای از تصویرها و رویدادهای ذهنی هنگام خواب، یا آرزویی برای آینده، است.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:45:11.292Z"
+  },
+  {
+    "id": 35064,
+    "concept_explained_fa": "خاطره یا تصویر ذهنی از شخص، رویداد یا تجربه گذشته؛ همچنین توانایی ذهن برای به خاطر سپردن را بیان می‌کند.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:45:19.497Z"
+  },
+  {
+    "id": 35106,
+    "concept_explained_fa": "کسی است که در دریا به کشتی‌ها حمله می‌کند یا از آن‌ها می‌دزدد؛ کاربردهای دیجیتال معنای دیگری دارند.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:45:35.876Z"
+  },
+  {
+    "id": 35391,
+    "concept_explained_fa": "بسیار سرد مانند یخ یا پوشیده از یخ؛ همچنین برای رفتار و لحن بسیار سرد و غیردوستانه کاربرد دارد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:47:19.151Z"
+  },
+  {
+    "id": 35471,
+    "concept_explained_fa": "دست، وسیله یا چیزی را به موقعیت بالاتر بردن؛ محاوره‌ای و وابسته به بافت، با معنی‌های متعدد دیگر.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:47:47.249Z"
+  },
+  {
+    "id": 35613,
+    "concept_explained_fa": "مربوط به بخش غربی یک ناحیه یا به فرهنگ و کشورهای غربی؛ دامنهٔ معنایی آن از صرف جهت جغرافیایی گسترده‌تر است.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:48:40.168Z"
+  },
+  {
+    "id": 35618,
+    "concept_explained_fa": "پایین‌رفتن در آب یا مادهٔ نرم، معمولاً بر اثر وزن؛ همچنین کاهش تدریجی سطح یا وضعیت.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:48:42.056Z"
+  },
+  {
+    "id": 35626,
+    "concept_explained_fa": "به به‌دست آوردن پول، دانش، مزیت، وزن یا چیز ارزشمند در طول زمان اشاره دارد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:48:44.521Z"
+  },
+  {
+    "id": 35627,
+    "concept_explained_fa": "یک قطره مایع یا، در کاربرد مجازی، مقدار بسیار کمی از چیزی.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:12:46.642Z"
+  },
+  {
+    "id": 35652,
+    "concept_explained_fa": "کامل و مطلق از نظر درجه یا ویژگی، یا دارای همه اجزای لازم؛ معنای دقیق به اسم و بافت بستگی دارد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:32:07.531Z"
+  },
+  {
+    "id": 35688,
+    "concept_explained_fa": "توانایی و عمل سخن گفتن، یا سخنرانی رسمی برای مخاطبان، است.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:49:08.519Z"
+  },
+  {
+    "id": 35692,
+    "concept_explained_fa": "شکلی از دو خط متقاطع است که نماد اصلی دین مسیحیت نیز محسوب می‌شود.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:49:10.070Z"
+  },
+  {
+    "id": 35700,
+    "concept_explained_fa": "در کاربرد وجهی، بیشتر در پرسش و منفی برای ضرورت یا نبود ضرورت؛ رسمی‌تر و از نظر ساخت محدودتر.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:49:12.074Z"
+  },
+  {
+    "id": 35789,
+    "concept_explained_fa": "داستان یا فیلم در زمان و مکانی مشخص رخ دادن.",
+    "conceptMergeReviewed": false,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-15T06:25:15.926Z"
+  },
+  {
+    "id": 35915,
+    "concept_explained_fa": "اندک و جزئی از نظر مقدار، درجه یا تفاوت؛ گاهی دربارهٔ اندام باریک نیز به‌کار می‌رود.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:50:36.482Z"
+  },
+  {
+    "id": 35928,
+    "concept_explained_fa": "به اندازه‌گیری وزن شخص یا چیزی با ترازو، یا سنجیدن اهمیت گزینه‌ها، اشاره دارد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:50:41.813Z"
+  },
+  {
+    "id": 35940,
+    "concept_explained_fa": "به تخریب ساختمان یا ساختار تا افتادن آن، یا زمین زدن شخص، اشاره دارد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:50:45.343Z"
+  },
+  {
+    "id": 36108,
+    "concept_explained_fa": "به ایجاد نگرانی یا مزاحمت برای شخص، یا زحمت انجام کاری، اشاره دارد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:51:52.718Z"
+  },
+  {
+    "id": 36449,
+    "concept_explained_fa": "فرایند، شیوه یا نظام اداره و کنترل یک کشور یا جامعه و اجرای تصمیم‌های عمومی؛ می‌تواند به خود نهاد حاکم نیز اشاره کند.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:54:08.141Z"
+  },
+  {
+    "id": 36532,
+    "concept_explained_fa": "چیزی از نظر فیزیکی به بخش‌های مجزا تقسیم شده باشد.",
+    "conceptMergeReviewed": false,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-15T06:25:16.449Z"
+  },
+  {
+    "id": 36626,
+    "concept_explained_fa": "به اندام پرواز پرندگان و حشرات یا بخش مشابه در دو سوی هواپیما اشاره دارد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:55:33.205Z"
+  },
+  {
+    "id": 36659,
+    "concept_explained_fa": "به عمل دریافت پول، کالا یا پیام اشاره دارد؛ همچنین می‌تواند مدرک پرداخت باشد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:55:45.074Z"
+  },
+  {
+    "id": 36780,
+    "concept_explained_fa": "خروج ناخواستهٔ مایع یا گاز از سوراخ یا شکاف، یا خود محل این خروج است.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:56:33.866Z"
+  },
+  {
+    "id": 36788,
+    "concept_explained_fa": "پر از جزئیات زنده، غیرمعمول و جالب؛ برای شخصیت، روایت یا زبان و گاهی رنگ‌های متنوع.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:56:35.921Z"
+  },
+  {
+    "id": 36799,
+    "concept_explained_fa": "لباس‌ها و پارچه‌هایی است که باید شسته شوند یا تازه شسته شده‌اند؛ همچنین به کار شستن آن‌ها اشاره می‌کند.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:56:40.737Z"
+  },
+  {
+    "id": 36812,
+    "concept_explained_fa": "در این نقش دستوری بزرگ‌ترین مقدار یا بخش را پیش از اسم نشان می‌دهد؛ به کیفیت «بهترین» اشاره ندارد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:56:46.638Z"
+  },
+  {
+    "id": 36814,
+    "concept_explained_fa": "یکی از طبقات افقی ساختمان که اتاق‌ها در آن قرار دارند؛ املای آن در کاربرد بریتانیایی با معنای روایت متفاوت است.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:56:47.465Z"
+  },
+  {
+    "id": 36843,
+    "concept_explained_fa": "زمان، حرکت یا فضایی را توصیف می‌کند که آرام، بی‌شتاب و کم‌فعالیت است؛ در این sense به تنبلی شخص اشاره ندارد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:56:56.566Z"
+  },
+  {
+    "id": 36848,
+    "concept_explained_fa": "برای تأکید بر کامل‌بودن یک ویژگی یا وضعیت به کار می‌رود و معنای جمع عددی ندارد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:56:58.277Z"
+  },
+  {
+    "id": 36882,
+    "concept_explained_fa": "به تماس فیزیکی با پوست و نیز توانایی احساس آن از راه لامسه اشاره دارد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:57:08.289Z"
+  },
+  {
+    "id": 36951,
+    "concept_explained_fa": "دارای مهارت، توانایی یا عملکرد ناکافی در زمینه‌ای مشخص؛ درباره کیفیت انجام کار است، نه نیروی بدنی.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:57:33.647Z"
+  },
+  {
+    "id": 37020,
+    "concept_explained_fa": "به همهٔ انسان‌ها در مجموع اشاره می‌کند و در این sense به مهربانی یا ویژگی انسان‌دوستی اشاره ندارد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:57:59.939Z"
+  },
+  {
+    "id": 37296,
+    "concept_explained_fa": "فضایی مشخص برای انباشتن یا دفع پسماندهاست، نه هر مکان کثیف و نامرتب.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:59:39.236Z"
+  },
+  {
+    "id": 37322,
+    "concept_explained_fa": "عمل آوردن کالا یا خدمت از کشور دیگر برای فروش یا استفاده، یا خود کالای واردشده است.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T09:59:45.896Z"
+  },
+  {
+    "id": 37503,
+    "concept_explained_fa": "به وضعیت عضو بودن و نیز مجموع اعضای یک گروه، سازمان یا باشگاه اشاره دارد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:00:52.343Z"
+  },
+  {
+    "id": 37534,
+    "concept_explained_fa": "توجه یا اهمیت ویژه‌ای که بر نکته‌ای گذاشته می‌شود؛ همچنین در زبان‌شناسی برای برجستگی هجای واژه به‌کار می‌رود.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:01:04.704Z"
+  },
+  {
+    "id": 37621,
+    "concept_explained_fa": "درباره آسمان و هوا، ابری، گرفته و کم‌نور بودن را توصیف می‌کند؛ به رنگ خاص اشیا اشاره ندارد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:01:33.112Z"
+  },
+  {
+    "id": 37817,
+    "concept_explained_fa": "به اندام نوک‌تیز برخی حشرات و جانوران یا زخمی که با آن ایجاد می‌شود اشاره دارد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:02:47.091Z"
+  },
+  {
+    "id": 37821,
+    "concept_explained_fa": "نوع یا نام دیگر منقار پرنده، به‌ویژه برای منقار پهن یا تخت پرندگان آبزی؛ در برخی گونه‌ها طبیعی‌تر است.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:02:48.212Z"
+  },
+  {
+    "id": 37843,
+    "concept_explained_fa": "بز جوان و نابالغ است؛ این واژه برای انسان به معنی کودک نیز کاربرد غیررسمی دارد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:02:55.869Z"
+  },
+  {
+    "id": 37938,
+    "concept_explained_fa": "به ماده و فرایندی اشاره دارد که دندان‌پزشک برای پر کردن بخش پوسیده یا سوراخ دندان استفاده می‌کند.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:03:31.093Z"
+  },
+  {
+    "id": 38080,
+    "concept_explained_fa": "دارایی یا بازاری که بتوان آن را سریع و با افت ارزش اندک به پول نقد تبدیل کرد؛ معنایی مالی و کاملاً متفاوت دارد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:04:28.759Z"
+  },
+  {
+    "id": 38151,
+    "concept_explained_fa": "با بریدن کوتاه یا جداشده، به‌ویژه دربارهٔ لبهٔ لباس.",
+    "conceptMergeReviewed": false,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-15T06:25:18.104Z"
+  },
+  {
+    "id": 38165,
+    "concept_explained_fa": "در این کاربرد، زیور قرارگرفته در سوراخ بدن؛ به خود سوراخ‌کاری یا کل زیور اشاره دارد، نه هر نوع نگین.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:05:02.624Z"
+  },
+  {
+    "id": 38186,
+    "concept_explained_fa": "به لباس‌های طراحی‌شده برای کاربرد یا موقعیت مشخص و نیز عمل پوشیدن آن‌ها اشاره دارد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:05:09.973Z"
+  },
+  {
+    "id": 38327,
+    "concept_explained_fa": "در دادگاه، نمایندگی حقوقی متهم را بر عهده دارد و در برابر ادعاهای دادستان استدلال می‌کند.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:06:09.907Z"
+  },
+  {
+    "id": 38367,
+    "concept_explained_fa": "به موسیقی دارای ضرب منظم و مناسب برای رقص، یا سبک موسیقی الکترونیک رقص، اشاره دارد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:06:25.807Z"
+  },
+  {
+    "id": 38411,
+    "concept_explained_fa": "در تئاتر و فیلم به مجموعه، بخش یا اتاق نگهداری لباس‌های بازیگران گفته می‌شود؛ معنای کمد لباس نیز رایج است.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:06:44.862Z"
+  },
+  {
+    "id": 38432,
+    "concept_explained_fa": "در هنر به رنگ روغن، معمولاً در ساخت جمع oils، یا به اثری گفته می‌شود که با این رنگ نقاشی شده است.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:06:53.955Z"
+  },
+  {
+    "id": 38580,
+    "concept_explained_fa": "در موسیقی به یک صدای مشخص یا نشانه نوشته‌شده‌ای اشاره دارد که ارتفاع و مدت صدا را نشان می‌دهد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:07:55.477Z"
+  },
+  {
+    "id": 38704,
+    "concept_explained_fa": "در کاربرد غیررسمی یعنی عمداً به کلاس یا قرار نرفتن یا چیزی و کسی را ناگهانی ترک‌کردن.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:08:48.007Z"
+  },
+  {
+    "id": 38725,
+    "concept_explained_fa": "فردی را توصیف می‌کند که نمی‌تواند روشن فکر کند یا چیزهایی را توصیف می‌کند که نامنظم و اشتباه ترکیب شده‌اند.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:08:58.016Z"
+  },
+  {
+    "id": 38973,
+    "concept_explained_fa": "غلاف معطر گونه‌هایی از ارکیدهٔ Vanilla و عصاره یا طعم‌دهندهٔ حاصل از آن است که در خوراکی‌های شیرین کاربرد دارد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:10:39.284Z"
+  },
+  {
+    "id": 39063,
+    "concept_explained_fa": "یعنی نور نرم و پیوسته‌ای تاباندن، یا چهره بر اثر گرما، سلامت، شادی یا احساس، رنگ و درخشندگی پیدا کند.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:21:23.611Z"
+  },
+  {
+    "id": 39096,
+    "concept_explained_fa": "در کاربرد پزشکی یا قدیمی، به بیماری یا مشکل جسمی خاص اشاره دارد؛ معنای اعتراض در اینجا منظور نیست.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:11:32.193Z"
+  },
+  {
+    "id": 39101,
+    "concept_explained_fa": "در کاربرد غیررسمی یعنی فرد احساس بیماری یا حال بسیار بدی دارد؛ معنای اصلی واژه فاسد یا پوسیده است.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:11:34.341Z"
+  },
+  {
+    "id": 39159,
+    "concept_explained_fa": "یعنی مشکل، نقص یا وضعیت نامطلوبی را اصلاح یا برطرف‌کردن؛ در کاربرد قدیمی‌تر می‌تواند به درمان بیماری نیز اشاره کند.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:12:00.394Z"
+  },
+  {
+    "id": 39192,
+    "concept_explained_fa": "عمل پیوند عضو یا بافت و نیز عضو یا بافت پیوندی.",
+    "conceptMergeReviewed": false,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-15T06:25:19.738Z"
+  },
+  {
+    "id": 39223,
+    "concept_explained_fa": "در این کاربرد یک وعده یا مقدار نوشیدنی الکلی، یا خودِ نوشیدنی الکلی، است.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:12:34.231Z"
+  },
+  {
+    "id": 39439,
+    "concept_explained_fa": "مجموعه‌ای از گونه‌های زبانی سینیتی مانند ماندارین و کانتونی است؛ در کاربرد رسمی، Chinese اغلب به چینی معیار اشاره دارد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:14:03.740Z"
+  },
+  {
+    "id": 39519,
+    "concept_explained_fa": "توپ گرد و بادی مخصوص بازی بسکتبال، یا در کاربردی دیگر خودِ ورزش بسکتبال، است.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:14:38.101Z"
+  },
+  {
+    "id": 39536,
+    "concept_explained_fa": "در گلف سوراخ کوچک روی گرین و نیز کل مسیر بازی از محل شروع تا آن سوراخ است.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:14:44.844Z"
+  },
+  {
+    "id": 39546,
+    "concept_explained_fa": "محل نشستن بازیکنان ذخیره و اعضای کادر در مسابقه است و می‌تواند به خود بازیکنان ذخیره نیز اشاره کند.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:14:49.843Z"
+  },
+  {
+    "id": 39616,
+    "concept_explained_fa": "حق قانونی عبور از زمین یا ملک دیگری، یا خود مسیری است که این حق در آن برقرار است.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:15:19.895Z"
+  },
+  {
+    "id": 39751,
+    "concept_explained_fa": "موتور دیزلی یا وسیلهٔ نقلیه‌ای مجهز به آن.",
+    "conceptMergeReviewed": false,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-15T06:25:20.031Z"
+  },
+  {
+    "id": 39761,
+    "concept_explained_fa": "مسیر طبیعی یا مصنوعی آب است و می‌تواند بخش عمیق و قابل کشتیرانی میان کرانه‌ها یا موانع آبی باشد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:16:21.175Z"
+  },
+  {
+    "id": 39854,
+    "concept_explained_fa": "در فیزیک و نجوم، حرکت چرخشی جسم حول محور خود یا ویژگی ذاتی کوانتومی ذرات است.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:16:58.838Z"
+  },
+  {
+    "id": 39878,
+    "concept_explained_fa": "رویدادی ناگهانی از خشم شدید یا مشاجره است؛ این واژه معانی دیگری مانند انفجار نیز دارد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:17:09.148Z"
+  },
+  {
+    "id": 39927,
+    "concept_explained_fa": "احساس تهوع یا، به‌صورت مجازی، انزجار شدید.",
+    "conceptMergeReviewed": false,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-15T06:25:20.100Z"
+  },
+  {
+    "id": 39955,
+    "concept_explained_fa": "صورت رایج catch one's breath است: لحظه‌ای نفس را از حیرت حبس کردن یا پس از فعالیت دوباره منظم نفس کشیدن.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:17:37.755Z"
+  },
+  {
+    "id": 40037,
+    "concept_explained_fa": "پیوند قانونی یا اجتماعی دو نفر به‌عنوان همسر است و گاهی به مراسم ایجاد این پیوند اشاره می‌کند.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:18:11.356Z"
+  },
+  {
+    "id": 40070,
+    "concept_explained_fa": "صفحه مدرج و معمولاً گرد دستگاه است که مقدار را نشان می‌دهد یا با چرخاندن آن تنظیم انجام می‌شود.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:18:22.723Z"
+  },
+  {
+    "id": 40220,
+    "concept_explained_fa": "در حمل‌ونقل نقطه یا عمل پیاده کردن مسافر یا تحویل دادن کالا در مقصد مشخص است.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:19:19.365Z"
+  },
+  {
+    "id": 40379,
+    "concept_explained_fa": "شخصی نیرومند و سرسخت یا ماده و چیزی محکم و بادوام را توصیف می‌کند که در برابر سختی، آسیب، پارگی یا فرسودگی مقاومت زیادی دارد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:29:06.670Z"
+  },
+  {
+    "id": 40461,
+    "concept_explained_fa": "برای همسرانی که جدا از هم زندگی می‌کنند اما هنوز طلاق نگرفته‌اند.",
+    "conceptMergeReviewed": false,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-15T06:25:20.132Z"
+  },
+  {
+    "id": 40543,
+    "concept_explained_fa": "در این کاربرد، هوای با دمای پایین یا احساس سرمای محیط است، نه بیماری سرماخوردگی.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:21:17.231Z"
+  },
+  {
+    "id": 40605,
+    "concept_explained_fa": "یعنی وزن شخص یا چیزی را با ترازو اندازه گرفتن، یا خود وزن مشخصی داشتن.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:21:42.279Z"
+  },
+  {
+    "id": 40619,
+    "concept_explained_fa": "در نقش اسم، زبان ژاپنی یا در برخی ساخت‌ها مردم ژاپن را بیان می‌کند؛ نقش دستوری آن با صفت متفاوت است.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:21:47.767Z"
+  },
+  {
+    "id": 40825,
+    "concept_explained_fa": "مایع یا مخلوطی با غلظت کم و حالت روان یا آب‌مانند؛ الزاماً طعم ضعیف ندارد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:22:57.834Z"
+  },
+  {
+    "id": 40925,
+    "concept_explained_fa": "یعنی شخص یا چیزی را به مکان قبلی بازگرداندن، یا خاطره و وضعیت گذشته‌ای را دوباره ایجاد کردن.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:23:39.080Z"
+  },
+  {
+    "id": 41038,
+    "concept_explained_fa": "درباره مدرک یا واقعیتی محکم، قابل‌اعتماد و روشن؛ نه صرفاً چیزی دشوار یا سفت.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:24:22.357Z"
+  },
+  {
+    "id": 41114,
+    "concept_explained_fa": "برای معنی جست‌وجو کردن معمولاً به همراه حرف اضافه مخصوص می‌آید؛ به تنهایی بیشتر معنای نگاه کردن دارد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:24:53.493Z"
+  },
+  {
+    "id": 41184,
+    "concept_explained_fa": "به‌طور مجازی، وضعیت یا تجربه‌ای بسیار دشوار، ترسناک و ناخوشایند است؛ معنای اصلی خواب وحشتناک است.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:25:16.529Z"
+  },
+  {
+    "id": 41294,
+    "concept_explained_fa": "معمولاً یعنی تقریباً یا عملاً؛ در بافت فناوری گاهی به انجام‌شدن از راه رایانه یا اینترنت اشاره دارد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:25:55.475Z"
+  },
+  {
+    "id": 41482,
+    "concept_explained_fa": "متن یا مطالب پس از حذف جزئیات کوتاه و به نکات اصلی خلاصه شدن.",
+    "conceptMergeReviewed": false,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-15T06:25:20.964Z"
+  },
+  {
+    "id": 41511,
+    "concept_explained_fa": "در این کاربرد پیش از اسم، مقدار یا شدت قابل‌توجه و رضایت‌بخشی را نشان می‌دهد، نه صرفاً خوب بودن اخلاقی.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:27:21.904Z"
+  },
+  {
+    "id": 41568,
+    "concept_explained_fa": "در این کاربرد به توجه کاملاً متمرکز یا تصمیم جدی و ثابت برای انجام کاری اشاره دارد، نه حالت حیرت.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:27:45.844Z"
+  },
+  {
+    "id": 41674,
+    "concept_explained_fa": "وضعیتی است که دو یا چند طرف درباره تصمیم، شرایط یا نظر مشترکی پذیرفته و هماهنگ شده‌اند.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:28:24.564Z"
+  },
+  {
+    "id": 41682,
+    "concept_explained_fa": "در این کاربرد یعنی در همه زمان‌ها یا برای همیشه؛ در پرسش‌ها و ساخت‌های تأکیدی کاربردهای دیگری نیز دارد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:28:27.283Z"
+  },
+  {
+    "id": 41700,
+    "concept_explained_fa": "در این کاربرد غیررسمی، پولی که شخص در برابر کار دریافت می‌کند؛ معنای عمومی آن بسیار گسترده‌تر است.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:28:34.024Z"
+  },
+  {
+    "id": 41713,
+    "concept_explained_fa": "به کنار گذاشتن عاطفی یا رفتاری فردی وابسته اشاره دارد، نه صرفاً نپذیرفتن یک پیشنهاد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:28:38.356Z"
+  },
+  {
+    "id": 41733,
+    "concept_explained_fa": "یعنی صدایی یکنواخت، آرام و پیوسته مانند دستگاه یا زنبور تولید کردن؛ همچنین می‌تواند زیرلب آهنگ خواندن باشد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:28:46.236Z"
+  },
+  {
+    "id": 41754,
+    "concept_explained_fa": "معنی خسته و بیزار معمولاً با حرف اضافه ویژه می‌آید؛ به تنهایی بیشتر به بیماری یا تهوع اشاره دارد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:28:54.153Z"
+  },
+  {
+    "id": 41859,
+    "concept_explained_fa": "راز یا اطلاعات پنهان را عمدی یا ناخواسته آشکار کردن؛ همچنین می‌تواند معنای آزادکردن داشته باشد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:29:32.258Z"
+  },
+  {
+    "id": 41922,
+    "concept_explained_fa": "در کاربرد محاوره‌ای I bet یعنی گوینده تقریباً مطمئن است که ادعا درست است، نه اینکه حتماً شرط‌بندی می‌کند.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:30:01.341Z"
+  },
+  {
+    "id": 41925,
+    "concept_explained_fa": "در سالن نمایش، بخش صندلی‌های طبقه بالاتر از همکف است؛ balcony همچنین سکوی بیرونی ساختمان را می‌گوید.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:30:02.232Z"
+  },
+  {
+    "id": 41999,
+    "concept_explained_fa": "در این کاربرد نام رنگ سفید است؛ در بافت‌های دیگر می‌تواند به بخش سفید یا دسته‌بندی‌های انسانی اشاره کند.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:30:28.977Z"
+  },
+  {
+    "id": 42069,
+    "concept_explained_fa": "در این کاربرد یعنی به سمت بالا، طبقه یا مکان مرتفع‌تر حرکت کردن؛ بافت می‌تواند معانی دیگری بسازد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:30:55.129Z"
+  },
+  {
+    "id": 42091,
+    "concept_explained_fa": "در ترکیب رایج مربوط به زمان، یعنی زودتر از موعد یا از قبل؛ به‌تنهایی معمولاً جلوتر بودن را می‌رساند.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:31:02.419Z"
+  },
+  {
+    "id": 42095,
+    "concept_explained_fa": "Thai نام زبان رسمی تایلند و نیز صفت مربوط به کشور و مردم آن است؛ باید با حرف بزرگ نوشته شود.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:31:03.265Z"
+  },
+  {
+    "id": 42123,
+    "concept_explained_fa": "در این کاربرد یعنی بخشی از پول را برای آینده پس‌انداز و کنار گذاشتن؛ معانی ذخیره و زندانی کردن نیز دارد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:31:12.816Z"
+  },
+  {
+    "id": 42157,
+    "concept_explained_fa": "یعنی نسخه یا نتیجه مشابهی دوباره تولید کردن؛ در زیست‌شناسی می‌تواند به تولیدمثل اشاره کند.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:31:24.953Z"
+  },
+  {
+    "id": 42165,
+    "concept_explained_fa": "یعنی صدایی بسیار بلند، بم و طنین‌دار ایجاد کردن؛ مجازی نیز می‌تواند رشد سریع را بیان کند.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:31:27.266Z"
+  },
+  {
+    "id": 42178,
+    "concept_explained_fa": "یعنی صدا پس از برخورد با سطح بازگردد و تکرار شود؛ مجازی نیز یعنی گفته‌ای را بازتاب دادن.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:31:31.827Z"
+  },
+  {
+    "id": 42182,
+    "concept_explained_fa": "ذره کوچک درخشان و داغی است که از آتش یا برخورد مواد بیرون می‌جهد؛ مجازی نیز آغاز یک احساس است.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:31:32.977Z"
+  },
+  {
+    "id": 42188,
+    "concept_explained_fa": "می‌تواند یعنی خود تسلیم شدن یا شخص، اختیار و چیزی را به طرف مقابل واگذار کردن.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:31:34.787Z"
+  },
+  {
+    "id": 42197,
+    "concept_explained_fa": "یعنی با جدیت و احساس شدید خواهش کردن؛ در حقوق نیز یعنی موضع رسمی خود را اعلام کردن.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:31:37.672Z"
+  },
+  {
+    "id": 42233,
+    "concept_explained_fa": "حرکت از جای بالاتر به پایین است؛ همچنین می‌تواند به اصل خانوادگی و نسب شخص اشاره کند.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:31:50.342Z"
+  },
+  {
+    "id": 42253,
+    "concept_explained_fa": "می‌تواند یعنی مانند مایع روان و جاری است، یا وضعیت و برنامه‌ای انعطاف‌پذیر و در حال تغییر دارد.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:31:57.527Z"
+  },
+  {
+    "id": 42786,
+    "concept_explained_fa": "اتاقک کوچک و محصور در کشتی یا وسیله سفر برای خواب، اقامت یا کار؛ همچنین کلبه‌ای ساده در طبیعت.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:35:27.453Z"
+  },
+  {
+    "id": 43884,
+    "concept_explained_fa": "کیفیت، زیر و بمی یا رنگ ویژه یک صدا یا ساز؛ همچنین می‌تواند حال‌وهوای عاطفی گفتار را برساند.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:42:36.849Z"
+  },
+  {
+    "id": 43975,
+    "concept_explained_fa": "شخصی که علاقهٔ بسیار به فرد، فعالیت یا چیزی دارد؛ در بافت عاطفی نیز شریک جنسی یا عاشق را می‌رساند.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:43:19.040Z"
+  },
+  {
+    "id": 44265,
+    "concept_explained_fa": "با فشار، گرما یا تلاش تدریجی چیزی را شکل‌دادن؛ همچنین رابطه، هویت یا مسیر تازه‌ای پدیدآوردن.",
+    "conceptMergeReviewed": true,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-14T10:45:20.186Z"
+  },
+  {
+    "id": 44423,
+    "concept_explained_fa": "جانور با پنجه یا چنگ خود به سطحی کشیدن یا ضربه زدن.",
+    "conceptMergeReviewed": false,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-15T06:25:25.411Z"
+  },
+  {
+    "id": 44485,
+    "concept_explained_fa": "برای اصلاح یا روشن‌کردن گفته، منظور مشخصی داشتن.",
+    "conceptMergeReviewed": false,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-15T06:25:26.424Z"
+  },
+  {
+    "id": 44500,
+    "concept_explained_fa": "فضا یا موقعیتی برداشت و حال‌وهوایی مشخص ایجاد کند.",
+    "conceptMergeReviewed": false,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-15T06:25:26.916Z"
+  },
+  {
+    "id": 44778,
+    "concept_explained_fa": "شخصی کاری، گفتگو یا فعالیتی را تمام کردن.",
+    "conceptMergeReviewed": false,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-15T06:25:33.760Z"
+  },
+  {
+    "id": 44910,
+    "concept_explained_fa": "مکان یا منطقه‌ای از نظر فیزیکی نابود و ویران شده باشد.",
+    "conceptMergeReviewed": false,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-15T06:25:37.195Z"
+  },
+  {
+    "id": 44938,
+    "concept_explained_fa": "برای نخستین آلبوم منتشرشدهٔ یک هنرمند یا گروه.",
+    "conceptMergeReviewed": false,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-15T06:25:37.597Z"
+  },
+  {
+    "id": 45014,
+    "concept_explained_fa": "چوب یا شیره‌ای که از درخت افرا به دست می‌آید.",
+    "conceptMergeReviewed": false,
+    "inflectionMergeReviewed": false,
+    "meaningReviewStatus": "CONFIRMED",
+    "updatedAt": "2026-08-15T06:25:38.381Z"
+  }
+]

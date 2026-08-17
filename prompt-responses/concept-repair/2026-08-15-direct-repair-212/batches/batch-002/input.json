@@ -1,0 +1,2070 @@
+[
+  {
+    "id": 4517,
+    "word": "work",
+    "pos": "verb",
+    "meaning_fa": "کار کردن",
+    "other_meanings_fa": [
+      "موثر واقع شدن",
+      "عمل کردن",
+      "اثر داشتن",
+      "جواب دادن"
+    ],
+    "concept_explained_fa": "فعالیت یا وظیفه‌ای را انجام دادن، یا دربارهٔ دستگاه، روش و دارو درست عمل کردن و نتیجهٔ موردنظر را ایجاد کردن.",
+    "sentences": [
+      {
+        "id": 27,
+        "sentence_en": "The toilet stopped working this morning.",
+        "sentence_en_meaning_fa": "توالت امروز صبح از کار افتاد."
+      },
+      {
+        "id": 384,
+        "sentence_en": "The heater stopped working last night.",
+        "sentence_en_meaning_fa": "بخاری دیشب از کار افتاد."
+      },
+      {
+        "id": 14592,
+        "sentence_en": "Her plan to increase sales worked.",
+        "sentence_en_meaning_fa": "برنامهٔ او برای افزایش فروش مؤثر واقع شد."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 4475,
+        "pos": "noun",
+        "meaning_fa": "کار",
+        "other_meanings_fa": []
+      },
+      {
+        "id": 4702,
+        "pos": "noun",
+        "meaning_fa": "محل کار",
+        "other_meanings_fa": [
+          "سر کار"
+        ]
+      },
+      {
+        "id": 34312,
+        "pos": "noun",
+        "meaning_fa": "شغل",
+        "other_meanings_fa": [
+          "کار",
+          "محل کار",
+          "اشتغال"
+        ]
+      },
+      {
+        "id": 36497,
+        "pos": "noun",
+        "meaning_fa": "اثر ادبی یا هنری",
+        "other_meanings_fa": [
+          "آثار جمع",
+          "اثر",
+          "تصنیف"
+        ]
+      },
+      {
+        "id": 39431,
+        "pos": "verb",
+        "meaning_fa": "تلاش کردن",
+        "other_meanings_fa": []
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 4646,
+    "word": "catch",
+    "pos": "verb",
+    "meaning_fa": "گرفتن",
+    "other_meanings_fa": [
+      "بازتاب دادن"
+    ],
+    "concept_explained_fa": "چیز در حال حرکت را گرفتن یا دریافت کردن؛ همچنین نور، توجه یا بیماری",
+    "sentences": [
+      {
+        "id": 106,
+        "sentence_en": "A glass sphere caught the sunlight on the shelf.",
+        "sentence_en_meaning_fa": "یک کرهٔ شیشه‌ای نور خورشید را روی قفسه گرفت."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 32355,
+        "pos": "verb",
+        "meaning_fa": "رسیدن به وسایل نقلیه",
+        "other_meanings_fa": [
+          "سوار شدن"
+        ]
+      },
+      {
+        "id": 34791,
+        "pos": "verb",
+        "meaning_fa": "گرفتن بیماری",
+        "other_meanings_fa": [
+          "سرما خوردن",
+          "دچار شدن"
+        ]
+      },
+      {
+        "id": 36921,
+        "pos": "verb",
+        "meaning_fa": "گرفتن",
+        "other_meanings_fa": [
+          "مچ گرفتن"
+        ]
+      },
+      {
+        "id": 41201,
+        "pos": "verb",
+        "meaning_fa": "فهمیدن",
+        "other_meanings_fa": [
+          "شنیدن",
+          "ملتفت شدن"
+        ]
+      },
+      {
+        "id": 42003,
+        "pos": "verb",
+        "meaning_fa": "تماشا کردن",
+        "other_meanings_fa": [
+          "گوش دادن",
+          "دیدن"
+        ]
+      },
+      {
+        "id": 44908,
+        "pos": "verb",
+        "meaning_fa": "گیر انداختن",
+        "other_meanings_fa": [
+          "به تله انداختن",
+          "به دام انداختن",
+          "دستگیر کردن"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 4701,
+    "word": "hot",
+    "pos": "adjective",
+    "meaning_fa": "داغ",
+    "other_meanings_fa": [
+      "گرم"
+    ],
+    "concept_explained_fa": "دارای دمای بالا، یا در کاربرد مجازی دارای شدت و هیجان زیاد.",
+    "sentences": [
+      {
+        "id": 139,
+        "sentence_en": "He brought a flask of hot tea to work.",
+        "sentence_en_meaning_fa": "او یک فلاسک چای داغ به محل کار آورد."
+      },
+      {
+        "id": 16689,
+        "sentence_en": "Competition is getting hotter day by day.",
+        "sentence_en_meaning_fa": "رقابت روزبه‌روز داغ‌تر می‌شود."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 31030,
+        "pos": "adjective",
+        "meaning_fa": "جذاب",
+        "other_meanings_fa": []
+      },
+      {
+        "id": 37508,
+        "pos": "adjective",
+        "meaning_fa": "جنجالی",
+        "other_meanings_fa": [
+          "جنجال برانگیز",
+          "جنجال آفرین"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 4733,
+    "word": "drink",
+    "pos": "noun",
+    "meaning_fa": "نوشیدنی",
+    "other_meanings_fa": [],
+    "concept_explained_fa": "هر مایعی که برای نوشیدن آماده است؛ اسم عمومی و بسیار رایج که در بعضی بافت‌ها می‌تواند به طور خاص به نوشیدنی الکلی اشاره کند.",
+    "sentences": [
+      {
+        "id": 164,
+        "sentence_en": "Put some ice in my drink, please.",
+        "sentence_en_meaning_fa": "لطفاً کمی یخ در نوشیدنی من بگذار."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 4549,
+        "pos": "verb",
+        "meaning_fa": "نوشیدن",
+        "other_meanings_fa": []
+      },
+      {
+        "id": 39223,
+        "pos": "noun",
+        "meaning_fa": "نوشیدنی الکلی",
+        "other_meanings_fa": [
+          "مشروب"
+        ]
+      },
+      {
+        "id": 39231,
+        "pos": "verb",
+        "meaning_fa": "مشروب نوشیدن",
+        "other_meanings_fa": [
+          "مشروب خوردن",
+          "نوشیدنی الکلی خوردن"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 4755,
+    "word": "set",
+    "pos": "verb",
+    "meaning_fa": "غروب کردن",
+    "other_meanings_fa": [
+      "فرو رفتن"
+    ],
+    "concept_explained_fa": "دربارهٔ خورشید یعنی پایین‌رفتن زیر افق؛ در کاربردهای دیگر به قرارگرفتن یا سفت‌شدن نیز اشاره دارد.",
+    "sentences": [
+      {
+        "id": 177,
+        "sentence_en": "They drove toward the mountain as the sun set.",
+        "sentence_en_meaning_fa": "آنها به سمت کوه رانندگی کردند وقتی خورشید غروب کرد."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 5101,
+        "pos": "adjective",
+        "meaning_fa": "در آستانه بودن",
+        "other_meanings_fa": []
+      },
+      {
+        "id": 32300,
+        "pos": "verb",
+        "meaning_fa": "معین کردن",
+        "other_meanings_fa": [
+          "تعیین کردن"
+        ]
+      },
+      {
+        "id": 35789,
+        "pos": "verb",
+        "meaning_fa": "رخ دادن",
+        "other_meanings_fa": [
+          "روی دادن"
+        ]
+      },
+      {
+        "id": 36470,
+        "pos": "noun",
+        "meaning_fa": "صحنه",
+        "other_meanings_fa": [
+          "محل فیلمبرداری",
+          "دکور",
+          "آرایه"
+        ]
+      },
+      {
+        "id": 39588,
+        "pos": "noun",
+        "meaning_fa": "ست",
+        "other_meanings_fa": [
+          "دست بازی",
+          "مجموعه ای از گیم ها"
+        ]
+      },
+      {
+        "id": 40201,
+        "pos": "noun",
+        "meaning_fa": "دستگاه رادیو تلویزیون و",
+        "other_meanings_fa": [
+          "گیرنده"
+        ]
+      },
+      {
+        "id": 40629,
+        "pos": "verb",
+        "meaning_fa": "کوک کردن",
+        "other_meanings_fa": [
+          "تنظیم کردن"
+        ]
+      },
+      {
+        "id": 40736,
+        "pos": "verb",
+        "meaning_fa": "زدن",
+        "other_meanings_fa": []
+      },
+      {
+        "id": 42136,
+        "pos": "verb",
+        "meaning_fa": "قرار دادن",
+        "other_meanings_fa": [
+          "گذاشتن"
+        ]
+      },
+      {
+        "id": 44850,
+        "pos": "verb",
+        "meaning_fa": "قرار داشتن",
+        "other_meanings_fa": []
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 4935,
+    "word": "deep",
+    "pos": "adjective",
+    "meaning_fa": "عمیق",
+    "other_meanings_fa": [],
+    "concept_explained_fa": "دارای فاصله زیاد از سطح تا پایین یا از جلو تا داخل؛ همچنین می‌تواند مجازی برای شدت یا پیچیدگی زیاد باشد.",
+    "sentences": [
+      {
+        "id": 297,
+        "sentence_en": "Her skirt had deep pockets for her phone.",
+        "sentence_en_meaning_fa": "دامنش برای گوشی‌اش جیب‌های عمیق داشت."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 35380,
+        "pos": "adjective",
+        "meaning_fa": "سیر رنگ",
+        "other_meanings_fa": [
+          "تیره"
+        ]
+      },
+      {
+        "id": 41218,
+        "pos": "adjective",
+        "meaning_fa": "به عمق",
+        "other_meanings_fa": []
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 5063,
+    "word": "whip",
+    "pos": "verb",
+    "meaning_fa": "زدن",
+    "other_meanings_fa": [
+      "هم زدن"
+    ],
+    "concept_explained_fa": "زدن سریع و پی در پی، یا ناگهان آماده کردن غذا",
+    "sentences": [
+      {
+        "id": 389,
+        "sentence_en": "He used a mixer to whip the cream.",
+        "sentence_en_meaning_fa": "او از همزن برای زدن خامه استفاده کرد."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 41767,
+        "pos": "verb",
+        "meaning_fa": "هم زدن",
+        "other_meanings_fa": []
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference",
+      "serious_fluency"
+    ]
+  },
+  {
+    "id": 5095,
+    "word": "liberal",
+    "pos": "noun",
+    "meaning_fa": "لیبرال",
+    "other_meanings_fa": [
+      "حزب لیبرال"
+    ],
+    "concept_explained_fa": "نام یک جریان سیاسی که معمولاً از آزادی‌های فردی و سیاست‌های میانه‌رو حمایت می‌کند؛ به دیدگاهی اشاره دارد که از آزادی‌های فردی و تغییرات اجتماعی حمایت می‌کند.",
+    "sentences": [
+      {
+        "id": 3586,
+        "sentence_en": "The Liberal won several key seats in the national election.",
+        "sentence_en_meaning_fa": "حزب لیبرال چندین کرسی کلیدی را در انتخابات ملی برد."
+      },
+      {
+        "id": 3614,
+        "sentence_en": "She supports liberal policies on social issues.",
+        "sentence_en_meaning_fa": "او از سیاست‌های لیبرال در مسائل اجتماعی حمایت می‌کند."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 30428,
+        "pos": "adjective",
+        "meaning_fa": "روشن فکرانه",
+        "other_meanings_fa": [
+          "آزاداندیشانه",
+          "آزادی خواهانه"
+        ]
+      },
+      {
+        "id": 34242,
+        "pos": "adjective",
+        "meaning_fa": "فراوان",
+        "other_meanings_fa": [
+          "زیاد"
+        ]
+      },
+      {
+        "id": 41451,
+        "pos": "noun",
+        "meaning_fa": "آزادی خواه",
+        "other_meanings_fa": [
+          "لیبرال",
+          "آزاداندیش",
+          "آزادی طلب"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 5245,
+    "word": "balance",
+    "pos": "noun",
+    "meaning_fa": "موجودی",
+    "other_meanings_fa": [],
+    "concept_explained_fa": "مقدار پول باقی مانده در حساب، یا تفاوت میان دو مقدار",
+    "sentences": [
+      {
+        "id": 3736,
+        "sentence_en": "I checked my balance before making a purchase.",
+        "sentence_en_meaning_fa": "من قبل از خرید موجودی خود را بررسی کردم."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 36503,
+        "pos": "noun",
+        "meaning_fa": "تعادل",
+        "other_meanings_fa": [
+          "توازن",
+          "موازنه",
+          "بالانس"
+        ]
+      },
+      {
+        "id": 36504,
+        "pos": "verb",
+        "meaning_fa": "متعادل کردن",
+        "other_meanings_fa": [
+          "تعادل برقرار کردن",
+          "تراز کردن",
+          "تعدیل کردن"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 5323,
+    "word": "go off",
+    "pos": "phrasal verb",
+    "meaning_fa": "خراب شدن",
+    "other_meanings_fa": [
+      "فاسد شدن"
+    ],
+    "concept_explained_fa": "درباره غذا یا نوشیدنی، خراب و فاسد شدن؛ همچنین برای خاموش یا منفجر شدن کاربردهای دیگری دارد",
+    "sentences": [
+      {
+        "id": 3814,
+        "sentence_en": "The milk went off after a few days.",
+        "sentence_en_meaning_fa": "شیر بعد از چند روز خراب شدن."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 1186,
+        "pos": "phrasal verb",
+        "meaning_fa": "به صدا در آمدن",
+        "other_meanings_fa": [
+          "زنگ زدن",
+          "زنگ خوردن",
+          "سروصدا کردن"
+        ]
+      },
+      {
+        "id": 5322,
+        "pos": "phrasal verb",
+        "meaning_fa": "منفجر شدن",
+        "other_meanings_fa": [
+          "انفجار رخ دادن"
+        ]
+      },
+      {
+        "id": 5324,
+        "pos": "phrasal verb",
+        "meaning_fa": "خاموش شدن",
+        "other_meanings_fa": [
+          "قطع شدن"
+        ]
+      },
+      {
+        "id": 5325,
+        "pos": "phrasal verb",
+        "meaning_fa": "از کسی بدش آمدن",
+        "other_meanings_fa": [
+          "دلزده شدن",
+          "دوست نداشتن",
+          "کمتر دوست داشتن"
+        ]
+      },
+      {
+        "id": 5326,
+        "pos": "phrasal verb",
+        "meaning_fa": "شروع کردن ناگهانی",
+        "other_meanings_fa": [
+          "یکدفعه شروع کردن"
+        ]
+      },
+      {
+        "id": 5327,
+        "pos": "phrasal verb",
+        "meaning_fa": "ترک کردن",
+        "other_meanings_fa": [
+          "رفتن"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 5332,
+    "word": "appreciation",
+    "pos": "noun",
+    "meaning_fa": "قدردانی",
+    "other_meanings_fa": [
+      "سپاسگزاری",
+      "سپاس",
+      "امتنان",
+      "تشکر"
+    ],
+    "concept_explained_fa": "احساس یا بیان قدردانی از لطف، کمک، ارزش یا کیفیت چیزی؛ همچنین می‌تواند به درک و ارزش‌گذاری آن اشاره کند.",
+    "sentences": [
+      {
+        "id": 3823,
+        "sentence_en": "She showed her appreciation with a thoughtful gift.",
+        "sentence_en_meaning_fa": "او قدردانی خود را با یک هدیه متفکرانه نشان داد."
+      },
+      {
+        "id": 15011,
+        "sentence_en": "My appreciation to you is forever.",
+        "sentence_en_meaning_fa": "سپاس من از شما برای همیشه است [تا همیشه از شما سپاسگزارم]."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 1555,
+        "pos": "noun",
+        "meaning_fa": "درک",
+        "other_meanings_fa": [
+          "فهم",
+          "شناخت"
+        ]
+      },
+      {
+        "id": 5333,
+        "pos": "noun",
+        "meaning_fa": "افزایش ارزش",
+        "other_meanings_fa": [
+          "بالارفتن قیمتافزایش بها"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 5483,
+    "word": "so called",
+    "pos": "adjective",
+    "meaning_fa": "به اصطلاح",
+    "other_meanings_fa": [],
+    "concept_explained_fa": "عنوان یا توصیفی که معمولاً با فاصله یا تردید به آن اشاره می‌شود.",
+    "sentences": [
+      {
+        "id": 3974,
+        "sentence_en": "He is a so-called expert in the field.",
+        "sentence_en_meaning_fa": "او در این حوزه یک به‌اصطلاح متخصص است."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 44570,
+        "pos": "adjective",
+        "meaning_fa": "کذایی",
+        "other_meanings_fa": [
+          "ادعایی"
+        ]
+      }
+    ],
+    "issue_types": [
+      "serious_fluency"
+    ]
+  },
+  {
+    "id": 5575,
+    "word": "toward",
+    "pos": "preposition",
+    "meaning_fa": "حوالی",
+    "other_meanings_fa": [
+      "حول و حوش"
+    ],
+    "concept_explained_fa": "برای نشان‌دادن جهت یا نزدیکی تقریبی به مکانی استفاده می‌شود، نه نقطه دقیق؛ در زمان، به نزدیکی یک نقطه یا دوره اشاره می‌کند، بدون تعیین لحظه دقیق.",
+    "sentences": [
+      {
+        "id": 4066,
+        "sentence_en": "We arrived toward the end of the day.",
+        "sentence_en_meaning_fa": "ما حوالی پایان روز رسیدیم."
+      },
+      {
+        "id": 4067,
+        "sentence_en": "He lives somewhere toward the city center.",
+        "sentence_en_meaning_fa": "او جایی حول و حوش مرکز شهر زندگی می‌کند."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 4753,
+        "pos": "preposition",
+        "meaning_fa": "به سوی",
+        "other_meanings_fa": [
+          "به سمت",
+          "طرف",
+          "به طرف",
+          "الی",
+          "در راستا"
+        ]
+      },
+      {
+        "id": 36733,
+        "pos": "preposition",
+        "meaning_fa": "با",
+        "other_meanings_fa": [
+          "نسبت به"
+        ]
+      },
+      {
+        "id": 37631,
+        "pos": "preposition",
+        "meaning_fa": "برای",
+        "other_meanings_fa": [
+          "در راه"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 5609,
+    "word": "file",
+    "pos": "verb",
+    "meaning_fa": "تشکیل دادن",
+    "other_meanings_fa": [
+      "درخواست دادن پرونده قضایی"
+    ],
+    "concept_explained_fa": "عمل ثبت و ارائه رسمی سند یا درخواست؛ اسم و مرتبط با تشکیل دادن اجزا نیست",
+    "sentences": [
+      {
+        "id": 4100,
+        "sentence_en": "They are filing a lawsuit against the company.",
+        "sentence_en_meaning_fa": "آن‌ها علیه شرکت تشکیل پرونده می‌دهند."
+      },
+      {
+        "id": 20303,
+        "sentence_en": "They plan to file for divorce next month.",
+        "sentence_en_meaning_fa": "آن‌ها قصد دارند ماه آینده درخواست طلاق بدهند."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 2458,
+        "pos": "noun",
+        "meaning_fa": "فایل",
+        "other_meanings_fa": []
+      },
+      {
+        "id": 2669,
+        "pos": "noun",
+        "meaning_fa": "سوهان",
+        "other_meanings_fa": []
+      },
+      {
+        "id": 4450,
+        "pos": "verb",
+        "meaning_fa": "بایگانی کردن",
+        "other_meanings_fa": [
+          "ثبت کردن"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 5723,
+    "word": "plague",
+    "pos": "noun",
+    "meaning_fa": "بلا",
+    "other_meanings_fa": [
+      "مصیبت"
+    ],
+    "concept_explained_fa": "بلا یا مشکل فراگیر و مداومی که افراد زیادی را آزار می‌دهد؛ همچنین نام بیماری همه‌گیر تاریخی",
+    "sentences": [
+      {
+        "id": 4214,
+        "sentence_en": "Traffic has become a plague in this area.",
+        "sentence_en_meaning_fa": "ترافیک در این منطقه به بلا تبدیل شده است."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 5722,
+        "pos": "noun",
+        "meaning_fa": "طاعون",
+        "other_meanings_fa": []
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 5812,
+    "word": "divine",
+    "pos": "adjective",
+    "meaning_fa": "مقدس",
+    "other_meanings_fa": [
+      "متبرک"
+    ],
+    "concept_explained_fa": "مربوط به خدا یا نیروی الهی؛ همچنین برای چیزی بسیار عالی یا آسمانی به‌صورت مجازی",
+    "sentences": [
+      {
+        "id": 4303,
+        "sentence_en": "It is considered a divine place.",
+        "sentence_en_meaning_fa": "آن یک مکان مقدس محسوب می‌شود."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 4338,
+        "pos": "adjective",
+        "meaning_fa": "الهی",
+        "other_meanings_fa": [
+          "خدایی"
+        ]
+      },
+      {
+        "id": 5813,
+        "pos": "adjective",
+        "meaning_fa": "آسمانی",
+        "other_meanings_fa": [
+          "ملکوتی"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 5973,
+    "word": "drive",
+    "pos": "noun",
+    "meaning_fa": "خیابان مسکونی",
+    "other_meanings_fa": [
+      "خیابان فرعی",
+      "مسیر مسکونی",
+      "خیابان یا جاده به ویژه در نام مکان",
+      "راه مسکونی",
+      "درایو در نام خیابان"
+    ],
+    "concept_explained_fa": "راه یا خیابانی معمولاً آرام و مسکونی، به‌ویژه در نام مکان‌ها؛ گاهی نیز مسیر خصوصی ورود خودرو به خانه را می‌رساند.",
+    "sentences": [
+      {
+        "id": 4403,
+        "sentence_en": "They live on a quiet drive near the lake.",
+        "sentence_en_meaning_fa": "آنها در یک خیابان مسکونی آرام نزدیک دریاچه زندگی می کنند."
+      },
+      {
+        "id": 21884,
+        "sentence_en": "Their apartment is located on Madison Drive.",
+        "sentence_en_meaning_fa": "آپارتمان آنها در خیابان مدیسون قرار دارد."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 4752,
+        "pos": "verb",
+        "meaning_fa": "رانندگی کردن",
+        "other_meanings_fa": [
+          "با اتومبیل رفتن",
+          "با اتومبیل رساندن"
+        ]
+      },
+      {
+        "id": 5039,
+        "pos": "noun",
+        "meaning_fa": "رانندگی",
+        "other_meanings_fa": []
+      },
+      {
+        "id": 37167,
+        "pos": "verb",
+        "meaning_fa": "وادار به کاری کردن",
+        "other_meanings_fa": [
+          "تحریک کردن",
+          "انگیزه دادن"
+        ]
+      },
+      {
+        "id": 37363,
+        "pos": "noun",
+        "meaning_fa": "انگیزه",
+        "other_meanings_fa": [
+          "اشتیاق"
+        ]
+      },
+      {
+        "id": 39704,
+        "pos": "verb",
+        "meaning_fa": "هدایت کردن",
+        "other_meanings_fa": [
+          "به سمتی بردن",
+          "سوق دادن"
+        ]
+      },
+      {
+        "id": 40966,
+        "pos": "noun",
+        "meaning_fa": "تلاش",
+        "other_meanings_fa": [
+          "کوشش",
+          "سعی"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 5976,
+    "word": "terrace",
+    "pos": "noun",
+    "meaning_fa": "مسیر محله ای",
+    "other_meanings_fa": [
+      "گذر محله ای",
+      "خیابان محله ای"
+    ],
+    "concept_explained_fa": "در نشانی های شهری، به مسیر کوتاه و آرام محله ای گفته می شود، نه تراس ساختمان.",
+    "sentences": [
+      {
+        "id": 4406,
+        "sentence_en": "Her house is on a quiet terrace.",
+        "sentence_en_meaning_fa": "خانه او در یک مسیر محله ای آرام است."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 2757,
+        "pos": "noun",
+        "meaning_fa": "تراس",
+        "other_meanings_fa": []
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 6073,
+    "word": "close",
+    "pos": "adjective",
+    "meaning_fa": "نزدیک",
+    "other_meanings_fa": [],
+    "concept_explained_fa": "دارای فاصله کم مکانی، زمانی یا عاطفی؛ صفت",
+    "sentences": [
+      {
+        "id": 4503,
+        "sentence_en": "The pharmacy is close to my apartment.",
+        "sentence_en_meaning_fa": "داروخانه نزدیک آپارتمان من است."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 4501,
+        "pos": "verb",
+        "meaning_fa": "بستن",
+        "other_meanings_fa": []
+      },
+      {
+        "id": 34582,
+        "pos": "adjective",
+        "meaning_fa": "صمیمی",
+        "other_meanings_fa": [
+          "نزدیک مجازی",
+          "اخت"
+        ]
+      },
+      {
+        "id": 35863,
+        "pos": "verb",
+        "meaning_fa": "برای همیشه تعطیل شدن",
+        "other_meanings_fa": [
+          "دایما بسته شدن",
+          "به فعالیت پایان دادن"
+        ]
+      },
+      {
+        "id": 37662,
+        "pos": "adjective",
+        "meaning_fa": "تنگاتنگ بودن رقابت",
+        "other_meanings_fa": [
+          "نزدیک به هم بودن"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 29969,
+    "word": "oral",
+    "pos": "adjective",
+    "meaning_fa": "کلامی",
+    "other_meanings_fa": [
+      "شفاهی",
+      "زبانی"
+    ],
+    "concept_explained_fa": "چیزی که از راه گفتار و دهان منتقل یا انجام می‌شود، در برابر نوشتاری؛ در پزشکی نیز معنی مربوط به دهان دارد.",
+    "sentences": [
+      {
+        "id": 4885,
+        "sentence_en": "The team relied on oral instructions during the emergency.",
+        "sentence_en_meaning_fa": "گروه در شرایط اضطراری به دستورالعمل‌های کلامی متکی بود."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 38612,
+        "pos": "noun",
+        "meaning_fa": "امتحان شفاهی",
+        "other_meanings_fa": [
+          "آزمون شفاهی"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 30027,
+    "word": "range",
+    "pos": "noun",
+    "meaning_fa": "گستره",
+    "other_meanings_fa": [
+      "دامنه",
+      "محدوده",
+      "مجموعه"
+    ],
+    "concept_explained_fa": "به تنوع گزینه‌ها یا فاصلهٔ میان دو حد در یک مجموعه اشاره دارد.",
+    "sentences": [
+      {
+        "id": 4990,
+        "sentence_en": "The store offers a wide range of affordable laptops.",
+        "sentence_en_meaning_fa": "فروشگاه گسترهٔ وسیعی از لپ‌تاپ‌های مقرون‌به‌صرفه ارائه می‌دهد."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 32513,
+        "pos": "verb",
+        "meaning_fa": "متغیر بودن",
+        "other_meanings_fa": [
+          "دامنه داشتن",
+          "گستره داشتن"
+        ]
+      },
+      {
+        "id": 38867,
+        "pos": "noun",
+        "meaning_fa": "اجاق",
+        "other_meanings_fa": [
+          "اجاق آشپزخانه"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 30284,
+    "word": "shed",
+    "pos": "verb",
+    "meaning_fa": "انداختن",
+    "other_meanings_fa": [
+      "ریختن"
+    ],
+    "concept_explained_fa": "به جداکردن یا رهاکردن پوشش، مو، برگ یا اشک از بدن یا سطح اشاره دارد.",
+    "sentences": [
+      {
+        "id": 5376,
+        "sentence_en": "Snakes shed their skin several times as they grow.",
+        "sentence_en_meaning_fa": "مارها هنگام رشد چندین بار پوست خود را می‌اندازند."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 5978,
+        "pos": "noun",
+        "meaning_fa": "انبار کوچک حیاط",
+        "other_meanings_fa": [
+          "انبار حیاط",
+          "آلونک",
+          "انبار"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 30441,
+    "word": "generation",
+    "pos": "noun",
+    "meaning_fa": "نسل",
+    "other_meanings_fa": [],
+    "concept_explained_fa": "گروه انسان‌هایی با دوره تولد نزدیک یا مرحله مشابه در توالی خانوادگی؛ همچنین برای نسل فناوری و محصولات به‌کار می‌رود.",
+    "sentences": [
+      {
+        "id": 6366,
+        "sentence_en": "Her generation grew up without smartphones or social media.",
+        "sentence_en_meaning_fa": "نسل او بدون تلفن‌های هوشمند یا رسانه‌های اجتماعی بزرگ شد."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 36351,
+        "pos": "noun",
+        "meaning_fa": "تولید",
+        "other_meanings_fa": [
+          "ساخت"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 30641,
+    "word": "archive",
+    "pos": "noun",
+    "meaning_fa": "بایگانی",
+    "other_meanings_fa": [
+      "اتاق یا اداره بایگانی",
+      "آرشیو"
+    ],
+    "concept_explained_fa": "مجموعه سازمان‌یافته اسناد و داده‌های تاریخی، یا محل و سامانه نگهداری و دسترسی به آنها است.",
+    "sentences": [
+      {
+        "id": 6818,
+        "sentence_en": "The archive contains letters from the nineteenth century.",
+        "sentence_en_meaning_fa": "این آرشیو نامه‌هایی از قرن نوزدهم دارد."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 41548,
+        "pos": "verb",
+        "meaning_fa": "بایگانی کردن",
+        "other_meanings_fa": [
+          "آرشیو کردن"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 30756,
+    "word": "discharge",
+    "pos": "verb",
+    "meaning_fa": "مرخص کردن",
+    "other_meanings_fa": [
+      "ترخیص کردن"
+    ],
+    "concept_explained_fa": "به پایان رسمی خدمت نظامی یا اقامت درمانی و اجازه خروج فرد از آن نهاد اشاره دارد.",
+    "sentences": [
+      {
+        "id": 6993,
+        "sentence_en": "He was discharged from the army following his injury.",
+        "sentence_en_meaning_fa": "او به‌خاطر جراحتش از ارتش مرخص شد."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 38220,
+        "pos": "verb",
+        "meaning_fa": "آزاد کردن",
+        "other_meanings_fa": []
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 31009,
+    "word": "trash",
+    "pos": "verb",
+    "meaning_fa": "داغون کردن",
+    "other_meanings_fa": [
+      "نابود کردن"
+    ],
+    "concept_explained_fa": "در کاربرد عامیانه، به تخریب شدید مکان یا وسیله، یا بدگویی تند از چیزی اشاره دارد.",
+    "sentences": [
+      {
+        "id": 8662,
+        "sentence_en": "My brother borrowed my car and trashed it.",
+        "sentence_en_meaning_fa": "برادرم اتومبیلم را قرض گرفت و آن را داغون کرد."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 2713,
+        "pos": "noun",
+        "meaning_fa": "زباله",
+        "other_meanings_fa": [
+          "آشغال"
+        ]
+      },
+      {
+        "id": 42027,
+        "pos": "noun",
+        "meaning_fa": "چیز مزخرف",
+        "other_meanings_fa": [
+          "چیز بی ارزش",
+          "چیز بی کیفیت"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 31030,
+    "word": "hot",
+    "pos": "adjective",
+    "meaning_fa": "جذاب",
+    "other_meanings_fa": [],
+    "concept_explained_fa": "در گفتار غیررسمی، برای فردی از نظر ظاهری بسیار جذاب و دارای کشش جنسی.",
+    "sentences": [
+      {
+        "id": 8704,
+        "sentence_en": "You were as hot for me as I was for you.",
+        "sentence_en_meaning_fa": "تو همانقدر برای من جذاب بودی که من برای تو بودم."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 4701,
+        "pos": "adjective",
+        "meaning_fa": "داغ",
+        "other_meanings_fa": [
+          "گرم"
+        ]
+      },
+      {
+        "id": 37508,
+        "pos": "adjective",
+        "meaning_fa": "جنجالی",
+        "other_meanings_fa": [
+          "جنجال برانگیز",
+          "جنجال آفرین"
+        ]
+      }
+    ],
+    "issue_types": [
+      "serious_fluency"
+    ]
+  },
+  {
+    "id": 31493,
+    "word": "go together",
+    "pos": "verb",
+    "meaning_fa": "ارتباط داشتن",
+    "other_meanings_fa": [
+      "به هم ربط داشتن"
+    ],
+    "concept_explained_fa": "دو پدیده معمولاً همراه باشند و با هم ارتباط داشته باشند.",
+    "sentences": [
+      {
+        "id": 9596,
+        "sentence_en": "Disease and poverty often go together.",
+        "sentence_en_meaning_fa": "بیماری و فقر اغلب با هم ارتباط دارند."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 44611,
+        "pos": "phrasal verb",
+        "meaning_fa": "به هم آمدن",
+        "other_meanings_fa": []
+      }
+    ],
+    "issue_types": [
+      "serious_fluency"
+    ]
+  },
+  {
+    "id": 31631,
+    "word": "run out",
+    "pos": "verb",
+    "meaning_fa": "منقضی شدن",
+    "other_meanings_fa": [
+      "باطل شدن"
+    ],
+    "concept_explained_fa": "در این کاربرد، رسیدن مدت اعتبار مجوز، قرارداد یا مهلت به پایان؛ بیشتر بر تمام شدن زمان تأکید دارد.",
+    "sentences": [
+      {
+        "id": 9776,
+        "sentence_en": "My contract runs out in September.",
+        "sentence_en_meaning_fa": "قرارداد من در ماه سپتامبر منقضی می‌شود."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 1698,
+        "pos": "phrasal verb",
+        "meaning_fa": "تمام شدن",
+        "other_meanings_fa": [
+          "ته کشیدن",
+          "به اتمام رسیدن"
+        ]
+      }
+    ],
+    "issue_types": [
+      "serious_fluency"
+    ]
+  },
+  {
+    "id": 31654,
+    "word": "set off",
+    "pos": "verb",
+    "meaning_fa": "آغاز کردن",
+    "other_meanings_fa": [
+      "شروع کردن"
+    ],
+    "concept_explained_fa": "در این کاربرد، به آغاز سفر، حرکت یا رویدادی که واکنش‌ها را شروع می‌کند اشاره دارد.",
+    "sentences": [
+      {
+        "id": 9807,
+        "sentence_en": "It set off a chain reaction.",
+        "sentence_en_meaning_fa": "آن، واکنشی زنجیره‌ای را آغاز کرد."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 42038,
+        "pos": "verb",
+        "meaning_fa": "منفجر کردن",
+        "other_meanings_fa": [
+          "ترکاندن"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 32318,
+    "word": "against",
+    "pos": "preposition",
+    "meaning_fa": "در مقابل",
+    "other_meanings_fa": [
+      "در برابر",
+      "مقابل"
+    ],
+    "concept_explained_fa": "مخالفت، رقابت، تماس یا تکیه در برابر شخص یا چیز را نشان می‌دهد؛ معنایی گسترده‌تر از رقابت ساده دارد.",
+    "sentences": [
+      {
+        "id": 10656,
+        "sentence_en": "Germany is playing against Brazil in the final tonight.",
+        "sentence_en_meaning_fa": "آلمان امشب در مسابقه فینال در برابر برزیل بازی می‌کند."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 36732,
+        "pos": "preposition",
+        "meaning_fa": "مخالف",
+        "other_meanings_fa": [
+          "علیه",
+          "ضد"
+        ]
+      },
+      {
+        "id": 40507,
+        "pos": "preposition",
+        "meaning_fa": "کنار",
+        "other_meanings_fa": [
+          "چسبیده به"
+        ]
+      },
+      {
+        "id": 44904,
+        "pos": "preposition",
+        "meaning_fa": "خلاف",
+        "other_meanings_fa": []
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 32319,
+    "word": "ring",
+    "pos": "verb",
+    "meaning_fa": "زنگ زدن",
+    "other_meanings_fa": [],
+    "concept_explained_fa": "در این کاربرد، به تماس تلفنی با شخص یا به‌صدا درآوردن زنگ اشاره دارد.",
+    "sentences": [
+      {
+        "id": 10657,
+        "sentence_en": "When is the best time to ring New York?",
+        "sentence_en_meaning_fa": "چه زمانی بهترین وقت برای زنگ زدن به نیویورک است؟"
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 3646,
+        "pos": "noun",
+        "meaning_fa": "انگشتر",
+        "other_meanings_fa": [
+          "حلقه",
+          "طوقه"
+        ]
+      },
+      {
+        "id": 36392,
+        "pos": "noun",
+        "meaning_fa": "گروه",
+        "other_meanings_fa": [
+          "دایره"
+        ]
+      },
+      {
+        "id": 40545,
+        "pos": "noun",
+        "meaning_fa": "صدای زنگ",
+        "other_meanings_fa": []
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 32328,
+    "word": "quite",
+    "pos": "adverb",
+    "meaning_fa": "بسیار",
+    "other_meanings_fa": [
+      "خیلی",
+      "زیاد"
+    ],
+    "concept_explained_fa": "برای نشان دادن درجه یا شدت زیادِ یک ویژگی.",
+    "sentences": [
+      {
+        "id": 10667,
+        "sentence_en": "My new school is quite different.",
+        "sentence_en_meaning_fa": "مدرسه جدید من بسیار متفاوت است."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 43456,
+        "pos": "adverb",
+        "meaning_fa": "نسبتا",
+        "other_meanings_fa": [
+          "تا حدودی"
+        ]
+      },
+      {
+        "id": 44639,
+        "pos": "adverb",
+        "meaning_fa": "کاملا",
+        "other_meanings_fa": []
+      },
+      {
+        "id": 44640,
+        "pos": "adverb",
+        "meaning_fa": "واقعا",
+        "other_meanings_fa": [
+          "حقیقتا"
+        ]
+      }
+    ],
+    "issue_types": [
+      "serious_fluency"
+    ]
+  },
+  {
+    "id": 32398,
+    "word": "clearly",
+    "pos": "adverb",
+    "meaning_fa": "به وضوح",
+    "other_meanings_fa": [
+      "به طور واضح",
+      "آشکارا",
+      "روشن و واضح"
+    ],
+    "concept_explained_fa": "به‌صورت روشن و بدون ابهام؛ در مورد فکر کردن، به‌درستی و با تمرکز.",
+    "sentences": [
+      {
+        "id": 10740,
+        "sentence_en": "I'd had two hours' sleep and wasn't thinking clearly.",
+        "sentence_en_meaning_fa": "فقط دو ساعت خوابیده بودم و نمی‌توانستم درست فکر کنم."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 44030,
+        "pos": "adverb",
+        "meaning_fa": "بدون شک",
+        "other_meanings_fa": [
+          "بی تردید",
+          "مسلما"
+        ]
+      },
+      {
+        "id": 44649,
+        "pos": "adverb",
+        "meaning_fa": "معلوم است که",
+        "other_meanings_fa": []
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 32496,
+    "word": "average",
+    "pos": "noun",
+    "meaning_fa": "میانگین",
+    "other_meanings_fa": [
+      "میانگین حسابی",
+      "مقدار متوسط",
+      "میزان متوسط"
+    ],
+    "concept_explained_fa": "در کاربرد معمول، عدد حاصل از جمع چند مقدار و تقسیم بر تعداد آن‌ها؛ در گفتار می‌تواند مفهوم متوسط را گسترده‌تر بیان کند.",
+    "sentences": [
+      {
+        "id": 10846,
+        "sentence_en": "The average of ten and twenty is fifteen.",
+        "sentence_en_meaning_fa": "میانگین ده و بیست، پانزده است."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 32498,
+        "pos": "adjective",
+        "meaning_fa": "معمولی و در حد متوسط",
+        "other_meanings_fa": [
+          "متوسط",
+          "نه برجسته و نه ضعیف"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 32865,
+    "word": "curious",
+    "pos": "adjective",
+    "meaning_fa": "کنجکاو",
+    "other_meanings_fa": [],
+    "concept_explained_fa": "به تمایل فعال برای دانستن یا کشف موضوعی اشاره دارد، نه نامعمول‌بودن آن.",
+    "sentences": [
+      {
+        "id": 11263,
+        "sentence_en": "The kids were curious about the noise upstairs.",
+        "sentence_en_meaning_fa": "بچه‌ها دربارهٔ صدای طبقهٔ بالا کنجکاو بودند."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 30291,
+        "pos": "adjective",
+        "meaning_fa": "عجیب غریب",
+        "other_meanings_fa": [
+          "نامعمول",
+          "غریب"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 32879,
+    "word": "mold",
+    "pos": "verb",
+    "meaning_fa": "قالب گیری کردن",
+    "other_meanings_fa": [
+      "شکل دادن",
+      "قالب گرفتن"
+    ],
+    "concept_explained_fa": "به شکل‌دادن ماده در قالب یا پرورش شخصیت و رفتار به شکلی خاص اشاره دارد.",
+    "sentences": [
+      {
+        "id": 11281,
+        "sentence_en": "First, mold the clay into the desired shape.",
+        "sentence_en_meaning_fa": "ابتدا، گل رس را به شکل دلخواه قالب‌گیری کنید."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 39354,
+        "pos": "noun",
+        "meaning_fa": "کپک",
+        "other_meanings_fa": [
+          "قارچ"
+        ]
+      },
+      {
+        "id": 42385,
+        "pos": "noun",
+        "meaning_fa": "قالب",
+        "other_meanings_fa": []
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 32908,
+    "word": "domestic",
+    "pos": "adjective",
+    "meaning_fa": "مربوط به داخل یک کشور",
+    "other_meanings_fa": [
+      "داخلی",
+      "درون کشوری"
+    ],
+    "concept_explained_fa": "مربوط به امور درون مرزهای یک کشور، یا خانه و خانواده؛ در این معنی در برابر خارجی است.",
+    "sentences": [
+      {
+        "id": 11315,
+        "sentence_en": "Domestic flights leave from the eastern terminal.",
+        "sentence_en_meaning_fa": "پروازهای داخلی از پایانهٔ شرقی حرکت می‌کنند."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 32180,
+        "pos": "adjective",
+        "meaning_fa": "مربوط به خانه",
+        "other_meanings_fa": [
+          "خانگی"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 34100,
+    "word": "filter",
+    "pos": "verb",
+    "meaning_fa": "تصفیه کردن",
+    "other_meanings_fa": [
+      "از صافی گذراندن",
+      "پالودن",
+      "صاف کردن"
+    ],
+    "concept_explained_fa": "مایع، هوا یا اطلاعات را از صافی یا معیار عبور دادن تا بخش‌های نامطلوب جدا یا حذف شوند.",
+    "sentences": [
+      {
+        "id": 12879,
+        "sentence_en": "You need to filter the water before you drink it.",
+        "sentence_en_meaning_fa": "باید این آب را قبل از آشامیدن، تصفیه کنی [از صافی بگذرانی]."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 37209,
+        "pos": "verb",
+        "meaning_fa": "آهسته رد شدن",
+        "other_meanings_fa": [
+          "عبور کردن",
+          "به آرامی حرکت کردن"
+        ]
+      },
+      {
+        "id": 42536,
+        "pos": "noun",
+        "meaning_fa": "فیلتر (اینترنت)",
+        "other_meanings_fa": []
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 34215,
+    "word": "virtually",
+    "pos": "adverb",
+    "meaning_fa": "تقریبا",
+    "other_meanings_fa": [
+      "عملا",
+      "به جز در مواردی ناچیز"
+    ],
+    "concept_explained_fa": "آن‌قدر نزدیک به حالت کامل که تفاوت اندک باقی‌مانده اهمیت عملی ندارد؛ در این معنی ربطی به فضای دیجیتال ندارد.",
+    "sentences": [
+      {
+        "id": 13021,
+        "sentence_en": "The two designs are virtually identical in appearance.",
+        "sentence_en_meaning_fa": "این دو طرح از نظر ظاهر تقریباً یکسان‌اند."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 41294,
+        "pos": "adverb",
+        "meaning_fa": "به طور مجازی",
+        "other_meanings_fa": [
+          "مجازا"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 34680,
+    "word": "pity",
+    "pos": "noun",
+    "meaning_fa": "حیف",
+    "other_meanings_fa": [
+      "دریغ"
+    ],
+    "concept_explained_fa": "در عبارت گفتاری برای ابراز تأسف از اتفاق یا فرصت ناخوشایند؛ همچنین در معنای دیگر به ترحم اشاره دارد.",
+    "sentences": [
+      {
+        "id": 13516,
+        "sentence_en": "It's a pity (that) she can't come to the movies with us.",
+        "sentence_en_meaning_fa": "حیف شد که او نمی‌تواند با ما به سینما بیاید."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 1564,
+        "pos": "noun",
+        "meaning_fa": "دلسوزی",
+        "other_meanings_fa": [
+          "ترحم",
+          "همدردی"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 34993,
+    "word": "silver",
+    "pos": "adjective",
+    "meaning_fa": "نقره ای",
+    "other_meanings_fa": [
+      "به رنگ نقره",
+      "سیمین"
+    ],
+    "concept_explained_fa": "چیزی را توصیف می‌کند که رنگ خاکستری روشن و براق شبیه فلز نقره دارد یا از نقره ساخته شده است.",
+    "sentences": [
+      {
+        "id": 13843,
+        "sentence_en": "A silver car stopped outside the house.",
+        "sentence_en_meaning_fa": "یک خودروی نقره‌ای بیرون خانه توقف کرد."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 2733,
+        "pos": "noun",
+        "meaning_fa": "نقره",
+        "other_meanings_fa": []
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 35038,
+    "word": "dream",
+    "pos": "noun",
+    "meaning_fa": "رویا",
+    "other_meanings_fa": [
+      "خواب",
+      "رویایی"
+    ],
+    "concept_explained_fa": "تجربه‌ای از تصویرها و رویدادهای ذهنی هنگام خواب، یا آرزویی برای آینده، است.",
+    "sentences": [
+      {
+        "id": 13889,
+        "sentence_en": "I had a very odd dream about you last night.",
+        "sentence_en_meaning_fa": "دیشب خواب خیلی عجیبی درباره تو دیدم."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 32214,
+        "pos": "verb",
+        "meaning_fa": "رویا دیدن",
+        "other_meanings_fa": [
+          "خواب دیدن"
+        ]
+      },
+      {
+        "id": 35432,
+        "pos": "noun",
+        "meaning_fa": "هدف",
+        "other_meanings_fa": [
+          "آرزو",
+          "رویا"
+        ]
+      },
+      {
+        "id": 35433,
+        "pos": "verb",
+        "meaning_fa": "آرزو داشتن",
+        "other_meanings_fa": [
+          "تصور کردن"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 35064,
+    "word": "memory",
+    "pos": "noun",
+    "meaning_fa": "خاطره",
+    "other_meanings_fa": [
+      "یاد"
+    ],
+    "concept_explained_fa": "خاطره یا تصویر ذهنی از شخص، رویداد یا تجربه گذشته؛ همچنین توانایی ذهن برای به خاطر سپردن را بیان می‌کند.",
+    "sentences": [
+      {
+        "id": 13915,
+        "sentence_en": "My memories of her will haunt me for ever.",
+        "sentence_en_meaning_fa": "خاطرات من از او، مرا برای همیشه عذاب خواهد داد."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 32447,
+        "pos": "noun",
+        "meaning_fa": "حافظه انسان و رایانه",
+        "other_meanings_fa": [
+          "حافظه",
+          "خاطر",
+          "ذهن"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 35106,
+    "word": "pirate",
+    "pos": "noun",
+    "meaning_fa": "دزد دریایی",
+    "other_meanings_fa": [
+      "دریازن",
+      "مهاجم و غارتگر کشتی ها"
+    ],
+    "concept_explained_fa": "کسی است که در دریا به کشتی‌ها حمله می‌کند یا از آن‌ها می‌دزدد؛ کاربردهای دیجیتال معنای دیگری دارند.",
+    "sentences": [
+      {
+        "id": 13959,
+        "sentence_en": "The pirate hid the stolen goods below deck.",
+        "sentence_en_meaning_fa": "دزد دریایی کالاهای دزدیده‌شده را زیر عرشه پنهان کرد."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 40145,
+        "pos": "verb",
+        "meaning_fa": "غیرقانونی تکثیر کردن",
+        "other_meanings_fa": []
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 35391,
+    "word": "icy",
+    "pos": "adjective",
+    "meaning_fa": "بسیار سرد",
+    "other_meanings_fa": [
+      "یخ زده نما",
+      "سرد مانند یخ"
+    ],
+    "concept_explained_fa": "بسیار سرد مانند یخ یا پوشیده از یخ؛ همچنین برای رفتار و لحن بسیار سرد و غیردوستانه کاربرد دارد.",
+    "sentences": [
+      {
+        "id": 14271,
+        "sentence_en": "An icy wind blew across the empty field.",
+        "sentence_en_meaning_fa": "باد بسیار سردی از روی مزرعهٔ خالی وزید."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 36722,
+        "pos": "adjective",
+        "meaning_fa": "بسیار سرد و غیردوستانه",
+        "other_meanings_fa": [
+          "سرد و بی مهر",
+          "خصمانه"
+        ]
+      },
+      {
+        "id": 43370,
+        "pos": "adjective",
+        "meaning_fa": "یخ زده",
+        "other_meanings_fa": [
+          "پوشیده از یخ"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 35471,
+    "word": "put up",
+    "pos": "verb",
+    "meaning_fa": "بالا بردن",
+    "other_meanings_fa": [],
+    "concept_explained_fa": "دست، وسیله یا چیزی را به موقعیت بالاتر بردن؛ محاوره‌ای و وابسته به بافت، با معنی‌های متعدد دیگر.",
+    "sentences": [
+      {
+        "id": 14352,
+        "sentence_en": "I put my hand up to ask the teacher a question.",
+        "sentence_en_meaning_fa": "دستم را بالا بردم تا از معلم سؤالی بپرسم."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 4923,
+        "pos": "phrasal verb",
+        "meaning_fa": "برپا کردن",
+        "other_meanings_fa": [
+          "نصب کردن",
+          "به دیوار زدن"
+        ]
+      },
+      {
+        "id": 31052,
+        "pos": "verb",
+        "meaning_fa": "جا دادن",
+        "other_meanings_fa": [
+          "مسکن دادن",
+          "اتاق دادن"
+        ]
+      },
+      {
+        "id": 32035,
+        "pos": "verb",
+        "meaning_fa": "متقاعد به کاری اشتباه یا احمقانه کردن",
+        "other_meanings_fa": []
+      },
+      {
+        "id": 44545,
+        "pos": "phrasal verb",
+        "meaning_fa": "ساختن",
+        "other_meanings_fa": []
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 35613,
+    "word": "western",
+    "pos": "adjective",
+    "meaning_fa": "غربی",
+    "other_meanings_fa": [
+      "واقع در غرب",
+      "مربوط به غرب"
+    ],
+    "concept_explained_fa": "مربوط به بخش غربی یک ناحیه یا به فرهنگ و کشورهای غربی؛ دامنهٔ معنایی آن از صرف جهت جغرافیایی گسترده‌تر است.",
+    "sentences": [
+      {
+        "id": 14501,
+        "sentence_en": "The western hills receive snow every winter.",
+        "sentence_en_meaning_fa": "تپه‌های غربی هر زمستان برف دریافت می‌کنند."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 38528,
+        "pos": "noun",
+        "meaning_fa": "فیلم وسترن",
+        "other_meanings_fa": []
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 35618,
+    "word": "sink",
+    "pos": "verb",
+    "meaning_fa": "غرق شدن",
+    "other_meanings_fa": [
+      "ته رفتن",
+      "فرو رفتن"
+    ],
+    "concept_explained_fa": "پایین‌رفتن در آب یا مادهٔ نرم، معمولاً بر اثر وزن؛ همچنین کاهش تدریجی سطح یا وضعیت.",
+    "sentences": [
+      {
+        "id": 14506,
+        "sentence_en": "The boat filled with water and began to sink.",
+        "sentence_en_meaning_fa": "قایق پر از آب شد و شروع به غرق شدن کرد."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 3599,
+        "pos": "noun",
+        "meaning_fa": "سینک",
+        "other_meanings_fa": []
+      },
+      {
+        "id": 36162,
+        "pos": "verb",
+        "meaning_fa": "پایین آمدن",
+        "other_meanings_fa": [
+          "نزول یافتن",
+          "کم شدن"
+        ]
+      },
+      {
+        "id": 39607,
+        "pos": "verb",
+        "meaning_fa": "توپ را وارد حفره کردن",
+        "other_meanings_fa": [
+          "توپ را پاکت کردن",
+          "پات کردن"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  },
+  {
+    "id": 35626,
+    "word": "gain",
+    "pos": "verb",
+    "meaning_fa": "به دست آوردن",
+    "other_meanings_fa": [
+      "جمع کردن",
+      "کسب کردن",
+      "نفع بردن"
+    ],
+    "concept_explained_fa": "به به‌دست آوردن پول، دانش، مزیت، وزن یا چیز ارزشمند در طول زمان اشاره دارد.",
+    "sentences": [
+      {
+        "id": 14514,
+        "sentence_en": "The party gained over 50% of the vote.",
+        "sentence_en_meaning_fa": "(آن) حزب بیش از 50% آرا را به‌دست آورد."
+      }
+    ],
+    "sibling_senses": [
+      {
+        "id": 41465,
+        "pos": "noun",
+        "meaning_fa": "سود",
+        "other_meanings_fa": [
+          "منفعت",
+          "بهره",
+          "استفاده"
+        ]
+      }
+    ],
+    "issue_types": [
+      "other_sense_reference"
+    ]
+  }
+]

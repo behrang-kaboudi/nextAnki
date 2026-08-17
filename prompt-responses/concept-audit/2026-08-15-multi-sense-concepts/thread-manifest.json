@@ -1,0 +1,279 @@
+{
+  "projectId": "8fb394cb-9f70-4afc-bf64-fe7a8771b8d7",
+  "projectLabel": "PromptAnswers",
+  "model": "gpt-5.6-sol",
+  "thinking": "low",
+  "taskCount": 30,
+  "tasks": [
+    {
+      "batchId": "batch-001",
+      "issueType": "other-sense",
+      "title": "Concept audit batch-001 other-sense",
+      "promptPath": "/Users/seyedbehrangkaboudi/Personal-Local/Projects/NextJS/Anki/prompt-responses/concept-audit/2026-08-15-multi-sense-concepts/batches/batch-001/other-sense/prompt.md",
+      "threadId": "01a007d1-6afe-7033-897c-8a3fe5ff1d3e",
+      "clientThreadId": null,
+      "hostId": "local"
+    },
+    {
+      "batchId": "batch-002",
+      "issueType": "other-sense",
+      "title": "Concept audit batch-002 other-sense",
+      "promptPath": "/Users/seyedbehrangkaboudi/Personal-Local/Projects/NextJS/Anki/prompt-responses/concept-audit/2026-08-15-multi-sense-concepts/batches/batch-002/other-sense/prompt.md",
+      "threadId": "01a007d1-68e9-7a41-ab00-00f6ab083317",
+      "clientThreadId": null,
+      "hostId": "local"
+    },
+    {
+      "batchId": "batch-003",
+      "issueType": "other-sense",
+      "title": "Concept audit batch-003 other-sense",
+      "promptPath": "/Users/seyedbehrangkaboudi/Personal-Local/Projects/NextJS/Anki/prompt-responses/concept-audit/2026-08-15-multi-sense-concepts/batches/batch-003/other-sense/prompt.md",
+      "threadId": "01a007d1-6da9-7140-87b0-5236ce8a286c",
+      "clientThreadId": null,
+      "hostId": "local"
+    },
+    {
+      "batchId": "batch-004",
+      "issueType": "other-sense",
+      "title": "Concept audit batch-004 other-sense",
+      "promptPath": "/Users/seyedbehrangkaboudi/Personal-Local/Projects/NextJS/Anki/prompt-responses/concept-audit/2026-08-15-multi-sense-concepts/batches/batch-004/other-sense/prompt.md",
+      "threadId": "01a007d1-710c-7263-bdf0-0980d111e05d",
+      "clientThreadId": null,
+      "hostId": "local"
+    },
+    {
+      "batchId": "batch-005",
+      "issueType": "other-sense",
+      "title": "Concept audit batch-005 other-sense",
+      "promptPath": "/Users/seyedbehrangkaboudi/Personal-Local/Projects/NextJS/Anki/prompt-responses/concept-audit/2026-08-15-multi-sense-concepts/batches/batch-005/other-sense/prompt.md",
+      "threadId": "01a007d1-75c0-7b70-9bcb-768a069a3e86",
+      "clientThreadId": null,
+      "hostId": "local"
+    },
+    {
+      "batchId": "batch-006",
+      "issueType": "other-sense",
+      "title": "Concept audit batch-006 other-sense",
+      "promptPath": "/Users/seyedbehrangkaboudi/Personal-Local/Projects/NextJS/Anki/prompt-responses/concept-audit/2026-08-15-multi-sense-concepts/batches/batch-006/other-sense/prompt.md",
+      "threadId": "01a007d1-795a-72f1-ad5b-bf993c8889a8",
+      "clientThreadId": null,
+      "hostId": "local"
+    },
+    {
+      "batchId": "batch-007",
+      "issueType": "other-sense",
+      "title": "Concept audit batch-007 other-sense",
+      "promptPath": "/Users/seyedbehrangkaboudi/Personal-Local/Projects/NextJS/Anki/prompt-responses/concept-audit/2026-08-15-multi-sense-concepts/batches/batch-007/other-sense/prompt.md",
+      "threadId": "01a007d1-7c93-7b13-904c-446c1931e3c9",
+      "clientThreadId": null,
+      "hostId": "local"
+    },
+    {
+      "batchId": "batch-008",
+      "issueType": "other-sense",
+      "title": "Concept audit batch-008 other-sense",
+      "promptPath": "/Users/seyedbehrangkaboudi/Personal-Local/Projects/NextJS/Anki/prompt-responses/concept-audit/2026-08-15-multi-sense-concepts/batches/batch-008/other-sense/prompt.md",
+      "threadId": "01a007d1-8114-7463-b5b6-d15a536e9ee9",
+      "clientThreadId": null,
+      "hostId": "local"
+    },
+    {
+      "batchId": "batch-009",
+      "issueType": "other-sense",
+      "title": "Concept audit batch-009 other-sense",
+      "promptPath": "/Users/seyedbehrangkaboudi/Personal-Local/Projects/NextJS/Anki/prompt-responses/concept-audit/2026-08-15-multi-sense-concepts/batches/batch-009/other-sense/prompt.md",
+      "threadId": "01a007d1-848b-7c20-9dc1-7c637b9800db",
+      "clientThreadId": null,
+      "hostId": "local"
+    },
+    {
+      "batchId": "batch-010",
+      "issueType": "other-sense",
+      "title": "Concept audit batch-010 other-sense",
+      "promptPath": "/Users/seyedbehrangkaboudi/Personal-Local/Projects/NextJS/Anki/prompt-responses/concept-audit/2026-08-15-multi-sense-concepts/batches/batch-010/other-sense/prompt.md",
+      "threadId": "01a007d1-891b-76c1-be6b-35a522b9bff1",
+      "clientThreadId": null,
+      "hostId": "local"
+    },
+    {
+      "batchId": "batch-011",
+      "issueType": "other-sense",
+      "title": "Concept audit batch-011 other-sense",
+      "promptPath": "/Users/seyedbehrangkaboudi/Personal-Local/Projects/NextJS/Anki/prompt-responses/concept-audit/2026-08-15-multi-sense-concepts/batches/batch-011/other-sense/prompt.md",
+      "threadId": "01a007d1-8ced-7bc0-a8c0-fea8965853a0",
+      "clientThreadId": null,
+      "hostId": "local"
+    },
+    {
+      "batchId": "batch-012",
+      "issueType": "other-sense",
+      "title": "Concept audit batch-012 other-sense",
+      "promptPath": "/Users/seyedbehrangkaboudi/Personal-Local/Projects/NextJS/Anki/prompt-responses/concept-audit/2026-08-15-multi-sense-concepts/batches/batch-012/other-sense/prompt.md",
+      "threadId": "01a007d1-91e6-7162-9560-4ba4ce897c21",
+      "clientThreadId": null,
+      "hostId": "local"
+    },
+    {
+      "batchId": "batch-013",
+      "issueType": "other-sense",
+      "title": "Concept audit batch-013 other-sense",
+      "promptPath": "/Users/seyedbehrangkaboudi/Personal-Local/Projects/NextJS/Anki/prompt-responses/concept-audit/2026-08-15-multi-sense-concepts/batches/batch-013/other-sense/prompt.md",
+      "threadId": "01a007d1-9597-7563-b212-9165634b9aed",
+      "clientThreadId": null,
+      "hostId": "local"
+    },
+    {
+      "batchId": "batch-014",
+      "issueType": "other-sense",
+      "title": "Concept audit batch-014 other-sense",
+      "promptPath": "/Users/seyedbehrangkaboudi/Personal-Local/Projects/NextJS/Anki/prompt-responses/concept-audit/2026-08-15-multi-sense-concepts/batches/batch-014/other-sense/prompt.md",
+      "threadId": "01a007d1-9924-7ad3-8bc1-6d9e990cbb6f",
+      "clientThreadId": null,
+      "hostId": "local"
+    },
+    {
+      "batchId": "batch-015",
+      "issueType": "other-sense",
+      "title": "Concept audit batch-015 other-sense",
+      "promptPath": "/Users/seyedbehrangkaboudi/Personal-Local/Projects/NextJS/Anki/prompt-responses/concept-audit/2026-08-15-multi-sense-concepts/batches/batch-015/other-sense/prompt.md",
+      "threadId": "01a007d1-9d2f-7c21-adce-cbc4aec2b639",
+      "clientThreadId": null,
+      "hostId": "local"
+    },
+    {
+      "batchId": "batch-001",
+      "issueType": "serious-fluency",
+      "title": "Concept audit batch-001 serious-fluency",
+      "promptPath": "/Users/seyedbehrangkaboudi/Personal-Local/Projects/NextJS/Anki/prompt-responses/concept-audit/2026-08-15-multi-sense-concepts/batches/batch-001/serious-fluency/prompt.md",
+      "threadId": "01a007d1-a267-7340-a551-62873bcbbb22",
+      "clientThreadId": null,
+      "hostId": "local"
+    },
+    {
+      "batchId": "batch-002",
+      "issueType": "serious-fluency",
+      "title": "Concept audit batch-002 serious-fluency",
+      "promptPath": "/Users/seyedbehrangkaboudi/Personal-Local/Projects/NextJS/Anki/prompt-responses/concept-audit/2026-08-15-multi-sense-concepts/batches/batch-002/serious-fluency/prompt.md",
+      "threadId": "01a007d1-a839-7d02-a6a7-5abab6b64cb9",
+      "clientThreadId": null,
+      "hostId": "local"
+    },
+    {
+      "batchId": "batch-003",
+      "issueType": "serious-fluency",
+      "title": "Concept audit batch-003 serious-fluency",
+      "promptPath": "/Users/seyedbehrangkaboudi/Personal-Local/Projects/NextJS/Anki/prompt-responses/concept-audit/2026-08-15-multi-sense-concepts/batches/batch-003/serious-fluency/prompt.md",
+      "threadId": "01a007d1-adb1-7cb2-91bf-cf77cebcb918",
+      "clientThreadId": null,
+      "hostId": "local"
+    },
+    {
+      "batchId": "batch-004",
+      "issueType": "serious-fluency",
+      "title": "Concept audit batch-004 serious-fluency",
+      "promptPath": "/Users/seyedbehrangkaboudi/Personal-Local/Projects/NextJS/Anki/prompt-responses/concept-audit/2026-08-15-multi-sense-concepts/batches/batch-004/serious-fluency/prompt.md",
+      "threadId": "01a007d1-b9f9-7ba3-94e3-f1942528b3d1",
+      "clientThreadId": null,
+      "hostId": "local"
+    },
+    {
+      "batchId": "batch-005",
+      "issueType": "serious-fluency",
+      "title": "Concept audit batch-005 serious-fluency",
+      "promptPath": "/Users/seyedbehrangkaboudi/Personal-Local/Projects/NextJS/Anki/prompt-responses/concept-audit/2026-08-15-multi-sense-concepts/batches/batch-005/serious-fluency/prompt.md",
+      "threadId": "01a007d1-b37c-7860-811b-a54e76cb6f59",
+      "clientThreadId": null,
+      "hostId": "local"
+    },
+    {
+      "batchId": "batch-006",
+      "issueType": "serious-fluency",
+      "title": "Concept audit batch-006 serious-fluency",
+      "promptPath": "/Users/seyedbehrangkaboudi/Personal-Local/Projects/NextJS/Anki/prompt-responses/concept-audit/2026-08-15-multi-sense-concepts/batches/batch-006/serious-fluency/prompt.md",
+      "threadId": "01a007d1-bfef-76e1-ab24-314918ac240e",
+      "clientThreadId": null,
+      "hostId": "local"
+    },
+    {
+      "batchId": "batch-007",
+      "issueType": "serious-fluency",
+      "title": "Concept audit batch-007 serious-fluency",
+      "promptPath": "/Users/seyedbehrangkaboudi/Personal-Local/Projects/NextJS/Anki/prompt-responses/concept-audit/2026-08-15-multi-sense-concepts/batches/batch-007/serious-fluency/prompt.md",
+      "threadId": "01a007d1-c3be-7002-8a23-c539d950951f",
+      "clientThreadId": null,
+      "hostId": "local"
+    },
+    {
+      "batchId": "batch-008",
+      "issueType": "serious-fluency",
+      "title": "Concept audit batch-008 serious-fluency",
+      "promptPath": "/Users/seyedbehrangkaboudi/Personal-Local/Projects/NextJS/Anki/prompt-responses/concept-audit/2026-08-15-multi-sense-concepts/batches/batch-008/serious-fluency/prompt.md",
+      "threadId": "01a007d1-c866-77f2-aeef-232ad4c7d48f",
+      "clientThreadId": null,
+      "hostId": "local"
+    },
+    {
+      "batchId": "batch-009",
+      "issueType": "serious-fluency",
+      "title": "Concept audit batch-009 serious-fluency",
+      "promptPath": "/Users/seyedbehrangkaboudi/Personal-Local/Projects/NextJS/Anki/prompt-responses/concept-audit/2026-08-15-multi-sense-concepts/batches/batch-009/serious-fluency/prompt.md",
+      "threadId": "01a007d1-ccc0-73d0-ad10-7c9e44b90b72",
+      "clientThreadId": null,
+      "hostId": "local"
+    },
+    {
+      "batchId": "batch-010",
+      "issueType": "serious-fluency",
+      "title": "Concept audit batch-010 serious-fluency",
+      "promptPath": "/Users/seyedbehrangkaboudi/Personal-Local/Projects/NextJS/Anki/prompt-responses/concept-audit/2026-08-15-multi-sense-concepts/batches/batch-010/serious-fluency/prompt.md",
+      "threadId": "01a007d1-d0c4-7d50-a6e7-2a0a3fb36bf2",
+      "clientThreadId": null,
+      "hostId": "local"
+    },
+    {
+      "batchId": "batch-011",
+      "issueType": "serious-fluency",
+      "title": "Concept audit batch-011 serious-fluency",
+      "promptPath": "/Users/seyedbehrangkaboudi/Personal-Local/Projects/NextJS/Anki/prompt-responses/concept-audit/2026-08-15-multi-sense-concepts/batches/batch-011/serious-fluency/prompt.md",
+      "threadId": "01a007d1-d7bd-7b51-9b9c-093a3b5fae72",
+      "clientThreadId": null,
+      "hostId": "local"
+    },
+    {
+      "batchId": "batch-012",
+      "issueType": "serious-fluency",
+      "title": "Concept audit batch-012 serious-fluency",
+      "promptPath": "/Users/seyedbehrangkaboudi/Personal-Local/Projects/NextJS/Anki/prompt-responses/concept-audit/2026-08-15-multi-sense-concepts/batches/batch-012/serious-fluency/prompt.md",
+      "threadId": "01a007d1-dc5c-7433-89f7-b9ec669220d2",
+      "clientThreadId": null,
+      "hostId": "local"
+    },
+    {
+      "batchId": "batch-013",
+      "issueType": "serious-fluency",
+      "title": "Concept audit batch-013 serious-fluency",
+      "promptPath": "/Users/seyedbehrangkaboudi/Personal-Local/Projects/NextJS/Anki/prompt-responses/concept-audit/2026-08-15-multi-sense-concepts/batches/batch-013/serious-fluency/prompt.md",
+      "threadId": "01a007d1-e1ad-7550-a095-d1fb107e6ec8",
+      "clientThreadId": null,
+      "hostId": "local"
+    },
+    {
+      "batchId": "batch-014",
+      "issueType": "serious-fluency",
+      "title": "Concept audit batch-014 serious-fluency",
+      "promptPath": "/Users/seyedbehrangkaboudi/Personal-Local/Projects/NextJS/Anki/prompt-responses/concept-audit/2026-08-15-multi-sense-concepts/batches/batch-014/serious-fluency/prompt.md",
+      "threadId": "01a007d1-e6da-7cb3-959a-07cd27f5953f",
+      "clientThreadId": null,
+      "hostId": "local"
+    },
+    {
+      "batchId": "batch-015",
+      "issueType": "serious-fluency",
+      "title": "Concept audit batch-015 serious-fluency",
+      "promptPath": "/Users/seyedbehrangkaboudi/Personal-Local/Projects/NextJS/Anki/prompt-responses/concept-audit/2026-08-15-multi-sense-concepts/batches/batch-015/serious-fluency/prompt.md",
+      "threadId": "01a007d1-eda7-7011-b96d-8bc375248bff",
+      "clientThreadId": null,
+      "hostId": "local"
+    }
+  ]
+}

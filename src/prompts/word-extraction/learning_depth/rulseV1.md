@@ -1,7 +1,8 @@
 ══════════════════════════════════════
 Field name: learning_depth
 learning_depth:
-Determine how SERIOUSLY a non-specialist learner should study this word.
+Determine how SERIOUSLY a non-specialist learner should study the exact WordSense shown in the input.
+Use its Persian meaning, part of speech, concept explanation, and example sentence. Do not score a different or more common meaning of the same base_form.
 
 The score must reflect whether the word:
 
