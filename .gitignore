@@ -44,3 +44,17 @@ next-env.d.ts
 
 # local db backups
 /backups/
+
+# Audio files are versioned locally in the sibling Restic repository.
+/public/audio/**/*.mp3
+/public/audio/**/*.wav
+/public/audio/**/*.m4a
+/public/audio/**/*.aac
+/public/audio/**/*.ogg
+/public/audio/**/*.flac
+/public/audio/**/*.webm
+/public/audio/**/*.opus
+/public/audio/**/*.aiff
+/public/audio/**/*.aif
+/public/audio/**/*.caf
+/public/audio/**/*.wma

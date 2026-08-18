@@ -1,0 +1,4 @@
+#!/bin/sh
+
+project_root="$(git rev-parse --show-toplevel)" || exit 1
+exec "$project_root/scripts/audio-restic-versioning.sh" reject-staged
