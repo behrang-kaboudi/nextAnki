@@ -1,8 +1,8 @@
 import fs from "node:fs";
 
-const PLAN_FILE = process.env.EXTERNAL_VOCAB_IMPORT_PLAN_FILE ?? "external-vocabulary-database-import-plan.json";
-const RESULTS_FILE = process.env.EXTERNAL_VOCAB_IMPORT_RESULTS_FILE ?? "external-vocabulary-database-import-results.jsonl";
-const AMBIGUITIES_FILE = process.env.EXTERNAL_VOCAB_IMPORT_AMBIGUITIES_FILE ?? "external-vocabulary-database-import-ambiguities.json";
+const PLAN_FILE = process.env.EXTERNAL_VOCAB_IMPORT_PLAN_FILE ?? "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/external-vocabulary-database-import-plan.json";
+const RESULTS_FILE = process.env.EXTERNAL_VOCAB_IMPORT_RESULTS_FILE ?? "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/external-vocabulary-database-import-results.jsonl";
+const AMBIGUITIES_FILE = process.env.EXTERNAL_VOCAB_IMPORT_AMBIGUITIES_FILE ?? "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/external-vocabulary-database-import-ambiguities.json";
 const endpoint = process.env.EXTERNAL_VOCAB_IMPORT_URL ?? "http://localhost:3000/api/word-extraction/base/insert-tempwords";
 const execute = process.argv.includes("--execute");
 const batchSize = Math.max(1, Math.min(100, Number.parseInt(process.env.EXTERNAL_VOCAB_IMPORT_BATCH_SIZE ?? "25", 10) || 25));

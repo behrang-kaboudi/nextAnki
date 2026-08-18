@@ -5,8 +5,8 @@ import { spawnSync } from "node:child_process";
 import { PrismaClient } from "@prisma/client";
 import dotenv from "dotenv";
 
-const INPUT_FILE = process.env.PRODUCTIVE_TARGET_INPUT ?? "structurally-valid-vocabulary-codex-enriched-32273.json";
-const CATALOG_FILE = "structurally-valid-vocabulary-database-comparison.json";
+const INPUT_FILE = process.env.PRODUCTIVE_TARGET_INPUT ?? "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/structurally-valid-vocabulary-codex-enriched-32273.json";
+const CATALOG_FILE = "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/structurally-valid-vocabulary-database-comparison.json";
 const PYTHON = process.env.PRODUCTIVE_TARGET_PYTHON ?? "/tmp/anki-productive-target-venv/bin/python";
 const BATCH_SIZE = 150;
 

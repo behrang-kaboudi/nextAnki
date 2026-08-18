@@ -3,8 +3,8 @@ import path from "node:path";
 
 import { parseBamoozDictionaryHtml } from "./bamooz-parser.mjs";
 
-const SOURCE_FILE = "structurally-valid-vocabulary-working-set.json";
-const CACHE_FILE = "external-vocabulary-bamooz-cache.jsonl";
+const SOURCE_FILE = "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/structurally-valid-vocabulary-working-set.json";
+const CACHE_FILE = "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/external-vocabulary-bamooz-cache.jsonl";
 const args = new Map(process.argv.slice(2).map((arg) => {
   const [key, value = "true"] = arg.split("=", 2);
   return [key, value];

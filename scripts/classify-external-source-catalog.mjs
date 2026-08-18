@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
-const CATALOG_FILE = "a1-source-catalog.json";
+const CATALOG_FILE = "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/a1-source-catalog.json";
 const METHOD_ID = "structural_source_triage_v1";
 const PERSIAN_LETTER = /[\u0600-\u06FF]/u;
 const LATIN_LETTER = /[A-Za-z]/u;

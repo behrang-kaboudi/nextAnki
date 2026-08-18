@@ -1,9 +1,9 @@
 import fs from "node:fs";
 
-const INPUT_FILE = "structurally-valid-vocabulary-source-backed-with-database.json";
-const CACHE_FILE = "external-vocabulary-bamooz-cache.jsonl";
-const RESULTS_FILE = "external-vocabulary-codex-results.jsonl";
-const OUTPUT_FILE = "external-vocabulary-codex-queue.jsonl";
+const INPUT_FILE = "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/structurally-valid-vocabulary-source-backed-with-database.json";
+const CACHE_FILE = "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/external-vocabulary-bamooz-cache.jsonl";
+const RESULTS_FILE = "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/external-vocabulary-codex-results.jsonl";
+const OUTPUT_FILE = "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/external-vocabulary-codex-queue.jsonl";
 
 function normalizeTerm(value) {
   return value.normalize("NFKC").replace(/[’‘`]/gu, "'").replace(/\s+/gu, " ").trim().toLocaleLowerCase("en-US");

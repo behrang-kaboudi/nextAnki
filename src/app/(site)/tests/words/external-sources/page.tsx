@@ -65,7 +65,7 @@ type PageParams = {
   pageSize?: string;
 };
 
-const CATALOG_FILE = "a1-source-catalog.json";
+const CATALOG_FILE = "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/a1-source-catalog.json";
 const PAGE_SIZES = [25, 50, 100, 200] as const;
 const SOURCE_BADGES: Record<string, string> = {
   "ba-books": "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-900 dark:bg-blue-950/40 dark:text-blue-300",

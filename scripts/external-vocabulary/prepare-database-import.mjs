@@ -4,9 +4,9 @@ import path from "node:path";
 import { PrismaClient } from "@prisma/client";
 import dotenv from "dotenv";
 
-const INPUT_FILE = process.env.EXTERNAL_VOCAB_ENRICHED_FILE ?? "structurally-valid-vocabulary-enriched-reviewed.json";
-const VALIDATION_FILE = process.env.EXTERNAL_VOCAB_VALIDATION_FILE ?? "external-vocabulary-enrichment-reviewed-validation.json";
-const OUTPUT_FILE = process.env.EXTERNAL_VOCAB_IMPORT_PLAN_FILE ?? "external-vocabulary-database-import-plan.json";
+const INPUT_FILE = process.env.EXTERNAL_VOCAB_ENRICHED_FILE ?? "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/structurally-valid-vocabulary-enriched-reviewed.json";
+const VALIDATION_FILE = process.env.EXTERNAL_VOCAB_VALIDATION_FILE ?? "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/external-vocabulary-enrichment-reviewed-validation.json";
+const OUTPUT_FILE = process.env.EXTERNAL_VOCAB_IMPORT_PLAN_FILE ?? "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/external-vocabulary-database-import-plan.json";
 const MATCH_POS = process.env.EXTERNAL_VOCAB_MATCH_POS === "1";
 
 for (const name of [".env.local", ".env"]) {

@@ -5,8 +5,8 @@ import path from "node:path";
 import { PrismaClient } from "@prisma/client";
 import dotenv from "dotenv";
 
-const INPUT_FILE = "external-vocabulary-needs-generation-at-least-35-2067.json";
-const RESULTS_FILE = "external-vocabulary-needs-generation-at-least-35-2067-import-results.jsonl";
+const INPUT_FILE = "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/external-vocabulary-needs-generation-at-least-35-2067.json";
+const RESULTS_FILE = "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/external-vocabulary-needs-generation-at-least-35-2067-import-results.jsonl";
 const execute = process.argv.includes("--execute");
 
 for (const name of [".env.local", ".env"]) {

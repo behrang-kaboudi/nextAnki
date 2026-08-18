@@ -1,10 +1,10 @@
 import fs from "node:fs";
 
-const INPUT_FILE = "structurally-valid-vocabulary-enriched.json";
-const MANIFEST_FILE = "external-vocabulary-review-manifest.json";
-const STATE_FILE = "external-vocabulary-review-batch-state.json";
-const OUTPUT_FILE = "structurally-valid-vocabulary-enriched-reviewed.json";
-const ISSUES_FILE = "external-vocabulary-review-merge-issues.json";
+const INPUT_FILE = "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/structurally-valid-vocabulary-enriched.json";
+const MANIFEST_FILE = "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/external-vocabulary-review-manifest.json";
+const STATE_FILE = "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/external-vocabulary-review-batch-state.json";
+const OUTPUT_FILE = "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/structurally-valid-vocabulary-enriched-reviewed.json";
+const ISSUES_FILE = "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/external-vocabulary-review-merge-issues.json";
 
 function readLines(file) {
   return fs.readFileSync(file, "utf8").split("\n").filter(Boolean).map((line) => JSON.parse(line));

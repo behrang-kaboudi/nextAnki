@@ -4,8 +4,8 @@ const args = new Map(process.argv.slice(2).map((arg) => {
   const [key, value = "true"] = arg.split("=", 2);
   return [key, value];
 }));
-const outputFile = args.get("--file") ?? "external-vocabulary-enrichment-pilot-output.json";
-const manifestFile = args.get("--manifest") ?? "external-vocabulary-enrichment-manifest.json";
+const outputFile = args.get("--file") ?? "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/external-vocabulary-enrichment-pilot-output.json";
+const manifestFile = args.get("--manifest") ?? "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/external-vocabulary-enrichment-manifest.json";
 
 function persianWordCount(value) {
   return value.trim().split(/\s+/u).filter(Boolean).length;

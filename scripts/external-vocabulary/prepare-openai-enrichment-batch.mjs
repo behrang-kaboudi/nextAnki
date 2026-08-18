@@ -2,11 +2,11 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 
-const CATALOG_FILE = "structurally-valid-vocabulary-database-comparison.json";
-const CACHE_FILE = "external-vocabulary-bamooz-cache.jsonl";
-const REQUESTS_FILE = "external-vocabulary-enrichment-requests.jsonl";
-const MANIFEST_FILE = "external-vocabulary-enrichment-manifest.json";
-const REQUEST_PART_PREFIX = "external-vocabulary-enrichment-requests-part-";
+const CATALOG_FILE = "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/structurally-valid-vocabulary-database-comparison.json";
+const CACHE_FILE = "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/external-vocabulary-bamooz-cache.jsonl";
+const REQUESTS_FILE = "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/external-vocabulary-enrichment-requests.jsonl";
+const MANIFEST_FILE = "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/external-vocabulary-enrichment-manifest.json";
+const REQUEST_PART_PREFIX = "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/external-vocabulary-enrichment-requests-part-";
 const MODEL = process.env.EXTERNAL_VOCAB_MODEL ?? "gpt-5.6-sol";
 const REASONING = process.env.EXTERNAL_VOCAB_REASONING ?? "medium";
 const MAX_ENTRIES = 8;
@@ -184,8 +184,12 @@ function main() {
     },
   }));
   fs.writeFileSync(REQUESTS_FILE, `${requests.map((request) => JSON.stringify(request)).join("\n")}\n`);
-  for (const file of fs.readdirSync(process.cwd())) {
-    if (file.startsWith(REQUEST_PART_PREFIX) && file.endsWith(".jsonl")) fs.unlinkSync(file);
+  const requestPartDirectory = path.dirname(REQUEST_PART_PREFIX);
+  const requestPartBasenamePrefix = path.basename(REQUEST_PART_PREFIX);
+  for (const file of fs.readdirSync(requestPartDirectory)) {
+    if (file.startsWith(requestPartBasenamePrefix) && file.endsWith(".jsonl")) {
+      fs.unlinkSync(path.join(requestPartDirectory, file));
+    }
   }
   const requestParts = [];
   let partLines = [];

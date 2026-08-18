@@ -1,11 +1,12 @@
 import fs from "node:fs";
+import path from "node:path";
 
-const ENRICHED_FILE = "structurally-valid-vocabulary-enriched.json";
-const VALIDATION_FILE = "external-vocabulary-enrichment-validation.json";
-const SOURCE_REQUESTS_FILE = "external-vocabulary-enrichment-requests.jsonl";
-const REQUESTS_FILE = "external-vocabulary-review-requests.jsonl";
-const MANIFEST_FILE = "external-vocabulary-review-manifest.json";
-const PART_PREFIX = "external-vocabulary-review-requests-part-";
+const ENRICHED_FILE = "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/structurally-valid-vocabulary-enriched.json";
+const VALIDATION_FILE = "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/external-vocabulary-enrichment-validation.json";
+const SOURCE_REQUESTS_FILE = "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/external-vocabulary-enrichment-requests.jsonl";
+const REQUESTS_FILE = "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/external-vocabulary-review-requests.jsonl";
+const MANIFEST_FILE = "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/external-vocabulary-review-manifest.json";
+const PART_PREFIX = "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/external-vocabulary-review-requests-part-";
 const MAX_ITEMS = 5;
 const MAX_PART_CHARS = Math.max(150_000, Number.parseInt(process.env.EXTERNAL_VOCAB_REVIEW_PART_CHARS ?? "190000", 10) || 190_000);
 
@@ -57,8 +58,12 @@ const requests = groups.map((items, index) => ({
   },
 }));
 fs.writeFileSync(REQUESTS_FILE, `${requests.map((request) => JSON.stringify(request)).join("\n")}\n`);
-for (const file of fs.readdirSync(process.cwd())) {
-  if (file.startsWith(PART_PREFIX) && file.endsWith(".jsonl")) fs.unlinkSync(file);
+const partDirectory = path.dirname(PART_PREFIX);
+const partBasenamePrefix = path.basename(PART_PREFIX);
+for (const file of fs.readdirSync(partDirectory)) {
+  if (file.startsWith(partBasenamePrefix) && file.endsWith(".jsonl")) {
+    fs.unlinkSync(path.join(partDirectory, file));
+  }
 }
 const parts = [];
 let lines = [];

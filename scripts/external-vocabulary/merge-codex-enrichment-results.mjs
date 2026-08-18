@@ -1,9 +1,9 @@
 import fs from "node:fs";
 
-const INPUT_FILE = "structurally-valid-vocabulary-source-backed-with-database.json";
-const RESULTS_FILE = "external-vocabulary-codex-results.jsonl";
-const OUTPUT_FILE = "structurally-valid-vocabulary-codex-enriched.json";
-const ISSUES_FILE = "external-vocabulary-codex-merge-issues.json";
+const INPUT_FILE = "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/structurally-valid-vocabulary-source-backed-with-database.json";
+const RESULTS_FILE = "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/external-vocabulary-codex-results.jsonl";
+const OUTPUT_FILE = "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/structurally-valid-vocabulary-codex-enriched.json";
+const ISSUES_FILE = "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/external-vocabulary-codex-merge-issues.json";
 
 function readLines(file) {
   if (!fs.existsSync(file)) return [];

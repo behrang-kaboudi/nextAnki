@@ -4,11 +4,11 @@ import os from "node:os";
 import path from "node:path";
 
 const planFile = process.env.EXTERNAL_VOCAB_IMPORT_PLAN_FILE
-  ?? "external-vocabulary-completed-at-least-35-14888-database-import-plan.json";
+  ?? "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/external-vocabulary-completed-at-least-35-14888-database-import-plan.json";
 const ambiguitiesFile = process.env.EXTERNAL_VOCAB_IMPORT_AMBIGUITIES_FILE
-  ?? "external-vocabulary-completed-at-least-35-14888-database-import-ambiguities.json";
+  ?? "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/external-vocabulary-completed-at-least-35-14888-database-import-ambiguities.json";
 const outputFile = process.env.EXTERNAL_VOCAB_IMPORT_RESOLUTIONS_FILE
-  ?? "external-vocabulary-completed-at-least-35-14888-persian-resolutions.json";
+  ?? "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/external-vocabulary-completed-at-least-35-14888-persian-resolutions.json";
 const batchSize = 150;
 const codex = "/Applications/ChatGPT.app/Contents/Resources/codex";
 const tempDirectory = fs.mkdtempSync(path.join(os.tmpdir(), "persian-resolution-"));

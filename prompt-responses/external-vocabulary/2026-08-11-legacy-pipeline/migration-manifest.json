@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "workflow": "external-vocabulary",
+  "migration_date": "2026-08-17",
+  "source_location": "project root",
+  "destination": "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline",
+  "migrated_original_files": 449,
+  "file_counts": {
+    "json": 28,
+    "jsonl": 420,
+    "log": 1
+  },
+  "code_reference_files_updated": 24,
+  "pre_migration_checksums": "pre-migration-checksums.sha256",
+  "notes": [
+    "Original basenames were preserved.",
+    "Stored cross-file references and project code defaults were updated to the destination path.",
+    "The checksum file records the original file contents before stored path references were updated."
+  ]
+}

@@ -1,7 +1,7 @@
 import fs from "node:fs";
 
-const INPUT_FILE = process.env.EXTERNAL_VOCAB_ENRICHED_FILE ?? "structurally-valid-vocabulary-enriched.json";
-const REPORT_FILE = process.env.EXTERNAL_VOCAB_VALIDATION_FILE ?? "external-vocabulary-enrichment-validation.json";
+const INPUT_FILE = process.env.EXTERNAL_VOCAB_ENRICHED_FILE ?? "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/structurally-valid-vocabulary-enriched.json";
+const REPORT_FILE = process.env.EXTERNAL_VOCAB_VALIDATION_FILE ?? "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/external-vocabulary-enrichment-validation.json";
 
 function normalizePersianLoose(value) {
   return value.normalize("NFC").replace(/[يى]/gu, "ی").replace(/ك/gu, "ک").replace(/[\s\u200c\p{P}\p{N}]/gu, "");

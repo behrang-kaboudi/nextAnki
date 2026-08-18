@@ -2,8 +2,8 @@ import "dotenv/config";
 import fs from "node:fs";
 import { PrismaClient } from "@prisma/client";
 
-const INPUT_FILE = "structurally-valid-vocabulary-source-backed.json";
-const OUTPUT_FILE = "structurally-valid-vocabulary-source-backed-with-database.json";
+const INPUT_FILE = "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/structurally-valid-vocabulary-source-backed.json";
+const OUTPUT_FILE = "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/structurally-valid-vocabulary-source-backed-with-database.json";
 
 function jsonIds(value) {
   return Array.isArray(value) ? value.filter((item) => Number.isInteger(item) && item > 0) : [];

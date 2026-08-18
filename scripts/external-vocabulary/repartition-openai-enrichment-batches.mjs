@@ -1,9 +1,10 @@
 import fs from "node:fs";
+import path from "node:path";
 
-const REQUESTS_FILE = "external-vocabulary-enrichment-requests.jsonl";
-const MANIFEST_FILE = "external-vocabulary-enrichment-manifest.json";
-const STATE_FILE = "external-vocabulary-enrichment-batch-state.json";
-const PREFIX = "external-vocabulary-enrichment-requests-part-";
+const REQUESTS_FILE = "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/external-vocabulary-enrichment-requests.jsonl";
+const MANIFEST_FILE = "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/external-vocabulary-enrichment-manifest.json";
+const STATE_FILE = "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/external-vocabulary-enrichment-batch-state.json";
+const PREFIX = "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/external-vocabulary-enrichment-requests-part-";
 const maxChars = Math.max(150_000, Number.parseInt(process.env.EXTERNAL_VOCAB_REPARTITION_CHARS ?? "950000", 10) || 950_000);
 
 const manifest = JSON.parse(fs.readFileSync(MANIFEST_FILE, "utf8"));
@@ -16,9 +17,12 @@ const completedIds = new Set(completed.flatMap((batch) => {
 }));
 const remainingLines = fs.readFileSync(REQUESTS_FILE, "utf8").split("\n").filter(Boolean)
   .filter((line) => !completedIds.has(JSON.parse(line).custom_id));
-for (const file of fs.readdirSync(process.cwd())) {
-  if (!file.startsWith(PREFIX) || !file.endsWith(".jsonl")) continue;
-  if (!completed.some((batch) => batch.request_file === file)) fs.unlinkSync(file);
+const partDirectory = path.dirname(PREFIX);
+const partBasenamePrefix = path.basename(PREFIX);
+for (const file of fs.readdirSync(partDirectory)) {
+  if (!file.startsWith(partBasenamePrefix) || !file.endsWith(".jsonl")) continue;
+  const filePath = path.join(partDirectory, file);
+  if (!completed.some((batch) => batch.request_file === filePath)) fs.unlinkSync(filePath);
 }
 
 const completedParts = completed.map((batch) => {

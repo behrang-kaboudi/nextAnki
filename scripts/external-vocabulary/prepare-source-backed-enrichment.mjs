@@ -1,9 +1,9 @@
 import fs from "node:fs";
 
-const CATALOG_FILE = "structurally-valid-vocabulary-database-comparison.json";
-const CACHE_FILE = "external-vocabulary-bamooz-cache.jsonl";
-const COMPLETED_FILE = "structurally-valid-vocabulary-enriched.json";
-const OUTPUT_FILE = "structurally-valid-vocabulary-source-backed.json";
+const CATALOG_FILE = "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/structurally-valid-vocabulary-database-comparison.json";
+const CACHE_FILE = "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/external-vocabulary-bamooz-cache.jsonl";
+const COMPLETED_FILE = "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/structurally-valid-vocabulary-enriched.json";
+const OUTPUT_FILE = "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/structurally-valid-vocabulary-source-backed.json";
 
 function readJsonLines(file) {
   return fs.readFileSync(file, "utf8").split("\n").filter(Boolean).map((line) => JSON.parse(line));

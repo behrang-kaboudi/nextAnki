@@ -26,7 +26,7 @@ function state(file) {
 async function waitForFirstBatch() {
   while (true) {
     run("node", ["scripts/external-vocabulary/openai-enrichment-batch.mjs", "status"], { capture: true });
-    const first = state("external-vocabulary-enrichment-batch-state.json").batches.find((batch) => batch.part_number === 1);
+    const first = state("prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/external-vocabulary-enrichment-batch-state.json").batches.find((batch) => batch.part_number === 1);
     process.stdout.write(`${JSON.stringify({ stage: "initial_batch", status: first.status, request_counts: first.request_counts })}\n`);
     if (first.status === "completed") return;
     if (["failed", "expired", "cancelled"].includes(first.status)) throw new Error(`Initial batch ended with ${first.status}.`);
@@ -36,11 +36,11 @@ async function waitForFirstBatch() {
 
 await waitForFirstBatch();
 run("node", ["scripts/external-vocabulary/openai-enrichment-batch.mjs", "download"]);
-const manifest = state("external-vocabulary-enrichment-manifest.json");
+const manifest = state("prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/external-vocabulary-enrichment-manifest.json");
 if (manifest.max_batch_input_chars > targetPartChars) {
   while (true) {
     run("node", ["scripts/external-vocabulary/openai-enrichment-batch.mjs", "status"], { capture: true });
-    const batches = state("external-vocabulary-enrichment-batch-state.json").batches;
+    const batches = state("prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/external-vocabulary-enrichment-batch-state.json").batches;
     const active = batches.filter((batch) => !["completed", "failed", "expired", "cancelled"].includes(batch.status));
     const fatal = batches.find((batch) => ["expired", "cancelled"].includes(batch.status) || (batch.status === "failed" && !batch.retryable));
     if (fatal) throw new Error(`Batch part ${fatal.part_number} ended with ${fatal.status}.`);
@@ -59,33 +59,33 @@ run("node", ["scripts/external-vocabulary/openai-enrichment-batch.mjs", "run"], 
 run("node", ["scripts/external-vocabulary/collect-openai-enrichment-output.mjs"]);
 run("node", ["scripts/external-vocabulary/validate-enriched-vocabulary.mjs"], { allowedStatuses: [2] });
 run("node", ["scripts/external-vocabulary/prepare-openai-enrichment-review.mjs"]);
-const reviewManifest = state("external-vocabulary-review-manifest.json");
+const reviewManifest = state("prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/external-vocabulary-review-manifest.json");
 if (reviewManifest.request_count > 0) {
   run("node", ["scripts/external-vocabulary/openai-enrichment-batch.mjs", "run"], {
-    env: { EXTERNAL_VOCAB_BATCH_PREFIX: "external-vocabulary-review", EXTERNAL_VOCAB_MAX_ACTIVE_BATCHES: "20" },
+    env: { EXTERNAL_VOCAB_BATCH_PREFIX: "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/external-vocabulary-review", EXTERNAL_VOCAB_MAX_ACTIVE_BATCHES: "20" },
   });
   run("node", ["scripts/external-vocabulary/merge-openai-enrichment-review.mjs"]);
 } else {
-  fs.copyFileSync("structurally-valid-vocabulary-enriched.json", "structurally-valid-vocabulary-enriched-reviewed.json");
+  fs.copyFileSync("prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/structurally-valid-vocabulary-enriched.json", "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/structurally-valid-vocabulary-enriched-reviewed.json");
 }
 run("node", ["scripts/external-vocabulary/validate-enriched-vocabulary.mjs"], {
   allowedStatuses: [2],
   env: {
-    EXTERNAL_VOCAB_ENRICHED_FILE: "structurally-valid-vocabulary-enriched-reviewed.json",
-    EXTERNAL_VOCAB_VALIDATION_FILE: "external-vocabulary-enrichment-reviewed-validation.json",
+    EXTERNAL_VOCAB_ENRICHED_FILE: "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/structurally-valid-vocabulary-enriched-reviewed.json",
+    EXTERNAL_VOCAB_VALIDATION_FILE: "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/external-vocabulary-enrichment-reviewed-validation.json",
   },
 });
-const finalValidation = state("external-vocabulary-enrichment-reviewed-validation.json");
+const finalValidation = state("prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/external-vocabulary-enrichment-reviewed-validation.json");
 if (finalValidation.error_rows || finalValidation.review_rows) {
-  fs.writeFileSync("external-vocabulary-pipeline-status.json", `${JSON.stringify({ status: "quality_gate", generated_at: new Date().toISOString(), error_rows: finalValidation.error_rows, review_rows: finalValidation.review_rows })}\n`);
+  fs.writeFileSync("prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/external-vocabulary-pipeline-status.json", `${JSON.stringify({ status: "quality_gate", generated_at: new Date().toISOString(), error_rows: finalValidation.error_rows, review_rows: finalValidation.review_rows })}\n`);
   throw new Error(`Final quality gate has ${finalValidation.error_rows} error rows and ${finalValidation.review_rows} review rows; database import was not started.`);
 }
 run("node", ["scripts/external-vocabulary/prepare-database-import.mjs"]);
 if (!allowDatabaseImport) {
-  fs.writeFileSync("external-vocabulary-pipeline-status.json", `${JSON.stringify({ status: "ready_for_database_import", generated_at: new Date().toISOString() })}\n`);
+  fs.writeFileSync("prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/external-vocabulary-pipeline-status.json", `${JSON.stringify({ status: "ready_for_database_import", generated_at: new Date().toISOString() })}\n`);
   process.exit(0);
 }
 run("npm", ["run", "db:backup"]);
 run("npm", ["run", "dev:start"]);
 run("node", ["scripts/external-vocabulary/import-enriched-vocabulary.mjs", "--execute"], { allowedStatuses: [2] });
-fs.writeFileSync("external-vocabulary-pipeline-status.json", `${JSON.stringify({ status: "database_import_finished", generated_at: new Date().toISOString() })}\n`);
+fs.writeFileSync("prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/external-vocabulary-pipeline-status.json", `${JSON.stringify({ status: "database_import_finished", generated_at: new Date().toISOString() })}\n`);

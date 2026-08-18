@@ -4,11 +4,11 @@ import path from "node:path";
 import dotenv from "dotenv";
 import OpenAI from "openai";
 
-const BATCH_PREFIX = process.env.EXTERNAL_VOCAB_BATCH_PREFIX ?? "external-vocabulary-enrichment";
+const BATCH_PREFIX = process.env.EXTERNAL_VOCAB_BATCH_PREFIX ?? "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/external-vocabulary-enrichment";
 const REQUESTS_FILE = `${BATCH_PREFIX}-requests.jsonl`;
 const STATE_FILE = `${BATCH_PREFIX}-batch-state.json`;
 const MANIFEST_FILE = `${BATCH_PREFIX}-manifest.json`;
-const PILOT_OUTPUT_FILE = process.env.EXTERNAL_VOCAB_PILOT_OUTPUT ?? "external-vocabulary-enrichment-pilot-output.json";
+const PILOT_OUTPUT_FILE = process.env.EXTERNAL_VOCAB_PILOT_OUTPUT ?? "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/external-vocabulary-enrichment-pilot-output.json";
 const MAX_ACTIVE_BATCHES = Math.max(1, Number.parseInt(process.env.EXTERNAL_VOCAB_MAX_ACTIVE_BATCHES ?? "1", 10) || 1);
 
 for (const name of [".env.local", ".env"]) {

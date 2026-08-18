@@ -1,11 +1,11 @@
 import fs from "node:fs";
 
 const planFile = process.env.EXTERNAL_VOCAB_IMPORT_PLAN_FILE
-  ?? "external-vocabulary-completed-at-least-35-14888-database-import-plan.json";
+  ?? "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/external-vocabulary-completed-at-least-35-14888-database-import-plan.json";
 const resolutionsFile = process.env.EXTERNAL_VOCAB_IMPORT_RESOLUTIONS_FILE
-  ?? "external-vocabulary-completed-at-least-35-14888-persian-resolutions.json";
+  ?? "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/external-vocabulary-completed-at-least-35-14888-persian-resolutions.json";
 const resultsFile = process.env.EXTERNAL_VOCAB_IMPORT_RESOLVED_RESULTS_FILE
-  ?? "external-vocabulary-completed-at-least-35-14888-resolved-import-results.jsonl";
+  ?? "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/external-vocabulary-completed-at-least-35-14888-resolved-import-results.jsonl";
 const endpoint = process.env.EXTERNAL_VOCAB_IMPORT_URL
   ?? "http://localhost:3000/api/word-extraction/base/insert-tempwords";
 

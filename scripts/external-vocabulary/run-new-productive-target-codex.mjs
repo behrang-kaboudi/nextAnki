@@ -4,7 +4,7 @@ import os from "node:os";
 import path from "node:path";
 
 const filePath = path.resolve(
-  process.argv[2] ?? "external-vocabulary-productive-target-above-40-20075.json",
+  process.argv[2] ?? "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/external-vocabulary-productive-target-above-40-20075.json",
 );
 const batchSize = Number(process.argv[3] ?? 200);
 const workspace = process.cwd();
@@ -14,7 +14,7 @@ const schemaPath = path.join(tempDirectory, "schema.json");
 const outputPath = path.join(tempDirectory, "output.json");
 const logPath = path.join(
   workspace,
-  "external-vocabulary-new-productive-target-progress.log",
+  "prompt-responses/external-vocabulary/2026-08-11-legacy-pipeline/external-vocabulary-new-productive-target-progress.log",
 );
 
 const schema = {
