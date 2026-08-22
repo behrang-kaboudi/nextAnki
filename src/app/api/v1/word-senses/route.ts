@@ -7,6 +7,12 @@ import {
   createWordSenseFromIntake,
   parseWordSenseIntakeInput,
 } from "@/lib/words/createWordSenseFromIntake.server";
+import {
+  updateWordSenseFromIntake,
+  WordSenseIntakeUpdateConflictError,
+  WordSenseIntakeUpdateNotFoundError,
+} from "@/lib/words/updateWordSenseFromIntake.server";
+import { parseWordSenseIntakeUpdateInput } from "@/lib/words/wordSenseIntakeUpdate";
 
 export const runtime = "nodejs";
 
@@ -50,6 +56,30 @@ export async function POST(request: Request) {
       { status: result.action === "created" ? 201 : 200 },
     );
   } catch (error) {
+    return NextResponse.json(
+      { ok: false, error: error instanceof Error ? error.message : String(error) },
+      { status: 400 },
+    );
+  }
+}
+
+export async function PATCH(request: Request) {
+  try {
+    const body = await request.json().catch(() => null);
+    const input = parseWordSenseIntakeUpdateInput(body);
+    const result = await updateWordSenseFromIntake(input);
+    return NextResponse.json({
+      ok: true,
+      ...result,
+      changes: input.changes,
+    });
+  } catch (error) {
+    if (error instanceof WordSenseIntakeUpdateNotFoundError) {
+      return NextResponse.json({ ok: false, error: error.message }, { status: 404 });
+    }
+    if (error instanceof WordSenseIntakeUpdateConflictError) {
+      return NextResponse.json({ ok: false, error: error.message }, { status: 409 });
+    }
     return NextResponse.json(
       { ok: false, error: error instanceof Error ? error.message : String(error) },
       { status: 400 },

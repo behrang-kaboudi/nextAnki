@@ -32,14 +32,35 @@ identify the difference, determine the American canonical spelling, and use
 that American form as the database lookup and candidate `base_form`. Do not
 create parallel American and British entries for the same spelling variant.
 
+## Single-item API handling for multiple inputs — ENABLED
+
+The intake APIs in this guide accept one target or one `WordSense` mutation per
+request. When the user supplies multiple words or phrases, extract every target
+and keep its supplied sentence, meaning, and optional `pos` attached to that
+target. Process every target independently and in the user's original order.
+
+- Call the exact-search endpoint separately for each normalized `target_word`.
+- Prepare and quality-review each existing selection, update proposal, or new
+  candidate independently. One passing item must not hide another item's failure.
+- The user-facing answer may show all reviewed proposals together so the user
+  can approve all of them or name a subset.
+- After explicit approval, call the applicable single-item `PATCH`, `POST`, or
+  study-list endpoint separately for each approved item. Never send an array to
+  an endpoint whose contract in this guide is single-item.
+- Preserve stable labels and the user's input order when reporting per-item
+  success or failure. A successful request for one item does not prove that a
+  later item succeeded.
+
 ## Mandatory personal study-list destination — ENABLED
 
 Every word or phrase the user submits through this meaning-learning workflow
 must ultimately be represented by one exact contextual `WordSense.id` in
 `data/study/behrang.json`, the personal study list for `behrang`.
 
-- If Phase 1 returns one clear existing contextual match, Phase 4 must add that
-  unchanged stored ID through `POST /api/v1/study-lists/behrang`.
+- If Phase 1 returns one clear existing contextual match, Phase 4 may first
+  propose a same-concept update and, after any separately required update
+  confirmation, must add the selected stored ID through
+  `POST /api/v1/study-lists/behrang`.
 - If Phase 1 returns no matching base form, or Phase 4 finds that the base form
   exists but none of its stored concepts matches the requested contextual
   sense, Phase 2 must prepare and review the candidate. After the user explicitly authorizes its database insertion,
@@ -133,6 +154,10 @@ list.
 - After identifying one clear existing contextual match, the same user-facing
   answer that reports the meaning and selected stored concept must explicitly
   ask: `آیا این WordSense را در فهرست مطالعهٔ بهرنگ قرار بدهم؟`
+- When the selected stored concept has a safe same-concept update proposal, show
+  the exact proposal and also ask: `آیا این به‌روزرسانی را روی WordSense اعمال
+  کنم؟` Updating the database and enrolling the ID are separate confirmations;
+  the user may approve either one, both, or neither.
 - After preparing a reviewed new candidate, the answer must explicitly ask
   whether the user wants it inserted and placed in the personal study list for
   `behrang`.
@@ -199,6 +224,7 @@ The API returns:
     {
       "id": 123,
       "anki_link_id": "123_0000000000000",
+      "updated_at": "2026-08-22T12:00:00.000Z",
       "base_form": "example",
       "pos": "noun",
       "meaning_fa": "...",
@@ -221,7 +247,9 @@ The seven lexical fields are:
 6. `sentence_en`
 7. `sentence_en_meaning_fa`
 
-`id` and `anki_link_id` are identity metadata, not additional lexical fields.
+`id`, `anki_link_id`, and `updated_at` are identity/version metadata, not
+additional lexical fields. Preserve `updated_at` exactly because an approved
+update must send it back as `expected_updated_at`.
 
 ### Result interpretation
 
@@ -267,6 +295,7 @@ Before presenting or consuming the result, review it for:
 - exact normalized `base_form` matching;
 - complete preservation of every returned item;
 - presence of all seven lexical fields in every item;
+- a valid `updated_at` timestamp in every existing item;
 - absence of unsupported claims about contextual match or Anki status.
 
 The result must score at least 8.0/10 with no critical defect. If it fails, fix
@@ -371,6 +400,10 @@ comments, Markdown keys, or any other property to the JSON object.
    - Translate the full supplied sentence naturally and accurately into
      Persian.
    - Preserve the target's selected sense and the sentence's tone and polarity.
+   - Treat `meaning_fa` as the semantic anchor for the target sense, not as
+     wording that must appear literally in the translation.
+   - Natural Persian restructuring and inflection are required when literal
+     insertion of `meaning_fa` would be ungrammatical or unnatural.
 
 8. Full-mode enrichment fields
    - Follow the rendered field prompt returned by the prompt-package API for
@@ -531,7 +564,7 @@ The result must score at least 8.0/10 with no critical defect.
 Report the database result and whether the concept ID was added to the user's
 study list, then stop. Anki transfer remains a separate explicit workflow.
 
-## Phase 4 — Existing contextual sense selection and study-list enrollment — ENABLED
+## Phase 4 — Existing contextual sense selection, optional update, and study-list enrollment — ENABLED
 
 ### Entry condition
 
@@ -543,8 +576,9 @@ stored concept clearly matches; they do run after a verified no-match result.
 
 Compare the supplied sentence with every returned database concept, select one
 stored `WordSense` only when it clearly represents the same contextual sense
-and grammatical role, and add that selected concept's `id` to the personal
-study list. Do not query or mutate Anki in this phase.
+and grammatical role, propose a safe same-concept update when stored alternative
+meanings are incomplete, and add that selected concept's `id` to the personal
+study list after confirmation. Do not query or mutate Anki in this phase.
 
 ### Selection procedure
 
@@ -559,8 +593,72 @@ study list. Do not query or mutate Anki in this phase.
    missing concept like a new word while preserving the existing base form.
 5. If multiple items remain plausible, report the ambiguity and the candidate
    IDs and stop without adding any ID to the study list.
-6. Preserve the selected database item exactly. Do not merge, rewrite, update,
-   insert, or delete any `WordSense` record.
+6. If the selected item already represents the exact concept but is missing a
+   natural Persian alternative for that same sense and grammatical role, prepare
+   the single-item update proposal below. A different, broader, narrower, or
+   context-only meaning is not an update; route a genuinely distinct sense to
+   Phase 2 instead.
+7. Preserve the selected database item exactly until the user explicitly
+   confirms the displayed update. Do not merge, rewrite, insert, delete, or
+   silently update any `WordSense` record.
+
+### Existing-record update proposal and API
+
+The enabled intake update is intentionally narrow: it may add or remove
+`other_meanings_fa` values on one existing `WordSense`. It does not update the
+primary meaning, base form, `pos`, concept, sentence, IPA, or learning scores.
+
+Before any update, show this exact proposal shape with the selected Phase 1
+values:
+
+```json
+{
+  "action": "update",
+  "word_sense_id": 123,
+  "expected_updated_at": "2026-08-22T12:00:00.000Z",
+  "changes": {
+    "other_meanings_fa": {
+      "add": ["به اندازه"],
+      "remove": []
+    }
+  }
+}
+```
+
+Use additive changes instead of resending the complete stored array. Do not
+repeat the primary `meaning_fa`, do not add spelling-only or colloquial
+duplicates, and do not place the same normalized meaning in both `add` and
+`remove`. Use an empty array for the direction that has no change. If neither
+direction has a justified change, do not propose an update.
+
+After the user explicitly approves the current proposal, call:
+
+```http
+PATCH /api/v1/word-senses
+Content-Type: application/json
+```
+
+with the single-item body below. Do not include `action` in the API body:
+
+```json
+{
+  "id": 123,
+  "expected_updated_at": "2026-08-22T12:00:00.000Z",
+  "changes": {
+    "other_meanings_fa": {
+      "add": ["به اندازه"],
+      "remove": []
+    }
+  }
+}
+```
+
+Require HTTP success, `ok: true`, the same positive `item.id`, and `action`
+equal to `updated` or `unchanged`. Require the returned
+`item.other_meanings_fa` to reflect the approved addition/removal. A `409`
+means the record changed after the proposal; search again, prepare a fresh
+proposal, and request fresh confirmation instead of retrying the stale update.
+An update response does not authorize or prove study-list enrollment.
 
 ### Study-list API
 
@@ -615,9 +713,11 @@ job.
 
 ### Phase 4 user-facing output
 
-Report the selected stored concept and show the actual study-list API response
-in a JSON code block. State that the ID is in the personal study list and that
-Anki itself was not changed. Do not claim that the card is absent from or
+When an update was approved, show the actual update API response in a JSON code
+block and report whether it was updated or already unchanged. When study-list
+enrollment was approved, also show the actual study-list API response in a JSON
+code block. Report the outcome of each requested operation separately. State
+that Anki itself was not changed. Do not claim that the card is absent from or
 present in `FilterKnowing`; the two management pages perform that check.
 
 ### Phase 4 quality gate
@@ -626,7 +726,11 @@ Before reporting success, verify:
 
 - exactly one returned stored concept clearly matches the contextual sense and
   grammatical role;
-- the selected ID and item came unchanged from the Phase 1 response;
+- the selected ID and `expected_updated_at` came unchanged from the Phase 1
+  response;
+- any update contains only same-concept `other_meanings_fa` additions/removals,
+  exactly matches the approved proposal, and has a verified `updated` or
+  `unchanged` response;
 - no new candidate or database record was generated when an existing concept
   was selected or the result remained ambiguous;
 - the study-list response has `ok: true` and contains the selected ID;
@@ -639,10 +743,10 @@ uncertain, do not enqueue an ID; report the ambiguity instead.
 
 ### Phase 4 stop condition
 
-When one concept is selected, report the contextual selection and verified
-study-list result, then stop. When no concept matches, continue to Phase 2.
-Anki reconciliation and transfer remain separate workflows performed from the
-two management pages.
+When one concept is selected, report the contextual selection and each
+confirmed update or study-list result, then stop. When no concept matches,
+continue to Phase 2. Anki reconciliation and transfer remain separate workflows
+performed from the two management pages.
 
 ## Future phases — NOT ENABLED
 
@@ -677,6 +781,11 @@ success and Anki success must be reported separately.
 - Do not query Anki before or during Phase 4; add only the selected WordSense ID
   to the personal study list and leave reconciliation to the two management
   pages.
+- Do not call `PATCH /api/v1/word-senses` before showing the exact single-item
+  proposal and receiving explicit confirmation for the current item or selected
+  group of items.
+- Do not use the update API to combine distinct senses or to change fields
+  outside its documented `other_meanings_fa` add/remove contract.
 - Do not add an ID when no stored contextual sense clearly matches or when
   multiple returned senses remain plausible.
 - Do not collapse distinct spellings or distinct `WordSense` records.

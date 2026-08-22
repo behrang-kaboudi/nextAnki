@@ -1,20 +1,14 @@
-import { readFile } from "node:fs/promises";
-import path from "node:path";
-
+import { renderPromptFromFile } from "@/prompts/_core/promptStore";
 import { SentenceFieldsClient } from "./SentenceFieldsClient";
 
 export const runtime = "nodejs";
 
-async function readPrompt(relPath: string) {
-  const absPath = path.join(process.cwd(), relPath);
-  return readFile(absPath, "utf8");
-}
-
 export default async function SentenceFieldsTempPage() {
   const promptPaths = [
     "src/prompts/tempSent.md",
+    "src/prompts/word-extraction/sentence_meaning_fa/rulseV1.md",
   ];
-  const fullPrompt = (await Promise.all(promptPaths.map(readPrompt))).join("\n\n");
+  const fullPrompt = await renderPromptFromFile({ file: "tempSent.md" });
 
   return (
     <main className="mx-auto w-full max-w-5xl select-text p-4">

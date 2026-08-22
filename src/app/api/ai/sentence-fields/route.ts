@@ -4,20 +4,18 @@ import { gptChatWithUsage } from "@/lib/ai/model_runner/gpt";
 import { prisma } from "@/lib/prisma";
 import { normalizePromptForCache } from "@/lib/ai/prompt_cache/normalize";
 import crypto from "node:crypto";
-import { readFile } from "node:fs/promises";
-import path from "node:path";
 import { geminiGenerateWithExplicitCache } from "@/lib/ai/model_runner/gemini";
 import { primarySentenceId } from "@/lib/words/sentenceIds";
 import { meaningReviewNotNeedsActionWhere } from "@/lib/words/meaningReviewStatus";
 import { touchWordSensesLinkedToSentenceId } from "@/lib/words/wordSenseRepo";
+import { renderPromptFromFile } from "@/prompts/_core/promptStore";
 
 export const runtime = "nodejs";
 
 const PROCESSING_PREFIX = "__PROCESSING__:";
 
 async function readSystemPromptFromFile(): Promise<string> {
-  const promptPath = path.join(process.cwd(), "src", "prompts", "tempSent.md");
-  return readFile(promptPath, "utf8");
+  return renderPromptFromFile({ file: "tempSent.md" });
 }
 
 function extractJsonCandidate(text: string): unknown {

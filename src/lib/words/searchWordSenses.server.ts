@@ -12,6 +12,7 @@ import { hydrateWordsWithPrimarySentence } from "@/lib/words/primarySentences.se
 export type WordSenseSearchItem = {
   id: number;
   anki_link_id: string;
+  updated_at: string;
   base_form: string;
   pos: string;
   meaning_fa: string;
@@ -34,6 +35,7 @@ export async function searchWordSensesByExactBaseForm(input: string) {
     select: {
       id: true,
       anki_link_id: true,
+      updatedAt: true,
       englishId: true,
       english: { select: WORD_SENSE_ENGLISH_FIELDS_SELECT },
       meaningId: true,
@@ -54,6 +56,7 @@ export async function searchWordSensesByExactBaseForm(input: string) {
   const items: WordSenseSearchItem[] = hydrated.map((row) => ({
     id: row.id,
     anki_link_id: row.anki_link_id,
+    updated_at: row.updatedAt.toISOString(),
     base_form: row.base_form,
     pos: row.pos ?? "",
     meaning_fa: row.meaning_fa,
