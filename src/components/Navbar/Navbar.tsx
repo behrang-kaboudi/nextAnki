@@ -7,6 +7,7 @@ function toNavbarItems(items: MenuItem[]): NavbarItem[] {
     if (item.type === "group") {
       return {
         label: item.label,
+        href: item.href,
         icon: item.icon,
         children: toNavbarItems(item.items),
       };

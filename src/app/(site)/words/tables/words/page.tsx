@@ -20,6 +20,7 @@ import { getPendingWordSenseConceptMergeStats } from "@/lib/words/wordSenseConce
 import { getPendingWordSenseInflectionMergeStats } from "@/lib/words/wordSenseInflectionMerge.server";
 import { getPendingWordSenseMeaningComparisonStats } from "@/lib/words/wordSenseMeaningComparison.server";
 import { getMeaningReviewEligibilitySummary } from "@/lib/words/meaningReviewWorkflow.server";
+import { getPendingWordSenseIdiomReviewCount } from "@/lib/words/wordSenseIdiomReview.server";
 import { getCustomExtractionPendingSummary } from "@/lib/word-extraction/customExtraction.server";
 
 import OpenWordSenseEditorModal from "../../editor/OpenWordSenseEditorModal.client";
@@ -43,6 +44,7 @@ import TableFieldMaintenance from "@/components/table-field-maintenance/TableFie
 import WordSenseSelectVisibleRows from "./WordSenseSelectVisibleRows.client";
 import PersianMeaningIpaReview from "./PersianMeaningIpaReview.client";
 import WordSenseLearningScores from "./WordSenseLearningScores.client";
+import WordSenseIdiomReview from "./WordSenseIdiomReview.client";
 
 export const metadata = { title: "Words — WordSense Table" };
 export const runtime = "nodejs";
@@ -59,6 +61,7 @@ const SORT_FIELDS = [
   "sentenceIds",
   "conceptMergeReviewed",
   "inflectionMergeReviewed",
+  "idiomReviewCompleted",
   "otherMeaningIds",
   "comparedMeaningWordIds",
   "synonymIds",
@@ -86,6 +89,7 @@ const TABLE_COLUMNS = [
   { key: "sentenceIds", label: "sentenceIds" },
   { key: "conceptMergeReviewed", label: "conceptMergeReviewed" },
   { key: "inflectionMergeReviewed", label: "inflectionMergeReviewed" },
+  { key: "idiomReviewCompleted", label: "idiomReviewCompleted" },
   { key: "otherMeaningIds", label: "otherMeaningIds" },
   { key: "comparedMeaningWordIds", label: "comparedMeaningWordIds" },
   { key: "synonymIds", label: "synonymIds" },
@@ -115,6 +119,7 @@ const DEFAULT_TABLE_COLUMNS: TableColumnKey[] = [
   "sentenceIds",
   "conceptMergeReviewed",
   "inflectionMergeReviewed",
+  "idiomReviewCompleted",
   "otherMeaningIds",
   "comparedMeaningWordIds",
   "synonymIds",
@@ -308,6 +313,7 @@ export default async function WordsTablePage({
 }: {
   searchParams: Promise<{
     q?: string;
+    searchField?: string;
     page?: string;
     pageSize?: string;
     sort?: string;
@@ -319,6 +325,9 @@ export default async function WordsTablePage({
 }) {
   const params = await searchParams;
   const q = String(params.q ?? "").trim();
+  const searchField = params.searchField === "id" || params.searchField === "base_form" ? params.searchField : "all";
+  const searchedId = Number(q);
+  const exactId = Number.isSafeInteger(searchedId) && searchedId > 0 ? searchedId : null;
   const page = parsePositiveInt(params.page, 1);
   const showAll = params.pageSize === "all";
   const pageSize = Math.min(
@@ -334,7 +343,7 @@ export default async function WordsTablePage({
   const missingConceptAudioOnly = params.missingConceptAudio === "1";
   const columns = parseColumns(params.columns);
   const hasColumn = (column: TableColumnKey) => columns.includes(column);
-  const matchingPersianIds = q
+  const matchingPersianIds = q && searchField === "all"
     ? (
         await prisma.persianWord.findMany({
           where: {
@@ -349,16 +358,20 @@ export default async function WordsTablePage({
       ).map((row) => row.id)
     : [];
   const searchWhere: Prisma.WordSenseWhereInput | undefined = q
-    ? {
-        OR: [
-          { english: { is: { base_form: { contains: q } } } },
-          { anki_link_id: { contains: q } },
-          { meaning: { is: { id: { in: matchingPersianIds } } } },
-          ...matchingPersianIds.map((id) => ({
-            otherMeaningIds: { array_contains: id },
-          })),
-        ],
-      }
+    ? searchField === "id"
+      ? { id: exactId ?? -1 }
+      : searchField === "base_form"
+        ? { english: { is: { base_form: { contains: q } } } }
+        : {
+            OR: [
+              { english: { is: { base_form: { contains: q } } } },
+              { anki_link_id: { contains: q } },
+              { meaning: { is: { id: { in: matchingPersianIds } } } },
+              ...matchingPersianIds.map((id) => ({
+                otherMeaningIds: { array_contains: id },
+              })),
+            ],
+          }
     : undefined;
   const reviewWhere: Prisma.WordSenseWhereInput | undefined =
     review === "pending"
@@ -388,6 +401,7 @@ export default async function WordsTablePage({
       sentenceIds: { sentenceIds: dir },
       conceptMergeReviewed: { conceptMergeReviewed: dir },
       inflectionMergeReviewed: { inflectionMergeReviewed: dir },
+      idiomReviewCompleted: { idiomReviewCompleted: dir },
       otherMeaningIds: { otherMeaningIds: dir },
       comparedMeaningWordIds: { comparedMeaningWordIds: dir },
       synonymIds: { synonymIds: dir },
@@ -426,6 +440,7 @@ export default async function WordsTablePage({
     missingMeaningIpaCount,
     pendingMeaningIpaReviewCount,
     phoneticCreateRemainingCount,
+    idiomReviewRemainingCount,
   ] = await Promise.all([
     prisma.wordSense.count({ where }),
     prisma.wordSense.count({ where: pendingReviewWhere }),
@@ -446,6 +461,7 @@ export default async function WordsTablePage({
         sentenceIds: true,
         conceptMergeReviewed: true,
         inflectionMergeReviewed: true,
+        idiomReviewCompleted: true,
         otherMeaningIds: true,
         comparedMeaningWordIds: true,
         synonymIds: true,
@@ -487,6 +503,7 @@ export default async function WordsTablePage({
     prisma.englishWord.count({
       where: { OR: [{ phonetic_us: null }, { phonetic_us: "" }] },
     }),
+    getPendingWordSenseIdiomReviewCount(),
   ]);
   const rows = await hydrateWordsWithPrimarySentence(rawRows);
   const referencedMeaningIds = Array.from(
@@ -560,6 +577,7 @@ export default async function WordsTablePage({
       dir: next.dir ?? dir,
     });
     if (q) query.set("q", q);
+    query.set("searchField", searchField);
     if (review !== "all") query.set("review", review);
     if (missingConceptAudioOnly) query.set("missingConceptAudio", "1");
     columns.forEach((column) => query.append("columns", column));
@@ -577,6 +595,7 @@ export default async function WordsTablePage({
       pageSize: showAll ? "all" : String(pageSize),
       sort,
       dir,
+      searchField,
     });
     columns.forEach((column) => query.append("columns", column));
     return `/words/tables/words?${query.toString()}`;
@@ -637,6 +656,11 @@ export default async function WordsTablePage({
           {columns.map((column) => (
             <input key={column} type="hidden" name="columns" value={column} />
           ))}
+          <fieldset className="flex items-center gap-2 text-sm" aria-label="Search field">
+            <label className="flex items-center gap-1"><input type="radio" name="searchField" value="all" defaultChecked={searchField === "all"} /> All fields</label>
+            <label className="flex items-center gap-1"><input type="radio" name="searchField" value="id" defaultChecked={searchField === "id"} /> id</label>
+            <label className="flex items-center gap-1"><input type="radio" name="searchField" value="base_form" defaultChecked={searchField === "base_form"} /> english.base_form</label>
+          </fieldset>
           <button
             type="submit"
             className="rounded border px-3 py-2 text-sm hover:bg-black/5 dark:hover:bg-white/5"
@@ -655,26 +679,73 @@ export default async function WordsTablePage({
       </section>
 
       <section className="mt-4 overflow-hidden rounded border">
-        <div className="grid gap-3 p-3 lg:grid-cols-2">
-          <div>
+        <div className="space-y-3 p-3">
+          <div className="grid gap-3 lg:grid-cols-2">
+            <section className="rounded border border-card p-3">
+              <div className="mb-2">
+                <div className="text-sm font-semibold">Human-only checks</div>
+                <div className="text-xs opacity-70">
+                  Manual review outside the agent workflow API and its dependency order.
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <WordSenseIdiomReview remainingCount={idiomReviewRemainingCount} />
+              </div>
+              <div className="mt-3 border-t pt-3">
+                <BatchEnglishWordJsonHintGenerate
+                  initialRemainingCount={jsonHintRemainingCount}
+                  initialTotalCount={jsonHintTotalCount}
+                  modes={["all"]}
+                />
+              </div>
+            </section>
+
+            <section className="rounded border border-card p-3">
+              <div className="mb-2">
+                <div className="text-sm font-semibold">Dependent agent workflow</div>
+                <div className="text-xs opacity-70">
+                  Run stages 1–4 in order. The amber NEEDS YOUR ACTION queue remains human-only and is excluded from the API.
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <WordSenseMeaningsReview
+                  pendingCount={meaningReviewSummary.totalEligible}
+                  statusPendingCount={meaningReviewSummary.pendingReview}
+                  initialSummary={meaningReviewSummary}
+                />
+                <WordSenseConceptMerge
+                  remainingGroupCount={conceptMergeRemainingStats.groupCount}
+                  remainingRecordCount={conceptMergeRemainingStats.recordCount}
+                />
+                <WordSenseInflectionMerge
+                  remainingGroupCount={inflectionMergeRemainingStats.groupCount}
+                  remainingRecordCount={inflectionMergeRemainingStats.recordCount}
+                />
+                <WordSenseMeaningComparison
+                  remainingGroupCount={meaningComparisonRemainingStats.groupCount}
+                  remainingRecordCount={meaningComparisonRemainingStats.recordCount}
+                />
+              </div>
+              <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
+                <span className="rounded-full bg-amber-500/10 px-3 py-1 font-semibold text-amber-700">
+                  {pendingReviewCount.toLocaleString()} need AI review
+                </span>
+                <span className="text-muted">
+                  An empty otherMeaningIds value is complete only when meaningReviewStatus is CONFIRMED.
+                </span>
+              </div>
+            </section>
+          </div>
+
+          <div className="grid gap-3 lg:grid-cols-2">
+            <section className="rounded border border-card p-3">
+              <div className="mb-2">
+                <div className="text-sm font-semibold">Automated completion</div>
+                <div className="text-xs opacity-70">
+                  Fill remaining learning scores and pronunciation fields after the dependent workflow is complete.
+                </div>
+              </div>
             <div className="flex flex-wrap gap-2">
-              <WordSenseMeaningsReview
-                pendingCount={meaningReviewSummary.totalEligible}
-                statusPendingCount={meaningReviewSummary.pendingReview}
-                initialSummary={meaningReviewSummary}
-              />
-              <WordSenseConceptMerge
-                remainingGroupCount={conceptMergeRemainingStats.groupCount}
-                remainingRecordCount={conceptMergeRemainingStats.recordCount}
-              />
-              <WordSenseInflectionMerge
-                remainingGroupCount={inflectionMergeRemainingStats.groupCount}
-                remainingRecordCount={inflectionMergeRemainingStats.recordCount}
-              />
-              <WordSenseMeaningComparison
-                remainingGroupCount={meaningComparisonRemainingStats.groupCount}
-                remainingRecordCount={meaningComparisonRemainingStats.recordCount}
-              />
               <WordSenseLearningScores
                 initialRemainingCount={learningScoreSummary.total}
                 initialFieldCounts={{
@@ -693,52 +764,56 @@ export default async function WordsTablePage({
                 initialRemainingCount={phoneticCreateRemainingCount}
               />
             </div>
-            <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
-              <span className="rounded-full bg-amber-500/10 px-3 py-1 font-semibold text-amber-700">
-                {pendingReviewCount.toLocaleString()} need AI review
-              </span>
-              <span className="text-muted">
-                An empty otherMeaningIds value is complete only when meaningReviewStatus is CONFIRMED.
-              </span>
-            </div>
-            <div className="mt-3 border-t pt-3">
-              <div className="mb-2">
-                <div className="text-sm font-semibold">Data maintenance</div>
-                <div className="text-xs opacity-70">
-                  Preview and clear supported WordSense fields with dependency-aware recovery snapshots.
-                </div>
-              </div>
-              <TableFieldMaintenance
-                modelLabel="WordSense"
-                apiBase="/api/words/field-maintenance"
-                scopeContext={{
-                  filter: { q, review, missingConceptAudio: missingConceptAudioOnly },
-                  filteredCount: total,
-                }}
-              />
-            </div>
-          </div>
-          <div className="space-y-3 border-t pt-3 lg:border-l lg:border-t-0 lg:pl-3 lg:pt-0">
-            <section className="flex flex-col gap-2">
-              <div>
-                <div className="text-sm font-semibold">All audio fields</div>
-                <div className="text-xs opacity-70">
-                  Generates only missing audio for base_form, canonical_text, concept_explained_fa, sentence_en, and sentence_en_meaning_fa.
-                </div>
-              </div>
-              <BatchWordFieldVoiceGenerateAllFields
-                remainingCount={audioRemainingCounts.total}
-                missingFileCount={audioRemainingCounts.missingFile}
-                changedTextCount={audioRemainingCounts.changedText}
-              />
             </section>
-            <div className="border-t pt-3">
-              <BatchEnglishWordJsonHintGenerate
-                initialRemainingCount={jsonHintRemainingCount}
-                initialTotalCount={jsonHintTotalCount}
-              />
-            </div>
+
+            <section className="rounded border border-card p-3">
+              <div>
+                <div className="text-sm font-semibold">Generated assets and metadata</div>
+                <div className="text-xs opacity-70">
+                  Generate missing audio assets, then complete EnglishWord JSON hints.
+                </div>
+              </div>
+              <div className="mt-2 space-y-3">
+                <section className="flex flex-col gap-2">
+                  <div>
+                    <div className="text-sm font-semibold">All audio fields</div>
+                    <div className="text-xs opacity-70">
+                      Generates only missing audio for base_form, canonical_text, concept_explained_fa, sentence_en, and sentence_en_meaning_fa.
+                    </div>
+                  </div>
+                  <BatchWordFieldVoiceGenerateAllFields
+                    remainingCount={audioRemainingCounts.total}
+                    missingFileCount={audioRemainingCounts.missingFile}
+                    changedTextCount={audioRemainingCounts.changedText}
+                  />
+                </section>
+                <div className="border-t pt-3">
+                  <BatchEnglishWordJsonHintGenerate
+                    initialRemainingCount={jsonHintRemainingCount}
+                    initialTotalCount={jsonHintTotalCount}
+                    modes={["missing"]}
+                  />
+                </div>
+              </div>
+            </section>
           </div>
+
+          <section className="border-t pt-3">
+            <div className="mb-2">
+              <div className="text-sm font-semibold">Data maintenance</div>
+              <div className="text-xs opacity-70">
+                Preview and clear supported WordSense fields with dependency-aware recovery snapshots.
+              </div>
+            </div>
+            <TableFieldMaintenance
+              modelLabel="WordSense"
+              apiBase="/api/words/field-maintenance"
+              scopeContext={{
+                filter: { q, review, missingConceptAudio: missingConceptAudioOnly },
+                filteredCount: total,
+              }}
+            />
+          </section>
         </div>
       </section>
       <section className="mt-4 rounded border p-3">
@@ -829,6 +904,14 @@ export default async function WordsTablePage({
                     href={sortHref("inflectionMergeReviewed")}
                     label="inflectionMergeReviewed"
                     active={sort === "inflectionMergeReviewed"}
+                    direction={dir}
+                  />
+                ) : null}
+                {hasColumn("idiomReviewCompleted") ? (
+                  <SortHeader
+                    href={sortHref("idiomReviewCompleted")}
+                    label="idiomReviewCompleted"
+                    active={sort === "idiomReviewCompleted"}
                     direction={dir}
                   />
                 ) : null}
@@ -1040,6 +1123,9 @@ export default async function WordsTablePage({
                   ) : null}
                   {hasColumn("inflectionMergeReviewed") ? (
                     <td className="px-3 py-2">{row.inflectionMergeReviewed ? "true" : "false"}</td>
+                  ) : null}
+                  {hasColumn("idiomReviewCompleted") ? (
+                    <td className="px-3 py-2">{row.idiomReviewCompleted ? "true" : "false"}</td>
                   ) : null}
                   {hasColumn("otherMeaningIds") ? (
                     <td className="max-w-64 px-3 py-2 font-mono">

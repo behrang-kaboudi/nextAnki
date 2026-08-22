@@ -17,29 +17,40 @@ function referencedMeaningIds(value: Prisma.JsonValue | null) {
   });
 }
 
-async function listDeletablePersianWords(client: typeof prisma): Promise<UnreferencedPersianWord[]> {
-  const [persianWords, wordSenses] = await Promise.all([
-    client.persianWord.findMany({
-      where: {
-        AND: [
-          { OR: [{ audio_file_name: null }, { audio_file_name: "" }] },
-          { OR: [{ meaning_fa_IPA: null }, { meaning_fa_IPA: "" }] },
-          { OR: [{ meaning_fa_IPA_normalize: null }, { meaning_fa_IPA_normalize: "" }] },
-        ],
-      },
-      select: { id: true },
-    }),
-    client.wordSense.findMany({
-      select: { meaningId: true, otherMeaningIds: true },
-    }),
-  ]);
-  const referencedIds = new Set(
-    wordSenses.flatMap((wordSense) => [
+async function loadPersianWordReferenceCounts(client: typeof prisma) {
+  const wordSenses = await client.wordSense.findMany({
+    select: { meaningId: true, otherMeaningIds: true },
+  });
+  const counts = new Map<number, number>();
+  for (const wordSense of wordSenses) {
+    const ids = new Set([
       ...(wordSense.meaningId === null ? [] : [wordSense.meaningId]),
       ...referencedMeaningIds(wordSense.otherMeaningIds),
-    ]),
-  );
-  return persianWords.filter((persianWord) => !referencedIds.has(persianWord.id));
+    ]);
+    for (const id of ids) counts.set(id, (counts.get(id) ?? 0) + 1);
+  }
+  return counts;
+}
+
+function listDeletablePersianWordCandidates(client: typeof prisma) {
+  return client.persianWord.findMany({
+    where: {
+      AND: [
+        { OR: [{ audio_file_name: null }, { audio_file_name: "" }] },
+        { OR: [{ meaning_fa_IPA: null }, { meaning_fa_IPA: "" }] },
+        { OR: [{ meaning_fa_IPA_normalize: null }, { meaning_fa_IPA_normalize: "" }] },
+      ],
+    },
+    select: { id: true },
+  });
+}
+
+async function listDeletablePersianWords(client: typeof prisma): Promise<UnreferencedPersianWord[]> {
+  const [persianWords, referenceCounts] = await Promise.all([
+    listDeletablePersianWordCandidates(client),
+    loadPersianWordReferenceCounts(client),
+  ]);
+  return persianWords.filter((persianWord) => !referenceCounts.has(persianWord.id));
 }
 
 export function unreferencedPersianWordConfirmation(count: number) {
@@ -48,6 +59,17 @@ export function unreferencedPersianWordConfirmation(count: number) {
 
 export async function countDeletablePersianWords() {
   return (await listDeletablePersianWords(prisma)).length;
+}
+
+export async function getPersianWordTableReferenceSummary() {
+  const [persianWords, referenceCounts] = await Promise.all([
+    listDeletablePersianWordCandidates(prisma),
+    loadPersianWordReferenceCounts(prisma),
+  ]);
+  return {
+    deletableCount: persianWords.filter((persianWord) => !referenceCounts.has(persianWord.id)).length,
+    referenceCounts,
+  };
 }
 
 function activeJobNames() {

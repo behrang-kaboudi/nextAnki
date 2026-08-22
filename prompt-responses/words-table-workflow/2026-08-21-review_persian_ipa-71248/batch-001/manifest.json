@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "runId": "2026-08-21-review_persian_ipa-71248",
+  "taskId": "review_persian_ipa",
+  "status": "applied",
+  "itemCount": 1,
+  "inputFile": "input.json",
+  "responseFile": "response.json",
+  "qaFile": "qa.json",
+  "acceptedIds": [71248],
+  "excludedIds": []
+}

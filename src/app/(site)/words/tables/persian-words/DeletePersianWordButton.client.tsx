@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export default function DeletePersianWordButton({ id, label }: { id: number; label: string }) {
+export default function DeletePersianWordButton({ id, label, referenceCount }: { id: number; label: string; referenceCount: number }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
 
@@ -33,9 +33,9 @@ export default function DeletePersianWordButton({ id, label }: { id: number; lab
     <button
       type="button"
       onClick={() => void onDelete()}
-      disabled={busy}
-      className="rounded border border-red-500/30 bg-red-600/10 px-2 py-1 text-[11px] font-semibold text-red-700 hover:bg-red-600/15 disabled:opacity-50 dark:text-red-300"
-      title="Delete PersianWord"
+      disabled={busy || referenceCount > 0}
+      className="rounded border border-red-500/30 bg-red-600/10 px-2 py-1 text-[11px] font-semibold text-red-700 hover:bg-red-600/15 disabled:cursor-not-allowed disabled:opacity-40 dark:text-red-300"
+      title={referenceCount ? `Unlink ${referenceCount} WordSense record(s) before deleting` : "Delete PersianWord"}
     >
       {busy ? "…" : "Delete"}
     </button>

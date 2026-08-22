@@ -6,6 +6,8 @@ import { PromptSourcesButton } from "@/components/prompts/PromptSourcesButton";
 import { PromptBatchControls } from "@/components/prompts/PromptBatchControls.client";
 import { RemainingCountBadge, RemainingCountButton } from "@/components/remaining-count";
 import { BulkReviewStatusActions } from "@/components/review-status/BulkReviewStatusActions.client";
+import { combinePromptParts } from "@/lib/ai/promptPolicy";
+import { completeAgentArtifact, usePendingAgentArtifact } from "@/lib/words/wordsTableAgentWorkflow.client";
 import DeleteWordSenseModalButton from "./DeleteWordSenseModalButton.client";
 import {
   MeaningReviewSingleFlight,
@@ -16,14 +18,15 @@ import {
 } from "@/lib/words/meaningReviewFinalization";
 
 const PROMPT_PATHS = [
-  "src/prompts/word-extraction/meaning_fa_review/rulseV1.md",
   "src/prompts/word-extraction/pos/rulseV1.md",
   "src/prompts/word-extraction/concept_explained_fa/rulseV1.md",
   "src/prompts/word-extraction/sentence_en/rulseV1.md",
   "src/prompts/word-extraction/sentence_meaning_fa/rulseV1.md",
+  "src/prompts/word-extraction/meaning_fa_review/rulseV1.md",
 ] as const;
 const PROMPT_SOURCE_PATHS = [
   ...PROMPT_PATHS,
+  "src/prompts/word-extraction/_shared/meaning_fa_core_v1.md",
   "src/prompts/word-extraction/other_meanings_fa/rulseV1.md",
   "src/prompts/word-extraction/_shared/other_meanings_fa_core_v1.md",
 ] as const;
@@ -84,6 +87,8 @@ export default function WordSenseMeaningsReview({
     [e, setE] = useState<string | null>(null),
     [remaining, setRemaining] = useState<number | null>(null),
     [notice, setNotice] = useState<string | null>(null);
+  const pendingAgent = usePendingAgentArtifact("review_persian_meanings");
+  const [agentRunId, setAgentRunId] = useState<string | null>(null);
   const [loadedCount, setLoadedCount] = useState(0);
   const [summary, setSummary] = useState(initialSummary);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -205,7 +210,7 @@ export default function WordSenseMeaningsReview({
           error?: string;
         };
       if (!x.ok || !j.ok) throw Error(j.error || "Could not create data.");
-      setPrompt(promptResponses.join("\n\n"));
+      setPrompt(combinePromptParts(promptResponses));
       setD(JSON.stringify(j.items, null, 2));
       setRemaining(
         typeof j.totalEligible === "number" ? j.totalEligible : null,
@@ -220,12 +225,12 @@ export default function WordSenseMeaningsReview({
       setB(false);
     }
   };
-  const apply = async () => {
+  const apply = async (responseValue = a) => {
     setB(true);
     setE(null);
     setNotice(null);
     try {
-      const c = JSON.parse(a) as unknown;
+      const c = JSON.parse(responseValue) as unknown;
       const responseObject = !Array.isArray(c) && c && typeof c === "object"
         ? c as Record<string, unknown>
         : null;
@@ -386,6 +391,11 @@ export default function WordSenseMeaningsReview({
       const report = await commit(request);
       if (report) {
         const finalNotice = reportText(report);
+        if (agentRunId) {
+          await completeAgentArtifact(agentRunId);
+          setAgentRunId(null);
+          await pendingAgent.refresh();
+        }
         setNotice(finalNotice);
         setConfirmOpen(false);
         await load(finalNotice);
@@ -422,19 +432,38 @@ export default function WordSenseMeaningsReview({
       .catch((reason) =>
         setE(reason instanceof Error ? reason.message : String(reason)),
       );
+  const openStage = async () => {
+    setB(true);
+    setE(null);
+    try {
+      const artifact = await pendingAgent.loadResponse();
+      if (!artifact || artifact.response === undefined) {
+        setO(true);
+        await load();
+        return;
+      }
+      const savedResponse = JSON.stringify(artifact.response, null, 2);
+      setA(savedResponse);
+      setAgentRunId(artifact.runId);
+      setO(true);
+      await apply(savedResponse);
+    } catch (error) {
+      setE(error instanceof Error ? error.message : String(error));
+    } finally {
+      setB(false);
+    }
+  };
   return (
     <>
       <div className="inline-flex items-start gap-1">
         <button
           type="button"
-          onClick={() => {
-            setO(true);
-            void load();
-          }}
+          onClick={() => void openStage()}
           disabled={b}
           className="rounded border px-3 py-2 text-sm transition active:scale-90 hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5"
         >
           1. REVIEW PERSIAN MEANINGS <RemainingCountBadge count={pendingCount} />
+          {pendingAgent.artifact ? <span className="ml-1 text-emerald-700">AI response ready ✓</span> : null}
         </button>
         <button
           type="button"
@@ -575,10 +604,10 @@ export default function WordSenseMeaningsReview({
                 </ul>
                 <div className="mt-2 font-semibold">اولویت قطعی معنی و concept</div>
                 <ul className="list-disc pr-5">
-                  <li><code>meaning_fa</code> هویت معنایی و مرجع اصلی است؛ فیلد دیگری اجازه ندارد sense آن را تغییر دهد.</li>
+                  <li><code>meaning_fa</code> ابتدا طبق قواعد مشترک بررسی می‌شود؛ مقدار معتبر یا اصلاح‌شدهٔ بدون تغییر sense، هویت معنایی و مرجع اصلی است.</li>
                   <li>اگر concept خالی یا ناسازگار است، براساس معنی اصلاح یا تولید می‌شود.</li>
-                  <li>معنی فقط برای ایراد سطحی مانند غلط املایی، فاصله، صورت دستوری آشکار یا فارسی کمی غیرطبیعی اصلاح می‌شود؛ تغییر sense ممنوع است.</li>
-                  <li>اگر معنی اساساً متعلق به <code>base_form</code> نیست، مدل فقط <code>invalid_primary_meaning=true</code> گزارش می‌کند؛ هیچ داده‌ای تغییر نمی‌کند و رکورد برای رسیدگی یا حذف دستی pending می‌ماند.</li>
+                  <li>معنی بدون تغییر sense برای ایراد سطحی یا جزئیاتی که فقط از کلمات دیگر جمله وارد شده‌اند اصلاح می‌شود؛ تغییر sense ممنوع است.</li>
+                  <li>اگر معنی متعلق به <code>base_form</code> نیست، اصلاح به تغییر sense نیاز دارد، یا حفظ همان sense قطعی نیست، مدل فقط <code>invalid_primary_meaning=true</code> گزارش می‌کند؛ هیچ داده‌ای تغییر نمی‌کند و رکورد برای رسیدگی یا حذف دستی pending می‌ماند.</li>
                 </ul>
                 <div className="mt-2 font-semibold">هماهنگ‌سازی فیلدهای وابسته</div>
                 <ul className="list-disc pr-5">

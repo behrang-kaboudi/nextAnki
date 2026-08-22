@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "runId": "2026-08-21-compare_word_meanings-7952c0d9-0c10-4e5b-9f44-0f06762afb16",
+  "stageId": "compare_word_meanings",
+  "status": "applied",
+  "createdAt": "2026-08-21T15:14:14.346Z",
+  "updatedAt": "2026-08-21T15:24:19.856Z",
+  "itemCount": 3,
+  "promptFile": "prompt.md",
+  "inputFile": "input.json",
+  "responseFile": "response.json",
+  "qaFile": "qa.json"
+}

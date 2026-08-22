@@ -1,0 +1,633 @@
+{
+  "generatedAt": "2026-08-19T01:34:36.635Z",
+  "status": "pass_as_candidate_list",
+  "semanticBoundary": "The QA confirms candidate evidence and current database identity. It does not claim that every candidate is a confirmed semantic defect.",
+  "criteriaChecked": [
+    "whole-database scope recorded",
+    "candidate counts and identifier arrays match",
+    "all candidate WordSense IDs are unique and currently exist",
+    "EnglishWord IDs, base forms, and primary Persian meanings match the live database",
+    "every candidate has a shorter same-EnglishWord Persian meaning and sentence-level contributor evidence",
+    "all evidence sentence IDs remain connected to the candidate WordSense",
+    "strong/review tier assignment matches the documented scoring rule",
+    "the motivating care record 2067 is present with medical-to-Persian evidence"
+  ],
+  "defectsFoundDuringQa": [],
+  "correctionsMade": [],
+  "minimumItemScore": 8.3,
+  "batchScore": 8.66,
+  "itemResults": [
+    {
+      "wordSenseId": 1368,
+      "score": 9.2,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 1783,
+      "score": 9.2,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 1840,
+      "score": 9.2,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 2056,
+      "score": 9.2,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 2067,
+      "score": 9.2,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 2400,
+      "score": 9.2,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 2628,
+      "score": 9.2,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 3832,
+      "score": 9.2,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 4127,
+      "score": 9.2,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 4158,
+      "score": 9.2,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 5718,
+      "score": 9.2,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 30745,
+      "score": 9.2,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 32218,
+      "score": 9.2,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 32544,
+      "score": 9.2,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 34109,
+      "score": 9.2,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 34457,
+      "score": 9.2,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 34958,
+      "score": 9.2,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 35782,
+      "score": 9.2,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 35785,
+      "score": 9.2,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 37760,
+      "score": 9.2,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 37937,
+      "score": 9.2,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 38016,
+      "score": 9.2,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 38230,
+      "score": 9.2,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 38639,
+      "score": 9.2,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 38668,
+      "score": 9.2,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 39446,
+      "score": 9.2,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 39448,
+      "score": 9.2,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 39515,
+      "score": 9.2,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 39561,
+      "score": 9.2,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 39724,
+      "score": 9.2,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 40109,
+      "score": 9.2,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 41045,
+      "score": 9.2,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 41343,
+      "score": 9.2,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 42177,
+      "score": 9.2,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 42369,
+      "score": 9.2,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 42490,
+      "score": 9.2,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 42951,
+      "score": 9.2,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 44460,
+      "score": 9.2,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 44864,
+      "score": 9.2,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 44995,
+      "score": 9.2,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 45037,
+      "score": 9.2,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 2368,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 32847,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 38888,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 42298,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 42743,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 44860,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 1599,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 1690,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 30859,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 31455,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 31561,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 31731,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 31732,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 32298,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 32479,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 32748,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 32857,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 32879,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 32909,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 33611,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 34898,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 35184,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 35335,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 35352,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 35990,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 35994,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 36414,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 36473,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 36920,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 37506,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 37705,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 37720,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 38390,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 38432,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 38700,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 39043,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 39528,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 39586,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 39860,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 40070,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 40103,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 40156,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 40187,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 40236,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 40260,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 40306,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 40733,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 41222,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 41500,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 41631,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 41724,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 41960,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 42181,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 42286,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 42469,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 42493,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 42499,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 43258,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 43945,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 44618,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    },
+    {
+      "wordSenseId": 44836,
+      "score": 8.3,
+      "status": "pass_as_candidate",
+      "checked": "current IDs, primary meaning, connected sentence evidence, shorter same-EnglishWord meaning, tier contract"
+    }
+  ]
+}

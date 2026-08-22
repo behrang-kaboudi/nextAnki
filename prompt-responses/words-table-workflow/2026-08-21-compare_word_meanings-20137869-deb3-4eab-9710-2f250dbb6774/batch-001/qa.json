@@ -1,0 +1,640 @@
+{
+  "status": "passed",
+  "score": 8.808,
+  "criteria": {
+    "correctness": true,
+    "completeness": true,
+    "relevance": true,
+    "internalConsistency": true,
+    "clarity": true,
+    "schemaCompliance": true,
+    "semanticReviewComplete": true,
+    "exactGroupCoverage": true,
+    "exactRecordOccurrenceCoverage": true,
+    "symmetricSynonymRelations": true,
+    "minimumRecordScore": 8.8,
+    "outputSha256": "6e28847a327edbda1676521e4e2ef4e9a7e8577d79534d95e1191bfb7dc77bff"
+  },
+  "itemResults": [
+    {
+      "key": "adjective:8",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "adjective:153",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "adjective:260",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "verb:268",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "verb:327",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:377",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:459",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:473",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "adjective:495",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "adjective:561",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:585",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:611",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "adjective:662",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "verb:727",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "verb:805",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:895",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "verb:956",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:976",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "adjective:1092",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "adjective:1110",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "adjective:1147",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:1175",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:1517",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:1767",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:1768",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:2115",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:2122",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:2395",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:2438",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "verb:2625",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "adjective:2638",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:2676",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "verb:2682",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "verb:2730",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:2732",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "adjective:2734",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:2749",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:2766",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "verb:2791",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "verb:2831",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "adjective:2884",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "verb:2997",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "verb:3038",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:3064",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "verb:3111",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:3171",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "verb:3175",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:3180",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:3221",
+      "status": "passed",
+      "score": 9.1
+    },
+    {
+      "key": "adjective:3274",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "verb:3288",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "adjective:3367",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:3371",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "verb:3392",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "phrasal verb:3438",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "adjective:3446",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "adjective:3463",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:3472",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "verb:3517",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "adjective:3523",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:3538",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:3539",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:3540",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "verb:3551",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "verb:3592",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "verb:3647",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:3655",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:3681",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "verb:3796",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:3865",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:4049",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:4096",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:4105",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:4243",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "adjective:4247",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:4346",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:4378",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "adjective:4416",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "adjective:4431",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:4552",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:4596",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "adverb:4622",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:4748",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "adjective:4921",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "verb:4939",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:5042",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:5314",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "verb:5434",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:5792",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:6022",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "verb:6162",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "verb:6196",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "verb:6231",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "verb:6245",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "adjective:6288",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "adjective:6332",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:6336",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:6383",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "adjective:6392",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "verb:6398",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "verb:6399",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:6472",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:6557",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:6619",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "verb:47180",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "adverb:47193",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "adverb:47194",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "adverb:47697",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "verb:47775",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "verb:47950",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "verb:47952",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "adjective:48257",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:48984",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "verb:49621",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:50633",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "adjective:51094",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:52385",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:54912",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:55946",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "adjective:57088",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:58272",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:59056",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "adjective:59184",
+      "status": "passed",
+      "score": 8.8
+    },
+    {
+      "key": "noun:62099",
+      "status": "passed",
+      "score": 8.8
+    }
+  ]
+}

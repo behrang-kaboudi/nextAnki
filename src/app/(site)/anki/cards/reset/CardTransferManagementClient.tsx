@@ -11,6 +11,8 @@ import {
   WordAnkiConstants,
 } from "@/lib/anki";
 
+import AnkiWordSyncQuickActions from "./AnkiWordSyncQuickActions";
+
 const BATCH_SIZE = 200;
 const TEN_YEARS_IN_DAYS = 3650;
 const ORANGE_FLAG = 2;
@@ -67,7 +69,7 @@ type ReviewResetScanResult = {
   matchingSourceCards: ReviewResetCandidate[];
 };
 
-type SuspendedCardCandidate = {
+type LastHardCardCandidate = {
   sourceDeck: string;
   sourceCardId: number;
   noteId: number;
@@ -75,8 +77,20 @@ type SuspendedCardCandidate = {
   meaningFa: string;
 };
 
-type SuspendedCardScanResult = {
-  candidates: SuspendedCardCandidate[];
+type LastHardCardScanResult = {
+  candidates: LastHardCardCandidate[];
+};
+
+type PronunciationLastHardCardCandidate = {
+  pronunciationCardId: number;
+  noteId: number;
+  baseForm: string;
+  meaningFa: string;
+};
+
+type PronunciationLastHardCardScanResult = {
+  cardsChecked: number;
+  candidates: PronunciationLastHardCardCandidate[];
 };
 
 type PronunciationResetCandidate = {
@@ -109,6 +123,51 @@ type PronunciationSourceScanResult = {
   matchingCards: PronunciationSourceCandidate[];
 };
 
+type BackgroundSyncStatus = {
+  running: boolean;
+  done: boolean;
+  stoppedEarly: boolean;
+  error: string | null;
+  total: number;
+  processed: number;
+  created?: number;
+  updated: number;
+  failed: number;
+  mediaUploaded: number;
+};
+
+type MasterStageStatus = "pending" | "running" | "completed" | "error";
+
+type MasterStage = {
+  label: string;
+  status: MasterStageStatus;
+  detail: string;
+  processed: number;
+  total: number;
+};
+
+const MASTER_STAGE_LABELS = [
+  "Copy all media",
+  "Delete Anki notes missing in DB",
+  "Full database sync",
+  "انجام ۴ مرحله",
+  "انجام ۳ مرحله",
+] as const;
+
+function createMasterStages(): MasterStage[] {
+  return MASTER_STAGE_LABELS.map((label) => ({
+    label,
+    status: "pending",
+    detail: "در انتظار اجرا",
+    processed: 0,
+    total: 0,
+  }));
+}
+
+function wait(milliseconds: number) {
+  return new Promise((resolve) => window.setTimeout(resolve, milliseconds));
+}
+
 function escapeAnkiQueryValue(value: string) {
   return value.replaceAll('"', '\\"');
 }
@@ -122,9 +181,12 @@ export default function CardTransferManagementClient() {
   const [reviewResetCandidates, setReviewResetCandidates] = useState<ReviewResetCandidate[]>([]);
   const [reviewResetStatus, setReviewResetStatus] = useState<string | null>(null);
   const [reviewResetError, setReviewResetError] = useState<string | null>(null);
-  const [suspendedCardCandidates, setSuspendedCardCandidates] = useState<SuspendedCardCandidate[]>([]);
-  const [suspendedCardStatus, setSuspendedCardStatus] = useState<string | null>(null);
-  const [suspendedCardError, setSuspendedCardError] = useState<string | null>(null);
+  const [lastHardCardCandidates, setLastHardCardCandidates] = useState<LastHardCardCandidate[]>([]);
+  const [lastHardCardStatus, setLastHardCardStatus] = useState<string | null>(null);
+  const [lastHardCardError, setLastHardCardError] = useState<string | null>(null);
+  const [pronunciationLastHardCardCandidates, setPronunciationLastHardCardCandidates] = useState<PronunciationLastHardCardCandidate[]>([]);
+  const [pronunciationLastHardCardStatus, setPronunciationLastHardCardStatus] = useState<string | null>(null);
+  const [pronunciationLastHardCardError, setPronunciationLastHardCardError] = useState<string | null>(null);
   const [pronunciationResetCandidates, setPronunciationResetCandidates] = useState<PronunciationResetCandidate[]>([]);
   const [pronunciationResetStatus, setPronunciationResetStatus] = useState<string | null>(null);
   const [pronunciationResetError, setPronunciationResetError] = useState<string | null>(null);
@@ -137,6 +199,10 @@ export default function CardTransferManagementClient() {
   const [mainRunAllError, setMainRunAllError] = useState<string | null>(null);
   const [pronunciationRunAllStatus, setPronunciationRunAllStatus] = useState<string | null>(null);
   const [pronunciationRunAllError, setPronunciationRunAllError] = useState<string | null>(null);
+  const [masterModalOpen, setMasterModalOpen] = useState(false);
+  const [masterRunning, setMasterRunning] = useState(false);
+  const [masterStages, setMasterStages] = useState<MasterStage[]>(createMasterStages);
+  const [masterFailedIndex, setMasterFailedIndex] = useState<number | null>(null);
 
   async function scanCandidates(): Promise<ScanResult> {
     const allCandidates: Candidate[] = [];
@@ -308,12 +374,12 @@ export default function CardTransferManagementClient() {
     return `کارت‌های مبدا با فلگ Orange: ${result.orangeSourceCards} | Review با interval بالای ۱۰ سال: ${result.reviewCardsOverTenYears} | کارت‌های مبدا قابل ریست: ${result.matchingSourceCards.length}${resetText}`;
   }
 
-  async function scanSuspendedCards(): Promise<SuspendedCardScanResult> {
-    const candidates: SuspendedCardCandidate[] = [];
+  async function scanLastHardCards(): Promise<LastHardCardScanResult> {
+    const candidates: LastHardCardCandidate[] = [];
 
     for (const source of SOURCE_CARDS) {
       const response = await ankiOperations.findCards({
-        query: `deck:"${escapeAnkiQueryValue(source.deck)}" card:"${escapeAnkiQueryValue(source.cardTemplate)}" is:suspended`,
+        query: `deck:"${escapeAnkiQueryValue(source.deck)}" card:"${escapeAnkiQueryValue(source.cardTemplate)}" -is:new`,
       });
       if (!response.ok) throw new Error(response.error);
 
@@ -324,7 +390,29 @@ export default function CardTransferManagementClient() {
         cards.push(...(infoResponse.result ?? []));
       }
 
-      const noteIds = [...new Set(cards.map((card) => card.note))];
+      const lastAnswerButtonByCardId = new Map<number, number>();
+      for (const batch of chunkArray(cards.map((card) => card.cardId), BATCH_SIZE)) {
+        const reviewsResponse = await ankiOperations.getReviewsOfCards({ cards: batch });
+        if (!reviewsResponse.ok) throw new Error(reviewsResponse.error);
+
+        for (const cardId of batch) {
+          let lastAnswerButton: { id: number; ease: number } | null = null;
+          for (const review of reviewsResponse.result?.[String(cardId)] ?? []) {
+            if (review.ease < 1 || review.ease > 4) continue;
+            if (lastAnswerButton === null || review.id > lastAnswerButton.id) {
+              lastAnswerButton = review;
+            }
+          }
+          if (lastAnswerButton !== null) {
+            lastAnswerButtonByCardId.set(cardId, lastAnswerButton.ease);
+          }
+        }
+      }
+
+      const eligibleCards = cards.filter(
+        (card) => lastAnswerButtonByCardId.get(card.cardId) === 2,
+      );
+      const noteIds = [...new Set(eligibleCards.map((card) => card.note))];
       if (!noteIds.length) continue;
       const notesById = new Map<number, AnkiNotesInfo[number]>();
       for (const batch of chunkArray(noteIds, BATCH_SIZE)) {
@@ -333,7 +421,7 @@ export default function CardTransferManagementClient() {
         for (const note of notesResponse.result ?? []) notesById.set(note.noteId, note);
       }
 
-      for (const card of cards) {
+      for (const card of eligibleCards) {
         const note = notesById.get(card.note);
         candidates.push({
           sourceDeck: source.deck,
@@ -348,9 +436,77 @@ export default function CardTransferManagementClient() {
     return { candidates };
   }
 
-  function formatSuspendedCardStatus(result: SuspendedCardScanResult, resetCount?: number) {
+  function formatLastHardCardStatus(result: LastHardCardScanResult, resetCount?: number) {
     const resetText = resetCount == null ? "" : ` | ریست‌شده: ${resetCount}`;
-    return `کارت‌های Suspend‌شده در EnToFa و FaToEn: ${result.candidates.length}${resetText}`;
+    return `کارت‌های EnToFa و FaToEn با آخرین پاسخ Hard (ease=2): ${result.candidates.length}${resetText}`;
+  }
+
+  async function scanPronunciationLastHardCards(): Promise<PronunciationLastHardCardScanResult> {
+    const response = await ankiOperations.findCards({
+      query: `deck:"${escapeAnkiQueryValue(PRONUNCIATION_DECK)}" card:"${escapeAnkiQueryValue(PRONUNCIATION_CARD_TEMPLATE)}" -is:new`,
+    });
+    if (!response.ok) throw new Error(response.error);
+
+    const cards: Array<{ cardId: number; note: number }> = [];
+    for (const batch of chunkArray(response.result ?? [], BATCH_SIZE)) {
+      const infoResponse = await ankiOperations.cardsInfo({ cards: batch });
+      if (!infoResponse.ok) throw new Error(infoResponse.error);
+      for (const card of infoResponse.result ?? []) {
+        if (card.deckName !== PRONUNCIATION_DECK) continue;
+        cards.push({ cardId: card.cardId, note: card.note });
+      }
+    }
+
+    const lastAnswerButtonByCardId = new Map<number, number>();
+    for (const batch of chunkArray(cards.map((card) => card.cardId), BATCH_SIZE)) {
+      const reviewsResponse = await ankiOperations.getReviewsOfCards({ cards: batch });
+      if (!reviewsResponse.ok) throw new Error(reviewsResponse.error);
+
+      for (const cardId of batch) {
+        let lastAnswerButton: { id: number; ease: number } | null = null;
+        for (const review of reviewsResponse.result?.[String(cardId)] ?? []) {
+          if (review.ease < 1 || review.ease > 4) continue;
+          if (lastAnswerButton === null || review.id > lastAnswerButton.id) {
+            lastAnswerButton = review;
+          }
+        }
+        if (lastAnswerButton !== null) {
+          lastAnswerButtonByCardId.set(cardId, lastAnswerButton.ease);
+        }
+      }
+    }
+
+    const eligibleCards = cards.filter(
+      (card) => lastAnswerButtonByCardId.get(card.cardId) === 2,
+    );
+    const noteIds = [...new Set(eligibleCards.map((card) => card.note))];
+    const notesById = new Map<number, AnkiNotesInfo[number]>();
+    for (const batch of chunkArray(noteIds, BATCH_SIZE)) {
+      const notesResponse = await ankiOperations.notesInfo({ notes: batch });
+      if (!notesResponse.ok) throw new Error(notesResponse.error);
+      for (const note of notesResponse.result ?? []) notesById.set(note.noteId, note);
+    }
+
+    return {
+      cardsChecked: cards.length,
+      candidates: eligibleCards.map((card) => {
+        const note = notesById.get(card.note);
+        return {
+          pronunciationCardId: card.cardId,
+          noteId: card.note,
+          baseForm: note?.fields.base_form?.value ?? "",
+          meaningFa: note?.fields.meaning_fa?.value ?? "",
+        };
+      }),
+    };
+  }
+
+  function formatPronunciationLastHardCardStatus(
+    result: PronunciationLastHardCardScanResult,
+    resetCount?: number,
+  ) {
+    const resetText = resetCount == null ? "" : ` | ریست‌شده: ${resetCount}`;
+    return `کارت‌های Pronunciation بررسی‌شده: ${result.cardsChecked} | آخرین پاسخ Hard (ease=2): ${result.candidates.length}${resetText}`;
   }
 
   async function scanPronunciationSourceCandidates(
@@ -665,38 +821,75 @@ export default function CardTransferManagementClient() {
     }
   }
 
-  async function testSuspendedCards() {
+  async function testLastHardCards() {
     if (running || previewLoading) return;
     setPreviewLoading(true);
-    setSuspendedCardError(null);
-    setSuspendedCardStatus("در حال استخراج کارت‌های Suspend‌شده؛ هیچ کارتی ریست نمی‌شود…");
+    setLastHardCardError(null);
+    setLastHardCardStatus("در حال پیدا کردن کارت‌هایی که آخرین پاسخ واقعی آن‌ها Hard بوده است؛ هیچ کارتی ریست نمی‌شود…");
     try {
-      const result = await scanSuspendedCards();
-      setSuspendedCardCandidates(result.candidates);
-      setSuspendedCardStatus(`Preview آماده است — ${formatSuspendedCardStatus(result)}`);
+      const result = await scanLastHardCards();
+      setLastHardCardCandidates(result.candidates);
+      setLastHardCardStatus(`Preview آماده است — ${formatLastHardCardStatus(result)}`);
     } catch (caught) {
-      setSuspendedCardCandidates([]);
-      setSuspendedCardError(caught instanceof Error ? caught.message : "ارتباط با AnkiConnect ناموفق بود.");
-      setSuspendedCardStatus(null);
+      setLastHardCardCandidates([]);
+      setLastHardCardError(caught instanceof Error ? caught.message : "ارتباط با AnkiConnect ناموفق بود.");
+      setLastHardCardStatus(null);
     } finally {
       setPreviewLoading(false);
     }
   }
 
-  async function resetSuspendedCards() {
+  async function resetLastHardCards() {
     if (running || previewLoading) return;
     setRunning(true);
-    setSuspendedCardError(null);
-    setSuspendedCardStatus("در حال استخراج و ریست کارت‌های Suspend‌شده…");
+    setLastHardCardError(null);
+    setLastHardCardStatus("در حال پیدا کردن و ریست کارت‌هایی که آخرین پاسخ واقعی آن‌ها Hard بوده است…");
     try {
-      const result = await scanSuspendedCards();
-      setSuspendedCardCandidates(result.candidates);
+      const result = await scanLastHardCards();
+      setLastHardCardCandidates(result.candidates);
       const cardIds = [...new Set(result.candidates.map((candidate) => candidate.sourceCardId))];
       await resetCardsToStudyQueue(cardIds);
-      setSuspendedCardStatus(`انجام شد — ${formatSuspendedCardStatus(result, cardIds.length)}`);
+      setLastHardCardStatus(`انجام شد — ${formatLastHardCardStatus(result, cardIds.length)}`);
     } catch (caught) {
-      setSuspendedCardError(caught instanceof Error ? caught.message : "ارتباط با AnkiConnect ناموفق بود.");
-      setSuspendedCardStatus(null);
+      setLastHardCardError(caught instanceof Error ? caught.message : "ارتباط با AnkiConnect ناموفق بود.");
+      setLastHardCardStatus(null);
+    } finally {
+      setRunning(false);
+    }
+  }
+
+  async function testPronunciationLastHardCards() {
+    if (running || previewLoading) return;
+    setPreviewLoading(true);
+    setPronunciationLastHardCardError(null);
+    setPronunciationLastHardCardStatus("در حال پیدا کردن کارت‌های Pronunciation که آخرین پاسخ واقعی آن‌ها Hard بوده است؛ هیچ کارتی ریست نمی‌شود…");
+    try {
+      const result = await scanPronunciationLastHardCards();
+      setPronunciationLastHardCardCandidates(result.candidates);
+      setPronunciationLastHardCardStatus(`Preview آماده است — ${formatPronunciationLastHardCardStatus(result)}`);
+    } catch (caught) {
+      setPronunciationLastHardCardCandidates([]);
+      setPronunciationLastHardCardError(caught instanceof Error ? caught.message : "ارتباط با AnkiConnect ناموفق بود.");
+      setPronunciationLastHardCardStatus(null);
+    } finally {
+      setPreviewLoading(false);
+    }
+  }
+
+  async function resetPronunciationLastHardCards() {
+    if (running || previewLoading) return;
+    setRunning(true);
+    setPronunciationLastHardCardError(null);
+    setPronunciationLastHardCardStatus("در حال پیدا کردن و ریست کارت‌های Pronunciation که آخرین پاسخ واقعی آن‌ها Hard بوده است…");
+    try {
+      const result = await scanPronunciationLastHardCards();
+      setPronunciationLastHardCardCandidates(result.candidates);
+      const cardIds = [...new Set(result.candidates.map((candidate) => candidate.pronunciationCardId))];
+      await resetCardsToStudyQueue(cardIds);
+      setPronunciationLastHardCardStatus(`انجام شد — ${formatPronunciationLastHardCardStatus(result, cardIds.length)}`);
+    } catch (caught) {
+      setPronunciationLastHardCardError(caught instanceof Error ? caught.message : "ارتباط با AnkiConnect ناموفق بود.");
+      setPronunciationLastHardCardStatus(null);
     } finally {
       setRunning(false);
     }
@@ -819,14 +1012,13 @@ export default function CardTransferManagementClient() {
     }
   }
 
-  async function runAllMainSteps() {
-    if (running || previewLoading) return;
-    setRunning(true);
-    setMainRunAllError(null);
-    setMainRunAllStatus("در حال اجرای گام‌های ۱ تا ۴…");
+  async function executeAllMainSteps(
+    onProgress?: (processed: number, total: number, detail: string) => void,
+  ) {
     let currentStep = "گام ۱: بلد نبودن صوت";
     const report: string[] = [];
     try {
+      onProgress?.(0, 4, currentStep);
       const stepOne = await scanPronunciationResetCandidates();
       const stepOneSourceIds = [...new Set(stepOne.matchingPronunciationCards.map((card) => card.sourceCardId))];
       const stepOnePronunciationIds = [...new Set(stepOne.matchingPronunciationCards.map((card) => card.pronunciationCardId))];
@@ -836,34 +1028,92 @@ export default function CardTransferManagementClient() {
       }
       await updateCardFlagsWithRollback(stepOneSourceIds, 0, PURPLE_FLAG);
       report.push(`گام ۱: ${stepOnePronunciationIds.length} کارت صوت`);
+      onProgress?.(1, 4, report.at(-1) ?? currentStep);
 
       currentStep = "گام ۲: بلد نبودن کارت اصلی";
+      onProgress?.(1, 4, currentStep);
       const stepTwo = await scanReviewResetCandidates();
       const stepTwoSourceIds = [...new Set(stepTwo.matchingSourceCards.map((card) => card.sourceCardId))];
       await resetCardsToStudyQueue(stepTwoSourceIds);
       await updateCardFlagsWithRollback(stepTwoSourceIds, 0, ORANGE_FLAG);
       report.push(`گام ۲: ${stepTwoSourceIds.length} کارت اصلی`);
+      onProgress?.(2, 4, report.at(-1) ?? currentStep);
 
-      currentStep = "گام ۳: ریست کارت‌های Suspend‌شده";
-      const stepThree = await scanSuspendedCards();
+      currentStep = "گام ۳: ریست کارت‌هایی با آخرین پاسخ Hard";
+      onProgress?.(2, 4, currentStep);
+      const stepThree = await scanLastHardCards();
       const stepThreeCardIds = [...new Set(stepThree.candidates.map((card) => card.sourceCardId))];
       await resetCardsToStudyQueue(stepThreeCardIds);
-      report.push(`گام ۳: ${stepThreeCardIds.length} کارت Suspend‌شده`);
+      report.push(`گام ۳: ${stepThreeCardIds.length} کارت با آخرین پاسخ Hard`);
+      onProgress?.(3, 4, report.at(-1) ?? currentStep);
 
       currentStep = "گام ۴: اتمام مرور";
+      onProgress?.(3, 4, currentStep);
       const stepFour = await scanCandidates();
       const stepFourReviewIds = [...new Set(stepFour.candidates.map((card) => card.reviewCardId))];
       const stepFourSourceIds = [...new Set(stepFour.candidates.map((card) => card.sourceCardId))];
       await resetCardsToStudyQueue(stepFourReviewIds);
       await updateCardFlagsWithRollback(stepFourSourceIds, ORANGE_FLAG, 0);
       report.push(`گام ۴: ${stepFourReviewIds.length} کارت Review`);
-      setMainRunAllStatus(`انجام شد — ${report.join(" | ")}`);
+      onProgress?.(4, 4, report.at(-1) ?? currentStep);
+      return report;
     } catch (caught) {
       const message = caught instanceof Error ? caught.message : "ارتباط با AnkiConnect ناموفق بود.";
-      setMainRunAllError(`خطا در ${currentStep}: ${message}`);
+      throw new Error(`خطا در ${currentStep}: ${message}`);
+    }
+  }
+
+  async function runAllMainSteps() {
+    if (running || previewLoading) return;
+    setRunning(true);
+    setMainRunAllError(null);
+    setMainRunAllStatus("در حال اجرای گام‌های ۱ تا ۴…");
+    try {
+      const report = await executeAllMainSteps();
+      setMainRunAllStatus(`انجام شد — ${report.join(" | ")}`);
+    } catch (caught) {
+      setMainRunAllError(caught instanceof Error ? caught.message : String(caught));
       setMainRunAllStatus(null);
     } finally {
       setRunning(false);
+    }
+  }
+
+  async function executeAllPronunciationSteps(
+    onProgress?: (processed: number, total: number, detail: string) => void,
+  ) {
+    let currentStep = "گام ۱: بلد نبودن صوت";
+    const report: string[] = [];
+    try {
+      onProgress?.(0, 3, currentStep);
+      const stepOne = await scanPronunciationSourceCandidates("again");
+      const stepOneReviewIds = [...new Set(stepOne.matchingCards.map((card) => card.reviewCardId))];
+      const stepOneSourceIds = [...new Set(stepOne.matchingCards.map((card) => card.sourceCardId))];
+      await resetCardsToStudyQueue(stepOneReviewIds);
+      await updateCardFlagsWithRollback(stepOneSourceIds, ORANGE_FLAG, 0);
+      report.push(`گام ۱: ${stepOneReviewIds.length} کارت ReviewPronunciation`);
+      onProgress?.(1, 3, report.at(-1) ?? currentStep);
+
+      currentStep = "گام ۲: ریست Pronunciation با آخرین پاسخ Hard";
+      onProgress?.(1, 3, currentStep);
+      const stepTwo = await scanPronunciationLastHardCards();
+      const stepTwoCardIds = [...new Set(stepTwo.candidates.map((card) => card.pronunciationCardId))];
+      await resetCardsToStudyQueue(stepTwoCardIds);
+      report.push(`گام ۲: ${stepTwoCardIds.length} کارت Pronunciation با آخرین پاسخ Hard`);
+      onProgress?.(2, 3, report.at(-1) ?? currentStep);
+
+      currentStep = "گام ۳: اتمام مرور صوت";
+      onProgress?.(2, 3, currentStep);
+      const stepThree = await scanPronunciationSourceCandidates("orange");
+      const stepThreeSourceIds = [...new Set(stepThree.matchingCards.map((card) => card.sourceCardId))];
+      await resetCardsToStudyQueue(stepThreeSourceIds);
+      await updateCardFlagsWithRollback(stepThreeSourceIds, 0, ORANGE_FLAG);
+      report.push(`گام ۳: ${stepThreeSourceIds.length} کارت صوت`);
+      onProgress?.(3, 3, report.at(-1) ?? currentStep);
+      return report;
+    } catch (caught) {
+      const message = caught instanceof Error ? caught.message : "ارتباط با AnkiConnect ناموفق بود.";
+      throw new Error(`خطا در ${currentStep}: ${message}`);
     }
   }
 
@@ -871,31 +1121,193 @@ export default function CardTransferManagementClient() {
     if (running || previewLoading) return;
     setRunning(true);
     setPronunciationRunAllError(null);
-    setPronunciationRunAllStatus("در حال اجرای گام‌های Pronunciation…");
-    let currentStep = "گام ۱: بلد نبودن صوت";
-    const report: string[] = [];
+    setPronunciationRunAllStatus("در حال اجرای گام‌های ۱ تا ۳ Pronunciation…");
     try {
-      const stepOne = await scanPronunciationSourceCandidates("again");
-      const stepOneReviewIds = [...new Set(stepOne.matchingCards.map((card) => card.reviewCardId))];
-      const stepOneSourceIds = [...new Set(stepOne.matchingCards.map((card) => card.sourceCardId))];
-      await resetCardsToStudyQueue(stepOneReviewIds);
-      await updateCardFlagsWithRollback(stepOneSourceIds, ORANGE_FLAG, 0);
-      report.push(`گام ۱: ${stepOneReviewIds.length} کارت ReviewPronunciation`);
-
-      currentStep = "گام ۲: اتمام مرور صوت";
-      const stepTwo = await scanPronunciationSourceCandidates("orange");
-      const stepTwoSourceIds = [...new Set(stepTwo.matchingCards.map((card) => card.sourceCardId))];
-      await resetCardsToStudyQueue(stepTwoSourceIds);
-      await updateCardFlagsWithRollback(stepTwoSourceIds, 0, ORANGE_FLAG);
-      report.push(`گام ۲: ${stepTwoSourceIds.length} کارت صوت`);
+      const report = await executeAllPronunciationSteps();
       setPronunciationRunAllStatus(`انجام شد — ${report.join(" | ")}`);
     } catch (caught) {
-      const message = caught instanceof Error ? caught.message : "ارتباط با AnkiConnect ناموفق بود.";
-      setPronunciationRunAllError(`خطا در ${currentStep}: ${message}`);
+      setPronunciationRunAllError(caught instanceof Error ? caught.message : String(caught));
       setPronunciationRunAllStatus(null);
     } finally {
       setRunning(false);
     }
+  }
+
+  function updateMasterStage(index: number, patch: Partial<MasterStage>) {
+    setMasterStages((current) =>
+      current.map((stage, stageIndex) => (stageIndex === index ? { ...stage, ...patch } : stage)),
+    );
+  }
+
+  async function requestJson<T>(endpoint: string, init?: RequestInit): Promise<T> {
+    const response = await fetch(endpoint, init);
+    const data = (await response.json().catch(() => ({}))) as T & { error?: string };
+    if (!response.ok) throw new Error(data.error ?? `Request failed (${response.status})`);
+    return data;
+  }
+
+  async function runBackgroundSync(
+    stageIndex: number,
+    startEndpoint: string,
+    statusEndpoint: string,
+    formatDetail: (status: BackgroundSyncStatus) => string,
+  ) {
+    await requestJson(startEndpoint, { method: "POST" });
+
+    while (true) {
+      const data = await requestJson<{ status?: BackgroundSyncStatus }>(statusEndpoint);
+      const jobStatus = data.status;
+      if (!jobStatus) throw new Error("The sync job did not return a status.");
+
+      updateMasterStage(stageIndex, {
+        processed: jobStatus.processed,
+        total: jobStatus.total,
+        detail: formatDetail(jobStatus),
+      });
+
+      if (jobStatus.error) throw new Error(jobStatus.error);
+      if (!jobStatus.running) {
+        if (jobStatus.stoppedEarly) throw new Error("The sync job stopped before completion.");
+        if (!jobStatus.done) throw new Error("The sync job ended without completing.");
+        if (jobStatus.failed > 0) throw new Error(`${jobStatus.failed} item(s) failed.`);
+        return formatDetail(jobStatus);
+      }
+
+      await wait(750);
+    }
+  }
+
+  async function deleteAnkiNotesMissingInDatabase(stageIndex: number) {
+    updateMasterStage(stageIndex, { detail: "در حال بررسی نوت‌های Anki…" });
+    const scan = await requestJson<{
+      totalNotes?: number;
+      checkedNotes?: number;
+      missing?: Array<{ noteId: number }>;
+    }>("/api/word/anki-missing", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ limit: 50_000 }),
+    });
+
+    const missingNoteIds = Array.isArray(scan.missing) ? scan.missing.map((note) => note.noteId) : [];
+    updateMasterStage(stageIndex, {
+      processed: 0,
+      total: missingNoteIds.length,
+      detail: `${scan.checkedNotes ?? 0} از ${scan.totalNotes ?? 0} نوت بررسی شد؛ ${missingNoteIds.length} نوت برای حذف پیدا شد.`,
+    });
+
+    if (!missingNoteIds.length) return "هیچ نوتی برای حذف پیدا نشد.";
+
+    const result = await requestJson<{ deleted?: number }>("/api/word/anki-missing/delete", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ noteIds: missingNoteIds }),
+    });
+    const deleted = result.deleted ?? 0;
+    updateMasterStage(stageIndex, {
+      processed: deleted,
+      total: missingNoteIds.length,
+      detail: `${deleted} از ${missingNoteIds.length} نوت حذف شد.`,
+    });
+    if (deleted !== missingNoteIds.length) {
+      throw new Error(`Expected to delete ${missingNoteIds.length} notes, but ${deleted} were reported deleted.`);
+    }
+    return `${deleted} نوت حذف شد.`;
+  }
+
+  async function executeMasterStage(stageIndex: number) {
+    switch (stageIndex) {
+      case 0:
+        return runBackgroundSync(
+          stageIndex,
+          "/api/tests/sync-anki-words/media/sync-all/start",
+          "/api/tests/sync-anki-words/media/sync-all/status",
+          (jobStatus) =>
+            `${jobStatus.processed}/${jobStatus.total} processed • ${jobStatus.mediaUploaded} uploaded • ${jobStatus.failed} failed`,
+        );
+      case 1:
+        return deleteAnkiNotesMissingInDatabase(stageIndex);
+      case 2:
+        return runBackgroundSync(
+          stageIndex,
+          "/api/tests/sync-anki-words/full/sync-all/start",
+          "/api/tests/sync-anki-words/full/sync-all/status",
+          (jobStatus) =>
+            `${jobStatus.processed}/${jobStatus.total} processed • ${jobStatus.created ?? 0} created • ${jobStatus.updated} updated • ${jobStatus.failed} failed`,
+        );
+      case 3: {
+        setMainRunAllError(null);
+        setMainRunAllStatus("در حال اجرای گام‌های ۱ تا ۴…");
+        const report = await executeAllMainSteps((processed, total, detail) => {
+          updateMasterStage(stageIndex, { processed, total, detail });
+        });
+        const detail = report.join(" | ");
+        setMainRunAllStatus(`انجام شد — ${detail}`);
+        return detail;
+      }
+      case 4: {
+        setPronunciationRunAllError(null);
+        setPronunciationRunAllStatus("در حال اجرای گام‌های ۱ تا ۳ Pronunciation…");
+        const report = await executeAllPronunciationSteps((processed, total, detail) => {
+          updateMasterStage(stageIndex, { processed, total, detail });
+        });
+        const detail = report.join(" | ");
+        setPronunciationRunAllStatus(`انجام شد — ${detail}`);
+        return detail;
+      }
+      default:
+        throw new Error("Unknown master workflow stage.");
+    }
+  }
+
+  async function continueMasterWorkflow(startIndex: number) {
+    setMasterRunning(true);
+    setRunning(true);
+    setMasterFailedIndex(null);
+
+    try {
+      for (let stageIndex = startIndex; stageIndex < MASTER_STAGE_LABELS.length; stageIndex += 1) {
+        updateMasterStage(stageIndex, {
+          status: "running",
+          detail: "در حال شروع…",
+          processed: 0,
+          total: 0,
+        });
+        try {
+          const detail = await executeMasterStage(stageIndex);
+          updateMasterStage(stageIndex, { status: "completed", detail });
+        } catch (caught) {
+          const message = caught instanceof Error ? caught.message : String(caught);
+          updateMasterStage(stageIndex, { status: "error", detail: message });
+          setMasterFailedIndex(stageIndex);
+          if (stageIndex === 3) {
+            setMainRunAllError(message);
+            setMainRunAllStatus(null);
+          }
+          if (stageIndex === 4) {
+            setPronunciationRunAllError(message);
+            setPronunciationRunAllStatus(null);
+          }
+          return;
+        }
+      }
+    } finally {
+      setMasterRunning(false);
+      setRunning(false);
+    }
+  }
+
+  function startMasterWorkflow() {
+    if (running || previewLoading || masterRunning) return;
+    setMasterStages(createMasterStages());
+    setMasterFailedIndex(null);
+    setMasterModalOpen(true);
+    void continueMasterWorkflow(0);
+  }
+
+  function retryMasterWorkflow() {
+    if (masterRunning || masterFailedIndex === null) return;
+    void continueMasterWorkflow(masterFailedIndex);
   }
 
   return (
@@ -907,6 +1319,120 @@ export default function CardTransferManagementClient() {
             subtitle="بررسی مستقل کارت‌های اصلی و کارت‌های صوت"
           />
         </div>
+        <AnkiWordSyncQuickActions
+          disabled={running || previewLoading || masterRunning}
+          allJobsRunning={masterRunning}
+          onRunAllJobs={startMasterWorkflow}
+        />
+        {masterModalOpen ? (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
+            role="dialog"
+            aria-modal="true"
+          >
+            <div dir="rtl" lang="fa" className="w-full max-w-3xl rounded-3xl border border-card bg-card p-5 text-right shadow-2xl sm:p-6">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h2 className="text-lg font-bold text-foreground">اجرای همهٔ عملیات</h2>
+                  <p className="mt-1 text-sm text-muted">
+                    مراحل به‌ترتیب اجرا می‌شوند و در صورت خطا، ادامهٔ فرایند متوقف می‌شود.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setMasterModalOpen(false)}
+                  disabled={masterRunning}
+                  aria-label="بستن"
+                  className="grid size-10 shrink-0 place-items-center rounded-full border border-card bg-background text-xl text-muted disabled:opacity-50"
+                >
+                  ×
+                </button>
+              </div>
+
+              <ol className="mt-5 grid gap-2">
+                {masterStages.map((stage, index) => {
+                  const progressPercent = stage.total > 0 ? Math.min(100, Math.round((stage.processed / stage.total) * 100)) : 0;
+                  return (
+                    <li key={stage.label} className="rounded-xl border border-card bg-background p-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <div className="text-sm font-semibold text-foreground">
+                            {index + 1}. <span dir="auto">{stage.label}</span>
+                          </div>
+                          <div className={`mt-1 text-xs ${stage.status === "error" ? "text-red-700 dark:text-red-400" : "text-muted"}`}>
+                            {stage.detail}
+                          </div>
+                        </div>
+                        <span
+                          className={`shrink-0 rounded-full px-2 py-1 text-[11px] font-semibold ${
+                            stage.status === "completed"
+                              ? "bg-green-600/10 text-green-700 dark:text-green-400"
+                              : stage.status === "error"
+                                ? "bg-red-600/10 text-red-700 dark:text-red-400"
+                                : stage.status === "running"
+                                  ? "bg-blue-600/10 text-blue-700 dark:text-blue-400"
+                                  : "bg-black/5 text-muted dark:bg-white/5"
+                          }`}
+                        >
+                          {stage.status === "completed"
+                            ? "انجام شد"
+                            : stage.status === "error"
+                              ? "خطا"
+                              : stage.status === "running"
+                                ? "در حال اجرا"
+                                : "در انتظار"}
+                        </span>
+                      </div>
+                      {stage.status === "running" && stage.total > 0 ? (
+                        <div className="mt-3">
+                          <div className="mb-1 flex items-center justify-between text-[11px] text-muted">
+                            <span>{progressPercent}%</span>
+                            <span dir="ltr">{stage.processed}/{stage.total}</span>
+                          </div>
+                          <div className="h-2 overflow-hidden rounded-full bg-black/10 dark:bg-white/10">
+                            <div className="h-full rounded-full bg-[var(--primary)] transition-[width]" style={{ width: `${progressPercent}%` }} />
+                          </div>
+                        </div>
+                      ) : null}
+                    </li>
+                  );
+                })}
+              </ol>
+
+              <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-card pt-4">
+                <div className="text-xs text-muted">
+                  {masterRunning
+                    ? "لطفاً تا پایان مرحلهٔ جاری این پنجره را باز نگه دارید."
+                    : masterFailedIndex !== null
+                      ? "خطا برطرف شود؛ سپس Retry همان مرحله را دوباره اجرا می‌کند."
+                      : masterStages.every((stage) => stage.status === "completed")
+                        ? "همهٔ مراحل با موفقیت انجام شدند."
+                        : "آمادهٔ اجرا"}
+                </div>
+                <div className="flex items-center gap-2">
+                  {masterFailedIndex !== null ? (
+                    <button
+                      type="button"
+                      onClick={retryMasterWorkflow}
+                      disabled={masterRunning}
+                      className="h-10 rounded-xl bg-[var(--primary)] px-4 text-sm font-bold text-[var(--primary-foreground)] disabled:opacity-50"
+                    >
+                      Retry
+                    </button>
+                  ) : null}
+                  <button
+                    type="button"
+                    onClick={() => setMasterModalOpen(false)}
+                    disabled={masterRunning}
+                    className="h-10 rounded-xl border border-card bg-background px-4 text-sm font-semibold text-foreground disabled:opacity-50"
+                  >
+                    بستن
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : null}
         <section className="order-1 grid gap-3 rounded-2xl border border-card bg-background p-3 xl:col-span-1">
           <div className="flex items-start justify-between gap-3">
             <div>
@@ -983,15 +1509,15 @@ export default function CardTransferManagementClient() {
 
           <section className="grid gap-3 rounded-2xl border border-card bg-background p-3">
           <div>
-            <h2 className="text-base font-semibold text-foreground">۳. ریست کارت‌های Suspend‌شده</h2>
+            <h2 className="text-base font-semibold text-foreground">۳. ریست کارت‌هایی که آخرین بار Hard خورده‌اند</h2>
             <p className="mt-1 text-xs leading-5 text-muted">
-              کارت‌های Suspend‌شدهٔ <span dir="ltr">EnToFa</span> و <span dir="ltr">FaToEn</span> به کارت New تبدیل می‌شوند.
+              کارت‌های غیر New از نوع <span dir="ltr">EnToFa</span> و <span dir="ltr">FaToEn</span> که آخرین پاسخ واقعی آن‌ها <span dir="ltr">Hard (ease=2)</span> است، به کارت New تبدیل می‌شوند.
             </p>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             <button
               type="button"
-              onClick={() => void testSuspendedCards()}
+              onClick={() => void testLastHardCards()}
               disabled={running || previewLoading}
               className="h-11 rounded-xl border border-card px-4 text-sm font-semibold text-foreground disabled:opacity-60"
             >
@@ -999,15 +1525,15 @@ export default function CardTransferManagementClient() {
             </button>
             <button
               type="button"
-              onClick={() => void resetSuspendedCards()}
+              onClick={() => void resetLastHardCards()}
               disabled={running || previewLoading}
               className="h-11 rounded-xl bg-[var(--primary)] px-4 text-sm font-semibold text-[var(--primary-foreground)] disabled:opacity-60"
             >
-              {running ? "در حال ریست…" : "ریست Suspend"}
+              {running ? "در حال ریست…" : "ریست Hard"}
             </button>
           </div>
-          {suspendedCardError && <p className="text-sm font-semibold text-red-700 dark:text-red-400">{suspendedCardError}</p>}
-          {suspendedCardStatus && <p className="rounded-xl border border-card p-3 text-sm text-foreground">{suspendedCardStatus}</p>}
+          {lastHardCardError && <p className="text-sm font-semibold text-red-700 dark:text-red-400">{lastHardCardError}</p>}
+          {lastHardCardStatus && <p className="rounded-xl border border-card p-3 text-sm text-foreground">{lastHardCardStatus}</p>}
           </section>
 
           <section className="grid gap-2 rounded-2xl border border-card bg-background p-2">
@@ -1049,7 +1575,7 @@ export default function CardTransferManagementClient() {
             </div>
             <div className="flex items-center gap-2">
               <button type="button" onClick={() => void runAllPronunciationSteps()} disabled={running || previewLoading} className="h-10 rounded-xl bg-[var(--primary)] px-3 text-xs font-bold text-[var(--primary-foreground)] disabled:opacity-60">
-                {running ? "در حال اجرا…" : "انجام ۲ مرحله"}
+                {running ? "در حال اجرا…" : "انجام ۳ مرحله"}
               </button>
               <button type="button" onClick={() => setIsPronunciationHelpOpen(true)} aria-label="راهنمای کارت‌های Pronunciation" className="grid size-10 shrink-0 place-items-center rounded-full border border-card bg-card text-lg font-bold text-foreground shadow-elevated">?</button>
             </div>
@@ -1073,7 +1599,25 @@ export default function CardTransferManagementClient() {
             </section>
             <section className="grid gap-3 rounded-2xl border border-card bg-card p-3">
               <div>
-                <h3 className="text-base font-semibold text-foreground">۲. اتمام مرور صوت</h3>
+                <h3 className="text-base font-semibold text-foreground">۲. ریست کارت‌هایی که آخرین بار Hard خورده‌اند</h3>
+                <p className="mt-1 text-xs leading-5 text-muted">
+                  فقط کارت‌های غیر New از نوع <span dir="ltr">{PRONUNCIATION_CARD_TEMPLATE}</span> در دک <span dir="ltr">{PRONUNCIATION_DECK}</span> که آخرین پاسخ واقعی آن‌ها <span dir="ltr">Hard (ease=2)</span> است، به New برمی‌گردند.
+                </p>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <button type="button" onClick={() => void testPronunciationLastHardCards()} disabled={running || previewLoading} className="h-11 rounded-xl border border-card px-4 text-sm font-semibold text-foreground disabled:opacity-60">
+                  {previewLoading ? "در حال آماده‌سازی Preview…" : "Test / Preview"}
+                </button>
+                <button type="button" onClick={() => void resetPronunciationLastHardCards()} disabled={running || previewLoading} className="h-11 rounded-xl bg-[var(--primary)] px-4 text-sm font-semibold text-[var(--primary-foreground)] disabled:opacity-60">
+                  {running ? "در حال ریست…" : "ریست Hard"}
+                </button>
+              </div>
+              {pronunciationLastHardCardError && <p className="text-sm font-semibold text-red-700 dark:text-red-400">{pronunciationLastHardCardError}</p>}
+              {pronunciationLastHardCardStatus && <p className="rounded-xl border border-card p-3 text-sm text-foreground">{pronunciationLastHardCardStatus}</p>}
+            </section>
+            <section className="grid gap-3 rounded-2xl border border-card bg-card p-3">
+              <div>
+                <h3 className="text-base font-semibold text-foreground">۳. اتمام مرور صوت</h3>
                 <p className="mt-1 text-xs leading-5 text-muted">Orange + ReviewPronunciation قدیمی: ریست Pronunciation، سپس حذف Orange.</p>
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
@@ -1096,12 +1640,24 @@ export default function CardTransferManagementClient() {
             </table>
           </div>
           ) : null}
+          {pronunciationLastHardCardCandidates.length > 0 ? (
+          <div className="overflow-x-auto rounded-xl border border-card bg-card">
+            <div className="border-b border-card p-4">
+              <h3 className="font-semibold text-foreground">نتیجهٔ آخرین پاسخ Hard در Pronunciation</h3>
+              <p className="mt-1 text-sm text-muted">فقط کارت‌های Pronunciation از دک Pronunciation که آخرین دکمهٔ واقعی آن‌ها Hard بوده است</p>
+            </div>
+            <table className="min-w-full text-right text-sm">
+              <thead className="bg-background text-xs text-muted"><tr><th className="px-4 py-3">لغت</th><th className="px-4 py-3">معنی فارسی</th><th className="px-4 py-3">Pronunciation Card</th></tr></thead>
+              <tbody>{pronunciationLastHardCardCandidates.map((candidate) => <tr key={candidate.pronunciationCardId} className="border-t border-card"><td className="px-4 py-3 font-semibold text-foreground">{candidate.baseForm || "—"}</td><td className="px-4 py-3">{candidate.meaningFa || "—"}</td><td className="px-4 py-3 font-mono text-xs text-muted">{candidate.pronunciationCardId}</td></tr>)}</tbody>
+            </table>
+          </div>
+          ) : null}
         </section>
 
-        <section className={`${suspendedCardCandidates.length === 0 ? "hidden " : ""}order-4 overflow-hidden rounded-2xl border border-card bg-background xl:col-span-2`}>
+        <section className={`${lastHardCardCandidates.length === 0 ? "hidden " : ""}order-4 overflow-hidden rounded-2xl border border-card bg-background xl:col-span-2`}>
           <div className="border-b border-card p-4">
-            <h2 className="font-semibold text-foreground">نتیجهٔ گام ۳: ریست کارت‌های Suspend‌شده</h2>
-            <p className="mt-1 text-sm text-muted">کارت‌های Suspend‌شدهٔ EnToFa و FaToEn که با ریست به صف New برمی‌گردند</p>
+            <h2 className="font-semibold text-foreground">نتیجهٔ گام ۳: آخرین پاسخ Hard</h2>
+            <p className="mt-1 text-sm text-muted">کارت‌های EnToFa و FaToEn که آخرین دکمهٔ واقعی آن‌ها Hard بوده و با ریست به صف New برمی‌گردند</p>
           </div>
           <div className="overflow-x-auto">
             <table className="min-w-full text-right text-sm">
@@ -1114,7 +1670,7 @@ export default function CardTransferManagementClient() {
                 </tr>
               </thead>
               <tbody>
-                {suspendedCardCandidates.map((candidate) => (
+                {lastHardCardCandidates.map((candidate) => (
                   <tr key={candidate.sourceCardId} className="border-t border-card">
                     <td className="px-4 py-3 font-semibold text-foreground">{candidate.baseForm || "—"}</td>
                     <td className="px-4 py-3 text-foreground">{candidate.meaningFa || "—"}</td>
@@ -1257,6 +1813,7 @@ export default function CardTransferManagementClient() {
               </div>
               <ol className="mt-5 list-inside list-decimal space-y-4 text-sm leading-7 text-foreground">
                 <li><span className="font-semibold">بلد نبودن کارت صوت:</span> فقط کارت‌های بدون فلگ <span dir="ltr">{PRONUNCIATION_CARD_TEMPLATE}</span> که آخرین review آن‌ها <span dir="ltr">Again (ease=1)</span> و <span dir="ltr">ivl</span> آن‌ها بیشتر از ۳۶۵۰ روز است انتخاب می‌شوند. ابتدا <span dir="ltr">{REVIEW_PRONUNCIATION_CARD_TEMPLATE}</span> متناظر ریست و فقط پس از موفقیت، فلگ Orange روی Pronunciation ثبت می‌شود.</li>
+                <li><span className="font-semibold">ریست کارت‌هایی با آخرین پاسخ Hard:</span> فقط کارت‌های غیر New از نوع <span dir="ltr">{PRONUNCIATION_CARD_TEMPLATE}</span> در خود دک <span dir="ltr">{PRONUNCIATION_DECK}</span> بررسی می‌شوند. اگر جدیدترین رکوردی که یک دکمهٔ واقعی مرور دارد <span dir="ltr">Hard (ease=2)</span> باشد، همان کارت Pronunciation ریست و به New برگردانده می‌شود؛ کارت‌های New و Hardهای قدیمی‌تر اثری ندارند.</li>
                 <li><span className="font-semibold">اتمام مرور صوت:</span> کارت‌های <span dir="ltr">{PRONUNCIATION_CARD_TEMPLATE}</span> با فلگ Orange (کد ۲) از <span dir="ltr">{PRONUNCIATION_DECK}</span> انتخاب می‌شوند. اگر کارت متناظر <span dir="ltr">{REVIEW_PRONUNCIATION_CARD_TEMPLATE}</span> در <span dir="ltr">{REVIEW_PRONUNCIATION_DECK}</span> آخرین <span dir="ltr">ivl</span> بیشتر از ۳۶۵۰ روز داشته باشد، ابتدا Pronunciation ریست و فقط پس از موفقیت، فلگ Orange حذف می‌شود.</li>
               </ol>
               <p className="mt-4 rounded-xl border border-card bg-background p-3 text-sm leading-7 text-muted">قبل از اجرا، همهٔ شرایط و کارت‌های متناظر بررسی می‌شوند. در خطای عملیات اصلی فلگ تغییر نمی‌کند؛ اگر تغییر فلگ نیمه‌کاره بماند، فلگ‌های تغییرکرده به مقدار قبلی برمی‌گردند و مرحلهٔ خطادار گزارش می‌شود.</p>
@@ -1295,8 +1852,8 @@ export default function CardTransferManagementClient() {
                   کارت‌های <span dir="ltr">EnToFa</span> و <span dir="ltr">FaToEn</span> با فلگ Orange (کد ۲) بررسی می‌شوند. اگر کارت متناظر <span dir="ltr">{REVIEW_CARD_TEMPLATE}</span> در دک <span dir="ltr">{REVIEW_DECK}</span> آخرین <span dir="ltr">ivl</span> بیشتر از ۳۶۵۰ روز داشته باشد، ابتدا کارت‌های مبدا ریست و فقط پس از موفقیت، فلگ Orange آن‌ها حذف می‌شود.
                 </li>
                 <li>
-                  <span className="font-semibold">ریست کارت‌های Suspend‌شده:</span>{" "}
-                  همهٔ کارت‌های Suspend‌شده با نوع <span dir="ltr">EnToFa</span> در دک <span dir="ltr">{WordAnkiConstants.decks.EnToFa}</span> و نوع <span dir="ltr">FaToEn</span> در دک <span dir="ltr">{WordAnkiConstants.decks.FaToEn}</span> ریست می‌شوند و به صف New برمی‌گردند.
+                  <span className="font-semibold">ریست کارت‌هایی با آخرین پاسخ Hard:</span>{" "}
+                  فقط تاریخچهٔ کارت‌های غیر New از نوع <span dir="ltr">EnToFa</span> در دک <span dir="ltr">{WordAnkiConstants.decks.EnToFa}</span> و نوع <span dir="ltr">FaToEn</span> در دک <span dir="ltr">{WordAnkiConstants.decks.FaToEn}</span> بررسی می‌شود. اگر جدیدترین رکوردی که یک دکمهٔ واقعی مرور دارد <span dir="ltr">Hard (ease=2)</span> باشد، خود آن کارت ریست و به صف New برگردانده می‌شود. کارت‌های New و رکوردهای غیرِ دکمه‌ای در تعیین آخرین پاسخ نادیده گرفته می‌شوند.
                 </li>
                 <li>
                   <span className="font-semibold">اتمام مرور:</span>{" "}

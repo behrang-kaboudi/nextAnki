@@ -46,6 +46,10 @@ export type MergeOutputRow =
     }
   | { id: number; delete: true; mergedIntoId: number };
 
+export type ManualConceptMergeEntry = {
+  wordSenseId: number;
+};
+
 const sourceSelect = {
   id: true,
   englishId: true,
@@ -75,12 +79,17 @@ function positiveIds(value: Prisma.JsonValue | null): number[] {
   ))];
 }
 
-function groupByEnglish(words: SourceWordSense[]) {
-  const groups = new Map<number, SourceWordSense[]>();
+function conceptMergeGroupKey(word: Pick<SourceWordSense, "englishId" | "pos">) {
+  return `${word.englishId}\u0000${word.pos ?? ""}`;
+}
+
+function groupByEnglishAndPos(words: SourceWordSense[]) {
+  const groups = new Map<string, SourceWordSense[]>();
   for (const word of words) {
-    const group = groups.get(word.englishId) ?? [];
+    const key = conceptMergeGroupKey(word);
+    const group = groups.get(key) ?? [];
     group.push(word);
-    groups.set(word.englishId, group);
+    groups.set(key, group);
   }
   return [...groups.values()];
 }
@@ -91,7 +100,7 @@ export async function getPendingWordSenseConceptMergeStats() {
     orderBy: [{ englishId: "asc" }, { id: "asc" }],
     select: sourceSelect,
   });
-  const groups = groupByEnglish(words).filter(
+  const groups = groupByEnglishAndPos(words).filter(
     (group) =>
       group.length >= 2 &&
       group.some((word) => !word.conceptMergeReviewed),
@@ -169,7 +178,7 @@ export async function prepareWordSenseConceptMerge(batchSize: number) {
       orderBy: [{ englishId: "asc" }, { id: "asc" }],
       select: sourceSelect,
     });
-    const allGroups = groupByEnglish(words);
+    const allGroups = groupByEnglishAndPos(words);
     let reviewedSingleRecords = 0;
 
     for (const group of allGroups) {
@@ -200,6 +209,69 @@ export async function prepareWordSenseConceptMerge(batchSize: number) {
       items: await conceptMergeItemsForGroups(selected, tx),
     };
   }, { maxWait: 10_000, timeout: 120_000 });
+}
+
+function validateManualEntries(entries: ManualConceptMergeEntry[]) {
+  if (
+    entries.length < 2 ||
+    entries.some((entry) => !isPositiveId(entry.wordSenseId)) ||
+    new Set(entries.map((entry) => entry.wordSenseId)).size !== entries.length
+  ) {
+    throw new Error("A manual merge group must contain at least two unique WordSense IDs.");
+  }
+}
+
+export function parseManualConceptMergeEntries(value: unknown): ManualConceptMergeEntry[] {
+  if (!Array.isArray(value)) throw new Error("entries must be an array of WordSense IDs.");
+  const entries = value.map((raw) => {
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
+      throw new Error("Every manual merge entry must be an object.");
+    }
+    const entry = raw as Record<string, unknown>;
+    if (
+      !isPositiveId(entry.wordSenseId) ||
+      Object.keys(entry).some((key) => key !== "wordSenseId")
+    ) {
+      throw new Error("Every manual merge entry must contain only a positive wordSenseId value.");
+    }
+    return { wordSenseId: entry.wordSenseId };
+  });
+  validateManualEntries(entries);
+  return entries;
+}
+
+export async function prepareManualWordSenseConceptMerge(entries: ManualConceptMergeEntry[]) {
+  validateManualEntries(entries);
+  const requestedIds = entries.map((entry) => entry.wordSenseId);
+  const words = await prisma.wordSense.findMany({
+    where: { id: { in: requestedIds } },
+    orderBy: { id: "asc" },
+    select: sourceSelect,
+  });
+  if (words.length !== requestedIds.length) {
+    const foundIds = new Set(words.map((word) => word.id));
+    const missingIds = requestedIds.filter((id) => !foundIds.has(id));
+    throw new Error(`WordSense ID(s) not found: ${missingIds.join(", ")}.`);
+  }
+  if (new Set(words.map((word) => word.englishId)).size !== 1) {
+    throw new Error("All WordSense records in one manual merge group must belong to the same EnglishWord.");
+  }
+  if (new Set(words.map((word) => word.pos ?? "")).size !== 1) {
+    throw new Error("All WordSense records in one manual merge group must have the same part of speech.");
+  }
+  if (words.some((word) => word.meaningReviewStatus !== MeaningReviewStatus.CONFIRMED)) {
+    throw new Error("Every selected WordSense must have confirmed Persian meanings before manual concept merge.");
+  }
+  const normalizedEntries = words.map((word) => ({
+    wordSenseId: word.id,
+  }));
+  const [items] = await conceptMergeItemsForGroups([words], prisma);
+  return {
+    entries: normalizedEntries,
+    englishWordId: words[0].englishId,
+    sourceGroup: words.map((word) => word.id),
+    items,
+  };
 }
 
 function isPositiveId(value: unknown): value is number {
@@ -262,6 +334,93 @@ export function parseMergeOutput(value: unknown): MergeOutputRow[] {
   return rows;
 }
 
+export function parseManualMergeOutput(value: unknown): MergeOutputRow[] {
+  return parseMergeOutput(value);
+}
+
+function sameOrderedStrings(left: readonly string[], right: readonly string[]) {
+  return left.length === right.length && left.every((value, index) => value === right[index]);
+}
+
+export function validateManualMergeOutput(sourceRows: Array<{
+  id: number;
+  word: string;
+  meaning_fa: string;
+  other_meanings_fa: string[];
+  concept_explained_fa: string;
+  pos: string;
+  sentenceIds: number[];
+}>, output: MergeOutputRow[]) {
+  if (sourceRows.length < 2 || output.length !== sourceRows.length) {
+    throw new Error("A mergeable manual response must contain every selected WordSense exactly once.");
+  }
+  const sourceIds = sourceRows.map((row) => row.id);
+  if (!sameIds(sourceIds, output.map((row) => row.id))) {
+    throw new Error("The manual response must contain every selected WordSense ID exactly once and no other IDs.");
+  }
+  if (new Set(sourceRows.map((row) => row.word)).size !== 1) {
+    throw new Error("Selected WordSense records do not belong to the same English word.");
+  }
+  if (new Set(sourceRows.map((row) => row.pos)).size !== 1) {
+    throw new Error("Selected WordSense records have different parts of speech and cannot be manually merged.");
+  }
+  const retained = output.filter((row): row is Extract<MergeOutputRow, { delete: false }> => !row.delete);
+  const removed = output.filter((row): row is Extract<MergeOutputRow, { delete: true }> => row.delete);
+  if (retained.length !== 1 || removed.length !== sourceRows.length - 1) {
+    throw new Error("A mergeable manual response must retain exactly one record and merge every other selected record into it.");
+  }
+  const survivor = retained[0];
+  const oldestId = Math.min(...sourceIds);
+  const mergedIds = sourceIds.filter((id) => id !== oldestId).sort((left, right) => left - right);
+  if (
+    survivor.id !== oldestId ||
+    !sameOrderedIds(output.map((row) => row.id), [oldestId, ...mergedIds]) ||
+    !sameIds(survivor.mergedRecordIds, mergedIds) ||
+    removed.some((row) => row.mergedIntoId !== oldestId) ||
+    survivor.word !== sourceRows[0].word
+  ) {
+    throw new Error("The oldest selected WordSense must be the sole retained record and every newer record must merge into it.");
+  }
+  const sourceById = new Map(sourceRows.map((row) => [row.id, row]));
+  const survivorSource = sourceById.get(oldestId)!;
+  if (survivor.meaning_fa !== survivorSource.meaning_fa) {
+    throw new Error("The retained record must preserve the oldest WordSense primary meaning.");
+  }
+  const allMeanings: string[] = [];
+  for (const id of [...sourceIds].sort((left, right) => left - right)) {
+    const row = sourceById.get(id)!;
+    for (const meaning of [row.meaning_fa, ...row.other_meanings_fa]) {
+      if (meaning && !allMeanings.includes(meaning)) allMeanings.push(meaning);
+    }
+  }
+  const expectedOtherMeanings = allMeanings.filter((meaning) => meaning !== survivor.meaning_fa);
+  if (!sameOrderedStrings(survivor.other_meanings_fa, expectedOtherMeanings)) {
+    throw new Error("The merged record must preserve every selected Persian meaning in source order without adding new meanings.");
+  }
+  const requiredSentences = [...new Set(
+    [...sourceIds]
+      .sort((left, right) => left - right)
+      .flatMap((id) => sourceById.get(id)!.sentenceIds),
+  )];
+  if (!sameOrderedIds(survivor.sentenceIds, requiredSentences)) {
+    throw new Error("The merged record must preserve every selected sentence in source order.");
+  }
+  const conceptWordCount = survivor.concept_explained_fa.trim().split(/\s+/u).filter(Boolean).length;
+  if (!survivor.concept_explained_fa.trim() || conceptWordCount > 50) {
+    throw new Error("The merged concept explanation must contain 1 to 50 words.");
+  }
+}
+
+export async function previewManualWordSenseConceptMerge(
+  entries: ManualConceptMergeEntry[],
+  value: unknown,
+) {
+  const prepared = await prepareManualWordSenseConceptMerge(entries);
+  const output = parseManualMergeOutput(value);
+  validateManualMergeOutput(prepared.items, output);
+  return { ...prepared, mergeable: true as const, output };
+}
+
 export async function loadWordSenseConceptMergeGroups(output: MergeOutputRow[]) {
   const outputIds = output.map((row) => row.id);
   const referencedWords = await prisma.wordSense.findMany({
@@ -275,15 +434,16 @@ export async function loadWordSenseConceptMergeGroups(output: MergeOutputRow[]) 
     throw new Error("One or more response ids no longer exist.");
   }
   const referencedById = new Map(referencedWords.map((word) => [word.id, word]));
-  const englishIds: number[] = [];
-  const seenEnglishIds = new Set<number>();
+  const groupKeys: string[] = [];
+  const seenGroupKeys = new Set<string>();
   for (const id of outputIds) {
-    const englishId = referencedById.get(id)!.englishId;
-    if (!seenEnglishIds.has(englishId)) {
-      seenEnglishIds.add(englishId);
-      englishIds.push(englishId);
+    const key = conceptMergeGroupKey(referencedById.get(id)!);
+    if (!seenGroupKeys.has(key)) {
+      seenGroupKeys.add(key);
+      groupKeys.push(key);
     }
   }
+  const englishIds = [...new Set(outputIds.map((id) => referencedById.get(id)!.englishId))];
   const currentWords = await prisma.wordSense.findMany({
     where: {
       englishId: { in: englishIds },
@@ -292,18 +452,18 @@ export async function loadWordSenseConceptMergeGroups(output: MergeOutputRow[]) 
     orderBy: [{ englishId: "asc" }, { id: "asc" }],
     select: sourceSelect,
   });
-  const currentGroupsByEnglishId = new Map(
-    groupByEnglish(currentWords).map((group) => [group[0].englishId, group]),
+  const currentGroupsByKey = new Map(
+    groupByEnglishAndPos(currentWords).map((group) => [conceptMergeGroupKey(group[0]), group]),
   );
-  const groups = englishIds.map((englishId) => {
-    const group = currentGroupsByEnglishId.get(englishId) ?? [];
-    const responseGroupIds = outputIds.filter((id) => referencedById.get(id)?.englishId === englishId);
+  const groups = groupKeys.map((key) => {
+    const group = currentGroupsByKey.get(key) ?? [];
+    const responseGroupIds = outputIds.filter((id) => conceptMergeGroupKey(referencedById.get(id)!) === key);
     const currentIds = group.map((word) => word.id);
     if (group.length < 2 || !sameIds(responseGroupIds, currentIds)) {
-      throw new Error(`Response ids do not contain the complete current group for englishId ${englishId}.`);
+      throw new Error("Response ids do not contain the complete current group for its EnglishWord and part of speech.");
     }
     if (!group.some((word) => !word.conceptMergeReviewed)) {
-      throw new Error(`The group for englishId ${englishId} was already reviewed.`);
+      throw new Error("The group for this EnglishWord and part of speech was already reviewed.");
     }
     return group;
   });
@@ -328,6 +488,7 @@ export async function applyWordSenseConceptMerge(
   reviewOnlySourceGroups: number[][] = [],
   reviewOnlyRecordIds: number[] = [],
   deferredRecordIds: number[] = [],
+  options: { manual?: boolean } = {},
 ) {
   return prisma.$transaction(async (tx) => {
     const sourceIds = sourceGroups.flat();
@@ -362,6 +523,9 @@ export async function applyWordSenseConceptMerge(
       throw new Error("The deferred record ids are invalid.");
     }
     const deferredIds = new Set(deferredRecordIds);
+    if (options.manual && (sourceGroups.length !== 1 || reviewOnlyIds.size || deferredIds.size)) {
+      throw new Error("A manual concept merge must apply exactly one group without review-only or deferred records.");
+    }
     const activeSourceGroups = sourceGroups.filter((group) =>
       group.some((id) => !reviewOnlyIds.has(id) && !deferredIds.has(id)),
     );
@@ -386,14 +550,30 @@ export async function applyWordSenseConceptMerge(
       const group = groupIds.map((id) => byId.get(id)!);
       const englishId = group[0].englishId;
       if (group.some((word) => word.englishId !== englishId)) throw new Error("A source group contains different English words.");
-      if (!group.some((word) => !word.conceptMergeReviewed)) {
-        throw new Error(`The group for englishId ${englishId} is no longer eligible for concept merging.`);
+      const pos = group[0].pos;
+      if (group.some((word) => word.pos !== pos)) throw new Error("A source group contains different parts of speech.");
+      if (!options.manual && !group.some((word) => !word.conceptMergeReviewed)) {
+        throw new Error("The group for this EnglishWord and part of speech is no longer eligible for concept merging.");
       }
-      const currentIds = (await tx.wordSense.findMany({
-        where: { englishId, meaningReviewStatus: MeaningReviewStatus.CONFIRMED },
-        select: { id: true },
-      })).map((word) => word.id);
-      if (!sameIds(groupIds, currentIds)) throw new Error(`The records for englishId ${englishId} changed. Create the data again.`);
+      if (options.manual) {
+        if (!sameOrderedIds(groupIds, [...groupIds].sort((left, right) => left - right))) {
+          throw new Error("Manual source records must be ordered from the oldest WordSense ID to the newest.");
+        }
+      } else {
+        const currentIds = (await tx.wordSense.findMany({
+          where: { englishId, pos, meaningReviewStatus: MeaningReviewStatus.CONFIRMED },
+          select: { id: true },
+        })).map((word) => word.id);
+        if (!sameIds(groupIds, currentIds)) {
+          throw new Error("The records for this EnglishWord and part of speech changed. Create the data again.");
+        }
+      }
+    }
+
+    if (options.manual) {
+      const manualGroup = sourceGroups[0].map((id) => byId.get(id)!);
+      const [manualItems] = await conceptMergeItemsForGroups([manualGroup], tx);
+      validateManualMergeOutput(manualItems, output);
     }
 
     const activeOutput = output.filter((row) => !reviewOnlyIds.has(row.id) && !deferredIds.has(row.id));

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { PromptSourcesButton } from "@/components/prompts/PromptSourcesButton";
 import { PromptBatchControls } from "@/components/prompts/PromptBatchControls.client";
 import { RemainingCountBadge, RemainingCountButton } from "@/components/remaining-count";
+import { combinePromptParts } from "@/lib/ai/promptPolicy";
 
 type ResponseItem = { id: number; phonetic_us: string };
 
@@ -88,7 +89,7 @@ export default function EnglishWordPhoneticUsPrompt({
       ]);
       const rowsJson = await readJson<{ ok?: boolean; items?: unknown; totalUnconfirmed?: number; error?: string }>(rowsResponse, "Could not load unconfirmed rows");
       if (!rowsResponse.ok || !rowsJson.ok) throw new Error(rowsJson.error || "Could not load unconfirmed rows.");
-      setPrompt(promptResponses.join("\n\n"));
+      setPrompt(combinePromptParts(promptResponses));
       setData(JSON.stringify(rowsJson.items ?? [], null, 2));
       setRemaining(typeof rowsJson.totalUnconfirmed === "number" ? rowsJson.totalUnconfirmed : initialRemainingCount);
       setLoadedCount(Array.isArray(rowsJson.items) ? rowsJson.items.length : 0);

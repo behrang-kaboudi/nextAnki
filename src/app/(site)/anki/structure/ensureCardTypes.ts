@@ -73,6 +73,37 @@ async function addMissingCardTypes(
   return { ok: true };
 }
 
+async function addFieldsRequiredByCardTypes(
+  modelName: string,
+  desiredFields: string[],
+  appendLog: LogFn,
+): Promise<StepResult> {
+  const fieldsRes = await cardTypeOperations.modelFieldNames({ modelName });
+  if (!fieldsRes.ok || !fieldsRes.result) {
+    appendLog(`✗ modelFieldNames failed: ${fieldsRes.ok ? "null result" : fieldsRes.error}`);
+    return { ok: false };
+  }
+
+  const currentFields = fieldsRes.result;
+  const missingFields = desiredFields.filter((fieldName) => !currentFields.includes(fieldName));
+  if (missingFields.length === 0) {
+    appendLog("✓ All fields required by Card Types already exist.");
+    return { ok: true };
+  }
+
+  appendLog(`Adding fields required by Card Types first (${missingFields.length}): ${missingFields.join(", ")}`);
+  for (const fieldName of missingFields) {
+    const addRes = await cardTypeOperations.modelFieldAdd({ modelName, fieldName });
+    if (!addRes.ok) {
+      appendLog(`✗ modelFieldAdd failed for ${fieldName}: ${addRes.error}`);
+      return { ok: false };
+    }
+    appendLog(`✓ Added required field: ${fieldName}`);
+  }
+
+  return { ok: true };
+}
+
 async function removeExtraCardTypes(
   modelName: string,
   extraNames: string[],
@@ -171,6 +202,15 @@ export async function ensureMetaLexVr9CardTypes(
     );
     if (!createResult.ok) return createResult;
   } else {
+    // Anki validates field references while adding a Card Type. Add all missing
+    // configured fields first; Step 4 still owns exact removal and ordering.
+    const fieldsResult = await addFieldsRequiredByCardTypes(
+      modelName,
+      config?.noteType.fields ?? DEFAULT_WORD_NOTE_FIELDS.slice().map(String),
+      appendLog,
+    );
+    if (!fieldsResult.ok) return fieldsResult;
+
     const templatesRes = await cardTypeOperations.modelTemplates({ modelName });
     if (!templatesRes.ok || !templatesRes.result) {
       appendLog(`✗ modelTemplates failed: ${templatesRes.ok ? "null result" : templatesRes.error}`);

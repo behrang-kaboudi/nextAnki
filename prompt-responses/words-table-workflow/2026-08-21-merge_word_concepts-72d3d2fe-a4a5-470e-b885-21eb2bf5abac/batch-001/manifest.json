@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "runId": "2026-08-21-merge_word_concepts-72d3d2fe-a4a5-470e-b885-21eb2bf5abac",
+  "stageId": "merge_word_concepts",
+  "status": "applied",
+  "createdAt": "2026-08-21T18:50:39.821Z",
+  "updatedAt": "2026-08-21T20:05:03.911Z",
+  "itemCount": 2152,
+  "promptFile": "prompt.md",
+  "inputFile": "input.json",
+  "responseFile": "response.json",
+  "qaFile": "qa.json",
+  "humanReviewPolicy": "merge_only",
+  "applicationFile": null
+}

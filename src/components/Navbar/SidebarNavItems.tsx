@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { MenuIcon } from "@/components/icons";
 import { ChevronDownIcon } from "./ChevronDownIcon";
 import { NavItemLink } from "./NavItemLink";
@@ -25,7 +27,21 @@ export function SidebarNavItems({
               <summary className={navbarStyles.navGroupSummary} onClick={closeSiblingDetails}>
                 <span className="flex items-center gap-2">
                   {item.icon ? <MenuIcon name={item.icon} className="size-5 opacity-80" /> : null}
-                  <span>{item.label}</span>
+                  {item.href ? (
+                    <Link
+                      href={item.href}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        closeAllDetailsInNav(event);
+                        onNavigate?.();
+                      }}
+                      className="transition hover:text-foreground"
+                    >
+                      {item.label}
+                    </Link>
+                  ) : (
+                    <span>{item.label}</span>
+                  )}
                 </span>
                 <ChevronDownIcon className={navbarStyles.navGroupChevron} />
               </summary>

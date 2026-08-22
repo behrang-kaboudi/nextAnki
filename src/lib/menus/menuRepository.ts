@@ -79,10 +79,12 @@ function validateItem(value: unknown, pathLabel: string, depth: number): MenuIte
       throw new Error(`${pathLabel}: groups can only be nested ${MAX_MENU_DEPTH} levels deep.`);
     }
     const items = validateItems(value.items, `${pathLabel}.items`, depth + 1);
+    const href = cleanString(value.href);
     return {
       type: "group",
       label,
       items,
+      ...(href ? { href: validateHref(href, pathLabel) } : {}),
       ...(icon ? { icon } : {}),
     };
   }

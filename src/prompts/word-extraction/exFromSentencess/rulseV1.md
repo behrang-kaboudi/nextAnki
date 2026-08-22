@@ -40,6 +40,9 @@ CORE RULES:
 - The meaning must EXACTLY match the sense used in the sentence.
 - Do NOT list multiple meanings.
 - Do NOT give general meanings—only context-specific meaning.
+- Before writing `meaning_fa`, silently place the same `base_form`, with the same grammatical category and the same intended sense, in a different natural sentence that does not reuse the contextual words from the original sentence; the proposed meaning must remain valid in that new sentence.
+- Every semantic component of `meaning_fa` must be contributed by the `base_form` itself; do not include any component contributed only by any other word or phrase anywhere in the original sentence, regardless of its distance from the `base_form`.
+- Temporarily ignore the original sentence and translate the proposed `meaning_fa` by itself back into English; if the direct natural back-translation contains any content meaning not expressed by the `base_form` with the same grammatical category and intended sense, revise `meaning_fa`.
 
 4. PHRASES:
 

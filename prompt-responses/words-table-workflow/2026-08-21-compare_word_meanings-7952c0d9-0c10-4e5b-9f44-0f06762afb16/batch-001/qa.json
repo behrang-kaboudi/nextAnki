@@ -1,0 +1,30 @@
+{
+  "status": "passed",
+  "score": 9.2,
+  "criteria": {
+    "exactCoverageAndOrder": true,
+    "exactSchema": true,
+    "conceptsPersianOnlyAndAtMost50Words": true,
+    "synonymIdsGroupLocalUniqueNonSelfAndBidirectional": true,
+    "semanticSenseBoundariesPreserved": true,
+    "sourceQaMinimumScore": 9.1,
+    "sourceQaOverallScore": 9.4
+  },
+  "itemResults": [
+    {
+      "key": "noun:3384",
+      "status": "passed",
+      "score": 9.1
+    },
+    {
+      "key": "noun:6281",
+      "status": "passed",
+      "score": 9.2
+    },
+    {
+      "key": "noun:48816",
+      "status": "passed",
+      "score": 9.2
+    }
+  ]
+}

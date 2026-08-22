@@ -184,6 +184,9 @@ function validateResultForRecord(record: MeaningReviewPromptRecord, result: Revi
   if (newSentences.length > 1) {
     throw new Error(`WordSense ${record.id} may create at most one replacement sentence per review.`);
   }
+  if (newSentences.length && !missing.has("sentence_en") && !invalidIds.size) {
+    throw new Error(`WordSense ${record.id} may create a new sentence only when no sentence exists or an existing sentence is marked invalid.`);
+  }
   if (invalidIds.size && newSentences.length !== 1) {
     throw new Error(`WordSense ${record.id} must provide exactly one replacement sentence when invalid_sentence_ids is not empty.`);
   }

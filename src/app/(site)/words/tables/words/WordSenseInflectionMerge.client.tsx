@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { PromptSourcesButton } from "@/components/prompts/PromptSourcesButton";
 import { PromptBatchControls } from "@/components/prompts/PromptBatchControls.client";
 import { RemainingCountButton, RemainingGroupRecordBadge } from "@/components/remaining-count";
+import { completeAgentArtifact, usePendingAgentArtifact } from "@/lib/words/wordsTableAgentWorkflow.client";
 
 const PROMPT_PATH = "src/prompts/word-extraction/merge_inflected_forms/rulseV1.md";
 
@@ -97,6 +98,8 @@ export default function WordSenseInflectionMerge({
   remainingRecordCount: number;
 }) {
   const router = useRouter();
+  const pendingAgent = usePendingAgentArtifact("merge_inflected_forms");
+  const [agentRunId, setAgentRunId] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -167,11 +170,11 @@ export default function WordSenseInflectionMerge({
     }
   };
 
-  const openPreview = async () => {
+  const openPreview = async (responseValue = response) => {
     setBusy(true);
     setError(null);
     try {
-      const value = JSON.parse(response) as unknown;
+      const value = JSON.parse(responseValue) as unknown;
       const recordsResponse = await fetch("/api/words/inflection-merge/records", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -221,6 +224,11 @@ export default function WordSenseInflectionMerge({
         error?: string;
       };
       if (!applyResponse.ok || !result.ok) throw new Error(result.error || "Could not apply inflection merges.");
+      if (agentRunId) {
+        await completeAgentArtifact(agentRunId);
+        setAgentRunId(null);
+        await pendingAgent.refresh();
+      }
       setConfirmOpen(false);
       setResponse("");
       router.refresh();
@@ -240,6 +248,26 @@ export default function WordSenseInflectionMerge({
   ));
   const copyText = `${prompt}\n\n${JSON.stringify(groups, null, 2)}`;
   const totalDeleted = preview.flatMap((group) => group.entries).reduce((sum, entry) => sum + entry.deleteWordIds.length, 0);
+  const openStage = async () => {
+    setBusy(true);
+    setError(null);
+    try {
+      const artifact = await pendingAgent.loadResponse();
+      if (!artifact || artifact.response === undefined) {
+        await createData(true);
+        return;
+      }
+      const savedResponse = JSON.stringify(artifact.response, null, 2);
+      setResponse(savedResponse);
+      setAgentRunId(artifact.runId);
+      setOpen(true);
+      await openPreview(savedResponse);
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : String(reason));
+    } finally {
+      setBusy(false);
+    }
+  };
 
   return (
     <>
@@ -247,10 +275,11 @@ export default function WordSenseInflectionMerge({
         type="button"
         disabled={busy}
         aria-busy={busy && !open}
-        onClick={() => void createData(true)}
+        onClick={() => void openStage()}
         className="relative rounded border px-3 py-2 text-sm hover:bg-black/5 disabled:opacity-100 dark:hover:bg-white/5"
       >
         3. MERGE INFLECTED FORMS <RemainingGroupRecordBadge groupCount={remainingGroupCount} recordCount={remainingRecordCount} />
+        {pendingAgent.artifact ? <span className="ml-1 text-emerald-700">AI response ready ✓</span> : null}
         {busy && !open ? (
           <span className="absolute inset-0 flex items-center justify-center gap-1 rounded bg-background/85" aria-hidden="true">
             <span className="size-1.5 animate-bounce rounded-full bg-current [animation-delay:-0.3s]" />

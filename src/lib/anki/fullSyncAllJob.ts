@@ -143,7 +143,7 @@ type PendingWrite = {
   action: AnkiMultiAction;
 };
 
-const MAX_MULTI_ACTIONS = 200;
+const MAX_MULTI_ACTIONS = 1000;
 const MAX_MULTI_PAYLOAD_BYTES = 1_000_000;
 
 function chunkWrites(writes: PendingWrite[]): PendingWrite[][] {
@@ -315,7 +315,7 @@ async function runJob(state: State) {
     }
 
     let lastId = 0;
-    const pageSize = 500;
+    const pageSize = 1000;
     for (;;) {
       if (state.stopRequested) break;
 

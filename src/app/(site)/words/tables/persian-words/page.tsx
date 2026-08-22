@@ -7,7 +7,7 @@ import { TableColumnSelector } from "@/components/table-column-selector";
 import TableFieldMaintenance from "@/components/table-field-maintenance/TableFieldMaintenance.client";
 import { BulkReviewStatusActions } from "@/components/review-status/BulkReviewStatusActions.client";
 import { getPendingPersianWordAudioIds } from "@/lib/audio/wordAudioPending.server";
-import { countDeletablePersianWords } from "@/lib/persian/unreferencedPersianWordMaintenance.server";
+import { getPersianWordTableReferenceSummary } from "@/lib/persian/unreferencedPersianWordMaintenance.server";
 import { prisma } from "@/lib/prisma";
 import { getPersianWordColumnEmptyCounts } from "@/lib/words/tableColumnEmptyCounts.server";
 
@@ -19,6 +19,7 @@ import PersianWordMeaningIpaConfirmedToggle from "./PersianWordMeaningIpaConfirm
 import AddPersianWordModal from "./AddPersianWordModal.client";
 import DeletePersianWordButton from "./DeletePersianWordButton.client";
 import DeleteUnreferencedPersianWords from "./DeleteUnreferencedPersianWords.client";
+import UnlinkPersianWordButton from "./UnlinkPersianWordButton.client";
 
 export const metadata = { title: "Words — PersianWord Table" };
 export const runtime = "nodejs";
@@ -89,10 +90,13 @@ function SortHeader({ href, label, active, direction, indicators }: { href: stri
 export default async function PersianWordsTablePage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; page?: string; pageSize?: string; sort?: string; dir?: string; missingAudio?: string; ipaConfirmed?: string; columns?: string | string[] }>;
+  searchParams: Promise<{ q?: string; searchField?: string; page?: string; pageSize?: string; sort?: string; dir?: string; missingAudio?: string; ipaConfirmed?: string; columns?: string | string[] }>;
 }) {
   const params = await searchParams;
   const q = String(params.q ?? "").trim();
+  const searchField = params.searchField === "id" || params.searchField === "canonical_text" ? params.searchField : "all";
+  const searchedId = Number(q);
+  const exactId = Number.isSafeInteger(searchedId) && searchedId > 0 ? searchedId : null;
   const page = parsePositiveInt(params.page, 1);
   const showAll = params.pageSize === "all";
   const pageSize = Math.min(Math.max(parsePositiveInt(params.pageSize, 100), 10), 1000);
@@ -115,11 +119,15 @@ export default async function PersianWordsTablePage({
     updatedAt: { updatedAt: dir },
   };
   const filters: Prisma.PersianWordWhereInput[] = [];
-  if (q) filters.push({ OR: [{ canonical_text: { contains: q } }, { normalized_text: { contains: q } }, { meaning_fa_IPA: { contains: q } }, { meaning_fa_IPA_normalize: { contains: q } }, { audio_source_text: { contains: q } }] });
+  if (q) filters.push(searchField === "id"
+    ? { id: exactId ?? -1 }
+    : searchField === "canonical_text"
+      ? { canonical_text: { contains: q } }
+      : { OR: [{ canonical_text: { contains: q } }, { normalized_text: { contains: q } }, { meaning_fa_IPA: { contains: q } }, { meaning_fa_IPA_normalize: { contains: q } }, { audio_source_text: { contains: q } }] });
   if (missingAudioOnly) filters.push({ id: { in: await getPendingPersianWordAudioIds() } });
   if (ipaConfirmed !== "all") filters.push({ meaning_fa_IPA_confirmed: ipaConfirmed === "true" });
   const where = filters.length ? { AND: filters } : undefined;
-  const [total, rows, emptyCounts, missingMeaningIpaCount, pendingMeaningIpaConfirmationCount, deletablePersianWordCount] = await Promise.all([
+  const [total, rows, emptyCounts, missingMeaningIpaCount, pendingMeaningIpaConfirmationCount, referenceSummary] = await Promise.all([
     prisma.persianWord.count({ where }),
     prisma.persianWord.findMany({
       where,
@@ -148,12 +156,14 @@ export default async function PersianWordsTablePage({
         AND: [{ meaning_fa_IPA: { not: null } }, { meaning_fa_IPA: { not: "" } }],
       },
     }),
-    countDeletablePersianWords(),
+    getPersianWordTableReferenceSummary(),
   ]);
+  const deletablePersianWordCount = referenceSummary.deletableCount;
   const totalPages = showAll ? 1 : Math.max(1, Math.ceil(total / pageSize));
   const pageHref = (nextPage: number) => {
     const query = new URLSearchParams({ page: String(nextPage), pageSize: showAll ? "all" : String(pageSize), sort, dir });
     if (q) query.set("q", q);
+    query.set("searchField", searchField);
     if (missingAudioOnly) query.set("missingAudio", "1");
     if (ipaConfirmed !== "all") query.set("ipaConfirmed", ipaConfirmed);
     columns.forEach((column) => query.append("columns", column));
@@ -163,13 +173,14 @@ export default async function PersianWordsTablePage({
     const nextDir = field === sort && dir === "asc" ? "desc" : "asc";
     const query = new URLSearchParams({ page: "1", pageSize: showAll ? "all" : String(pageSize), sort: field, dir: nextDir });
     if (q) query.set("q", q);
+    query.set("searchField", searchField);
     if (missingAudioOnly) query.set("missingAudio", "1");
     if (ipaConfirmed !== "all") query.set("ipaConfirmed", ipaConfirmed);
     columns.forEach((column) => query.append("columns", column));
     return `/words/tables/persian-words?${query.toString()}`;
   };
   const clearHref = (() => {
-    const query = new URLSearchParams({ page: "1", pageSize: showAll ? "all" : String(pageSize), sort, dir });
+    const query = new URLSearchParams({ page: "1", pageSize: showAll ? "all" : String(pageSize), sort, dir, searchField });
     if (missingAudioOnly) query.set("missingAudio", "1");
     if (ipaConfirmed !== "all") query.set("ipaConfirmed", ipaConfirmed);
     columns.forEach((column) => query.append("columns", column));
@@ -214,6 +225,11 @@ export default async function PersianWordsTablePage({
               </select>
             </label>
             {columns.map((column) => <input key={column} type="hidden" name="columns" value={column} />)}
+            <fieldset className="flex items-center gap-2 text-sm" aria-label="Search field">
+              <label className="flex items-center gap-1"><input type="radio" name="searchField" value="all" defaultChecked={searchField === "all"} /> All fields</label>
+              <label className="flex items-center gap-1"><input type="radio" name="searchField" value="id" defaultChecked={searchField === "id"} /> id</label>
+              <label className="flex items-center gap-1"><input type="radio" name="searchField" value="canonical_text" defaultChecked={searchField === "canonical_text"} /> canonical_text</label>
+            </fieldset>
             <button type="submit" className="rounded border px-3 py-2 text-sm hover:bg-black/5 dark:hover:bg-white/5">
               Search
             </button>
@@ -288,7 +304,7 @@ export default async function PersianWordsTablePage({
                   {hasColumn("audio_source_text") ? <td className="max-w-52 px-3 py-2" dir="rtl"><span className="block truncate" title={row.audio_source_text ?? ""}>{row.audio_source_text ?? "—"}</span></td> : null}
                   {hasColumn("createdAt") ? <td className="whitespace-nowrap px-3 py-2 font-mono">{row.createdAt.toISOString()}</td> : null}
                   {hasColumn("updatedAt") ? <td className="whitespace-nowrap px-3 py-2 font-mono">{row.updatedAt.toISOString()}</td> : null}
-                  {hasColumn("actions") ? <td className="px-3 py-2"><div className="flex flex-wrap gap-1"><OpenPersianWordEditorModal id={row.id} label={row.canonical_text} /><DeletePersianWordButton id={row.id} label={row.canonical_text} /></div></td> : null}
+                  {hasColumn("actions") ? <td className="px-3 py-2"><div className="flex flex-wrap gap-1"><OpenPersianWordEditorModal id={row.id} label={row.canonical_text} /><UnlinkPersianWordButton id={row.id} label={row.canonical_text} referenceCount={referenceSummary.referenceCounts.get(row.id) ?? 0} /><DeletePersianWordButton id={row.id} label={row.canonical_text} referenceCount={referenceSummary.referenceCounts.get(row.id) ?? 0} /></div></td> : null}
                 </tr>
               ))}
               {!rows.length ? <tr><td colSpan={columns.length} className="px-3 py-6 text-center text-sm opacity-70">No rows.</td></tr> : null}

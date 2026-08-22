@@ -3,9 +3,12 @@ import "server-only";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 
+import { GLOBAL_AMERICAN_ENGLISH_POLICY_START } from "@/lib/ai/promptPolicy";
+
 type RenderVars = Record<string, string | number | boolean | null | undefined>;
 
 const PROMPTS_ROOT = path.join(process.cwd(), "src", "prompts");
+const GLOBAL_AMERICAN_ENGLISH_POLICY = "_core/american-english-policy-v1.md";
 
 function assertSafeRelativePath(relPath: string) {
   if (path.isAbsolute(relPath)) {
@@ -39,6 +42,11 @@ const VAR_RE = /\{\{\s*([a-zA-Z0-9_.-]+)\s*\}\}/g;
 async function loadText(relPath: string) {
   const abs = resolvePromptPath(relPath);
   return readFile(abs, "utf8");
+}
+
+export async function withGlobalAmericanEnglishPolicy(source: string) {
+  if (source.includes(GLOBAL_AMERICAN_ENGLISH_POLICY_START)) return source;
+  return `${await loadText(GLOBAL_AMERICAN_ENGLISH_POLICY)}\n\n${source}`;
 }
 
 function withDefaultMdExtension(relPath: string) {
@@ -97,6 +105,7 @@ export async function renderPromptFromFile(options: {
   file: string;
   vars?: RenderVars;
   maxIncludeDepth?: number;
+  includeGlobalPolicy?: boolean;
 }) {
   const vars = options.vars ?? {};
   const maxIncludeDepth = options.maxIncludeDepth ?? 20;
@@ -104,6 +113,8 @@ export async function renderPromptFromFile(options: {
   const file = withDefaultMdExtension(options.file);
   const template = await loadText(file);
   const withIncludes = await resolveIncludes(template, { maxDepth: maxIncludeDepth, stack: [file] });
-  return renderVars(withIncludes, vars);
+  const prepared = options.includeGlobalPolicy === false
+    ? withIncludes
+    : await withGlobalAmericanEnglishPolicy(withIncludes);
+  return renderVars(prepared, vars);
 }
-

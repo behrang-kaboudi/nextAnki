@@ -25,9 +25,11 @@ type Status = {
 export default function BatchEnglishWordJsonHintGenerate({
   initialRemainingCount,
   initialTotalCount,
+  modes = ["missing", "all"],
 }: {
   initialRemainingCount: number;
   initialTotalCount: number;
+  modes?: readonly Mode[];
 }) {
   const router = useRouter();
   const { status } = useJobProgress<Status>(JOB_PROGRESS_TOPICS.englishWordJsonHint);
@@ -60,10 +62,18 @@ export default function BatchEnglishWordJsonHintGenerate({
     router.refresh();
   }, [router, status]);
 
-  const processed = status?.processedCandidates ?? 0;
-  const total = status?.totalCandidates ?? 0;
+  const visibleStatus = status && modes.includes(status.mode) ? status : null;
+  const processed = visibleStatus?.processedCandidates ?? 0;
+  const total = visibleStatus?.totalCandidates ?? 0;
   const remaining = Math.max(0, total - processed);
   const busy = Boolean(startingMode || status?.running);
+  const showMissing = modes.includes("missing");
+  const showAll = modes.includes("all");
+  const description = showMissing && showAll
+    ? "Generate missing handles only empty json_hint values; Generate all recalculates every EnglishWord record."
+    : showMissing
+      ? "Generate only empty json_hint values."
+      : "Recalculate every EnglishWord record. This operation is human-only.";
 
   return (
     <section className="flex flex-col gap-2">
@@ -71,11 +81,11 @@ export default function BatchEnglishWordJsonHintGenerate({
         <div>
           <div className="text-sm font-semibold">JSON hint</div>
           <div className="text-xs opacity-70">
-            Generate missing handles only empty json_hint values; Generate all recalculates every EnglishWord record.
+            {description}
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
-          <button
+          {showMissing ? <button
             type="button"
             onClick={() => void start("missing")}
             disabled={busy}
@@ -83,8 +93,8 @@ export default function BatchEnglishWordJsonHintGenerate({
           >
             {status?.running && status.mode === "missing" ? "Generating missing json_hint…" : "Generate missing json_hint"}
             <RemainingCountBadge count={status?.running && status.mode === "missing" ? remaining : initialRemainingCount} />
-          </button>
-          <button
+          </button> : null}
+          {showAll ? <button
             type="button"
             onClick={() => void start("all")}
             disabled={busy}
@@ -92,16 +102,16 @@ export default function BatchEnglishWordJsonHintGenerate({
           >
             {status?.running && status.mode === "all" ? "Generating all json_hint…" : "Generate all json_hint"}
             <RemainingCountBadge count={status?.running && status.mode === "all" ? remaining : initialTotalCount} />
-          </button>
+          </button> : null}
         </div>
       </div>
-      {status ? (
+      {visibleStatus ? (
         <div className="text-xs opacity-80">
-          mode={status.mode} • done={processed.toLocaleString()}/{total.toLocaleString()} • remaining={remaining.toLocaleString()} • generated={status.generated.toLocaleString()} • skippedNoPhonetic={status.skippedNoPhonetic.toLocaleString()}
-          {status.currentId ? <> • current=#{status.currentId} ({status.currentText ?? "—"})</> : null}
+          mode={visibleStatus.mode} • done={processed.toLocaleString()}/{total.toLocaleString()} • remaining={remaining.toLocaleString()} • generated={visibleStatus.generated.toLocaleString()} • skippedNoPhonetic={visibleStatus.skippedNoPhonetic.toLocaleString()}
+          {visibleStatus.currentId ? <> • current=#{visibleStatus.currentId} ({visibleStatus.currentText ?? "—"})</> : null}
         </div>
       ) : null}
-      {error || status?.error ? <div className="text-xs text-red-600">{error ?? status?.error}</div> : null}
+      {error || visibleStatus?.error ? <div className="text-xs text-red-600">{error ?? visibleStatus?.error}</div> : null}
     </section>
   );
 }

@@ -7,6 +7,7 @@ import { MeaningReviewStatus, Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { touchWordSensesLinkedToSentenceId, updateWordSense } from "@/lib/words/wordSenseRepo";
 import { wordSentenceIds } from "@/lib/words/sentenceIds";
+import { idiomReviewCompletedForBaseForm } from "@/lib/words/idiomReview";
 
 type ExistingSentenceRef = {
   existingId: number;
@@ -299,6 +300,7 @@ export async function applyWordSenseSplitRepairBatch(body: WordSenseSplitRepairR
         pos: true,
         concept_explained_fa: true,
         updatedAt: true,
+        english: { select: { base_form: true } },
       },
     });
     if (sources.length !== sourceIds.length) throw new Error("One or more source WordSenses no longer exist.");
@@ -440,6 +442,7 @@ export async function applyWordSenseSplitRepairBatch(body: WordSenseSplitRepairR
             meaningReviewStatus: MeaningReviewStatus.PENDING,
             conceptMergeReviewed: false,
             inflectionMergeReviewed: false,
+            idiomReviewCompleted: idiomReviewCompletedForBaseForm(source.english.base_form),
           },
           select: { id: true },
         });

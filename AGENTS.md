@@ -14,12 +14,40 @@
 - Keep the human-readable route inventory in `src/config/siteMap.ts` synchronized whenever any UI page is added, moved, renamed, or removed. Write or update its plain-English summary, and update `config/menus.json` when the page should be directly navigable. Test pages must live under `/tests`; the Tests hub reads its categories from this site map.
 - Wrap every rendered Persian UI string in an element with `dir="rtl"`. Mixed-language UI copy whose base language is Persian must also use `dir="rtl"`; use right alignment where the text is displayed as a block.
 
+## Provider and spending boundary
+- Agents, ChatGPT, and Codex must never directly call a separately billed provider API, use provider credentials, or operate provider SDKs on the user's behalf unless the user gives explicit, current, task-specific authorization for that direct provider call.
+- The application owns its internal APIs and provider configuration. When the user explicitly authorizes a specific application operation, the agent may call the application's own API even when that endpoint internally uses the provider configured by the user. The agent must not read, select, replace, expose, or directly operate that provider or its credentials.
+- Calling an authorized application API is an application action, not permission for the agent to make an equivalent direct provider call. Keep authorization scoped to the named application operation.
+- Treat application APIs as provider-opaque capability boundaries. Agent-facing status, prompts, and workflow decisions should expose only the operation, inputs, remaining work, job state, and result; they must not require or reveal provider identity, credentials, billing configuration, or backend implementation details. Agents must not inspect behind an application API or branch workflow behavior based on the hidden provider.
+- Do not ask whether an application endpoint is paid or free, infer its cost model, or require provider- or billing-specific approval. Authorization is scoped only to the user-visible application operation; any provider choice, billing arrangement, and execution cost behind that endpoint remain the application's private implementation detail.
+
+## Page workflow routing
+
+- When the user refers to "this page" or uses an equivalent contextual phrase such as "do the work for this page," resolve the page from the most recently identified application URL, route, or explicit page reference in the current conversation. Do not require the user to remember a workflow name or special trigger phrase.
+- When that resolved page is `/words/tables/words`, read `src/app/(site)/words/tables/words/AGENTS.md` and `src/app/(site)/words/tables/words/page-workflow.md` completely, then follow that page workflow. A direct instruction to perform or continue the work for that page authorizes starting or continuing the documented workflow within its stated confirmation boundaries.
+- If no page can be identified from the available conversation or application context, ask which page the user means instead of guessing.
+
 ## Prompt Response Artifacts
 - Never create prompt inputs, model responses, JSON answers, reviewed IDs, QA reports, manifests, or related intermediate artifacts in the project root.
 - Store every prompt run under `prompt-responses/<workflow-slug>/<YYYY-MM-DD>-<run-slug>/`; keep that run's prompt, response, corrections, reviewed-ID files, and QA evidence together in the same run folder.
 - For parallel or batched work, create a stable subfolder per lane or batch (for example `lane-01/` or `batch-001/`) and keep its prompt, raw response, corrected response, and QA result together there.
 - Use clear deterministic filenames such as `prompt.md`, `response.json`, `corrected-response.json`, `reviewed-ids.json`, `qa.md`, and `manifest.json`; do not create new root-level names such as `promptAns*.json`, `promptQ.json`, or `response*.json`.
 - Do not move or delete existing prompt artifacts unless the user explicitly authorizes that cleanup; this rule governs all newly created artifacts.
+
+## Word Sense Intake Workflow
+
+- The global language convention for every project prompt is [American English Policy](src/prompts/_core/american-english-policy-v1.md) at `src/prompts/_core/american-english-policy-v1.md`. Every new or modified English value produced for storage must use contemporary standard American English. Do not create a conflicting regional-English rule in an individual prompt.
+- The model-facing entry prompt is [Word Sense Intake System Instruction](src/prompts/word-extraction/word-sense-workflow/system-v1.md) at `src/prompts/word-extraction/word-sense-workflow/system-v1.md`.
+- The canonical step-by-step guide is [Word Sense Intake Workflow Guide](src/prompts/word-extraction/word-sense-workflow/guide-v1.md) at `src/prompts/word-extraction/word-sense-workflow/guide-v1.md`.
+- For any AI or agent task that receives an English word or phrase and asks for its meaning in a supplied sentence or context, read and follow the canonical guide. Execute only phases explicitly marked **ENABLED** and stop after the last enabled phase.
+- When the user says they do not want to study a word or phrase, interpret that statement only as declining enrollment in the personal study list. Do not treat it as declining database insertion; database insertion is a separate decision that still requires its own explicit authorization, and the user will state explicitly when they do not want the candidate stored in the database.
+- When composing another prompt through `src/prompts/_core/promptStore.ts`, include the guide with `{{> word-extraction/word-sense-workflow/guide-v1}}` instead of copying its contents.
+
+## Site To-Do List
+
+- The project's non-code future-work list is `project-planning/site-todo.md`.
+- When the user says to add something to the "to-do list", append a new item to the end of that file; do not treat the request as authorization to implement it.
+- When the user asks for a to-do report, read the whole file and report the pending work, useful implementation considerations, dependencies or risks, and practical recommendations. Keep recorded tasks distinct from agent recommendations.
 
 ## Where To Look
 - Prisma + migrations + `schema.prisma`: `prisma/AGENTS.md`

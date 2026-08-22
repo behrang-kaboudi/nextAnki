@@ -26,34 +26,6 @@
             "href": "/words/extraction",
             "icon": "sparkles",
             "description": "Choose between new-word intake and completion of existing vocabulary records."
-          },
-          {
-            "type": "group",
-            "label": "Word Hints",
-            "items": [
-              {
-                "type": "link",
-                "label": "Audio Hints",
-                "href": "/words/hints/audio",
-                "icon": "audio",
-                "description": "Generate and maintain word-field audio."
-              },
-              {
-                "type": "link",
-                "label": "JSON Hints",
-                "href": "/words/hints/json",
-                "icon": "code",
-                "description": "Generate and review structured word hints."
-              }
-            ],
-            "icon": "brain"
-          },
-          {
-            "type": "link",
-            "label": "Word Cleanup",
-            "href": "/words/cleanup",
-            "icon": "tools",
-            "description": "Remove local words missing from Anki."
           }
         ],
         "icon": "database"
@@ -95,6 +67,28 @@
       },
       {
         "type": "group",
+        "label": "AI",
+        "items": [
+          {
+            "type": "link",
+            "label": "AI Commands",
+            "href": "/ai/commands",
+            "icon": "sparkles",
+            "description": "See the current and planned tasks you can ask AI to perform."
+          },
+          {
+            "type": "link",
+            "label": "Prompt Builder",
+            "href": "/ai/prompt-builder",
+            "icon": "sparkles",
+            "description": "Build and preview reusable AI prompts."
+          }
+        ],
+        "href": "/ai/commands",
+        "icon": "sparkles"
+      },
+      {
+        "type": "group",
         "label": "Anki",
         "items": [
           {
@@ -113,10 +107,10 @@
           },
           {
             "type": "link",
-            "label": "Anki Word Sync",
-            "href": "/anki/sync/words",
-            "icon": "link",
-            "description": "Run and monitor the primary word synchronization workflow."
+            "label": "Reset Equivalent Cards",
+            "href": "/anki/cards/reset",
+            "icon": "tools",
+            "description": "Review and reset equivalent bilingual cards."
           },
           {
             "type": "link",
@@ -126,119 +120,14 @@
             "description": "Create and inspect required Anki structure."
           },
           {
-            "type": "group",
-            "label": "Cards",
-            "items": [
-              {
-                "type": "link",
-                "label": "Card Manager",
-                "href": "/anki/cards/manager",
-                "icon": "database",
-                "description": "Manage matching Anki notes, cards, and study state."
-              },
-              {
-                "type": "link",
-                "label": "Add Cards for Study",
-                "href": "/anki/cards/study",
-                "icon": "app",
-                "description": "Select words and add their cards to study."
-              },
-              {
-                "type": "link",
-                "label": "Transfer Cards",
-                "href": "/anki/cards/transfer",
-                "icon": "link",
-                "description": "Move matching card types between decks."
-              },
-              {
-                "type": "link",
-                "label": "Reset Equivalent Cards",
-                "href": "/anki/cards/reset",
-                "icon": "tools",
-                "description": "Review and reset equivalent bilingual cards."
-              },
-              {
-                "type": "link",
-                "label": "Suspension Manager",
-                "href": "/anki/cards/suspensions",
-                "icon": "tools",
-                "description": "Find and manage suspended cards."
-              }
-            ],
-            "icon": "app"
-          },
-          {
-            "type": "group",
-            "label": "Setup",
-            "items": [
-              {
-                "type": "link",
-                "label": "Connection",
-                "href": "/anki/connection",
-                "icon": "link",
-                "description": "View AnkiConnect settings and prerequisites."
-              },
-              {
-                "type": "link",
-                "label": "Migrations",
-                "href": "/anki/migrations",
-                "icon": "tools",
-                "description": "Run one-time Anki migrations."
-              }
-            ],
-            "icon": "settings"
+            "type": "link",
+            "label": "Card Manager",
+            "href": "/anki/cards/manager",
+            "icon": "database",
+            "description": "Manage matching Anki notes, cards, and study state."
           }
         ],
         "icon": "anki"
-      },
-      {
-        "type": "group",
-        "label": "IPA",
-        "items": [
-          {
-            "type": "link",
-            "label": "IPA Keywords",
-            "href": "/ipa/keywords",
-            "icon": "ipa",
-            "description": "Manage IPA keyword mappings."
-          },
-          {
-            "type": "link",
-            "label": "Picture Words",
-            "href": "/ipa/picture-words",
-            "icon": "image",
-            "description": "Maintain visual pronunciation associations."
-          },
-          {
-            "type": "link",
-            "label": "Picture Word Audio",
-            "href": "/ipa/picture-words/audio",
-            "icon": "audio",
-            "description": "Manage audio for picture words."
-          }
-        ],
-        "icon": "ipa"
-      },
-      {
-        "type": "group",
-        "label": "AI",
-        "items": [
-          {
-            "type": "link",
-            "label": "Prompt Builder",
-            "href": "/ai/prompt-builder",
-            "icon": "sparkles",
-            "description": "Build and preview reusable AI prompts."
-          },
-          {
-            "type": "link",
-            "label": "Local AI Studio",
-            "href": "/ai/local-chat",
-            "icon": "brain",
-            "description": "Manage LM Studio models and chat with them locally."
-          }
-        ],
-        "icon": "sparkles"
       },
       {
         "type": "group",
@@ -277,46 +166,172 @@
       },
       {
         "type": "group",
-        "label": "Tests",
+        "label": "Less Used",
         "items": [
           {
             "type": "link",
-            "label": "Tests Hub",
+            "label": "Overview",
             "href": "/tests",
             "icon": "tools",
-            "description": "Search all internal test pages."
+            "description": "Search and open less frequently used tools."
           },
           {
             "type": "group",
-            "label": "Anki Tests",
+            "label": "Anki Utilities",
             "items": [
               {
                 "type": "link",
-                "label": "AnkiConnect Playground",
+                "label": "Connection",
+                "href": "/anki/connection",
+                "icon": "link",
+                "description": "View AnkiConnect settings and prerequisites."
+              },
+              {
+                "type": "link",
+                "label": "Migrations",
+                "href": "/anki/migrations",
+                "icon": "tools",
+                "description": "Run one-time Anki migrations."
+              },
+              {
+                "type": "link",
+                "label": "Suspension Manager",
+                "href": "/anki/cards/suspensions",
+                "icon": "tools",
+                "description": "Find and manage suspended cards."
+              },
+              {
+                "type": "link",
+                "label": "Transfer Cards",
+                "href": "/anki/cards/transfer",
+                "icon": "link",
+                "description": "Move matching card types between decks."
+              },
+              {
+                "type": "link",
+                "label": "AnkiConnect Console",
                 "href": "/tests/anki/connection",
                 "icon": "link",
                 "description": "Call low-level AnkiConnect actions."
               },
               {
                 "type": "link",
-                "label": "Anki Review Log",
+                "label": "Anki Review Log Inspector",
                 "href": "/tests/anki/review-log",
                 "icon": "file",
                 "description": "Inspect AnkiDroid review-log output."
+              },
+              {
+                "type": "link",
+                "label": "Sentence Card Sync",
+                "href": "/tests/sync/sentence-cards",
+                "icon": "link",
+                "description": "Ensure and synchronize sentence cards."
+              },
+              {
+                "type": "link",
+                "label": "Anki Word Sync",
+                "href": "/anki/sync/words",
+                "icon": "link",
+                "description": "Run and monitor the primary word synchronization workflow."
+              },
+              {
+                "type": "link",
+                "label": "Add Cards for Study",
+                "href": "/anki/cards/study",
+                "icon": "app",
+                "description": "Select words and add their cards to study."
               }
             ],
             "icon": "anki"
           },
           {
             "type": "group",
-            "label": "Editor Tests",
+            "label": "Word Utilities",
             "items": [
               {
                 "type": "link",
-                "label": "Editor Test",
+                "label": "Audio Hints",
+                "href": "/words/hints/audio",
+                "icon": "audio",
+                "description": "Generate and maintain word-field audio."
+              },
+              {
+                "type": "link",
+                "label": "JSON Hints",
+                "href": "/words/hints/json",
+                "icon": "code",
+                "description": "Generate and review structured word hints."
+              },
+              {
+                "type": "link",
+                "label": "Word Cleanup",
+                "href": "/words/cleanup",
+                "icon": "tools",
+                "description": "Remove local words missing from Anki."
+              },
+              {
+                "type": "link",
+                "label": "Sentence Fields",
+                "href": "/tests/words/sentence-fields",
+                "icon": "database",
+                "description": "Review temporary sentence fields on words."
+              },
+              {
+                "type": "link",
+                "label": "External Source Catalog",
+                "href": "/tests/words/external-sources",
+                "icon": "database",
+                "description": "Browse the read-only external vocabulary source catalog."
+              }
+            ],
+            "icon": "database"
+          },
+          {
+            "type": "group",
+            "label": "IPA Tools",
+            "items": [
+              {
+                "type": "link",
+                "label": "IPA Keywords",
+                "href": "/ipa/keywords",
+                "icon": "ipa",
+                "description": "Manage IPA keyword mappings."
+              },
+              {
+                "type": "link",
+                "label": "Picture Words",
+                "href": "/ipa/picture-words",
+                "icon": "image",
+                "description": "Maintain visual pronunciation associations."
+              },
+              {
+                "type": "link",
+                "label": "Picture Word Audio",
+                "href": "/ipa/picture-words/audio",
+                "icon": "audio",
+                "description": "Manage audio for picture words."
+              },
+              {
+                "type": "link",
+                "label": "IPA Word Inspector",
+                "href": "/tests/ipa/words",
+                "icon": "ipa",
+                "description": "Inspect and normalize special IPA words."
+              }
+            ],
+            "icon": "ipa"
+          },
+          {
+            "type": "group",
+            "label": "Editor Tools",
+            "items": [
+              {
+                "type": "link",
+                "label": "Editor Playground",
                 "href": "/tests/editors/basic",
                 "icon": "file",
-                "description": "Test the shared rich-text editor."
+                "description": "Exercise the shared rich-text editor."
               },
               {
                 "type": "link",
@@ -330,52 +345,31 @@
           },
           {
             "type": "group",
-            "label": "IPA Tests",
+            "label": "Local AI",
             "items": [
               {
                 "type": "link",
-                "label": "IPA Word Test",
-                "href": "/tests/ipa/words",
-                "icon": "ipa",
-                "description": "Inspect and normalize special IPA words."
+                "label": "Local AI Studio",
+                "href": "/ai/local-chat",
+                "icon": "brain",
+                "description": "Manage LM Studio models and chat with them locally."
               }
             ],
-            "icon": "ipa"
+            "icon": "brain"
           },
           {
             "type": "group",
-            "label": "Sync Tests",
+            "label": "Development Tools",
             "items": [
               {
                 "type": "link",
-                "label": "Sentence Card Sync",
-                "href": "/tests/sync/sentence-cards",
-                "icon": "link",
-                "description": "Ensure and synchronize sentence cards."
+                "label": "Function Playground",
+                "href": "/tests/functions",
+                "icon": "code",
+                "description": "Exercise reusable server-side function helpers."
               }
             ],
-            "icon": "link"
-          },
-          {
-            "type": "group",
-            "label": "Word Tests",
-            "items": [
-              {
-                "type": "link",
-                "label": "Sentence Fields",
-                "href": "/tests/words/sentence-fields",
-                "icon": "database",
-                "description": "Review temporary sentence fields on words."
-              }
-            ],
-            "icon": "database"
-          },
-          {
-            "type": "link",
-            "label": "Test Functions",
-            "href": "/tests/functions",
-            "icon": "code",
-            "description": "Exercise reusable test function helpers."
+            "icon": "code"
           }
         ],
         "icon": "tools"

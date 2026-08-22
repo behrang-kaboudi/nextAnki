@@ -159,6 +159,7 @@ try {
           productive_target: entry.productive_target,
           concept_explained_fa: null,
           sentenceIds: [],
+          idiomReviewCompleted: !/[\s\u2010-\u2015-]/u.test(entry.base_form.trim()),
           meaningReviewStatus: "PENDING",
           conceptMergeReviewed: false,
           inflectionMergeReviewed: false,

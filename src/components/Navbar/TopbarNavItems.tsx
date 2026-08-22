@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { ChevronDownIcon } from "./ChevronDownIcon";
 import { DropdownNavItems } from "./DropdownNavItems";
 import { NavItemLink } from "./NavItemLink";
@@ -21,7 +23,20 @@ export function TopbarNavItems({
           return (
             <details key={itemKey} className={navbarStyles.topbarGroup}>
               <summary className={navbarStyles.topbarGroupSummary} onClick={closeSiblingDetails}>
-                <span>{item.label}</span>
+                {item.href ? (
+                  <Link
+                    href={item.href}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      closeAllDetailsInNav(event);
+                    }}
+                    className="transition hover:text-foreground"
+                  >
+                    {item.label}
+                  </Link>
+                ) : (
+                  <span>{item.label}</span>
+                )}
                 <ChevronDownIcon className={navbarStyles.topbarChevron} />
               </summary>
               <div className={navbarStyles.topbarDropdown}>

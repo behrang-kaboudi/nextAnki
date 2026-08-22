@@ -9,6 +9,7 @@ import { addPersianWord } from "@/lib/tables/persianWord";
 import { normalizeEnglishWordText } from "@/lib/english/normalize";
 import { findEnglishWordIdsByKnownForm } from "@/lib/english/englishWordForms.server";
 import { updateWordSense } from "@/lib/words/wordSenseRepo";
+import { idiomReviewCompletedForBaseForm } from "@/lib/words/idiomReview";
 
 export const runtime = "nodejs";
 
@@ -239,6 +240,7 @@ export async function POST(req: Request) {
                 anki_link_id: `pending_${randomUUID()}`,
                 englishId: englishWord.id,
                 meaningId: persianMeaning.item.id,
+                idiomReviewCompleted: idiomReviewCompletedForBaseForm(item.base_form),
               },
               select: { id: true },
             });

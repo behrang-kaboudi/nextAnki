@@ -95,7 +95,12 @@ async function importRow(row) {
       select: { id: true },
     });
     const word = await tx.wordSense.create({
-      data: { ...row.wordData, englishId: english.id, meaningId: meaning.id },
+      data: {
+        ...row.wordData,
+        englishId: english.id,
+        meaningId: meaning.id,
+        idiomReviewCompleted: !/[\s\u2010-\u2015-]/u.test(row.base_form.trim()),
+      },
       select: { id: true },
     });
     const sentence = await tx.sentence.upsert({

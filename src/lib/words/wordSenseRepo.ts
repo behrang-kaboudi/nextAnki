@@ -9,6 +9,7 @@ import {
   NEEDS_ACTION_MEANING_REVIEW_STATUSES,
 } from "@/lib/words/meaningReviewStatus";
 import { wordSentenceIds } from "@/lib/words/sentenceIds";
+import { idiomReviewCompletedForBaseForm } from "@/lib/words/idiomReview";
 
 function stripManualUpdatedAt<T extends { data?: unknown }>(args: T): T {
   const data = (args as { data?: Record<string, unknown> }).data;
@@ -28,6 +29,17 @@ const conceptMergeInputs = new Set([
 ]);
 
 const inflectionMergeInputs = new Set([
+  "englishId",
+  "english",
+  "meaningId",
+  "meaning",
+  "otherMeaningIds",
+  "sentenceIds",
+  "pos",
+  "concept_explained_fa",
+]);
+
+const idiomReviewInputs = new Set([
   "englishId",
   "english",
   "meaningId",
@@ -87,7 +99,38 @@ function resetInflectionMergeReview(data: unknown) {
   }
 }
 
-type WordSenseWriteClient = Pick<PrismaClient, "wordSense"> | Pick<Prisma.TransactionClient, "wordSense">;
+type WordSenseWriteClient = Pick<PrismaClient, "wordSense" | "englishWord"> |
+  Pick<Prisma.TransactionClient, "wordSense" | "englishWord">;
+
+async function resetIdiomReviewForWordSenseIds(
+  ids: readonly number[],
+  client: WordSenseWriteClient,
+) {
+  const uniqueIds = [...new Set(ids.filter((id) => Number.isSafeInteger(id) && id > 0))];
+  if (!uniqueIds.length) return;
+  const words = await client.wordSense.findMany({
+    where: { id: { in: uniqueIds } },
+    select: { id: true, english: { select: { base_form: true } } },
+  });
+  const completedIds = words
+    .filter((word) => idiomReviewCompletedForBaseForm(word.english.base_form))
+    .map((word) => word.id);
+  const pendingIds = words
+    .filter((word) => !idiomReviewCompletedForBaseForm(word.english.base_form))
+    .map((word) => word.id);
+  if (completedIds.length) {
+    await client.wordSense.updateMany({
+      where: { id: { in: completedIds } },
+      data: { idiomReviewCompleted: true },
+    });
+  }
+  if (pendingIds.length) {
+    await client.wordSense.updateMany({
+      where: { id: { in: pendingIds } },
+      data: { idiomReviewCompleted: false },
+    });
+  }
+}
 
 export async function updateWordSense(
   args: Prisma.WordSenseUpdateArgs,
@@ -95,6 +138,20 @@ export async function updateWordSense(
 ) {
   stripManualUpdatedAt(args);
   resetConceptMergeReview(args.data);
+  const data = args.data as Record<string, unknown>;
+  if (data.idiomReviewCompleted === undefined && Object.keys(data).some((key) => idiomReviewInputs.has(key))) {
+    const current = await client.wordSense.findUnique({
+      where: args.where,
+      select: { englishId: true, english: { select: { base_form: true } } },
+    });
+    if (current) {
+      const nextEnglishId = typeof data.englishId === "number" ? data.englishId : current.englishId;
+      const baseForm = nextEnglishId === current.englishId
+        ? current.english.base_form
+        : (await client.englishWord.findUnique({ where: { id: nextEnglishId }, select: { base_form: true } }))?.base_form;
+      if (baseForm) data.idiomReviewCompleted = idiomReviewCompletedForBaseForm(baseForm);
+    }
+  }
   if (needsMeaningReviewReset(args.data)) {
     const current = await client.wordSense.findUnique({
       where: args.where,
@@ -165,6 +222,7 @@ export async function touchWordSensesLinkedToSentenceId(
           },
         })
       : { count: 0 };
+    await resetIdiomReviewForWordSenseIds(eligibleWords.map((word) => word.id), client);
     return { count: pending.count + missing.count };
   }
   return client.wordSense.updateMany({
@@ -209,6 +267,7 @@ export async function touchWordSensesByIds(
       },
       data: { meaningReviewStatus: MeaningReviewStatus.NEEDS_ACTION_MISSING_PRIMARY },
     });
+    await resetIdiomReviewForWordSenseIds(uniqueIds, client);
   }
   return touched;
 }
@@ -219,13 +278,18 @@ export async function touchWordSensesByEnglishId(
   options?: {
     resetConceptMergeReviewed?: boolean;
     resetMeaningReviewStatus?: boolean;
+    resetIdiomReviewCompleted?: boolean;
   },
 ) {
+  const baseForm = options?.resetIdiomReviewCompleted
+    ? (await prisma.englishWord.findUnique({ where: { id: englishId }, select: { base_form: true } }))?.base_form
+    : null;
   const touched = await prisma.wordSense.updateMany({
     where: { englishId },
     data: {
       updatedAt: new Date(),
       ...(options?.resetConceptMergeReviewed ? { conceptMergeReviewed: false } : {}),
+      ...(baseForm ? { idiomReviewCompleted: idiomReviewCompletedForBaseForm(baseForm) } : {}),
     },
   });
   if (options?.resetMeaningReviewStatus) {
@@ -245,6 +309,10 @@ export async function touchWordSensesByEnglishId(
       },
       data: { meaningReviewStatus: MeaningReviewStatus.NEEDS_ACTION_MISSING_PRIMARY },
     });
+    await resetIdiomReviewForWordSenseIds(
+      (await prisma.wordSense.findMany({ where: { englishId }, select: { id: true } })).map((word) => word.id),
+      prisma,
+    );
   }
   return touched;
 }
@@ -296,6 +364,52 @@ export async function deleteWordSense(
     return writeClient.wordSense.delete(args);
   };
 
+  return client
+    ? deleteWithClient(client)
+    : prisma.$transaction((tx) => deleteWithClient(tx));
+}
+
+export async function deleteWordSenses(
+  ids: readonly number[],
+  client?: WordSenseWriteClient,
+) {
+  const uniqueIds = [...new Set(ids.filter((id) => Number.isSafeInteger(id) && id > 0))];
+  if (!uniqueIds.length) return { count: 0 };
+  const deleteWithClient = async (writeClient: WordSenseWriteClient) => {
+    const targets = await writeClient.wordSense.findMany({
+      where: { id: { in: uniqueIds } },
+      select: { id: true },
+    });
+    if (targets.length !== uniqueIds.length) {
+      throw new Error("One or more WordSense records no longer exist.");
+    }
+    const targetIds = new Set(targets.map((target) => target.id));
+    const words = await writeClient.wordSense.findMany({
+      where: { id: { notIn: uniqueIds } },
+      select: { id: true, comparedMeaningWordIds: true, synonymIds: true },
+    });
+    const asIds = (value: Prisma.JsonValue | null, selfId: number) => Array.isArray(value)
+      ? [...new Set(value.filter((item): item is number =>
+          typeof item === "number" && Number.isSafeInteger(item) && item > 0 && item !== selfId,
+        ))]
+      : [];
+    for (const word of words) {
+      const compared = asIds(word.comparedMeaningWordIds, word.id);
+      const synonyms = asIds(word.synonymIds, word.id);
+      if (!compared.some((id) => targetIds.has(id)) && !synonyms.some((id) => targetIds.has(id))) continue;
+      const nextSynonyms = synonyms.filter((id) => !targetIds.has(id));
+      const nextCompared = [...new Set([
+        ...compared.filter((id) => !targetIds.has(id)),
+        ...nextSynonyms,
+      ])];
+      await updateWordSense({
+        where: { id: word.id },
+        data: { comparedMeaningWordIds: nextCompared, synonymIds: nextSynonyms },
+        select: { id: true },
+      }, writeClient);
+    }
+    return writeClient.wordSense.deleteMany({ where: { id: { in: uniqueIds } } });
+  };
   return client
     ? deleteWithClient(client)
     : prisma.$transaction((tx) => deleteWithClient(tx));

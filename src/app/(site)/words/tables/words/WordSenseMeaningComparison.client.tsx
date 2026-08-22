@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { PromptSourcesButton } from "@/components/prompts/PromptSourcesButton";
 import { PromptBatchControls } from "@/components/prompts/PromptBatchControls.client";
 import { RemainingCountButton, RemainingGroupRecordBadge } from "@/components/remaining-count";
+import { completeAgentArtifact, usePendingAgentArtifact } from "@/lib/words/wordsTableAgentWorkflow.client";
 
 const PROMPT_PATH = "src/prompts/word-extraction/compare_word_meanings/rulseV1.md";
 
@@ -19,7 +20,9 @@ type SourceRecord = {
 };
 
 type SourceGroup = {
+  groupKey: string;
   persianWordId: number;
+  pos: string;
   shared_persian_meaning: string;
   records: SourceRecord[];
 };
@@ -31,7 +34,9 @@ type OutputRecord = {
 };
 
 type OutputGroup = {
+  groupKey: string;
   persianWordId: number;
+  pos: string;
   records: OutputRecord[];
 };
 
@@ -47,7 +52,8 @@ function parseResponse(value: string, sourceGroups: SourceGroup[]): OutputGroup[
     if (!raw || typeof raw !== "object") throw new Error("Every output group must be an object.");
     const group = raw as Record<string, unknown>;
     const source = sourceGroups[groupIndex];
-    if (group.persianWordId !== source.persianWordId || !Array.isArray(group.records) ||
+    if (group.groupKey !== source.groupKey || group.persianWordId !== source.persianWordId ||
+        group.pos !== source.pos || !Array.isArray(group.records) ||
         group.records.length !== source.records.length) {
       throw new Error(`Output group ${groupIndex + 1} does not match its input group.`);
     }
@@ -57,7 +63,12 @@ function parseResponse(value: string, sourceGroups: SourceGroup[]): OutputGroup[
       typeof record.concept_explained_fa !== "string" || !record.concept_explained_fa.trim() ||
       !Array.isArray(record.synonymIds)
     )) throw new Error(`Output records for PersianWord ${source.persianWordId} do not match the input order.`);
-    return { persianWordId: source.persianWordId, records };
+    return {
+      groupKey: source.groupKey,
+      persianWordId: source.persianWordId,
+      pos: source.pos,
+      records,
+    };
   });
 }
 
@@ -69,10 +80,12 @@ export default function WordSenseMeaningComparison({
   remainingRecordCount: number;
 }) {
   const router = useRouter();
+  const pendingAgent = usePendingAgentArtifact("compare_word_meanings");
+  const [agentRunId, setAgentRunId] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const [showWorkflowGuide, setShowWorkflowGuide] = useState(false);
   const [reviewOpen, setReviewOpen] = useState(false);
-  const [busyGroupId, setBusyGroupId] = useState<number | null>(null);
+  const [busyGroupKey, setBusyGroupKey] = useState<string | null>(null);
   const [applyingAll, setApplyingAll] = useState(false);
   const [loading, setLoading] = useState(false);
   const [limit, setLimit] = useState(String(remainingGroupCount));
@@ -81,8 +94,8 @@ export default function WordSenseMeaningComparison({
   const [totalGroups, setTotalGroups] = useState(0);
   const [response, setResponse] = useState("");
   const [outputs, setOutputs] = useState<OutputGroup[]>([]);
-  const [drafts, setDrafts] = useState<Record<number, string>>({});
-  const [confirmed, setConfirmed] = useState<Set<number>>(new Set());
+  const [drafts, setDrafts] = useState<Record<string, string>>({});
+  const [confirmed, setConfirmed] = useState<Set<string>>(new Set());
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   useEffect(() => setLimit(String(remainingGroupCount)), [remainingGroupCount]);
@@ -142,11 +155,11 @@ export default function WordSenseMeaningComparison({
     }
   };
 
-  const openReview = async () => {
+  const openReview = async (responseValue = response) => {
     setError(null);
     setLoading(true);
     try {
-      const rawOutput = JSON.parse(response) as unknown;
+      const rawOutput = JSON.parse(responseValue) as unknown;
       const recordsResponse = await fetch("/api/words/meaning-comparison/records", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -160,11 +173,11 @@ export default function WordSenseMeaningComparison({
       if (!recordsResponse.ok || !recordsJson.ok || !Array.isArray(recordsJson.items)) {
         throw new Error(recordsJson.error || "Could not load the source groups from this response.");
       }
-      const parsed = parseResponse(response, recordsJson.items);
+      const parsed = parseResponse(responseValue, recordsJson.items);
       setGroups(recordsJson.items);
       setTotalGroups(recordsJson.items.length);
       setOutputs(parsed);
-      setDrafts(Object.fromEntries(parsed.map((group) => [group.persianWordId, JSON.stringify(group, null, 2)])));
+      setDrafts(Object.fromEntries(parsed.map((group) => [group.groupKey, JSON.stringify(group, null, 2)])));
       setConfirmed(new Set());
       setNotice(`Loaded ${parsed.length} group(s) directly from the saved response ✓`);
       setReviewOpen(true);
@@ -176,12 +189,14 @@ export default function WordSenseMeaningComparison({
   };
 
   const applyGroup = async (source: SourceGroup) => {
-    const parsed = parseResponse(`[${drafts[source.persianWordId] ?? ""}]`, [source]);
+    const parsed = parseResponse(`[${drafts[source.groupKey] ?? ""}]`, [source]);
     const applyResponse = await fetch("/api/words/meaning-comparison/apply", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
+        groupKey: source.groupKey,
         persianWordId: source.persianWordId,
+        pos: source.pos,
         sourceWordIds: source.records.map((record) => record.id),
         output: parsed,
       }),
@@ -193,34 +208,42 @@ export default function WordSenseMeaningComparison({
 
   const confirmGroup = async (source: SourceGroup) => {
     setError(null);
-    setBusyGroupId(source.persianWordId);
+    setBusyGroupKey(source.groupKey);
     try {
       const updated = await applyGroup(source);
-      setConfirmed((current) => new Set([...current, source.persianWordId]));
-      setNotice(`Confirmed PersianWord ${source.persianWordId}; updated ${updated} WordSense record(s) ✓`);
+      const nextConfirmed = new Set([...confirmed, source.groupKey]);
+      setConfirmed(nextConfirmed);
+      if (agentRunId && nextConfirmed.size === groups.length) {
+        await completeAgentArtifact(agentRunId);
+        setAgentRunId(null);
+        await pendingAgent.refresh();
+      }
+      setNotice(`Confirmed ${source.groupKey}; updated ${updated} WordSense record(s) ✓`);
       router.refresh();
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : String(reason));
     } finally {
-      setBusyGroupId(null);
+      setBusyGroupKey(null);
     }
   };
 
   const confirmAllGroups = async () => {
-    const pending = groups.filter((group) => !confirmed.has(group.persianWordId));
+    const pending = groups.filter((group) => !confirmed.has(group.groupKey));
     if (!pending.length) return;
     setError(null);
     setApplyingAll(true);
     try {
       const output = pending.map((source) => (
-        parseResponse(`[${drafts[source.persianWordId] ?? ""}]`, [source])[0]
+        parseResponse(`[${drafts[source.groupKey] ?? ""}]`, [source])[0]
       ));
       const applyResponse = await fetch("/api/words/meaning-comparison/apply-batch", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           sourceGroups: pending.map((source) => ({
+            groupKey: source.groupKey,
             persianWordId: source.persianWordId,
+            pos: source.pos,
             sourceWordIds: source.records.map((record) => record.id),
           })),
           output,
@@ -237,8 +260,13 @@ export default function WordSenseMeaningComparison({
       }
       setConfirmed((current) => new Set([
         ...current,
-        ...pending.map((source) => source.persianWordId),
+        ...pending.map((source) => source.groupKey),
       ]));
+      if (agentRunId) {
+        await completeAgentArtifact(agentRunId);
+        setAgentRunId(null);
+        await pendingAgent.refresh();
+      }
       setNotice(`Confirmed all ${result.confirmed ?? pending.length} remaining group(s); updated ${result.updated ?? 0} WordSense record(s) ✓`);
       router.refresh();
     } catch (reason) {
@@ -249,7 +277,27 @@ export default function WordSenseMeaningComparison({
   };
 
   const copyText = `${prompt}\n\n${JSON.stringify(groups, null, 2)}`;
-  const outputByPersianId = new Map(outputs.map((group) => [group.persianWordId, group]));
+  const outputByGroupKey = new Map(outputs.map((group) => [group.groupKey, group]));
+  const openStage = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const artifact = await pendingAgent.loadResponse();
+      if (!artifact || artifact.response === undefined) {
+        await createData(true);
+        return;
+      }
+      const savedResponse = JSON.stringify(artifact.response, null, 2);
+      setResponse(savedResponse);
+      setAgentRunId(artifact.runId);
+      setOpen(true);
+      await openReview(savedResponse);
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : String(reason));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <>
@@ -257,10 +305,11 @@ export default function WordSenseMeaningComparison({
         type="button"
         disabled={loading}
         aria-busy={loading && !open}
-        onClick={() => void createData(true)}
+        onClick={() => void openStage()}
         className="relative rounded border px-3 py-2 text-sm hover:bg-black/5 disabled:opacity-100 dark:hover:bg-white/5"
       >
         4. COMPARE WORD MEANINGS <RemainingGroupRecordBadge groupCount={remainingGroupCount} recordCount={remainingRecordCount} />
+        {pendingAgent.artifact ? <span className="ml-1 text-emerald-700">AI response ready ✓</span> : null}
         {loading && !open ? (
           <span className="absolute inset-0 flex items-center justify-center gap-1 rounded bg-background/85" aria-hidden="true">
             <span className="size-1.5 animate-bounce rounded-full bg-current [animation-delay:-0.3s]" />
@@ -283,7 +332,7 @@ export default function WordSenseMeaningComparison({
               <div>
                 <b>Compare word meanings — WordSense</b>
                 <div className="text-xs opacity-70">
-                  Groups share a PersianWord meaning. Database fields change only after each group is reviewed and confirmed.
+                  Groups share a PersianWord meaning and part of speech. Database fields change only after each group is reviewed and confirmed.
                 </div>
               </div>
               <div className="flex flex-wrap items-center justify-end gap-2">
@@ -314,8 +363,8 @@ export default function WordSenseMeaningComparison({
                 </p>
                 <div className="mt-2 font-semibold">شرایط انتخاب رکوردها</div>
                 <ul className="list-disc pr-5">
-                  <li>هر معنی موجود در <code>meaningId</code> یا <code>otherMeaningIds</code> یک گروه می‌سازد.</li>
-                  <li>فقط گروه‌هایی انتخاب می‌شوند که آن معنی فارسی را دست‌کم دو WordSense استفاده کرده باشند.</li>
+                  <li>هر ترکیب یکسان از معنی موجود در <code>meaningId</code> یا <code>otherMeaningIds</code> و <code>pos</code> یک گروه می‌سازد.</li>
+                  <li>فقط گروه‌هایی انتخاب می‌شوند که آن معنی فارسی و نقش دستوری یکسان را دست‌کم دو WordSense استفاده کرده باشند.</li>
                   <li>گروهی که تمام اعضایش قبلاً یکدیگر را در <code>comparedMeaningWordIds</code> ثبت کرده‌اند دوباره نمایش داده نمی‌شود.</li>
                   <li>شناسهٔ PersianWord مشترک باید هنوز در دیتابیس موجود باشد و گروه در پاسخ دقیقاً با دادهٔ ورودی تطبیق کند.</li>
                 </ul>
@@ -366,7 +415,7 @@ export default function WordSenseMeaningComparison({
                   disabled={loading}
                   onChange={(event) => setResponse(event.target.value)}
                   className="min-h-0 flex-1 rounded border p-3 font-mono text-xs"
-                  placeholder='[{"persianWordId":123,"records":[{"id":10,"concept_explained_fa":"...","synonymIds":[11]}]}]'
+                  placeholder='[{"groupKey":"adjective:123","persianWordId":123,"pos":"adjective","records":[{"id":10,"concept_explained_fa":"...","synonymIds":[11]}]}]'
                 />
                 <div className="flex gap-2">
                   <button
@@ -396,28 +445,28 @@ export default function WordSenseMeaningComparison({
               <div className="flex flex-wrap gap-2">
                 <button
                   type="button"
-                  disabled={busyGroupId !== null || applyingAll || confirmed.size === groups.length}
+                  disabled={busyGroupKey !== null || applyingAll || confirmed.size === groups.length}
                   onClick={() => void confirmAllGroups()}
                   className={buttonClass}
                 >{applyingAll ? "CONFIRMING ALL…" : "CONFIRM ALL GROUPS"}</button>
-                <button type="button" disabled={busyGroupId !== null || applyingAll} onClick={() => setReviewOpen(false)} className={buttonClass}>Back without further changes</button>
+                <button type="button" disabled={busyGroupKey !== null || applyingAll} onClick={() => setReviewOpen(false)} className={buttonClass}>Back without further changes</button>
               </div>
             </div>
             {error ? <div className="rounded border border-red-500/30 bg-red-500/10 p-2 text-sm text-red-700">{error}</div> : null}
             {notice ? <div className="rounded border border-emerald-500/30 bg-emerald-500/10 p-2 text-sm text-emerald-800">{notice}</div> : null}
             <div className="min-h-0 flex-1 space-y-4 overflow-auto pr-1">
               {groups.map((source, index) => {
-                const isConfirmed = confirmed.has(source.persianWordId);
+                const isConfirmed = confirmed.has(source.groupKey);
                 return (
-                  <section key={source.persianWordId} className={`rounded-xl border p-4 ${isConfirmed ? "border-emerald-500/50 bg-emerald-500/10" : ""}`}>
+                  <section key={source.groupKey} className={`rounded-xl border p-4 ${isConfirmed ? "border-emerald-500/50 bg-emerald-500/10" : ""}`}>
                     <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                      <div className="text-sm font-semibold">Group {index + 1} • PersianWord {source.persianWordId} • {source.shared_persian_meaning}</div>
+                      <div className="text-sm font-semibold">Group {index + 1} • {source.groupKey} • {source.shared_persian_meaning}</div>
                       <button
                         type="button"
-                        disabled={busyGroupId !== null || applyingAll || isConfirmed}
+                        disabled={busyGroupKey !== null || applyingAll || isConfirmed}
                         onClick={() => void confirmGroup(source)}
                         className={buttonClass}
-                      >{isConfirmed ? "CONFIRMED ✓" : busyGroupId === source.persianWordId ? "APPLYING…" : "CONFIRM THIS GROUP"}</button>
+                      >{isConfirmed ? "CONFIRMED ✓" : busyGroupKey === source.groupKey ? "APPLYING…" : "CONFIRM THIS GROUP"}</button>
                     </div>
                     <div className="grid gap-3 lg:grid-cols-2">
                       <div>
@@ -427,9 +476,9 @@ export default function WordSenseMeaningComparison({
                       <div>
                         <div className="mb-1 text-xs font-semibold opacity-70">Proposed values (editable JSON)</div>
                         <textarea
-                          value={drafts[source.persianWordId] ?? JSON.stringify(outputByPersianId.get(source.persianWordId), null, 2)}
-                          disabled={busyGroupId !== null || applyingAll || isConfirmed}
-                          onChange={(event) => setDrafts((current) => ({ ...current, [source.persianWordId]: event.target.value }))}
+                          value={drafts[source.groupKey] ?? JSON.stringify(outputByGroupKey.get(source.groupKey), null, 2)}
+                          disabled={busyGroupKey !== null || applyingAll || isConfirmed}
+                          onChange={(event) => setDrafts((current) => ({ ...current, [source.groupKey]: event.target.value }))}
                           className="h-80 w-full rounded border p-3 font-mono text-xs"
                         />
                       </div>

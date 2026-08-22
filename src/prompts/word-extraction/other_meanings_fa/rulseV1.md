@@ -1,13 +1,16 @@
 # Field rules: `other_meanings_fa`
 
-Preserve reasonable existing alternatives. Apply a small benefit of the doubt to values already present in other_meanings_fa: do not remove an existing alternative merely because it is slightly less exact, more colloquial, differs mildly in tone from meaning_fa, or would require a natural structural rewrite in the current Persian translation. Keep it when it is still a natural and useful equivalent of the same lexical sense and grammatical role beyond the wording of one sentence. Remove an existing alternative when it belongs to a different sense or grammatical role, depends only on the current context, is misleading or unnatural for this WordSense, or is a duplicate, spelling variant, explanation, or rare/unhelpful expression. This preservation rule applies only to existing alternatives; newly added alternatives must still satisfy the stricter rules below.
-This benefit of the doubt never permits preserving an item that violates the core rules, including a mere non-established transliteration.
-
-Actively check whether the exact sense of the record has useful alternative Persian equivalents, even when the current value is empty.
-
 {{> word-extraction/_shared/other_meanings_fa_core_v1.md}}
 
-- Usually return no more than three alternatives.
+Preserve reasonable existing alternatives only after they have passed every core semantic rule. Apply a meaningful benefit of the doubt to a valid existing alternative when it is more colloquial, differs mildly in tone or register from `meaning_fa`, uses a different natural grammatical structure in Persian, or would require a natural structural rewrite in the current Persian translation. These differences are acceptable only when the item independently expresses the exact same lexical sense and grammatical role. Remove an existing alternative when it belongs to a different sense or grammatical role, has a broader or narrower semantic scope, depends only on the current context, is misleading or unnatural for this WordSense, or is a duplicate, spelling variant, definition, explanation, or rare/unhelpful expression.
+This benefit of the doubt never permits preserving an item that violates the core rules, including a mere non-established transliteration.
+
+Actively check whether the exact sense of the record is missing any important, common, natural, and meaningfully distinct Persian equivalent, even when the current array is already non-empty. Add a missing alternative when it is genuinely useful for understanding or actively recalling the English word in this exact sense; do not wait for `other_meanings_fa` to be null or empty.
+
+- Valid alternatives may include a common synonym, a natural short phrase when no precise single-word equivalent exists, a useful formal or everyday equivalent, or a loanword that is genuinely established in standard Persian.
+- Exact part-of-speech matching is not mechanical when natural Persian requires a short phrase or a different grammatical structure, but the alternative must preserve the same lexical role and sense.
+- Each added alternative must contribute real learning value and be meaningfully distinct from the existing equivalents. Do not add optional synonyms merely to make the array longer.
+- Usually return no more than five alternatives. This is a ceiling, not a target; return fewer whenever additional alternatives would be redundant, weak, uncommon, or unnecessary.
 
 The value of `other_meanings_fa` must always be a JSON array of strings:
 

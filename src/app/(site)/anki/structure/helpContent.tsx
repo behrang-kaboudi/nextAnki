@@ -49,6 +49,10 @@ export const structureBuilderHelpContent: Record<HelpKey, { title: string; body:
       <div className="space-y-2 text-sm leading-6">
         <p>Card Typeهای تعریف‌شده در تب «Card Typeها و Templateها» را با Note Type انتخابی هماهنگ می‌کند.</p>
         <p>
+          پیش از ساخت Card Type، فیلدهای مفقودی که Templateها به آن‌ها نیاز دارند اضافه می‌شوند تا Anki هنگام
+          اعتبارسنجی Template با خطای «Field not found» متوقف نشود.
+        </p>
+        <p>
           اگر Note Type وجود نداشته باشد، همراه فیلدها و Card Typeهای فعلی ساخته می‌شود. Card Type مفقود اضافه و
           Card Type اضافه حذف می‌شود.
         </p>

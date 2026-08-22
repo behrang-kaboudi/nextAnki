@@ -1,0 +1,3366 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-19T01:33:43.981Z",
+  "databaseScope": {
+    "wordSenses": 17871,
+    "englishWords": 14061,
+    "persianWords": 31160,
+    "sentences": 19302,
+    "primaryMeaningsChecked": 17869,
+    "connectedSentencesChecked": 19272
+  },
+  "classificationBoundary": "These are whole-database candidates, not confirmed defects. Every included record has both a shorter Persian meaning for the same EnglishWord and explicit sentence-level evidence that another English word or phrase can account for a component of the stored primary meaning.",
+  "selectionRule": "Included when detectionScore >= 6. Lower-signal lexical overlaps remain only in raw-candidates.json and are excluded from this requested review file.",
+  "counts": {
+    "candidates": 102,
+    "strong": 41,
+    "review": 61,
+    "uniqueEnglishWords": 99
+  },
+  "candidateWordSenseIds": [
+    1368,
+    1783,
+    1840,
+    2056,
+    2067,
+    2400,
+    2628,
+    3832,
+    4127,
+    4158,
+    5718,
+    30745,
+    32218,
+    32544,
+    34109,
+    34457,
+    34958,
+    35782,
+    35785,
+    37760,
+    37937,
+    38016,
+    38230,
+    38639,
+    38668,
+    39446,
+    39448,
+    39515,
+    39561,
+    39724,
+    40109,
+    41045,
+    41343,
+    42177,
+    42369,
+    42490,
+    42951,
+    44460,
+    44864,
+    44995,
+    45037,
+    2368,
+    32847,
+    38888,
+    42298,
+    42743,
+    44860,
+    1599,
+    1690,
+    30859,
+    31455,
+    31561,
+    31731,
+    31732,
+    32298,
+    32479,
+    32748,
+    32857,
+    32879,
+    32909,
+    33611,
+    34898,
+    35184,
+    35335,
+    35352,
+    35990,
+    35994,
+    36414,
+    36473,
+    36920,
+    37506,
+    37705,
+    37720,
+    38390,
+    38432,
+    38700,
+    39043,
+    39528,
+    39586,
+    39860,
+    40070,
+    40103,
+    40156,
+    40187,
+    40236,
+    40260,
+    40306,
+    40733,
+    41222,
+    41500,
+    41631,
+    41724,
+    41960,
+    42181,
+    42286,
+    42469,
+    42493,
+    42499,
+    43258,
+    43945,
+    44618,
+    44836
+  ],
+  "candidateEnglishWordIds": [
+    541,
+    647,
+    669,
+    771,
+    831,
+    917,
+    957,
+    974,
+    1083,
+    1183,
+    1412,
+    1460,
+    1469,
+    1634,
+    1824,
+    1836,
+    2055,
+    2094,
+    2172,
+    2187,
+    2266,
+    2544,
+    2598,
+    2620,
+    2782,
+    3023,
+    3205,
+    3535,
+    3581,
+    3583,
+    3662,
+    3818,
+    3904,
+    3905,
+    4047,
+    4134,
+    22431,
+    22631,
+    22970,
+    23049,
+    23140,
+    23207,
+    23538,
+    23542,
+    23554,
+    23592,
+    23624,
+    23765,
+    23865,
+    24115,
+    24170,
+    24181,
+    24214,
+    24269,
+    24271,
+    24282,
+    24312,
+    24320,
+    24503,
+    24602,
+    24614,
+    24874,
+    25297,
+    25749,
+    25987,
+    25996,
+    26191,
+    26299,
+    26301,
+    26361,
+    26413,
+    26474,
+    26561,
+    26635,
+    26744,
+    26920,
+    27103,
+    27141,
+    27777,
+    27938,
+    28369,
+    28393,
+    28667,
+    28732,
+    28921,
+    28923,
+    29283,
+    29347,
+    29586,
+    30062,
+    30212,
+    30460,
+    30527,
+    30580,
+    30676,
+    30679,
+    30874,
+    31038,
+    31846
+  ],
+  "candidates": [
+    {
+      "wordSenseId": 1368,
+      "englishWordId": 1412,
+      "baseForm": "fatigue",
+      "pos": "noun",
+      "meaningFa": "خستگی شدید",
+      "otherMeaningsFa": [
+        "فرسودگی",
+        "خستگی",
+        "ستوه"
+      ],
+      "conceptExplainedFa": "خستگی جسمی یا ذهنی قابل‌توجه و پایدار که توان فعالیت را کاهش می‌دهد؛ لزوماً به پایان تقریباً کامل انرژی نمی‌رسد.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "خستگی"
+      ],
+      "detectionScore": 9,
+      "evidence": [
+        {
+          "sentenceId": 2813,
+          "sentenceEn": "The hikers were suffering from severe fatigue after their long journey.",
+          "sentenceMeaningFa": "کوهنوردان پس از سفر طولانی خود دچار خستگی شدید شده بودند.",
+          "contributingEnglishWordId": 3264,
+          "contributingBaseForm": "severe",
+          "matchedPersianMeaning": "شدید",
+          "matchedComponent": "شدید",
+          "matchesNestedRemainder": true
+        }
+      ],
+      "candidateTier": "strong"
+    },
+    {
+      "wordSenseId": 1783,
+      "englishWordId": 2620,
+      "baseForm": "pane",
+      "pos": "noun",
+      "meaningFa": "شیشه پنجره",
+      "otherMeaningsFa": [
+        "شیشه"
+      ],
+      "conceptExplainedFa": "قطعه تخت و مشخصی از شیشه که در پنجره، در یا قاب قرار گرفته است",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "شیشه"
+      ],
+      "detectionScore": 9,
+      "evidence": [
+        {
+          "sentenceId": 3131,
+          "sentenceEn": "A small crack appeared in the bottom pane of the window.",
+          "sentenceMeaningFa": "یک ترک کوچک در شیشهٔ پنجره پایینی ظاهر شد.",
+          "contributingEnglishWordId": 4095,
+          "contributingBaseForm": "window",
+          "matchedPersianMeaning": "پنجره",
+          "matchedComponent": "پنجره",
+          "matchesNestedRemainder": true
+        }
+      ],
+      "candidateTier": "strong"
+    },
+    {
+      "wordSenseId": 1840,
+      "englishWordId": 3581,
+      "baseForm": "straw",
+      "pos": "noun",
+      "meaningFa": "نی نوشیدنی",
+      "otherMeaningsFa": [
+        "نی",
+        "نی برای نوشیدن"
+      ],
+      "conceptExplainedFa": "لوله‌ای باریک از کاغذ، پلاستیک یا فلز است که نوشیدنی از راه مکیدن درون آن وارد دهان می‌شود.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "نی"
+      ],
+      "detectionScore": 9,
+      "evidence": [
+        {
+          "sentenceId": 26945,
+          "sentenceEn": "Can I get a straw with my drink?",
+          "sentenceMeaningFa": "آیا می‌توانم با نوشیدنی‌ام نی داشته باشم؟",
+          "contributingEnglishWordId": 1169,
+          "contributingBaseForm": "drink",
+          "matchedPersianMeaning": "نوشیدنی",
+          "matchedComponent": "نوشیدنی",
+          "matchesNestedRemainder": true
+        }
+      ],
+      "candidateTier": "strong"
+    },
+    {
+      "wordSenseId": 2056,
+      "englishWordId": 3662,
+      "baseForm": "swipe",
+      "pos": "verb",
+      "meaningFa": "کارت کشیدن",
+      "otherMeaningsFa": [
+        "کارت زدن"
+      ],
+      "conceptExplainedFa": "کارت بانکی، شناسایی یا ورود را از دستگاه کارت‌خوان عبوردادن تا پرداخت، ثبت حضور یا دسترسی انجام شود.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "کشیدن"
+      ],
+      "detectionScore": 9,
+      "evidence": [
+        {
+          "sentenceId": 3383,
+          "sentenceEn": "You need to swipe your card to enter the building.",
+          "sentenceMeaningFa": "برای ورود به ساختمان باید کارت بکشید.",
+          "contributingEnglishWordId": 538,
+          "contributingBaseForm": "card",
+          "matchedPersianMeaning": "کارت",
+          "matchedComponent": "کارت",
+          "matchesNestedRemainder": true
+        }
+      ],
+      "candidateTier": "strong"
+    },
+    {
+      "wordSenseId": 2067,
+      "englishWordId": 541,
+      "baseForm": "care",
+      "pos": "noun",
+      "meaningFa": "مراقبت پزشکی",
+      "otherMeaningsFa": [
+        "رسیدگی پزشکی"
+      ],
+      "conceptExplainedFa": "مراقبت از کسی، رسیدگی",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "مراقبت"
+      ],
+      "detectionScore": 9,
+      "evidence": [
+        {
+          "sentenceId": 3392,
+          "sentenceEn": "The patient needs professional medical care to recover fully at home.",
+          "sentenceMeaningFa": "بیمار برای بهبودی کامل در خانه به مراقبت پزشکی حرفه‌ای نیاز دارد.",
+          "contributingEnglishWordId": 24379,
+          "contributingBaseForm": "medical",
+          "matchedPersianMeaning": "پزشکی",
+          "matchedComponent": "پزشکی",
+          "matchesNestedRemainder": true
+        }
+      ],
+      "candidateTier": "strong"
+    },
+    {
+      "wordSenseId": 2400,
+      "englishWordId": 1634,
+      "baseForm": "glass baking dish",
+      "pos": "noun",
+      "meaningFa": "ظرف پیرکس",
+      "otherMeaningsFa": [
+        "پیرکس"
+      ],
+      "conceptExplainedFa": "ظرف شیشه‌ای مقاوم به حرارت برای پخت غذا در فر.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "پیرکس"
+      ],
+      "detectionScore": 9,
+      "evidence": [
+        {
+          "sentenceId": 97,
+          "sentenceEn": "She baked lasagna in a glass baking dish.",
+          "sentenceMeaningFa": "او لازانیا را در یک ظرف پخت شیشه‌ای پخت.",
+          "contributingEnglishWordId": 25922,
+          "contributingBaseForm": "in",
+          "matchedPersianMeaning": "ظرف",
+          "matchedComponent": "ظرف",
+          "matchesNestedRemainder": true
+        }
+      ],
+      "candidateTier": "strong"
+    },
+    {
+      "wordSenseId": 2628,
+      "englishWordId": 3205,
+      "baseForm": "scarf",
+      "pos": "noun",
+      "meaningFa": "شال گردن",
+      "otherMeaningsFa": [
+        "شال"
+      ],
+      "conceptExplainedFa": "پارچه بلند برای دور گردن، سر یا شانه‌ها؛ کاربردی عمومی‌تر و گاهی فقط برای گرما یا تزئین.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "شال"
+      ],
+      "detectionScore": 9,
+      "evidence": [
+        {
+          "sentenceId": 325,
+          "sentenceEn": "He wrapped a scarf around his neck.",
+          "sentenceMeaningFa": "او یک شال گردن دور گردنش پیچید.",
+          "contributingEnglishWordId": 2469,
+          "contributingBaseForm": "neck",
+          "matchedPersianMeaning": "گردن",
+          "matchedComponent": "گردن",
+          "matchesNestedRemainder": true
+        }
+      ],
+      "candidateTier": "strong"
+    },
+    {
+      "wordSenseId": 3832,
+      "englishWordId": 2172,
+      "baseForm": "leg",
+      "pos": "noun",
+      "meaningFa": "پایه میز",
+      "otherMeaningsFa": [
+        "پایه"
+      ],
+      "conceptExplainedFa": "در این کاربرد یکی از پایه‌های زیر میز، صندلی یا وسیله است که وزن آن را نگه می‌دارد.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "پایه"
+      ],
+      "detectionScore": 9,
+      "evidence": [
+        {
+          "sentenceId": 1521,
+          "sentenceEn": "One leg of the table is broken.",
+          "sentenceMeaningFa": "یکی از پایه میز شکسته است.",
+          "contributingEnglishWordId": 3673,
+          "contributingBaseForm": "table",
+          "matchedPersianMeaning": "میز",
+          "matchedComponent": "میز",
+          "matchesNestedRemainder": true
+        }
+      ],
+      "candidateTier": "strong"
+    },
+    {
+      "wordSenseId": 4127,
+      "englishWordId": 974,
+      "baseForm": "debris",
+      "pos": "noun",
+      "meaningFa": "آوار ساختمان",
+      "otherMeaningsFa": [
+        "آوار",
+        "نخاله"
+      ],
+      "conceptExplainedFa": "قطعات پراکنده، آوار یا نخاله‌ای که پس از تخریب، فروریختن، حادثه یا انفجار باقی می‌ماند.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "آوار"
+      ],
+      "detectionScore": 9,
+      "evidence": [
+        {
+          "sentenceId": 6782,
+          "sentenceEn": "Workers cleared the debris after the old building collapsed.",
+          "sentenceMeaningFa": "کارگران پس از فروریختن ساختمان قدیمی، آوار را پاک کردند.",
+          "contributingEnglishWordId": 452,
+          "contributingBaseForm": "building",
+          "matchedPersianMeaning": "ساختمان",
+          "matchedComponent": "ساختمان",
+          "matchesNestedRemainder": true
+        }
+      ],
+      "candidateTier": "strong"
+    },
+    {
+      "wordSenseId": 4158,
+      "englishWordId": 1083,
+      "baseForm": "discuss",
+      "pos": "verb",
+      "meaningFa": "بحث کردن درباره",
+      "otherMeaningsFa": [
+        "گفتگو کردن درباره",
+        "مطرح کردن",
+        "حرف زدن",
+        "در میان گذاشتن",
+        "طرح کردن",
+        "مورد بحث قرار دادن",
+        "به چیزی پرداختن",
+        "بحث کردن",
+        "مذاکره کردن"
+      ],
+      "conceptExplainedFa": "دربارهٔ موضوعی با دیگران گفتگو و جنبه‌های آن را بررسی کردن تا نظرها مبادله یا تصمیمی حاصل شود.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "بحث کردن"
+      ],
+      "detectionScore": 9,
+      "evidence": [
+        {
+          "sentenceId": 13531,
+          "sentenceEn": "I'm not prepared to discuss this on the phone.",
+          "sentenceMeaningFa": "من آماده نیستم این موضوع را پشت تلفن در میان بگذارم.",
+          "contributingEnglishWordId": 26237,
+          "contributingBaseForm": "on",
+          "matchedPersianMeaning": "درباره",
+          "matchedComponent": "درباره",
+          "matchesNestedRemainder": true
+        }
+      ],
+      "candidateTier": "strong"
+    },
+    {
+      "wordSenseId": 5718,
+      "englishWordId": 3905,
+      "baseForm": "typhoon",
+      "pos": "noun",
+      "meaningFa": "توفان شدید",
+      "otherMeaningsFa": [
+        "گردباد دریایی",
+        "گردباد",
+        "توفان"
+      ],
+      "conceptExplainedFa": "توفان گرمسیری بسیار شدید و چرخانی است که در غرب اقیانوس آرام شکل می‌گیرد.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "توفان"
+      ],
+      "detectionScore": 9,
+      "evidence": [
+        {
+          "sentenceId": 4209,
+          "sentenceEn": "The typhoon caused severe damage to the city.",
+          "sentenceMeaningFa": "توفان شدید آسیب جدی به شهر وارد کرد.",
+          "contributingEnglishWordId": 3264,
+          "contributingBaseForm": "severe",
+          "matchedPersianMeaning": "شدید",
+          "matchedComponent": "شدید",
+          "matchesNestedRemainder": true
+        }
+      ],
+      "candidateTier": "strong"
+    },
+    {
+      "wordSenseId": 30745,
+      "englishWordId": 771,
+      "baseForm": "compose",
+      "pos": "verb",
+      "meaningFa": "ساختن موسیقی",
+      "otherMeaningsFa": [
+        "آهنگ ساختن",
+        "تصنیف کردن"
+      ],
+      "conceptExplainedFa": "به آفرینش و تنظیم هدفمند ملودی، هارمونی و ریتم برای تبدیل ایده‌های صوتی به یک اثر موسیقایی اشاره دارد.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "ساختن"
+      ],
+      "detectionScore": 9,
+      "evidence": [
+        {
+          "sentenceId": 6980,
+          "sentenceEn": "Nina composed the music for our short film.",
+          "sentenceMeaningFa": "نینا موسیقی فیلم کوتاه ما را ساخت.",
+          "contributingEnglishWordId": 26026,
+          "contributingBaseForm": "music",
+          "matchedPersianMeaning": "موسیقی",
+          "matchedComponent": "موسیقی",
+          "matchesNestedRemainder": true
+        }
+      ],
+      "candidateTier": "strong"
+    },
+    {
+      "wordSenseId": 32218,
+      "englishWordId": 24115,
+      "baseForm": "jupiter",
+      "pos": "noun",
+      "meaningFa": "سیاره مشتری",
+      "otherMeaningsFa": [
+        "مشتری",
+        "بزرگ ترین سیاره منظومه شمسی"
+      ],
+      "conceptExplainedFa": "پنجمین سیاره از خورشید و بزرگ‌ترین سیارهٔ منظومهٔ شمسی است؛ غولی گازی با توفان بزرگ و قمرهای فراوان.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "مشتری"
+      ],
+      "detectionScore": 9,
+      "evidence": [
+        {
+          "sentenceId": 10532,
+          "sentenceEn": "Jupiter is larger than every other planet.",
+          "sentenceMeaningFa": "مشتری از هر سیارهٔ دیگری بزرگ‌تر است.",
+          "contributingEnglishWordId": 24047,
+          "contributingBaseForm": "planet",
+          "matchedPersianMeaning": "سیاره",
+          "matchedComponent": "سیاره",
+          "matchesNestedRemainder": true
+        }
+      ],
+      "candidateTier": "strong"
+    },
+    {
+      "wordSenseId": 32544,
+      "englishWordId": 24320,
+      "baseForm": "town",
+      "pos": "noun",
+      "meaningFa": "شهر کوچک",
+      "otherMeaningsFa": [
+        "شهرک",
+        "شهر"
+      ],
+      "conceptExplainedFa": "منطقهٔ شهری مسکونی است که معمولاً از شهر بزرگ کوچک‌تر و از روستا بزرگ‌تر است.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "شهر"
+      ],
+      "detectionScore": 9,
+      "evidence": [
+        {
+          "sentenceId": 10893,
+          "sentenceEn": "He was born in the small town of Elnora, Indiana.",
+          "sentenceMeaningFa": "او در شهر کوچک \"النورا\"، (در ایالت) \"ایندیانا\" متولد شد.",
+          "contributingEnglishWordId": 3394,
+          "contributingBaseForm": "small",
+          "matchedPersianMeaning": "کوچک",
+          "matchedComponent": "کوچک",
+          "matchesNestedRemainder": true
+        }
+      ],
+      "candidateTier": "strong"
+    },
+    {
+      "wordSenseId": 34109,
+      "englishWordId": 25749,
+      "baseForm": "virus",
+      "pos": "noun",
+      "meaningFa": "ویروس رایانه",
+      "otherMeaningsFa": [],
+      "conceptExplainedFa": "برنامهٔ مخربی است که می‌تواند تکثیر شود و به رایانه، فایل یا شبکه آسیب بزند.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "ویروس"
+      ],
+      "detectionScore": 9,
+      "evidence": [
+        {
+          "sentenceId": 12891,
+          "sentenceEn": "My computer has been acting strangely, and I suspect it's a virus.",
+          "sentenceMeaningFa": "رایانه من رفتار عجیبی داشته است و به گمانم ویروس است.",
+          "contributingEnglishWordId": 777,
+          "contributingBaseForm": "computer",
+          "matchedPersianMeaning": "رایانه",
+          "matchedComponent": "رایانه",
+          "matchesNestedRemainder": true
+        }
+      ],
+      "candidateTier": "strong"
+    },
+    {
+      "wordSenseId": 34457,
+      "englishWordId": 25996,
+      "baseForm": "sing",
+      "pos": "verb",
+      "meaningFa": "آواز خواندن",
+      "otherMeaningsFa": [
+        "سرود خواندن",
+        "آهنگ خواندن",
+        "خواندن"
+      ],
+      "conceptExplainedFa": "به تولید آوا و ملودی با صدای انسان و اجرای ترانه اشاره دارد.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "خواندن"
+      ],
+      "detectionScore": 9,
+      "evidence": [
+        {
+          "sentenceId": 13291,
+          "sentenceEn": "Will you sing a song for us?",
+          "sentenceMeaningFa": "آیا یک آهنگ برای ما می‌خوانی؟",
+          "contributingEnglishWordId": 26300,
+          "contributingBaseForm": "song",
+          "matchedPersianMeaning": "آواز",
+          "matchedComponent": "آواز",
+          "matchesNestedRemainder": true
+        }
+      ],
+      "candidateTier": "strong"
+    },
+    {
+      "wordSenseId": 34958,
+      "englishWordId": 2187,
+      "baseForm": "letter",
+      "pos": "noun",
+      "meaningFa": "حرف الفبا",
+      "otherMeaningsFa": [
+        "حرف"
+      ],
+      "conceptExplainedFa": "یکی از نشانه‌های نوشتاری الفبا است که صدای زبان را نمایش می‌دهد.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "حرف"
+      ],
+      "detectionScore": 9,
+      "evidence": [
+        {
+          "sentenceId": 13803,
+          "sentenceEn": "‘B’ is the second letter of the alphabet.",
+          "sentenceMeaningFa": "\"B\" دومین حرف الفبا است.",
+          "contributingEnglishWordId": 26441,
+          "contributingBaseForm": "alphabet",
+          "matchedPersianMeaning": "الفبا",
+          "matchedComponent": "الفبا",
+          "matchesNestedRemainder": true
+        }
+      ],
+      "candidateTier": "strong"
+    },
+    {
+      "wordSenseId": 35782,
+      "englishWordId": 26635,
+      "baseForm": "act",
+      "pos": "verb",
+      "meaningFa": "نقش بازی کردن",
+      "otherMeaningsFa": [
+        "بازی کردن"
+      ],
+      "conceptExplainedFa": "به اجرای نقش شخصیت در فیلم، تئاتر یا نمایش اشاره دارد.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "بازی کردن"
+      ],
+      "detectionScore": 9,
+      "evidence": [
+        {
+          "sentenceId": 14675,
+          "sentenceEn": "Andrew Pike was chosen to act the part of the lawyer in the film.",
+          "sentenceMeaningFa": "از \"اندرو پایک\" خواسته شد تا نقش وکیل را در نمایش بازی کند.",
+          "contributingEnglishWordId": 2643,
+          "contributingBaseForm": "part",
+          "matchedPersianMeaning": "نقش",
+          "matchedComponent": "نقش",
+          "matchesNestedRemainder": true
+        }
+      ],
+      "candidateTier": "strong"
+    },
+    {
+      "wordSenseId": 35785,
+      "englishWordId": 2782,
+      "baseForm": "play",
+      "pos": "verb",
+      "meaningFa": "نقش بازی کردن",
+      "otherMeaningsFa": [
+        "نقش ایفا کردن",
+        "بازی کردن"
+      ],
+      "conceptExplainedFa": "به اجرای نقش یک شخصیت در فیلم، نمایش یا بازسازی اشاره دارد.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "بازی کردن",
+        "بازی"
+      ],
+      "detectionScore": 9,
+      "evidence": [
+        {
+          "sentenceId": 14678,
+          "sentenceEn": "Daniel Craig played the role of James Bond.",
+          "sentenceMeaningFa": "\"دنیل کریگ\" نقش \"جیمز باند\" را بازی کرد.",
+          "contributingEnglishWordId": 26729,
+          "contributingBaseForm": "role",
+          "matchedPersianMeaning": "نقش",
+          "matchedComponent": "نقش",
+          "matchesNestedRemainder": true
+        }
+      ],
+      "candidateTier": "strong"
+    },
+    {
+      "wordSenseId": 37760,
+      "englishWordId": 1469,
+      "baseForm": "fish",
+      "pos": "noun",
+      "meaningFa": "گوشت ماهی",
+      "otherMeaningsFa": [],
+      "conceptExplainedFa": "به گوشت ماهی اشاره دارد که به عنوان غذا پخته و مصرف می‌شود.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "ماهی"
+      ],
+      "detectionScore": 9,
+      "evidence": [
+        {
+          "sentenceId": 16998,
+          "sentenceEn": "I don't eat fish or meat.",
+          "sentenceMeaningFa": "من ماهی یا گوشت نمی‌خورم.",
+          "contributingEnglishWordId": 2333,
+          "contributingBaseForm": "meat",
+          "matchedPersianMeaning": "گوشت",
+          "matchedComponent": "گوشت",
+          "matchesNestedRemainder": true
+        }
+      ],
+      "candidateTier": "strong"
+    },
+    {
+      "wordSenseId": 37937,
+      "englishWordId": 917,
+      "baseForm": "crown",
+      "pos": "noun",
+      "meaningFa": "تاج دندان",
+      "otherMeaningsFa": [
+        "روکش دندان"
+      ],
+      "conceptExplainedFa": "روکش مصنوعی که برای محافظت و بازسازی روی دندان آسیب‌دیده قرار می‌گیرد.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "تاج"
+      ],
+      "detectionScore": 9,
+      "evidence": [
+        {
+          "sentenceId": 17806,
+          "sentenceEn": "The dentist fitted a crown over the damaged tooth.",
+          "sentenceMeaningFa": "دندان‌پزشک روی دندان آسیب‌دیده یک روکش نصب کرد.",
+          "contributingEnglishWordId": 3806,
+          "contributingBaseForm": "tooth",
+          "matchedPersianMeaning": "دندان",
+          "matchedComponent": "دندان",
+          "matchesNestedRemainder": true
+        }
+      ],
+      "candidateTier": "strong"
+    },
+    {
+      "wordSenseId": 38016,
+      "englishWordId": 27938,
+      "baseForm": "subsidiary",
+      "pos": "noun",
+      "meaningFa": "شرکت تابعه",
+      "otherMeaningsFa": [],
+      "conceptExplainedFa": "به شرکتی اشاره دارد که شرکت دیگری بیش از نیمی از مالکیت یا کنترل آن را در اختیار دارد.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "تابعه"
+      ],
+      "detectionScore": 9,
+      "evidence": [
+        {
+          "sentenceId": 18077,
+          "sentenceEn": "She’s working for an overseas subsidiary of the company.",
+          "sentenceMeaningFa": "او برای یک شرکت تابعه در خارج از کشور کار می کند.",
+          "contributingEnglishWordId": 748,
+          "contributingBaseForm": "company",
+          "matchedPersianMeaning": "شرکت",
+          "matchedComponent": "شرکت",
+          "matchesNestedRemainder": true
+        }
+      ],
+      "candidateTier": "strong"
+    },
+    {
+      "wordSenseId": 38230,
+      "englishWordId": 24312,
+      "baseForm": "cell",
+      "pos": "noun",
+      "meaningFa": "سلول زندان",
+      "otherMeaningsFa": [
+        "بازداشتگاه",
+        "حجره",
+        "سلول"
+      ],
+      "conceptExplainedFa": "به اتاق کوچک و قفل‌شده‌ای در زندان یا بازداشتگاه اشاره دارد که زندانی در آن نگهداری می‌شود.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "سلول"
+      ],
+      "detectionScore": 9,
+      "evidence": [
+        {
+          "sentenceId": 18580,
+          "sentenceEn": "The jail cell was very small.",
+          "sentenceMeaningFa": "سلول زندان بسیار کوچک بود.",
+          "contributingEnglishWordId": 22941,
+          "contributingBaseForm": "jail",
+          "matchedPersianMeaning": "زندان",
+          "matchedComponent": "زندان",
+          "matchesNestedRemainder": true
+        }
+      ],
+      "candidateTier": "strong"
+    },
+    {
+      "wordSenseId": 38639,
+      "englishWordId": 28369,
+      "baseForm": "german",
+      "pos": "noun",
+      "meaningFa": "زبان آلمانی",
+      "otherMeaningsFa": [
+        "آلمانی"
+      ],
+      "conceptExplainedFa": "زبان اصلی آلمان و اتریش و یکی از زبان‌های رسمی سوئیس و چند منطقهٔ اروپایی است.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "آلمانی"
+      ],
+      "detectionScore": 9,
+      "evidence": [
+        {
+          "sentenceId": 19724,
+          "sentenceEn": "German is offered as an elective language here.",
+          "sentenceMeaningFa": "زبان آلمانی اینجا به‌عنوان یک زبان اختیاری ارائه می‌شود.",
+          "contributingEnglishWordId": 2135,
+          "contributingBaseForm": "language",
+          "matchedPersianMeaning": "زبان",
+          "matchedComponent": "زبان",
+          "matchesNestedRemainder": true
+        }
+      ],
+      "candidateTier": "strong"
+    },
+    {
+      "wordSenseId": 38668,
+      "englishWordId": 28393,
+      "baseForm": "co educational",
+      "pos": "adjective",
+      "meaningFa": "مدرسه مختلط",
+      "otherMeaningsFa": [
+        "مختلط"
+      ],
+      "conceptExplainedFa": "مدرسه یا نظام آموزشی‌ای را توصیف می‌کند که دختران و پسران در آن با هم تحصیل می‌کنند.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "مختلط"
+      ],
+      "detectionScore": 9,
+      "evidence": [
+        {
+          "sentenceId": 19763,
+          "sentenceEn": "The school has now made the decision to go fully co-educational.",
+          "sentenceMeaningFa": "مدرسه حالا تصمیم گرفته است که کاملا مختلط شود.",
+          "contributingEnglishWordId": 3211,
+          "contributingBaseForm": "school",
+          "matchedPersianMeaning": "مدرسه",
+          "matchedComponent": "مدرسه",
+          "matchesNestedRemainder": true
+        }
+      ],
+      "candidateTier": "strong"
+    },
+    {
+      "wordSenseId": 39446,
+      "englishWordId": 28921,
+      "baseForm": "russian",
+      "pos": "noun",
+      "meaningFa": "زبان روسی",
+      "otherMeaningsFa": [
+        "روسی"
+      ],
+      "conceptExplainedFa": "در این کاربرد نام زبان روسی است و در انگلیسی باید با حرف بزرگ نوشته شود.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "روسی"
+      ],
+      "detectionScore": 9,
+      "evidence": [
+        {
+          "sentenceId": 22153,
+          "sentenceEn": "Russian is a very complex language.",
+          "sentenceMeaningFa": "زبان روسی یک زبان بسیار پیچیده است.",
+          "contributingEnglishWordId": 2135,
+          "contributingBaseForm": "language",
+          "matchedPersianMeaning": "زبان",
+          "matchedComponent": "زبان",
+          "matchesNestedRemainder": true
+        }
+      ],
+      "candidateTier": "strong"
+    },
+    {
+      "wordSenseId": 39448,
+      "englishWordId": 28923,
+      "baseForm": "french",
+      "pos": "noun",
+      "meaningFa": "زبان فرانسوی",
+      "otherMeaningsFa": [
+        "فرانسوی",
+        "زبان رومی تبار فرانسه و کشورهای دیگر"
+      ],
+      "conceptExplainedFa": "زبانی رومی‌تبار و زبان رسمی فرانسه و چندین کشور و سازمان بین‌المللی است که گونه‌های منطقه‌ای متعددی دارد.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "فرانسوی"
+      ],
+      "detectionScore": 9,
+      "evidence": [
+        {
+          "sentenceId": 22164,
+          "sentenceEn": "French is an official language in several countries.",
+          "sentenceMeaningFa": "فرانسوی در چندین کشور زبان رسمی است.",
+          "contributingEnglishWordId": 2135,
+          "contributingBaseForm": "language",
+          "matchedPersianMeaning": "زبان",
+          "matchedComponent": "زبان",
+          "matchesNestedRemainder": true
+        }
+      ],
+      "candidateTier": "strong"
+    },
+    {
+      "wordSenseId": 39515,
+      "englishWordId": 3535,
+      "baseForm": "steal",
+      "pos": "verb",
+      "meaningFa": "بیس دزدیدن",
+      "otherMeaningsFa": [
+        "بدون ضربه به بیس بعدی دویدن",
+        "استیل کردن بیس"
+      ],
+      "conceptExplainedFa": "در بیسبال یعنی دونده هنگام پرتاب توپ و بدون کمک ضربه، با خطر آوت‌شدن به بیس بعدی برود.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "دزدیدن"
+      ],
+      "detectionScore": 9,
+      "evidence": [
+        {
+          "sentenceId": 22403,
+          "sentenceEn": "The runner tried to steal second base.",
+          "sentenceMeaningFa": "دونده تلاش کرد بیس دوم را بدزدد.",
+          "contributingEnglishWordId": 24107,
+          "contributingBaseForm": "base",
+          "matchedPersianMeaning": "بیس",
+          "matchedComponent": "بیس",
+          "matchesNestedRemainder": true
+        }
+      ],
+      "candidateTier": "strong"
+    },
+    {
+      "wordSenseId": 39561,
+      "englishWordId": 24269,
+      "baseForm": "friendly",
+      "pos": "adjective",
+      "meaningFa": "دوستانه مسابقه",
+      "otherMeaningsFa": [],
+      "conceptExplainedFa": "مسابقه‌ای را توصیف می‌کند که رسمی یا رقابتی نیست و معمولاً برای تمرین یا سرگرمی برگزار می‌شود.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "دوستانه"
+      ],
+      "detectionScore": 9,
+      "evidence": [
+        {
+          "sentenceId": 22578,
+          "sentenceEn": "It was only a friendly match.",
+          "sentenceMeaningFa": "(این) یک مسابقه دوستانه بود.",
+          "contributingEnglishWordId": 2316,
+          "contributingBaseForm": "match",
+          "matchedPersianMeaning": "مسابقه",
+          "matchedComponent": "مسابقه",
+          "matchesNestedRemainder": true
+        }
+      ],
+      "candidateTier": "strong"
+    },
+    {
+      "wordSenseId": 39724,
+      "englishWordId": 957,
+      "baseForm": "dairy",
+      "pos": "noun",
+      "meaningFa": "کارخانه لبنیات",
+      "otherMeaningsFa": [
+        "بخش تولید لبنیات در مزرعه"
+      ],
+      "conceptExplainedFa": "محل تولید یا فرآوری شیر و محصولات لبنی.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "لبنیات"
+      ],
+      "detectionScore": 9,
+      "evidence": [
+        {
+          "sentenceId": 23245,
+          "sentenceEn": "He works at a dairy plant outside town.",
+          "sentenceMeaningFa": "او در یک کارخانه لبنیات کار می‌کند.",
+          "contributingEnglishWordId": 2774,
+          "contributingBaseForm": "plant",
+          "matchedPersianMeaning": "کارخانه",
+          "matchedComponent": "کارخانه",
+          "matchesNestedRemainder": true
+        }
+      ],
+      "candidateTier": "strong"
+    },
+    {
+      "wordSenseId": 40109,
+      "englishWordId": 22431,
+      "baseForm": "charge",
+      "pos": "noun",
+      "meaningFa": "بار الکتریکی",
+      "otherMeaningsFa": [
+        "بار"
+      ],
+      "conceptExplainedFa": "ویژگی فیزیکی ماده که سبب ایجاد یا تجربه نیروی الکتریکی می‌شود؛ می‌تواند مثبت، منفی یا خنثی باشد.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "بار"
+      ],
+      "detectionScore": 9,
+      "evidence": [
+        {
+          "sentenceId": 24401,
+          "sentenceEn": "Every electron carries a negative electric charge.",
+          "sentenceMeaningFa": "هر الکترون بار الکتریکی منفی دارد.",
+          "contributingEnglishWordId": 24161,
+          "contributingBaseForm": "electric",
+          "matchedPersianMeaning": "الکتریکی",
+          "matchedComponent": "الکتریکی",
+          "matchesNestedRemainder": true
+        }
+      ],
+      "candidateTier": "strong"
+    },
+    {
+      "wordSenseId": 41045,
+      "englishWordId": 22631,
+      "baseForm": "even",
+      "pos": "adjective",
+      "meaningFa": "زوج عدد",
+      "otherMeaningsFa": [
+        "زوج"
+      ],
+      "conceptExplainedFa": "عددی را توصیف می‌کند که بدون باقی‌مانده بر دو تقسیم می‌شود.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "زوج"
+      ],
+      "detectionScore": 9,
+      "evidence": [
+        {
+          "sentenceId": 26004,
+          "sentenceEn": "Please choose an even number of volunteers for each team.",
+          "sentenceMeaningFa": "لطفاً برای هر تیم تعداد زوجی داوطلب انتخاب کنید.",
+          "contributingEnglishWordId": 2511,
+          "contributingBaseForm": "number",
+          "matchedPersianMeaning": "عدد",
+          "matchedComponent": "عدد",
+          "matchesNestedRemainder": true
+        }
+      ],
+      "candidateTier": "strong"
+    },
+    {
+      "wordSenseId": 41343,
+      "englishWordId": 4047,
+      "baseForm": "water",
+      "pos": "verb",
+      "meaningFa": "آب افتادن دهان",
+      "otherMeaningsFa": [
+        "آب افتادن"
+      ],
+      "conceptExplainedFa": "درباره دهان یعنی در واکنش به بو، دیدن یا فکر غذا بزاق بیشتری تولید شدن.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "آب افتادن",
+        "آب"
+      ],
+      "detectionScore": 9,
+      "evidence": [
+        {
+          "sentenceId": 26453,
+          "sentenceEn": "The food smelled so good that it made my mouth water.",
+          "sentenceMeaningFa": "غذا آنقدر خوشمزه بود که باعث شد دهانم آب بیفتد.",
+          "contributingEnglishWordId": 2423,
+          "contributingBaseForm": "mouth",
+          "matchedPersianMeaning": "دهان",
+          "matchedComponent": "دهان",
+          "matchesNestedRemainder": true
+        }
+      ],
+      "candidateTier": "strong"
+    },
+    {
+      "wordSenseId": 42177,
+      "englishWordId": 30460,
+      "baseForm": "loop",
+      "pos": "noun",
+      "meaningFa": "حلقه طناب",
+      "otherMeaningsFa": [
+        "حلقه"
+      ],
+      "conceptExplainedFa": "شکل خمیده و بسته یا تقریباً بسته‌ای است که طناب، سیم، مسیر یا برنامه می‌تواند ایجاد کند.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "حلقه"
+      ],
+      "detectionScore": 9,
+      "evidence": [
+        {
+          "sentenceId": 27701,
+          "sentenceEn": "A loop of rope was tied round their wrists.",
+          "sentenceMeaningFa": "حلقه‌ای طناب دور کمرهایشان بسته شده بود.",
+          "contributingEnglishWordId": 3128,
+          "contributingBaseForm": "rope",
+          "matchedPersianMeaning": "طناب",
+          "matchedComponent": "طناب",
+          "matchesNestedRemainder": true
+        }
+      ],
+      "candidateTier": "strong"
+    },
+    {
+      "wordSenseId": 42369,
+      "englishWordId": 30580,
+      "baseForm": "price tag",
+      "pos": "noun",
+      "meaningFa": "برچسب قیمت (کالا)",
+      "otherMeaningsFa": [
+        "برچسب قیمت"
+      ],
+      "conceptExplainedFa": "برچسب یا نشانی روی کالا است که مبلغ تعیین‌شده برای فروش آن را نشان می‌دهد.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "برچسب قیمت"
+      ],
+      "detectionScore": 9,
+      "evidence": [
+        {
+          "sentenceId": 30363,
+          "sentenceEn": "The price tag said forty dollars, but the item scanned at fifty.",
+          "sentenceMeaningFa": "برچسب قیمت چهل دلار نشان می‌داد، اما کالا در صندوق پنجاه دلار ثبت شد.",
+          "contributingEnglishWordId": 22876,
+          "contributingBaseForm": "item",
+          "matchedPersianMeaning": "کالا",
+          "matchedComponent": "کالا",
+          "matchesNestedRemainder": true
+        }
+      ],
+      "candidateTier": "strong"
+    },
+    {
+      "wordSenseId": 42490,
+      "englishWordId": 30676,
+      "baseForm": "text to speech",
+      "pos": "noun",
+      "meaningFa": "متن به گفتار (نرم افزار)",
+      "otherMeaningsFa": [
+        "تبدیل متن به گفتار",
+        "متن به گفتار"
+      ],
+      "conceptExplainedFa": "اصطلاحی تخصصی در حوزهٔ پردازش گفتار که نوشتهٔ دیجیتال را با صدای مصنوعی قابل‌شنیدن می‌خواند.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "متن به گفتار"
+      ],
+      "detectionScore": 9,
+      "evidence": [
+        {
+          "sentenceId": 30245,
+          "sentenceEn": "Text-to-speech software reads online articles aloud for him.",
+          "sentenceMeaningFa": "نرم‌افزار تبدیل متن به گفتار مقاله‌های آنلاین را برای او با صدای بلند می‌خواند.",
+          "contributingEnglishWordId": 25701,
+          "contributingBaseForm": "software",
+          "matchedPersianMeaning": "نرم افزار",
+          "matchedComponent": "نرم افزار",
+          "matchesNestedRemainder": true
+        }
+      ],
+      "candidateTier": "strong"
+    },
+    {
+      "wordSenseId": 42951,
+      "englishWordId": 31038,
+      "baseForm": "cutting",
+      "pos": "adjective",
+      "meaningFa": "نیش دار (سخن)",
+      "otherMeaningsFa": [
+        "طعنه آمیز",
+        "نیش دار"
+      ],
+      "conceptExplainedFa": "برای سخنی است که هوشمندانه اما تند و آزاردهنده است و قصد یا اثر تحقیر دارد.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "نیش دار"
+      ],
+      "detectionScore": 9,
+      "evidence": [
+        {
+          "sentenceId": 29459,
+          "sentenceEn": "Her cutting remark silenced the entire room.",
+          "sentenceMeaningFa": "سخن نیش‌دار او تمام اتاق را ساکت کرد.",
+          "contributingEnglishWordId": 27091,
+          "contributingBaseForm": "remark",
+          "matchedPersianMeaning": "سخن",
+          "matchedComponent": "سخن",
+          "matchesNestedRemainder": true
+        }
+      ],
+      "candidateTier": "strong"
+    },
+    {
+      "wordSenseId": 44460,
+      "englishWordId": 2266,
+      "baseForm": "mailbox",
+      "pos": "noun",
+      "meaningFa": "صندوق پست عمومی",
+      "otherMeaningsFa": [],
+      "conceptExplainedFa": "صندوق پست عمومی برای انداختن نامه‌های آماده ارسال.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "صندوق پست"
+      ],
+      "detectionScore": 9,
+      "evidence": [
+        {
+          "sentenceId": 30537,
+          "sentenceEn": "She dropped the letter into a public mailbox.",
+          "sentenceMeaningFa": "او نامه را داخل یک صندوق پست عمومی انداخت.",
+          "contributingEnglishWordId": 24025,
+          "contributingBaseForm": "public",
+          "matchedPersianMeaning": "عمومی",
+          "matchedComponent": "عمومی",
+          "matchesNestedRemainder": true
+        }
+      ],
+      "candidateTier": "strong"
+    },
+    {
+      "wordSenseId": 44864,
+      "englishWordId": 23554,
+      "baseForm": "come down",
+      "pos": "phrasal verb",
+      "meaningFa": "فرود آمدن هواپیما",
+      "otherMeaningsFa": [
+        "فرود آمدن"
+      ],
+      "conceptExplainedFa": "هواپیما فرود بیاید و به زمین بنشیند.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "فرود آمدن"
+      ],
+      "detectionScore": 9,
+      "evidence": [
+        {
+          "sentenceId": 30696,
+          "sentenceEn": "The plane came down safely despite the strong wind.",
+          "sentenceMeaningFa": "هواپیما با وجود باد شدید به سلامت فرود آمد.",
+          "contributingEnglishWordId": 2772,
+          "contributingBaseForm": "plane",
+          "matchedPersianMeaning": "هواپیما",
+          "matchedComponent": "هواپیما",
+          "matchesNestedRemainder": true
+        }
+      ],
+      "candidateTier": "strong"
+    },
+    {
+      "wordSenseId": 44995,
+      "englishWordId": 28732,
+      "baseForm": "intern",
+      "pos": "noun",
+      "meaningFa": "انترن پزشکی",
+      "otherMeaningsFa": [
+        "انترن"
+      ],
+      "conceptExplainedFa": "پزشک تازه‌فارغ‌التحصیلی که در بیمارستان زیر نظر پزشکان ارشد کار می‌کند.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "انترن"
+      ],
+      "detectionScore": 9,
+      "evidence": [
+        {
+          "sentenceId": 30800,
+          "sentenceEn": "The medical intern checked each patient before morning rounds.",
+          "sentenceMeaningFa": "انترن پزشکی پیش از ویزیت صبحگاهی هر بیمار را معاینه کرد.",
+          "contributingEnglishWordId": 24379,
+          "contributingBaseForm": "medical",
+          "matchedPersianMeaning": "پزشکی",
+          "matchedComponent": "پزشکی",
+          "matchesNestedRemainder": true
+        }
+      ],
+      "candidateTier": "strong"
+    },
+    {
+      "wordSenseId": 45037,
+      "englishWordId": 1836,
+      "baseForm": "hold",
+      "pos": "verb",
+      "meaningFa": "برتری داشتن",
+      "otherMeaningsFa": [],
+      "conceptExplainedFa": "نسبت به شخص یا گروهی دیگر برتری یا مزیتی داشتن.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "داشتن"
+      ],
+      "detectionScore": 9,
+      "evidence": [
+        {
+          "sentenceId": 30843,
+          "sentenceEn": "Our team holds a slight advantage after the first round.",
+          "sentenceMeaningFa": "تیم ما پس از دور اول برتری اندکی دارد.",
+          "contributingEnglishWordId": 46,
+          "contributingBaseForm": "advantage",
+          "matchedPersianMeaning": "برتری",
+          "matchedComponent": "برتری",
+          "matchesNestedRemainder": true
+        }
+      ],
+      "candidateTier": "strong"
+    },
+    {
+      "wordSenseId": 2368,
+      "englishWordId": 2055,
+      "baseForm": "jar",
+      "pos": "noun",
+      "meaningFa": "ظرف شیشه ای دردار",
+      "otherMeaningsFa": [
+        "شیشه در دار",
+        "ظرف شیشه ای",
+        "ظرف شیشه ای دهان گشاد",
+        "بانکه شیشه ای"
+      ],
+      "conceptExplainedFa": "ظرف شیشه‌ای دهان‌گشاد و دردار برای نگهداری خوراکی یا اشیا.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "ظرف شیشه ای"
+      ],
+      "detectionScore": 7,
+      "evidence": [
+        {
+          "sentenceId": 1375,
+          "sentenceEn": "She kept cookies in a glass jar.",
+          "sentenceMeaningFa": "او بیسکویت‌ها را در یک ظرف شیشه‌ای نگه می‌داشت.",
+          "contributingEnglishWordId": 1633,
+          "contributingBaseForm": "glass",
+          "matchedPersianMeaning": "شیشه",
+          "matchedComponent": "شیشه",
+          "matchesNestedRemainder": false
+        },
+        {
+          "sentenceId": 1375,
+          "sentenceEn": "She kept cookies in a glass jar.",
+          "sentenceMeaningFa": "او بیسکویت‌ها را در یک ظرف شیشه‌ای نگه می‌داشت.",
+          "contributingEnglishWordId": 1633,
+          "contributingBaseForm": "glass",
+          "matchedPersianMeaning": "شیشه ای",
+          "matchedComponent": "شیشه ای",
+          "matchesNestedRemainder": false
+        },
+        {
+          "sentenceId": 1375,
+          "sentenceEn": "She kept cookies in a glass jar.",
+          "sentenceMeaningFa": "او بیسکویت‌ها را در یک ظرف شیشه‌ای نگه می‌داشت.",
+          "contributingEnglishWordId": 25922,
+          "contributingBaseForm": "in",
+          "matchedPersianMeaning": "ظرف",
+          "matchedComponent": "ظرف",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 32847,
+      "englishWordId": 3023,
+      "baseForm": "register",
+      "pos": "noun",
+      "meaningFa": "فهرست رسمی نام ها یا اطلاعات",
+      "otherMeaningsFa": [
+        "دفتر ثبت",
+        "فهرست",
+        "سیاهه"
+      ],
+      "conceptExplainedFa": "فهرست یا سابقه رسمی افراد، دارایی‌ها یا رویدادها که برای ثبت قانونی، اداری یا مراجعه نگهداری می‌شود.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "فهرست"
+      ],
+      "detectionScore": 7,
+      "evidence": [
+        {
+          "sentenceId": 11242,
+          "sentenceEn": "Her name appears on the official register.",
+          "sentenceMeaningFa": "نام او در فهرست رسمی آمده است.",
+          "contributingEnglishWordId": 2542,
+          "contributingBaseForm": "official",
+          "matchedPersianMeaning": "رسمی",
+          "matchedComponent": "رسمی",
+          "matchesNestedRemainder": false
+        },
+        {
+          "sentenceId": 11242,
+          "sentenceEn": "Her name appears on the official register.",
+          "sentenceMeaningFa": "نام او در فهرست رسمی آمده است.",
+          "contributingEnglishWordId": 25883,
+          "contributingBaseForm": "name",
+          "matchedPersianMeaning": "نام",
+          "matchedComponent": "نام",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 38888,
+      "englishWordId": 3818,
+      "baseForm": "tough",
+      "pos": "adjective",
+      "meaningFa": "سفت و دشوار برای جویدن",
+      "otherMeaningsFa": [
+        "نرم نشده",
+        "دیرجو"
+      ],
+      "conceptExplainedFa": "گوشت یا غذای دیگری را توصیف می‌کند که بافتش سفت است و به‌راحتی بریده یا جویده نمی‌شود.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "دشوار"
+      ],
+      "detectionScore": 7,
+      "evidence": [
+        {
+          "sentenceId": 20405,
+          "sentenceEn": "The steak was tough and difficult to chew.",
+          "sentenceMeaningFa": "استیک سفت بود و به‌سختی جویده می‌شد.",
+          "contributingEnglishWordId": 26724,
+          "contributingBaseForm": "difficult",
+          "matchedPersianMeaning": "دشوار",
+          "matchedComponent": "دشوار",
+          "matchesNestedRemainder": false
+        },
+        {
+          "sentenceId": 20405,
+          "sentenceEn": "The steak was tough and difficult to chew.",
+          "sentenceMeaningFa": "استیک سفت بود و به‌سختی جویده می‌شد.",
+          "contributingEnglishWordId": 27070,
+          "contributingBaseForm": "chew",
+          "matchedPersianMeaning": "جویدن",
+          "matchedComponent": "جویدن",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 42298,
+      "englishWordId": 30527,
+      "baseForm": "swing vote",
+      "pos": "noun",
+      "meaningFa": "رای سرگردان (رای نامطمین تا روز انتخابات)",
+      "otherMeaningsFa": [
+        "رای مردد",
+        "رای نامطمین"
+      ],
+      "conceptExplainedFa": "رأی فردی است که پیش از انتخابات تصمیم ثابتی ندارد و ممکن است به هر نامزد یا حزب برسد.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "رای نامطمین"
+      ],
+      "detectionScore": 7,
+      "evidence": [
+        {
+          "sentenceId": 30483,
+          "sentenceEn": "Both campaigns spent heavily to win the swing vote before election day.",
+          "sentenceMeaningFa": "هر دو کارزار هزینهٔ زیادی کردند تا پیش از روز انتخابات رأی‌های مردد را به دست آورند.",
+          "contributingEnglishWordId": 22765,
+          "contributingBaseForm": "election",
+          "matchedPersianMeaning": "انتخابات",
+          "matchedComponent": "انتخابات",
+          "matchesNestedRemainder": false
+        },
+        {
+          "sentenceId": 30483,
+          "sentenceEn": "Both campaigns spent heavily to win the swing vote before election day.",
+          "sentenceMeaningFa": "هر دو کارزار هزینهٔ زیادی کردند تا پیش از روز انتخابات رأی‌های مردد را به دست آورند.",
+          "contributingEnglishWordId": 25924,
+          "contributingBaseForm": "day",
+          "matchedPersianMeaning": "روز",
+          "matchedComponent": "روز",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 42743,
+      "englishWordId": 30874,
+      "baseForm": "test drive",
+      "pos": "verb",
+      "meaningFa": "به طور آزمایشی راندن پیش از خرید خودرو",
+      "otherMeaningsFa": [
+        "آزمایشی راندن"
+      ],
+      "conceptExplainedFa": "یعنی پیش از خرید، خودرو را مدتی می‌رانی تا عملکرد، راحتی و مناسب‌بودنش را بررسی کنی.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "آزمایشی راندن"
+      ],
+      "detectionScore": 7,
+      "evidence": [
+        {
+          "sentenceId": 29654,
+          "sentenceEn": "I test-drove the car before making an offer.",
+          "sentenceMeaningFa": "پیش از پیشنهاد قیمت خودرو را آزمایشی راندم.",
+          "contributingEnglishWordId": 297,
+          "contributingBaseForm": "before",
+          "matchedPersianMeaning": "پیش",
+          "matchedComponent": "پیش",
+          "matchesNestedRemainder": false
+        },
+        {
+          "sentenceId": 29654,
+          "sentenceEn": "I test-drove the car before making an offer.",
+          "sentenceMeaningFa": "پیش از پیشنهاد قیمت خودرو را آزمایشی راندم.",
+          "contributingEnglishWordId": 297,
+          "contributingBaseForm": "before",
+          "matchedPersianMeaning": "پیش از",
+          "matchedComponent": "پیش از",
+          "matchesNestedRemainder": false
+        },
+        {
+          "sentenceId": 29654,
+          "sentenceEn": "I test-drove the car before making an offer.",
+          "sentenceMeaningFa": "پیش از پیشنهاد قیمت خودرو را آزمایشی راندم.",
+          "contributingEnglishWordId": 535,
+          "contributingBaseForm": "car",
+          "matchedPersianMeaning": "خودرو",
+          "matchedComponent": "خودرو",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 44860,
+      "englishWordId": 26920,
+      "baseForm": "signal",
+      "pos": "noun",
+      "meaningFa": "سیگنال رادیو تلویزیون یا تلفن همراه",
+      "otherMeaningsFa": [
+        "آنتن تلفن همراه"
+      ],
+      "conceptExplainedFa": "سیگنال رادیویی یا آنتن قابل دریافت تلفن همراه.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "سیگنال"
+      ],
+      "detectionScore": 7,
+      "evidence": [
+        {
+          "sentenceId": 24463,
+          "sentenceEn": "I can't get a signal on my cell phone.",
+          "sentenceMeaningFa": "تلفن همراهم آنتن نمی‌دهد.",
+          "contributingEnglishWordId": 2726,
+          "contributingBaseForm": "phone",
+          "matchedPersianMeaning": "تلفن",
+          "matchedComponent": "تلفن",
+          "matchesNestedRemainder": false
+        },
+        {
+          "sentenceId": 24463,
+          "sentenceEn": "I can't get a signal on my cell phone.",
+          "sentenceMeaningFa": "تلفن همراهم آنتن نمی‌دهد.",
+          "contributingEnglishWordId": 24367,
+          "contributingBaseForm": "cell phone",
+          "matchedPersianMeaning": "تلفن همراه",
+          "matchedComponent": "تلفن همراه",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 1599,
+      "englishWordId": 3583,
+      "baseForm": "stray",
+      "pos": "verb",
+      "meaningFa": "از مسیر منحرف شدن",
+      "otherMeaningsFa": [
+        "از مسیر دور شدن",
+        "راه گم کردن",
+        "سرگردان شدن",
+        "منحرف شدن"
+      ],
+      "conceptExplainedFa": "به دور شدن ناخواسته از مسیر درست، محل یا گروه اصلی و سرگردان شدن اشاره دارد.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "منحرف شدن"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 2961,
+          "sentenceEn": "The hikers got lost after they strayed from the main path.",
+          "sentenceMeaningFa": "کوهنوردان پس از اینکه از مسیر اصلی سرگردان شدند، گم شدند.",
+          "contributingEnglishWordId": 2666,
+          "contributingBaseForm": "path",
+          "matchedPersianMeaning": "مسیر",
+          "matchedComponent": "مسیر",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 1690,
+      "englishWordId": 2598,
+      "baseForm": "overtime",
+      "pos": "adverb",
+      "meaningFa": "اضافه کاری کردن",
+      "otherMeaningsFa": [
+        "اضافه کاری"
+      ],
+      "conceptExplainedFa": "برای بیان کار کردن بیش از ساعات عادی و تعیین‌شدهٔ شغل به‌کار می‌رود.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "اضافه کاری"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 3042,
+          "sentenceEn": "He's been working overtime every night this week to finish the report.",
+          "sentenceMeaningFa": "او برای تمام کردن گزارش، هر شب این هفته را اضافه‌کاری کرده است.",
+          "contributingEnglishWordId": 26414,
+          "contributingBaseForm": "working",
+          "matchedPersianMeaning": "کاری",
+          "matchedComponent": "کاری",
+          "matchesNestedRemainder": false
+        },
+        {
+          "sentenceId": 14917,
+          "sentenceEn": "We are working overtime to get the job done on time.",
+          "sentenceMeaningFa": "ما داریم اضافه کار می‌کنیم تا کار را سر وقت تمام کنیم.",
+          "contributingEnglishWordId": 26414,
+          "contributingBaseForm": "working",
+          "matchedPersianMeaning": "کاری",
+          "matchedComponent": "کاری",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 30859,
+      "englishWordId": 23049,
+      "baseForm": "amnesty",
+      "pos": "noun",
+      "meaningFa": "عفو عمومی سیاست",
+      "otherMeaningsFa": [
+        "عفو عمومی"
+      ],
+      "conceptExplainedFa": "بخشش رسمی گروهی از افراد برای جرائم، به‌ویژه جرائم سیاسی، بدون اجرای مجازات است.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "عفو عمومی"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 7352,
+          "sentenceEn": "The president granted a general amnesty for all political prisoners.",
+          "sentenceMeaningFa": "رئیس جمهور به تمام زندانیان سیاسی عفو عمومی داد.",
+          "contributingEnglishWordId": 1604,
+          "contributingBaseForm": "general",
+          "matchedPersianMeaning": "عمومی",
+          "matchedComponent": "عمومی",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 31455,
+      "englishWordId": 23542,
+      "baseForm": "warm up",
+      "pos": "verb",
+      "meaningFa": "گرم کردن بدن پیش از ورزش",
+      "otherMeaningsFa": [
+        "گرم کردن",
+        "نرمش پیش از ورزش"
+      ],
+      "conceptExplainedFa": "در ورزش، به انجام حرکات سبک برای آماده‌کردن عضلات و بدن پیش از فعالیت شدید اشاره دارد.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "گرم کردن"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 9556,
+          "sentenceEn": "You should warm up before exercising.",
+          "sentenceMeaningFa": "باید پیش از ورزش بدنتان را گرم کنید.",
+          "contributingEnglishWordId": 297,
+          "contributingBaseForm": "before",
+          "matchedPersianMeaning": "پیش",
+          "matchedComponent": "پیش",
+          "matchesNestedRemainder": false
+        },
+        {
+          "sentenceId": 9556,
+          "sentenceEn": "You should warm up before exercising.",
+          "sentenceMeaningFa": "باید پیش از ورزش بدنتان را گرم کنید.",
+          "contributingEnglishWordId": 297,
+          "contributingBaseForm": "before",
+          "matchedPersianMeaning": "پیش از",
+          "matchedComponent": "پیش از",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 31561,
+      "englishWordId": 23624,
+      "baseForm": "close down",
+      "pos": "verb",
+      "meaningFa": "تعطیل کردن موقتی یا برای همیشه",
+      "otherMeaningsFa": [
+        "تعطیل شدن",
+        "برچیدن",
+        "تعطیل کردن"
+      ],
+      "conceptExplainedFa": "به متوقف‌کردن فعالیت و بستن کسب‌وکار، کارخانه یا سامانه برای مدتی یا همیشه اشاره دارد.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "تعطیل کردن"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 9681,
+          "sentenceEn": "All the mines in this area were closed down in the 80s.",
+          "sentenceMeaningFa": "تمام معدن‌های این منطقه در (سال‌های) دهه 80 تعطیل شدند.",
+          "contributingEnglishWordId": 25957,
+          "contributingBaseForm": "closed",
+          "matchedPersianMeaning": "تعطیل",
+          "matchedComponent": "تعطیل",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 31731,
+      "englishWordId": 23765,
+      "baseForm": "get out",
+      "pos": "verb",
+      "meaningFa": "از زیر انجام کاری در رفتن",
+      "otherMeaningsFa": [
+        "انجام ندادن کاری"
+      ],
+      "conceptExplainedFa": "در این کاربرد، به یافتن راهی برای انجام‌ندادن وظیفه یا تعهد اشاره دارد.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "در رفتن"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 9906,
+          "sentenceEn": "I’ll go swimming with you if I can get out of cleaning my room.",
+          "sentenceMeaningFa": "با تو به شنا خواهم آمد، اگر بتوانم از زیر تمیز کردن اتاقم در بروم.",
+          "contributingEnglishWordId": 1646,
+          "contributingBaseForm": "go",
+          "matchedPersianMeaning": "رفتن",
+          "matchedComponent": "رفتن",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 31732,
+      "englishWordId": 23538,
+      "baseForm": "mix up",
+      "pos": "verb",
+      "meaningFa": "یکی را با دیگری اشتباه گرفتن",
+      "otherMeaningsFa": [
+        "قاطی کردن",
+        "ترکیب چیزی را بهم زدن"
+      ],
+      "conceptExplainedFa": "در این کاربرد، به اشتباه‌گرفتن دو شخص یا چیز مشابه با یکدیگر اشاره دارد.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "اشتباه"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 9908,
+          "sentenceEn": "I think you must be mixing me up with someone else.",
+          "sentenceMeaningFa": "فکر کنم من را با یک نفر دیگر اشتباه گرفته‌اید.",
+          "contributingEnglishWordId": 26129,
+          "contributingBaseForm": "someone",
+          "matchedPersianMeaning": "یکی",
+          "matchedComponent": "یکی",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 32298,
+      "englishWordId": 24170,
+      "baseForm": "really",
+      "pos": "adverb",
+      "meaningFa": "واقعا یا حقیقتا",
+      "otherMeaningsFa": [
+        "به راستی",
+        "در واقع",
+        "واقعا"
+      ],
+      "conceptExplainedFa": "برای تأکید بر واقعی‌بودن، درستی یا شدت چیزی به کار می‌رود و می‌تواند شگفتی یا تردید را نیز نشان دهد.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "واقعا"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 10634,
+          "sentenceEn": "The final exam was really quite difficult.",
+          "sentenceMeaningFa": "امتحان نهایی واقعاً بسیار دشوار بود.",
+          "contributingEnglishWordId": 24188,
+          "contributingBaseForm": "quite",
+          "matchedPersianMeaning": "حقیقتا",
+          "matchedComponent": "حقیقتا",
+          "matchesNestedRemainder": false
+        },
+        {
+          "sentenceId": 10634,
+          "sentenceEn": "The final exam was really quite difficult.",
+          "sentenceMeaningFa": "امتحان نهایی واقعاً بسیار دشوار بود.",
+          "contributingEnglishWordId": 24188,
+          "contributingBaseForm": "quite",
+          "matchedPersianMeaning": "واقعا",
+          "matchedComponent": "واقعا",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 32479,
+      "englishWordId": 24282,
+      "baseForm": "criticism",
+      "pos": "noun",
+      "meaningFa": "نقد و ارزیابی اثر هنری یا ادبی",
+      "otherMeaningsFa": [
+        "نقد",
+        "تحلیل انتقادی"
+      ],
+      "conceptExplainedFa": "فرایند تحلیل و ارزیابی آثار هنری، ادبی یا فکری و بررسی قوت، ضعف، معنا و ارزش آن‌ها؛ مفهوم کلی نقد است.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "نقد"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 10829,
+          "sentenceEn": "The journal publishes serious literary criticism.",
+          "sentenceMeaningFa": "این مجله نقد ادبی جدی منتشر می‌کند.",
+          "contributingEnglishWordId": 27147,
+          "contributingBaseForm": "literary",
+          "matchedPersianMeaning": "ادبی",
+          "matchedComponent": "ادبی",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 32748,
+      "englishWordId": 24503,
+      "baseForm": "ashamed",
+      "pos": "adjective",
+      "meaningFa": "شرمنده یا خجالت زده از رفتار خود",
+      "otherMeaningsFa": [
+        "شرمسار",
+        "خجالت زده"
+      ],
+      "conceptExplainedFa": "برای فردی است که به‌دلیل کار، اشتباه یا ویژگی خود احساس شرم، گناه یا ناراحتی از قضاوت دیگران دارد.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "خجالت زده"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 11108,
+          "sentenceEn": "He felt ashamed of his dishonest behavior.",
+          "sentenceMeaningFa": "او از رفتار نادرست خود شرمنده بود.",
+          "contributingEnglishWordId": 22808,
+          "contributingBaseForm": "behavior",
+          "matchedPersianMeaning": "رفتار",
+          "matchedComponent": "رفتار",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 32857,
+      "englishWordId": 24602,
+      "baseForm": "no kidding",
+      "pos": "interjection",
+      "meaningFa": "واقعا یا جدی می گویم",
+      "otherMeaningsFa": [
+        "شوخی نمی کنم",
+        "جدی",
+        "دقیقا"
+      ],
+      "conceptExplainedFa": "عبارتی غیررسمی برای نشان‌دادن شگفتی و پرسیدن «جدی؟»، یا تأکید بر اینکه گوینده شوخی نمی‌کند، است.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "جدی"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 11253,
+          "sentenceEn": "No kidding? You actually met the author?",
+          "sentenceMeaningFa": "واقعاً؟ تو واقعاً نویسنده را دیدی؟",
+          "contributingEnglishWordId": 34,
+          "contributingBaseForm": "actually",
+          "matchedPersianMeaning": "واقعا",
+          "matchedComponent": "واقعا",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 32879,
+      "englishWordId": 24614,
+      "baseForm": "mold",
+      "pos": "verb",
+      "meaningFa": "قالب گیری کردن",
+      "otherMeaningsFa": [
+        "شکل دادن",
+        "قالب گرفتن"
+      ],
+      "conceptExplainedFa": "ماده‌ای نرم مانند گل رس را با دست یا قالب به شکل دلخواه درآوردن و قالب‌گیری کردن.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "قالب"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 11281,
+          "sentenceEn": "First, mold the clay into the desired shape.",
+          "sentenceMeaningFa": "ابتدا، گل رس را به شکل دلخواه قالب‌گیری کنید.",
+          "contributingEnglishWordId": 3273,
+          "contributingBaseForm": "shape",
+          "matchedPersianMeaning": "قالب",
+          "matchedComponent": "قالب",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 32909,
+      "englishWordId": 23207,
+      "baseForm": "up to",
+      "pos": "phrase",
+      "meaningFa": "انتخاب چیزی بر عهده کسی بودن",
+      "otherMeaningsFa": [],
+      "conceptExplainedFa": "اختیار انتخاب یا تصمیم‌گیری دربارهٔ چیزی بر عهدهٔ شخصی بودن.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "بر عهده کسی بودن"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 11316,
+          "sentenceEn": "It’s up to you whether to get the blue one or the red one.",
+          "sentenceMeaningFa": "این‌که مدل آبی را بگیری یا مدل قرمز، به انتخاب خودت بستگی دارد.",
+          "contributingEnglishWordId": 25892,
+          "contributingBaseForm": "one",
+          "matchedPersianMeaning": "کسی",
+          "matchedComponent": "کسی",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 33611,
+      "englishWordId": 25297,
+      "baseForm": "new moon",
+      "pos": "noun",
+      "meaningFa": "مرحله ماه نو که ماه تقریبا دیده نمی شود",
+      "otherMeaningsFa": [
+        "ماه نو",
+        "محاق"
+      ],
+      "conceptExplainedFa": "مرحله‌ای است که ماه نزدیک جهت خورشید قرار دارد و نیمهٔ روشن آن رو به زمین نیست، پس تقریباً نامرئی است.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "ماه نو"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 12237,
+          "sentenceEn": "The new moon is nearly invisible tonight.",
+          "sentenceMeaningFa": "ماه نو امشب تقریباً دیده نمی‌شود.",
+          "contributingEnglishWordId": 24536,
+          "contributingBaseForm": "nearly",
+          "matchedPersianMeaning": "تقریبا",
+          "matchedComponent": "تقریبا",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 34898,
+      "englishWordId": 26299,
+      "baseForm": "hip hop",
+      "pos": "noun",
+      "meaningFa": "هیپ هاپ ژانر موسیقی",
+      "otherMeaningsFa": [
+        "هیپ هاپ",
+        "فرهنگ و موسیقی هیپ هاپ",
+        "سبک مبتنی بر رپ و بیت"
+      ],
+      "conceptExplainedFa": "فرهنگ و سبک موسیقی ریتم‌محوری است که رپ، دی‌جی‌گری، بیت و عناصر دیگری را دربرمی‌گیرد.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "هیپ هاپ"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 13740,
+          "sentenceEn": "The station plays mainly hip-hop and R&B music.",
+          "sentenceMeaningFa": "آن شبکه (رادیویی)، اکثراً موسیقی \"هیپ‌هاپ\" و \"آراندبی\" پخش می‌کند.",
+          "contributingEnglishWordId": 26026,
+          "contributingBaseForm": "music",
+          "matchedPersianMeaning": "موسیقی",
+          "matchedComponent": "موسیقی",
+          "matchesNestedRemainder": false
+        },
+        {
+          "sentenceId": 18928,
+          "sentenceEn": "Hip hop transformed popular music around the world.",
+          "sentenceMeaningFa": "هیپ‌هاپ موسیقی عامه‌پسند را در سراسر جهان دگرگون کرد.",
+          "contributingEnglishWordId": 26026,
+          "contributingBaseForm": "music",
+          "matchedPersianMeaning": "موسیقی",
+          "matchedComponent": "موسیقی",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 35184,
+      "englishWordId": 25987,
+      "baseForm": "study",
+      "pos": "noun",
+      "meaningFa": "اتاق مطالعه",
+      "otherMeaningsFa": [
+        "دفتر کار"
+      ],
+      "conceptExplainedFa": "اتاقی آرام در خانه است که برای مطالعه، نوشتن یا کار فکری استفاده می‌شود.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "مطالعه"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 14050,
+          "sentenceEn": "He was in the study, reading.",
+          "sentenceMeaningFa": "او در اتاق مطالعه مشغول خواندن بود.",
+          "contributingEnglishWordId": 25992,
+          "contributingBaseForm": "reading",
+          "matchedPersianMeaning": "مطالعه",
+          "matchedComponent": "مطالعه",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 35335,
+      "englishWordId": 26561,
+      "baseForm": "captain",
+      "pos": "noun",
+      "meaningFa": "کاپیتان تیم ورزشی",
+      "otherMeaningsFa": [
+        "کاپیتان"
+      ],
+      "conceptExplainedFa": "بازیکنی است که به‌عنوان رهبر رسمی تیم ورزشی انتخاب می‌شود.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "کاپیتان"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 14215,
+          "sentenceEn": "It's unusual to have a goalkeeper as the team captain.",
+          "sentenceMeaningFa": "نامعمول است [غیر عادی است] که یک دروازه‌بان به عنوان کاپیتان تیم باشد.",
+          "contributingEnglishWordId": 26327,
+          "contributingBaseForm": "team",
+          "matchedPersianMeaning": "تیم",
+          "matchedComponent": "تیم",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 35352,
+      "englishWordId": 24874,
+      "baseForm": "shoot",
+      "pos": "verb",
+      "meaningFa": "شوت کردن فوتبال و",
+      "otherMeaningsFa": [
+        "ضربه زدن",
+        "پرتاب کردن",
+        "شوت کردن"
+      ],
+      "conceptExplainedFa": "به زدن یا پرتاب کردن توپ به سوی هدف، سبد یا دروازه در ورزش اشاره دارد.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "شوت کردن"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 14232,
+          "sentenceEn": "He shot from the middle of the court and still managed to score.",
+          "sentenceMeaningFa": "او از وسط زمین شوت کرد، ولی با این حال توانست گل بزند.",
+          "contributingEnglishWordId": 27156,
+          "contributingBaseForm": "shot",
+          "matchedPersianMeaning": "شوت",
+          "matchedComponent": "شوت",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 35990,
+      "englishWordId": 2094,
+      "baseForm": "key",
+      "pos": "noun",
+      "meaningFa": "کلید کامپیوتر و",
+      "otherMeaningsFa": [
+        "شستی"
+      ],
+      "conceptExplainedFa": "دکمه‌ای روی صفحه‌کلید یا دستگاه است که با فشردن آن فرمان یا نویسه‌ای وارد می‌شود.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "کلید"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 14906,
+          "sentenceEn": "Press the return key to enter the information.",
+          "sentenceMeaningFa": "کلید بازگشت را برای وارد کردن اطلاعات فشار دهید.",
+          "contributingEnglishWordId": 26361,
+          "contributingBaseForm": "return",
+          "matchedPersianMeaning": "کلید",
+          "matchedComponent": "کلید",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 35994,
+      "englishWordId": 23592,
+      "baseForm": "take up",
+      "pos": "verb",
+      "meaningFa": "زمان و فضا اشغال کردن",
+      "otherMeaningsFa": [
+        "زمان و مکان گرفتن",
+        "اشغال کردن"
+      ],
+      "conceptExplainedFa": "به اشغال کردن مقدار مشخصی از زمان، فضا یا توجه اشاره دارد.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "اشغال کردن"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 14910,
+          "sentenceEn": "Her time is fully taken up with writing.",
+          "sentenceMeaningFa": "زمان او کاملاً توسط نویسندگی گرفته می‌شود.",
+          "contributingEnglishWordId": 3783,
+          "contributingBaseForm": "time",
+          "matchedPersianMeaning": "زمان",
+          "matchedComponent": "زمان",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 36414,
+      "englishWordId": 27103,
+      "baseForm": "parliament",
+      "pos": "noun",
+      "meaningFa": "پارلمان یا مجلس قانون گذاری",
+      "otherMeaningsFa": [
+        "مجلس",
+        "نهاد قانون گذاری"
+      ],
+      "conceptExplainedFa": "نهاد منتخب یا رسمی یک کشور است که دربارهٔ قوانین بحث و تصمیم‌گیری می‌کند و ساختارش میان کشورها تفاوت دارد.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "مجلس"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 15400,
+          "sentenceEn": "Parliament approved the revised law after debate.",
+          "sentenceMeaningFa": "پارلمان پس از بحث قانون اصلاح‌شده را تصویب کرد.",
+          "contributingEnglishWordId": 24360,
+          "contributingBaseForm": "law",
+          "matchedPersianMeaning": "قانون",
+          "matchedComponent": "قانون",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 36473,
+      "englishWordId": 27141,
+      "baseForm": "setting",
+      "pos": "noun",
+      "meaningFa": "زمان و مکان وقوع داستان فیلم یا نمایش",
+      "otherMeaningsFa": [
+        "محل و زمان وقوع داستان",
+        "محیط",
+        "فضا",
+        "مکان",
+        "موقعیت"
+      ],
+      "conceptExplainedFa": "زمان، مکان یا محیطی را بیان می‌کند که رویدادی واقعی یا داستانی، از جمله داستان، فیلم یا نمایش، در آن رخ می‌دهد.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "مکان"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 15461,
+          "sentenceEn": "The play has its setting in Vienna.",
+          "sentenceMeaningFa": "داستان این نمایش در وین می‌گذرد.",
+          "contributingEnglishWordId": 2782,
+          "contributingBaseForm": "play",
+          "matchedPersianMeaning": "نمایش",
+          "matchedComponent": "نمایش",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 36920,
+      "englishWordId": 1460,
+      "baseForm": "fire",
+      "pos": "verb",
+      "meaningFa": "شلیک کردن اسلحه",
+      "otherMeaningsFa": [
+        "تیراندازی کردن",
+        "آتش کردن",
+        "تیر انداختن"
+      ],
+      "conceptExplainedFa": "یعنی با اسلحه گلوله‌ای را به سوی هدف شلیک کردن.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "شلیک"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 15932,
+          "sentenceEn": "Someone fired a gun at me.",
+          "sentenceMeaningFa": "کسی (با اسلحه) به من شلیک کرد.",
+          "contributingEnglishWordId": 1717,
+          "contributingBaseForm": "gun",
+          "matchedPersianMeaning": "اسلحه",
+          "matchedComponent": "اسلحه",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 37506,
+      "englishWordId": 24271,
+      "baseForm": "giant",
+      "pos": "noun",
+      "meaningFa": "غول افسانه ای",
+      "otherMeaningsFa": [
+        "موجود بسیار بزرگ انسان نما",
+        "غول"
+      ],
+      "conceptExplainedFa": "در افسانه و داستان، موجودی انسان‌نما و بسیار بزرگ و نیرومند است که اغلب نقش تهدیدکننده دارد.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "غول"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 16687,
+          "sentenceEn": "The legend describes a giant living beyond the mountains.",
+          "sentenceMeaningFa": "افسانه غولی را توصیف می‌کند که آن سوی کوه‌ها زندگی می‌کند.",
+          "contributingEnglishWordId": 2173,
+          "contributingBaseForm": "legend",
+          "matchedPersianMeaning": "افسانه",
+          "matchedComponent": "افسانه",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 37705,
+      "englishWordId": 26301,
+      "baseForm": "musical",
+      "pos": "adjective",
+      "meaningFa": "اهل موسیقی یا بااستعداد در موسیقی",
+      "otherMeaningsFa": [
+        "اهل موسیقی",
+        "بااستعداد در موسیقی"
+      ],
+      "conceptExplainedFa": "دارای استعداد، علاقه یا فعالیت چشمگیر در زمینهٔ موسیقی.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "بااستعداد در موسیقی",
+        "اهل موسیقی"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 16933,
+          "sentenceEn": "She comes from a very musical family.",
+          "sentenceMeaningFa": "او از خانواده‌ای بسیار اهل موسیقی است.",
+          "contributingEnglishWordId": 27302,
+          "contributingBaseForm": "from",
+          "matchedPersianMeaning": "اهل",
+          "matchedComponent": "اهل",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 37720,
+      "englishWordId": 27777,
+      "baseForm": "aboard",
+      "pos": "adverb",
+      "meaningFa": "سوار کشتی هواپیما و",
+      "otherMeaningsFa": [
+        "سوار"
+      ],
+      "conceptExplainedFa": "یعنی داخل و سوار کشتی، هواپیما، قطار یا وسیلهٔ نقلیهٔ مشابه بودن یا رفتن.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "سوار"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 16951,
+          "sentenceEn": "Are all the passengers aboard the ship?",
+          "sentenceMeaningFa": "آیا همه مسافران سوار کشتی هستند (شده اند)؟",
+          "contributingEnglishWordId": 3294,
+          "contributingBaseForm": "ship",
+          "matchedPersianMeaning": "کشتی",
+          "matchedComponent": "کشتی",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 38390,
+      "englishWordId": 23140,
+      "baseForm": "line",
+      "pos": "noun",
+      "meaningFa": "جمله دیالوگ بازیگر",
+      "otherMeaningsFa": [
+        "دیالوگ",
+        "متن نقش"
+      ],
+      "conceptExplainedFa": "جمله یا بخشی از متن است که بازیگر در نمایش، فیلم یا برنامه می‌گوید؛ شکل جمع آن می‌تواند کل متن نقش باشد.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "دیالوگ"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 18977,
+          "sentenceEn": "The actor forgot his final line onstage.",
+          "sentenceMeaningFa": "بازیگر روی صحنه آخرین جملهٔ دیالوگش را فراموش کرد.",
+          "contributingEnglishWordId": 33,
+          "contributingBaseForm": "actor",
+          "matchedPersianMeaning": "بازیگر",
+          "matchedComponent": "بازیگر",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 38432,
+      "englishWordId": 2544,
+      "baseForm": "oil",
+      "pos": "noun",
+      "meaningFa": "رنگ روغن یا نقاشی با آن",
+      "otherMeaningsFa": [
+        "رنگ های روغنی",
+        "اثر نقاشی روغنی"
+      ],
+      "conceptExplainedFa": "در هنر، رنگ روغن، مجموعهٔ رنگ‌های روغنی یا اثری که با این رنگ‌ها نقاشی شده است.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "روغن"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 19087,
+          "sentenceEn": "The artist prefers to paint landscapes in oil.",
+          "sentenceMeaningFa": "هنرمند ترجیح می‌دهد منظره‌ها را با رنگ روغن نقاشی کند.",
+          "contributingEnglishWordId": 2610,
+          "contributingBaseForm": "paint",
+          "matchedPersianMeaning": "رنگ",
+          "matchedComponent": "رنگ",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 38700,
+      "englishWordId": 26191,
+      "baseForm": "president",
+      "pos": "noun",
+      "meaningFa": "رییس دانشگاه یا سازمان",
+      "otherMeaningsFa": [
+        "رییس",
+        "مدیر عالی"
+      ],
+      "conceptExplainedFa": "فردی است که بالاترین مقام اجرایی یک سازمان، دانشگاه یا برخی کشورها را بر عهده دارد.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "رییس"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 19834,
+          "sentenceEn": "The university president welcomed the new students.",
+          "sentenceMeaningFa": "رئیس دانشگاه از دانشجویان جدید استقبال کرد.",
+          "contributingEnglishWordId": 3923,
+          "contributingBaseForm": "university",
+          "matchedPersianMeaning": "دانشگاه",
+          "matchedComponent": "دانشگاه",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 39043,
+      "englishWordId": 28667,
+      "baseForm": "binge",
+      "pos": "verb",
+      "meaningFa": "در مدت کوتاه افراط کردن",
+      "otherMeaningsFa": [
+        "در خوردن یا نوشیدن زیاده روی کردن",
+        "مصرف افراطی دوره ای"
+      ],
+      "conceptExplainedFa": "یعنی در مدتی کوتاه مقدار بسیار زیادی غذا، نوشیدنی، رسانه یا چیز دیگری مصرف‌کردن و کنترل را کنارگذاشتن.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "افراط"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 21086,
+          "sentenceEn": "Some people binge on snacks while watching television.",
+          "sentenceMeaningFa": "برخی افراد هنگام تماشای تلویزیون در خوردن تنقلات افراط می‌کنند.",
+          "contributingEnglishWordId": 29854,
+          "contributingBaseForm": "while",
+          "matchedPersianMeaning": "مدت",
+          "matchedComponent": "مدت",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 39528,
+      "englishWordId": 22970,
+      "baseForm": "stroke",
+      "pos": "noun",
+      "meaningFa": "ضربه به توپ",
+      "otherMeaningsFa": [
+        "ضربه"
+      ],
+      "conceptExplainedFa": "عمل تماس کنترل‌شدهٔ چوب ورزشی با توپ برای تعیین مسیر و فاصلهٔ حرکت آن است.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "ضربه"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 22470,
+          "sentenceEn": "His final stroke sent the golf ball into the hole.",
+          "sentenceMeaningFa": "ضربه نهایی او به توپ، توپ گلف را داخل حفره فرستاد.",
+          "contributingEnglishWordId": 229,
+          "contributingBaseForm": "ball",
+          "matchedPersianMeaning": "توپ",
+          "matchedComponent": "توپ",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 39586,
+      "englishWordId": 26361,
+      "baseForm": "return",
+      "pos": "verb",
+      "meaningFa": "برگرداندن توپ در تنیس",
+      "otherMeaningsFa": [
+        "جواب دادن توپ"
+      ],
+      "conceptExplainedFa": "در تنیس یعنی به سرویس یا ضربه حریف پاسخ داد و توپ را به زمین او برگرداند.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "برگرداندن"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 22643,
+          "sentenceEn": "His aim was to make the other side unable to return the ball.",
+          "sentenceMeaningFa": "هدف او این بود که نگذارد آن طرف، توپ را برگرداند.",
+          "contributingEnglishWordId": 229,
+          "contributingBaseForm": "ball",
+          "matchedPersianMeaning": "توپ",
+          "matchedComponent": "توپ",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 39860,
+      "englishWordId": 669,
+      "baseForm": "clear",
+      "pos": "verb",
+      "meaningFa": "صاف شدن آسمان و",
+      "otherMeaningsFa": [
+        "باز شدن",
+        "زلال شدن مایعات",
+        "صاف شدن"
+      ],
+      "conceptExplainedFa": "درباره هوا یا آسمان یعنی ابر، مه یا باران کنار برود و وضعیت روشن و صاف شود.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "صاف شدن",
+        "صاف"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 23726,
+          "sentenceEn": "It rained in the morning, but in the afternoon the sky cleared.",
+          "sentenceMeaningFa": "صبح باران بارید، اما بعد از ظهر آسمان صاف شد.",
+          "contributingEnglishWordId": 26228,
+          "contributingBaseForm": "sky",
+          "matchedPersianMeaning": "آسمان",
+          "matchedComponent": "آسمان",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 40070,
+      "englishWordId": 26744,
+      "baseForm": "dial",
+      "pos": "noun",
+      "meaningFa": "صفحه ساعت رادیو و",
+      "otherMeaningsFa": [
+        "شماره گیر تلفن",
+        "شماره گیر",
+        "صفحه"
+      ],
+      "conceptExplainedFa": "صفحه‌ای مدرج در ساعت یا رادیو است که زمان، عدد یا مقدار تنظیم‌شده را نشان می‌دهد.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "صفحه"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 24335,
+          "sentenceEn": "I looked at the dial to see what time it was.",
+          "sentenceMeaningFa": "من به صفحه ساعت نگاه کردم تا ببینم ساعت چند است.",
+          "contributingEnglishWordId": 3783,
+          "contributingBaseForm": "time",
+          "matchedPersianMeaning": "ساعت",
+          "matchedComponent": "ساعت",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 40103,
+      "englishWordId": 24214,
+      "baseForm": "positive",
+      "pos": "noun",
+      "meaningFa": "نتیجه مثبت آزمایش",
+      "otherMeaningsFa": [],
+      "conceptExplainedFa": "نتیجه آزمایشی است که وجود ویژگی، ماده، بیماری یا اثر مورد بررسی را نشان می‌دهد.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "مثبت"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 24392,
+          "sentenceEn": "The result can be a false positive.",
+          "sentenceMeaningFa": "نتیجه (آزمایش) می‌تواند یک نتیجه مثبت اشتباه باشد.",
+          "contributingEnglishWordId": 3074,
+          "contributingBaseForm": "result",
+          "matchedPersianMeaning": "نتیجه",
+          "matchedComponent": "نتیجه",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 40156,
+      "englishWordId": 29283,
+      "baseForm": "answering machine",
+      "pos": "noun",
+      "meaningFa": "پیام گیر تلفن",
+      "otherMeaningsFa": [
+        "پیام گیر"
+      ],
+      "conceptExplainedFa": "دستگاهی تلفنی است که هنگام پاسخ ندادن، پیام تماس‌گیرنده را ضبط و بعداً پخش می‌کند.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "پیام گیر"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 24479,
+          "sentenceEn": "she could leave a message on the answering machine.",
+          "sentenceMeaningFa": "او می توانست روی پیام گیر، یک پیغام بگذارد.",
+          "contributingEnglishWordId": 2355,
+          "contributingBaseForm": "message",
+          "matchedPersianMeaning": "پیام",
+          "matchedComponent": "پیام",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 40187,
+      "englishWordId": 647,
+      "baseForm": "circulation",
+      "pos": "noun",
+      "meaningFa": "تیراژ روزنامه و مجله",
+      "otherMeaningsFa": [
+        "تیراژ",
+        "شمارگان"
+      ],
+      "conceptExplainedFa": "تعداد نسخه‌های روزنامه یا مجله است که در یک دوره چاپ و میان خوانندگان توزیع می‌شود.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "تیراژ"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 24535,
+          "sentenceEn": "The magazine had a large circulation.",
+          "sentenceMeaningFa": "این مجله تیراژ بالایی داشت.",
+          "contributingEnglishWordId": 26308,
+          "contributingBaseForm": "magazine",
+          "matchedPersianMeaning": "مجله",
+          "matchedComponent": "مجله",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 40236,
+      "englishWordId": 26413,
+      "baseForm": "service",
+      "pos": "noun",
+      "meaningFa": "سرویس اتوبوس و",
+      "otherMeaningsFa": [
+        "سرویس"
+      ],
+      "conceptExplainedFa": "در حمل‌ونقل یک حرکت برنامه‌ریزی‌شده اتوبوس، قطار یا وسیله عمومی در مسیر و زمان مشخص است.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "سرویس"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 24615,
+          "sentenceEn": "Bus service is provided for trip throughout Romania.",
+          "sentenceMeaningFa": "سرویس اتوبوس برای سفر به دور \"رومانی\" فراهم شده است.",
+          "contributingEnglishWordId": 469,
+          "contributingBaseForm": "bus",
+          "matchedPersianMeaning": "اتوبوس",
+          "matchedComponent": "اتوبوس",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 40260,
+      "englishWordId": 3904,
+      "baseForm": "twist",
+      "pos": "noun",
+      "meaningFa": "پیچ تند جاده یا رودخانه",
+      "otherMeaningsFa": [
+        "پیچ"
+      ],
+      "conceptExplainedFa": "در مسیر یا رودخانه خم یا پیچ تند و مشخصی است که جهت را به‌طور محسوس تغییر می‌دهد.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "پیچ"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 24662,
+          "sentenceEn": "The car followed the twists and turns of the mountain road.",
+          "sentenceMeaningFa": "ماشین در امتداد پیچ و خم‌های جاده کوهستانی حرکت می‌کرد.",
+          "contributingEnglishWordId": 3112,
+          "contributingBaseForm": "road",
+          "matchedPersianMeaning": "جاده",
+          "matchedComponent": "جاده",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 40306,
+      "englishWordId": 1824,
+      "baseForm": "hike",
+      "pos": "verb",
+      "meaningFa": "پیاده گردی کردن طولانی",
+      "otherMeaningsFa": [
+        "پیاده روی کردن"
+      ],
+      "conceptExplainedFa": "مسافتی نسبتاً طولانی را برای تفریح یا ورزش، معمولاً در طبیعت و مسیرهای ناهموار، پیاده طی کردن.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "پیاده گردی"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 24749,
+          "sentenceEn": "They went hiking in the Blue Ridge Mountains.",
+          "sentenceMeaningFa": "آن‌ها برای پیاده‌گردی کردن به کوهستان [رشته کوه‌های] «بلو ریج» رفتند.",
+          "contributingEnglishWordId": 26306,
+          "contributingBaseForm": "hiking",
+          "matchedPersianMeaning": "پیاده گردی",
+          "matchedComponent": "پیاده گردی",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 40733,
+      "englishWordId": 29586,
+      "baseForm": "high jump",
+      "pos": "noun",
+      "meaningFa": "پرش ارتفاع ورزش",
+      "otherMeaningsFa": [
+        "پرش ارتفاع"
+      ],
+      "conceptExplainedFa": "رشته دوومیدانی است که ورزشکار می‌کوشد بدون انداختن میله افقی از بالاترین ارتفاع بپرد.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "پرش ارتفاع"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 25415,
+          "sentenceEn": "She won a silver medal in the high jump.",
+          "sentenceMeaningFa": "او در (ورزش) پرش ارتفاع برنده مدال نقره شد.",
+          "contributingEnglishWordId": 29015,
+          "contributingBaseForm": "the high jump",
+          "matchedPersianMeaning": "پرش ارتفاع",
+          "matchedComponent": "پرش ارتفاع",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 41222,
+      "englishWordId": 1836,
+      "baseForm": "hold",
+      "pos": "verb",
+      "meaningFa": "در دست داشتن عنوان یا رکورد",
+      "otherMeaningsFa": [],
+      "conceptExplainedFa": "عنوان قهرمانی، رکورد یا جایگاه برتر را در اختیار داشتن.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "داشتن"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 26254,
+          "sentenceEn": "She held the title of world champion for three years.",
+          "sentenceMeaningFa": "او سه سال عنوان قهرمان جهان را در اختیار داشت.",
+          "contributingEnglishWordId": 26814,
+          "contributingBaseForm": "title",
+          "matchedPersianMeaning": "عنوان",
+          "matchedComponent": "عنوان",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 41500,
+      "englishWordId": 30062,
+      "baseForm": "comeback",
+      "pos": "noun",
+      "meaningFa": "بازگشت به مقام و قدرت سابق",
+      "otherMeaningsFa": [
+        "بازگشت"
+      ],
+      "conceptExplainedFa": "بازگشت به موفقیت، محبوبیت، سلامت یا فعالیت پس از دوره‌ای از شکست، غیبت یا ضعف است.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "بازگشت"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 26755,
+          "sentenceEn": "The former world champion is hoping to make a comeback .",
+          "sentenceMeaningFa": "قهرمان سابق جهان، امیدوار است (به مقام خود) بازگشت کند [قهرمان سابق جهان، امیدوار است مقام خود را پس بگیرد].",
+          "contributingEnglishWordId": 1526,
+          "contributingBaseForm": "former",
+          "matchedPersianMeaning": "سابق",
+          "matchedComponent": "سابق",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 41631,
+      "englishWordId": 1183,
+      "baseForm": "dry",
+      "pos": "verb",
+      "meaningFa": "خشک کردن",
+      "otherMeaningsFa": [
+        "خشکاندن"
+      ],
+      "conceptExplainedFa": "در کاربرد متعدی یعنی آب یا رطوبت چیزی را با هوا، گرما یا پارچه از آن خارج کردن.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "خشک"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 26961,
+          "sentenceEn": "Devin dried her eyes with a handkerchief.",
+          "sentenceMeaningFa": "\"دوین\" چشم‌هایش را با دستمال خشک کرد.",
+          "contributingEnglishWordId": 31446,
+          "contributingBaseForm": "dried",
+          "matchedPersianMeaning": "خشک",
+          "matchedComponent": "خشک",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 41724,
+      "englishWordId": 30212,
+      "baseForm": "troop",
+      "pos": "noun",
+      "meaningFa": "گروه سربازان",
+      "otherMeaningsFa": [
+        "سربازان"
+      ],
+      "conceptExplainedFa": "یک گروه یا واحد از سربازان است؛ شکل جمع آن می‌تواند به طور کلی به نیروهای نظامی اشاره کند.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "سربازان"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 27088,
+          "sentenceEn": "We send the packages to the US troops.",
+          "sentenceMeaningFa": "ما بسته‌ها را برای سربازان آمریکایی می‌فرستیم.",
+          "contributingEnglishWordId": 30454,
+          "contributingBaseForm": "troops",
+          "matchedPersianMeaning": "سربازان",
+          "matchedComponent": "سربازان",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 41960,
+      "englishWordId": 29347,
+      "baseForm": "clerk",
+      "pos": "noun",
+      "meaningFa": "فروشنده فروشگاه و",
+      "otherMeaningsFa": [
+        "فروشنده"
+      ],
+      "conceptExplainedFa": "در انگلیسی آمریکایی می‌تواند کارمند فروشگاه باشد که به مشتری، صندوق یا ثبت کالا رسیدگی می‌کند.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "فروشنده"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 27420,
+          "sentenceEn": "She was a clerk in an ice-cream store.",
+          "sentenceMeaningFa": "او فروشنده یک بستنی‌فروشی بود.",
+          "contributingEnglishWordId": 3572,
+          "contributingBaseForm": "store",
+          "matchedPersianMeaning": "فروشگاه",
+          "matchedComponent": "فروشگاه",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 42181,
+      "englishWordId": 26474,
+      "baseForm": "rail",
+      "pos": "noun",
+      "meaningFa": "نرده راه پله",
+      "otherMeaningsFa": [
+        "نرده",
+        "دستگیره"
+      ],
+      "conceptExplainedFa": "میله‌ای محافظ و قابل‌گرفتن در کنار پله‌هاست که به حفظ تعادل و جلوگیری از سقوط کمک می‌کند.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "نرده"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 27708,
+          "sentenceEn": "Hold the rail while you walk down these steep stairs.",
+          "sentenceMeaningFa": "هنگام پایین رفتن از این پله‌های شیب‌دار، نردهٔ راه‌پله را بگیر.",
+          "contributingEnglishWordId": 3511,
+          "contributingBaseForm": "stairs",
+          "matchedPersianMeaning": "پله",
+          "matchedComponent": "پله",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 42286,
+      "englishWordId": 3205,
+      "baseForm": "scarf",
+      "pos": "verb",
+      "meaningFa": "با ولع و سریع خوردن",
+      "otherMeaningsFa": [
+        "با عجله بلعیدن",
+        "سریع خوردن"
+      ],
+      "conceptExplainedFa": "خوردن مقدار زیادی غذا با سرعت و ولع، معمولاً به دلیل گرسنگی یا کمبود وقت، را بیان می‌کند.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "سریع خوردن"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 30442,
+          "sentenceEn": "He scarfed down a sandwich before running back to class.",
+          "sentenceMeaningFa": "او یک ساندویچ را با عجله بلعید و به کلاس برگشت.",
+          "contributingEnglishWordId": 1151,
+          "contributingBaseForm": "down",
+          "matchedPersianMeaning": "سریع خوردن",
+          "matchedComponent": "سریع خوردن",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 42469,
+      "englishWordId": 4134,
+      "baseForm": "worm",
+      "pos": "noun",
+      "meaningFa": "کرم رایانه ای",
+      "otherMeaningsFa": [],
+      "conceptExplainedFa": "اصطلاحی تخصصی در حوزهٔ امنیت رایانه که بدون دخالت کاربر تکثیر می‌شود و در شبکه گسترش می‌یابد.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "کرم"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 30266,
+          "sentenceEn": "The computer worm spread across the office network without user action.",
+          "sentenceMeaningFa": "کرم رایانه‌ای بدون دخالت کاربر در سراسر شبکهٔ اداره پخش شد.",
+          "contributingEnglishWordId": 777,
+          "contributingBaseForm": "computer",
+          "matchedPersianMeaning": "رایانه",
+          "matchedComponent": "رایانه",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 42493,
+      "englishWordId": 30679,
+      "baseForm": "cellular",
+      "pos": "adjective",
+      "meaningFa": "مربوط به شبکه سلولی",
+      "otherMeaningsFa": [
+        "سلولی",
+        "موبایلی"
+      ],
+      "conceptExplainedFa": "ارتباط یا دستگاهی را توصیف می‌کند که برای انتقال داده و تماس از شبکهٔ تلفن همراه استفاده می‌کند.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "سلولی"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 30242,
+          "sentenceEn": "The tablet switches to the cellular network whenever Wi-Fi is unavailable.",
+          "sentenceMeaningFa": "هر وقت وای‌فای در دسترس نباشد، تبلت به شبکهٔ سلولی وصل می‌شود.",
+          "contributingEnglishWordId": 22499,
+          "contributingBaseForm": "network",
+          "matchedPersianMeaning": "شبکه",
+          "matchedComponent": "شبکه",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 42499,
+      "englishWordId": 831,
+      "baseForm": "control",
+      "pos": "noun",
+      "meaningFa": "کلید کنترل (کیبورد کامپیوتر)",
+      "otherMeaningsFa": [
+        "کلید"
+      ],
+      "conceptExplainedFa": "کلیدی اصلاح‌گر روی صفحه‌کلید است که همراه کلیدهای دیگر میان‌برها و فرمان‌های نرم‌افزاری را اجرا می‌کند.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "کنترل",
+        "کلید"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 30237,
+          "sentenceEn": "Hold the Control key while clicking to select several files.",
+          "sentenceMeaningFa": "برای انتخاب چند فایل، هنگام کلیک‌کردن کلید Control را نگه دارید.",
+          "contributingEnglishWordId": 2094,
+          "contributingBaseForm": "key",
+          "matchedPersianMeaning": "کلید",
+          "matchedComponent": "کلید",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 43258,
+      "englishWordId": 24181,
+      "baseForm": "travel",
+      "pos": "verb",
+      "meaningFa": "سریع رفتن (وسیله نقلیه)",
+      "otherMeaningsFa": [
+        "با سرعت حرکت کردن"
+      ],
+      "conceptExplainedFa": "حرکت وسیلهٔ نقلیه با سرعت در امتداد مسیر یا عبور سریع از منطقه‌ای را بیان می‌کند.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "رفتن"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 29169,
+          "sentenceEn": "The train was traveling quickly through the valley.",
+          "sentenceMeaningFa": "قطار به‌سرعت از دره عبور می‌کرد.",
+          "contributingEnglishWordId": 2947,
+          "contributingBaseForm": "quickly",
+          "matchedPersianMeaning": "سریع",
+          "matchedComponent": "سریع",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 43945,
+      "englishWordId": 31846,
+      "baseForm": "drive in",
+      "pos": "noun",
+      "meaningFa": "(رستوران و ...) اتومبیل رو",
+      "otherMeaningsFa": [
+        "اتومبیل رو"
+      ],
+      "conceptExplainedFa": "مکانی خدماتی است که مشتری با خودرو وارد می‌شود و بدون نیاز به پارک طولانی خدمات دریافت می‌کند.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "اتومبیل رو"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 28511,
+          "sentenceEn": "We ordered burgers at a drive-in restaurant.",
+          "sentenceMeaningFa": "در یک رستوران اتومبیل‌رو برگر سفارش دادیم.",
+          "contributingEnglishWordId": 3068,
+          "contributingBaseForm": "restaurant",
+          "matchedPersianMeaning": "رستوران",
+          "matchedComponent": "رستوران",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 44618,
+      "englishWordId": 23865,
+      "baseForm": "start up",
+      "pos": "phrasal verb",
+      "meaningFa": "موتور یا دستگاه را راه اندازی کردن یا به کار افتادن",
+      "otherMeaningsFa": [
+        "روشن کردن",
+        "شروع به کار کردن"
+      ],
+      "conceptExplainedFa": "موتور یا دستگاهی را روشن کردن یا شروع به کار کردن آن.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "راه اندازی کردن"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 11780,
+          "sentenceEn": "The old engine started up after several attempts.",
+          "sentenceMeaningFa": "موتور قدیمی پس از چند تلاش روشن شد.",
+          "contributingEnglishWordId": 1272,
+          "contributingBaseForm": "engine",
+          "matchedPersianMeaning": "موتور",
+          "matchedComponent": "موتور",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    },
+    {
+      "wordSenseId": 44836,
+      "englishWordId": 1836,
+      "baseForm": "hold",
+      "pos": "verb",
+      "meaningFa": "انجام دادن یا داشتن مکالمه",
+      "otherMeaningsFa": [
+        "برگزار کردن گفت وگو",
+        "گفت وگو کردن"
+      ],
+      "conceptExplainedFa": "گفت‌وگو یا مکالمه‌ای را برگزار کردن.",
+      "meaningReviewStatus": "CONFIRMED",
+      "nestedShorterMeanings": [
+        "داشتن"
+      ],
+      "detectionScore": 6,
+      "evidence": [
+        {
+          "sentenceId": 16826,
+          "sentenceEn": "They held a private conversation after dinner.",
+          "sentenceMeaningFa": "آن‌ها پس از شام گفت‌وگویی خصوصی داشتند.",
+          "contributingEnglishWordId": 26015,
+          "contributingBaseForm": "conversation",
+          "matchedPersianMeaning": "مکالمه",
+          "matchedComponent": "مکالمه",
+          "matchesNestedRemainder": false
+        }
+      ],
+      "candidateTier": "review"
+    }
+  ]
+}

@@ -4,6 +4,7 @@ import { PageHeader } from "@/components/page-header";
 import Link from "next/link";
 import { useCallback, useRef, useState } from "react";
 
+import { combinePromptParts } from "@/lib/ai/promptPolicy";
 import { WORD_EXTRACTION_PROMPTS_PHASE3 } from "@/lib/word-extraction/promptSpecs";
 
 const buttonBase =
@@ -237,7 +238,7 @@ export default function WordExtractionPage() {
       const results = await Promise.all(
         paths.map(async (path) => {
           const res = await fetch(
-            `/api/ai/prompt-file?path=${encodeURIComponent(path)}`,
+            `/api/ai/prompt-file?path=${encodeURIComponent(path)}&render=1`,
             { method: "GET" },
           );
           if (!res.ok) {
@@ -1729,9 +1730,9 @@ export default function WordExtractionPage() {
                     <button
                       type="button"
                       onClick={() => {
-                        const combined = baseModalItems
-                          .map((item) => item.text.trim())
-                          .join("\n\n");
+                        const combined = combinePromptParts(
+                          baseModalItems.map((item) => item.text),
+                        );
                         void navigator.clipboard
                           .writeText(combined)
                           .then(() => {
@@ -1754,9 +1755,9 @@ export default function WordExtractionPage() {
                 </div>
                 <textarea
                   readOnly
-                  value={baseModalItems
-                    .map((item) => item.text.trim())
-                    .join("\n\n")}
+                  value={combinePromptParts(
+                    baseModalItems.map((item) => item.text),
+                  )}
                   className="min-h-0 flex-1 resize-none rounded border bg-transparent p-3 font-mono text-xs"
                 />
               </div>
@@ -1826,9 +1827,9 @@ export default function WordExtractionPage() {
                     <button
                       type="button"
                       onClick={() => {
-                        const combined = sentenceExtractModalItems
-                          .map((item) => item.text.trim())
-                          .join("\n\n");
+                        const combined = combinePromptParts(
+                          sentenceExtractModalItems.map((item) => item.text),
+                        );
                         void navigator.clipboard
                           .writeText(combined)
                           .then(() => {
@@ -1884,9 +1885,9 @@ export default function WordExtractionPage() {
                     <button
                       type="button"
                       onClick={() => {
-                        const combined = sentenceExtractModalItems
-                          .map((item) => item.text.trim())
-                          .join("\n\n");
+                        const combined = combinePromptParts(
+                          sentenceExtractModalItems.map((item) => item.text),
+                        );
                         const tail = sentenceExtractModalTailJson
                           ? `\n\n${sentenceExtractModalTailJson}`
                           : "";
@@ -1919,11 +1920,9 @@ export default function WordExtractionPage() {
                 </div>
                 <textarea
                   readOnly
-                  value={`${sentenceExtractModalItems
-                    .map((item) => item.text.trim())
-                    .join(
-                      "\n\n",
-                    )}${sentenceExtractModalTailJson ? `\n\n${sentenceExtractModalTailJson}` : ""}`}
+                  value={`${combinePromptParts(
+                    sentenceExtractModalItems.map((item) => item.text),
+                  )}${sentenceExtractModalTailJson ? `\n\n${sentenceExtractModalTailJson}` : ""}`}
                   className="min-h-0 flex-1 resize-none rounded border bg-transparent p-3 font-mono text-xs"
                 />
               </div>
@@ -1988,9 +1987,9 @@ export default function WordExtractionPage() {
                     <button
                       type="button"
                       onClick={() => {
-                        const combined = phoneticModalItems
-                          .map((item) => item.text.trim())
-                          .join("\n\n");
+                        const combined = combinePromptParts(
+                          phoneticModalItems.map((item) => item.text),
+                        );
                         void navigator.clipboard
                           .writeText(combined)
                           .then(() => {
@@ -2041,9 +2040,9 @@ export default function WordExtractionPage() {
                     <button
                       type="button"
                       onClick={() => {
-                        const combined = phoneticModalItems
-                          .map((item) => item.text.trim())
-                          .join("\n\n");
+                        const combined = combinePromptParts(
+                          phoneticModalItems.map((item) => item.text),
+                        );
                         const tail = phoneticModalTailJson
                           ? `\n\n${phoneticModalTailJson}`
                           : "";
@@ -2072,11 +2071,9 @@ export default function WordExtractionPage() {
                 </div>
                 <textarea
                   readOnly
-                  value={`${phoneticModalItems
-                    .map((item) => item.text.trim())
-                    .join(
-                      "\n\n",
-                    )}${phoneticModalTailJson ? `\n\n${phoneticModalTailJson}` : ""}`}
+                  value={`${combinePromptParts(
+                    phoneticModalItems.map((item) => item.text),
+                  )}${phoneticModalTailJson ? `\n\n${phoneticModalTailJson}` : ""}`}
                   className="min-h-0 flex-1 resize-none rounded border bg-transparent p-3 font-mono text-xs"
                 />
               </div>
@@ -2346,9 +2343,9 @@ export default function WordExtractionPage() {
                     <button
                       type="button"
                       onClick={() => {
-                        const combined = base2ModalItems
-                          .map((item) => item.text.trim())
-                          .join("\n\n");
+                        const combined = combinePromptParts(
+                          base2ModalItems.map((item) => item.text),
+                        );
                         void navigator.clipboard
                           .writeText(combined)
                           .then(() => {
@@ -2399,9 +2396,9 @@ export default function WordExtractionPage() {
                     <button
                       type="button"
                       onClick={() => {
-                        const combined = base2ModalItems
-                          .map((item) => item.text.trim())
-                          .join("\n\n");
+                        const combined = combinePromptParts(
+                          base2ModalItems.map((item) => item.text),
+                        );
                         const tail = base2ModalTailJson
                           ? `\n\n${base2ModalTailJson}`
                           : "";
@@ -2430,11 +2427,9 @@ export default function WordExtractionPage() {
                 </div>
                 <textarea
                   readOnly
-                  value={`${base2ModalItems
-                    .map((item) => item.text.trim())
-                    .join(
-                      "\n\n",
-                    )}${base2ModalTailJson ? `\n\n${base2ModalTailJson}` : ""}`}
+                  value={`${combinePromptParts(
+                    base2ModalItems.map((item) => item.text),
+                  )}${base2ModalTailJson ? `\n\n${base2ModalTailJson}` : ""}`}
                   className="min-h-0 flex-1 resize-none rounded border bg-transparent p-3 font-mono text-xs"
                 />
               </div>

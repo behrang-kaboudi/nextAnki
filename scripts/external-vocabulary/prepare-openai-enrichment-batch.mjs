@@ -20,6 +20,8 @@ const args = new Map(process.argv.slice(2).map((arg) => {
   return [key, value];
 }));
 const limitRequests = Math.max(0, Number.parseInt(args.get("--limit-requests") ?? "0", 10) || 0);
+const PROMPTS_ROOT = path.join(process.cwd(), "src", "prompts");
+const PROMPT_INCLUDE_RE = /\{\{\s*>\s*([^\s}]+)\s*\}\}/g;
 
 function normalizeTerm(value) {
   return value.normalize("NFKC").replace(/[’‘`]/gu, "'").replace(/\s+/gu, " ").trim().toLocaleLowerCase("en-US");
@@ -28,6 +30,19 @@ function normalizeTerm(value) {
 function readJsonLines(filePath) {
   if (!fs.existsSync(filePath)) return [];
   return fs.readFileSync(filePath, "utf8").split("\n").filter(Boolean).map((line) => JSON.parse(line));
+}
+
+function readRenderedPrompt(file, stack = []) {
+  const absolutePath = path.join(process.cwd(), file);
+  const source = fs.readFileSync(absolutePath, "utf8");
+  return source.replace(PROMPT_INCLUDE_RE, (_match, includePathRaw) => {
+    const includePath = path.extname(includePathRaw) ? includePathRaw : `${includePathRaw}.md`;
+    if (stack.includes(includePath)) {
+      throw new Error(`Circular prompt include detected: ${[...stack, includePath].join(" -> ")}`);
+    }
+    const relativeFile = path.relative(process.cwd(), path.join(PROMPTS_ROOT, includePath));
+    return readRenderedPrompt(relativeFile, [...stack, includePath]);
+  });
 }
 
 function promptText() {
@@ -41,7 +56,7 @@ function promptText() {
     "src/prompts/word-extraction/sentence_en/rulseV1.md",
     "src/prompts/word-extraction/sentence_meaning_fa/rulseV1.md",
   ];
-  const projectRules = files.map((file) => fs.readFileSync(path.join(process.cwd(), file), "utf8")).join("\n\n");
+  const projectRules = files.map((file) => readRenderedPrompt(file, [file])).join("\n\n");
   return `${projectRules}\n\nADDITIONAL ENRICHMENT WORKFLOW RULES\n
 - Return exactly one output item for every input record, in the same order, with the same source_row_index.
 - Treat every input record as one intended sense. Never merge records or introduce a new English sense.

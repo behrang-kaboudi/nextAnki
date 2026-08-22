@@ -1,0 +1,13 @@
+{
+  "generated_at": "2026-08-18T23:02:58.425Z",
+  "workflow": "sentence-translation-audio-audit",
+  "tracking_cutoff": "2026-08-10T08:39:40.000Z",
+  "legacy_audio_candidates": 4292,
+  "resolved_historical_sources": 4190,
+  "mismatch_count": 239,
+  "priority_1_count": 181,
+  "priority_2_count": 58,
+  "unresolved_count": 102,
+  "database_mutated": false,
+  "audio_files_mutated": false
+}

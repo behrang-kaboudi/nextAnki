@@ -58,9 +58,12 @@ function SortHeader({ href, label, active, direction, indicators }: { href: stri
   return <th className="whitespace-nowrap px-3 py-2"><Link href={href} className="inline-flex items-center gap-1 hover:underline"><TableColumnIndicators indicators={indicators} /><span>{label} <span className={active ? "opacity-100" : "opacity-40"}>{active && direction === "asc" ? "↑" : "↓"}</span></span></Link></th>;
 }
 
-export default async function SentencesTablePage({ searchParams }: { searchParams: Promise<{ q?: string; page?: string; pageSize?: string; sort?: string; dir?: string; columns?: string | string[]; missingAudio?: string; ids?: string; maintenanceOperationId?: string; maintenancePreviewId?: string }> }) {
+export default async function SentencesTablePage({ searchParams }: { searchParams: Promise<{ q?: string; searchField?: string; page?: string; pageSize?: string; sort?: string; dir?: string; columns?: string | string[]; missingAudio?: string; ids?: string; maintenanceOperationId?: string; maintenancePreviewId?: string }> }) {
   const params = await searchParams;
   const q = String(params.q ?? "").trim();
+  const searchField = params.searchField === "id" || params.searchField === "sentence_en" ? params.searchField : "all";
+  const searchedId = Number(q);
+  const exactId = Number.isSafeInteger(searchedId) && searchedId > 0 ? searchedId : null;
   const page = positiveInt(params.page, 1);
   const pageSize = Math.min(Math.max(positiveInt(params.pageSize, 50), 10), 200);
   const sort = SORT_FIELDS.includes(params.sort as SortField) ? (params.sort as SortField) : "updatedAt";
@@ -78,7 +81,11 @@ export default async function SentencesTablePage({ searchParams }: { searchParam
   const hasInspectionScope = Boolean(params.ids || params.maintenanceOperationId || params.maintenancePreviewId);
   const hasColumn = (key: TableColumnKey) => columns.includes(key);
   const filters: Prisma.SentenceWhereInput[] = [];
-  if (q) filters.push({ OR: [{ sentence_en: { contains: q } }, { sentence_en_meaning_fa: { contains: q } }, { sentence_en_audio_source_text: { contains: q } }, { sentence_en_meaning_fa_audio_source_text: { contains: q } }] });
+  if (q) filters.push(searchField === "id"
+    ? { id: exactId ?? -1 }
+    : searchField === "sentence_en"
+      ? { sentence_en: { contains: q } }
+      : { OR: [{ sentence_en: { contains: q } }, { sentence_en_meaning_fa: { contains: q } }, { sentence_en_audio_source_text: { contains: q } }, { sentence_en_meaning_fa_audio_source_text: { contains: q } }] });
   if (hasInspectionScope) filters.push({ id: { in: inspectedIds } });
   if (missingAudio) {
     const [sentenceIds, meaningIds] = await Promise.all([
@@ -111,6 +118,7 @@ export default async function SentencesTablePage({ searchParams }: { searchParam
   const href = (nextPage: number, nextSort = sort, nextDir = dir) => {
     const query = new URLSearchParams({ page: String(nextPage), pageSize: String(pageSize), sort: nextSort, dir: nextDir });
     if (q) query.set("q", q);
+    query.set("searchField", searchField);
     if (missingAudio) query.set("missingAudio", missingAudio);
     if (params.ids) query.set("ids", params.ids);
     if (params.maintenanceOperationId) query.set("maintenanceOperationId", params.maintenanceOperationId);
@@ -119,7 +127,7 @@ export default async function SentencesTablePage({ searchParams }: { searchParam
     return `/words/tables/sentences?${query.toString()}`;
   };
   const clearHref = (() => {
-    const query = new URLSearchParams({ page: "1", pageSize: String(pageSize), sort, dir });
+    const query = new URLSearchParams({ page: "1", pageSize: String(pageSize), sort, dir, searchField });
     columns.forEach((column) => query.append("columns", column));
     return `/words/tables/sentences?${query.toString()}`;
   })();
@@ -128,7 +136,7 @@ export default async function SentencesTablePage({ searchParams }: { searchParam
     <PageHeader title="Sentence Table" subtitle="Browse unique sentence records and manage their owned English and Persian audio files." />
     {hasInspectionScope ? <div className="mt-4 rounded border border-blue-500/30 bg-blue-500/5 p-3 text-sm">{inspectedIds.length ? "Showing Sentence records affected by the selected WordSense maintenance preview or operation. Deleted rows appear again here after Undo." : "No current Sentence rows are available for this maintenance preview or operation; the preview may have expired or the rows may have been deleted."}</div> : null}
     <section className="mt-4 overflow-hidden rounded border"><div className="p-3">
-      <form className="flex flex-wrap items-center gap-2"><input name="q" defaultValue={q} placeholder="Search sentence or Persian meaning…" className="w-full rounded border px-3 py-2 text-sm sm:w-96" /><label className="flex items-center gap-1 text-sm">Missing audio <select name="missingAudio" defaultValue={missingAudio} className="rounded border px-2 py-2"><option value="">All</option><option value="any">Either field</option><option value="sentence_en">sentence_en</option><option value="sentence_en_meaning_fa">sentence_en_meaning_fa</option></select></label><label className="flex items-center gap-1 text-sm">Rows <select name="pageSize" defaultValue={String(pageSize)} className="rounded border px-2 py-2"><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option><option value="200">200</option></select></label><input type="hidden" name="sort" value={sort} /><input type="hidden" name="dir" value={dir} />{columns.map((column) => <input key={column} type="hidden" name="columns" value={column} />)}<button type="submit" className="rounded border px-3 py-2 text-sm hover:bg-black/5 dark:hover:bg-white/5">Search</button>{q || missingAudio ? <Link href={clearHref} className="rounded border px-3 py-2 text-sm hover:bg-black/5 dark:hover:bg-white/5">Clear</Link> : null}</form>
+      <form className="flex flex-wrap items-center gap-2"><input name="q" defaultValue={q} placeholder="Search sentence or Persian meaning…" className="w-full rounded border px-3 py-2 text-sm sm:w-96" /><label className="flex items-center gap-1 text-sm">Missing audio <select name="missingAudio" defaultValue={missingAudio} className="rounded border px-2 py-2"><option value="">All</option><option value="any">Either field</option><option value="sentence_en">sentence_en</option><option value="sentence_en_meaning_fa">sentence_en_meaning_fa</option></select></label><label className="flex items-center gap-1 text-sm">Rows <select name="pageSize" defaultValue={String(pageSize)} className="rounded border px-2 py-2"><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option><option value="200">200</option></select></label><input type="hidden" name="sort" value={sort} /><input type="hidden" name="dir" value={dir} />{columns.map((column) => <input key={column} type="hidden" name="columns" value={column} />)}<fieldset className="flex items-center gap-2 text-sm" aria-label="Search field"><label className="flex items-center gap-1"><input type="radio" name="searchField" value="all" defaultChecked={searchField === "all"} /> All fields</label><label className="flex items-center gap-1"><input type="radio" name="searchField" value="id" defaultChecked={searchField === "id"} /> id</label><label className="flex items-center gap-1"><input type="radio" name="searchField" value="sentence_en" defaultChecked={searchField === "sentence_en"} /> sentence_en</label></fieldset><button type="submit" className="rounded border px-3 py-2 text-sm hover:bg-black/5 dark:hover:bg-white/5">Search</button>{q || missingAudio ? <Link href={clearHref} className="rounded border px-3 py-2 text-sm hover:bg-black/5 dark:hover:bg-white/5">Clear</Link> : null}</form>
       <div className="mt-3 grid gap-4 border-t pt-3 lg:grid-cols-[minmax(240px,0.7fr)_minmax(0,1.3fr)]">
         <div className="flex flex-col items-start gap-2">
           <TableFieldMaintenance modelLabel="Sentence" apiBase="/api/table-field-maintenance/Sentence" />

@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "runId": "2026-08-21-review_persian_meanings-9f5f67e7-928d-424d-ab5c-5e5adbe23d50",
+  "stageId": "review_persian_meanings",
+  "status": "applied",
+  "createdAt": "2026-08-21T17:02:27.952Z",
+  "updatedAt": "2026-08-21T17:04:20.916Z",
+  "itemCount": 1,
+  "promptFile": "prompt.md",
+  "inputFile": "input.json",
+  "responseFile": "response.json",
+  "qaFile": "qa.json",
+  "humanReviewPolicy": "merge_only",
+  "applicationFile": "application.json"
+}

@@ -1,0 +1,110 @@
+<!-- GLOBAL_AMERICAN_ENGLISH_POLICY_V1 -->
+# Global American English Policy
+
+Use contemporary standard American English for every new or modified English
+value produced for this project.
+
+- Use American spelling, vocabulary, grammar, capitalization, punctuation, and
+  idiomatic usage. Do not output a British, Canadian, Australian, or mixed
+  regional convention when an American form exists.
+- Store canonical English dictionary forms in American spelling. For example,
+  use `acknowledgment`, `color`, `center`, `organize`, and `traveling`, not
+  `acknowledgement`, `colour`, `centre`, `organise`, or `travelling`.
+- Write and normalize `base_form`, English headwords, generated English
+  sentences, corrected English sentences, English explanations, hints, and
+  labels according to American English.
+- Use contemporary American meaning and usage evidence when regional meanings
+  or word choices differ. Do not silently store a British-only headword or
+  meaning as the project's canonical American entry.
+- Use General American pronunciation for pronunciation or phonetic fields.
+- When user-supplied English uses another regional convention, preserve its
+  meaning and intent but convert any English value that will be newly stored or
+  returned as corrected/generated project data to American English. Briefly
+  identify the normalization when it matters to the user's decision.
+- Do not rewrite existing database values, quoted source text, proper names,
+  code, identifiers, or exact-match evidence merely to apply this policy unless
+  the current task explicitly authorizes changing those values.
+- This policy changes language convention only. It never authorizes changing a
+  requested sense, grammatical role, factual content, JSON schema, field order,
+  or exact output contract.
+<!-- /GLOBAL_AMERICAN_ENGLISH_POLICY_V1 -->
+
+
+به تو آرایه‌ای از گروه‌های candidate داده می‌شود. هر گروه شامل چند شکل نوشتاری انگلیسی است که برنامه با قواعد صرفی ساده به هم مرتبط دانسته است: `s/es` فقط برای گروه‌های اسم و `ing/ed` فقط برای گروه‌های فعل. اعضای هر گروه از قبل بر اساس `pos` یکسان جدا شده‌اند، اما شباهت نوشتاری و یکسان‌بودن `pos` به‌تنهایی برای ادغام کافی نیست.
+
+## هدف
+
+برای هر گروه مشخص کن کدام WordSenseها دقیقاً یک مفهوم واژگانی را در شکل‌های صرفی متفاوت بیان می‌کنند. از هر مفهوم تکراری فقط قدیمی‌ترین WordSense، یعنی رکورد دارای کمترین `wordId`، باقی بماند و WordSenseهای تکراری جدیدتر برای حذف معرفی شوند. مفهوم‌های مستقل، تثبیت‌شده یا دارای کاربرد معنایی متفاوت باید در entryهای جدا باقی بمانند.
+
+## تشخیص شکل صرفی
+
+فقط روابط قانونمند و روشن زیر را بررسی کن:
+
+- فقط در گروه `noun`: جمع استاندارد اسم با `s/es` و تغییر قانونمند `y → ies`؛
+- فقط در گروه `verb`: شکل `ing` قانونمند، همراه با قواعد املایی معمول مانند حذف `e` یا دوبرابرشدن صامت؛
+- فقط در گروه `verb`: گذشته و past participle قانونمند با `ed`، همراه با قواعد املایی معمول مانند `y → ied` یا دوبرابرشدن صامت.
+
+شکل سوم‌شخص فعل با `s/es`، اسم‌های دارای `ing/ed`، نقش‌های دستوری غیر از `noun/verb`، افعال و جمع‌های بی‌قاعده، comparative/superlative و کلمات اشتقاقی را در این مرحله ادغام نکن.
+
+## معیار مفهوم یکسان
+
+`meaningFa`، `otherMeaningsFa`، `conceptExplainedFa` و متن جمله‌ها را بررسی کن. WordSenseها را فقط وقتی در یک entry قرار بده که تفاوتشان صرفاً شکل صرفی همان واژه و همان مفهوم باشد. تفاوت زمان، شمار یا استمرار به‌تنهایی مفهوم مستقل آموزشی ایجاد نمی‌کند.
+
+موارد زیر می‌توانند مستقل باشند و نباید صرفاً به دلیل پسوند حذف شوند:
+
+- `building` به معنی «ساختمان» در برابر شکل `ing` فعل `build`؛
+- `glasses` به معنی «عینک» در برابر جمع معمول `glass`؛
+- اسم یا صفت تثبیت‌شده‌ای که از نظر معنی و کاربرد مدخل مستقلی است؛
+- دو WordSense هم‌نقش که معنی، الگوی کاربرد یا امکان جایگزینی متفاوت دارند.
+
+اگر دربارهٔ یک ادغام مطمئن نیستی، WordSenseها را در entryهای جدا با `deleteWordIds: []` نگه دار. حذف اشتباه از کم‌ادغام‌کردن بدتر است.
+
+## انتخاب فرم اصلی انگلیسی
+
+برای هر entry یک `canonicalEnglishWordId` و `canonicalForm` انتخاب کن:
+
+- `canonicalEnglishWordId` باید یکی از EnglishWordهای همان گروه باشد.
+- `canonicalForm` باید دقیقاً `baseForm` همان EnglishWord باشد.
+- معمولاً صورت فرهنگ‌لغتی انتخاب می‌شود، اما اگر یک صورت جمع یا شکل دیگر مدخل طبیعی‌تر و رایج‌تر آموزشی است، می‌توان همان را انتخاب کرد؛ برای نمونه در مفهوم عمومی «کفش» انتخاب `shoes` مجاز است.
+- EnglishWord منتخب باید در همان entry دست‌کم یک WordSense داشته باشد.
+
+انتخاب فرم اصلی مستقل از انتخاب WordSense قدیمی‌تر است. ممکن است `keepWordId` ابتدا زیر EnglishWord دیگری باشد؛ برنامه پس از تأیید آن را به EnglishWord منتخب متصل می‌کند.
+
+## انتخاب WordSense باقی‌مانده
+
+- `keepWordId` باید کمترین `wordId` میان خودش و تمام `deleteWordIds` همان entry باشد.
+- تمام WordSenseهای جدیدتر همان مفهوم و همان خانوادهٔ صرفی را در `deleteWordIds` قرار بده.
+- اگر WordSenseی مفهوم مستقل دارد، برای آن entry جدا بساز و `deleteWordIds` را خالی بگذار.
+- تمام WordSenseهای ورودی باید دقیقاً یک بار در خروجی ظاهر شوند: یا یک بار در `keepWordId` یا یک بار در `deleteWordIds`.
+- یک WordSense نباید در دو entry یا دو گروه ظاهر شود.
+
+## ساختار خروجی
+
+فقط یک آرایهٔ JSON فشرده برگردان. ترتیب گروه‌ها را دقیقاً مطابق ورودی حفظ کن. برای هر گروه `groupKey` و `pos` ورودی را بدون تغییر تکرار کن.
+
+هر entry فقط همین چهار فیلد را داشته باشد:
+
+```json
+{
+  "canonicalEnglishWordId": 44,
+  "canonicalForm": "shoes",
+  "keepWordId": 81,
+  "deleteWordIds": [120]
+}
+```
+
+هیچ `reason`، `action`، `confidence`، توضیح، Markdown یا فیلد اضافه‌ای در خروجی ننویس.
+
+## نمونهٔ مفهومی
+
+اگر گروه noun شامل `shoe` با WordSense 81 و `shoes` با WordSense 120 باشد و هر دو مفهوم «کفش» داشته باشند، خروجی می‌تواند فرم اصلی `shoes` را انتخاب کند ولی WordSense قدیمی‌تر 81 را نگه دارد:
+
+```json
+[{"groupKey":"noun:21,44","pos":"noun","entries":[{"canonicalEnglishWordId":44,"canonicalForm":"shoes","keepWordId":81,"deleteWordIds":[120]}]}]
+```
+
+اگر گروه verb شامل WordSense 201 برای `build` و WordSense 202 برای کاربرد فعلی `building` باشد، آن‌ها می‌توانند یک entry شوند. WordSense noun به معنی «ساختمان» باید در گروه noun یا entry مستقل باقی بماند.
+
+## کنترل نهایی
+
+قبل از خروجی بررسی کن که تمام گروه‌ها و WordSenseها دقیقاً یک بار پوشش داده شده‌اند، keeper هر entry قدیمی‌ترین WordSense آن entry است، فرم اصلی واقعاً در ورودی همان گروه وجود دارد، WordSenseهای مستقل حذف نشده‌اند و خروجی فقط JSON معتبر و فشرده است.

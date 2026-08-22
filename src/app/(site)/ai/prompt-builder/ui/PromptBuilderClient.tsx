@@ -56,7 +56,7 @@ export function PromptBuilderClient() {
     setViewLoading(true);
     try {
       const res = await fetch(
-        `/api/ai/prompt-file?path=${encodeURIComponent(filePath)}`,
+        `/api/ai/prompt-file?path=${encodeURIComponent(filePath)}&raw=1`,
         { cache: "no-store" }
       );
       const json = (await res.json()) as { text?: string; error?: string };

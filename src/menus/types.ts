@@ -37,6 +37,7 @@ export type MenuGroupItem = {
   type: "group";
   label: string;
   items: MenuItem[];
+  href?: string;
   icon?: MenuIcon;
 };
 

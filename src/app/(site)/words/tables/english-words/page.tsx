@@ -57,9 +57,12 @@ function SortHeader({ href, label, active, direction, indicators }: { href: stri
   return <th className="whitespace-nowrap px-3 py-2"><Link href={href} className="inline-flex items-center gap-1 hover:underline"><TableColumnIndicators indicators={indicators} /><span>{label} <span className={active ? "opacity-100" : "opacity-40"}>{active && direction === "asc" ? "↑" : "↓"}</span></span></Link></th>;
 }
 
-export default async function EnglishWordsTablePage({ searchParams }: { searchParams: Promise<{ q?: string; page?: string; sort?: string; dir?: string; missingAudio?: string; columns?: string | string[] }> }) {
+export default async function EnglishWordsTablePage({ searchParams }: { searchParams: Promise<{ q?: string; searchField?: string; page?: string; sort?: string; dir?: string; missingAudio?: string; columns?: string | string[] }> }) {
   const params = await searchParams;
   const q = String(params.q ?? "").trim();
+  const searchField = params.searchField === "id" || params.searchField === "base_form" ? params.searchField : "all";
+  const searchedId = Number(q);
+  const exactId = Number.isSafeInteger(searchedId) && searchedId > 0 ? searchedId : null;
   const page = positiveInt(params.page, 1);
   const sort = SORT_FIELDS.includes(params.sort as SortField) ? (params.sort as SortField) : "updatedAt";
   const dir = params.dir === "asc" ? "asc" : "desc";
@@ -68,7 +71,11 @@ export default async function EnglishWordsTablePage({ searchParams }: { searchPa
   const hasColumn = (key: TableColumnKey) => columns.includes(key);
   const pendingAudioIds = missingAudio ? await getPendingEnglishWordAudioIds() : [];
   const where: Prisma.EnglishWordWhereInput | undefined = q || missingAudio ? { AND: [
-    ...(q ? [{ OR: [{ base_form: { contains: q } }, { phonetic_us: { contains: q } }, { phonetic_us_normalized: { contains: q } }, { audio_source_text: { contains: q } }] }] : []),
+    ...(q ? [searchField === "id"
+      ? { id: exactId ?? -1 }
+      : searchField === "base_form"
+        ? { base_form: { contains: q } }
+        : { OR: [{ base_form: { contains: q } }, { phonetic_us: { contains: q } }, { phonetic_us_normalized: { contains: q } }, { audio_source_text: { contains: q } }] }] : []),
     ...(missingAudio ? [{ id: { in: pendingAudioIds } }] : []),
   ] } : undefined;
   const orderBy: Prisma.EnglishWordOrderByWithRelationInput[] = [{ [sort]: dir } as Prisma.EnglishWordOrderByWithRelationInput, ...(sort === "id" ? [] : [{ id: "desc" as const }])];
@@ -86,18 +93,19 @@ export default async function EnglishWordsTablePage({ searchParams }: { searchPa
   const href = (nextPage: number, nextSort = sort, nextDir = dir) => {
     const query = new URLSearchParams({ page: String(nextPage), sort: nextSort, dir: nextDir });
     if (q) query.set("q", q);
+    query.set("searchField", searchField);
     if (missingAudio) query.set("missingAudio", "1");
     columns.forEach((column) => query.append("columns", column));
     return `/words/tables/english-words?${query}`;
   };
-  const clearQuery = new URLSearchParams({ page: "1", sort, dir });
+  const clearQuery = new URLSearchParams({ page: "1", sort, dir, searchField });
   columns.forEach((column) => clearQuery.append("columns", column));
 
   return <main className="mx-auto w-full max-w-7xl p-4">
     <PageHeader title="EnglishWord Table" subtitle="Canonical English words and phrases with US pronunciation, JSON hints, and one audio file." />
     <section className="mt-4 overflow-hidden rounded border">
       <div className="p-3">
-      <form className="flex flex-wrap items-center gap-2"><input name="q" defaultValue={q} placeholder="Search text, source text, or IPA…" className="w-full rounded border px-3 py-2 text-sm sm:w-80" /><input type="hidden" name="sort" value={sort} /><input type="hidden" name="dir" value={dir} /><label className="flex items-center gap-1 text-sm"><input name="missingAudio" value="1" type="checkbox" defaultChecked={missingAudio} /> Needs audio generation</label>{columns.map((column) => <input key={column} type="hidden" name="columns" value={column} />)}<button type="submit" className="rounded border px-3 py-2 text-sm">Search</button>{q || missingAudio ? <Link href={`/words/tables/english-words?${clearQuery}`} className="rounded border px-3 py-2 text-sm">Clear</Link> : null}</form>
+      <form className="flex flex-wrap items-center gap-2"><input name="q" defaultValue={q} placeholder="Search text, source text, or IPA…" className="w-full rounded border px-3 py-2 text-sm sm:w-80" /><input type="hidden" name="sort" value={sort} /><input type="hidden" name="dir" value={dir} /><label className="flex items-center gap-1 text-sm"><input name="missingAudio" value="1" type="checkbox" defaultChecked={missingAudio} /> Needs audio generation</label>{columns.map((column) => <input key={column} type="hidden" name="columns" value={column} />)}<fieldset className="flex items-center gap-2 text-sm" aria-label="Search field"><label className="flex items-center gap-1"><input type="radio" name="searchField" value="all" defaultChecked={searchField === "all"} /> All fields</label><label className="flex items-center gap-1"><input type="radio" name="searchField" value="id" defaultChecked={searchField === "id"} /> id</label><label className="flex items-center gap-1"><input type="radio" name="searchField" value="base_form" defaultChecked={searchField === "base_form"} /> base_form</label></fieldset><button type="submit" className="rounded border px-3 py-2 text-sm">Search</button>{q || missingAudio ? <Link href={`/words/tables/english-words?${clearQuery}`} className="rounded border px-3 py-2 text-sm">Clear</Link> : null}</form>
         <div className="mt-3 grid gap-3 border-t pt-3 lg:grid-cols-2">
           <div className="flex flex-wrap items-center gap-2"><AddEnglishWordModal /><EnglishWordPhoneticUsPrompt initialRemainingCount={phoneticCreateRemainingCount} /><TableFieldMaintenance modelLabel="EnglishWord" apiBase="/api/table-field-maintenance/EnglishWord" /></div>
           <div className="space-y-3 border-t pt-3 lg:border-l lg:border-t-0 lg:pl-3 lg:pt-0"><BatchWordFieldVoiceGenerate field="base_form" /><div className="border-t pt-3"><BatchEnglishWordJsonHintGenerate initialRemainingCount={jsonHintRemainingCount} initialTotalCount={jsonHintTotalCount} /></div></div>

@@ -64,6 +64,8 @@ model WordSense {
   conceptMergeReviewed                   Boolean      @default(false)
   /// True after this WordSense has passed the regular-inflection merge workflow.
   inflectionMergeReviewed                Boolean      @default(false)
+  /// True after this WordSense has been reviewed for independent multi-word dictionary value.
+  idiomReviewCompleted                   Boolean      @default(false)
   meaningReviewStatus                    MeaningReviewStatus @default(PENDING)
   pos                                    String?
   concept_explained_fa                   String?      @db.Text
@@ -86,6 +88,7 @@ model WordSense {
   @@index([meaningId], map: "WordSense_meaningId_idx")
   @@index([conceptMergeReviewed], map: "WordSense_conceptMergeReviewed_idx")
   @@index([inflectionMergeReviewed], map: "WordSense_inflectionMergeReviewed_idx")
+  @@index([idiomReviewCompleted], map: "WordSense_idiomReviewCompleted_idx")
   @@index([meaningReviewStatus], map: "WordSense_meaningReviewStatus_idx")
   @@map("word_sense")
 }

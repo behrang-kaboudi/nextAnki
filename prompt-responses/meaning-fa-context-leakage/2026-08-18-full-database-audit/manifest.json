@@ -1,0 +1,22 @@
+{
+  "generatedAt": "2026-08-19T01:34:36.640Z",
+  "run": "2026-08-18-full-database-audit",
+  "readOnlyDatabaseAudit": true,
+  "statusMutationApplied": true,
+  "databaseMutations": 100,
+  "files": {
+    "requestedCandidateFile": "candidates.json",
+    "rawDetectorOutput": "raw-candidates.json",
+    "prompt": "prompt.md",
+    "qa": "qa.json",
+    "prePendingStatusSnapshot": "pre-pending-status-snapshot.json",
+    "pendingApplyReport": "pending-apply-report.json"
+  },
+  "candidatesSha256": "493480470fa350ba654aa6c883c308cad4a003155b75251c42470793ebbeffa6",
+  "counts": {
+    "candidates": 102,
+    "strong": 41,
+    "review": 61,
+    "uniqueEnglishWords": 99
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "status": "passed",
+  "score": 9.8,
+  "criteria": {
+    "correctness": {
+      "status": "passed",
+      "score": 9.8
+    },
+    "completeness": {
+      "status": "passed",
+      "score": 9.7
+    },
+    "relevance": {
+      "status": "passed",
+      "score": 9.8
+    },
+    "internal_consistency": {
+      "status": "passed",
+      "score": 9.8
+    },
+    "clarity": {
+      "status": "passed",
+      "score": 9.7
+    },
+    "schema_compliance": {
+      "status": "passed",
+      "score": 10
+    }
+  },
+  "itemResults": [
+    {
+      "key": "45074",
+      "status": "passed",
+      "score": 9.8
+    }
+  ]
+}

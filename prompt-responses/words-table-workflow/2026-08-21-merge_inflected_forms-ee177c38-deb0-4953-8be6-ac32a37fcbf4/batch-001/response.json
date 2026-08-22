@@ -1,0 +1,20 @@
+[
+  {
+    "groupKey": "noun:23286,24069",
+    "pos": "noun",
+    "entries": [
+      {
+        "canonicalEnglishWordId": 23286,
+        "canonicalForm": "aids",
+        "keepWordId": 31153,
+        "deleteWordIds": []
+      },
+      {
+        "canonicalEnglishWordId": 24069,
+        "canonicalForm": "aid",
+        "keepWordId": 32158,
+        "deleteWordIds": []
+      }
+    ]
+  }
+]

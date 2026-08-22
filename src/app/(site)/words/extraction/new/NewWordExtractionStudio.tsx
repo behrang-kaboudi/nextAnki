@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useState } from "react";
 import { PromptSourcesButton } from "@/components/prompts/PromptSourcesButton";
 import { PersianWordResolutionModal } from "@/components/words/PersianWordResolutionModal.client";
+import { combinePromptParts } from "@/lib/ai/promptPolicy";
 import type {
   PersianWordAmbiguity,
   PersianWordResolutionSelection,
@@ -21,6 +22,10 @@ const BASE_PROMPT_PATHS = [
   "src/prompts/word-extraction/sentence_en/rulseV1.md",
   "src/prompts/word-extraction/sentence_meaning_fa/rulseV1.md",
   "src/prompts/word-extraction/base/input_words_v1.md",
+] as const;
+const BASE_PROMPT_SOURCE_PATHS = [
+  ...BASE_PROMPT_PATHS,
+  "src/prompts/word-extraction/_shared/meaning_fa_core_v1.md",
 ] as const;
 
 const REQUIRED_FIELDS = [
@@ -205,7 +210,7 @@ export default function NewWordExtractionStudio() {
     try {
       const promptParts = await Promise.all(
         BASE_PROMPT_PATHS.map(async (path) => {
-          const response = await fetch(`/api/ai/prompt-file?path=${encodeURIComponent(path)}`);
+          const response = await fetch(`/api/ai/prompt-file?path=${encodeURIComponent(path)}&render=1`);
           const json = (await response.json().catch(() => null)) as { text?: string; error?: string } | null;
           if (!response.ok || typeof json?.text !== "string") {
             throw new Error(json?.error ?? `Failed to load ${path} (${response.status}).`);
@@ -214,7 +219,7 @@ export default function NewWordExtractionStudio() {
         }),
       );
 
-      const prompt = `${promptParts.join("\n\n")}\n\n${rawWords.trim()}`;
+      const prompt = `${combinePromptParts(promptParts)}\n\n${rawWords.trim()}`;
       setGeneratedPrompt(prompt);
       setShowPrompt(true);
       await navigator.clipboard.writeText(prompt);
@@ -570,10 +575,10 @@ export default function NewWordExtractionStudio() {
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-card px-5 py-4">
               <div>
                 <h2 id="generated-prompt-title" className="font-bold text-foreground">Generated base-data prompt</h2>
-                <p className="mt-1 text-xs text-muted">{BASE_PROMPT_PATHS.length} prompt files + your raw words</p>
+                <p className="mt-1 text-xs text-muted">{BASE_PROMPT_SOURCE_PATHS.length} prompt files + your raw words</p>
               </div>
               <div className="flex gap-2">
-                <PromptSourcesButton paths={BASE_PROMPT_PATHS} />
+                <PromptSourcesButton paths={BASE_PROMPT_SOURCE_PATHS} />
                 <button type="button" onClick={() => void copyGeneratedPrompt()} className={`${buttonBase} bg-[var(--primary)] text-white`}>
                   {promptCopied ? "Copied" : "Copy prompt"}
                 </button>

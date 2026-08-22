@@ -1,7 +1,7 @@
 import { TestsClient } from "./TestsClient";
 
 export const metadata = {
-  title: "Tests",
+  title: "Less Used",
 };
 
 export const runtime = "nodejs";

@@ -21,7 +21,9 @@ type ComparisonSourceWordSense = {
 };
 
 export type MeaningComparisonOutputGroup = {
+  groupKey: string;
   persianWordId: number;
+  pos: string;
   records: Array<{
     id: number;
     concept_explained_fa: string;
@@ -30,7 +32,9 @@ export type MeaningComparisonOutputGroup = {
 };
 
 export type MeaningComparisonSourceGroup = {
+  groupKey: string;
   persianWordId: number;
+  pos: string;
   sourceWordIds: number[];
 };
 
@@ -71,25 +75,37 @@ function isFullyCompared(group: ComparisonSourceWordSense[]) {
 }
 
 function buildGroups(words: ComparisonSourceWordSense[]) {
-  const groups = new Map<number, ComparisonSourceWordSense[]>();
+  const groups = new Map<string, {
+    groupKey: string;
+    persianWordId: number;
+    pos: string;
+    words: ComparisonSourceWordSense[];
+  }>();
   for (const word of words) {
     for (const persianWordId of persianMeaningIds(word)) {
-      const group = groups.get(persianWordId) ?? [];
-      group.push(word);
-      groups.set(persianWordId, group);
+      const pos = word.pos ?? "";
+      const groupKey = `${pos}:${persianWordId}`;
+      const group = groups.get(groupKey) ?? { groupKey, persianWordId, pos, words: [] };
+      group.words.push(word);
+      groups.set(groupKey, group);
     }
   }
-  return [...groups.entries()]
-    .sort(([left], [right]) => left - right)
-    .filter(([, group]) => group.length >= 2)
-    .map(([persianWordId, group]) => ({
-      persianWordId,
-      words: group.sort((left, right) => left.id - right.id),
+  return [...groups.values()]
+    .sort((left, right) => left.persianWordId - right.persianWordId || left.pos.localeCompare(right.pos))
+    .filter((group) => group.words.length >= 2)
+    .map((group) => ({
+      ...group,
+      words: group.words.sort((left, right) => left.id - right.id),
     }));
 }
 
 async function comparisonItemsForGroups(
-  groups: Array<{ persianWordId: number; words: ComparisonSourceWordSense[] }>,
+  groups: Array<{
+    groupKey: string;
+    persianWordId: number;
+    pos: string;
+    words: ComparisonSourceWordSense[];
+  }>,
 ) {
   const meaningIds = [...new Set(groups.flatMap(({ words: group }) =>
     group.flatMap(persianMeaningIds),
@@ -102,8 +118,10 @@ async function comparisonItemsForGroups(
     : [];
   const meaningById = new Map(meanings.map((meaning) => [meaning.id, meaning.canonical_text]));
 
-  return groups.map(({ persianWordId, words: group }) => ({
+  return groups.map(({ groupKey, persianWordId, pos, words: group }) => ({
+    groupKey,
     persianWordId,
+    pos,
     shared_persian_meaning: meaningById.get(persianWordId) ?? "",
     records: group.map((word) => ({
       id: word.id,
@@ -189,15 +207,18 @@ export function parseMeaningComparisonOutput(value: unknown): MeaningComparisonO
   if (!Array.isArray(value) || value.length === 0) {
     throw new Error("Response must be a non-empty JSON array of groups.");
   }
-  const seenGroups = new Set<number>();
+  const seenGroups = new Set<string>();
   return value.map((rawGroup) => {
     if (!rawGroup || typeof rawGroup !== "object") throw new Error("Every response group must be an object.");
     const group = rawGroup as Record<string, unknown>;
-    if (!isPositiveId(group.persianWordId) || seenGroups.has(group.persianWordId) ||
-        !hasOnlyKeys(group, ["persianWordId", "records"]) || !Array.isArray(group.records) || group.records.length < 2) {
-      throw new Error("Every group needs a unique persianWordId and at least two records.");
+    if (typeof group.groupKey !== "string" || !group.groupKey || seenGroups.has(group.groupKey) ||
+        !isPositiveId(group.persianWordId) || typeof group.pos !== "string" ||
+        group.groupKey !== `${group.pos}:${group.persianWordId}` ||
+        !hasOnlyKeys(group, ["groupKey", "persianWordId", "pos", "records"]) ||
+        !Array.isArray(group.records) || group.records.length < 2) {
+      throw new Error("Every group needs a unique groupKey matching its persianWordId and part of speech, plus at least two records.");
     }
-    seenGroups.add(group.persianWordId);
+    seenGroups.add(group.groupKey);
     const seenRecords = new Set<number>();
     const records = group.records.map((rawRecord) => {
       if (!rawRecord || typeof rawRecord !== "object") throw new Error("Every response record must be an object.");
@@ -225,7 +246,12 @@ export function parseMeaningComparisonOutput(value: unknown): MeaningComparisonO
         }
       }
     }
-    return { persianWordId: group.persianWordId, records };
+    return {
+      groupKey: group.groupKey,
+      persianWordId: group.persianWordId,
+      pos: group.pos,
+      records,
+    };
   });
 }
 
@@ -241,13 +267,16 @@ export async function loadWordSenseMeaningComparisonGroups(
     orderBy: { id: "asc" },
     select: comparisonSelect,
   });
-  const currentByPersianWordId = new Map(
-    buildGroups(words).map((group) => [group.persianWordId, group]),
+  const currentByGroupKey = new Map(
+    buildGroups(words).map((group) => [group.groupKey, group]),
   );
   const requestedGroups = output.map((outputGroup) => {
-    const current = currentByPersianWordId.get(outputGroup.persianWordId);
+    const current = currentByGroupKey.get(outputGroup.groupKey);
     if (!current) {
-      throw new Error(`PersianWord group ${outputGroup.persianWordId} no longer exists.`);
+      throw new Error(`Meaning comparison group ${outputGroup.groupKey} no longer exists.`);
+    }
+    if (current.persianWordId !== outputGroup.persianWordId || current.pos !== outputGroup.pos) {
+      throw new Error(`Meaning comparison group ${outputGroup.groupKey} no longer matches its PersianWord or part of speech.`);
     }
     const outputIds = outputGroup.records.map((record) => record.id);
     const currentIds = current.words.map((word) => word.id);
@@ -262,12 +291,11 @@ export async function loadWordSenseMeaningComparisonGroups(
 }
 
 export async function applyWordSenseMeaningComparison(
-  persianWordId: number,
-  sourceWordIds: number[],
+  sourceGroup: MeaningComparisonSourceGroup,
   output: MeaningComparisonOutputGroup,
 ) {
   const result = await applyWordSenseMeaningComparisonBatch(
-    [{ persianWordId, sourceWordIds }],
+    [sourceGroup],
     [output],
   );
   return { updated: result.updated };
@@ -286,8 +314,8 @@ export async function applyWordSenseMeaningComparisonBatch(
       orderBy: { id: "asc" },
       select: comparisonSelect,
     });
-    const currentGroupByPersianWordId = new Map(
-      buildGroups(allWords).map((group) => [group.persianWordId, group]),
+    const currentGroupByKey = new Map(
+      buildGroups(allWords).map((group) => [group.groupKey, group]),
     );
     const validWordIds = new Set(allWords.map((word) => word.id));
     const nextById = new Map(allWords.map((word) => [word.id, { ...word }]));
@@ -300,15 +328,22 @@ export async function applyWordSenseMeaningComparisonBatch(
     for (let groupIndex = 0; groupIndex < output.length; groupIndex += 1) {
       const source = sourceGroups[groupIndex];
       const outputGroup = output[groupIndex];
-      if (!isPositiveId(source?.persianWordId) || outputGroup.persianWordId !== source.persianWordId ||
+      if (typeof source?.groupKey !== "string" || !source.groupKey ||
+          !isPositiveId(source.persianWordId) || typeof source.pos !== "string" ||
+          source.groupKey !== `${source.pos}:${source.persianWordId}` ||
+          outputGroup.groupKey !== source.groupKey || outputGroup.persianWordId !== source.persianWordId ||
+          outputGroup.pos !== source.pos ||
           !Array.isArray(source.sourceWordIds) || source.sourceWordIds.length < 2 ||
           source.sourceWordIds.some((id) => !isPositiveId(id)) ||
           new Set(source.sourceWordIds).size !== source.sourceWordIds.length) {
         throw new Error(`Source candidate group ${groupIndex + 1} is invalid.`);
       }
-      const currentGroup = currentGroupByPersianWordId.get(source.persianWordId);
+      const currentGroup = currentGroupByKey.get(source.groupKey);
       if (!currentGroup) {
-        throw new Error(`PersianWord group ${source.persianWordId} no longer exists.`);
+        throw new Error(`Meaning comparison group ${source.groupKey} no longer exists.`);
+      }
+      if (currentGroup.persianWordId !== source.persianWordId || currentGroup.pos !== source.pos) {
+        throw new Error(`Meaning comparison group ${source.groupKey} no longer matches its PersianWord or part of speech.`);
       }
       const currentIds = currentGroup?.words.map((word) => word.id) ?? [];
       if (!sameOrderedIds(source.sourceWordIds, currentIds)) {

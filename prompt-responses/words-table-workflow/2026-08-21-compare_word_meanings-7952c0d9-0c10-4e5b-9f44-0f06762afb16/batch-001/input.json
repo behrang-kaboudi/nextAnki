@@ -1,0 +1,166 @@
+[
+  {
+    "groupKey": "noun:3384",
+    "persianWordId": 3384,
+    "pos": "noun",
+    "shared_persian_meaning": "قدردانی",
+    "records": [
+      {
+        "id": 5332,
+        "word": "appreciation",
+        "pos": "noun",
+        "meaning_fa": "قدردانی",
+        "other_meanings_fa": [
+          "سپاسگزاری",
+          "سپاس",
+          "امتنان",
+          "تشکر"
+        ],
+        "concept_explained_fa": "احساس یا بیان سپاس و قدردانی از لطف، کمک یا کار ارزشمند کسی.",
+        "synonymIds": [
+          42183
+        ]
+      },
+      {
+        "id": 42148,
+        "word": "recognition",
+        "pos": "noun",
+        "meaning_fa": "قدردانی",
+        "other_meanings_fa": [
+          "سپاس"
+        ],
+        "concept_explained_fa": "در این کاربرد توجه و قدردانی رسمی از تلاش، موفقیت یا ارزش شخص و اثر او است.",
+        "synonymIds": []
+      },
+      {
+        "id": 42183,
+        "word": "gratitude",
+        "pos": "noun",
+        "meaning_fa": "سپاسگزاری",
+        "other_meanings_fa": [
+          "قدردانی",
+          "تشکر",
+          "امتنان"
+        ],
+        "concept_explained_fa": "احساس و بیان سپاس و قدردانی نسبت به کمک، لطف یا چیز ارزشمندی است که دریافت شده.",
+        "synonymIds": [
+          5332
+        ]
+      },
+      {
+        "id": 45073,
+        "word": "acknowledgment",
+        "pos": "noun",
+        "meaning_fa": "قدردانی",
+        "other_meanings_fa": [
+          "سپاسگزاری",
+          "تشکر"
+        ],
+        "concept_explained_fa": "بیان یا نوشته‌ای است که کمک، لطف یا مشارکت فردی را به رسمیت می‌شناسد و سپاس از او را نشان می‌دهد.",
+        "synonymIds": []
+      }
+    ]
+  },
+  {
+    "groupKey": "noun:6281",
+    "persianWordId": 6281,
+    "pos": "noun",
+    "shared_persian_meaning": "سپاسگزاری",
+    "records": [
+      {
+        "id": 5332,
+        "word": "appreciation",
+        "pos": "noun",
+        "meaning_fa": "قدردانی",
+        "other_meanings_fa": [
+          "سپاسگزاری",
+          "سپاس",
+          "امتنان",
+          "تشکر"
+        ],
+        "concept_explained_fa": "احساس یا بیان سپاس و قدردانی از لطف، کمک یا کار ارزشمند کسی.",
+        "synonymIds": [
+          42183
+        ]
+      },
+      {
+        "id": 42183,
+        "word": "gratitude",
+        "pos": "noun",
+        "meaning_fa": "سپاسگزاری",
+        "other_meanings_fa": [
+          "قدردانی",
+          "تشکر",
+          "امتنان"
+        ],
+        "concept_explained_fa": "احساس و بیان سپاس و قدردانی نسبت به کمک، لطف یا چیز ارزشمندی است که دریافت شده.",
+        "synonymIds": [
+          5332
+        ]
+      },
+      {
+        "id": 45073,
+        "word": "acknowledgment",
+        "pos": "noun",
+        "meaning_fa": "قدردانی",
+        "other_meanings_fa": [
+          "سپاسگزاری",
+          "تشکر"
+        ],
+        "concept_explained_fa": "بیان یا نوشته‌ای است که کمک، لطف یا مشارکت فردی را به رسمیت می‌شناسد و سپاس از او را نشان می‌دهد.",
+        "synonymIds": []
+      }
+    ]
+  },
+  {
+    "groupKey": "noun:48816",
+    "persianWordId": 48816,
+    "pos": "noun",
+    "shared_persian_meaning": "تشکر",
+    "records": [
+      {
+        "id": 5332,
+        "word": "appreciation",
+        "pos": "noun",
+        "meaning_fa": "قدردانی",
+        "other_meanings_fa": [
+          "سپاسگزاری",
+          "سپاس",
+          "امتنان",
+          "تشکر"
+        ],
+        "concept_explained_fa": "احساس یا بیان سپاس و قدردانی از لطف، کمک یا کار ارزشمند کسی.",
+        "synonymIds": [
+          42183
+        ]
+      },
+      {
+        "id": 42183,
+        "word": "gratitude",
+        "pos": "noun",
+        "meaning_fa": "سپاسگزاری",
+        "other_meanings_fa": [
+          "قدردانی",
+          "تشکر",
+          "امتنان"
+        ],
+        "concept_explained_fa": "احساس و بیان سپاس و قدردانی نسبت به کمک، لطف یا چیز ارزشمندی است که دریافت شده.",
+        "synonymIds": [
+          5332
+        ]
+      },
+      {
+        "id": 45073,
+        "word": "acknowledgment",
+        "pos": "noun",
+        "meaning_fa": "قدردانی",
+        "other_meanings_fa": [
+          "سپاسگزاری",
+          "تشکر"
+        ],
+        "concept_explained_fa": "بیان یا نوشته‌ای است که کمک، لطف یا مشارکت فردی را به رسمیت می‌شناسد و سپاس از او را نشان می‌دهد.",
+        "synonymIds": []
+      }
+    ]
+  }
+]

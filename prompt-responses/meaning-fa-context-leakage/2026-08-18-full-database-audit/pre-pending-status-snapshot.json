@@ -1,0 +1,3485 @@
+{
+  "capturedAt": "2026-08-19T02:51:57.778Z",
+  "candidateFile": "candidates.json",
+  "targetCount": 102,
+  "confirmedCount": 100,
+  "alreadyPendingCount": 2,
+  "records": [
+    {
+      "id": 1368,
+      "anki_link_id": "694076e5a97a8681bac58a7f",
+      "englishId": 1412,
+      "meaningId": 621,
+      "otherMeaningIds": [
+        5010,
+        57994,
+        67573
+      ],
+      "comparedMeaningWordIds": [
+        36207
+      ],
+      "synonymIds": [
+        36207
+      ],
+      "sentenceIds": [
+        2813
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "خستگی جسمی یا ذهنی قابل‌توجه و پایدار که توان فعالیت را کاهش می‌دهد؛ لزوماً به پایان تقریباً کامل انرژی نمی‌رسد.",
+      "concept_explained_fa_audio_file_name": "w__1368__concept_explained_fa__1786698244881.mp3",
+      "concept_explained_fa_audio_source_text": "خستگی جسمی یا ذهنی قابل‌توجه و پایدار که توان فعالیت را کاهش می‌دهد؛ لزوماً به پایان تقریباً کامل انرژی نمی‌رسد.",
+      "learning_depth": 0.7,
+      "other_meanings_en": null,
+      "category": "medical_health",
+      "hint_to_select": null,
+      "imageability": 30,
+      "productive_target": 48,
+      "createdAt": "2025-12-31T04:30:59.671Z",
+      "updatedAt": "2026-08-18T18:13:32.983Z"
+    },
+    {
+      "id": 1599,
+      "anki_link_id": "6940786ca97a8681bac58d64",
+      "englishId": 3583,
+      "meaningId": 6815,
+      "otherMeaningIds": [
+        6836,
+        47344,
+        714,
+        654
+      ],
+      "comparedMeaningWordIds": [
+        1439,
+        5478
+      ],
+      "synonymIds": [
+        1439
+      ],
+      "sentenceIds": [
+        2961,
+        4957
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "verb",
+      "concept_explained_fa": "به دور شدن ناخواسته از مسیر درست، محل یا گروه اصلی و سرگردان شدن اشاره دارد.",
+      "concept_explained_fa_audio_file_name": "w__1599__concept_explained_fa__1786698268480.mp3",
+      "concept_explained_fa_audio_source_text": "به دور شدن ناخواسته از مسیر درست، محل یا گروه اصلی و سرگردان شدن اشاره دارد.",
+      "learning_depth": 0.62,
+      "other_meanings_en": null,
+      "category": "daily_life",
+      "hint_to_select": null,
+      "imageability": 35,
+      "productive_target": 46,
+      "createdAt": "2025-12-31T04:30:59.719Z",
+      "updatedAt": "2026-08-18T18:14:05.456Z"
+    },
+    {
+      "id": 1690,
+      "anki_link_id": "69407a9ea97a8681bac58fb9",
+      "englishId": 2598,
+      "meaningId": 6856,
+      "otherMeaningIds": [
+        813
+      ],
+      "comparedMeaningWordIds": [
+        33340,
+        40367
+      ],
+      "synonymIds": [],
+      "sentenceIds": [
+        3042,
+        14917
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "adverb",
+      "concept_explained_fa": "برای بیان کار کردن بیش از ساعات عادی و تعیین‌شدهٔ شغل به‌کار می‌رود.",
+      "concept_explained_fa_audio_file_name": "w__1690__concept_explained_fa__1786698287856.mp3",
+      "concept_explained_fa_audio_source_text": "برای بیان کار کردن بیش از ساعات عادی و تعیین‌شدهٔ شغل به‌کار می‌رود.",
+      "learning_depth": 0.62,
+      "other_meanings_en": null,
+      "category": "business_management",
+      "hint_to_select": null,
+      "imageability": 25,
+      "productive_target": 49,
+      "createdAt": "2025-12-31T04:30:59.719Z",
+      "updatedAt": "2026-08-18T18:13:50.487Z"
+    },
+    {
+      "id": 1783,
+      "anki_link_id": "69407c4ca97a8681bac591c9",
+      "englishId": 2620,
+      "meaningId": 3925,
+      "otherMeaningIds": [
+        1540
+      ],
+      "comparedMeaningWordIds": [
+        2368,
+        2742
+      ],
+      "synonymIds": [],
+      "sentenceIds": [
+        3131
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "PENDING",
+      "pos": "noun",
+      "concept_explained_fa": "قطعه تخت و مشخصی از شیشه که در پنجره، در یا قاب قرار گرفته است",
+      "concept_explained_fa_audio_file_name": "w__1783__concept_explained_fa__1786372818530.mp3",
+      "concept_explained_fa_audio_source_text": "قطعه تخت و مشخصی از شیشه که در پنجره، در یا قاب قرار گرفته است",
+      "learning_depth": 0.58,
+      "other_meanings_en": null,
+      "category": "daily_life",
+      "hint_to_select": null,
+      "imageability": 95,
+      "productive_target": 36,
+      "createdAt": "2025-12-31T04:30:59.719Z",
+      "updatedAt": "2026-08-19T01:56:29.276Z"
+    },
+    {
+      "id": 1840,
+      "anki_link_id": "69408425a97a8681bac5930c",
+      "englishId": 3581,
+      "meaningId": 67527,
+      "otherMeaningIds": [
+        926,
+        66802
+      ],
+      "comparedMeaningWordIds": [
+        3112,
+        3556
+      ],
+      "synonymIds": [],
+      "sentenceIds": [
+        3186,
+        26945
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "PENDING",
+      "pos": "noun",
+      "concept_explained_fa": "لوله‌ای باریک از کاغذ، پلاستیک یا فلز است که نوشیدنی از راه مکیدن درون آن وارد دهان می‌شود.",
+      "concept_explained_fa_audio_file_name": "w__1840__concept_explained_fa__1786698309324.mp3",
+      "concept_explained_fa_audio_source_text": "لوله‌ای باریک از کاغذ، پلاستیک یا فلز است که نوشیدنی از راه مکیدن درون آن وارد دهان می‌شود.",
+      "learning_depth": 0.78,
+      "other_meanings_en": null,
+      "category": "daily_life",
+      "hint_to_select": null,
+      "imageability": 85,
+      "productive_target": 50,
+      "createdAt": "2025-12-31T04:30:59.719Z",
+      "updatedAt": "2026-08-19T02:34:51.444Z"
+    },
+    {
+      "id": 2056,
+      "anki_link_id": "69409e4fa97a8681bac5980a",
+      "englishId": 3662,
+      "meaningId": 5617,
+      "otherMeaningIds": [
+        5618
+      ],
+      "comparedMeaningWordIds": [
+        31626,
+        31627,
+        42927
+      ],
+      "synonymIds": [],
+      "sentenceIds": [
+        3383
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "verb",
+      "concept_explained_fa": "کارت بانکی، شناسایی یا ورود را از دستگاه کارت‌خوان عبوردادن تا پرداخت، ثبت حضور یا دسترسی انجام شود.",
+      "concept_explained_fa_audio_file_name": "w__2056__concept_explained_fa__1786698346875.mp3",
+      "concept_explained_fa_audio_source_text": "کارت بانکی، شناسایی یا ورود را از دستگاه کارت‌خوان عبوردادن تا پرداخت، ثبت حضور یا دسترسی انجام شود.",
+      "learning_depth": 0.78,
+      "other_meanings_en": null,
+      "category": "finance_banking",
+      "hint_to_select": null,
+      "imageability": 60,
+      "productive_target": 80,
+      "createdAt": "2025-12-31T04:30:59.750Z",
+      "updatedAt": "2026-08-18T18:14:06.786Z"
+    },
+    {
+      "id": 2067,
+      "anki_link_id": "69409fbda97a8681bac59878",
+      "englishId": 541,
+      "meaningId": 6957,
+      "otherMeaningIds": [
+        6958
+      ],
+      "comparedMeaningWordIds": null,
+      "synonymIds": null,
+      "sentenceIds": [
+        3392
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "مراقبت از کسی، رسیدگی",
+      "concept_explained_fa_audio_file_name": "w__2067__concept_explained_fa__1786372899951.mp3",
+      "concept_explained_fa_audio_source_text": "مراقبت از کسی، رسیدگی",
+      "learning_depth": 0.85,
+      "other_meanings_en": null,
+      "category": "medical_health",
+      "hint_to_select": null,
+      "imageability": 20,
+      "productive_target": 90,
+      "createdAt": "2025-12-31T04:30:59.750Z",
+      "updatedAt": "2026-08-18T18:13:19.623Z"
+    },
+    {
+      "id": 2368,
+      "anki_link_id": "2368_1770122064607",
+      "englishId": 2055,
+      "meaningId": 6996,
+      "otherMeaningIds": [
+        1326,
+        7065,
+        57300,
+        57302
+      ],
+      "comparedMeaningWordIds": [
+        1783,
+        2742
+      ],
+      "synonymIds": [],
+      "sentenceIds": [
+        65,
+        142,
+        1375,
+        14657
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "ظرف شیشه‌ای دهان‌گشاد و دردار برای نگهداری خوراکی یا اشیا.",
+      "concept_explained_fa_audio_file_name": "w__2368__concept_explained_fa__1787076990259.mp3",
+      "concept_explained_fa_audio_source_text": "ظرف شیشه‌ای دهان‌گشاد و دردار برای نگهداری خوراکی یا اشیا.",
+      "learning_depth": 0.35,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 95,
+      "productive_target": 76,
+      "createdAt": "2026-02-03T12:34:24.607Z",
+      "updatedAt": "2026-08-18T18:16:30.641Z"
+    },
+    {
+      "id": 2400,
+      "anki_link_id": "2400_1770122064686",
+      "englishId": 1634,
+      "meaningId": 3966,
+      "otherMeaningIds": [
+        5827
+      ],
+      "comparedMeaningWordIds": null,
+      "synonymIds": null,
+      "sentenceIds": [
+        97
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "ظرف شیشه‌ای مقاوم به حرارت برای پخت غذا در فر.",
+      "concept_explained_fa_audio_file_name": "w__2400__concept_explained_fa__1786372987221.mp3",
+      "concept_explained_fa_audio_source_text": "ظرف شیشه‌ای مقاوم به حرارت برای پخت غذا در فر.",
+      "learning_depth": 0.35,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 95,
+      "productive_target": 47,
+      "createdAt": "2026-02-03T12:34:24.686Z",
+      "updatedAt": "2026-08-18T20:46:01.078Z"
+    },
+    {
+      "id": 2628,
+      "anki_link_id": "2628_1770127127200",
+      "englishId": 3205,
+      "meaningId": 3152,
+      "otherMeaningIds": [
+        1465
+      ],
+      "comparedMeaningWordIds": [
+        2627
+      ],
+      "synonymIds": [],
+      "sentenceIds": [
+        325
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "پارچه بلند برای دور گردن، سر یا شانه‌ها؛ کاربردی عمومی‌تر و گاهی فقط برای گرما یا تزئین.",
+      "concept_explained_fa_audio_file_name": "w__2628__concept_explained_fa__1786373067328.mp3",
+      "concept_explained_fa_audio_source_text": "پارچه بلند برای دور گردن، سر یا شانه‌ها؛ کاربردی عمومی‌تر و گاهی فقط برای گرما یا تزئین.",
+      "learning_depth": 0.7,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 95,
+      "productive_target": 83,
+      "createdAt": "2026-02-03T13:58:47.200Z",
+      "updatedAt": "2026-08-18T18:13:59.390Z"
+    },
+    {
+      "id": 3832,
+      "anki_link_id": "3832_1773111851335",
+      "englishId": 2172,
+      "meaningId": 4125,
+      "otherMeaningIds": [
+        5903
+      ],
+      "comparedMeaningWordIds": [
+        2759,
+        2796,
+        3787,
+        32208,
+        32538,
+        34186,
+        35190
+      ],
+      "synonymIds": [],
+      "sentenceIds": [
+        1521,
+        27166
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "در این کاربرد یکی از پایه‌های زیر میز، صندلی یا وسیله است که وزن آن را نگه می‌دارد.",
+      "concept_explained_fa_audio_file_name": "w__3832__concept_explained_fa__1786698491708.mp3",
+      "concept_explained_fa_audio_source_text": "در این کاربرد یکی از پایه‌های زیر میز، صندلی یا وسیله است که وزن آن را نگه می‌دارد.",
+      "learning_depth": 0.38,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 86,
+      "productive_target": 60,
+      "createdAt": "2026-03-10T03:04:11.334Z",
+      "updatedAt": "2026-08-18T18:13:44.495Z"
+    },
+    {
+      "id": 4127,
+      "anki_link_id": "4127_1773114441854",
+      "englishId": 974,
+      "meaningId": 2596,
+      "otherMeaningIds": [
+        2291,
+        48213
+      ],
+      "comparedMeaningWordIds": [
+        3743,
+        43709
+      ],
+      "synonymIds": [
+        3743
+      ],
+      "sentenceIds": [
+        1803,
+        6782
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "قطعات پراکنده، آوار یا نخاله‌ای که پس از تخریب، فروریختن، حادثه یا انفجار باقی می‌ماند.",
+      "concept_explained_fa_audio_file_name": "w__4127__concept_explained_fa__1786698513475.mp3",
+      "concept_explained_fa_audio_source_text": "قطعات پراکنده، آوار یا نخاله‌ای که پس از تخریب، فروریختن، حادثه یا انفجار باقی می‌ماند.",
+      "learning_depth": 0.55,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 78,
+      "productive_target": 49,
+      "createdAt": "2026-03-10T03:47:21.853Z",
+      "updatedAt": "2026-08-18T18:13:24.531Z"
+    },
+    {
+      "id": 4158,
+      "anki_link_id": "4158_1774390851312",
+      "englishId": 1083,
+      "meaningId": 2602,
+      "otherMeaningIds": [
+        6073,
+        2656,
+        55367,
+        55644,
+        49886,
+        51677,
+        48524,
+        49449,
+        178
+      ],
+      "comparedMeaningWordIds": [
+        403,
+        4233,
+        4485,
+        30279,
+        30826,
+        30829,
+        31436,
+        31614,
+        31776,
+        32508,
+        32915,
+        34165,
+        34255,
+        34484,
+        34485,
+        37999,
+        40175,
+        40586,
+        40646,
+        41068
+      ],
+      "synonymIds": [
+        31436,
+        31614,
+        32915,
+        40646
+      ],
+      "sentenceIds": [
+        1812,
+        13531,
+        26165
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "verb",
+      "concept_explained_fa": "دربارهٔ موضوعی با دیگران گفتگو و جنبه‌های آن را بررسی کردن تا نظرها مبادله یا تصمیمی حاصل شود.",
+      "concept_explained_fa_audio_file_name": "w__4158__concept_explained_fa__1786698514687.mp3",
+      "concept_explained_fa_audio_source_text": "دربارهٔ موضوعی با دیگران گفتگو و جنبه‌های آن را بررسی کردن تا نظرها مبادله یا تصمیمی حاصل شود.",
+      "learning_depth": 0.9,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 40,
+      "productive_target": 60,
+      "createdAt": "2026-03-24T22:20:51.310Z",
+      "updatedAt": "2026-08-18T18:13:26.401Z"
+    },
+    {
+      "id": 5718,
+      "anki_link_id": "5718_1777779776129",
+      "englishId": 3905,
+      "meaningId": 1159,
+      "otherMeaningIds": [
+        6401,
+        2593,
+        48464
+      ],
+      "comparedMeaningWordIds": [
+        2195,
+        4122,
+        4321,
+        39870
+      ],
+      "synonymIds": [
+        2195
+      ],
+      "sentenceIds": [
+        4209,
+        7040
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "توفان گرمسیری بسیار شدید و چرخانی است که در غرب اقیانوس آرام شکل می‌گیرد.",
+      "concept_explained_fa_audio_file_name": "w__5718__concept_explained_fa__1786698666037.mp3",
+      "concept_explained_fa_audio_source_text": "توفان گرمسیری بسیار شدید و چرخانی است که در غرب اقیانوس آرام شکل می‌گیرد.",
+      "learning_depth": 0.5,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 88,
+      "productive_target": 62,
+      "createdAt": "2026-05-03T03:42:56.129Z",
+      "updatedAt": "2026-08-18T18:14:09.166Z"
+    },
+    {
+      "id": 30745,
+      "anki_link_id": "30745_1786582151458",
+      "englishId": 771,
+      "meaningId": 48394,
+      "otherMeaningIds": [
+        48396,
+        48395
+      ],
+      "comparedMeaningWordIds": null,
+      "synonymIds": null,
+      "sentenceIds": [
+        6980
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "verb",
+      "concept_explained_fa": "به آفرینش و تنظیم هدفمند ملودی، هارمونی و ریتم برای تبدیل ایده‌های صوتی به یک اثر موسیقایی اشاره دارد.",
+      "concept_explained_fa_audio_file_name": "w__30745__concept_explained_fa__1786699055608.mp3",
+      "concept_explained_fa_audio_source_text": "به آفرینش و تنظیم هدفمند ملودی، هارمونی و ریتم برای تبدیل ایده‌های صوتی به یک اثر موسیقایی اشاره دارد.",
+      "learning_depth": 0.57,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 72,
+      "productive_target": 52,
+      "createdAt": "2026-08-13T00:49:11.459Z",
+      "updatedAt": "2026-08-18T18:13:22.011Z"
+    },
+    {
+      "id": 30859,
+      "anki_link_id": "30859_1786582152560",
+      "englishId": 23049,
+      "meaningId": 48564,
+      "otherMeaningIds": [
+        48565
+      ],
+      "comparedMeaningWordIds": null,
+      "synonymIds": null,
+      "sentenceIds": [
+        7352
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "بخشش رسمی گروهی از افراد برای جرائم، به‌ویژه جرائم سیاسی، بدون اجرای مجازات است.",
+      "concept_explained_fa_audio_file_name": "w__30859__concept_explained_fa__1786699100992.mp3",
+      "concept_explained_fa_audio_source_text": "بخشش رسمی گروهی از افراد برای جرائم، به‌ویژه جرائم سیاسی، بدون اجرای مجازات است.",
+      "learning_depth": 0.39,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 24,
+      "productive_target": 35,
+      "createdAt": "2026-08-13T00:49:12.560Z",
+      "updatedAt": "2026-08-18T18:14:24.241Z"
+    },
+    {
+      "id": 31455,
+      "anki_link_id": "31455_1786582158590",
+      "englishId": 23542,
+      "meaningId": 70922,
+      "otherMeaningIds": [
+        991,
+        70923
+      ],
+      "comparedMeaningWordIds": [
+        1924,
+        4574,
+        4623,
+        31976,
+        32925
+      ],
+      "synonymIds": [],
+      "sentenceIds": [
+        9556
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "verb",
+      "concept_explained_fa": "در ورزش، به انجام حرکات سبک برای آماده‌کردن عضلات و بدن پیش از فعالیت شدید اشاره دارد.",
+      "concept_explained_fa_audio_file_name": "w__31455__concept_explained_fa__1786699330569.mp3",
+      "concept_explained_fa_audio_source_text": "در ورزش، به انجام حرکات سبک برای آماده‌کردن عضلات و بدن پیش از فعالیت شدید اشاره دارد.",
+      "learning_depth": 0.88,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 71,
+      "productive_target": 90,
+      "createdAt": "2026-08-13T00:49:18.590Z",
+      "updatedAt": "2026-08-18T20:46:01.078Z"
+    },
+    {
+      "id": 31561,
+      "anki_link_id": "31561_1786582159451",
+      "englishId": 23624,
+      "meaningId": 49601,
+      "otherMeaningIds": [
+        49602,
+        49603,
+        49604
+      ],
+      "comparedMeaningWordIds": [
+        31572,
+        32196,
+        32312
+      ],
+      "synonymIds": [
+        31572,
+        32312
+      ],
+      "sentenceIds": [
+        9681
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "verb",
+      "concept_explained_fa": "به متوقف‌کردن فعالیت و بستن کسب‌وکار، کارخانه یا سامانه برای مدتی یا همیشه اشاره دارد.",
+      "concept_explained_fa_audio_file_name": "w__31561__concept_explained_fa__1786699368912.mp3",
+      "concept_explained_fa_audio_source_text": "به متوقف‌کردن فعالیت و بستن کسب‌وکار، کارخانه یا سامانه برای مدتی یا همیشه اشاره دارد.",
+      "learning_depth": 0.81,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 78,
+      "productive_target": 80,
+      "createdAt": "2026-08-13T00:49:19.451Z",
+      "updatedAt": "2026-08-18T20:46:01.078Z"
+    },
+    {
+      "id": 31731,
+      "anki_link_id": "31731_1786582160802",
+      "englishId": 23765,
+      "meaningId": 6944,
+      "otherMeaningIds": [
+        49822
+      ],
+      "comparedMeaningWordIds": [
+        2021
+      ],
+      "synonymIds": [
+        2021
+      ],
+      "sentenceIds": [
+        9906
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "verb",
+      "concept_explained_fa": "در این کاربرد، به یافتن راهی برای انجام‌ندادن وظیفه یا تعهد اشاره دارد.",
+      "concept_explained_fa_audio_file_name": "w__31731__concept_explained_fa__1786699433242.mp3",
+      "concept_explained_fa_audio_source_text": "در این کاربرد، به یافتن راهی برای انجام‌ندادن وظیفه یا تعهد اشاره دارد.",
+      "learning_depth": 0.82,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 53,
+      "productive_target": 81,
+      "createdAt": "2026-08-13T00:49:20.802Z",
+      "updatedAt": "2026-08-18T20:46:01.078Z"
+    },
+    {
+      "id": 31732,
+      "anki_link_id": "31732_1786582160811",
+      "englishId": 23538,
+      "meaningId": 49823,
+      "otherMeaningIds": [
+        49824,
+        49825
+      ],
+      "comparedMeaningWordIds": [
+        39906,
+        40383
+      ],
+      "synonymIds": [],
+      "sentenceIds": [
+        9908
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "verb",
+      "concept_explained_fa": "در این کاربرد، به اشتباه‌گرفتن دو شخص یا چیز مشابه با یکدیگر اشاره دارد.",
+      "concept_explained_fa_audio_file_name": "w__31732__concept_explained_fa__1786699433616.mp3",
+      "concept_explained_fa_audio_source_text": "در این کاربرد، به اشتباه‌گرفتن دو شخص یا چیز مشابه با یکدیگر اشاره دارد.",
+      "learning_depth": 0.89,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 72,
+      "productive_target": 91,
+      "createdAt": "2026-08-13T00:49:20.812Z",
+      "updatedAt": "2026-08-18T20:46:01.078Z"
+    },
+    {
+      "id": 32218,
+      "anki_link_id": "32218_1786582165148",
+      "englishId": 24115,
+      "meaningId": 50523,
+      "otherMeaningIds": [
+        5245,
+        50524
+      ],
+      "comparedMeaningWordIds": [
+        5087,
+        32760,
+        35094,
+        44558
+      ],
+      "synonymIds": [],
+      "sentenceIds": [
+        10532
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "پنجمین سیاره از خورشید و بزرگ‌ترین سیارهٔ منظومهٔ شمسی است؛ غولی گازی با توفان بزرگ و قمرهای فراوان.",
+      "concept_explained_fa_audio_file_name": "w__32218__concept_explained_fa__1786699616377.mp3",
+      "concept_explained_fa_audio_source_text": "پنجمین سیاره از خورشید و بزرگ‌ترین سیارهٔ منظومهٔ شمسی است؛ غولی گازی با توفان بزرگ و قمرهای فراوان.",
+      "learning_depth": 0.41,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 89,
+      "productive_target": 37,
+      "createdAt": "2026-08-13T00:49:25.149Z",
+      "updatedAt": "2026-08-18T18:14:29.750Z"
+    },
+    {
+      "id": 32298,
+      "anki_link_id": "32298_1786582166058",
+      "englishId": 24170,
+      "meaningId": 50663,
+      "otherMeaningIds": [
+        47724,
+        4622,
+        1057
+      ],
+      "comparedMeaningWordIds": [
+        891,
+        2026,
+        4950,
+        30271,
+        30290,
+        30820,
+        32301,
+        32328,
+        32736,
+        35888,
+        36365,
+        42054,
+        43102,
+        44600,
+        44640
+      ],
+      "synonymIds": [
+        30271,
+        30290,
+        32736,
+        44600
+      ],
+      "sentenceIds": [
+        10634
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "adverb",
+      "concept_explained_fa": "برای تأکید بر واقعی‌بودن، درستی یا شدت چیزی به کار می‌رود و می‌تواند شگفتی یا تردید را نیز نشان دهد.",
+      "concept_explained_fa_audio_file_name": "w__32298__concept_explained_fa__1786699647163.mp3",
+      "concept_explained_fa_audio_source_text": "برای تأکید بر واقعی‌بودن، درستی یا شدت چیزی به کار می‌رود و می‌تواند شگفتی یا تردید را نیز نشان دهد.",
+      "learning_depth": 0.95,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 20,
+      "productive_target": 99,
+      "createdAt": "2026-08-13T00:49:26.058Z",
+      "updatedAt": "2026-08-18T18:14:31.128Z"
+    },
+    {
+      "id": 32479,
+      "anki_link_id": "32479_1786582168503",
+      "englishId": 24282,
+      "meaningId": 50919,
+      "otherMeaningIds": [
+        50920,
+        50921
+      ],
+      "comparedMeaningWordIds": [
+        35791,
+        38080
+      ],
+      "synonymIds": [],
+      "sentenceIds": [
+        10829
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "فرایند تحلیل و ارزیابی آثار هنری، ادبی یا فکری و بررسی قوت، ضعف، معنا و ارزش آن‌ها؛ مفهوم کلی نقد است.",
+      "concept_explained_fa_audio_file_name": "w__32479__concept_explained_fa__1786699712235.mp3",
+      "concept_explained_fa_audio_source_text": "فرایند تحلیل و ارزیابی آثار هنری، ادبی یا فکری و بررسی قوت، ضعف، معنا و ارزش آن‌ها؛ مفهوم کلی نقد است.",
+      "learning_depth": 0.45,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 27,
+      "productive_target": 43,
+      "createdAt": "2026-08-13T00:49:28.503Z",
+      "updatedAt": "2026-08-18T18:14:32.421Z"
+    },
+    {
+      "id": 32544,
+      "anki_link_id": "32544_1786582169352",
+      "englishId": 24320,
+      "meaningId": 51041,
+      "otherMeaningIds": [
+        51042,
+        50938
+      ],
+      "comparedMeaningWordIds": [
+        32488,
+        36819,
+        39281,
+        44906
+      ],
+      "synonymIds": [],
+      "sentenceIds": [
+        10893
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "منطقهٔ شهری مسکونی است که معمولاً از شهر بزرگ کوچک‌تر و از روستا بزرگ‌تر است.",
+      "concept_explained_fa_audio_file_name": "w__32544__concept_explained_fa__1786699733813.mp3",
+      "concept_explained_fa_audio_source_text": "منطقهٔ شهری مسکونی است که معمولاً از شهر بزرگ کوچک‌تر و از روستا بزرگ‌تر است.",
+      "learning_depth": 0.93,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 86,
+      "productive_target": 96,
+      "createdAt": "2026-08-13T00:49:29.351Z",
+      "updatedAt": "2026-08-18T18:14:32.421Z"
+    },
+    {
+      "id": 32748,
+      "anki_link_id": "32748_1786582171826",
+      "englishId": 24503,
+      "meaningId": 51397,
+      "otherMeaningIds": [
+        51398,
+        51399
+      ],
+      "comparedMeaningWordIds": [
+        35262,
+        36966,
+        39929
+      ],
+      "synonymIds": [
+        35262,
+        36966,
+        39929
+      ],
+      "sentenceIds": [
+        11108
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "adjective",
+      "concept_explained_fa": "برای فردی است که به‌دلیل کار، اشتباه یا ویژگی خود احساس شرم، گناه یا ناراحتی از قضاوت دیگران دارد.",
+      "concept_explained_fa_audio_file_name": "w__32748__concept_explained_fa__1786699812211.mp3",
+      "concept_explained_fa_audio_source_text": "برای فردی است که به‌دلیل کار، اشتباه یا ویژگی خود احساس شرم، گناه یا ناراحتی از قضاوت دیگران دارد.",
+      "learning_depth": 0.9,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 25,
+      "productive_target": 92,
+      "createdAt": "2026-08-13T00:49:31.826Z",
+      "updatedAt": "2026-08-18T18:14:34.745Z"
+    },
+    {
+      "id": 32847,
+      "anki_link_id": "32847_1786582173088",
+      "englishId": 3023,
+      "meaningId": 51562,
+      "otherMeaningIds": [
+        51563,
+        566,
+        51564
+      ],
+      "comparedMeaningWordIds": [
+        30475,
+        30797,
+        30922,
+        34678,
+        37502,
+        42566
+      ],
+      "synonymIds": [
+        34678
+      ],
+      "sentenceIds": [
+        11242
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "فهرست یا سابقه رسمی افراد، دارایی‌ها یا رویدادها که برای ثبت قانونی، اداری یا مراجعه نگهداری می‌شود.",
+      "concept_explained_fa_audio_file_name": "w__32847__concept_explained_fa__1786699850917.mp3",
+      "concept_explained_fa_audio_source_text": "فهرست یا سابقه رسمی افراد، دارایی‌ها یا رویدادها که برای ثبت قانونی، اداری یا مراجعه نگهداری می‌شود.",
+      "learning_depth": 0.48,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 80,
+      "productive_target": 46,
+      "createdAt": "2026-08-13T00:49:33.089Z",
+      "updatedAt": "2026-08-18T18:13:57.826Z"
+    },
+    {
+      "id": 32857,
+      "anki_link_id": "32857_1786582173175",
+      "englishId": 24602,
+      "meaningId": 51577,
+      "otherMeaningIds": [
+        51578,
+        3583,
+        1179
+      ],
+      "comparedMeaningWordIds": [
+        2254,
+        4442,
+        5068,
+        30292,
+        32604,
+        32785,
+        35323,
+        37282,
+        44294
+      ],
+      "synonymIds": [],
+      "sentenceIds": [
+        11253
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "interjection",
+      "concept_explained_fa": "عبارتی غیررسمی برای نشان‌دادن شگفتی و پرسیدن «جدی؟»، یا تأکید بر اینکه گوینده شوخی نمی‌کند، است.",
+      "concept_explained_fa_audio_file_name": "w__32857__concept_explained_fa__1786699855010.mp3",
+      "concept_explained_fa_audio_source_text": "عبارتی غیررسمی برای نشان‌دادن شگفتی و پرسیدن «جدی؟»، یا تأکید بر اینکه گوینده شوخی نمی‌کند، است.",
+      "learning_depth": 0.79,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 14,
+      "productive_target": 77,
+      "createdAt": "2026-08-13T00:49:33.175Z",
+      "updatedAt": "2026-08-18T20:46:01.078Z"
+    },
+    {
+      "id": 32879,
+      "anki_link_id": "32879_1786582173379",
+      "englishId": 24614,
+      "meaningId": 51604,
+      "otherMeaningIds": [
+        2998,
+        51605
+      ],
+      "comparedMeaningWordIds": [
+        4730,
+        41149,
+        44265
+      ],
+      "synonymIds": [
+        4730,
+        44265
+      ],
+      "sentenceIds": [
+        11281
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "verb",
+      "concept_explained_fa": "ماده‌ای نرم مانند گل رس را با دست یا قالب به شکل دلخواه درآوردن و قالب‌گیری کردن.",
+      "concept_explained_fa_audio_file_name": "w__32879__concept_explained_fa__1787077133763.mp3",
+      "concept_explained_fa_audio_source_text": "ماده‌ای نرم مانند گل رس را با دست یا قالب به شکل دلخواه درآوردن و قالب‌گیری کردن.",
+      "learning_depth": 0.64,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 53,
+      "productive_target": 61,
+      "createdAt": "2026-08-13T00:49:33.379Z",
+      "updatedAt": "2026-08-18T18:18:54.164Z"
+    },
+    {
+      "id": 32909,
+      "anki_link_id": "32909_1786582173709",
+      "englishId": 23207,
+      "meaningId": 51663,
+      "otherMeaningIds": [],
+      "comparedMeaningWordIds": null,
+      "synonymIds": null,
+      "sentenceIds": [
+        11316
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "phrase",
+      "concept_explained_fa": "اختیار انتخاب یا تصمیم‌گیری دربارهٔ چیزی بر عهدهٔ شخصی بودن.",
+      "concept_explained_fa_audio_file_name": "w__32909__concept_explained_fa__1787077136076.mp3",
+      "concept_explained_fa_audio_source_text": "اختیار انتخاب یا تصمیم‌گیری دربارهٔ چیزی بر عهدهٔ شخصی بودن.",
+      "learning_depth": 0.94,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 37,
+      "productive_target": 98,
+      "createdAt": "2026-08-13T00:49:33.709Z",
+      "updatedAt": "2026-08-18T20:46:01.078Z"
+    },
+    {
+      "id": 33611,
+      "anki_link_id": "33611_1786582180570",
+      "englishId": 25297,
+      "meaningId": 53458,
+      "otherMeaningIds": [
+        53459,
+        53460
+      ],
+      "comparedMeaningWordIds": null,
+      "synonymIds": null,
+      "sentenceIds": [
+        12237
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "مرحله‌ای است که ماه نزدیک جهت خورشید قرار دارد و نیمهٔ روشن آن رو به زمین نیست، پس تقریباً نامرئی است.",
+      "concept_explained_fa_audio_file_name": "w__33611__concept_explained_fa__1786700172020.mp3",
+      "concept_explained_fa_audio_source_text": "مرحله‌ای است که ماه نزدیک جهت خورشید قرار دارد و نیمهٔ روشن آن رو به زمین نیست، پس تقریباً نامرئی است.",
+      "learning_depth": 0.64,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 25,
+      "productive_target": 61,
+      "createdAt": "2026-08-13T00:49:40.570Z",
+      "updatedAt": "2026-08-18T20:46:01.078Z"
+    },
+    {
+      "id": 34109,
+      "anki_link_id": "34109_1786582186837",
+      "englishId": 25749,
+      "meaningId": 54737,
+      "otherMeaningIds": [],
+      "comparedMeaningWordIds": null,
+      "synonymIds": null,
+      "sentenceIds": [
+        12891
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "برنامهٔ مخربی است که می‌تواند تکثیر شود و به رایانه، فایل یا شبکه آسیب بزند.",
+      "concept_explained_fa_audio_file_name": "w__34109__concept_explained_fa__1786700378922.mp3",
+      "concept_explained_fa_audio_source_text": "برنامهٔ مخربی است که می‌تواند تکثیر شود و به رایانه، فایل یا شبکه آسیب بزند.",
+      "learning_depth": 0.87,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 90,
+      "productive_target": 88,
+      "createdAt": "2026-08-13T00:49:46.837Z",
+      "updatedAt": "2026-08-18T18:14:45.247Z"
+    },
+    {
+      "id": 34457,
+      "anki_link_id": "34457_1786582191137",
+      "englishId": 25996,
+      "meaningId": 55329,
+      "otherMeaningIds": [
+        55330,
+        55331,
+        3155
+      ],
+      "comparedMeaningWordIds": [
+        4798,
+        4980,
+        5255,
+        34449,
+        34481,
+        35735,
+        36111
+      ],
+      "synonymIds": [],
+      "sentenceIds": [
+        13291
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "verb",
+      "concept_explained_fa": "به تولید آوا و ملودی با صدای انسان و اجرای ترانه اشاره دارد.",
+      "concept_explained_fa_audio_file_name": "w__34457__concept_explained_fa__1786700507178.mp3",
+      "concept_explained_fa_audio_source_text": "به تولید آوا و ملودی با صدای انسان و اجرای ترانه اشاره دارد.",
+      "learning_depth": 0.72,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 56,
+      "productive_target": 72,
+      "createdAt": "2026-08-13T00:49:51.137Z",
+      "updatedAt": "2026-08-18T18:14:47.641Z"
+    },
+    {
+      "id": 34898,
+      "anki_link_id": "34898_1786582196927",
+      "englishId": 26299,
+      "meaningId": 55980,
+      "otherMeaningIds": [
+        61531,
+        61532,
+        61533
+      ],
+      "comparedMeaningWordIds": null,
+      "synonymIds": null,
+      "sentenceIds": [
+        13740,
+        18928
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "فرهنگ و سبک موسیقی ریتم‌محوری است که رپ، دی‌جی‌گری، بیت و عناصر دیگری را دربرمی‌گیرد.",
+      "concept_explained_fa_audio_file_name": "w__34898__concept_explained_fa__1786700664217.mp3",
+      "concept_explained_fa_audio_source_text": "فرهنگ و سبک موسیقی ریتم‌محوری است که رپ، دی‌جی‌گری، بیت و عناصر دیگری را دربرمی‌گیرد.",
+      "learning_depth": 0.67,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 58,
+      "productive_target": 65,
+      "createdAt": "2026-08-13T00:49:56.928Z",
+      "updatedAt": "2026-08-18T20:46:01.078Z"
+    },
+    {
+      "id": 34958,
+      "anki_link_id": "34958_1786582197714",
+      "englishId": 2187,
+      "meaningId": 56082,
+      "otherMeaningIds": [
+        6534
+      ],
+      "comparedMeaningWordIds": [
+        6007,
+        35686,
+        37673
+      ],
+      "synonymIds": [
+        37673
+      ],
+      "sentenceIds": [
+        13803
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "یکی از نشانه‌های نوشتاری الفبا است که صدای زبان را نمایش می‌دهد.",
+      "concept_explained_fa_audio_file_name": "w__34958__concept_explained_fa__1786700684430.mp3",
+      "concept_explained_fa_audio_source_text": "یکی از نشانه‌های نوشتاری الفبا است که صدای زبان را نمایش می‌دهد.",
+      "learning_depth": 0.93,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 77,
+      "productive_target": 96,
+      "createdAt": "2026-08-13T00:49:57.715Z",
+      "updatedAt": "2026-08-18T18:13:44.495Z"
+    },
+    {
+      "id": 35184,
+      "anki_link_id": "35184_1786582201779",
+      "englishId": 25987,
+      "meaningId": 5347,
+      "otherMeaningIds": [
+        3116
+      ],
+      "comparedMeaningWordIds": [
+        1789,
+        3031,
+        38619
+      ],
+      "synonymIds": [
+        1789
+      ],
+      "sentenceIds": [
+        14050
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": true,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "اتاقی آرام در خانه است که برای مطالعه، نوشتن یا کار فکری استفاده می‌شود.",
+      "concept_explained_fa_audio_file_name": "w__35184__concept_explained_fa__1786700761359.mp3",
+      "concept_explained_fa_audio_source_text": "اتاقی آرام در خانه است که برای مطالعه، نوشتن یا کار فکری استفاده می‌شود.",
+      "learning_depth": 0.49,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 52,
+      "productive_target": 47,
+      "createdAt": "2026-08-13T00:50:01.779Z",
+      "updatedAt": "2026-08-18T18:14:47.641Z"
+    },
+    {
+      "id": 35335,
+      "anki_link_id": "35335_1786582203566",
+      "englishId": 26561,
+      "meaningId": 56672,
+      "otherMeaningIds": [
+        56673
+      ],
+      "comparedMeaningWordIds": [
+        42794
+      ],
+      "synonymIds": [],
+      "sentenceIds": [
+        14215
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "بازیکنی است که به‌عنوان رهبر رسمی تیم ورزشی انتخاب می‌شود.",
+      "concept_explained_fa_audio_file_name": "w__35335__concept_explained_fa__1786700819812.mp3",
+      "concept_explained_fa_audio_source_text": "بازیکنی است که به‌عنوان رهبر رسمی تیم ورزشی انتخاب می‌شود.",
+      "learning_depth": 0.72,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 61,
+      "productive_target": 72,
+      "createdAt": "2026-08-13T00:50:03.566Z",
+      "updatedAt": "2026-08-18T18:14:52.615Z"
+    },
+    {
+      "id": 35352,
+      "anki_link_id": "35352_1786582203992",
+      "englishId": 24874,
+      "meaningId": 56695,
+      "otherMeaningIds": [
+        3289,
+        56191,
+        2829
+      ],
+      "comparedMeaningWordIds": [
+        1118,
+        4469,
+        4711,
+        4766,
+        5189,
+        5234,
+        35026,
+        39512
+      ],
+      "synonymIds": [],
+      "sentenceIds": [
+        14232
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "verb",
+      "concept_explained_fa": "به زدن یا پرتاب کردن توپ به سوی هدف، سبد یا دروازه در ورزش اشاره دارد.",
+      "concept_explained_fa_audio_file_name": "w__35352__concept_explained_fa__1786700825122.mp3",
+      "concept_explained_fa_audio_source_text": "به زدن یا پرتاب کردن توپ به سوی هدف، سبد یا دروازه در ورزش اشاره دارد.",
+      "learning_depth": 0.8,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 73,
+      "productive_target": 78,
+      "createdAt": "2026-08-13T00:50:03.992Z",
+      "updatedAt": "2026-08-18T18:14:38.620Z"
+    },
+    {
+      "id": 35782,
+      "anki_link_id": "35782_1786582210425",
+      "englishId": 26635,
+      "meaningId": 57334,
+      "otherMeaningIds": [
+        2828
+      ],
+      "comparedMeaningWordIds": [
+        1315,
+        4468,
+        6054,
+        35785,
+        44075
+      ],
+      "synonymIds": [
+        35785
+      ],
+      "sentenceIds": [
+        14675
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "verb",
+      "concept_explained_fa": "به اجرای نقش شخصیت در فیلم، تئاتر یا نمایش اشاره دارد.",
+      "concept_explained_fa_audio_file_name": "w__35782__concept_explained_fa__1786700983086.mp3",
+      "concept_explained_fa_audio_source_text": "به اجرای نقش شخصیت در فیلم، تئاتر یا نمایش اشاره دارد.",
+      "learning_depth": 0.6,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 58,
+      "productive_target": 55,
+      "createdAt": "2026-08-13T00:50:10.425Z",
+      "updatedAt": "2026-08-18T20:46:01.371Z"
+    },
+    {
+      "id": 35785,
+      "anki_link_id": "35785_1786582210452",
+      "englishId": 2782,
+      "meaningId": 57334,
+      "otherMeaningIds": [
+        57336,
+        2828
+      ],
+      "comparedMeaningWordIds": [
+        1315,
+        4468,
+        6054,
+        35782,
+        44075
+      ],
+      "synonymIds": [
+        35782
+      ],
+      "sentenceIds": [
+        14678
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "verb",
+      "concept_explained_fa": "به اجرای نقش یک شخصیت در فیلم، نمایش یا بازسازی اشاره دارد.",
+      "concept_explained_fa_audio_file_name": "w__35785__concept_explained_fa__1786700984611.mp3",
+      "concept_explained_fa_audio_source_text": "به اجرای نقش یک شخصیت در فیلم، نمایش یا بازسازی اشاره دارد.",
+      "learning_depth": 0.84,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 54,
+      "productive_target": 84,
+      "createdAt": "2026-08-13T00:50:10.452Z",
+      "updatedAt": "2026-08-18T20:46:01.371Z"
+    },
+    {
+      "id": 35990,
+      "anki_link_id": "35990_1786582212967",
+      "englishId": 2094,
+      "meaningId": 57675,
+      "otherMeaningIds": [
+        57676
+      ],
+      "comparedMeaningWordIds": null,
+      "synonymIds": null,
+      "sentenceIds": [
+        14906
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "دکمه‌ای روی صفحه‌کلید یا دستگاه است که با فشردن آن فرمان یا نویسه‌ای وارد می‌شود.",
+      "concept_explained_fa_audio_file_name": "w__35990__concept_explained_fa__1786701068419.mp3",
+      "concept_explained_fa_audio_source_text": "دکمه‌ای روی صفحه‌کلید یا دستگاه است که با فشردن آن فرمان یا نویسه‌ای وارد می‌شود.",
+      "learning_depth": 0.88,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 88,
+      "productive_target": 90,
+      "createdAt": "2026-08-13T00:50:12.967Z",
+      "updatedAt": "2026-08-18T18:13:43.368Z"
+    },
+    {
+      "id": 35994,
+      "anki_link_id": "35994_1786582213002",
+      "englishId": 23592,
+      "meaningId": 57680,
+      "otherMeaningIds": [
+        57681,
+        47314
+      ],
+      "comparedMeaningWordIds": [
+        29985
+      ],
+      "synonymIds": [
+        29985
+      ],
+      "sentenceIds": [
+        14910
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "verb",
+      "concept_explained_fa": "به اشغال کردن مقدار مشخصی از زمان، فضا یا توجه اشاره دارد.",
+      "concept_explained_fa_audio_file_name": "w__35994__concept_explained_fa__1786701070051.mp3",
+      "concept_explained_fa_audio_source_text": "به اشغال کردن مقدار مشخصی از زمان، فضا یا توجه اشاره دارد.",
+      "learning_depth": 0.89,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 27,
+      "productive_target": 91,
+      "createdAt": "2026-08-13T00:50:13.002Z",
+      "updatedAt": "2026-08-18T20:46:01.078Z"
+    },
+    {
+      "id": 36414,
+      "anki_link_id": "36414_1786582217741",
+      "englishId": 27103,
+      "meaningId": 58271,
+      "otherMeaningIds": [
+        58272,
+        58273
+      ],
+      "comparedMeaningWordIds": [
+        42310,
+        42315,
+        44280
+      ],
+      "synonymIds": [],
+      "sentenceIds": [
+        15400
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "نهاد منتخب یا رسمی یک کشور است که دربارهٔ قوانین بحث و تصمیم‌گیری می‌کند و ساختارش میان کشورها تفاوت دارد.",
+      "concept_explained_fa_audio_file_name": "w__36414__concept_explained_fa__1786701232512.mp3",
+      "concept_explained_fa_audio_source_text": "نهاد منتخب یا رسمی یک کشور است که دربارهٔ قوانین بحث و تصمیم‌گیری می‌کند و ساختارش میان کشورها تفاوت دارد.",
+      "learning_depth": 0.7,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 21,
+      "productive_target": 70,
+      "createdAt": "2026-08-13T00:50:17.741Z",
+      "updatedAt": "2026-08-18T18:14:58.732Z"
+    },
+    {
+      "id": 36473,
+      "anki_link_id": "36473_1786582218391",
+      "englishId": 27141,
+      "meaningId": 70970,
+      "otherMeaningIds": [
+        70971,
+        6258,
+        3200,
+        3632,
+        6181
+      ],
+      "comparedMeaningWordIds": [
+        4438,
+        4842,
+        5048,
+        5228,
+        5231,
+        29930,
+        30383,
+        30536,
+        31197,
+        32451,
+        32592,
+        34933,
+        35589,
+        35875,
+        42021,
+        44784
+      ],
+      "synonymIds": [
+        5231,
+        35875
+      ],
+      "sentenceIds": [
+        15461,
+        26066
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "زمان، مکان یا محیطی را بیان می‌کند که رویدادی واقعی یا داستانی، از جمله داستان، فیلم یا نمایش، در آن رخ می‌دهد.",
+      "concept_explained_fa_audio_file_name": "w__36473__concept_explained_fa__1787077215880.mp3",
+      "concept_explained_fa_audio_source_text": "زمان، مکان یا محیطی را بیان می‌کند که رویدادی واقعی یا داستانی، از جمله داستان، فیلم یا نمایش، در آن رخ می‌دهد.",
+      "learning_depth": 0.68,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 88,
+      "productive_target": 67,
+      "createdAt": "2026-08-13T00:50:18.392Z",
+      "updatedAt": "2026-08-18T18:20:16.245Z"
+    },
+    {
+      "id": 36920,
+      "anki_link_id": "36920_1786582224091",
+      "englishId": 1460,
+      "meaningId": 59116,
+      "otherMeaningIds": [
+        53210,
+        59117,
+        57370
+      ],
+      "comparedMeaningWordIds": [
+        33519,
+        35808,
+        40337
+      ],
+      "synonymIds": [
+        33519,
+        35808
+      ],
+      "sentenceIds": [
+        15932
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "verb",
+      "concept_explained_fa": "یعنی با اسلحه گلوله‌ای را به سوی هدف شلیک کردن.",
+      "concept_explained_fa_audio_file_name": "w__36920__concept_explained_fa__1786701440353.mp3",
+      "concept_explained_fa_audio_source_text": "یعنی با اسلحه گلوله‌ای را به سوی هدف شلیک کردن.",
+      "learning_depth": 0.81,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 29,
+      "productive_target": 80,
+      "createdAt": "2026-08-13T00:50:24.091Z",
+      "updatedAt": "2026-08-18T18:13:32.983Z"
+    },
+    {
+      "id": 37506,
+      "anki_link_id": "37506_1786582231901",
+      "englishId": 24271,
+      "meaningId": 60012,
+      "otherMeaningIds": [
+        60013,
+        60014
+      ],
+      "comparedMeaningWordIds": null,
+      "synonymIds": null,
+      "sentenceIds": [
+        16687
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "در افسانه و داستان، موجودی انسان‌نما و بسیار بزرگ و نیرومند است که اغلب نقش تهدیدکننده دارد.",
+      "concept_explained_fa_audio_file_name": "w__37506__concept_explained_fa__1786701653215.mp3",
+      "concept_explained_fa_audio_source_text": "در افسانه و داستان، موجودی انسان‌نما و بسیار بزرگ و نیرومند است که اغلب نقش تهدیدکننده دارد.",
+      "learning_depth": 0.63,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 77,
+      "productive_target": 60,
+      "createdAt": "2026-08-13T00:50:31.901Z",
+      "updatedAt": "2026-08-18T18:14:32.421Z"
+    },
+    {
+      "id": 37705,
+      "anki_link_id": "37705_1786582234178",
+      "englishId": 26301,
+      "meaningId": 70987,
+      "otherMeaningIds": [
+        60263,
+        70988
+      ],
+      "comparedMeaningWordIds": [
+        32756
+      ],
+      "synonymIds": [],
+      "sentenceIds": [
+        16933
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "adjective",
+      "concept_explained_fa": "دارای استعداد، علاقه یا فعالیت چشمگیر در زمینهٔ موسیقی.",
+      "concept_explained_fa_audio_file_name": "w__37705__concept_explained_fa__1787077248004.mp3",
+      "concept_explained_fa_audio_source_text": "دارای استعداد، علاقه یا فعالیت چشمگیر در زمینهٔ موسیقی.",
+      "learning_depth": 0.47,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 78,
+      "productive_target": 45,
+      "createdAt": "2026-08-13T00:50:34.179Z",
+      "updatedAt": "2026-08-18T18:20:48.371Z"
+    },
+    {
+      "id": 37720,
+      "anki_link_id": "37720_1786582234358",
+      "englishId": 27777,
+      "meaningId": 60287,
+      "otherMeaningIds": [
+        55834
+      ],
+      "comparedMeaningWordIds": [
+        4004,
+        34814,
+        40297
+      ],
+      "synonymIds": [],
+      "sentenceIds": [
+        16951
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "adverb",
+      "concept_explained_fa": "یعنی داخل و سوار کشتی، هواپیما، قطار یا وسیلهٔ نقلیهٔ مشابه بودن یا رفتن.",
+      "concept_explained_fa_audio_file_name": "w__37720__concept_explained_fa__1786701732814.mp3",
+      "concept_explained_fa_audio_source_text": "یعنی داخل و سوار کشتی، هواپیما، قطار یا وسیلهٔ نقلیهٔ مشابه بودن یا رفتن.",
+      "learning_depth": 0.67,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 20,
+      "productive_target": 65,
+      "createdAt": "2026-08-13T00:50:34.359Z",
+      "updatedAt": "2026-08-18T18:15:04.322Z"
+    },
+    {
+      "id": 37760,
+      "anki_link_id": "37760_1786582234879",
+      "englishId": 1469,
+      "meaningId": 60347,
+      "otherMeaningIds": [],
+      "comparedMeaningWordIds": null,
+      "synonymIds": null,
+      "sentenceIds": [
+        16998
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "به گوشت ماهی اشاره دارد که به عنوان غذا پخته و مصرف می‌شود.",
+      "concept_explained_fa_audio_file_name": "w__37760__concept_explained_fa__1786701744328.mp3",
+      "concept_explained_fa_audio_source_text": "به گوشت ماهی اشاره دارد که به عنوان غذا پخته و مصرف می‌شود.",
+      "learning_depth": 0.91,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 87,
+      "productive_target": 94,
+      "createdAt": "2026-08-13T00:50:34.879Z",
+      "updatedAt": "2026-08-18T18:13:32.983Z"
+    },
+    {
+      "id": 37937,
+      "anki_link_id": "37937_1786582237256",
+      "englishId": 917,
+      "meaningId": 60688,
+      "otherMeaningIds": [
+        60689
+      ],
+      "comparedMeaningWordIds": null,
+      "synonymIds": null,
+      "sentenceIds": [
+        17806
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "روکش مصنوعی که برای محافظت و بازسازی روی دندان آسیب‌دیده قرار می‌گیرد.",
+      "concept_explained_fa_audio_file_name": "w__37937__concept_explained_fa__1787077253446.mp3",
+      "concept_explained_fa_audio_source_text": "روکش مصنوعی که برای محافظت و بازسازی روی دندان آسیب‌دیده قرار می‌گیرد.",
+      "learning_depth": 0.73,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 89,
+      "productive_target": 74,
+      "createdAt": "2026-08-13T00:50:37.256Z",
+      "updatedAt": "2026-08-18T18:20:53.772Z"
+    },
+    {
+      "id": 38016,
+      "anki_link_id": "38016_1786582238171",
+      "englishId": 27938,
+      "meaningId": 60844,
+      "otherMeaningIds": [],
+      "comparedMeaningWordIds": null,
+      "synonymIds": null,
+      "sentenceIds": [
+        18077
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "به شرکتی اشاره دارد که شرکت دیگری بیش از نیمی از مالکیت یا کنترل آن را در اختیار دارد.",
+      "concept_explained_fa_audio_file_name": "w__38016__concept_explained_fa__1786701842557.mp3",
+      "concept_explained_fa_audio_source_text": "به شرکتی اشاره دارد که شرکت دیگری بیش از نیمی از مالکیت یا کنترل آن را در اختیار دارد.",
+      "learning_depth": 0.64,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 61,
+      "productive_target": 61,
+      "createdAt": "2026-08-13T00:50:38.171Z",
+      "updatedAt": "2026-08-18T18:15:05.232Z"
+    },
+    {
+      "id": 38230,
+      "anki_link_id": "38230_1786582240867",
+      "englishId": 24312,
+      "meaningId": 61259,
+      "otherMeaningIds": [
+        2093,
+        2436,
+        61260
+      ],
+      "comparedMeaningWordIds": [
+        3464,
+        3925
+      ],
+      "synonymIds": [],
+      "sentenceIds": [
+        18580
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "به اتاق کوچک و قفل‌شده‌ای در زندان یا بازداشتگاه اشاره دارد که زندانی در آن نگهداری می‌شود.",
+      "concept_explained_fa_audio_file_name": "w__38230__concept_explained_fa__1786701926266.mp3",
+      "concept_explained_fa_audio_source_text": "به اتاق کوچک و قفل‌شده‌ای در زندان یا بازداشتگاه اشاره دارد که زندانی در آن نگهداری می‌شود.",
+      "learning_depth": 0.85,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 88,
+      "productive_target": 85,
+      "createdAt": "2026-08-13T00:50:40.867Z",
+      "updatedAt": "2026-08-18T18:14:32.421Z"
+    },
+    {
+      "id": 38390,
+      "anki_link_id": "38390_1786582242789",
+      "englishId": 23140,
+      "meaningId": 61593,
+      "otherMeaningIds": [
+        58214,
+        61594
+      ],
+      "comparedMeaningWordIds": [
+        36375
+      ],
+      "synonymIds": [],
+      "sentenceIds": [
+        18977
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "جمله یا بخشی از متن است که بازیگر در نمایش، فیلم یا برنامه می‌گوید؛ شکل جمع آن می‌تواند کل متن نقش باشد.",
+      "concept_explained_fa_audio_file_name": "w__38390__concept_explained_fa__1786701995393.mp3",
+      "concept_explained_fa_audio_source_text": "جمله یا بخشی از متن است که بازیگر در نمایش، فیلم یا برنامه می‌گوید؛ شکل جمع آن می‌تواند کل متن نقش باشد.",
+      "learning_depth": 0.83,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 87,
+      "productive_target": 82,
+      "createdAt": "2026-08-13T00:50:42.789Z",
+      "updatedAt": "2026-08-18T18:14:25.189Z"
+    },
+    {
+      "id": 38432,
+      "anki_link_id": "38432_1786582243259",
+      "englishId": 2544,
+      "meaningId": 61696,
+      "otherMeaningIds": [
+        61697,
+        61698
+      ],
+      "comparedMeaningWordIds": null,
+      "synonymIds": null,
+      "sentenceIds": [
+        19087
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "در هنر، رنگ روغن، مجموعهٔ رنگ‌های روغنی یا اثری که با این رنگ‌ها نقاشی شده است.",
+      "concept_explained_fa_audio_file_name": "w__38432__concept_explained_fa__1787077276340.mp3",
+      "concept_explained_fa_audio_source_text": "در هنر، رنگ روغن، مجموعهٔ رنگ‌های روغنی یا اثری که با این رنگ‌ها نقاشی شده است.",
+      "learning_depth": 0.41,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 87,
+      "productive_target": 38,
+      "createdAt": "2026-08-13T00:50:43.259Z",
+      "updatedAt": "2026-08-18T18:21:16.730Z"
+    },
+    {
+      "id": 38639,
+      "anki_link_id": "38639_1786582246102",
+      "englishId": 28369,
+      "meaningId": 62132,
+      "otherMeaningIds": [
+        62133
+      ],
+      "comparedMeaningWordIds": null,
+      "synonymIds": null,
+      "sentenceIds": [
+        19724
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "زبان اصلی آلمان و اتریش و یکی از زبان‌های رسمی سوئیس و چند منطقهٔ اروپایی است.",
+      "concept_explained_fa_audio_file_name": "w__38639__concept_explained_fa__1786702100205.mp3",
+      "concept_explained_fa_audio_source_text": "زبان اصلی آلمان و اتریش و یکی از زبان‌های رسمی سوئیس و چند منطقهٔ اروپایی است.",
+      "learning_depth": 0.79,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 27,
+      "productive_target": 77,
+      "createdAt": "2026-08-13T00:50:46.103Z",
+      "updatedAt": "2026-08-18T18:15:08.452Z"
+    },
+    {
+      "id": 38668,
+      "anki_link_id": "38668_1786582246437",
+      "englishId": 28393,
+      "meaningId": 62193,
+      "otherMeaningIds": [
+        62194
+      ],
+      "comparedMeaningWordIds": null,
+      "synonymIds": null,
+      "sentenceIds": [
+        19763
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "adjective",
+      "concept_explained_fa": "مدرسه یا نظام آموزشی‌ای را توصیف می‌کند که دختران و پسران در آن با هم تحصیل می‌کنند.",
+      "concept_explained_fa_audio_file_name": "w__38668__concept_explained_fa__1786702112303.mp3",
+      "concept_explained_fa_audio_source_text": "مدرسه یا نظام آموزشی‌ای را توصیف می‌کند که دختران و پسران در آن با هم تحصیل می‌کنند.",
+      "learning_depth": 0.45,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 29,
+      "productive_target": 42,
+      "createdAt": "2026-08-13T00:50:46.438Z",
+      "updatedAt": "2026-08-18T20:46:01.078Z"
+    },
+    {
+      "id": 38700,
+      "anki_link_id": "38700_1786582246843",
+      "englishId": 26191,
+      "meaningId": 62268,
+      "otherMeaningIds": [
+        1098,
+        62269
+      ],
+      "comparedMeaningWordIds": [
+        2093,
+        31331,
+        32812,
+        34722
+      ],
+      "synonymIds": [],
+      "sentenceIds": [
+        19834
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "فردی است که بالاترین مقام اجرایی یک سازمان، دانشگاه یا برخی کشورها را بر عهده دارد.",
+      "concept_explained_fa_audio_file_name": "w__38700__concept_explained_fa__1786702125807.mp3",
+      "concept_explained_fa_audio_source_text": "فردی است که بالاترین مقام اجرایی یک سازمان، دانشگاه یا برخی کشورها را بر عهده دارد.",
+      "learning_depth": 0.81,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 81,
+      "productive_target": 80,
+      "createdAt": "2026-08-13T00:50:46.843Z",
+      "updatedAt": "2026-08-18T18:14:49.384Z"
+    },
+    {
+      "id": 38888,
+      "anki_link_id": "38888_1786582249632",
+      "englishId": 3818,
+      "meaningId": 62651,
+      "otherMeaningIds": [
+        62652,
+        62653
+      ],
+      "comparedMeaningWordIds": null,
+      "synonymIds": null,
+      "sentenceIds": [
+        20405
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "adjective",
+      "concept_explained_fa": "گوشت یا غذای دیگری را توصیف می‌کند که بافتش سفت است و به‌راحتی بریده یا جویده نمی‌شود.",
+      "concept_explained_fa_audio_file_name": "w__38888__concept_explained_fa__1786702203955.mp3",
+      "concept_explained_fa_audio_source_text": "گوشت یا غذای دیگری را توصیف می‌کند که بافتش سفت است و به‌راحتی بریده یا جویده نمی‌شود.",
+      "learning_depth": 0.84,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 78,
+      "productive_target": 84,
+      "createdAt": "2026-08-13T00:50:49.632Z",
+      "updatedAt": "2026-08-18T18:14:07.852Z"
+    },
+    {
+      "id": 39043,
+      "anki_link_id": "39043_1786582251836",
+      "englishId": 28667,
+      "meaningId": 63023,
+      "otherMeaningIds": [
+        63024,
+        63025
+      ],
+      "comparedMeaningWordIds": null,
+      "synonymIds": null,
+      "sentenceIds": [
+        21086
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "verb",
+      "concept_explained_fa": "یعنی در مدتی کوتاه مقدار بسیار زیادی غذا، نوشیدنی، رسانه یا چیز دیگری مصرف‌کردن و کنترل را کنارگذاشتن.",
+      "concept_explained_fa_audio_file_name": "w__39043__concept_explained_fa__1786702267517.mp3",
+      "concept_explained_fa_audio_source_text": "یعنی در مدتی کوتاه مقدار بسیار زیادی غذا، نوشیدنی، رسانه یا چیز دیگری مصرف‌کردن و کنترل را کنارگذاشتن.",
+      "learning_depth": 0.72,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 75,
+      "productive_target": 72,
+      "createdAt": "2026-08-13T00:50:51.836Z",
+      "updatedAt": "2026-08-18T18:15:10.364Z"
+    },
+    {
+      "id": 39446,
+      "anki_link_id": "39446_1786582257151",
+      "englishId": 28921,
+      "meaningId": 63814,
+      "otherMeaningIds": [
+        63815
+      ],
+      "comparedMeaningWordIds": [
+        43030,
+        43132
+      ],
+      "synonymIds": [],
+      "sentenceIds": [
+        22153
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "در این کاربرد نام زبان روسی است و در انگلیسی باید با حرف بزرگ نوشته شود.",
+      "concept_explained_fa_audio_file_name": "w__39446__concept_explained_fa__1786702447180.mp3",
+      "concept_explained_fa_audio_source_text": "در این کاربرد نام زبان روسی است و در انگلیسی باید با حرف بزرگ نوشته شود.",
+      "learning_depth": 0.65,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 78,
+      "productive_target": 63,
+      "createdAt": "2026-08-13T00:50:57.151Z",
+      "updatedAt": "2026-08-18T18:15:12.380Z"
+    },
+    {
+      "id": 39448,
+      "anki_link_id": "39448_1786582257175",
+      "englishId": 28923,
+      "meaningId": 63820,
+      "otherMeaningIds": [
+        63821,
+        63822
+      ],
+      "comparedMeaningWordIds": [
+        43060
+      ],
+      "synonymIds": [],
+      "sentenceIds": [
+        22164
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "زبانی رومی‌تبار و زبان رسمی فرانسه و چندین کشور و سازمان بین‌المللی است که گونه‌های منطقه‌ای متعددی دارد.",
+      "concept_explained_fa_audio_file_name": "w__39448__concept_explained_fa__1786702447874.mp3",
+      "concept_explained_fa_audio_source_text": "زبانی رومی‌تبار و زبان رسمی فرانسه و چندین کشور و سازمان بین‌المللی است که گونه‌های منطقه‌ای متعددی دارد.",
+      "learning_depth": 0.86,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 88,
+      "productive_target": 87,
+      "createdAt": "2026-08-13T00:50:57.176Z",
+      "updatedAt": "2026-08-18T18:15:12.380Z"
+    },
+    {
+      "id": 39515,
+      "anki_link_id": "39515_1786582258115",
+      "englishId": 3535,
+      "meaningId": 63982,
+      "otherMeaningIds": [
+        63983,
+        63984
+      ],
+      "comparedMeaningWordIds": null,
+      "synonymIds": null,
+      "sentenceIds": [
+        22403
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "verb",
+      "concept_explained_fa": "در بیسبال یعنی دونده هنگام پرتاب توپ و بدون کمک ضربه، با خطر آوت‌شدن به بیس بعدی برود.",
+      "concept_explained_fa_audio_file_name": "w__39515__concept_explained_fa__1786702476162.mp3",
+      "concept_explained_fa_audio_source_text": "در بیسبال یعنی دونده هنگام پرتاب توپ و بدون کمک ضربه، با خطر آوت‌شدن به بیس بعدی برود.",
+      "learning_depth": 0.47,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 71,
+      "productive_target": 45,
+      "createdAt": "2026-08-13T00:50:58.115Z",
+      "updatedAt": "2026-08-18T18:14:05.456Z"
+    },
+    {
+      "id": 39528,
+      "anki_link_id": "39528_1786582258270",
+      "englishId": 22970,
+      "meaningId": 64008,
+      "otherMeaningIds": [
+        5785
+      ],
+      "comparedMeaningWordIds": [
+        2223,
+        30886,
+        35463,
+        41424
+      ],
+      "synonymIds": [],
+      "sentenceIds": [
+        22470
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "عمل تماس کنترل‌شدهٔ چوب ورزشی با توپ برای تعیین مسیر و فاصلهٔ حرکت آن است.",
+      "concept_explained_fa_audio_file_name": "w__39528__concept_explained_fa__1786702481416.mp3",
+      "concept_explained_fa_audio_source_text": "عمل تماس کنترل‌شدهٔ چوب ورزشی با توپ برای تعیین مسیر و فاصلهٔ حرکت آن است.",
+      "learning_depth": 0.41,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 91,
+      "productive_target": 37,
+      "createdAt": "2026-08-13T00:50:58.270Z",
+      "updatedAt": "2026-08-18T18:14:24.241Z"
+    },
+    {
+      "id": 39561,
+      "anki_link_id": "39561_1786582258798",
+      "englishId": 24269,
+      "meaningId": 64082,
+      "otherMeaningIds": [],
+      "comparedMeaningWordIds": null,
+      "synonymIds": null,
+      "sentenceIds": [
+        22578
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "adjective",
+      "concept_explained_fa": "مسابقه‌ای را توصیف می‌کند که رسمی یا رقابتی نیست و معمولاً برای تمرین یا سرگرمی برگزار می‌شود.",
+      "concept_explained_fa_audio_file_name": "w__39561__concept_explained_fa__1786702494927.mp3",
+      "concept_explained_fa_audio_source_text": "مسابقه‌ای را توصیف می‌کند که رسمی یا رقابتی نیست و معمولاً برای تمرین یا سرگرمی برگزار می‌شود.",
+      "learning_depth": 0.39,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 65,
+      "productive_target": 35,
+      "createdAt": "2026-08-13T00:50:58.798Z",
+      "updatedAt": "2026-08-18T18:14:31.128Z"
+    },
+    {
+      "id": 39586,
+      "anki_link_id": "39586_1786582259198",
+      "englishId": 26361,
+      "meaningId": 64147,
+      "otherMeaningIds": [
+        64148
+      ],
+      "comparedMeaningWordIds": null,
+      "synonymIds": null,
+      "sentenceIds": [
+        22643
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "verb",
+      "concept_explained_fa": "در تنیس یعنی به سرویس یا ضربه حریف پاسخ داد و توپ را به زمین او برگرداند.",
+      "concept_explained_fa_audio_file_name": "w__39586__concept_explained_fa__1786702505779.mp3",
+      "concept_explained_fa_audio_source_text": "در تنیس یعنی به سرویس یا ضربه حریف پاسخ داد و توپ را به زمین او برگرداند.",
+      "learning_depth": 0.49,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 68,
+      "productive_target": 47,
+      "createdAt": "2026-08-13T00:50:59.198Z",
+      "updatedAt": "2026-08-18T18:14:50.411Z"
+    },
+    {
+      "id": 39724,
+      "anki_link_id": "39724_1786582261379",
+      "englishId": 957,
+      "meaningId": 64437,
+      "otherMeaningIds": [
+        64438
+      ],
+      "comparedMeaningWordIds": null,
+      "synonymIds": null,
+      "sentenceIds": [
+        23245
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "محل تولید یا فرآوری شیر و محصولات لبنی.",
+      "concept_explained_fa_audio_file_name": "w__39724__concept_explained_fa__1787077310506.mp3",
+      "concept_explained_fa_audio_source_text": "محل تولید یا فرآوری شیر و محصولات لبنی.",
+      "learning_depth": 0.41,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 61,
+      "productive_target": 37,
+      "createdAt": "2026-08-13T00:51:01.379Z",
+      "updatedAt": "2026-08-18T18:21:50.767Z"
+    },
+    {
+      "id": 39860,
+      "anki_link_id": "39860_1786582263991",
+      "englishId": 669,
+      "meaningId": 64711,
+      "otherMeaningIds": [
+        64712,
+        64713,
+        64714
+      ],
+      "comparedMeaningWordIds": null,
+      "synonymIds": null,
+      "sentenceIds": [
+        23726
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "verb",
+      "concept_explained_fa": "درباره هوا یا آسمان یعنی ابر، مه یا باران کنار برود و وضعیت روشن و صاف شود.",
+      "concept_explained_fa_audio_file_name": "w__39860__concept_explained_fa__1786702620635.mp3",
+      "concept_explained_fa_audio_source_text": "درباره هوا یا آسمان یعنی ابر، مه یا باران کنار برود و وضعیت روشن و صاف شود.",
+      "learning_depth": 0.72,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 69,
+      "productive_target": 72,
+      "createdAt": "2026-08-13T00:51:03.991Z",
+      "updatedAt": "2026-08-18T18:13:20.794Z"
+    },
+    {
+      "id": 40070,
+      "anki_link_id": "40070_1786582266906",
+      "englishId": 26744,
+      "meaningId": 65038,
+      "otherMeaningIds": [
+        65039,
+        65040,
+        3217
+      ],
+      "comparedMeaningWordIds": [
+        3697,
+        5077,
+        5473,
+        38348,
+        41561
+      ],
+      "synonymIds": [],
+      "sentenceIds": [
+        24335
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "صفحه‌ای مدرج در ساعت یا رادیو است که زمان، عدد یا مقدار تنظیم‌شده را نشان می‌دهد.",
+      "concept_explained_fa_audio_file_name": "w__40070__concept_explained_fa__1787077322318.mp3",
+      "concept_explained_fa_audio_source_text": "صفحه‌ای مدرج در ساعت یا رادیو است که زمان، عدد یا مقدار تنظیم‌شده را نشان می‌دهد.",
+      "learning_depth": 0.64,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 87,
+      "productive_target": 61,
+      "createdAt": "2026-08-13T00:51:06.906Z",
+      "updatedAt": "2026-08-18T18:22:02.736Z"
+    },
+    {
+      "id": 40103,
+      "anki_link_id": "40103_1786582267420",
+      "englishId": 24214,
+      "meaningId": 65083,
+      "otherMeaningIds": [],
+      "comparedMeaningWordIds": null,
+      "synonymIds": null,
+      "sentenceIds": [
+        24392
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "نتیجه آزمایشی است که وجود ویژگی، ماده، بیماری یا اثر مورد بررسی را نشان می‌دهد.",
+      "concept_explained_fa_audio_file_name": "w__40103__concept_explained_fa__1786702716236.mp3",
+      "concept_explained_fa_audio_source_text": "نتیجه آزمایشی است که وجود ویژگی، ماده، بیماری یا اثر مورد بررسی را نشان می‌دهد.",
+      "learning_depth": 0.68,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 21,
+      "productive_target": 67,
+      "createdAt": "2026-08-13T00:51:07.420Z",
+      "updatedAt": "2026-08-18T18:14:31.128Z"
+    },
+    {
+      "id": 40109,
+      "anki_link_id": "40109_1786582267521",
+      "englishId": 22431,
+      "meaningId": 65091,
+      "otherMeaningIds": [
+        766
+      ],
+      "comparedMeaningWordIds": [
+        1354,
+        1634,
+        4267,
+        29899,
+        30051,
+        34419,
+        36314,
+        41615,
+        42620,
+        43695
+      ],
+      "synonymIds": [
+        43695
+      ],
+      "sentenceIds": [
+        24401
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "ویژگی فیزیکی ماده که سبب ایجاد یا تجربه نیروی الکتریکی می‌شود؛ می‌تواند مثبت، منفی یا خنثی باشد.",
+      "concept_explained_fa_audio_file_name": "w__40109__concept_explained_fa__1786702718299.mp3",
+      "concept_explained_fa_audio_source_text": "ویژگی فیزیکی ماده که سبب ایجاد یا تجربه نیروی الکتریکی می‌شود؛ می‌تواند مثبت، منفی یا خنثی باشد.",
+      "learning_depth": 0.49,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 27,
+      "productive_target": 48,
+      "createdAt": "2026-08-13T00:51:07.520Z",
+      "updatedAt": "2026-08-18T18:14:15.538Z"
+    },
+    {
+      "id": 40156,
+      "anki_link_id": "40156_1786582268132",
+      "englishId": 29283,
+      "meaningId": 65162,
+      "otherMeaningIds": [
+        65163
+      ],
+      "comparedMeaningWordIds": null,
+      "synonymIds": null,
+      "sentenceIds": [
+        24479
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "دستگاهی تلفنی است که هنگام پاسخ ندادن، پیام تماس‌گیرنده را ضبط و بعداً پخش می‌کند.",
+      "concept_explained_fa_audio_file_name": "w__40156__concept_explained_fa__1786702734836.mp3",
+      "concept_explained_fa_audio_source_text": "دستگاهی تلفنی است که هنگام پاسخ ندادن، پیام تماس‌گیرنده را ضبط و بعداً پخش می‌کند.",
+      "learning_depth": 0.6,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 89,
+      "productive_target": 55,
+      "createdAt": "2026-08-13T00:51:08.132Z",
+      "updatedAt": "2026-08-18T20:46:01.078Z"
+    },
+    {
+      "id": 40187,
+      "anki_link_id": "40187_1786582268570",
+      "englishId": 647,
+      "meaningId": 65199,
+      "otherMeaningIds": [
+        65200,
+        65201
+      ],
+      "comparedMeaningWordIds": null,
+      "synonymIds": null,
+      "sentenceIds": [
+        24535
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "تعداد نسخه‌های روزنامه یا مجله است که در یک دوره چاپ و میان خوانندگان توزیع می‌شود.",
+      "concept_explained_fa_audio_file_name": "w__40187__concept_explained_fa__1786702746155.mp3",
+      "concept_explained_fa_audio_source_text": "تعداد نسخه‌های روزنامه یا مجله است که در یک دوره چاپ و میان خوانندگان توزیع می‌شود.",
+      "learning_depth": 0.49,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 21,
+      "productive_target": 48,
+      "createdAt": "2026-08-13T00:51:08.570Z",
+      "updatedAt": "2026-08-18T18:13:20.794Z"
+    },
+    {
+      "id": 40236,
+      "anki_link_id": "40236_1786582269216",
+      "englishId": 26413,
+      "meaningId": 65274,
+      "otherMeaningIds": [
+        5036
+      ],
+      "comparedMeaningWordIds": [
+        1410
+      ],
+      "synonymIds": [],
+      "sentenceIds": [
+        24615
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "در حمل‌ونقل یک حرکت برنامه‌ریزی‌شده اتوبوس، قطار یا وسیله عمومی در مسیر و زمان مشخص است.",
+      "concept_explained_fa_audio_file_name": "w__40236__concept_explained_fa__1786702764611.mp3",
+      "concept_explained_fa_audio_source_text": "در حمل‌ونقل یک حرکت برنامه‌ریزی‌شده اتوبوس، قطار یا وسیله عمومی در مسیر و زمان مشخص است.",
+      "learning_depth": 0.65,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 52,
+      "productive_target": 62,
+      "createdAt": "2026-08-13T00:51:09.217Z",
+      "updatedAt": "2026-08-18T18:14:51.612Z"
+    },
+    {
+      "id": 40260,
+      "anki_link_id": "40260_1786582269552",
+      "englishId": 3904,
+      "meaningId": 65307,
+      "otherMeaningIds": [
+        4398
+      ],
+      "comparedMeaningWordIds": [
+        3540,
+        5018,
+        36135,
+        36757
+      ],
+      "synonymIds": [],
+      "sentenceIds": [
+        24662
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "در مسیر یا رودخانه خم یا پیچ تند و مشخصی است که جهت را به‌طور محسوس تغییر می‌دهد.",
+      "concept_explained_fa_audio_file_name": "w__40260__concept_explained_fa__1786702774569.mp3",
+      "concept_explained_fa_audio_source_text": "در مسیر یا رودخانه خم یا پیچ تند و مشخصی است که جهت را به‌طور محسوس تغییر می‌دهد.",
+      "learning_depth": 0.43,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 88,
+      "productive_target": 40,
+      "createdAt": "2026-08-13T00:51:09.552Z",
+      "updatedAt": "2026-08-18T18:14:09.166Z"
+    },
+    {
+      "id": 40306,
+      "anki_link_id": "40306_1786582270199",
+      "englishId": 1824,
+      "meaningId": 65373,
+      "otherMeaningIds": [
+        65374
+      ],
+      "comparedMeaningWordIds": [
+        40422,
+        41627,
+        44226
+      ],
+      "synonymIds": [],
+      "sentenceIds": [
+        24749
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "verb",
+      "concept_explained_fa": "مسافتی نسبتاً طولانی را برای تفریح یا ورزش، معمولاً در طبیعت و مسیرهای ناهموار، پیاده طی کردن.",
+      "concept_explained_fa_audio_file_name": "w__40306__concept_explained_fa__1786702790709.mp3",
+      "concept_explained_fa_audio_source_text": "مسافتی نسبتاً طولانی را برای تفریح یا ورزش، معمولاً در طبیعت و مسیرهای ناهموار، پیاده طی کردن.",
+      "learning_depth": 0.72,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 35,
+      "productive_target": 72,
+      "createdAt": "2026-08-13T00:51:10.199Z",
+      "updatedAt": "2026-08-18T18:13:39.225Z"
+    },
+    {
+      "id": 40733,
+      "anki_link_id": "40733_1786582276586",
+      "englishId": 29586,
+      "meaningId": 65816,
+      "otherMeaningIds": [
+        64229
+      ],
+      "comparedMeaningWordIds": [
+        39623
+      ],
+      "synonymIds": [
+        39623
+      ],
+      "sentenceIds": [
+        25415
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "رشته دوومیدانی است که ورزشکار می‌کوشد بدون انداختن میله افقی از بالاترین ارتفاع بپرد.",
+      "concept_explained_fa_audio_file_name": "w__40733__concept_explained_fa__1786702947672.mp3",
+      "concept_explained_fa_audio_source_text": "رشته دوومیدانی است که ورزشکار می‌کوشد بدون انداختن میله افقی از بالاترین ارتفاع بپرد.",
+      "learning_depth": 0.47,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 55,
+      "productive_target": 45,
+      "createdAt": "2026-08-13T00:51:16.586Z",
+      "updatedAt": "2026-08-18T20:46:01.078Z"
+    },
+    {
+      "id": 41045,
+      "anki_link_id": "41045_1786582281790",
+      "englishId": 22631,
+      "meaningId": 66137,
+      "otherMeaningIds": [
+        57445
+      ],
+      "comparedMeaningWordIds": [
+        35850
+      ],
+      "synonymIds": [],
+      "sentenceIds": [
+        26004
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "adjective",
+      "concept_explained_fa": "عددی را توصیف می‌کند که بدون باقی‌مانده بر دو تقسیم می‌شود.",
+      "concept_explained_fa_audio_file_name": "w__41045__concept_explained_fa__1786703064883.mp3",
+      "concept_explained_fa_audio_source_text": "عددی را توصیف می‌کند که بدون باقی‌مانده بر دو تقسیم می‌شود.",
+      "learning_depth": 0.61,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 33,
+      "productive_target": 57,
+      "createdAt": "2026-08-13T00:51:21.790Z",
+      "updatedAt": "2026-08-18T18:14:18.103Z"
+    },
+    {
+      "id": 41222,
+      "anki_link_id": "41222_1786582284492",
+      "englishId": 1836,
+      "meaningId": 66309,
+      "otherMeaningIds": [],
+      "comparedMeaningWordIds": null,
+      "synonymIds": null,
+      "sentenceIds": [
+        26254
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "verb",
+      "concept_explained_fa": "عنوان قهرمانی، رکورد یا جایگاه برتر را در اختیار داشتن.",
+      "concept_explained_fa_audio_file_name": "w__41222__concept_explained_fa__1787077347179.mp3",
+      "concept_explained_fa_audio_source_text": "عنوان قهرمانی، رکورد یا جایگاه برتر را در اختیار داشتن.",
+      "learning_depth": 0.67,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 79,
+      "productive_target": 65,
+      "createdAt": "2026-08-13T00:51:24.492Z",
+      "updatedAt": "2026-08-18T18:22:27.486Z"
+    },
+    {
+      "id": 41343,
+      "anki_link_id": "41343_1786582286348",
+      "englishId": 4047,
+      "meaningId": 66445,
+      "otherMeaningIds": [
+        66446
+      ],
+      "comparedMeaningWordIds": null,
+      "synonymIds": null,
+      "sentenceIds": [
+        26453
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "verb",
+      "concept_explained_fa": "درباره دهان یعنی در واکنش به بو، دیدن یا فکر غذا بزاق بیشتری تولید شدن.",
+      "concept_explained_fa_audio_file_name": "w__41343__concept_explained_fa__1786703175811.mp3",
+      "concept_explained_fa_audio_source_text": "درباره دهان یعنی در واکنش به بو، دیدن یا فکر غذا بزاق بیشتری تولید شدن.",
+      "learning_depth": 0.66,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 72,
+      "productive_target": 64,
+      "createdAt": "2026-08-13T00:51:26.348Z",
+      "updatedAt": "2026-08-18T18:14:11.607Z"
+    },
+    {
+      "id": 41500,
+      "anki_link_id": "41500_1786582288600",
+      "englishId": 30062,
+      "meaningId": 66654,
+      "otherMeaningIds": [
+        56908
+      ],
+      "comparedMeaningWordIds": [
+        35515,
+        38464,
+        44979
+      ],
+      "synonymIds": [],
+      "sentenceIds": [
+        26755
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "بازگشت به موفقیت، محبوبیت، سلامت یا فعالیت پس از دوره‌ای از شکست، غیبت یا ضعف است.",
+      "concept_explained_fa_audio_file_name": "w__41500__concept_explained_fa__1786703238016.mp3",
+      "concept_explained_fa_audio_source_text": "بازگشت به موفقیت، محبوبیت، سلامت یا فعالیت پس از دوره‌ای از شکست، غیبت یا ضعف است.",
+      "learning_depth": 0.69,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 25,
+      "productive_target": 68,
+      "createdAt": "2026-08-13T00:51:28.600Z",
+      "updatedAt": "2026-08-18T18:15:17.887Z"
+    },
+    {
+      "id": 41631,
+      "anki_link_id": "41631_1786582291358",
+      "englishId": 1183,
+      "meaningId": 66822,
+      "otherMeaningIds": [
+        66823
+      ],
+      "comparedMeaningWordIds": null,
+      "synonymIds": null,
+      "sentenceIds": [
+        26961
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "verb",
+      "concept_explained_fa": "در کاربرد متعدی یعنی آب یا رطوبت چیزی را با هوا، گرما یا پارچه از آن خارج کردن.",
+      "concept_explained_fa_audio_file_name": "w__41631__concept_explained_fa__1786703288043.mp3",
+      "concept_explained_fa_audio_source_text": "در کاربرد متعدی یعنی آب یا رطوبت چیزی را با هوا، گرما یا پارچه از آن خارج کردن.",
+      "learning_depth": 0.87,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 69,
+      "productive_target": 88,
+      "createdAt": "2026-08-13T00:51:31.358Z",
+      "updatedAt": "2026-08-18T18:13:27.580Z"
+    },
+    {
+      "id": 41724,
+      "anki_link_id": "41724_1786582293012",
+      "englishId": 30212,
+      "meaningId": 66927,
+      "otherMeaningIds": [
+        66928
+      ],
+      "comparedMeaningWordIds": [
+        42166
+      ],
+      "synonymIds": [
+        42166
+      ],
+      "sentenceIds": [
+        27088
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": true,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "یک گروه یا واحد از سربازان است؛ شکل جمع آن می‌تواند به طور کلی به نیروهای نظامی اشاره کند.",
+      "concept_explained_fa_audio_file_name": "w__41724__concept_explained_fa__1786703322543.mp3",
+      "concept_explained_fa_audio_source_text": "یک گروه یا واحد از سربازان است؛ شکل جمع آن می‌تواند به طور کلی به نیروهای نظامی اشاره کند.",
+      "learning_depth": 0.63,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 59,
+      "productive_target": 60,
+      "createdAt": "2026-08-13T00:51:33.012Z",
+      "updatedAt": "2026-08-18T18:15:18.976Z"
+    },
+    {
+      "id": 41960,
+      "anki_link_id": "41960_1786582296456",
+      "englishId": 29347,
+      "meaningId": 67174,
+      "otherMeaningIds": [
+        3817
+      ],
+      "comparedMeaningWordIds": [
+        5994,
+        30591,
+        34716,
+        35093,
+        35095
+      ],
+      "synonymIds": [],
+      "sentenceIds": [
+        27420
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "در انگلیسی آمریکایی می‌تواند کارمند فروشگاه باشد که به مشتری، صندوق یا ثبت کالا رسیدگی می‌کند.",
+      "concept_explained_fa_audio_file_name": "w__41960__concept_explained_fa__1786703415121.mp3",
+      "concept_explained_fa_audio_source_text": "در انگلیسی آمریکایی می‌تواند کارمند فروشگاه باشد که به مشتری، صندوق یا ثبت کالا رسیدگی می‌کند.",
+      "learning_depth": 0.62,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 87,
+      "productive_target": 59,
+      "createdAt": "2026-08-13T00:51:36.456Z",
+      "updatedAt": "2026-08-18T18:15:15.395Z"
+    },
+    {
+      "id": 42177,
+      "anki_link_id": "42177_1786582300475",
+      "englishId": 30460,
+      "meaningId": 67410,
+      "otherMeaningIds": [
+        2437
+      ],
+      "comparedMeaningWordIds": [
+        3646,
+        36389,
+        39520
+      ],
+      "synonymIds": [],
+      "sentenceIds": [
+        27701
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "شکل خمیده و بسته یا تقریباً بسته‌ای است که طناب، سیم، مسیر یا برنامه می‌تواند ایجاد کند.",
+      "concept_explained_fa_audio_file_name": "w__42177__concept_explained_fa__1786703491014.mp3",
+      "concept_explained_fa_audio_source_text": "شکل خمیده و بسته یا تقریباً بسته‌ای است که طناب، سیم، مسیر یا برنامه می‌تواند ایجاد کند.",
+      "learning_depth": 0.66,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 57,
+      "productive_target": 64,
+      "createdAt": "2026-08-13T00:51:40.475Z",
+      "updatedAt": "2026-08-18T18:15:20.058Z"
+    },
+    {
+      "id": 42181,
+      "anki_link_id": "42181_1786582300548",
+      "englishId": 26474,
+      "meaningId": 4006,
+      "otherMeaningIds": [
+        953,
+        1240
+      ],
+      "comparedMeaningWordIds": [
+        985,
+        1874,
+        2755,
+        3842,
+        44365,
+        44415
+      ],
+      "synonymIds": [
+        1874,
+        2755,
+        44415
+      ],
+      "sentenceIds": [
+        27708
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "میله‌ای محافظ و قابل‌گرفتن در کنار پله‌هاست که به حفظ تعادل و جلوگیری از سقوط کمک می‌کند.",
+      "concept_explained_fa_audio_file_name": "w__42181__concept_explained_fa__1786703492209.mp3",
+      "concept_explained_fa_audio_source_text": "میله‌ای محافظ و قابل‌گرفتن در کنار پله‌هاست که به حفظ تعادل و جلوگیری از سقوط کمک می‌کند.",
+      "learning_depth": 0.74,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 61,
+      "productive_target": 75,
+      "createdAt": "2026-08-13T00:51:40.548Z",
+      "updatedAt": "2026-08-18T18:14:52.615Z"
+    },
+    {
+      "id": 42286,
+      "anki_link_id": "import_93ef7659-a4ad-4cbc-be20-ece7d41a513c",
+      "englishId": 3205,
+      "meaningId": 67567,
+      "otherMeaningIds": [
+        70584,
+        48861
+      ],
+      "comparedMeaningWordIds": [
+        31061
+      ],
+      "synonymIds": [],
+      "sentenceIds": [
+        30442
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "verb",
+      "concept_explained_fa": "خوردن مقدار زیادی غذا با سرعت و ولع، معمولاً به دلیل گرسنگی یا کمبود وقت، را بیان می‌کند.",
+      "concept_explained_fa_audio_file_name": "w__42286__concept_explained_fa__1786703530716.mp3",
+      "concept_explained_fa_audio_source_text": "خوردن مقدار زیادی غذا با سرعت و ولع، معمولاً به دلیل گرسنگی یا کمبود وقت، را بیان می‌کند.",
+      "learning_depth": 0.46,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 77,
+      "productive_target": 44,
+      "createdAt": "2026-08-13T15:07:17.535Z",
+      "updatedAt": "2026-08-18T18:13:59.390Z"
+    },
+    {
+      "id": 42298,
+      "anki_link_id": "import_c96fbe98-9561-47e7-b2c3-6cd1884c37bc",
+      "englishId": 30527,
+      "meaningId": 67584,
+      "otherMeaningIds": [
+        70585,
+        70586
+      ],
+      "comparedMeaningWordIds": null,
+      "synonymIds": null,
+      "sentenceIds": [
+        30483
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "رأی فردی است که پیش از انتخابات تصمیم ثابتی ندارد و ممکن است به هر نامزد یا حزب برسد.",
+      "concept_explained_fa_audio_file_name": "w__42298__concept_explained_fa__1786703534900.mp3",
+      "concept_explained_fa_audio_source_text": "رأی فردی است که پیش از انتخابات تصمیم ثابتی ندارد و ممکن است به هر نامزد یا حزب برسد.",
+      "learning_depth": 0.49,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 71,
+      "productive_target": 48,
+      "createdAt": "2026-08-13T15:07:17.567Z",
+      "updatedAt": "2026-08-18T20:46:01.078Z"
+    },
+    {
+      "id": 42369,
+      "anki_link_id": "import_6e292f32-d426-4f9d-9c44-ceae64550012",
+      "englishId": 30580,
+      "meaningId": 67684,
+      "otherMeaningIds": [
+        67685
+      ],
+      "comparedMeaningWordIds": null,
+      "synonymIds": null,
+      "sentenceIds": [
+        30363
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "برچسب یا نشانی روی کالا است که مبلغ تعیین‌شده برای فروش آن را نشان می‌دهد.",
+      "concept_explained_fa_audio_file_name": "w__42369__concept_explained_fa__1786703563565.mp3",
+      "concept_explained_fa_audio_source_text": "برچسب یا نشانی روی کالا است که مبلغ تعیین‌شده برای فروش آن را نشان می‌دهد.",
+      "learning_depth": 0.84,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 26,
+      "productive_target": 83,
+      "createdAt": "2026-08-13T15:07:17.732Z",
+      "updatedAt": "2026-08-18T20:46:01.078Z"
+    },
+    {
+      "id": 42469,
+      "anki_link_id": "import_16993d2b-bcb8-43ea-b2d6-73b5ef59e53c",
+      "englishId": 4134,
+      "meaningId": 67833,
+      "otherMeaningIds": [],
+      "comparedMeaningWordIds": null,
+      "synonymIds": null,
+      "sentenceIds": [
+        30266
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "اصطلاحی تخصصی در حوزهٔ امنیت رایانه که بدون دخالت کاربر تکثیر می‌شود و در شبکه گسترش می‌یابد.",
+      "concept_explained_fa_audio_file_name": "w__42469__concept_explained_fa__1786703605309.mp3",
+      "concept_explained_fa_audio_source_text": "اصطلاحی تخصصی در حوزهٔ امنیت رایانه که بدون دخالت کاربر تکثیر می‌شود و در شبکه گسترش می‌یابد.",
+      "learning_depth": 0.45,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 85,
+      "productive_target": 42,
+      "createdAt": "2026-08-13T15:07:17.937Z",
+      "updatedAt": "2026-08-18T18:14:13.010Z"
+    },
+    {
+      "id": 42490,
+      "anki_link_id": "import_d5a0d514-ddf3-4e0c-bf86-18c254f0bc48",
+      "englishId": 30676,
+      "meaningId": 67863,
+      "otherMeaningIds": [
+        70604,
+        70605
+      ],
+      "comparedMeaningWordIds": null,
+      "synonymIds": null,
+      "sentenceIds": [
+        30245
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "اصطلاحی تخصصی در حوزهٔ پردازش گفتار که نوشتهٔ دیجیتال را با صدای مصنوعی قابل‌شنیدن می‌خواند.",
+      "concept_explained_fa_audio_file_name": "w__42490__concept_explained_fa__1786703615098.mp3",
+      "concept_explained_fa_audio_source_text": "اصطلاحی تخصصی در حوزهٔ پردازش گفتار که نوشتهٔ دیجیتال را با صدای مصنوعی قابل‌شنیدن می‌خواند.",
+      "learning_depth": 0.57,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 67,
+      "productive_target": 52,
+      "createdAt": "2026-08-13T15:07:17.968Z",
+      "updatedAt": "2026-08-18T20:46:01.078Z"
+    },
+    {
+      "id": 42493,
+      "anki_link_id": "import_adae0356-f9f6-4555-bd82-ec0138279f42",
+      "englishId": 30679,
+      "meaningId": 67866,
+      "otherMeaningIds": [
+        69672,
+        70491
+      ],
+      "comparedMeaningWordIds": [
+        43943
+      ],
+      "synonymIds": [],
+      "sentenceIds": [
+        30242
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "adjective",
+      "concept_explained_fa": "ارتباط یا دستگاهی را توصیف می‌کند که برای انتقال داده و تماس از شبکهٔ تلفن همراه استفاده می‌کند.",
+      "concept_explained_fa_audio_file_name": "w__42493__concept_explained_fa__1786703616254.mp3",
+      "concept_explained_fa_audio_source_text": "ارتباط یا دستگاهی را توصیف می‌کند که برای انتقال داده و تماس از شبکهٔ تلفن همراه استفاده می‌کند.",
+      "learning_depth": 0.46,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 26,
+      "productive_target": 44,
+      "createdAt": "2026-08-13T15:07:17.972Z",
+      "updatedAt": "2026-08-18T18:15:21.665Z"
+    },
+    {
+      "id": 42499,
+      "anki_link_id": "import_2734f7ae-d54d-40a1-87e7-db3708b2a22a",
+      "englishId": 831,
+      "meaningId": 67872,
+      "otherMeaningIds": [
+        1207
+      ],
+      "comparedMeaningWordIds": [
+        2294,
+        2779,
+        40153
+      ],
+      "synonymIds": [],
+      "sentenceIds": [
+        30237
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "کلیدی اصلاح‌گر روی صفحه‌کلید است که همراه کلیدهای دیگر میان‌برها و فرمان‌های نرم‌افزاری را اجرا می‌کند.",
+      "concept_explained_fa_audio_file_name": "w__42499__concept_explained_fa__1786703618351.mp3",
+      "concept_explained_fa_audio_source_text": "کلیدی اصلاح‌گر روی صفحه‌کلید است که همراه کلیدهای دیگر میان‌برها و فرمان‌های نرم‌افزاری را اجرا می‌کند.",
+      "learning_depth": 0.51,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 87,
+      "productive_target": 50,
+      "createdAt": "2026-08-13T15:07:17.978Z",
+      "updatedAt": "2026-08-18T18:13:23.239Z"
+    },
+    {
+      "id": 42743,
+      "anki_link_id": "import_2484fbc8-6506-4a50-94e3-498ef2c8c9a7",
+      "englishId": 30874,
+      "meaningId": 70676,
+      "otherMeaningIds": [
+        70677
+      ],
+      "comparedMeaningWordIds": null,
+      "synonymIds": null,
+      "sentenceIds": [
+        29654
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "verb",
+      "concept_explained_fa": "یعنی پیش از خرید، خودرو را مدتی می‌رانی تا عملکرد، راحتی و مناسب‌بودنش را بررسی کنی.",
+      "concept_explained_fa_audio_file_name": "w__42743__concept_explained_fa__1786703711314.mp3",
+      "concept_explained_fa_audio_source_text": "یعنی پیش از خرید، خودرو را مدتی می‌رانی تا عملکرد، راحتی و مناسب‌بودنش را بررسی کنی.",
+      "learning_depth": 0.7,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 74,
+      "productive_target": 70,
+      "createdAt": "2026-08-13T15:07:18.457Z",
+      "updatedAt": "2026-08-18T20:46:01.078Z"
+    },
+    {
+      "id": 42951,
+      "anki_link_id": "import_97c24446-3d27-4752-8465-e8a981bf929d",
+      "englishId": 31038,
+      "meaningId": 68495,
+      "otherMeaningIds": [
+        66386,
+        70574
+      ],
+      "comparedMeaningWordIds": [
+        41291
+      ],
+      "synonymIds": [],
+      "sentenceIds": [
+        29459
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "adjective",
+      "concept_explained_fa": "برای سخنی است که هوشمندانه اما تند و آزاردهنده است و قصد یا اثر تحقیر دارد.",
+      "concept_explained_fa_audio_file_name": "w__42951__concept_explained_fa__1786703789452.mp3",
+      "concept_explained_fa_audio_source_text": "برای سخنی است که هوشمندانه اما تند و آزاردهنده است و قصد یا اثر تحقیر دارد.",
+      "learning_depth": 0.39,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 29,
+      "productive_target": 35,
+      "createdAt": "2026-08-13T15:07:19.654Z",
+      "updatedAt": "2026-08-18T18:15:24.065Z"
+    },
+    {
+      "id": 43258,
+      "anki_link_id": "import_abf81a1d-560a-48fd-891e-c1a22118cacf",
+      "englishId": 24181,
+      "meaningId": 68855,
+      "otherMeaningIds": [
+        70768
+      ],
+      "comparedMeaningWordIds": null,
+      "synonymIds": null,
+      "sentenceIds": [
+        29169
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "verb",
+      "concept_explained_fa": "حرکت وسیلهٔ نقلیه با سرعت در امتداد مسیر یا عبور سریع از منطقه‌ای را بیان می‌کند.",
+      "concept_explained_fa_audio_file_name": "w__43258__concept_explained_fa__1786703912593.mp3",
+      "concept_explained_fa_audio_source_text": "حرکت وسیلهٔ نقلیه با سرعت در امتداد مسیر یا عبور سریع از منطقه‌ای را بیان می‌کند.",
+      "learning_depth": 0.45,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 32,
+      "productive_target": 43,
+      "createdAt": "2026-08-13T15:07:20.304Z",
+      "updatedAt": "2026-08-18T18:14:31.128Z"
+    },
+    {
+      "id": 43945,
+      "anki_link_id": "import_82c4c582-08d7-4d5c-b140-af9131b608dc",
+      "englishId": 31846,
+      "meaningId": 69676,
+      "otherMeaningIds": [
+        70384
+      ],
+      "comparedMeaningWordIds": null,
+      "synonymIds": null,
+      "sentenceIds": [
+        28511
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "مکانی خدماتی است که مشتری با خودرو وارد می‌شود و بدون نیاز به پارک طولانی خدمات دریافت می‌کند.",
+      "concept_explained_fa_audio_file_name": "w__43945__concept_explained_fa__1786704186033.mp3",
+      "concept_explained_fa_audio_source_text": "مکانی خدماتی است که مشتری با خودرو وارد می‌شود و بدون نیاز به پارک طولانی خدمات دریافت می‌کند.",
+      "learning_depth": 0.49,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 91,
+      "productive_target": 42,
+      "createdAt": "2026-08-13T15:07:21.478Z",
+      "updatedAt": "2026-08-18T20:46:01.078Z"
+    },
+    {
+      "id": 44460,
+      "anki_link_id": "split_repair-batch-0003_2459_63589_7ef60807-629d-435b-9d4c-9e036c5e1b52",
+      "englishId": 2266,
+      "meaningId": 63589,
+      "otherMeaningIds": [],
+      "comparedMeaningWordIds": null,
+      "synonymIds": null,
+      "sentenceIds": [
+        30537
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "صندوق پست عمومی برای انداختن نامه‌های آماده ارسال.",
+      "concept_explained_fa_audio_file_name": "w__44460__concept_explained_fa__1787077458438.mp3",
+      "concept_explained_fa_audio_source_text": "صندوق پست عمومی برای انداختن نامه‌های آماده ارسال.",
+      "learning_depth": 0.65,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 99,
+      "productive_target": 52,
+      "createdAt": "2026-08-15T04:23:58.475Z",
+      "updatedAt": "2026-08-18T18:24:18.783Z"
+    },
+    {
+      "id": 44618,
+      "anki_link_id": "split_repair-batch-0007_31867_52478_6c3c4d22-673a-442d-9b12-655a88532bc3",
+      "englishId": 23865,
+      "meaningId": 52478,
+      "otherMeaningIds": [
+        3189,
+        3273
+      ],
+      "comparedMeaningWordIds": [
+        5037,
+        5160
+      ],
+      "synonymIds": [],
+      "sentenceIds": [
+        11780
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "phrasal verb",
+      "concept_explained_fa": "موتور یا دستگاهی را روشن کردن یا شروع به کار کردن آن.",
+      "concept_explained_fa_audio_file_name": "w__44618__concept_explained_fa__1787077510987.mp3",
+      "concept_explained_fa_audio_source_text": "موتور یا دستگاهی را روشن کردن یا شروع به کار کردن آن.",
+      "learning_depth": 0.83,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 92,
+      "productive_target": 78,
+      "createdAt": "2026-08-15T04:54:26.652Z",
+      "updatedAt": "2026-08-18T20:46:01.078Z"
+    },
+    {
+      "id": 44836,
+      "anki_link_id": "split_repair-batch-0009_35624_60140_35e197be-e1c3-4f68-b023-cc9e13abba92",
+      "englishId": 1836,
+      "meaningId": 60140,
+      "otherMeaningIds": [
+        60141,
+        60142
+      ],
+      "comparedMeaningWordIds": null,
+      "synonymIds": null,
+      "sentenceIds": [
+        16826
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "verb",
+      "concept_explained_fa": "گفت‌وگو یا مکالمه‌ای را برگزار کردن.",
+      "concept_explained_fa_audio_file_name": "w__44836__concept_explained_fa__1787077580730.mp3",
+      "concept_explained_fa_audio_source_text": "گفت‌وگو یا مکالمه‌ای را برگزار کردن.",
+      "learning_depth": 0.48,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 57,
+      "productive_target": 29,
+      "createdAt": "2026-08-15T05:14:11.524Z",
+      "updatedAt": "2026-08-18T18:26:21.004Z"
+    },
+    {
+      "id": 44860,
+      "anki_link_id": "split_repair-batch-0009_35981_65147_dbe19765-a3d8-4398-969e-7266a482723b",
+      "englishId": 26920,
+      "meaningId": 71181,
+      "otherMeaningIds": [
+        71182
+      ],
+      "comparedMeaningWordIds": null,
+      "synonymIds": null,
+      "sentenceIds": [
+        24463
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "سیگنال رادیویی یا آنتن قابل دریافت تلفن همراه.",
+      "concept_explained_fa_audio_file_name": "w__44860__concept_explained_fa__1787077586627.mp3",
+      "concept_explained_fa_audio_source_text": "سیگنال رادیویی یا آنتن قابل دریافت تلفن همراه.",
+      "learning_depth": 0.86,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 56,
+      "productive_target": 91,
+      "createdAt": "2026-08-15T05:14:11.650Z",
+      "updatedAt": "2026-08-18T18:26:26.919Z"
+    },
+    {
+      "id": 44864,
+      "anki_link_id": "split_repair-batch-0009_36027_57735_a979e73b-fcd5-449f-a0ce-60dc0c2b62d2",
+      "englishId": 23554,
+      "meaningId": 57735,
+      "otherMeaningIds": [
+        3054
+      ],
+      "comparedMeaningWordIds": null,
+      "synonymIds": null,
+      "sentenceIds": [
+        30696
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "phrasal verb",
+      "concept_explained_fa": "هواپیما فرود بیاید و به زمین بنشیند.",
+      "concept_explained_fa_audio_file_name": "w__44864__concept_explained_fa__1787077587849.mp3",
+      "concept_explained_fa_audio_source_text": "هواپیما فرود بیاید و به زمین بنشیند.",
+      "learning_depth": 0.43,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 91,
+      "productive_target": 29,
+      "createdAt": "2026-08-15T05:14:11.668Z",
+      "updatedAt": "2026-08-18T20:46:01.078Z"
+    },
+    {
+      "id": 44995,
+      "anki_link_id": "split_repair-batch-0012_39144_63213_04d01bfd-54c5-4b16-abe6-86bde475c113",
+      "englishId": 28732,
+      "meaningId": 63213,
+      "otherMeaningIds": [
+        63212
+      ],
+      "comparedMeaningWordIds": null,
+      "synonymIds": null,
+      "sentenceIds": [
+        30800
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "noun",
+      "concept_explained_fa": "پزشک تازه‌فارغ‌التحصیلی که در بیمارستان زیر نظر پزشکان ارشد کار می‌کند.",
+      "concept_explained_fa_audio_file_name": "w__44995__concept_explained_fa__1787077625967.mp3",
+      "concept_explained_fa_audio_source_text": "پزشک تازه‌فارغ‌التحصیلی که در بیمارستان زیر نظر پزشکان ارشد کار می‌کند.",
+      "learning_depth": 0.6,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 90,
+      "productive_target": 43,
+      "createdAt": "2026-08-15T05:46:04.683Z",
+      "updatedAt": "2026-08-18T18:27:06.396Z"
+    },
+    {
+      "id": 45037,
+      "anki_link_id": "split_repair-batch-0013_41222_66310_3da7858d-a49a-4f25-a83b-8bbabe75bb51",
+      "englishId": 1836,
+      "meaningId": 66310,
+      "otherMeaningIds": [],
+      "comparedMeaningWordIds": null,
+      "synonymIds": null,
+      "sentenceIds": [
+        30843
+      ],
+      "conceptMergeReviewed": true,
+      "inflectionMergeReviewed": false,
+      "idiomReviewCompleted": true,
+      "meaningReviewStatus": "CONFIRMED",
+      "pos": "verb",
+      "concept_explained_fa": "نسبت به شخص یا گروهی دیگر برتری یا مزیتی داشتن.",
+      "concept_explained_fa_audio_file_name": "w__45037__concept_explained_fa__1787077637587.mp3",
+      "concept_explained_fa_audio_source_text": "نسبت به شخص یا گروهی دیگر برتری یا مزیتی داشتن.",
+      "learning_depth": 0.31,
+      "other_meanings_en": null,
+      "category": null,
+      "hint_to_select": null,
+      "imageability": 21,
+      "productive_target": 19,
+      "createdAt": "2026-08-15T05:46:09.638Z",
+      "updatedAt": "2026-08-18T18:27:17.877Z"
+    }
+  ]
+}

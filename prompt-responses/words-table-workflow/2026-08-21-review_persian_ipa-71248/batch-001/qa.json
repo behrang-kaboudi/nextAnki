@@ -1,0 +1,25 @@
+{
+  "status": "passed",
+  "score": 9.7,
+  "threshold": 8.0,
+  "criteria": {
+    "id_coverage_order_uniqueness": { "status": "passed", "score": 10.0 },
+    "schema_compliance": { "status": "passed", "score": 10.0 },
+    "canonical_text_alignment": { "status": "passed", "score": 9.8 },
+    "consonant_preservation": { "status": "passed", "score": 9.8 },
+    "vowel_accuracy": { "status": "passed", "score": 9.5 },
+    "syllable_segmentation": { "status": "passed", "score": 9.5 }
+  },
+  "itemResults": [
+    {
+      "key": "71248",
+      "status": "passed",
+      "score": 9.7,
+      "evidence": "وسواسی is represented as væs-vɑː-si with every consonant preserved, short æ in the first syllable, long ɑː in the second syllable, and the final adjectival i."
+    }
+  ],
+  "defects": [],
+  "corrections": [],
+  "acceptedIds": [71248],
+  "excludedIds": []
+}

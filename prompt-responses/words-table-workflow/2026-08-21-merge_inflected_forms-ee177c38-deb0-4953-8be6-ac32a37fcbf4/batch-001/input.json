@@ -1,0 +1,66 @@
+[
+  {
+    "groupKey": "noun:23286,24069",
+    "pos": "noun",
+    "englishWords": [
+      {
+        "englishWordId": 23286,
+        "baseForm": "aids",
+        "words": [
+          {
+            "wordId": 31153,
+            "englishWordId": 23286,
+            "baseForm": "aids",
+            "pos": "noun",
+            "meaningFa": "ایدز بیماری",
+            "otherMeaningsFa": [
+              "سندرم نقص ایمنی اکتسابی",
+              "ایدز"
+            ],
+            "conceptExplainedFa": "مخفف «acquired immunodeficiency syndrome» و مرحله‌ای از عفونت HIV است که دستگاه ایمنی به‌شدت آسیب دیده است.",
+            "sentences": [
+              {
+                "sentenceId": 8907,
+                "sentenceEn": "Modern treatment can prevent HIV from progressing to AIDS.",
+                "sentenceEnMeaningFa": "درمان‌های امروزی می‌توانند از پیشرفت HIV به ایدز جلوگیری کنند."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "englishWordId": 24069,
+        "baseForm": "aid",
+        "words": [
+          {
+            "wordId": 32158,
+            "englishWordId": 24069,
+            "baseForm": "aid",
+            "pos": "noun",
+            "meaningFa": "کمک",
+            "otherMeaningsFa": [
+              "مساعدت",
+              "امداد",
+              "یاری",
+              "ابزار",
+              "وسیله"
+            ],
+            "conceptExplainedFa": "کمک، حمایت یا وسیله‌ای است که انجام کار، حرکت، دیدن، شنیدن یا فهمیدن را ممکن یا آسان‌تر می‌کند.",
+            "sentences": [
+              {
+                "sentenceId": 10459,
+                "sentenceEn": "He walks with the aid of a cane.",
+                "sentenceEnMeaningFa": "او به کمک یک عصا راه می‌رود."
+              },
+              {
+                "sentenceId": 27192,
+                "sentenceEn": "A good dictionary can be a useful aid to understanding a new language.",
+                "sentenceEnMeaningFa": "یک فرهنگ لغت خوب می‌تواند ابزاری مفید برای فهم یک زبان جدید باشد."
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

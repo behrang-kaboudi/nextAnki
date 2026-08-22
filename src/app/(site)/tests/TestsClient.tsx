@@ -3,12 +3,12 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
-import { testSiteMapGroups } from "@/config/siteMap";
+import { lessUsedSiteMapGroups } from "@/config/siteMap";
 
 type LinkItem = { href: string; label: string; note?: string };
 type Section = { title: string; links: LinkItem[]; defaultOpen?: boolean };
 
-const sections: Section[] = testSiteMapGroups.map((group, index) => ({
+const sections: Section[] = lessUsedSiteMapGroups.map((group, index) => ({
   title: group.title,
   defaultOpen: index < 3,
   links: group.pages
@@ -64,9 +64,9 @@ export function TestsClient() {
     <main className="mx-auto w-full max-w-6xl select-text p-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold">Tests</h1>
+          <h1 className="text-xl font-semibold">Less Used</h1>
           <p className="mt-1 text-sm opacity-80">
-            Central hub for internal dev/test pages.
+            Central hub for less frequently used tools and internal utilities.
           </p>
         </div>
 

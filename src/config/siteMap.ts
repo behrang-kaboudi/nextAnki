@@ -7,7 +7,7 @@ export type SiteMapPage = {
 
 export type SiteMapGroup = {
   id: string;
-  category: "Information" | "Workspace" | "Administration" | "Tests" | "Account";
+  category: "Information" | "Workspace" | "Administration" | "Less Used" | "Tests" | "Account";
   title: string;
   summary: string;
   pages: SiteMapPage[];
@@ -46,9 +46,6 @@ export const siteMapGroups: SiteMapGroup[] = [
       { title: "Persian Word Table", path: "/words/tables/persian-words", summary: "Browses and edits PersianWord records, including linked audio playback.", menu: true },
       { title: "English Word Table", path: "/words/tables/english-words", summary: "Browses canonical English words and phrases with US IPA, JSON hints, one audio file, and WordSense links.", menu: true },
       { title: "Sentence Table", path: "/words/tables/sentences", summary: "Browses and edits unique sentences, Persian meanings, and both persisted sentence-owned audio files.", menu: true },
-      { title: "Audio Hints", path: "/words/hints/audio", summary: "Reviews and manages WordSense-owned audio plus Sentence-owned audio stored by filename on Sentence records.", menu: true },
-      { title: "JSON Hints", path: "/words/hints/json", summary: "Reviews and generates structured JSON hints for vocabulary records.", menu: true },
-      { title: "Word Cleanup", path: "/words/cleanup", summary: "Finds and removes local words that no longer exist in Anki.", menu: true },
     ],
   },
   {
@@ -71,9 +68,7 @@ export const siteMapGroups: SiteMapGroup[] = [
     pages: [
       { title: "Card Manager", path: "/anki/cards/manager", summary: "Finds Anki notes and manages their matching cards and study state.", menu: true },
       { title: "Add Cards for Study", path: "/anki/cards/study", summary: "Selects suitable words and adds their cards to the study workflow.", menu: true },
-      { title: "Transfer Cards", path: "/anki/cards/transfer", summary: "Moves matching card types for a note from one Anki deck to another.", menu: true },
       { title: "Reset Equivalent Cards", path: "/anki/cards/reset", summary: "Reviews and resets equivalent English-to-Persian and Persian-to-English cards.", menu: true },
-      { title: "Suspension Manager", path: "/anki/cards/suspensions", summary: "Finds and manages suspended Anki cards.", menu: true },
       { title: "Knowing Filter Manager", path: "/anki/cards/knowing-filter", summary: "Browses and manages cards in knowing-filter decks and tags.", menu: true },
     ],
   },
@@ -81,11 +76,9 @@ export const siteMapGroups: SiteMapGroup[] = [
     id: "anki-setup",
     category: "Workspace",
     title: "Anki Setup",
-    summary: "Configure the Anki connection, structure, and one-time migrations.",
+    summary: "Configure the primary Anki deck, note-type, template, and settings structure.",
     pages: [
-      { title: "Connection", path: "/anki/connection", summary: "Shows AnkiConnect settings, prerequisites, and the planned connection flow.", menu: true },
       { title: "Structure Builder", path: "/anki/structure", summary: "Inspects and creates required decks, note types, templates, and deck settings.", menu: true },
-      { title: "Migrations", path: "/anki/migrations", summary: "Runs one-time Anki data migrations and displays their execution logs.", menu: true },
     ],
   },
   {
@@ -99,24 +92,13 @@ export const siteMapGroups: SiteMapGroup[] = [
     ],
   },
   {
-    id: "ipa",
-    category: "Workspace",
-    title: "IPA Tools",
-    summary: "Maintain pronunciation keywords, phrase matching, and picture-word media.",
-    pages: [
-      { title: "IPA Keywords", path: "/ipa/keywords", summary: "Manages IPA keyword mappings and their Persian-friendly forms.", menu: true },
-      { title: "Picture Words", path: "/ipa/picture-words", summary: "Maintains visual keyword associations used in pronunciation learning.", menu: true },
-      { title: "Picture Word Audio", path: "/ipa/picture-words/audio", summary: "Records, uploads, lists, and removes audio for picture words.", menu: true },
-    ],
-  },
-  {
     id: "ai",
     category: "Workspace",
     title: "AI Tools",
     summary: "Build reusable prompts and work with locally served AI models.",
     pages: [
+      { title: "AI Commands", path: "/ai/commands", summary: "Lists the current and planned tasks that can be requested from AI in plain language.", menu: true },
       { title: "Prompt Builder", path: "/ai/prompt-builder", summary: "Combines prompt files and previews the resulting reusable AI prompt.", menu: true },
-      { title: "Local AI Studio", path: "/ai/local-chat", summary: "Manages LM Studio models and their saved generation settings, then tests multi-turn local chat.", menu: true },
     ],
   },
   {
@@ -132,61 +114,72 @@ export const siteMapGroups: SiteMapGroup[] = [
     ],
   },
   {
-    id: "tests-anki",
-    category: "Tests",
-    title: "Anki Tests",
-    summary: "Inspect low-level AnkiConnect behavior and review history.",
+    id: "less-used-anki",
+    category: "Less Used",
+    title: "Anki Utilities",
+    summary: "Open occasional Anki configuration, maintenance, inspection, and card utilities.",
     pages: [
-      { title: "AnkiConnect Playground", path: "/tests/anki/connection", summary: "Calls AnkiConnect actions directly and displays their raw responses.", menu: true },
-      { title: "Anki Review Log", path: "/tests/anki/review-log", summary: "Displays AnkiDroid review-log data returned for selected cards.", menu: true },
-    ],
-  },
-  {
-    id: "tests-editors",
-    category: "Tests",
-    title: "Editor Tests",
-    summary: "Exercise rich-text editor behavior without changing production workflows.",
-    pages: [
-      { title: "Editor Test", path: "/tests/editors/basic", summary: "Provides a focused test surface for the shared rich-text editor.", menu: true },
-      { title: "Editor Demo", path: "/tests/editors/demo", summary: "Demonstrates editor features with a fuller example configuration.", menu: true },
-    ],
-  },
-  {
-    id: "tests-ipa",
-    category: "Tests",
-    title: "IPA Tests",
-    summary: "Inspect and repair IPA normalization data.",
-    pages: [
-      { title: "IPA Word Test", path: "/tests/ipa/words", summary: "Lists special IPA word records and runs normalization backfills.", menu: true },
-    ],
-  },
-  {
-    id: "tests-sync",
-    category: "Tests",
-    title: "Sync Tests",
-    summary: "Exercise the sentence-card synchronization test workflow.",
-    pages: [
+      { title: "Connection", path: "/anki/connection", summary: "Shows AnkiConnect settings, prerequisites, and the planned connection flow.", menu: true },
+      { title: "Migrations", path: "/anki/migrations", summary: "Runs one-time Anki data migrations and displays their execution logs.", menu: true },
+      { title: "Suspension Manager", path: "/anki/cards/suspensions", summary: "Finds and manages suspended Anki cards.", menu: true },
+      { title: "Transfer Cards", path: "/anki/cards/transfer", summary: "Moves matching card types for a note from one Anki deck to another.", menu: true },
+      { title: "AnkiConnect Console", path: "/tests/anki/connection", summary: "Calls AnkiConnect actions directly and displays their raw responses.", menu: true },
+      { title: "Anki Review Log Inspector", path: "/tests/anki/review-log", summary: "Displays AnkiDroid review-log data returned for selected cards.", menu: true },
       { title: "Sentence Card Sync", path: "/tests/sync/sentence-cards", summary: "Ensures sentence decks and synchronizes selected or all sentence cards.", menu: true },
     ],
   },
   {
-    id: "tests-words",
-    category: "Tests",
-    title: "Word Tests",
-    summary: "Run temporary or destructive vocabulary maintenance checks.",
+    id: "less-used-words",
+    category: "Less Used",
+    title: "Word Utilities",
+    summary: "Open occasional vocabulary hint, cleanup, field, and source-catalog utilities.",
     pages: [
+      { title: "Audio Hints", path: "/words/hints/audio", summary: "Reviews and manages WordSense-owned audio plus Sentence-owned audio stored by filename on Sentence records.", menu: true },
+      { title: "JSON Hints", path: "/words/hints/json", summary: "Reviews and generates structured JSON hints for vocabulary records.", menu: true },
+      { title: "Word Cleanup", path: "/words/cleanup", summary: "Finds and removes local words that no longer exist in Anki.", menu: true },
       { title: "Sentence Fields", path: "/tests/words/sentence-fields", summary: "Temporarily reviews and updates sentence fields stored on word records.", menu: true },
       { title: "External Source Catalog", path: "/tests/words/external-sources", summary: "Browses the read-only, deduplicated B-amooz and TTWordBank catalog with quality categories, search, source filters, evidence, and unresolved items.", menu: true },
     ],
   },
   {
-    id: "tests-utilities",
-    category: "Tests",
-    title: "Test Utilities",
-    summary: "Shared samples and utilities used while developing test pages.",
+    id: "less-used-ipa",
+    category: "Less Used",
+    title: "IPA Tools",
+    summary: "Maintain pronunciation keywords, picture-word media, and IPA normalization data.",
     pages: [
-      { title: "Tests Hub", path: "/tests", summary: "Searches and opens every internal test and development page.", menu: true },
-      { title: "Test Functions", path: "/tests/functions", summary: "Demonstrates the reusable server-side test function helpers.", menu: true },
+      { title: "IPA Keywords", path: "/ipa/keywords", summary: "Manages IPA keyword mappings and their Persian-friendly forms.", menu: true },
+      { title: "Picture Words", path: "/ipa/picture-words", summary: "Maintains visual keyword associations used in pronunciation learning.", menu: true },
+      { title: "Picture Word Audio", path: "/ipa/picture-words/audio", summary: "Records, uploads, lists, and removes audio for picture words.", menu: true },
+      { title: "IPA Word Inspector", path: "/tests/ipa/words", summary: "Lists special IPA word records and runs normalization backfills.", menu: true },
+    ],
+  },
+  {
+    id: "less-used-editors",
+    category: "Less Used",
+    title: "Editor Tools",
+    summary: "Exercise rich-text editor behavior outside the primary editing workflows.",
+    pages: [
+      { title: "Editor Playground", path: "/tests/editors/basic", summary: "Provides a focused surface for the shared rich-text editor.", menu: true },
+      { title: "Editor Demo", path: "/tests/editors/demo", summary: "Demonstrates editor features with a fuller example configuration.", menu: true },
+    ],
+  },
+  {
+    id: "less-used-local-ai",
+    category: "Less Used",
+    title: "Local AI",
+    summary: "Work with locally served AI models and saved generation settings.",
+    pages: [
+      { title: "Local AI Studio", path: "/ai/local-chat", summary: "Manages LM Studio models and their saved generation settings, then exercises multi-turn local chat.", menu: true },
+    ],
+  },
+  {
+    id: "less-used-development",
+    category: "Less Used",
+    title: "Development Tools",
+    summary: "Open the overview and focused utilities used during development.",
+    pages: [
+      { title: "Less Used Overview", path: "/tests", summary: "Searches and opens less frequently used tools and internal utilities.", menu: true },
+      { title: "Function Playground", path: "/tests/functions", summary: "Demonstrates reusable server-side function helpers.", menu: true },
     ],
   },
   {
@@ -204,4 +197,5 @@ export const siteMapGroups: SiteMapGroup[] = [
   },
 ];
 
-export const testSiteMapGroups = siteMapGroups.filter((group) => group.category === "Tests");
+export const lessUsedSiteMapGroups = siteMapGroups.filter((group) => group.category === "Less Used");
+export const testSiteMapGroups = lessUsedSiteMapGroups;

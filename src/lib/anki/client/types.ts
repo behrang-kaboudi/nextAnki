@@ -227,6 +227,7 @@ export type AnkiConnectActionMap = {
     result: Array<{
       cardId: number;
       note: number;
+      fields: AnkiNotesInfo[number]["fields"];
       deckName: string;
       modelName: string;
       ord: number;

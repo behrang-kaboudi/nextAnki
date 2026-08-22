@@ -17,6 +17,7 @@ import {
   resolvePersianWordOccurrences,
 } from "@/lib/words/persianWordResolution.server";
 import { updateWordSense } from "@/lib/words/wordSenseRepo";
+import { idiomReviewCompletedForBaseForm } from "@/lib/words/idiomReview";
 import { primarySentenceId } from "@/lib/words/sentenceIds";
 
 export const runtime = "nodejs";
@@ -465,6 +466,7 @@ export async function POST(request: Request) {
               concept_explained_fa: item.concept_explained_fa,
               sentenceIds: [sentence.id],
               conceptMergeReviewed: false,
+              idiomReviewCompleted: idiomReviewCompletedForBaseForm(item.base_form),
               meaningReviewStatus: "PENDING",
               productive_target: item.productive_target,
             },

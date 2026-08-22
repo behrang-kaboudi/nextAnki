@@ -12,12 +12,15 @@ import type {
   PersianWordAmbiguity,
   PersianWordResolutionSelection,
 } from "@/lib/words/persianWordResolution";
+import { completeAgentArtifact, usePendingAgentArtifact } from "@/lib/words/wordsTableAgentWorkflow.client";
 
 const PROMPT_PATH = "src/prompts/word-extraction/merge_word_concepts/rulseV1.md";
+const MANUAL_PROMPT_PATH = "src/prompts/word-extraction/manual_merge_word_concepts/rulseV1.md";
 const PROMPT_SOURCE_PATHS = [
   PROMPT_PATH,
   "src/prompts/word-extraction/_shared/other_meanings_fa_core_v1.md",
 ] as const;
+const MANUAL_PROMPT_SOURCE_PATHS = [MANUAL_PROMPT_PATH] as const;
 
 type SourceRow = {
   id: number;
@@ -67,6 +70,25 @@ type PrepareResponse = {
   totalEligibleGroups?: number;
   reviewedSingleRecords?: number;
   error?: string;
+};
+
+type ManualIdEntry = {
+  key: number;
+  wordSenseId: string;
+};
+
+type ManualGroupState = {
+  key: number;
+  entries: ManualIdEntry[];
+  englishWordId: number | null;
+  sourceRows: SourceRow[];
+  response: string;
+  output: OutputRow[];
+  status: "draft" | "ready" | "preview" | "applied";
+  busy: boolean;
+  error: string | null;
+  notice: string | null;
+  resolutionAmbiguities: PersianWordAmbiguity[];
 };
 
 const buttonClass =
@@ -339,6 +361,326 @@ function buildPreviewUnits(
   });
 }
 
+let nextManualKey = 0;
+
+function createManualEntry(): ManualIdEntry {
+  return { key: ++nextManualKey, wordSenseId: "" };
+}
+
+function createManualGroup(): ManualGroupState {
+  return {
+    key: ++nextManualKey,
+    entries: [createManualEntry(), createManualEntry()],
+    englishWordId: null,
+    sourceRows: [],
+    response: "",
+    output: [],
+    status: "draft",
+    busy: false,
+    error: null,
+    notice: null,
+    resolutionAmbiguities: [],
+  };
+}
+
+function ManualConceptMergeModal({
+  open,
+  onClose,
+  onApplied,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onApplied: () => void;
+}) {
+  const [prompt, setPrompt] = useState("");
+  const [promptError, setPromptError] = useState<string | null>(null);
+  const [manualGroups, setManualGroups] = useState<ManualGroupState[]>(() => [createManualGroup()]);
+  const [jsonModal, setJsonModal] = useState<{ groupKey: number; rowId: number } | null>(null);
+  const [sentenceModal, setSentenceModal] = useState<{ groupKey: number; title: string; ids: number[] } | null>(null);
+  const [conceptEdit, setConceptEdit] = useState<{ groupKey: number; rowId: number; value: string } | null>(null);
+
+  useEffect(() => {
+    if (!open || prompt) return;
+    setPromptError(null);
+    void fetch(`/api/ai/prompt-file?path=${encodeURIComponent(MANUAL_PROMPT_PATH)}&render=1`)
+      .then(async (response) => {
+        const json = (await response.json()) as { text?: string; error?: string };
+        if (!response.ok || typeof json.text !== "string") throw new Error(json.error || "Could not load the manual merge prompt.");
+        setPrompt(json.text);
+      })
+      .catch((reason) => setPromptError(reason instanceof Error ? reason.message : String(reason)));
+  }, [open, prompt]);
+
+  if (!open) return null;
+
+  const updateGroup = (groupKey: number, updater: (group: ManualGroupState) => ManualGroupState) => {
+    setManualGroups((current) => current.map((group) => group.key === groupKey ? updater(group) : group));
+  };
+
+  const parsedEntries = (group: ManualGroupState) => group.entries.map((entry) => ({
+    wordSenseId: Number(entry.wordSenseId),
+  }));
+
+  const resetPreparedGroup = (group: ManualGroupState): ManualGroupState => ({
+    ...group,
+    englishWordId: null,
+    sourceRows: [],
+    response: "",
+    output: [],
+    status: "draft",
+    error: null,
+    notice: null,
+    resolutionAmbiguities: [],
+  });
+
+  const prepareGroup = async (groupKey: number) => {
+    const group = manualGroups.find((item) => item.key === groupKey);
+    if (!group) return;
+    const entries = parsedEntries(group);
+    const selectedIds = entries.map((entry) => entry.wordSenseId);
+    if (entries.some((entry) => !Number.isSafeInteger(entry.wordSenseId) || entry.wordSenseId <= 0)) {
+      updateGroup(groupKey, (current) => ({ ...current, error: "هر ردیف باید یک WordSense ID مثبت داشته باشد." }));
+      return;
+    }
+    const overlappingId = manualGroups
+      .filter((item) => item.key !== groupKey && item.status !== "applied")
+      .flatMap((item) => parsedEntries(item).map((entry) => entry.wordSenseId))
+      .find((id) => selectedIds.includes(id) && Number.isSafeInteger(id) && id > 0);
+    if (overlappingId) {
+      updateGroup(groupKey, (current) => ({ ...current, error: `WordSense ${overlappingId} در یک گروه دستی دیگر هم استفاده شده است.` }));
+      return;
+    }
+    updateGroup(groupKey, (current) => ({ ...current, busy: true, error: null, notice: null }));
+    try {
+      const response = await fetch("/api/words/concept-merge/manual/prepare", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ entries }),
+      });
+      const json = (await response.json()) as {
+        ok?: boolean;
+        entries?: Array<{ wordSenseId: number }>;
+        englishWordId?: number;
+        items?: SourceRow[];
+        error?: string;
+      };
+      if (!response.ok || !json.ok || !Array.isArray(json.entries) || !Number.isSafeInteger(json.englishWordId) || !Array.isArray(json.items)) {
+        throw new Error(json.error || "Could not prepare the manual merge group.");
+      }
+      updateGroup(groupKey, (current) => ({
+        ...current,
+        englishWordId: json.englishWordId!,
+        entries: json.entries!.map((entry) => ({
+          key: createManualEntry().key,
+          wordSenseId: String(entry.wordSenseId),
+        })),
+        sourceRows: json.items!,
+        response: "",
+        output: [],
+        status: "ready",
+        busy: false,
+        error: null,
+        notice: `IDها اعتبارسنجی شدند؛ همه متعلق به EnglishWord #${json.englishWordId} هستند و پرامپت آماده است ✓`,
+        resolutionAmbiguities: [],
+      }));
+    } catch (reason) {
+      updateGroup(groupKey, (current) => ({
+        ...current,
+        busy: false,
+        error: reason instanceof Error ? reason.message : String(reason),
+      }));
+    }
+  };
+
+  const previewGroup = async (groupKey: number) => {
+    const group = manualGroups.find((item) => item.key === groupKey);
+    if (!group) return;
+    updateGroup(groupKey, (current) => ({ ...current, busy: true, error: null, notice: null }));
+    try {
+      const output = JSON.parse(group.response) as unknown;
+      const response = await fetch("/api/words/concept-merge/manual/preview", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ entries: parsedEntries(group), output }),
+      });
+      const json = (await response.json()) as {
+        ok?: boolean;
+        mergeable?: boolean;
+        items?: SourceRow[];
+        output?: OutputRow[];
+        error?: string;
+      };
+      if (!response.ok || !json.ok || typeof json.mergeable !== "boolean" || !Array.isArray(json.items) || !Array.isArray(json.output)) {
+        throw new Error(json.error || "Could not validate the manual merge response.");
+      }
+      updateGroup(groupKey, (current) => ({
+        ...current,
+        sourceRows: json.items!,
+        output: json.output!,
+        status: "preview",
+        busy: false,
+        error: null,
+        notice: "پاسخ معتبر است؛ پیش‌نمایش را بررسی و در صورت تأیید اعمال کنید.",
+        resolutionAmbiguities: [],
+      }));
+    } catch (reason) {
+      updateGroup(groupKey, (current) => ({
+        ...current,
+        busy: false,
+        error: reason instanceof Error ? reason.message : String(reason),
+      }));
+    }
+  };
+
+  const applyGroup = async (groupKey: number, selections: PersianWordResolutionSelection[] = []) => {
+    const group = manualGroups.find((item) => item.key === groupKey);
+    if (!group || group.status !== "preview") return;
+    updateGroup(groupKey, (current) => ({ ...current, busy: true, error: null }));
+    try {
+      const response = await fetch("/api/words/concept-merge/manual/apply", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          entries: parsedEntries(group),
+          output: group.output,
+          ...(selections.length ? { persian_word_resolutions: selections } : {}),
+        }),
+      });
+      const json = (await response.json()) as {
+        ok?: boolean;
+        code?: string;
+        ambiguities?: PersianWordAmbiguity[];
+        updated?: number;
+        deleted?: number;
+        error?: string;
+      };
+      if (response.status === 409 && json.code === "PERSIAN_WORD_RESOLUTION_REQUIRED" && Array.isArray(json.ambiguities) && json.ambiguities.length) {
+        updateGroup(groupKey, (current) => ({ ...current, busy: false, resolutionAmbiguities: json.ambiguities! }));
+        return;
+      }
+      if (!response.ok || !json.ok) throw new Error(json.error || "Could not apply the manual concept merge.");
+      updateGroup(groupKey, (current) => ({
+        ...current,
+        status: "applied",
+        busy: false,
+        notice: `مرج اعمال شد: ${json.updated ?? 0} رکورد به‌روزرسانی و ${json.deleted ?? 0} رکورد حذف شد ✓`,
+        resolutionAmbiguities: [],
+      }));
+      onApplied();
+    } catch (reason) {
+      updateGroup(groupKey, (current) => ({
+        ...current,
+        busy: false,
+        error: reason instanceof Error ? reason.message : String(reason),
+      }));
+    }
+  };
+
+  const sentenceGroup = sentenceModal ? manualGroups.find((group) => group.key === sentenceModal.groupKey) : undefined;
+  const sentenceById = new Map(
+    (sentenceGroup?.sourceRows ?? []).flatMap((source) => source.sentences.map((sentence) => [sentence.id, sentence] as const)),
+  );
+  const jsonGroup = jsonModal ? manualGroups.find((group) => group.key === jsonModal.groupKey) : undefined;
+  const jsonCurrent = jsonModal ? jsonGroup?.sourceRows.find((row) => row.id === jsonModal.rowId) : undefined;
+  const jsonProposed = jsonModal ? jsonGroup?.output.find((row) => row.id === jsonModal.rowId) : undefined;
+
+  return (
+    <div className="fixed inset-0 z-[55] flex items-center justify-center bg-black/60 p-4" role="dialog" aria-modal="true" aria-label="مرج مفاهیم با ID">
+      <div dir="rtl" className="flex h-[90vh] w-full max-w-7xl flex-col gap-4 rounded-2xl border border-card bg-background p-5 shadow-elevated">
+        <div className="flex flex-wrap items-start justify-between gap-3 border-b border-card pb-3">
+          <div dir="rtl" className="text-right">
+            <h2 className="text-lg font-bold">مرج مفاهیم با ID</h2>
+            <p className="mt-1 text-xs opacity-70">هر گروه یک پرامپت، پاسخ، پیش‌نمایش و تأیید مستقل دارد. تمام WordSenseهای اعتبارسنجی‌شده باید در یک Concept ادغام شوند.</p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <button type="button" onClick={() => setManualGroups((current) => [...current, createManualGroup()])} className={buttonClass}>افزودن گروه جدید</button>
+            <PromptSourcesButton paths={MANUAL_PROMPT_SOURCE_PATHS} />
+            <button type="button" disabled={manualGroups.some((group) => group.busy)} onClick={onClose} className={buttonClass}>بستن</button>
+          </div>
+        </div>
+        {promptError ? <div className="rounded border border-red-500/30 bg-red-500/10 p-2 text-sm text-red-700">{promptError}</div> : null}
+        <div className="min-h-0 flex-1 space-y-4 overflow-auto pr-1">
+          {manualGroups.map((group, groupIndex) => {
+            const copyData = group.sourceRows.map((row) => ({
+              englishWordId: group.englishWordId,
+              wordSenseId: row.id,
+              wordSense: row,
+            }));
+            const copyText = `${prompt}\n\n${JSON.stringify(copyData, null, 2)}`;
+            const survivor = group.output.find((row): row is RetainedOutputRow => !row.delete);
+            const removed = group.output.filter((row): row is Extract<OutputRow, { delete: true }> => row.delete);
+            const sourceById = new Map(group.sourceRows.map((row) => [row.id, row]));
+            return (
+              <section key={group.key} className="overflow-hidden rounded-xl border-2 border-black/45 bg-black/[0.025] shadow-sm dark:border-white/40 dark:bg-white/[0.025]">
+                <header className="flex flex-wrap items-center justify-between gap-2 border-b-2 border-black/30 bg-background px-3 py-2 dark:border-white/30">
+                  <div dir="rtl" className="font-bold">گروه {groupIndex + 1}</div>
+                  {manualGroups.length > 1 && group.status !== "applied" ? (
+                    <button type="button" disabled={group.busy} onClick={() => setManualGroups((current) => current.filter((item) => item.key !== group.key))} className={buttonClass}>حذف این گروه</button>
+                  ) : null}
+                </header>
+                <div className="grid gap-4 p-3">
+                  <div className="grid gap-2">
+                    {group.entries.map((entry, entryIndex) => {
+                      const sourceRow = group.sourceRows.find((row) => row.id === Number(entry.wordSenseId));
+                      return (
+                        <div key={entry.key} className="flex flex-wrap items-end gap-2 rounded-lg border border-card bg-background p-2">
+                          <span dir="rtl" className="pb-2 text-xs font-semibold">Concept {entryIndex + 1}</span>
+                          <label className="grid gap-1 text-xs">WordSense ID<input type="number" min="1" value={entry.wordSenseId} disabled={group.busy || group.status === "applied"} onChange={(event) => updateGroup(group.key, (current) => resetPreparedGroup({ ...current, entries: current.entries.map((item) => item.key === entry.key ? { ...item, wordSenseId: event.target.value } : item) }))} className="w-36 rounded border px-2 py-1.5 font-mono" /></label>
+                          {sourceRow ? (
+                            <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-1 rounded-md border border-blue-500/25 bg-blue-500/[0.06] px-3 py-2">
+                              <span dir="ltr" className="shrink-0 font-semibold">{sourceRow.word}</span>
+                              <span dir="rtl" className="min-w-0 text-right text-sm">{sourceRow.concept_explained_fa || "بدون توضیح مفهوم"}</span>
+                            </div>
+                          ) : null}
+                          {group.entries.length > 2 && group.status !== "applied" ? <button type="button" disabled={group.busy} onClick={() => updateGroup(group.key, (current) => resetPreparedGroup({ ...current, entries: current.entries.filter((item) => item.key !== entry.key) }))} className={buttonClass}>حذف Concept</button> : null}
+                        </div>
+                      );
+                    })}
+                    <div className="flex flex-wrap gap-2">
+                      <button type="button" disabled={group.busy || group.status === "applied"} onClick={() => updateGroup(group.key, (current) => resetPreparedGroup({ ...current, entries: [...current.entries, createManualEntry()] }))} className={buttonClass}>افزودن Concept به این گروه</button>
+                      <button type="button" disabled={group.busy || group.status === "applied" || !prompt} onClick={() => void prepareGroup(group.key)} className={buttonClass}>{group.busy && group.status === "draft" ? "در حال بررسی…" : "اعتبارسنجی IDها و ساخت پرامپت"}</button>
+                    </div>
+                  </div>
+                  {group.error ? <div dir="rtl" className="rounded border border-red-500/30 bg-red-500/10 p-2 text-right text-sm text-red-700">{group.error}</div> : null}
+                  {group.notice ? <div dir="rtl" className="rounded border border-emerald-500/30 bg-emerald-500/10 p-2 text-right text-sm text-emerald-800 dark:text-emerald-200">{group.notice}</div> : null}
+                  {group.sourceRows.length ? (
+                    <div className="grid min-h-[300px] gap-3 lg:grid-cols-2">
+                      <section dir="ltr" className="flex min-h-0 flex-col gap-2">
+                        <div className="flex items-center justify-between gap-2"><b>Prompt + data</b><button type="button" disabled={!prompt} onClick={() => void navigator.clipboard.writeText(copyText).then(() => updateGroup(group.key, (current) => ({ ...current, notice: "پرامپت و دادهٔ این گروه کپی شد ✓" }))).catch((reason) => updateGroup(group.key, (current) => ({ ...current, error: reason instanceof Error ? reason.message : String(reason) })))} className={buttonClass}>Copy</button></div>
+                        <textarea readOnly value={copyText} className="min-h-[260px] flex-1 rounded border p-3 font-mono text-xs" />
+                      </section>
+                      <section dir="ltr" className="flex min-h-0 flex-col gap-2">
+                        <b>Response JSON</b>
+                        <textarea value={group.response} disabled={group.busy || group.status === "applied"} onChange={(event) => updateGroup(group.key, (current) => ({ ...current, response: event.target.value, output: [], status: "ready", error: null, notice: null, resolutionAmbiguities: [] }))} placeholder='[{"id":1,"word":"...","meaning_fa":"...","other_meanings_fa":[],"concept_explained_fa":"...","sentenceIds":[],"delete":false,"mergedRecordIds":[2],"mergedIntoId":null},{"id":2,"delete":true,"mergedIntoId":1}]' className="min-h-[220px] flex-1 rounded border p-3 font-mono text-xs" />
+                        <div className="flex gap-2"><button type="button" disabled={group.busy || group.status === "applied"} onClick={() => void navigator.clipboard.readText().then((value) => updateGroup(group.key, (current) => ({ ...current, response: value, output: [], status: "ready", error: null, notice: null }))).catch((reason) => updateGroup(group.key, (current) => ({ ...current, error: reason instanceof Error ? reason.message : String(reason) })))} className={buttonClass}>Paste response</button><button type="button" disabled={group.busy || group.status === "applied" || !group.response.trim()} onClick={() => void previewGroup(group.key)} className={`${buttonClass} flex-1`}>بررسی پاسخ و نمایش Preview</button></div>
+                      </section>
+                    </div>
+                  ) : null}
+                  {group.status === "preview" && survivor ? (
+                    <section className="grid gap-3 rounded-xl border-2 border-emerald-700/60 bg-emerald-500/5 p-3 dark:border-emerald-300/60">
+                      <div dir="rtl" className="font-bold">پیش‌نمایش مرج این گروه</div>
+                      <div dir="ltr" className="flex flex-nowrap items-start gap-3 overflow-x-auto">
+                        <div className="w-[280px] shrink-0"><MergeSourceCard row={survivor} current={sourceById.get(survivor.id)} retained onOpenJson={() => setJsonModal({ groupKey: group.key, rowId: survivor.id })} /></div>
+                        {removed.map((row) => <div key={row.id} className="w-[280px] shrink-0"><MergeSourceCard row={row} current={sourceById.get(row.id)} retained={false} onOpenJson={() => setJsonModal({ groupKey: group.key, rowId: row.id })} /></div>)}
+                        <div className="min-w-[500px] flex-1 self-stretch"><MergeResultCard proposed={survivor} onOpenSentences={() => setSentenceModal({ groupKey: group.key, title: `جملات نهایی WordSense #${survivor.id}`, ids: survivor.sentenceIds })} onEditConcept={() => setConceptEdit({ groupKey: group.key, rowId: survivor.id, value: survivor.concept_explained_fa })} /></div>
+                      </div>
+                      <div className="flex justify-end"><button type="button" dir="rtl" disabled={group.busy} onClick={() => void applyGroup(group.key)} className={`${buttonClass} border-emerald-700 bg-emerald-600 px-5 font-bold text-white hover:bg-emerald-700 dark:border-emerald-300`}>{group.busy ? "در حال اعمال…" : "تأیید و اعمال این مرج"}</button></div>
+                    </section>
+                  ) : null}
+                </div>
+                <PersianWordResolutionModal ambiguities={group.resolutionAmbiguities} busy={group.busy} description="اعمال مرج دستی متوقف شده و هنوز هیچ تغییری ذخیره نشده است. PersianWord ID با تلفظ درست را انتخاب کنید تا همین Preview دوباره اعمال شود." onCancel={() => updateGroup(group.key, (current) => ({ ...current, resolutionAmbiguities: [], error: "اعمال لغو شد؛ هیچ انتخاب مبهمی ذخیره نشد." }))} onConfirm={(selections) => void applyGroup(group.key, selections)} />
+              </section>
+            );
+          })}
+        </div>
+      </div>
+      {jsonModal && jsonProposed ? <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/65 p-4" role="dialog" aria-modal="true" onMouseDown={(event) => event.target === event.currentTarget && setJsonModal(null)}><div className="flex max-h-[82vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border-2 border-black/60 bg-background shadow-elevated dark:border-white/50"><div className="flex items-center justify-between gap-3 border-b-2 border-black/45 px-4 py-3 dark:border-white/40"><strong>WordSense #{jsonModal.rowId}</strong><button type="button" onClick={() => setJsonModal(null)} className={buttonClass}>بستن</button></div><div className="grid min-h-0 flex-1 overflow-auto md:grid-cols-2"><section className="min-w-0 border-b-2 border-black/45 p-4 dark:border-white/40 md:border-b-0 md:border-r-2"><b>Current JSON</b><pre className="mt-2 overflow-auto whitespace-pre-wrap font-mono text-xs">{JSON.stringify(jsonCurrent ?? "Not loaded", null, 2)}</pre></section><section className="min-w-0 p-4"><b>Proposed JSON</b><pre className="mt-2 overflow-auto whitespace-pre-wrap font-mono text-xs">{JSON.stringify(jsonProposed, null, 2)}</pre></section></div></div></div> : null}
+      {sentenceModal ? <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/65 p-4" role="dialog" aria-modal="true" onMouseDown={(event) => event.target === event.currentTarget && setSentenceModal(null)}><div className="flex max-h-[82vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border-2 border-black/60 bg-background shadow-elevated dark:border-white/50"><div className="flex items-center justify-between gap-3 border-b-2 border-black/45 px-4 py-3 dark:border-white/40"><strong dir="rtl">{sentenceModal.title}</strong><button type="button" onClick={() => setSentenceModal(null)} className={buttonClass}>بستن</button></div><div className="min-h-0 flex-1 overflow-auto p-4"><SentenceList ids={sentenceModal.ids} sentenceById={sentenceById} /></div></div></div> : null}
+      {conceptEdit ? <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/65 p-4" role="dialog" aria-modal="true" onMouseDown={(event) => event.target === event.currentTarget && setConceptEdit(null)}><div className="w-full max-w-3xl rounded-2xl border-2 border-black/60 bg-background p-4 shadow-elevated dark:border-white/50"><div className="mb-3 flex items-center justify-between gap-3"><strong dir="rtl">ویرایش توضیح مفهوم نهایی</strong><button type="button" onClick={() => setConceptEdit(null)} className={buttonClass}>لغو</button></div><textarea dir="rtl" value={conceptEdit.value} onChange={(event) => setConceptEdit((current) => current ? { ...current, value: event.target.value } : current)} rows={8} className="w-full rounded border p-3 text-right leading-7" /><div className="mt-3 flex justify-end"><button type="button" dir="rtl" onClick={() => { updateGroup(conceptEdit.groupKey, (group) => ({ ...group, output: group.output.map((row) => row.id === conceptEdit.rowId && !row.delete ? { ...row, concept_explained_fa: conceptEdit.value.trim() } : row), notice: "توضیح مفهوم در Preview ویرایش شد؛ پیش از Apply دوباره آن را کنترل کنید." })); setConceptEdit(null); }} className={buttonClass}>ذخیره در Preview</button></div></div></div> : null}
+    </div>
+  );
+}
+
 export default function WordSenseConceptMerge({
   remainingGroupCount,
   remainingRecordCount,
@@ -347,7 +689,10 @@ export default function WordSenseConceptMerge({
   remainingRecordCount: number;
 }) {
   const router = useRouter();
+  const pendingAgent = usePendingAgentArtifact("merge_word_concepts");
+  const [agentRunId, setAgentRunId] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
+  const [manualOpen, setManualOpen] = useState(false);
   const [showSelectionHelp, setShowSelectionHelp] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -429,11 +774,11 @@ export default function WordSenseConceptMerge({
     }
   };
 
-  const parseForPreview = async () => {
+  const parseForPreview = async (responseValue = response) => {
     setBusy(true);
     setError(null);
     try {
-      const value = JSON.parse(response) as unknown;
+      const value = JSON.parse(responseValue) as unknown;
       const recordsResponse = await fetch("/api/words/concept-merge/records", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -551,6 +896,11 @@ export default function WordSenseConceptMerge({
         return;
       }
       if (!applyResponse.ok || !result.ok) throw new Error(result.error || "Could not apply concept merges.");
+      if (agentRunId) {
+        await completeAgentArtifact(agentRunId);
+        setAgentRunId(null);
+        await pendingAgent.refresh();
+      }
       setResolutionAmbiguities([]);
       setConfirmOpen(false);
       setResponse("");
@@ -597,6 +947,26 @@ export default function WordSenseConceptMerge({
     setConceptEditValue(row.concept_explained_fa);
   };
   const copyText = `${prompt}\n\n${JSON.stringify(groups, null, 2)}`;
+  const openStage = async () => {
+    setBusy(true);
+    setError(null);
+    try {
+      const artifact = await pendingAgent.loadResponse();
+      if (!artifact || artifact.response === undefined) {
+        await createData(true);
+        return;
+      }
+      const savedResponse = JSON.stringify(artifact.response, null, 2);
+      setResponse(savedResponse);
+      setAgentRunId(artifact.runId);
+      setOpen(true);
+      await parseForPreview(savedResponse);
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : String(reason));
+    } finally {
+      setBusy(false);
+    }
+  };
   return (
     <>
       <div className="inline-flex items-start gap-1">
@@ -604,10 +974,11 @@ export default function WordSenseConceptMerge({
           type="button"
           disabled={busy}
           aria-busy={busy && !open}
-          onClick={() => void createData(true)}
+          onClick={() => void openStage()}
           className="relative rounded border px-3 py-2 text-sm hover:bg-black/5 disabled:opacity-100 dark:hover:bg-white/5"
         >
           2. MERGE WORD CONCEPTS <RemainingGroupRecordBadge groupCount={remainingGroupCount} recordCount={remainingRecordCount} />
+          {pendingAgent.artifact ? <span className="ml-1 text-emerald-700">AI response ready ✓</span> : null}
           {busy && !open ? (
             <span className="absolute inset-0 flex items-center justify-center gap-1 rounded bg-background/85" aria-hidden="true">
               <span className="size-1.5 animate-bounce rounded-full bg-current [animation-delay:-0.3s]" />
@@ -641,7 +1012,7 @@ export default function WordSenseConceptMerge({
               <div>
                 <b>Merge word concepts — WordSense</b>
                 <div className="text-xs opacity-70">
-                  Candidate records are grouped by englishId. Nothing is deleted until the human confirmation step.
+                  Candidate records are grouped by englishId and part of speech. Nothing is deleted until the human confirmation step.
                 </div>
               </div>
               <div className="flex flex-wrap items-center justify-end gap-2">
@@ -653,6 +1024,14 @@ export default function WordSenseConceptMerge({
                   className={buttonClass}
                 >
                   راهنمای انتخاب و تغییر داده‌ها
+                </button>
+                <button
+                  type="button"
+                  dir="rtl"
+                  onClick={() => setManualOpen(true)}
+                  className={buttonClass}
+                >
+                  مرج مفاهیم با ID
                 </button>
                 <PromptSourcesButton paths={PROMPT_SOURCE_PATHS} />
                 <button type="button" disabled={busy} onClick={() => setOpen(false)} className={buttonClass}>Close</button>
@@ -671,7 +1050,7 @@ export default function WordSenseConceptMerge({
                 </p>
                 <div className="mt-2 font-semibold">شرایط انتخاب رکوردها</div>
                 <ul className="list-disc pr-5">
-                  <li>رکوردها بر اساس <code>englishId</code> یکسان گروه‌بندی می‌شوند.</li>
+                  <li>رکوردها بر اساس <code>englishId</code> و <code>pos</code> یکسان گروه‌بندی می‌شوند.</li>
                   <li>گروه باید حداقل دو رکورد <code>WordSense</code> داشته باشد.</li>
                   <li>حداقل یک رکورد گروه باید <code>conceptMergeReviewed=false</code> داشته باشد.</li>
                   <li>گروهی که تمام رکوردهایش بررسی شده‌اند دوباره به پرامپت ارسال نمی‌شود.</li>
@@ -1076,6 +1455,11 @@ export default function WordSenseConceptMerge({
           setError("Apply cancelled; no ambiguous PersianWord selection was saved.");
         }}
         onConfirm={(selections) => void applyConfirmed(selections)}
+      />
+      <ManualConceptMergeModal
+        open={manualOpen}
+        onClose={() => setManualOpen(false)}
+        onApplied={() => router.refresh()}
       />
     </>
   );

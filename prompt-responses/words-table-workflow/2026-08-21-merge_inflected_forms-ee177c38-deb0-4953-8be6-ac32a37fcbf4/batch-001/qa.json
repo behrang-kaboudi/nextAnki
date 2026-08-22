@@ -1,0 +1,18 @@
+{
+  "status": "passed",
+  "score": 10,
+  "criteria": {
+    "correctness": true,
+    "completeness": true,
+    "semanticSafety": true,
+    "schemaCompliance": true,
+    "exactCoverage": true
+  },
+  "itemResults": [
+    {
+      "key": "noun:23286,24069",
+      "status": "passed",
+      "score": 10
+    }
+  ]
+}

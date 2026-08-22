@@ -1,0 +1,21 @@
+[
+  {
+    "id": 45074,
+    "mode": "review",
+    "review_status": "PENDING",
+    "missing_fields": [],
+    "requested_fields": [],
+    "base_form": "persnickety",
+    "meaning_fa": "وسواسی",
+    "other_meanings_fa": [],
+    "pos": "adjective",
+    "concept_explained_fa": "به فردی اشاره دارد که به جزئیات کوچک بیش از حد توجه می‌کند و انتظار دارد هر چیز دقیقاً مطابق معیارهایش باشد.",
+    "sentences": [
+      {
+        "id": 30929,
+        "sentence_en": "My new supervisor is persnickety about how the reports are formatted.",
+        "sentence_en_meaning_fa": "سرپرست جدیدم دربارهٔ نحوهٔ قالب‌بندی گزارش‌ها وسواسی است."
+      }
+    ]
+  }
+]

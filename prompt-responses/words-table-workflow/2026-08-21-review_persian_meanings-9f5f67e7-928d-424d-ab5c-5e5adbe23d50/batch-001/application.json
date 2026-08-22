@@ -1,0 +1,11 @@
+{
+  "endpoint": "/api/words/meanings-review/update-bulk",
+  "method": "POST",
+  "body": {
+    "ids": [
+      45074
+    ],
+    "results": [],
+    "requestKey": "meaning-review-v1-8bfa3b71"
+  }
+}

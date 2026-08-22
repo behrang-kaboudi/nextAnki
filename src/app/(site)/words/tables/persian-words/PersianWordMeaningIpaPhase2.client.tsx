@@ -7,6 +7,7 @@ import { SpecialCharactersBar } from "@/components/ipa/SpecialCharactersBar";
 import { PromptSourcesButton } from "@/components/prompts/PromptSourcesButton";
 import { PromptBatchControls } from "@/components/prompts/PromptBatchControls.client";
 import { RemainingCountBadge, RemainingCountButton } from "@/components/remaining-count";
+import { combinePromptParts } from "@/lib/ai/promptPolicy";
 
 const PROMPT_PATHS = [
   "src/prompts/word-extraction/base/inputOutRulseV1 .md",
@@ -85,7 +86,7 @@ export default function PersianWordMeaningIpaPhase2({ initialMissingCount }: { i
         Promise.all(PROMPT_PATHS.map(async (path) => { const res = await fetch(`/api/ai/prompt-file?path=${encodeURIComponent(path)}`); const json = (await res.json()) as { text?: string; error?: string }; if (!res.ok || !json.text) throw new Error(json.error || "Could not load prompt."); return json.text; })),
         fetch(`/api/words/persian-words/meaning-fa-ipa/missing?batchSize=${encodeURIComponent(limit)}`).then(async (res) => { const json = (await res.json()) as { ok?: boolean; items?: unknown; totalMissing?: number; error?: string }; if (!res.ok || !json.ok) throw new Error(json.error || "Could not load missing rows."); return json; }),
       ]);
-      setPrompt(files.join("\n\n")); setData(JSON.stringify(missing.items ?? [], null, 2)); setRemainingCount(typeof missing.totalMissing === "number" ? missing.totalMissing : initialMissingCount); setLoadedCount(Array.isArray(missing.items) ? missing.items.length : 0);
+      setPrompt(combinePromptParts(files)); setData(JSON.stringify(missing.items ?? [], null, 2)); setRemainingCount(typeof missing.totalMissing === "number" ? missing.totalMissing : initialMissingCount); setLoadedCount(Array.isArray(missing.items) ? missing.items.length : 0);
     } catch (reason) { setError(reason instanceof Error ? reason.message : String(reason)); } finally { setLoading(false); }
   }, [initialMissingCount, limit]);
 
