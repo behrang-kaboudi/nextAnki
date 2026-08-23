@@ -42,10 +42,15 @@ CORE RULES:
 - The meaning must EXACTLY match the sense used in the sentence.
 - Do NOT list multiple meanings.
 - Do NOT give general meanings—only context-specific meaning.
+- For a verb or phrasal verb, identify whether its actual use in the original sentence is transitive or intransitive. Preserve that primary pattern in the Persian dictionary meaning and distinguish natural causative/transitive forms such as `کردن` or `دادن` from natural intransitive forms such as `شدن` or `یافتن` when the English use expresses that distinction.
+- Use the sentence's subject, direct object if any, complements, preposition, particle placement, and agent/undergoer relationship to determine the pattern. Do not substitute a different established or theoretical pattern of the same verb.
+- Before returning `meaning_fa`, verify it in a different natural sentence that uses the same lexical sense, part of speech, and transitive or intransitive pattern.
+- Translate `meaning_fa` directly back into English and apply the exact lexical-unit round-trip test: `base_form` -> `meaning_fa` -> English must return the same exact lexical unit. A longer expression containing `base_form` means the meaning belongs to that longer expression; a shorter component means the meaning is incomplete for a multi-word `base_form`.
 
 5. PHRASES:
 
 - If a multi-word expression has a single meaning, extract it as one item.
+- For phrasal and prepositional verbs, preserve the complete established unit and its actual complement pattern. Do not mistake an ordinary verb plus object for a phrasal verb.
 
 6. NO DUPLICATES:
 

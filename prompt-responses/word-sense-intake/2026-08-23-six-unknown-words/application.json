@@ -1,0 +1,132 @@
+{
+  "requests": [
+    {
+      "target": "undermine",
+      "http_status": 201,
+      "ok": true,
+      "action": "created",
+      "item": {
+        "id": 45076,
+        "anki_link_id": "45076_1787510254407",
+        "base_form": "undermine"
+      },
+      "study": {
+        "user": "behrang",
+        "requested_now": true,
+        "listed": true,
+        "ids": [45076]
+      }
+    },
+    {
+      "target": "deteriorate",
+      "http_status": 201,
+      "ok": true,
+      "action": "created",
+      "item": {
+        "id": 45077,
+        "anki_link_id": "45077_1787510254942",
+        "base_form": "deteriorate"
+      },
+      "study": {
+        "user": "behrang",
+        "requested_now": true,
+        "listed": true,
+        "ids": [45076, 45077]
+      }
+    },
+    {
+      "target": "discrepancy",
+      "http_status": 201,
+      "ok": true,
+      "action": "created",
+      "item": {
+        "id": 45078,
+        "anki_link_id": "45078_1787510255459",
+        "base_form": "discrepancy"
+      },
+      "study": {
+        "user": "behrang",
+        "requested_now": true,
+        "listed": true,
+        "ids": [45076, 45077, 45078]
+      }
+    },
+    {
+      "target": "plausible",
+      "http_status": 201,
+      "ok": true,
+      "action": "created",
+      "item": {
+        "id": 45079,
+        "anki_link_id": "45079_1787510257527",
+        "base_form": "plausible"
+      },
+      "study": {
+        "user": "behrang",
+        "requested_now": true,
+        "listed": true,
+        "ids": [45076, 45077, 45078, 45079]
+      }
+    },
+    {
+      "target": "negligible",
+      "http_status": 201,
+      "ok": true,
+      "action": "created",
+      "item": {
+        "id": 45080,
+        "anki_link_id": "45080_1787510260294",
+        "base_form": "negligible"
+      },
+      "study": {
+        "user": "behrang",
+        "requested_now": true,
+        "listed": true,
+        "ids": [45076, 45077, 45078, 45079, 45080]
+      }
+    },
+    {
+      "target": "concede",
+      "http_status": 201,
+      "ok": true,
+      "action": "created",
+      "item": {
+        "id": 45081,
+        "anki_link_id": "45081_1787510262506",
+        "base_form": "concede"
+      },
+      "study": {
+        "user": "behrang",
+        "requested_now": true,
+        "listed": true,
+        "ids": [45076, 45077, 45078, 45079, 45080, 45081]
+      }
+    }
+  ],
+  "verification": {
+    "database": [
+      { "base_form": "undermine", "exists": true, "count": 1, "id": 45076 },
+      { "base_form": "deteriorate", "exists": true, "count": 1, "id": 45077 },
+      { "base_form": "discrepancy", "exists": true, "count": 1, "id": 45078 },
+      { "base_form": "plausible", "exists": true, "count": 1, "id": 45079 },
+      { "base_form": "negligible", "exists": true, "count": 1, "id": 45080 },
+      { "base_form": "concede", "exists": true, "count": 1, "id": 45081 }
+    ],
+    "study_list": {
+      "ok": true,
+      "user": "behrang",
+      "ids": [45076, 45077, 45078, 45079, 45080, 45081],
+      "all_required_ids_present": true
+    },
+    "audit_correction": {
+      "id": 41952,
+      "initial_evidence": "The first insertion response showed that ID 41952 was already absent from the live study list.",
+      "temporary_agent_action": "The ID was re-added during diff investigation before the study-list implementation was inspected.",
+      "correction": "Inspection showed that the add endpoint cannot omit existing IDs, so the temporary re-add was removed through the DELETE endpoint.",
+      "correction_http_status": 200,
+      "final_state_verified": true
+    },
+    "all_requests_created": true,
+    "anki_changed": false
+  }
+}

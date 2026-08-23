@@ -281,13 +281,13 @@ export default function AnkiWordSyncQuickActions({
 
       {missingDeleteModalOpen ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" role="dialog" aria-modal="true">
-          <div dir="rtl" lang="fa" className="flex max-h-[85vh] w-full max-w-5xl flex-col rounded border bg-background p-4 text-right shadow-lg">
+          <div className="flex max-h-[85vh] w-full max-w-5xl flex-col rounded border bg-background p-4 text-left shadow-lg">
             <div className="flex items-start justify-between gap-3">
               <div className="space-y-1">
-                <div className="text-base font-semibold">حذف نوت‌های Anki که در دیتابیس نیستند</div>
+                <div className="text-base font-semibold">Delete Anki Notes Missing from the Database</div>
                 <div className="text-xs opacity-80">
-                  پیدا شده: <span className="font-semibold">{missingDeleteItems.length}</span> • بررسی‌شده:{" "}
-                  <span className="font-semibold">{missingDeleteCheckedNotes ?? "—"}</span> • کل نوت‌ها:{" "}
+                  Found: <span className="font-semibold">{missingDeleteItems.length}</span> • Checked:{" "}
+                  <span className="font-semibold">{missingDeleteCheckedNotes ?? "—"}</span> • Total notes:{" "}
                   <span className="font-semibold">{missingDeleteTotalNotes ?? "—"}</span>
                 </div>
                 {missingDeleteQuery ? <div className="text-xs opacity-80">Query: <Code>{missingDeleteQuery}</Code></div> : null}
@@ -299,7 +299,7 @@ export default function AnkiWordSyncQuickActions({
                   disabled={missingDeleteLoading || missingDeleteDeleting}
                   className="rounded border px-3 py-1.5 text-sm hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5"
                 >
-                  {missingDeleteLoading ? "در حال بارگذاری..." : "بازخوانی"}
+                  {missingDeleteLoading ? "Loading..." : "Refresh"}
                 </button>
                 <button
                   type="button"
@@ -307,7 +307,7 @@ export default function AnkiWordSyncQuickActions({
                   disabled={missingDeleteDeleting}
                   className="rounded border px-3 py-1.5 text-sm hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/5"
                 >
-                  بستن
+                  Close
                 </button>
               </div>
             </div>
@@ -316,15 +316,15 @@ export default function AnkiWordSyncQuickActions({
 
             <div className="mt-3 min-h-0 flex-1 overflow-auto rounded border">
               {missingDeleteLoading ? (
-                <div className="p-4 text-sm text-muted">در حال دریافت لیست...</div>
+                <div className="p-4 text-sm text-muted">Loading the list...</div>
               ) : missingDeleteItems.length ? (
-                <table className="w-full text-right text-xs">
+                <table className="w-full text-left text-xs">
                   <thead className="sticky top-0 bg-background">
                     <tr className="border-b border-card">
                       <th className="whitespace-nowrap px-3 py-2 font-semibold">noteId</th>
                       <th className="whitespace-nowrap px-3 py-2 font-semibold">anki_link_id</th>
-                      <th className="whitespace-nowrap px-3 py-2 font-semibold">لغت</th>
-                      <th className="px-3 py-2 font-semibold">معنی</th>
+                      <th className="whitespace-nowrap px-3 py-2 font-semibold">Word</th>
+                      <th dir="rtl" className="px-3 py-2 text-right font-semibold">معنی</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -333,25 +333,25 @@ export default function AnkiWordSyncQuickActions({
                         <td className="whitespace-nowrap px-3 py-2 font-mono">{item.noteId}</td>
                         <td className="whitespace-nowrap px-3 py-2 font-mono">{item.anki_link_id}</td>
                         <td className="whitespace-nowrap px-3 py-2">{item.base_form || "—"}</td>
-                        <td className="min-w-[18rem] px-3 py-2">{item.meaning_fa || "—"}</td>
+                        <td dir="rtl" className="min-w-[18rem] px-3 py-2 text-right">{item.meaning_fa || "—"}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               ) : (
-                <div className="p-4 text-sm text-muted">هیچ نوتی برای حذف پیدا نشد.</div>
+                <div className="p-4 text-sm text-muted">No notes were found for deletion.</div>
               )}
             </div>
 
             <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t pt-3">
-              <div className="text-xs text-muted">این عملیات نوت‌های پیدا شده را از Anki پاک می‌کند و قابل بازگشت نیست.</div>
+              <div className="text-xs text-muted">This permanently deletes the listed notes from Anki and cannot be undone.</div>
               <button
                 type="button"
                 onClick={() => void deleteMissingAnkiNotes()}
                 disabled={missingDeleteLoading || missingDeleteDeleting || !missingDeleteItems.length}
                 className="rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700 disabled:opacity-50"
               >
-                {missingDeleteDeleting ? "در حال حذف..." : `حذف همه از Anki (${missingDeleteItems.length})`}
+                {missingDeleteDeleting ? "Deleting..." : `Delete All from Anki (${missingDeleteItems.length})`}
               </button>
             </div>
           </div>

@@ -1,0 +1,52 @@
+{
+  "targets": [
+    {
+      "target_word": "undermine",
+      "sentence_en": null,
+      "lookup": {
+        "exists": false,
+        "count": 0
+      }
+    },
+    {
+      "target_word": "deteriorate",
+      "sentence_en": null,
+      "lookup": {
+        "exists": false,
+        "count": 0
+      }
+    },
+    {
+      "target_word": "discrepancy",
+      "sentence_en": null,
+      "lookup": {
+        "exists": false,
+        "count": 0
+      }
+    },
+    {
+      "target_word": "plausible",
+      "sentence_en": null,
+      "lookup": {
+        "exists": false,
+        "count": 0
+      }
+    },
+    {
+      "target_word": "negligible",
+      "sentence_en": null,
+      "lookup": {
+        "exists": false,
+        "count": 0
+      }
+    },
+    {
+      "target_word": "concede",
+      "sentence_en": null,
+      "lookup": {
+        "exists": false,
+        "count": 0
+      }
+    }
+  ]
+}

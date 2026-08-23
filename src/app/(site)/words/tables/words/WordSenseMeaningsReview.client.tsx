@@ -10,11 +10,12 @@ import { combinePromptParts } from "@/lib/ai/promptPolicy";
 import { completeAgentArtifact, usePendingAgentArtifact } from "@/lib/words/wordsTableAgentWorkflow.client";
 import DeleteWordSenseModalButton from "./DeleteWordSenseModalButton.client";
 import {
+  buildMeaningReviewResultRecord,
   MeaningReviewSingleFlight,
-  meaningReviewRequestKey,
   prepareMeaningReviewFinalization,
   type MeaningReviewCorrection as Correction,
   type MeaningReviewPreviewRecord,
+  type MeaningReviewResultRecord,
 } from "@/lib/words/meaningReviewFinalization";
 
 const PROMPT_PATHS = [
@@ -68,6 +69,58 @@ type EligibilitySummary = {
   missingSentence: number;
   missingSentenceTranslation: number;
 };
+
+function meaningReviewChangeSummary(
+  current: MeaningReviewPreviewRecord,
+  draft: string,
+) {
+  let result: MeaningReviewResultRecord;
+  try {
+    result = JSON.parse(draft) as MeaningReviewResultRecord;
+  } catch {
+    return ["Resulting JSON is invalid."];
+  }
+  if (!result || typeof result !== "object" || !Array.isArray(result.sentences)) {
+    return ["Resulting record is incomplete or invalid."];
+  }
+  if (result.review_status === "NEEDS_ACTION_INVALID_PRIMARY") {
+    return [
+      "No content changes",
+      `${current.review_status ?? "PENDING"} → NEEDS_ACTION_INVALID_PRIMARY`,
+    ];
+  }
+  const changes: string[] = [];
+  if (result.meaning_fa !== current.meaning_fa) changes.push("Primary meaning changed");
+  const currentOther = current.other_meanings_fa;
+  if (JSON.stringify(result.other_meanings_fa) !== JSON.stringify(currentOther)) {
+    const before = new Set(currentOther ?? []);
+    const after = new Set(result.other_meanings_fa ?? []);
+    const removed = [...before].filter((meaning) => !after.has(meaning));
+    const added = [...after].filter((meaning) => !before.has(meaning));
+    if (removed.length) changes.push(`Removed alternatives: ${removed.map((value) => `“${value}”`).join(", ")}`);
+    if (added.length) changes.push(`Added alternatives: ${added.map((value) => `“${value}”`).join(", ")}`);
+    if (!removed.length && !added.length) changes.push("Alternative meanings changed");
+  }
+  if (result.pos !== current.pos) changes.push(`Part of speech: ${current.pos ?? "null"} → ${result.pos ?? "null"}`);
+  if (result.concept_explained_fa !== current.concept_explained_fa) changes.push("Concept explanation changed");
+  const currentSentences = new Map((current.sentences ?? []).map((sentence) => [sentence.id, sentence]));
+  const resultIds = new Set(result.sentences
+    .filter((sentence) => sentence.sentence_id !== null)
+    .map((sentence) => sentence.sentence_id as number));
+  const removedSentenceIds = [...currentSentences.keys()].filter((id) => !resultIds.has(id));
+  if (removedSentenceIds.length) changes.push(`Replaced sentence IDs: ${removedSentenceIds.join(", ")}`);
+  if (result.sentences.some((sentence) => sentence.sentence_id === null)) changes.push("One new sentence will be linked");
+  const translatedIds = result.sentences.flatMap((sentence) => {
+    if (sentence.sentence_id === null) return [];
+    return sentence.sentence_en_meaning_fa !== currentSentences.get(sentence.sentence_id)?.sentence_en_meaning_fa
+      ? [sentence.sentence_id]
+      : [];
+  });
+  if (translatedIds.length) changes.push(`Updated sentence translations: ${translatedIds.join(", ")}`);
+  if (!changes.length) changes.push("No content changes");
+  changes.push(`${current.review_status ?? "PENDING"} → CONFIRMED`);
+  return changes;
+}
 export default function WordSenseMeaningsReview({
   pendingCount,
   statusPendingCount,
@@ -92,7 +145,6 @@ export default function WordSenseMeaningsReview({
   const [loadedCount, setLoadedCount] = useState(0);
   const [summary, setSummary] = useState(initialSummary);
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [corrections, setCorrections] = useState<Correction[]>([]);
   const [confirmedIds, setConfirmedIds] = useState<Set<number>>(new Set());
   const [drafts, setDrafts] = useState<Record<number, string>>({});
   const [showCloseHelp, setShowCloseHelp] = useState(false);
@@ -179,7 +231,6 @@ export default function WordSenseMeaningsReview({
     setD("");
     setA("");
     setLoadedCount(0);
-    setCorrections([]);
     setConfirmedIds(new Set());
     setDrafts({});
     setConfirmError(null);
@@ -270,11 +321,17 @@ export default function WordSenseMeaningsReview({
       };
       if (!recordsResponse.ok || !recordsJson.ok)
         throw Error(recordsJson.error || "Could not rebuild current records from the response IDs.");
-      setD(JSON.stringify(recordsJson.items ?? [], null, 2));
-      setCorrections(parsed);
+      const previewRecords = Array.isArray(recordsJson.items)
+        ? recordsJson.items as MeaningReviewPreviewRecord[]
+        : [];
+      const correctionsById = new Map(parsed.map((item) => [item.id, item]));
+      setD(JSON.stringify(previewRecords, null, 2));
       setDrafts(
         Object.fromEntries(
-          parsed.map((item) => [item.id, JSON.stringify(item, null, 2)]),
+          previewRecords.map((record) => [
+            record.id,
+            JSON.stringify(buildMeaningReviewResultRecord(record, correctionsById.get(record.id)), null, 2),
+          ]),
         ),
       );
       setConfirmedIds(new Set());
@@ -384,7 +441,6 @@ export default function WordSenseMeaningsReview({
     try {
       const request = prepareMeaningReviewFinalization({
         previewRecords: (d ? JSON.parse(d) : []) as MeaningReviewPreviewRecord[],
-        corrections,
         drafts,
         confirmedIds,
       });
@@ -406,21 +462,15 @@ export default function WordSenseMeaningsReview({
   };
   const confirmOne = async (id: number) => {
     try {
-      const draft = JSON.parse(drafts[id] ?? "") as Correction;
-      if (!draft || typeof draft !== "object" || draft.id !== id || draft.mode !== "review") {
-        throw new Error("The new value must be valid JSON with the same id and mode=review.");
-      }
-      const request = {
-        ids: [id],
-        results: [draft],
-        requestKey: meaningReviewRequestKey([id], [draft]),
-      };
-      const report = await commit(request);
-      if (report) {
-        setCorrections((current) =>
-          current.map((item) => (item.id === id ? draft : item)),
-        );
-      }
+      const previewRecords = (d ? JSON.parse(d) : []) as MeaningReviewPreviewRecord[];
+      const record = previewRecords.find((item) => item.id === id);
+      if (!record) throw new Error(`WordSense ${id} is not available in this preview.`);
+      const request = prepareMeaningReviewFinalization({
+        previewRecords: [record],
+        drafts,
+        confirmedIds: new Set(),
+      });
+      await commit(request);
     } catch (error) {
       setConfirmError(error instanceof Error ? error.message : String(error));
     }
@@ -777,8 +827,8 @@ export default function WordSenseMeaningsReview({
               <div>
                 <b id="meaning-review-confirm-title">Confirm meaning updates</b>
                 <div className="text-xs opacity-70">
-                  Compare or edit the proposed JSON. Row confirmation is optional;
-                  the final action validates and processes every remaining preview record.
+                  Every reviewed ID is shown. Edit the complete resulting record, then compare the
+                  human-readable change summary before confirming. The API still receives only the validated patch.
                 </div>
               </div>
               <div className="relative flex gap-2">
@@ -843,67 +893,84 @@ export default function WordSenseMeaningsReview({
               </div>
             ) : null}
             <div className="min-h-0 flex-1 overflow-auto rounded border">
-              <table className="w-full table-fixed text-left text-xs">
+              <table className="w-full min-w-[1100px] table-fixed text-left text-xs">
                 <colgroup>
-                  <col className="w-[6%]" />
-                  <col className="w-[43%]" />
-                  <col className="w-[43%]" />
+                  <col className="w-[5%]" />
+                  <col className="w-[29%]" />
+                  <col className="w-[38%]" />
+                  <col className="w-[20%]" />
                   <col className="w-[8%]" />
                 </colgroup>
                 <thead className="sticky top-0 bg-background">
                   <tr className="border-b">
                     <th className="px-3 py-2">id</th>
-                    <th className="px-3 py-2">Current</th>
-                    <th className="px-3 py-2">New (editable)</th>
+                    <th className="px-3 py-2">Current record</th>
+                    <th className="px-3 py-2">Result after apply (editable)</th>
+                    <th className="px-3 py-2">What will change</th>
                     <th className="px-3 py-2">action</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {corrections.map((correction) => {
-                    const old = (d ? JSON.parse(d) : []) as Array<
-                      Record<string, unknown>
-                    >;
-                    const current = old.find(
-                      (item) => item.id === correction.id,
-                    );
-                    const draft =
-                      drafts[correction.id] ??
-                      JSON.stringify(correction, null, 2);
+                  {((d ? JSON.parse(d) : []) as MeaningReviewPreviewRecord[]).map((record) => {
+                    const draft = drafts[record.id] ?? "";
+                    const currentRecord = {
+                      ...buildMeaningReviewResultRecord(record),
+                      review_status: record.review_status ?? "PENDING",
+                    };
+                    const changes = meaningReviewChangeSummary(record, draft);
                     return (
                       <tr
-                        key={correction.id}
-                        className={`border-b align-top ${confirmedIds.has(correction.id) ? "bg-emerald-500/10" : ""}`}
+                        key={record.id}
+                        className={`border-b align-top ${confirmedIds.has(record.id) ? "bg-emerald-500/10" : ""}`}
                       >
-                        <td className="px-3 py-2 font-mono">{correction.id}</td>
+                        <td className="px-3 py-2 font-mono">{record.id}</td>
                         <td className="px-3 py-2">
-                          <pre className="whitespace-pre-wrap break-words font-mono">
-                            {JSON.stringify(current ?? "Not loaded", null, 2)}
+                          <pre className="max-h-[32rem] overflow-auto whitespace-pre-wrap break-words rounded bg-black/[0.03] p-3 font-mono dark:bg-white/[0.04]">
+                            {JSON.stringify(currentRecord, null, 2)}
                           </pre>
                         </td>
                         <td className="px-3 py-2">
                           <textarea
                             value={draft}
-                            rows={Math.max(18, draft.split("\n").length + 1)}
+                            rows={Math.max(20, Math.min(36, draft.split("\n").length + 1))}
                             onChange={(event) =>
                               setDrafts((current) => ({
                                 ...current,
-                                [correction.id]: event.target.value,
+                                [record.id]: event.target.value,
                               }))
                             }
                             disabled={b}
-                            className="min-h-[28rem] w-full resize-y rounded border p-3 font-mono disabled:opacity-50"
+                            className="min-h-[24rem] w-full resize-y rounded border p-3 font-mono disabled:opacity-50"
                           />
+                        </td>
+                        <td className="px-3 py-2">
+                          <ul className="space-y-2">
+                            {changes.map((change) => (
+                              <li
+                                key={change}
+                                className={`rounded border px-2 py-1.5 leading-relaxed ${
+                                  change.startsWith("Removed") || change.startsWith("Replaced")
+                                    ? "border-red-500/30 bg-red-500/10 text-red-800 dark:text-red-200"
+                                    : change.startsWith("Added") || change.startsWith("One new")
+                                      ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-800 dark:text-emerald-200"
+                                      : "border-black/10 bg-black/[0.03] dark:border-white/10 dark:bg-white/[0.04]"
+                                }`}
+                              >
+                                {change}
+                              </li>
+                            ))}
+                          </ul>
                         </td>
                         <td className="px-3 py-2">
                           <button
                             type="button"
                             disabled={b}
-                            onClick={() => void confirmOne(correction.id)}
+                            onClick={() => void confirmOne(record.id)}
                             className="rounded border px-2 py-1 transition active:scale-90 hover:bg-black/5 disabled:opacity-50"
                           >
-                            {outcomeById[correction.id] === "attention_required"
+                            {outcomeById[record.id] === "attention_required"
                               ? "Attention required"
-                              : confirmedIds.has(correction.id)
+                              : confirmedIds.has(record.id)
                                 ? "Confirmed ✓"
                                 : "Confirm"}
                           </button>

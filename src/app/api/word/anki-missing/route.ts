@@ -6,9 +6,10 @@ import { prisma } from "@/lib/prisma";
 import { requireApiAuth } from "@/lib/auth/apiAuth";
 import { createAnkiOperations } from "@/lib/anki";
 import { AnkiNoteTypes } from "@/lib/anki";
+import { saveWordNoteInfoSnapshot } from "@/lib/anki/wordNoteInfoSnapshot";
 
 const DEFAULT_QUERY = `note:"${AnkiNoteTypes.META_LEX_VR9}"`;
-const NOTES_INFO_BATCH_SIZE = 1000;
+const NOTES_INFO_BATCH_SIZE = 3000;
 
 function chunk<T>(arr: T[], size: number) {
   const out: T[][] = [];
@@ -73,6 +74,7 @@ export async function POST(req: Request) {
     const infos: Array<{
       noteId: number;
       modelName: string;
+      tags: string[];
       fields: Record<string, { value: string; order: number }>;
     }> = [];
 
@@ -110,6 +112,11 @@ export async function POST(req: Request) {
       totalNotes: Array.isArray(noteIdsRes.result) ? noteIdsRes.result.length : 0,
       checkedNotes: allNoteIds.length,
       missing,
+      snapshotId: saveWordNoteInfoSnapshot({
+        query,
+        totalNotes: Array.isArray(noteIdsRes.result) ? noteIdsRes.result.length : 0,
+        notes: infos,
+      }),
     });
   } catch (e) {
     return NextResponse.json({ error: e instanceof Error ? e.message : String(e) }, { status: 500 });

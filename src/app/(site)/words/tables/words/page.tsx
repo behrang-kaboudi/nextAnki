@@ -83,6 +83,7 @@ const SORT_FIELDS = [
 type SortField = (typeof SORT_FIELDS)[number];
 
 const TABLE_COLUMNS = [
+  { key: "actions", label: "actions" },
   { key: "id", label: "id", required: true },
   { key: "englishId", label: "englishId" },
   { key: "meaningId", label: "meaningId" },
@@ -107,12 +108,12 @@ const TABLE_COLUMNS = [
   { key: "anki_link_id", label: "anki_link_id" },
   { key: "createdAt", label: "createdAt" },
   { key: "updatedAt", label: "updatedAt" },
-  { key: "actions", label: "actions" },
 ] as const;
 
 type TableColumnKey = (typeof TABLE_COLUMNS)[number]["key"];
 type MeaningReviewFilter = "all" | "pending" | "reviewed";
 const DEFAULT_TABLE_COLUMNS: TableColumnKey[] = [
+  "actions",
   "id",
   "englishId",
   "meaningId",
@@ -130,7 +131,6 @@ const DEFAULT_TABLE_COLUMNS: TableColumnKey[] = [
   "concept_explained_fa_audio_source_text",
   "anki_link_id",
   "updatedAt",
-  "actions",
 ];
 
 const COLUMN_INDICATORS: Partial<
@@ -856,6 +856,9 @@ export default async function WordsTablePage({
             <thead className="sticky top-0 bg-background">
               <tr className="border-b">
                 <th className="whitespace-nowrap px-3 py-2"><WordSenseSelectVisibleRows /></th>
+                {hasColumn("actions") ? (
+                  <th className="px-3 py-2">actions</th>
+                ) : null}
                 {hasColumn("id") ? (
                   <SortHeader
                     href={sortHref("id")}
@@ -1052,9 +1055,6 @@ export default async function WordsTablePage({
                     direction={dir}
                   />
                 ) : null}
-                {hasColumn("actions") ? (
-                  <th className="px-3 py-2">actions</th>
-                ) : null}
               </tr>
             </thead>
             <tbody>
@@ -1068,6 +1068,21 @@ export default async function WordsTablePage({
                       aria-label={`Select WordSense ${row.id}`}
                     />
                   </td>
+                  {hasColumn("actions") ? (
+                    <td className="px-3 py-2">
+                      <div className="flex items-center gap-1">
+                        <OpenWordSenseEditorModal
+                          id={row.id}
+                          label={row.english.base_form}
+                          compact
+                        />
+                        <DeleteWordSenseModalButton
+                          id={row.id}
+                          label={row.english.base_form}
+                        />
+                      </div>
+                    </td>
+                  ) : null}
                   {hasColumn("id") ? (
                     <td className="whitespace-nowrap px-3 py-2 font-mono">
                       {row.id}
@@ -1251,20 +1266,6 @@ export default async function WordsTablePage({
                   {hasColumn("updatedAt") ? (
                     <td className="whitespace-nowrap px-3 py-2 font-mono">
                       {row.updatedAt.toISOString()}
-                    </td>
-                  ) : null}
-                  {hasColumn("actions") ? (
-                    <td className="px-3 py-2">
-                      <div className="flex items-center gap-1">
-                        <OpenWordSenseEditorModal
-                          id={row.id}
-                          label={row.english.base_form}
-                        />
-                        <DeleteWordSenseModalButton
-                          id={row.id}
-                          label={row.english.base_form}
-                        />
-                      </div>
                     </td>
                   ) : null}
                 </tr>

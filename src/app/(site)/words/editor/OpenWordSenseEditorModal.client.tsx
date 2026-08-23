@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { ActionIcon } from "@/components/icons/ActionIcon";
 import WordEditorClient from "./[id]/word-sense-editor.client";
 import type { WordEditorInitial } from "@/lib/words/editorPayload";
 
@@ -15,9 +16,11 @@ type LoadState =
 export default function OpenWordSenseEditorModal({
   id,
   label,
+  compact = false,
 }: {
   id: number;
   label: string;
+  compact?: boolean;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -72,9 +75,13 @@ export default function OpenWordSenseEditorModal({
       <button
         type="button"
         onClick={openEditor}
-        className="rounded border px-2 py-1 text-[11px] hover:bg-black/5 dark:hover:bg-white/5"
+        aria-label={`Edit WordSense ${id} — ${label}`}
+        title="Edit WordSense"
+        className={compact
+          ? "rounded border p-1.5 transition active:scale-90 hover:bg-black/5 dark:hover:bg-white/5"
+          : "rounded border px-2 py-1 text-[11px] hover:bg-black/5 dark:hover:bg-white/5"}
       >
-        Open
+        {compact ? <ActionIcon name="edit" /> : "Open"}
       </button>
 
       {open ? (

@@ -1,0 +1,96 @@
+[
+  {
+    "base_form": "undermine",
+    "pos": "verb",
+    "meaning_fa": "تضعیف کردن",
+    "other_meanings_fa": [
+      "سست کردن"
+    ],
+    "concept_explained_fa": "به کاهش تدریجی قدرت، اعتبار، اعتماد یا اثرگذاری کسی یا چیزی، اغلب از راه رفتارهای غیرمستقیم یا تکرارشونده، اشاره دارد.",
+    "sentence_en": "Constant criticism can undermine a child's confidence.",
+    "sentence_en_meaning_fa": "انتقاد مداوم می‌تواند اعتمادبه‌نفس کودک را تضعیف کند.",
+    "phonetic_us": "ˌʌndɚˈmaɪn",
+    "meaning_fa_IPA": "tæzʔiːf kærdæn",
+    "imageability": 36,
+    "learning_depth": 0.72,
+    "productive_target": 64
+  },
+  {
+    "base_form": "deteriorate",
+    "pos": "verb",
+    "meaning_fa": "بدتر شدن",
+    "other_meanings_fa": [],
+    "concept_explained_fa": "به فرایندی اشاره دارد که در آن وضعیت، کیفیت یا عملکرد چیزی با گذشت زمان کاهش می‌یابد.",
+    "sentence_en": "Road conditions deteriorated quickly after the heavy snow.",
+    "sentence_en_meaning_fa": "وضعیت جاده‌ها پس از بارش سنگین برف به‌سرعت بدتر شد.",
+    "phonetic_us": "dɪˈtɪriəˌreɪt",
+    "meaning_fa_IPA": "bædtær ʃodæn",
+    "imageability": 45,
+    "learning_depth": 0.69,
+    "productive_target": 57
+  },
+  {
+    "base_form": "discrepancy",
+    "pos": "noun",
+    "meaning_fa": "مغایرت",
+    "other_meanings_fa": [
+      "عدم تطابق"
+    ],
+    "concept_explained_fa": "تفاوتی غیرمنتظره میان دو مقدار، گزارش یا مجموعه اطلاعات است که انتظار می‌رود با یکدیگر سازگار باشند.",
+    "sentence_en": "The auditor found a discrepancy between the two reports.",
+    "sentence_en_meaning_fa": "حسابرس میان دو گزارش مغایرتی پیدا کرد.",
+    "phonetic_us": "dɪˈskrɛpənsi",
+    "meaning_fa_IPA": "moɣɑːjeræt",
+    "imageability": 38,
+    "learning_depth": 0.62,
+    "productive_target": 46
+  },
+  {
+    "base_form": "plausible",
+    "pos": "adjective",
+    "meaning_fa": "باورپذیر",
+    "other_meanings_fa": [
+      "قابل‌باور"
+    ],
+    "concept_explained_fa": "دربارهٔ توضیح یا ادعایی به کار می‌رود که منطقی و ممکن به نظر می‌رسد، هرچند هنوز درستی آن ثابت نشده است.",
+    "sentence_en": "Her explanation sounded plausible, but we still checked the facts.",
+    "sentence_en_meaning_fa": "توضیح او باورپذیر به نظر می‌رسید، اما باز هم واقعیت‌ها را بررسی کردیم.",
+    "phonetic_us": "ˈplɑzəbəl",
+    "meaning_fa_IPA": "bɑːvæɾpæziːɾ",
+    "imageability": 22,
+    "learning_depth": 0.72,
+    "productive_target": 61
+  },
+  {
+    "base_form": "negligible",
+    "pos": "adjective",
+    "meaning_fa": "ناچیز",
+    "other_meanings_fa": [
+      "قابل‌چشم‌پوشی"
+    ],
+    "concept_explained_fa": "برای مقدار یا اثری به کار می‌رود که آن‌قدر کوچک یا کم‌اهمیت است که در عمل می‌توان آن را نادیده گرفت.",
+    "sentence_en": "The difference in cost was negligible for our team.",
+    "sentence_en_meaning_fa": "تفاوت هزینه برای تیم ما ناچیز بود.",
+    "phonetic_us": "ˈnɛɡlədʒəbəl",
+    "meaning_fa_IPA": "nɑːtʃiːz",
+    "imageability": 20,
+    "learning_depth": 0.64,
+    "productive_target": 47
+  },
+  {
+    "base_form": "concede",
+    "pos": "verb",
+    "meaning_fa": "پذیرفتن",
+    "other_meanings_fa": [
+      "اذعان کردن"
+    ],
+    "concept_explained_fa": "به پذیرفتن درستی یک ادعا یا برتری دیدگاهی، معمولاً پس از مقاومت یا با بی‌میلی، اشاره دارد.",
+    "sentence_en": "She finally conceded that the original plan had failed.",
+    "sentence_en_meaning_fa": "او سرانجام پذیرفت که طرح اولیه شکست خورده است.",
+    "phonetic_us": "kənˈsid",
+    "meaning_fa_IPA": "pæziːroftæn",
+    "imageability": 30,
+    "learning_depth": 0.63,
+    "productive_target": 52
+  }
+]

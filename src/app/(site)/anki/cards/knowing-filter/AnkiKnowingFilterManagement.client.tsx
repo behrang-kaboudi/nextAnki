@@ -37,6 +37,7 @@ const FA_TO_EN_WITH_HELP_CARD = "WordsForNewStudy-FaToEnWithHelp" as const;
 const FA_TO_EN_WITH_HELP_DECK = "WordsForNewStudy::FaToEnWithHelp" as const;
 const HARD_CARDS_DECK = "WordsForNewStudy::FaToEn" as const;
 const HARD_CARDS_CARD = "FaToEn" as const;
+const HARD_SCORE_THRESHOLD = 45;
 
 const TABLE_COLUMNS = [
   { key: "index", label: "#" },
@@ -89,22 +90,22 @@ const ACTIONS: Array<{
 }> = [
   {
     value: "again",
-    label: "بلد نیستم",
+    label: "Don't know",
     className: "border-red-500/30 text-red-700 dark:text-red-400",
   },
   {
     value: "familiar",
-    label: "آشنا هستم",
+    label: "Familiar",
     className: "border-amber-500/30 text-amber-700 dark:text-amber-400",
   },
   {
     value: "good",
-    label: "بلدم",
+    label: "Know",
     className: "border-emerald-500/30 text-emerald-700 dark:text-emerald-400",
   },
   {
     value: "easy",
-    label: "عالی",
+    label: "Know very well",
     className: "border-sky-500/30 text-sky-700 dark:text-sky-400",
   },
 ];
@@ -248,53 +249,53 @@ function buildQuery(
 function buildHelpSummaries(): HelpActionSummary[] {
   return [
     {
-      title: "بلد نیستم",
+      title: "Don't know",
       results: [
-        `${WordAnkiConstants.cardTypes.EnToFa} → ${WordAnkiConstants.decks.EnToFa}: یک بار Again (ease=1).`,
-        `${WordAnkiConstants.cardTypes.FaToEn} → ${WordAnkiConstants.decks.FaToEn}: یک بار Again (ease=1).`,
-        `${REVIEW_CARD} → ${REVIEW_DECK}: یک بار Easy (ease=4).`,
-        `${PRONUNCIATION_CARD} → ${PRONUNCIATION_DECK}: یک بار Easy (ease=4)، سپس افزودن رندم ۶۰ تا ۱۲۰ روز به تاریخ حاصل از Easy.`,
-        `${REVIEW_PRONUNCIATION_CARD} → ${REVIEW_PRONUNCIATION_DECK}: یک بار Easy (ease=4).`,
-        `${FA_TO_EN_WITH_HELP_CARD} → ${FA_TO_EN_WITH_HELP_DECK}: یک بار Again (ease=1).`,
+        `${WordAnkiConstants.cardTypes.EnToFa} → ${WordAnkiConstants.decks.EnToFa}: answer Again once (ease=1).`,
+        `${WordAnkiConstants.cardTypes.FaToEn} → ${WordAnkiConstants.decks.FaToEn}: answer Again once (ease=1), then suspend when the ⚖️ average is ${HARD_SCORE_THRESHOLD} or lower.`,
+        `${REVIEW_CARD} → ${REVIEW_DECK}: answer Easy once (ease=4).`,
+        `${PRONUNCIATION_CARD} → ${PRONUNCIATION_DECK}: answer Easy once (ease=4), then add a random 60–120 days to the resulting due date.`,
+        `${REVIEW_PRONUNCIATION_CARD} → ${REVIEW_PRONUNCIATION_DECK}: answer Easy once (ease=4).`,
+        `${FA_TO_EN_WITH_HELP_CARD} → ${FA_TO_EN_WITH_HELP_DECK}: answer Again once (ease=1).`,
       ],
       toneClassName:
         "border-red-500/20 bg-red-500/5 text-red-800 dark:text-red-300",
     },
     {
-      title: "آشنا هستم",
+      title: "Familiar",
       results: [
-        `${WordAnkiConstants.cardTypes.EnToFa} → ${WordAnkiConstants.decks.EnToFa}: یک بار Good (ease=3).`,
-        `${WordAnkiConstants.cardTypes.FaToEn} → ${WordAnkiConstants.decks.FaToEn}: فقط انتقال؛ بدون پاسخ یا ریست.`,
-        `${REVIEW_CARD} → ${REVIEW_DECK}: یک بار Easy (ease=4).`,
-        `${PRONUNCIATION_CARD} → ${PRONUNCIATION_DECK}: یک بار Easy (ease=4)، سپس افزودن رندم ۶۰ تا ۱۲۰ روز به تاریخ حاصل از Easy.`,
-        `${REVIEW_PRONUNCIATION_CARD} → ${REVIEW_PRONUNCIATION_DECK}: یک بار Easy (ease=4).`,
-        `${FA_TO_EN_WITH_HELP_CARD} → ${FA_TO_EN_WITH_HELP_DECK}: فقط انتقال؛ بدون پاسخ یا ریست.`,
+        `${WordAnkiConstants.cardTypes.EnToFa} → ${WordAnkiConstants.decks.EnToFa}: answer Good once (ease=3).`,
+        `${WordAnkiConstants.cardTypes.FaToEn} → ${WordAnkiConstants.decks.FaToEn}: move only, with no answer or reset, then suspend when the ⚖️ average is ${HARD_SCORE_THRESHOLD} or lower.`,
+        `${REVIEW_CARD} → ${REVIEW_DECK}: answer Easy once (ease=4).`,
+        `${PRONUNCIATION_CARD} → ${PRONUNCIATION_DECK}: answer Easy once (ease=4), then add a random 60–120 days to the resulting due date.`,
+        `${REVIEW_PRONUNCIATION_CARD} → ${REVIEW_PRONUNCIATION_DECK}: answer Easy once (ease=4).`,
+        `${FA_TO_EN_WITH_HELP_CARD} → ${FA_TO_EN_WITH_HELP_DECK}: move only, with no answer or reset.`,
       ],
       toneClassName:
         "border-amber-500/20 bg-amber-500/5 text-amber-800 dark:text-amber-300",
     },
     {
-      title: "بلدم",
+      title: "Know",
       results: [
-        `${WordAnkiConstants.cardTypes.EnToFa} → ${WordAnkiConstants.decks.EnToFa}: یک بار Easy (ease=4)، سپس افزودن رندم ۲۰ تا ۴۰ روز به تاریخ حاصل از Easy.`,
-        `${WordAnkiConstants.cardTypes.FaToEn} → ${WordAnkiConstants.decks.FaToEn}: یک بار Easy (ease=4)، سپس افزودن رندم ۲۰ تا ۴۰ روز به تاریخ حاصل از Easy.`,
-        `${REVIEW_CARD} → ${REVIEW_DECK}: یک بار Easy (ease=4)، سپس افزودن رندم ۲۰ تا ۴۰ روز به تاریخ حاصل از Easy.`,
-        `${PRONUNCIATION_CARD} → ${PRONUNCIATION_DECK}: یک بار Easy (ease=4)، سپس افزودن رندم ۲۰ تا ۴۰ روز به تاریخ حاصل از Easy.`,
-        `${REVIEW_PRONUNCIATION_CARD} → ${REVIEW_PRONUNCIATION_DECK}: یک بار Easy (ease=4)، سپس افزودن رندم ۲۰ تا ۴۰ روز به تاریخ حاصل از Easy.`,
-        `${FA_TO_EN_WITH_HELP_CARD} → ${FA_TO_EN_WITH_HELP_DECK}: یک بار Easy (ease=4)، سپس افزودن رندم ۲۰ تا ۴۰ روز به تاریخ حاصل از Easy.`,
+        `${WordAnkiConstants.cardTypes.EnToFa} → ${WordAnkiConstants.decks.EnToFa}: answer Easy once (ease=4), then add a random 20–40 days to the resulting due date.`,
+        `${WordAnkiConstants.cardTypes.FaToEn} → ${WordAnkiConstants.decks.FaToEn}: answer Easy once (ease=4), then add a random 20–40 days to the resulting due date; never suspend.`,
+        `${REVIEW_CARD} → ${REVIEW_DECK}: answer Easy once (ease=4), then add a random 20–40 days to the resulting due date.`,
+        `${PRONUNCIATION_CARD} → ${PRONUNCIATION_DECK}: answer Easy once (ease=4), then add a random 20–40 days to the resulting due date.`,
+        `${REVIEW_PRONUNCIATION_CARD} → ${REVIEW_PRONUNCIATION_DECK}: answer Easy once (ease=4), then add a random 20–40 days to the resulting due date.`,
+        `${FA_TO_EN_WITH_HELP_CARD} → ${FA_TO_EN_WITH_HELP_DECK}: answer Easy once (ease=4), then add a random 20–40 days to the resulting due date.`,
       ],
       toneClassName:
         "border-emerald-500/20 bg-emerald-500/5 text-emerald-800 dark:text-emerald-300",
     },
     {
-      title: "عالی",
+      title: "Know very well",
       results: [
-        `${WordAnkiConstants.cardTypes.EnToFa} → ${WordAnkiConstants.decks.EnToFa}: یک بار Easy (ease=4)، سپس افزودن رندم ۸۰ تا ۱۶۰ روز به تاریخ حاصل از Easy.`,
-        `${WordAnkiConstants.cardTypes.FaToEn} → ${WordAnkiConstants.decks.FaToEn}: یک بار Easy (ease=4)، سپس افزودن رندم ۸۰ تا ۱۶۰ روز به تاریخ حاصل از Easy.`,
-        `${REVIEW_CARD} → ${REVIEW_DECK}: یک بار Easy (ease=4)، سپس افزودن رندم ۸۰ تا ۱۶۰ روز به تاریخ حاصل از Easy.`,
-        `${PRONUNCIATION_CARD} → ${PRONUNCIATION_DECK}: یک بار Easy (ease=4)، سپس افزودن رندم ۶۰ تا ۱۲۰ روز به تاریخ حاصل از Easy.`,
-        `${REVIEW_PRONUNCIATION_CARD} → ${REVIEW_PRONUNCIATION_DECK}: یک بار Easy (ease=4)، سپس افزودن رندم ۸۰ تا ۱۶۰ روز به تاریخ حاصل از Easy.`,
-        `${FA_TO_EN_WITH_HELP_CARD} → ${FA_TO_EN_WITH_HELP_DECK}: یک بار Easy (ease=4)، سپس افزودن رندم ۸۰ تا ۱۶۰ روز به تاریخ حاصل از Easy.`,
+        `${WordAnkiConstants.cardTypes.EnToFa} → ${WordAnkiConstants.decks.EnToFa}: answer Easy once (ease=4), then add a random 80–160 days to the resulting due date.`,
+        `${WordAnkiConstants.cardTypes.FaToEn} → ${WordAnkiConstants.decks.FaToEn}: answer Easy once (ease=4), then add a random 80–160 days to the resulting due date; never suspend.`,
+        `${REVIEW_CARD} → ${REVIEW_DECK}: answer Easy once (ease=4), then add a random 80–160 days to the resulting due date.`,
+        `${PRONUNCIATION_CARD} → ${PRONUNCIATION_DECK}: answer Easy once (ease=4), then add a random 60–120 days to the resulting due date.`,
+        `${REVIEW_PRONUNCIATION_CARD} → ${REVIEW_PRONUNCIATION_DECK}: answer Easy once (ease=4), then add a random 80–160 days to the resulting due date.`,
+        `${FA_TO_EN_WITH_HELP_CARD} → ${FA_TO_EN_WITH_HELP_DECK}: answer Easy once (ease=4), then add a random 80–160 days to the resulting due date.`,
       ],
       toneClassName:
         "border-sky-500/20 bg-sky-500/5 text-sky-800 dark:text-sky-300",
@@ -342,9 +343,11 @@ export default function AnkiKnowingFilterManagementClient() {
   const [hardCardsStatus, setHardCardsStatus] = useState<string | null>(null);
   const [hardCardBusyId, setHardCardBusyId] = useState<number | null>(null);
   const [bulkSuspendBusy, setBulkSuspendBusy] = useState(false);
-  const [hardThreshold, setHardThreshold] = useState("100");
+  const [hardWordSearch, setHardWordSearch] = useState("");
+  const [appliedHardWordSearch, setAppliedHardWordSearch] = useState("");
+  const [hardThreshold, setHardThreshold] = useState(String(HARD_SCORE_THRESHOLD));
   const [appliedHardThreshold, setAppliedHardThreshold] = useState<number | null>(
-    100,
+    HARD_SCORE_THRESHOLD,
   );
   const [hardSortDirection, setHardSortDirection] = useState<"asc" | "desc">(
     "asc",
@@ -383,6 +386,14 @@ export default function AnkiKnowingFilterManagementClient() {
   const someVisibleRowsSelected = visibleSelectableRows.some((row) => selectedCardIds.has(row.cardId));
   const visibleHardCards = useMemo(() => {
     const filtered = hardCards.filter((row) => {
+      if (
+        appliedHardWordSearch &&
+        !fieldValue(row, "base_form")
+          .toLocaleLowerCase("en-US")
+          .includes(appliedHardWordSearch)
+      ) {
+        return false;
+      }
       if (appliedHardThreshold === null) return true;
       const average = scoreAverage(row, ["productive_target", "learning_depth"]);
       return average !== null && average <= appliedHardThreshold;
@@ -395,7 +406,7 @@ export default function AnkiKnowingFilterManagementClient() {
       if (rightValue === null) return -1;
       return (leftValue - rightValue) * (hardSortDirection === "asc" ? 1 : -1);
     });
-  }, [appliedHardThreshold, hardCards, hardSortDirection]);
+  }, [appliedHardThreshold, appliedHardWordSearch, hardCards, hardSortDirection]);
 
   async function loadCards(searchTerm?: string) {
     if (isLoading || busyCardId !== null) return;
@@ -483,7 +494,7 @@ export default function AnkiKnowingFilterManagementClient() {
       setError(
         caughtError instanceof Error
           ? caughtError.message
-          : "ارتباط با AnkiConnect ناموفق بود.",
+          : "Could not connect to AnkiConnect.",
       );
     } finally {
       setIsLoading(false);
@@ -571,7 +582,7 @@ export default function AnkiKnowingFilterManagementClient() {
       setHardCardsError(
         caughtError instanceof Error
           ? caughtError.message
-          : "بارگذاری کارت‌های سخت ناموفق بود.",
+          : "Could not load difficult cards.",
       );
     } finally {
       setHardCardsLoading(false);
@@ -581,11 +592,17 @@ export default function AnkiKnowingFilterManagementClient() {
   function applyHardCardsFilter() {
     const value = Number(hardThreshold);
     if (!hardThreshold.trim() || !Number.isFinite(value)) {
-      setHardCardsError("یک عدد معتبر برای فیلتر وارد کنید.");
+      setHardCardsError("Enter a valid number for the filter.");
       return;
     }
     setHardCardsError(null);
     setAppliedHardThreshold(value);
+  }
+
+  function applyHardCardsSearch() {
+    setAppliedHardWordSearch(
+      hardWordSearch.trim().toLocaleLowerCase("en-US"),
+    );
   }
 
   async function setHardCardSuspended(row: HardCardRow, suspended: boolean) {
@@ -612,7 +629,7 @@ export default function AnkiKnowingFilterManagementClient() {
       setHardCardsError(
         caughtError instanceof Error
           ? caughtError.message
-          : "تغییر وضعیت کارت ناموفق بود.",
+          : "Could not change the card's suspension status.",
       );
     } finally {
       setHardCardBusyId(null);
@@ -625,7 +642,7 @@ export default function AnkiKnowingFilterManagementClient() {
       .filter((row) => !row.suspended)
       .map((row) => row.cardId);
     if (!cardIds.length) {
-      setHardCardsStatus("همهٔ کارت‌های نتیجهٔ فیلتر از قبل suspended هستند.");
+      setHardCardsStatus("All cards in the filtered results are already suspended.");
       return;
     }
 
@@ -643,12 +660,12 @@ export default function AnkiKnowingFilterManagementClient() {
           changedIds.has(row.cardId) ? { ...row, suspended: true } : row,
         ),
       );
-      setHardCardsStatus(`${cardIds.length} کارت suspended شد.`);
+      setHardCardsStatus(`${cardIds.length} cards suspended.`);
     } catch (caughtError) {
       setHardCardsError(
         caughtError instanceof Error
           ? caughtError.message
-          : "Suspend گروهی ناموفق بود.",
+          : "Could not suspend the filtered cards.",
       );
     } finally {
       setBulkSuspendBusy(false);
@@ -676,7 +693,7 @@ export default function AnkiKnowingFilterManagementClient() {
     });
     if (!response.ok) throw new Error(response.error);
     if (!Array.isArray(response.result) || response.result.length === 0) {
-      throw new Error(`کارت ${cardType} برای نوت ${noteId} پیدا نشد.`);
+      throw new Error(`Could not find the ${cardType} card for note ${noteId}.`);
     }
     return response.result;
   }
@@ -689,7 +706,7 @@ export default function AnkiKnowingFilterManagementClient() {
       response.result.length !== cardIds.length ||
       response.result.some((card) => card.deckName !== deck)
     ) {
-      throw new Error(`انتقال کارت به Deck «${deck}» تأیید نشد.`);
+      throw new Error(`Could not confirm that the card moved to deck “${deck}”.`);
     }
   }
 
@@ -700,7 +717,7 @@ export default function AnkiKnowingFilterManagementClient() {
       !Array.isArray(infoResponse.result) ||
       infoResponse.result.length !== cardIds.length
     ) {
-      throw new Error(`تاریخ حاصل از Easy برای کارت ${cardLabel} دریافت نشد.`);
+      throw new Error(`Could not read the due date produced by Easy for ${cardLabel}.`);
     }
 
     const expectedDueByCardId = new Map<number, number>();
@@ -712,7 +729,7 @@ export default function AnkiKnowingFilterManagementClient() {
         !Number.isInteger(card.due)
       ) {
         throw new Error(
-          `کارت ${cardLabel} شمارهٔ ${card.cardId} پس از Easy در صف مرور استاندارد قرار نگرفت.`,
+          `${cardLabel} card ${card.cardId} was not in the standard review queue after Easy.`,
         );
       }
 
@@ -731,7 +748,7 @@ export default function AnkiKnowingFilterManagementClient() {
       ) {
         throw new Error(
           updateResponse.ok
-            ? `تاریخ جدید کارت ${cardLabel} شمارهٔ ${card.cardId} ذخیره نشد.`
+            ? `Could not save the new due date for ${cardLabel} card ${card.cardId}.`
             : updateResponse.error,
         );
       }
@@ -747,12 +764,17 @@ export default function AnkiKnowingFilterManagementClient() {
         (card) => expectedDueByCardId.get(card.cardId) !== card.due,
       )
     ) {
-      throw new Error(`ذخیرهٔ تاریخ جدید کارت ${cardLabel} تأیید نشد.`);
+      throw new Error(`Could not confirm the new due date for ${cardLabel}.`);
     }
   }
 
   async function applyKnowledgeAction(row: CardRow, action: (typeof ACTIONS)[number]) {
       const targets = actionTargets();
+      const hardScore = scoreAverage(row, ["productive_target", "learning_depth"]);
+      const shouldSuspendFaToEn =
+        (action.value === "again" || action.value === "familiar") &&
+        hardScore !== null &&
+        hardScore <= HARD_SCORE_THRESHOLD;
       const enToFaCardIds = await findNoteCards(
         row.noteId,
         targets.enToFa.cardType,
@@ -836,6 +858,13 @@ export default function AnkiKnowingFilterManagementClient() {
           await postponeCardsFromEasyDue(answerCardIds, targets.pronunciation.deck, PRONUNCIATION_DUE_OFFSET_MIN_DAYS, PRONUNCIATION_DUE_OFFSET_MAX_DAYS, targets.pronunciation.cardType);
         }
       }
+
+      if (shouldSuspendFaToEn) {
+        const suspendResponse = await ankiOperations.suspend({
+          cards: faToEnCardIds,
+        });
+        if (!suspendResponse.ok) throw new Error(suspendResponse.error);
+      }
   }
 
   function markRowCompleted(row: CardRow, action: KnowledgeAction) {
@@ -874,13 +903,13 @@ export default function AnkiKnowingFilterManagementClient() {
       await applyKnowledgeAction(row, action);
       markRowCompleted(row, action.value);
       setActionMessage(
-        `${action.label} برای «${fieldValue(row, "base_form") || row.noteId}» با موفقیت انجام شد.`,
+        `${action.label} completed successfully for “${fieldValue(row, "base_form") || row.noteId}”.`,
       );
     } catch (caughtError) {
       setError(
         caughtError instanceof Error
           ? caughtError.message
-          : "انجام اکشن در Anki ناموفق بود.",
+          : "Could not complete the action in Anki.",
       );
     } finally {
       setBusyCardId(null);
@@ -939,7 +968,7 @@ export default function AnkiKnowingFilterManagementClient() {
         markRowCompleted(row, action.value);
         succeeded += 1;
       } catch (caughtError) {
-        failures.push(`${fieldValue(row, "base_form") || row.noteId}: ${caughtError instanceof Error ? caughtError.message : "خطای نامشخص"}`);
+        failures.push(`${fieldValue(row, "base_form") || row.noteId}: ${caughtError instanceof Error ? caughtError.message : "Unknown error"}`);
       }
       setBulkProgress({ completed: succeeded + failures.length, total: selectedRows.length });
     }
@@ -947,9 +976,9 @@ export default function AnkiKnowingFilterManagementClient() {
     setBusyCardId(null);
     setBusyAction(null);
     setIsBulkRunning(false);
-    setActionMessage(`${action.label}: ${succeeded.toLocaleString()} مورد با موفقیت انجام شد${failures.length ? ` و ${failures.length.toLocaleString()} مورد ناموفق ماند` : ""}.`);
+    setActionMessage(`${action.label}: ${succeeded.toLocaleString()} completed successfully${failures.length ? `; ${failures.length.toLocaleString()} failed` : ""}.`);
     if (failures.length) {
-      setError(`موارد ناموفق برای تلاش دوباره انتخاب‌شده باقی ماندند: ${failures.join(" | ")}`);
+      setError(`Failed items remain selected so you can retry them: ${failures.join(" | ")}`);
     }
   }
 
@@ -999,10 +1028,10 @@ export default function AnkiKnowingFilterManagementClient() {
       <div className="flex flex-wrap items-center justify-between gap-3 px-2 py-3 text-sm">
         <div className="flex flex-wrap items-center gap-3 text-muted">
           <span>
-            نمایش {(currentPage - 1) * pageSize + 1} تا {Math.min(currentPage * pageSize, rows.length)} از {rows.length.toLocaleString()}
+            Showing {(currentPage - 1) * pageSize + 1}–{Math.min(currentPage * pageSize, rows.length)} of {rows.length.toLocaleString()}
           </span>
           <label className="flex items-center gap-2">
-            <span>تعداد در صفحه</span>
+            <span>Rows per page</span>
             <select
               value={pageSize}
               onChange={(event) => {
@@ -1019,17 +1048,17 @@ export default function AnkiKnowingFilterManagementClient() {
             </select>
           </label>
         </div>
-        <div className="flex items-center gap-2" dir="rtl">
+        <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
             disabled={currentPage === 1}
             className="rounded-lg border border-card bg-background px-3 py-1.5 font-semibold disabled:cursor-not-allowed disabled:opacity-40"
           >
-            قبلی
+            Previous
           </button>
           <span className="min-w-20 text-center text-xs text-muted">
-            صفحه {currentPage} از {totalPages}
+            Page {currentPage} of {totalPages}
           </span>
           <button
             type="button"
@@ -1037,7 +1066,7 @@ export default function AnkiKnowingFilterManagementClient() {
             disabled={currentPage === totalPages}
             className="rounded-lg border border-card bg-background px-3 py-1.5 font-semibold disabled:cursor-not-allowed disabled:opacity-40"
           >
-            بعدی
+            Next
           </button>
         </div>
       </div>
@@ -1050,7 +1079,7 @@ export default function AnkiKnowingFilterManagementClient() {
         <div className="flex items-start justify-between gap-3">
           <PageHeader
             title="Knowing Filter Card Management"
-            subtitle="مدیریت کارت‌های متناظر هر کلمه در دک فیلتر شناخت"
+            subtitle="Manage each word's related cards from the knowing-filter deck"
           />
           <div className="flex shrink-0 items-center gap-2">
             <button
@@ -1066,8 +1095,8 @@ export default function AnkiKnowingFilterManagementClient() {
             <button
               type="button"
               onClick={() => setIsHelpOpen(true)}
-              aria-label="راهنمای اکشن‌ها"
-              title="راهنمای اکشن‌ها"
+              aria-label="Action guide"
+              title="Action guide"
               className="grid size-10 place-items-center rounded-full border border-card bg-card text-lg font-bold text-foreground shadow-elevated transition hover:bg-background"
             >
               ?
@@ -1075,7 +1104,7 @@ export default function AnkiKnowingFilterManagementClient() {
           </div>
         </div>
 
-        <PendingStudyWords user="behrang" />
+        <PendingStudyWords user="behrang" language="en" />
 
         <section className="rounded-2xl border border-card bg-background p-4">
           <TableColumnSelector
@@ -1131,7 +1160,7 @@ export default function AnkiKnowingFilterManagementClient() {
           </div>
 
           <p className="mt-2 text-xs text-muted">
-            انتخاب هر دو فیلتر، همه کارت‌ها را نمایش می‌دهد.
+            Selecting both filters shows all cards.
           </p>
 
           <form
@@ -1184,13 +1213,13 @@ export default function AnkiKnowingFilterManagementClient() {
             <div className="flex items-center justify-between gap-3 px-2 py-2">
               <p className="text-sm font-semibold text-foreground">
                 {rows.length.toLocaleString()} cards
-                {appliedWordSearch ? ` matching “${appliedWordSearch}”` : ""} · صفحه {currentPage} از {totalPages}
+                {appliedWordSearch ? ` matching “${appliedWordSearch}”` : ""} · page {currentPage} of {totalPages}
               </p>
               <p className="text-xs text-muted">
-                اکشن‌های انجام‌شده در این بارگذاری دوباره اجرا نمی‌شوند.
+                Completed actions cannot run again until the list is reloaded.
               </p>
             </div>
-            <div dir="rtl" className="mx-2 mb-2 flex flex-wrap items-center gap-2 rounded-xl border border-card bg-background p-3">
+            <div className="mx-2 mb-2 flex flex-wrap items-center gap-2 rounded-xl border border-card bg-background p-3">
               <label className="flex cursor-pointer items-center gap-2 text-sm font-semibold text-foreground">
                 <input
                   ref={selectAllRef}
@@ -1200,9 +1229,9 @@ export default function AnkiKnowingFilterManagementClient() {
                   disabled={selectableRows.length === 0 || busyCardId !== null || isBulkRunning}
                   className="size-4 accent-[var(--primary)] disabled:opacity-50"
                 />
-                انتخاب همهٔ نتایج
+                Select all results
               </label>
-              <span className="text-xs text-muted">{selectedSelectableCount.toLocaleString()} از {selectableRows.length.toLocaleString()} انتخاب شده</span>
+              <span className="text-xs text-muted">{selectedSelectableCount.toLocaleString()} of {selectableRows.length.toLocaleString()} selected</span>
               <div className="flex flex-wrap gap-1.5">
                 {ACTIONS.map((action) => (
                   <button
@@ -1212,11 +1241,11 @@ export default function AnkiKnowingFilterManagementClient() {
                     disabled={selectedSelectableCount === 0 || busyCardId !== null || isBulkRunning}
                     className={`rounded-md border bg-card px-3 py-1.5 text-xs font-semibold transition hover:bg-background disabled:cursor-not-allowed disabled:opacity-50 ${action.className}`}
                   >
-                    {isBulkRunning && busyAction === action.value ? "در حال انجام…" : `${action.label} برای انتخاب‌ها`}
+                    {isBulkRunning && busyAction === action.value ? "Working…" : `${action.label} for selected`}
                   </button>
                 ))}
               </div>
-              {bulkProgress ? <span className="text-xs font-semibold text-muted">پیشرفت: {bulkProgress.completed.toLocaleString()} از {bulkProgress.total.toLocaleString()}</span> : null}
+              {bulkProgress ? <span className="text-xs font-semibold text-muted">Progress: {bulkProgress.completed.toLocaleString()} of {bulkProgress.total.toLocaleString()}</span> : null}
             </div>
             {renderPaginationControls()}
 
@@ -1228,8 +1257,8 @@ export default function AnkiKnowingFilterManagementClient() {
                       <input
                         ref={selectVisibleRef}
                         type="checkbox"
-                        aria-label="انتخاب ردیف‌های صفحهٔ فعلی"
-                        title="انتخاب ردیف‌های صفحهٔ فعلی"
+                        aria-label="Select rows on the current page"
+                        title="Select rows on the current page"
                         checked={allVisibleRowsSelected}
                         onChange={(event) => toggleVisibleRows(event.target.checked)}
                         disabled={visibleSelectableRows.length === 0 || busyCardId !== null || isBulkRunning}
@@ -1293,7 +1322,7 @@ export default function AnkiKnowingFilterManagementClient() {
                         <td className="px-3 py-3 text-center align-top">
                           <input
                             type="checkbox"
-                            aria-label={`انتخاب ${word || row.cardId}`}
+                            aria-label={`Select ${word || row.cardId}`}
                             checked={selectedCardIds.has(row.cardId)}
                             onChange={(event) => toggleRowSelection(row.cardId, event.target.checked)}
                             disabled={row.tags.includes(AnkiTag.Filtered) || completedActions[row.cardId] !== undefined || busyCardId !== null || isBulkRunning}
@@ -1306,11 +1335,10 @@ export default function AnkiKnowingFilterManagementClient() {
                         {hasColumn("actions") ? <td className="px-3 py-3 text-right align-top">
                           {row.tags.includes(AnkiTag.Filtered) ? (
                             <span className="text-xs font-semibold text-muted">
-                              فیلتر شده
+                              Filtered
                             </span>
                           ) : (
                             <div
-                              dir="rtl"
                               title={`Card ${row.cardId} · Note ${row.noteId}`}
                               className="flex min-w-64 flex-wrap justify-start gap-1.5"
                             >
@@ -1328,7 +1356,7 @@ export default function AnkiKnowingFilterManagementClient() {
                                 >
                                   {busyCardId === row.cardId &&
                                   busyAction === action.value
-                                    ? "در حال انجام…"
+                                    ? "Working…"
                                     : action.label}
                                 </button>
                               ))}
@@ -1336,10 +1364,9 @@ export default function AnkiKnowingFilterManagementClient() {
                           )}
                           {completedActions[row.cardId] ? (
                             <p
-                              dir="rtl"
                               className="mt-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-400"
                             >
-                              انجام شد
+                              Completed
                             </p>
                           ) : null}
                         </td> : null}
@@ -1358,7 +1385,7 @@ export default function AnkiKnowingFilterManagementClient() {
 
               {rows.length === 0 ? (
                 <div className="p-8 text-center text-sm text-muted">
-                  کارتی با این فیلتر پیدا نشد.
+                  No cards matched these filters.
                 </div>
               ) : null}
             </div>
@@ -1383,6 +1410,20 @@ export default function AnkiKnowingFilterManagementClient() {
               </div>
 
               <div className="flex flex-wrap items-end gap-2 border-b border-card p-4">
+                <label className="grid gap-1">
+                  <span className="text-xs font-semibold text-muted">Search English word</span>
+                  <input
+                    type="search"
+                    value={hardWordSearch}
+                    onChange={(event) => setHardWordSearch(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") applyHardCardsSearch();
+                    }}
+                    placeholder="e.g. example"
+                    className="h-10 w-56 rounded-xl border border-card bg-background px-3 text-sm outline-none placeholder:text-muted focus:ring-2 focus:ring-[var(--ring)]"
+                  />
+                </label>
+                <button type="button" onClick={applyHardCardsSearch} className="h-10 rounded-xl border border-card bg-background px-4 text-sm font-semibold hover:bg-accent">Search</button>
                 <label className="grid gap-1">
                   <span className="text-xs font-semibold text-muted">⚖️ maximum</span>
                   <input
@@ -1450,25 +1491,21 @@ export default function AnkiKnowingFilterManagementClient() {
             role="dialog"
             aria-modal="true"
           >
-            <div
-              dir="rtl"
-              className="flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-3xl border border-card bg-card shadow-2xl"
-            >
+            <div className="flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-3xl border border-card bg-card shadow-2xl">
               <div className="flex items-start justify-between gap-4 border-b border-card p-5 sm:p-6">
                 <div>
                   <h2 className="text-lg font-bold text-foreground">
-                    راهنمای اکشن‌های این صفحه
+                    Action Guide
                   </h2>
                   <p className="mt-1 text-sm text-muted">
-                    کارت‌های متناظر از دک انتخاب‌شده یعنی{" "}
-                    <span dir="ltr">{selectedDeck}</span> این دکمه‌ها این
-                    جابه‌جایی‌ها و پاسخ‌ها را اجرا می‌کنند.
+                    These actions move and answer related cards from the selected deck, {" "}
+                    <span>{selectedDeck}</span>.
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setIsHelpOpen(false)}
-                  aria-label="بستن"
+                  aria-label="Close"
                   className="grid size-10 shrink-0 place-items-center rounded-full border border-card bg-background text-xl text-muted transition hover:text-foreground"
                 >
                   ×
@@ -1478,94 +1515,63 @@ export default function AnkiKnowingFilterManagementClient() {
               <div className="overflow-y-auto p-5 sm:p-6">
                 <div className="grid gap-4">
                   <div className="rounded-2xl border border-card bg-background p-4 text-sm leading-7 text-foreground">
-                    <h3 className="font-bold">این صفحه چه کاری انجام می‌دهد؟</h3>
+                    <h3 className="font-bold">What does this page do?</h3>
                     <p className="mt-2">
-                      این صفحه کلمه‌ها را از دک فیلتر شناخت بررسی می‌کند تا مشخص
-                      کنی کدام کلمه را بلدی. دک انتخاب‌شده همیشه{" "}
-                      <span dir="ltr">{selectedDeck}</span> است و نتیجهٔ هر
-                      عملیات مستقیماً در Anki ثبت می‌شود.
+                      This page reviews words from the knowing-filter deck so you can record how well you know each word. The selected deck is always {" "}
+                      <span>{selectedDeck}</span>, and every action is saved directly in Anki.
                     </p>
                     <div className="mt-3 rounded-xl border border-card bg-card p-3">
-                      <p className="font-semibold">روند کار</p>
+                      <p className="font-semibold">Workflow</p>
                       <ol className="mt-1 list-inside list-decimal text-muted">
-                        <li>تگ‌ها را انتخاب کن و روی «Show Cards» بزن.</li>
-                        <li>برای هر ردیف، میزان شناختت از کلمه را انتخاب کن.</li>
-                        <li>برای اجرای گروهی، ردیف‌ها را تکی یا با «انتخاب همهٔ نتایج» انتخاب کن و سپس دکمهٔ گروهی را بزن.</li>
-                        <li>کارت‌ها به دک مناسب منتقل می‌شوند و در صورت نیاز پاسخ Anki ثبت می‌شود.</li>
-                        <li>برای دیدن وضعیت واقعی پس از عملیات، دوباره «Show Cards» را اجرا کن.</li>
+                        <li>Select the tag filters and choose Show Cards.</li>
+                        <li>For each row, choose how well you know the word.</li>
+                        <li>For a bulk action, select rows individually or use Select all results, then choose an action.</li>
+                        <li>The cards move to their appropriate decks and receive Anki answers when required.</li>
+                        <li>Choose Show Cards again to see the current state after an action.</li>
                       </ol>
                     </div>
                     <p className="mt-3 text-muted">
-                      هر ردیف یک کارت است، اما دکمه روی نوت همان ردیف اجرا می‌شود
-                      و کارت‌های متناظر همان نوت را هم پیدا می‌کند. بنابراین ممکن
-                      است یک کلیک روی هر شش کارتِ یک کلمه اثر بگذارد.
+                      Each row represents one card, but its action runs on that row&apos;s note and finds all related cards for the same note. One click can therefore affect all six cards for a word.
                     </p>
                     <p className="mt-2 text-muted">
-                      شش کارت متناظر هر Note عبارت‌اند از{" "}
-                      <span dir="ltr">EnToFa</span>،{" "}
-                      <span dir="ltr">FaToEn</span> و{" "}
-                      <span dir="ltr">{REVIEW_CARD}</span> و{" "}
-                      <span dir="ltr">{PRONUNCIATION_CARD}</span> و{" "}
-                      <span dir="ltr">{REVIEW_PRONUNCIATION_CARD}</span> و{" "}
-                      <span dir="ltr">{FA_TO_EN_WITH_HELP_CARD}</span>. اپ این کارت‌ها را
-                      برای همان Note پیدا می‌کند و به دک اصلی خودشان منتقل
-                      می‌کند؛ سپس بسته به دکمه، پاسخ متفاوتی برای هر کارت اجرا
-                      می‌شود.
+                      The six related card types are EnToFa, FaToEn, {REVIEW_CARD}, {PRONUNCIATION_CARD}, {REVIEW_PRONUNCIATION_CARD}, and {FA_TO_EN_WITH_HELP_CARD}. The app finds them for the same note, moves them to their main decks, and applies the answer defined for the selected action.
                     </p>
                     <p className="mt-2 rounded-xl border border-amber-500/20 bg-amber-500/5 p-3 text-amber-800 dark:text-amber-300">
-                      منظور از «کارت متناظر» کارت جدید یا کارت مخصوص فیلتر
-                      نیست؛ منظور کارت همان Note با نوع EnToFa، FaToEn،{" "}
-                      <span dir="ltr">{REVIEW_CARD}</span> یا{" "}
-                      <span dir="ltr">{PRONUNCIATION_CARD}</span> یا{" "}
-                      <span dir="ltr">{REVIEW_PRONUNCIATION_CARD}</span> یا{" "}
-                      <span dir="ltr">{FA_TO_EN_WITH_HELP_CARD}</span> است. ردیف فعلی فقط
-                      Note و کلمه را مشخص می‌کند؛ عملیات روی کارت‌های متناظر
-                      انجام می‌شود، نه صرفاً روی کارت فیلتر نمایش‌داده‌شده.
+                      A related card is not a new card or a special filter card. It is a card belonging to the same note with one of the listed card types. The current row identifies the note and word; the action runs on the related cards, not only on the displayed filter card.
                     </p>
                     <div className="mt-3 rounded-xl border border-card bg-card p-3">
-                      <h4 className="font-semibold">قاعدهٔ کلی انتقال</h4>
+                      <h4 className="font-semibold">General movement rule</h4>
                       <ul className="mt-2 list-inside list-disc space-y-1 text-muted">
                         <li>
-                          هر کارت متناظر به دک خودش برمی‌گردد؛ مثلاً{" "}
-                          <span dir="ltr">EnToFa</span> به{" "}
-                          <span dir="ltr">{WordAnkiConstants.decks.EnToFa}</span>{" "}
-                          و <span dir="ltr">FaToEn</span> به{" "}
-                          <span dir="ltr">{WordAnkiConstants.decks.FaToEn}</span>{" "}
-                          منتقل می‌شود.
+                          Each related card returns to its own deck. For example, EnToFa moves to {WordAnkiConstants.decks.EnToFa}, and FaToEn moves to {WordAnkiConstants.decks.FaToEn}.
                         </li>
+                        <li>After moving, each card receives the result listed for the selected action.</li>
+                        <li>Answers and due-date changes depend on the selected action; the sections below list the full details.</li>
                         <li>
-                          پس از انتقال، نتیجهٔ هر کارت در فهرست همان دکمه ثبت
-                          می‌شود.
-                        </li>
-                        <li>پاسخ و تغییر موعد هر کارت به دکمهٔ انتخاب‌شده وابسته است و جزئیات کامل آن در بخش‌های پایین آمده است.</li>
-                        <li>
-                          در شروع هر عملیات تگ{" "}
-                          <span dir="ltr">{AnkiTag.Filtered}</span> روی Note اضافه
-                          می‌شود و باقی می‌ماند؛ این تگ در انتقال کارت‌ها نقشی ندارد.
+                          At the start of every action, the {AnkiTag.Filtered} tag is added to the note and remains there. This tag does not control card movement.
                         </li>
                       </ul>
                     </div>
                   </div>
 
                   <section className="rounded-2xl border border-card bg-background p-4 text-sm leading-7">
-                    <h3 className="font-bold text-foreground">فیلترهای نمایش</h3>
+                    <h3 className="font-bold text-foreground">Display filters</h3>
                     <div className="mt-3 grid gap-3 sm:grid-cols-3">
                       <div className="rounded-xl border border-card bg-card p-3">
                         <p className="font-semibold text-foreground">With Filtered</p>
-                        <p className="mt-1 text-muted">فقط کارت‌هایی که نوتشان تگ <span dir="ltr">Filtered</span> دارد.</p>
+                        <p className="mt-1 text-muted">Only cards whose note has the Filtered tag.</p>
                       </div>
                       <div className="rounded-xl border border-card bg-card p-3">
                         <p className="font-semibold text-foreground">Without Filtered</p>
-                        <p className="mt-1 text-muted">فقط کارت‌هایی که نوتشان این تگ را ندارد.</p>
+                        <p className="mt-1 text-muted">Only cards whose note does not have this tag.</p>
                       </div>
                       <div className="rounded-xl border border-card bg-card p-3">
-                        <p className="font-semibold text-foreground">هر دو</p>
-                        <p className="mt-1 text-muted">همهٔ کارت‌های دک را نشان می‌دهد؛ یکی از دو گزینه باید فعال بماند.</p>
+                        <p className="font-semibold text-foreground">Both</p>
+                        <p className="mt-1 text-muted">Shows every card in the deck. At least one filter must remain selected.</p>
                       </div>
                     </div>
                     <p className="mt-3 text-xs text-muted">
-                      توجه: تگ روی Note ذخیره می‌شود، پس همهٔ کارت‌های آن Note
-                      در فیلتر تگ یکسان دیده می‌شوند.
+                      Note: tags are stored on notes, so every card belonging to the same note has the same tag-filter status.
                     </p>
                   </section>
 
@@ -1586,15 +1592,17 @@ export default function AnkiKnowingFilterManagementClient() {
                   ))}
 
                   <section className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4 text-sm leading-7 text-amber-800 dark:text-amber-300">
-                    <h3 className="font-bold">نکات مهم</h3>
+                    <h3 className="font-bold">Important details</h3>
                     <ul className="mt-2 list-inside list-disc">
-                      <li>در هر چهار دکمه، شش کارت متناظر همان Note به دک‌های اصلی منتقل می‌شوند.</li>
-                      <li>در «بلدم»، هر شش کارت دقیقاً یک بار Easy می‌گیرند و برای هر کارت یک عدد تصادفی مستقل بین ۲۰ تا ۴۰ روز به تاریخ حاصل از Easy اضافه می‌شود.</li>
-                      <li>در «عالی»، هر شش کارت دقیقاً یک بار Easy می‌گیرند؛ بازهٔ {PRONUNCIATION_CARD} برابر ۶۰ تا ۱۲۰ روز و بازهٔ پنج نوع دیگر برابر ۸۰ تا ۱۶۰ روز است.</li>
-                      <li>«انتخاب همهٔ نتایج» همهٔ ردیف‌های قابل‌اقدام در نتیجهٔ فیلتر را، حتی در صفحه‌های دیگر، انتخاب می‌کند؛ انتخاب تکی نیز مستقل باقی می‌ماند.</li>
-                      <li>چک‌باکس بالای ستون انتخاب فقط ردیف‌های قابل‌اقدامِ صفحهٔ فعلی را انتخاب یا لغو انتخاب می‌کند.</li>
-                      <li>اگر عملیات موفق شود، همان ردیف تا زمان بارگذاری دوباره «فیلتر شده» نشان داده می‌شود و دکمه‌ها دوباره فعال نمی‌شوند.</li>
-                      <li>اگر خطا دیدی، ابتدا وضعیت Deck و اتصال AnkiConnect را بررسی کن و سپس فهرست را دوباره بارگذاری کن.</li>
+                      <li>All four actions move the six related cards for the same note to their main decks.</li>
+                      <li>Don&apos;t know and Familiar suspend the FaToEn card when the ⚖️ average is {HARD_SCORE_THRESHOLD} or lower.</li>
+                      <li>Know and Know very well never suspend the FaToEn card.</li>
+                      <li>Know answers all six cards Easy once and adds an independent random 20–40 days to each resulting due date.</li>
+                      <li>Know very well answers all six cards Easy once. {PRONUNCIATION_CARD} receives an additional 60–120 days; the other five types receive 80–160 days.</li>
+                      <li>Select all results selects every actionable row in the filtered results, including rows on other pages. Individual selection remains independent.</li>
+                      <li>The checkbox above the selection column selects or clears only actionable rows on the current page.</li>
+                      <li>After a successful action, the row displays Filtered and its action buttons remain disabled until the list is reloaded.</li>
+                      <li>If an action fails, check the deck state and AnkiConnect connection, then reload the list.</li>
                     </ul>
                   </section>
                 </div>

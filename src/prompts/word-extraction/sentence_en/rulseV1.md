@@ -9,6 +9,16 @@ STRICT REQUIREMENTS FOR sentence_en:
 Most important the usage of base_form is base of the meaning_fa field not other meanings of base_form.
 If a `pos` value is provided, the base_form MUST be used with exactly that grammatical role in the sentence.
 
+PRIMARY-MEANING AND VERB-PATTERN AUTHORITY:
+
+- `meaning_fa` is the sole authority for the meaning and grammatical pattern demonstrated by the primary example sentence. Never choose the sentence pattern from `other_meanings_fa`.
+- If the target is a verb or phrasal verb, determine whether the primary use expressed by `meaning_fa` is transitive or intransitive and generate the sentence with that exact pattern.
+- A transitive primary use must take its natural direct object or required complement. An intransitive primary use must not be given a direct object merely because the English verb has a transitive use elsewhere.
+- Preserve the natural relationship between the subject and the event: distinguish an agent causing an action from a subject undergoing or experiencing the event.
+- For phrasal and prepositional verbs, use the established complement, preposition, and separable or inseparable word order. When a separable phrasal verb has a pronoun object, place the pronoun in the required natural position.
+- An established transitive or intransitive counterpart may be present in `other_meanings_fa`, but it does not authorize that pattern in the primary sentence. Do not invent an opposite pattern merely because it appears theoretically possible.
+- If the supplied fields do not support a clear natural sentence for the primary meaning and pattern, do not silently switch to an alternate meaning or pattern.
+
 1. The sentence MUST:
    - sound natural to a native American English speaker
    - be something people could realistically say, write, or read today
@@ -44,6 +54,14 @@ If a `pos` value is provided, the base_form MUST be used with exactly that gramm
 
 8. The sentence must match the most common American usage
    (NOT British, NOT archaic, NOT literary).
+
+VERB-PATTERN CHECK:
+
+- `meaning_fa: "باز شدن"` → an intransitive sentence such as `The door opened slowly.`
+- `meaning_fa: "باز کردن"` → a transitive sentence such as `She opened the door slowly.`
+- `meaning_fa: "بالا پریدن"` for `pop up` → the thing that rises is the subject, as in `The toast popped up from the toaster.` Do not make the toaster take the toast as a direct object for this primary meaning.
+
+Before returning the sentence, verify that its subject, direct object if any, complements, particle placement, and participant roles all match `meaning_fa` rather than an alternate meaning.
 
 Do NOT add explanations, comments, alternatives, or multiple sentences.
 

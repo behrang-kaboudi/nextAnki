@@ -2,7 +2,9 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  buildMeaningReviewResultRecord,
   MeaningReviewSingleFlight,
+  meaningReviewCorrectionFromResult,
   meaningReviewAtomicFailure,
   meaningReviewRequestKey,
   prepareMeaningReviewFinalization,
@@ -10,22 +12,39 @@ import {
 } from "./meaningReviewFinalization.ts";
 
 const previewRecords = [
-  { id: 1, mode: "review", missing_fields: [] },
-  { id: 2, mode: "review", missing_fields: ["pos"] },
-  { id: 3, mode: "review", missing_fields: [] },
+  {
+    id: 1, mode: "review", review_status: "PENDING", missing_fields: [], base_form: "initiative",
+    meaning_fa: "ابتکار عمل", other_meanings_fa: ["پیش قدمی"], pos: "noun",
+    concept_explained_fa: "آغاز مستقلانهٔ یک کار.",
+    sentences: [{ id: 11, sentence_en: "She showed initiative at work.", sentence_en_meaning_fa: "او در محل کار ابتکار نشان داد." }],
+  },
+  {
+    id: 2, mode: "review", review_status: "PENDING", missing_fields: [], base_form: "icon",
+    meaning_fa: "آیکون", other_meanings_fa: [], pos: "noun",
+    concept_explained_fa: "یک نماد تصویری در رابط کاربری است.",
+    sentences: [{ id: 22, sentence_en: "Tap the app icon.", sentence_en_meaning_fa: "روی آیکون برنامه بزنید." }],
+  },
+  {
+    id: 3, mode: "review", review_status: "PENDING", missing_fields: [], base_form: "harness",
+    meaning_fa: "سامانه اجرایی", other_meanings_fa: ["چارچوب اجرایی"], pos: "noun",
+    concept_explained_fa: "سامانه‌ای برای مدیریت اجرای ایجنت است.",
+    sentences: [{ id: 33, sentence_en: "The harness manages tool calls.", sentence_en_meaning_fa: "سامانهٔ اجرایی فراخوانی ابزارها را مدیریت می‌کند." }],
+  },
 ];
 const corrections = [
   { id: 1, mode: "review", meaning_fa: "یک" },
-  { id: 2, mode: "review", pos: "noun" },
+  { id: 2, mode: "review", pos: "adjective" },
 ];
 
-test("the final action includes every unconfirmed preview id and the edited drafts", () => {
+test("the final action includes every reviewed id and derives patches from complete result records", () => {
+  const first = buildMeaningReviewResultRecord(previewRecords[0], corrections[0]);
+  first.meaning_fa = "ویرایش‌شده";
   const request = prepareMeaningReviewFinalization({
     previewRecords,
-    corrections,
     drafts: {
-      1: JSON.stringify({ id: 1, mode: "review", meaning_fa: "ویرایش‌شده" }),
-      2: JSON.stringify(corrections[1]),
+      1: JSON.stringify(first),
+      2: JSON.stringify(buildMeaningReviewResultRecord(previewRecords[1], corrections[1])),
+      3: JSON.stringify(buildMeaningReviewResultRecord(previewRecords[2])),
     },
     confirmedIds: new Set(),
   });
@@ -39,8 +58,14 @@ test("the final action includes every unconfirmed preview id and the edited draf
 test("reviewed-only rows remain in scope while an invalid-primary result remains explicit", () => {
   const request = prepareMeaningReviewFinalization({
     previewRecords,
-    corrections: [{ id: 1, mode: "review", invalid_primary_meaning: true }],
-    drafts: {},
+    drafts: {
+      1: JSON.stringify(buildMeaningReviewResultRecord(
+        previewRecords[0],
+        { id: 1, mode: "review", invalid_primary_meaning: true },
+      )),
+      2: JSON.stringify(buildMeaningReviewResultRecord(previewRecords[1])),
+      3: JSON.stringify(buildMeaningReviewResultRecord(previewRecords[2])),
+    },
     confirmedIds: new Set(),
   });
   assert.deepEqual(request.ids, [1, 2, 3]);
@@ -50,19 +75,51 @@ test("reviewed-only rows remain in scope while an invalid-primary result remains
 test("invalid edited JSON blocks the complete batch before it is submitted", () => {
   assert.throws(() => prepareMeaningReviewFinalization({
     previewRecords,
-    corrections,
-    drafts: { 1: "{not-json", 2: JSON.stringify(corrections[1]) },
+    drafts: {
+      1: "{not-json",
+      2: JSON.stringify(buildMeaningReviewResultRecord(previewRecords[1])),
+      3: JSON.stringify(buildMeaningReviewResultRecord(previewRecords[2])),
+    },
     confirmedIds: new Set(),
-  }), /WordSense 1 is not valid JSON/);
+  }), /resulting JSON for WordSense 1 is not valid JSON/);
 });
 
 test("a no-op is reported instead of silently closing", () => {
   assert.throws(() => prepareMeaningReviewFinalization({
     previewRecords,
-    corrections,
     drafts: {},
     confirmedIds: new Set([1, 2, 3]),
   }), /nothing left to apply/);
+});
+
+test("an empty alternative array is displayed and submitted as an explicit deletion", () => {
+  const result = buildMeaningReviewResultRecord(previewRecords[0], {
+    id: 1,
+    mode: "review",
+    other_meanings_fa: [],
+  });
+  assert.deepEqual(result.other_meanings_fa, []);
+  assert.deepEqual(meaningReviewCorrectionFromResult(previewRecords[0], result), {
+    id: 1,
+    mode: "review",
+    other_meanings_fa: [],
+  });
+});
+
+test("a replacement sentence is shown in final position and converts back to the API contract", () => {
+  const patch = {
+    id: 1,
+    mode: "review",
+    invalid_sentence_ids: [11],
+    sentences: [{
+      sentence_id: null,
+      sentence_en: "She solved the problem without being asked.",
+      sentence_en_meaning_fa: "او بدون اینکه از او خواسته شود مشکل را حل کرد.",
+    }],
+  };
+  const result = buildMeaningReviewResultRecord(previewRecords[0], patch);
+  assert.equal(result.sentences[0].sentence_id, null);
+  assert.deepEqual(meaningReviewCorrectionFromResult(previewRecords[0], result), patch);
 });
 
 test("the request key is stable for a retry and changes with the payload", () => {

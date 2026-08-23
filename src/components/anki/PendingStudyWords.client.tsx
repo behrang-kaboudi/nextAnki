@@ -90,18 +90,46 @@ const DETAILED_STATUS_GROUPS: Array<{
   },
 ];
 
+const ENGLISH_DETAILED_STATUS_GROUPS: typeof DETAILED_STATUS_GROUPS = [
+  {
+    status: "incomplete",
+    title: "Incomplete in the database",
+    description: "Not ready to create an Anki note yet.",
+  },
+  {
+    status: "not_in_anki",
+    title: "Ready, but not in Anki",
+    description: "The required information is complete, but the related note has not been created yet.",
+  },
+  {
+    status: "in_anki_not_filter",
+    title: "In Anki, but not in FilterKnowing",
+    description: "The note was found and now needs to enter the filter stage.",
+  },
+];
+
 export function PendingStudyWords({
   user = "behrang",
   showDetailedStatuses = false,
   onTransferToStudyQueue,
+  onTransferAllToStudyQueue,
+  language = "fa",
 }: {
   user?: string;
   showDetailedStatuses?: boolean;
   onTransferToStudyQueue?: (ankiLinkId: string) => Promise<void>;
+  onTransferAllToStudyQueue?: (ankiLinkIds: string[]) => Promise<void>;
+  language?: "fa" | "en";
 }) {
+  const isEnglish = language === "en";
+  const numberLocale = isEnglish ? "en-US" : "fa-IR";
+  const detailedStatusGroups = isEnglish
+    ? ENGLISH_DETAILED_STATUS_GROUPS
+    : DETAILED_STATUS_GROUPS;
   const [items, setItems] = useState<ResolvedPendingStudyWord[] | null>(null);
   const [checking, setChecking] = useState(false);
   const [transferringId, setTransferringId] = useState<number | null>(null);
+  const [transferringAll, setTransferringAll] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [transferError, setTransferError] = useState<string | null>(null);
@@ -153,7 +181,11 @@ export function PendingStudyWords({
         if (!deleteResponse.ok || !deleteData?.ok) {
           throw new Error(deleteData?.error || `Study list update failed (${deleteResponse.status}).`);
         }
-        setMessage(`${completedIds.length.toLocaleString("fa-IR")} مورد وارد FilterKnowing شده بود و از فهرست حذف شد.`);
+        setMessage(
+          isEnglish
+            ? `${completedIds.length.toLocaleString(numberLocale)} items had entered FilterKnowing and were removed from the list.`
+            : `${completedIds.length.toLocaleString(numberLocale)} مورد وارد FilterKnowing شده بود و از فهرست حذف شد.`,
+        );
       }
       setItems(resolvedItems);
     } catch (caughtError) {
@@ -161,7 +193,7 @@ export function PendingStudyWords({
     } finally {
       setChecking(false);
     }
-  }, [checking, user]);
+  }, [checking, isEnglish, numberLocale, user]);
 
   const transferToStudyQueue = useCallback(
     async (item: ResolvedPendingStudyWord) => {
@@ -183,6 +215,43 @@ export function PendingStudyWords({
     [checking, loadAndReconcile, onTransferToStudyQueue, transferringId],
   );
 
+  const transferAllToStudyQueue = useCallback(async () => {
+    if (
+      !onTransferAllToStudyQueue ||
+      !items ||
+      checking ||
+      transferringId !== null ||
+      transferringAll
+    ) {
+      return;
+    }
+
+    const ankiLinkIds = items
+      .map((item) => item.anki_link_id.trim())
+      .filter(Boolean);
+    if (!ankiLinkIds.length) return;
+
+    setTransferringAll(true);
+    setTransferError(null);
+    try {
+      await onTransferAllToStudyQueue(ankiLinkIds);
+      await loadAndReconcile();
+    } catch (caughtError) {
+      setTransferError(
+        caughtError instanceof Error ? caughtError.message : String(caughtError),
+      );
+    } finally {
+      setTransferringAll(false);
+    }
+  }, [
+    checking,
+    items,
+    loadAndReconcile,
+    onTransferAllToStudyQueue,
+    transferringAll,
+    transferringId,
+  ]);
+
   useEffect(() => {
     void loadAndReconcile();
     // Reconcile once whenever the user list changes.
@@ -191,8 +260,11 @@ export function PendingStudyWords({
 
   if (items === null && !error) {
     return (
-      <div dir="rtl" className="rounded-xl border border-card bg-background px-4 py-3 text-right text-sm text-muted">
-        در حال بررسی خودکار فهرست مطالعهٔ بهرنگ…
+      <div
+        dir={isEnglish ? "ltr" : "rtl"}
+        className={`rounded-xl border border-card bg-background px-4 py-3 text-sm text-muted ${isEnglish ? "text-left" : "text-right"}`}
+      >
+        {isEnglish ? "Checking Behrang’s study list automatically…" : "در حال بررسی خودکار فهرست مطالعهٔ بهرنگ…"}
       </div>
     );
   }
@@ -201,8 +273,8 @@ export function PendingStudyWords({
 
   return (
     <section
-      dir="rtl"
-      className={`rounded-xl border p-4 text-right ${
+      dir={isEnglish ? "ltr" : "rtl"}
+      className={`rounded-xl border p-4 ${isEnglish ? "text-left" : "text-right"} ${
         items?.length
           ? "border-red-500/60 bg-red-500/10 shadow-[0_0_0_1px_rgba(239,68,68,0.08)]"
           : "border-emerald-500/30 bg-emerald-500/5"
@@ -214,31 +286,57 @@ export function PendingStudyWords({
           <div className={`text-sm font-bold ${items?.length ? "text-red-800 dark:text-red-300" : "text-emerald-800 dark:text-emerald-300"}`}>
             {items?.length
               ? showDetailedStatuses
-                ? `${items.length.toLocaleString("fa-IR")} مفهوم در مسیر ورود به مطالعه است`
-                : `${items.length.toLocaleString("fa-IR")} مفهوم باید وارد FilterKnowing شود`
-              : "فهرست مطالعه بررسی شد"}
+                ? isEnglish
+                  ? `${items.length.toLocaleString(numberLocale)} concepts are entering the study workflow`
+                  : `${items.length.toLocaleString(numberLocale)} مفهوم در مسیر ورود به مطالعه است`
+                : isEnglish
+                  ? `${items.length.toLocaleString(numberLocale)} concepts need to enter FilterKnowing`
+                  : `${items.length.toLocaleString(numberLocale)} مفهوم باید وارد FilterKnowing شود`
+              : isEnglish
+                ? "Study list checked"
+                : "فهرست مطالعه بررسی شد"}
           </div>
           <div className="mt-1 text-xs text-muted">
             {showDetailedStatuses
-              ? "مرحلهٔ هر مفهوم با بررسی کامل‌بودن اطلاعات و وضعیت آن در Anki مشخص می‌شود."
-              : "تطبیق با Anki به‌صورت خودکار و بر اساس "}
+              ? isEnglish
+                ? "Each concept's stage is determined by checking its data completeness and Anki status."
+                : "مرحلهٔ هر مفهوم با بررسی کامل‌بودن اطلاعات و وضعیت آن در Anki مشخص می‌شود."
+              : isEnglish
+                ? "Anki matching runs automatically using "
+                : "تطبیق با Anki به‌صورت خودکار و بر اساس "}
             {!showDetailedStatuses ? <span dir="ltr" className="font-mono">anki_link_id</span> : null}
-            {!showDetailedStatuses ? " انجام می‌شود." : null}
+            {!showDetailedStatuses ? (isEnglish ? "." : " انجام می‌شود.") : null}
           </div>
         </div>
-        <button
-          type="button"
-          onClick={() => void loadAndReconcile()}
-          disabled={checking}
-          className="h-9 rounded-lg border border-card bg-background px-3 text-xs font-semibold text-foreground transition hover:bg-accent disabled:opacity-60"
-        >
-          {checking ? "در حال بررسی…" : "بررسی دوباره"}
-        </button>
+        <div className="flex flex-wrap gap-2">
+          {items?.some((item) => item.anki_link_id.trim()) && onTransferAllToStudyQueue ? (
+            <button
+              type="button"
+              onClick={() => void transferAllToStudyQueue()}
+              disabled={checking || transferringId !== null || transferringAll}
+              className="h-9 rounded-lg border border-card bg-background px-3 text-xs font-semibold text-foreground transition hover:bg-accent disabled:opacity-60"
+            >
+              {transferringAll
+                ? isEnglish ? "Transferring all…" : "در حال انتقال همه…"
+                : isEnglish ? "Transfer all hierarchies to queue" : "انتقال ساختار درختی همه به صف"}
+            </button>
+          ) : null}
+          <button
+            type="button"
+            onClick={() => void loadAndReconcile()}
+            disabled={checking || transferringAll}
+            className="h-9 rounded-lg border border-card bg-background px-3 text-xs font-semibold text-foreground transition hover:bg-accent disabled:opacity-60"
+          >
+            {checking
+              ? isEnglish ? "Checking…" : "در حال بررسی…"
+              : isEnglish ? "Check again" : "بررسی دوباره"}
+          </button>
+        </div>
       </div>
 
       {items?.length && showDetailedStatuses ? (
         <div className="mt-3 grid gap-3">
-          {DETAILED_STATUS_GROUPS.map((group) => {
+          {detailedStatusGroups.map((group) => {
             const groupItems = items.filter((item) => item.study_status === group.status);
             if (!groupItems.length) return null;
             return (
@@ -246,7 +344,7 @@ export function PendingStudyWords({
                 <div className="flex flex-wrap items-baseline gap-2">
                   <div className="text-sm font-bold text-red-800 dark:text-red-300">{group.title}</div>
                   <div className="rounded-full bg-red-500/10 px-2 py-0.5 text-xs font-bold text-red-700 dark:text-red-300">
-                    {groupItems.length.toLocaleString("fa-IR")}
+                    {groupItems.length.toLocaleString(numberLocale)}
                   </div>
                 </div>
                 <div className="mt-1 text-xs text-muted">{group.description}</div>
@@ -261,8 +359,9 @@ export function PendingStudyWords({
                           ? () => void transferToStudyQueue(item)
                           : undefined
                       }
-                      transferDisabled={checking || transferringId !== null}
+                      transferDisabled={checking || transferringId !== null || transferringAll}
                       transferring={transferringId === item.id}
+                      language={language}
                     />
                   ))}
                 </div>
@@ -281,8 +380,9 @@ export function PendingStudyWords({
                   ? () => void transferToStudyQueue(item)
                   : undefined
               }
-              transferDisabled={checking || transferringId !== null}
+              transferDisabled={checking || transferringId !== null || transferringAll}
               transferring={transferringId === item.id}
+              language={language}
             />
           ))}
         </div>
@@ -291,12 +391,12 @@ export function PendingStudyWords({
       {message ? <div className="mt-2 text-xs text-emerald-700 dark:text-emerald-300">{message}</div> : null}
       {error ? (
         <div className="mt-2 text-xs font-semibold text-amber-800 dark:text-amber-300">
-          بررسی خودکار کامل نشد: {error} هیچ IDی حذف نشد.
+          {isEnglish ? "Automatic checking did not complete" : "بررسی خودکار کامل نشد"}: {error} {isEnglish ? "No IDs were removed." : "هیچ IDی حذف نشد."}
         </div>
       ) : null}
       {transferError ? (
         <div className="mt-2 text-xs font-semibold text-amber-800 dark:text-amber-300">
-          انتقال انجام نشد: {transferError}
+          {isEnglish ? "Transfer failed" : "انتقال انجام نشد"}: {transferError}
         </div>
       ) : null}
     </section>
@@ -309,13 +409,17 @@ function PendingStudyWordRow({
   onTransfer,
   transferDisabled = false,
   transferring = false,
+  language = "fa",
 }: {
   item: ResolvedPendingStudyWord;
   showReadinessIssues?: boolean;
   onTransfer?: () => void;
   transferDisabled?: boolean;
   transferring?: boolean;
+  language?: "fa" | "en";
 }) {
+  const isEnglish = language === "en";
+  const numberLocale = isEnglish ? "en-US" : "fa-IR";
   return (
     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border border-red-500/25 bg-background px-3 py-2 text-sm">
       <Link
@@ -327,19 +431,21 @@ function PendingStudyWordRow({
       <span dir="ltr" className="font-semibold text-foreground">
         {item.base_form || "Database record missing"}
       </span>
-      {item.meaning_fa ? <span className="text-foreground">{item.meaning_fa}</span> : null}
+      {item.meaning_fa ? <span dir="rtl" className="text-right text-foreground">{item.meaning_fa}</span> : null}
       {!showReadinessIssues ? (
         <span className="text-xs font-semibold text-red-700 dark:text-red-300">
-          {item.missing_from_database ? "رکورد دیتابیس پیدا نشد" : "هنوز در FilterKnowing نیست"}
+          {item.missing_from_database
+            ? isEnglish ? "Database record not found" : "رکورد دیتابیس پیدا نشد"
+            : isEnglish ? "Not in FilterKnowing yet" : "هنوز در FilterKnowing نیست"}
         </span>
       ) : null}
       {showReadinessIssues && item.study_status === "incomplete" ? (
         <span className="text-xs text-muted">
           {item.missing_from_database
-            ? "رکورد دیتابیس پیدا نشد"
-            : `${item.anki_readiness_issues.length.toLocaleString("fa-IR")} مورد ناقص${
+            ? isEnglish ? "Database record not found" : "رکورد دیتابیس پیدا نشد"
+            : `${item.anki_readiness_issues.length.toLocaleString(numberLocale)} ${isEnglish ? "incomplete items" : "مورد ناقص"}${
                 item.anki_readiness_issues.length
-                  ? `: ${item.anki_readiness_issues.slice(0, 3).map((issue) => issue.field).join("، ")}${item.anki_readiness_issues.length > 3 ? "…" : ""}`
+                  ? `: ${item.anki_readiness_issues.slice(0, 3).map((issue) => issue.field).join(isEnglish ? ", " : "، ")}${item.anki_readiness_issues.length > 3 ? "…" : ""}`
                   : ""
               }`}
         </span>
@@ -351,7 +457,9 @@ function PendingStudyWordRow({
           disabled={transferDisabled || !item.anki_link_id}
           className="ms-auto rounded-lg border border-card bg-background px-3 py-1.5 text-xs font-semibold text-foreground transition hover:bg-accent disabled:opacity-60"
         >
-          {transferring ? "در حال انتقال…" : "انتقال ساختار درختی به صف"}
+          {transferring
+            ? isEnglish ? "Transferring…" : "در حال انتقال…"
+            : isEnglish ? "Transfer hierarchy to queue" : "انتقال ساختار درختی به صف"}
         </button>
       ) : null}
     </div>

@@ -218,6 +218,7 @@ async function runJob(state: State) {
     state.mode === "changed"
       ? "copy changed Anki media"
       : "copy missing Anki media",
+    "media",
   );
   try {
     state.running = true;
@@ -469,7 +470,7 @@ export function startMediaSyncAllIfNeeded(opts?: {
   const state = getState();
   if (state.running) return getMediaSyncAllStatus();
   if (state._started && !state.done) return getMediaSyncAllStatus();
-  const active = getActiveWordSyncJob();
+  const active = getActiveWordSyncJob("media");
   if (active) {
     state.running = false;
     state.done = true;

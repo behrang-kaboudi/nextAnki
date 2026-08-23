@@ -21,6 +21,10 @@ import { hydrateWordSensesWithPersianMeanings } from "@/lib/words/persianMeaning
 import { hydrateWordSensesWithEnglishFields } from "@/lib/english/wordSenseEnglishFields.server";
 import { hydrateWordSensesWithEnglishSynonyms } from "@/lib/words/englishSynonyms.server";
 import { hydrateWordsWithPrimarySentence } from "@/lib/words/primarySentences.server";
+import {
+  consumeWordNoteInfoSnapshot,
+  type WordNoteInfoSnapshotItem,
+} from "@/lib/anki/wordNoteInfoSnapshot";
 
 export type FullSyncAllStatus = {
   jobId: string;
@@ -145,6 +149,8 @@ type PendingWrite = {
 
 const MAX_MULTI_ACTIONS = 1000;
 const MAX_MULTI_PAYLOAD_BYTES = 1_000_000;
+const NOTES_INFO_BATCH_SIZE = 5000;
+const DATABASE_PAGE_SIZE = 5000;
 
 function chunkWrites(writes: PendingWrite[]): PendingWrite[][] {
   const batches: PendingWrite[][] = [];
@@ -232,7 +238,7 @@ type ExistingAnkiNoteInfo = {
   fieldsByName: Partial<Record<string, string>>;
 };
 
-async function runJob(state: State) {
+async function runJob(state: State, options?: { snapshotId?: string }) {
   const releaseLock = acquireWordSyncJobLock("full sync DB → Anki");
   try {
     state.running = true;
@@ -289,17 +295,18 @@ async function runJob(state: State) {
       (field) => field !== "selfGuide" && field !== "anki_link_id",
     );
 
-    const idsRes = await ankiFinder.requestDetailed("findNotes", { query });
-    if (!idsRes.ok) throw new Error(idsRes.error);
-    const noteIds = idsRes.result ?? [];
+    const reusableSnapshot = options?.snapshotId
+      ? consumeWordNoteInfoSnapshot(options.snapshotId)
+      : null;
+    const snapshotNotes =
+      reusableSnapshot?.query === query &&
+      reusableSnapshot.notes.length === reusableSnapshot.totalNotes
+        ? reusableSnapshot.notes
+        : null;
 
     const noteByAnkiLinkId = new Map<string, ExistingAnkiNoteInfo>();
-    for (const batch of chunk(noteIds, 1000)) {
-      const infoRes = await ankiFinder.requestDetailed("notesInfo", {
-        notes: batch,
-      });
-      if (!infoRes.ok) throw new Error(infoRes.error);
-      for (const n of infoRes.result ?? []) {
+    const collectNoteInfo = (notes: WordNoteInfoSnapshotItem[]) => {
+      for (const n of notes) {
         const ankiLinkId = getAnkiLinkIdFromNoteFields(n);
         if (!ankiLinkId) continue;
         if (noteByAnkiLinkId.has(ankiLinkId)) continue;
@@ -312,17 +319,31 @@ async function runJob(state: State) {
         }
         noteByAnkiLinkId.set(ankiLinkId, { noteId: n.noteId, fieldsByName });
       }
+    };
+
+    if (snapshotNotes) {
+      collectNoteInfo(snapshotNotes);
+    } else {
+      const idsRes = await ankiFinder.requestDetailed("findNotes", { query });
+      if (!idsRes.ok) throw new Error(idsRes.error);
+      const noteIds = idsRes.result ?? [];
+      for (const batch of chunk(noteIds, NOTES_INFO_BATCH_SIZE)) {
+        const infoRes = await ankiFinder.requestDetailed("notesInfo", {
+          notes: batch,
+        });
+        if (!infoRes.ok) throw new Error(infoRes.error);
+        collectNoteInfo(infoRes.result ?? []);
+      }
     }
 
     let lastId = 0;
-    const pageSize = 1000;
     for (;;) {
       if (state.stopRequested) break;
 
       const rows = await prisma.wordSense.findMany({
         where: { id: { gt: lastId } },
         orderBy: { id: "asc" },
-        take: pageSize,
+        take: DATABASE_PAGE_SIZE,
       });
       if (!rows.length) break;
       lastId = rows[rows.length - 1]!.id;
@@ -416,7 +437,9 @@ async function runJob(state: State) {
   }
 }
 
-export function startFullSyncAllIfNeeded(): FullSyncAllStatus {
+export function startFullSyncAllIfNeeded(options?: {
+  snapshotId?: string;
+}): FullSyncAllStatus {
   const state = getState();
   if (state.running) return getFullSyncAllStatus();
   if (state._started && !state.done) return getFullSyncAllStatus();
@@ -433,7 +456,7 @@ export function startFullSyncAllIfNeeded(): FullSyncAllStatus {
   state.stopRequested = false;
   state.stoppedEarly = false;
 
-  void runJob(state).catch((e) => {
+  void runJob(state, options).catch((e) => {
     state.running = false;
     state.done = true;
     state.error = e instanceof Error ? e.message : String(e);

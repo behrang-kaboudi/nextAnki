@@ -2619,6 +2619,12 @@ export default function AnkiNotePage() {
               setPendingStudyTransferStatus,
             )
           }
+          onTransferAllToStudyQueue={(ankiLinkIds) =>
+            addAnkiLinkIdsToStudyQueue(
+              ankiLinkIds,
+              setPendingStudyTransferStatus,
+            )
+          }
         />
         {pendingStudyTransferStatus ? (
           <div dir="auto" className="px-1 text-sm text-muted">

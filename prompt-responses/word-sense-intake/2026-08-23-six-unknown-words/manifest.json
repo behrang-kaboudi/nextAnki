@@ -1,0 +1,35 @@
+{
+  "workflow": "word-sense-intake",
+  "run": "2026-08-23-six-unknown-words",
+  "mode": "full",
+  "target_count": 6,
+  "targets": [
+    "undermine",
+    "deteriorate",
+    "discrepancy",
+    "plausible",
+    "negligible",
+    "concede"
+  ],
+  "status": "applied_and_verified",
+  "quality_score": 9.4,
+  "api_contract": {
+    "method": "POST",
+    "path": "/api/v1/word-senses",
+    "single_item_requests_required": true,
+    "study_now_on_approved_insert": true,
+    "study_user_on_approved_insert": "behrang"
+  },
+  "mutations": {
+    "database_inserted": true,
+    "study_list_changed": true,
+    "anki_changed": false
+  },
+  "files": {
+    "input": "input.json",
+    "prompt": "prompt.md",
+    "response": "response.json",
+    "qa": "qa.md",
+    "application": "application.json"
+  }
+}

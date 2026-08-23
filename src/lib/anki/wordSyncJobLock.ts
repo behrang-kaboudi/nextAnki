@@ -6,28 +6,36 @@ type ActiveWordSyncJob = {
 };
 
 type WordSyncLockState = {
-  active: ActiveWordSyncJob | null;
+  activeByScope: Partial<Record<WordSyncJobScope, ActiveWordSyncJob>>;
 };
+
+export type WordSyncJobScope = "notes" | "media";
 
 function getLockState(): WordSyncLockState {
   const globalState = globalThis as unknown as {
     __ankiWordSyncJobLock?: WordSyncLockState;
   };
   if (!globalState.__ankiWordSyncJobLock) {
-    globalState.__ankiWordSyncJobLock = { active: null };
+    globalState.__ankiWordSyncJobLock = { activeByScope: {} };
   }
   return globalState.__ankiWordSyncJobLock;
 }
 
-export function getActiveWordSyncJob(): ActiveWordSyncJob | null {
-  return getLockState().active;
+export function getActiveWordSyncJob(
+  scope: WordSyncJobScope = "notes",
+): ActiveWordSyncJob | null {
+  return getLockState().activeByScope[scope] ?? null;
 }
 
-export function acquireWordSyncJobLock(name: string): () => void {
+export function acquireWordSyncJobLock(
+  name: string,
+  scope: WordSyncJobScope = "notes",
+): () => void {
   const state = getLockState();
-  if (state.active) {
+  const active = state.activeByScope[scope];
+  if (active) {
     throw new Error(
-      `Anki word sync job "${state.active.name}" is already running (started ${state.active.startedAt}).`,
+      `Anki word sync job "${active.name}" is already running (started ${active.startedAt}).`,
     );
   }
 
@@ -35,9 +43,9 @@ export function acquireWordSyncJobLock(name: string): () => void {
     name,
     startedAt: new Date().toISOString(),
   };
-  state.active = token;
+  state.activeByScope[scope] = token;
 
   return () => {
-    if (state.active === token) state.active = null;
+    if (state.activeByScope[scope] === token) delete state.activeByScope[scope];
   };
 }

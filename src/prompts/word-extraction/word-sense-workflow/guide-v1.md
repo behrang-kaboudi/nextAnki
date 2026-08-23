@@ -107,7 +107,7 @@ with a body containing the exact output fields required for the selected mode:
 ```
 
 The API resolves each field through the registered prompt path, recursively
-renders that file's `{{> ...}}` includes, applies the global American English
+renders that file's registered partial includes, applies the global American English
 policy, and returns the individual rendered prompts, ordered source paths,
 combined prompt, and exact output schema. The API only reads and packages local
 prompt files. The agent or person consuming the response performs generation.
@@ -379,9 +379,13 @@ comments, Markdown keys, or any other property to the JSON object.
    - Return exactly one natural, common Persian equivalent for this sense.
    - The meaning must have the same grammatical role as the target.
    - Context may select the sense but may not donate extra meaning.
+   - For a verb or phrasal verb, the primary Persian meaning must preserve the transitive or intransitive pattern selected by the supplied sentence. When no sentence is supplied, it must preserve the pattern of the intended primary use before an example sentence is generated.
+   - Keep only that selected primary pattern in `meaning_fa`; do not combine a transitive and intransitive counterpart in the primary value.
 4. `other_meanings_fa`
    - Return a JSON array of unique Persian alternatives for exactly the same
-     sense and grammatical role.
+     lexical sense and part of speech.
+   - For a verb or phrasal verb, an established and common transitive or intransitive counterpart of the same lexical sense may be included for learning value. Do not invent an opposite pattern, and do not include one that changes the lexical sense, participant relationship, complement pattern, or phrasal-verb analysis.
+   - An alternate verb pattern in this array never controls the primary example sentence; `meaning_fa` remains the sole sentence anchor.
    - Do not repeat `meaning_fa`.
    - Use `[]` when no useful alternative exists.
 5. `concept_explained_fa`
@@ -396,6 +400,7 @@ comments, Markdown keys, or any other property to the JSON object.
    - When omitted, generate one sentence only after `base_form`, `pos`,
      `meaning_fa`, and the contextual concept are fixed. Follow the retrieved
      `sentence_en` prompt exactly.
+   - For a verb or phrasal verb, the sentence must demonstrate the transitive or intransitive pattern expressed by `meaning_fa`, including the correct subject, direct object if any, complements, preposition, and particle placement. Do not select a pattern from `other_meanings_fa`.
 7. `sentence_en_meaning_fa`
    - Translate the full supplied sentence naturally and accurately into
      Persian.
@@ -404,6 +409,7 @@ comments, Markdown keys, or any other property to the JSON object.
      wording that must appear literally in the translation.
    - Natural Persian restructuring and inflection are required when literal
      insertion of `meaning_fa` would be ungrammatical or unnatural.
+   - Preserve the sentence's agent/undergoer relationship, direct object, direction of causation, and transitive or intransitive pattern. Do not hide an English pattern mismatch by translating it as the primary Persian pattern.
 
 8. Full-mode enrichment fields
    - Follow the rendered field prompt returned by the prompt-package API for
@@ -429,8 +435,13 @@ Before finalizing `meaning_fa`:
 - Translate `meaning_fa` by itself back into English. If its direct natural
   back-translation contains meaning not expressed by the target word in this
   sense and grammatical role, revise it.
+- Apply the exact lexical-unit round-trip test: `base_form` -> `meaning_fa` ->
+  English must return the same exact lexical unit. A longer expression containing
+  `base_form` means the meaning belongs to that longer expression; a shorter
+  component means the meaning is incomplete for a multi-word `base_form`.
 - Prefer a natural, common Persian equivalent. Do not use a transliteration
   unless it is genuinely established in standard Persian.
+- For a verb or phrasal verb, verify that the selected Persian meaning, the supplied or generated sentence, and its translation all express the same primary transitive or intransitive pattern. Treat any mismatch as a critical defect.
 
 Apply these existing project rules independently to every item in
 `other_meanings_fa`:
@@ -443,6 +454,7 @@ Review the complete candidate before showing or consuming it. Check:
 
 - valid JSON with exactly the seven light-mode keys or twelve full-mode keys in
   the required order;
+- for every verb or phrasal verb, consistent transitive or intransitive pattern across `meaning_fa`, `sentence_en`, and `sentence_en_meaning_fa`, with `other_meanings_fa` unable to override the primary pattern;
 - successful retrieval and use of every requested field prompt and its
   recursively rendered includes;
 - correct normalized base form and spelling convention;

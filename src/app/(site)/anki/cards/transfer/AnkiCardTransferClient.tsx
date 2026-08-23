@@ -22,21 +22,41 @@ async function findCards(query: string) {
   return Array.isArray(response.result) ? response.result : [];
 }
 
+function randomDueOffsetDays(minDays: number, maxDays: number) {
+  return Math.floor(Math.random() * (maxDays - minDays + 1)) + minDays;
+}
+
 export default function AnkiCardTransferClient() {
-  const [sourceDeck, setSourceDeck] = useState<string>(WordAnkiConstants.decks.EnToFa);
-  const [actionDeck, setActionDeck] = useState<string>(WordAnkiConstants.decks.EnToFa);
-  const [targetDeck, setTargetDeck] = useState<string>(WordAnkiConstants.decks.FaToEn);
-  const [sourceCardType, setSourceCardType] = useState<string>(WordAnkiConstants.cardTypes.EnToFa);
-  const [targetCardType, setTargetCardType] = useState<string>(WordAnkiConstants.cardTypes.FaToEn);
-  const [options, setOptions] = useState<AnkiOptions>({ decks: DECKS, cardTypes: CARD_TYPES });
+  const [sourceDeck, setSourceDeck] = useState<string>(
+    WordAnkiConstants.decks.EnToFa,
+  );
+  const [actionDeck, setActionDeck] = useState<string>(
+    WordAnkiConstants.decks.EnToFa,
+  );
+  const [targetDeck, setTargetDeck] = useState<string>(
+    WordAnkiConstants.decks.FaToEn,
+  );
+  const [sourceCardType, setSourceCardType] = useState<string>(
+    WordAnkiConstants.cardTypes.EnToFa,
+  );
+  const [targetCardType, setTargetCardType] = useState<string>(
+    WordAnkiConstants.cardTypes.FaToEn,
+  );
+  const [options, setOptions] = useState<AnkiOptions>({
+    decks: DECKS,
+    cardTypes: CARD_TYPES,
+  });
   const [optionsLoading, setOptionsLoading] = useState(true);
   const [status, setStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [selectedAction, setSelectedAction] = useState<"good" | "easy" | "studyDays" | null>(null);
+  const [selectedAction, setSelectedAction] = useState<
+    "good" | "easy" | "studyDays" | null
+  >(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [actionStatus, setActionStatus] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [studyDaysMin, setStudyDaysMin] = useState<number | "">(0);
   const [studyDaysMax, setStudyDaysMax] = useState<number | "">(7);
   const [confirmationOpen, setConfirmationOpen] = useState(false);
 
@@ -54,22 +74,46 @@ export default function AnkiCardTransferClient() {
 
         const modelNames = modelsResponse.result ?? [];
         const templateResponses = await Promise.all(
-          modelNames.map((modelName) => ankiOperations.modelTemplates({ modelName })),
+          modelNames.map((modelName) =>
+            ankiOperations.modelTemplates({ modelName }),
+          ),
         );
         const cardTypes = new Set<string>();
         for (const response of templateResponses) {
           if (!response.ok || !response.result) continue;
-          Object.keys(response.result).forEach((templateName) => cardTypes.add(templateName));
+          Object.keys(response.result).forEach((templateName) =>
+            cardTypes.add(templateName),
+          );
         }
         if (!cancelled) {
-          const decks = decksResponse.result?.length ? decksResponse.result : DECKS;
-          const resolvedCardTypes = cardTypes.size ? [...cardTypes].sort() : CARD_TYPES;
+          const decks = decksResponse.result?.length
+            ? decksResponse.result
+            : DECKS;
+          const resolvedCardTypes = cardTypes.size
+            ? [...cardTypes].sort()
+            : CARD_TYPES;
           setOptions({ decks, cardTypes: resolvedCardTypes });
-          setSourceDeck((current) => decks.includes(current) ? current : (decks[0] ?? current));
-          setActionDeck((current) => decks.includes(current) ? current : (decks[0] ?? current));
-          setTargetDeck((current) => decks.includes(current) ? current : (decks[1] ?? decks[0] ?? current));
-          setSourceCardType((current) => resolvedCardTypes.includes(current) ? current : (resolvedCardTypes[0] ?? current));
-          setTargetCardType((current) => resolvedCardTypes.includes(current) ? current : (resolvedCardTypes[1] ?? resolvedCardTypes[0] ?? current));
+          setSourceDeck((current) =>
+            decks.includes(current) ? current : (decks[0] ?? current),
+          );
+          setActionDeck((current) =>
+            decks.includes(current) ? current : (decks[0] ?? current),
+          );
+          setTargetDeck((current) =>
+            decks.includes(current)
+              ? current
+              : (decks[1] ?? decks[0] ?? current),
+          );
+          setSourceCardType((current) =>
+            resolvedCardTypes.includes(current)
+              ? current
+              : (resolvedCardTypes[0] ?? current),
+          );
+          setTargetCardType((current) =>
+            resolvedCardTypes.includes(current)
+              ? current
+              : (resolvedCardTypes[1] ?? resolvedCardTypes[0] ?? current),
+          );
         }
       } catch {
         // Keep the known project values available if AnkiConnect is temporarily offline.
@@ -79,7 +123,9 @@ export default function AnkiCardTransferClient() {
     }
 
     void loadOptions();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   async function transfer() {
@@ -115,14 +161,21 @@ export default function AnkiCardTransferClient() {
 
       const ids = [...targetCardIds];
       for (const batch of chunkArray(ids, BATCH_SIZE)) {
-        const response = await ankiOperations.changeDeck({ cards: batch, deck: targetDeck });
+        const response = await ankiOperations.changeDeck({
+          cards: batch,
+          deck: targetDeck,
+        });
         if (!response.ok) throw new Error(response.error);
       }
       setStatus(
         `تعداد کارت‌های مبدا: ${sourceCardIds.length} | نوت‌های یکتا: ${noteIds.length} | کارت‌های مقصد منتقل‌شده: ${ids.length}`,
       );
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "ارتباط با AnkiConnect ناموفق بود.");
+      setError(
+        caught instanceof Error
+          ? caught.message
+          : "ارتباط با AnkiConnect ناموفق بود.",
+      );
     } finally {
       setLoading(false);
     }
@@ -131,43 +184,120 @@ export default function AnkiCardTransferClient() {
   async function applyAction() {
     if (actionLoading || !selectedAction) return;
 
-    if (selectedAction === "studyDays" && (studyDaysMax === "" || !Number.isInteger(studyDaysMax) || studyDaysMax < 0)) {
-      setActionError("حداکثر روز مطالعه باید یک عدد صحیح صفر یا بزرگ‌تر باشد.");
-      return;
+    if (selectedAction === "studyDays") {
+      if (
+        studyDaysMin === "" ||
+        studyDaysMax === "" ||
+        !Number.isInteger(studyDaysMin) ||
+        !Number.isInteger(studyDaysMax) ||
+        studyDaysMin < 0 ||
+        studyDaysMax < 0
+      ) {
+        setActionError(
+          "حداقل و حداکثر روز باید عدد صحیح صفر یا بزرگ‌تر باشند.",
+        );
+        return;
+      }
+      if (studyDaysMin > studyDaysMax) {
+        setActionError("حداقل روز نمی‌تواند از حداکثر روز بیشتر باشد.");
+        return;
+      }
     }
 
     setActionLoading(true);
     setActionStatus(null);
     setActionError(null);
     try {
-      const cardIds = await findCards(`deck:${quoteAnkiSearchValue(actionDeck)}`);
+      const cardIds = await findCards(
+        `deck:${quoteAnkiSearchValue(actionDeck)}`,
+      );
       if (!cardIds.length) {
         setActionStatus(`در دک «${actionDeck}» کارتی پیدا نشد.`);
         return;
       }
 
       if (selectedAction === "studyDays") {
+        const minDays = studyDaysMin === "" ? 0 : studyDaysMin;
         const maxDays = studyDaysMax === "" ? 0 : studyDaysMax;
-        const cardsByDays = new Map<number, number[]>();
-        for (const cardId of cardIds) {
-          const days = Math.floor(Math.random() * (maxDays + 1));
-          const cards = cardsByDays.get(days) ?? [];
-          cards.push(cardId);
-          cardsByDays.set(days, cards);
+        const cardInfo = [] as Array<{
+          cardId: number;
+          type: number;
+          queue: number;
+          due: number;
+        }>;
+        for (const batch of chunkArray(cardIds, BATCH_SIZE)) {
+          const response = await ankiOperations.cardsInfo({ cards: batch });
+          if (!response.ok) throw new Error(response.error);
+          if (!Array.isArray(response.result)) {
+            throw new Error(
+              "اطلاعات تاریخ مطالعه‌ی کارت‌ها از Anki دریافت نشد.",
+            );
+          }
+          cardInfo.push(...response.result);
         }
 
-        for (const [days, cards] of cardsByDays) {
-          for (const batch of chunkArray(cards, BATCH_SIZE)) {
-            const response = await ankiOperations.setDueDate({
-              cards: batch,
-              days: String(days),
-            });
-            if (!response.ok) throw new Error(response.error);
+        if (cardInfo.length !== cardIds.length) {
+          throw new Error(
+            "اطلاعات تاریخ مطالعه‌ی همه‌ی کارت‌ها از Anki دریافت نشد.",
+          );
+        }
+
+        const unsupportedCard = cardInfo.find(
+          (card) =>
+            card.type !== 2 || card.queue !== 2 || !Number.isInteger(card.due),
+        );
+        if (unsupportedCard) {
+          throw new Error(
+            `کارت ${unsupportedCard.cardId} در صف مرور عادی نیست و تاریخ مطالعه‌ی قابل‌افزایش ندارد.`,
+          );
+        }
+
+        const expectedDueByCardId = new Map<number, number>();
+        for (const card of cardInfo) {
+          const nextDue = card.due + randomDueOffsetDays(minDays, maxDays);
+          const response = await ankiOperations.setSpecificValueOfCard({
+            card: card.cardId,
+            keys: ["due"],
+            newValues: [nextDue],
+            warning_check: true,
+          });
+          if (
+            !response.ok ||
+            !Array.isArray(response.result) ||
+            response.result.length !== 1 ||
+            response.result[0] !== true
+          ) {
+            throw new Error(
+              response.ok
+                ? `تاریخ مطالعه‌ی کارت ${card.cardId} ذخیره نشد.`
+                : response.error,
+            );
           }
+          expectedDueByCardId.set(card.cardId, nextDue);
+        }
+
+        const confirmedCardInfo = [] as Array<{ cardId: number; due: number }>;
+        for (const batch of chunkArray(cardIds, BATCH_SIZE)) {
+          const response = await ankiOperations.cardsInfo({ cards: batch });
+          if (!response.ok) throw new Error(response.error);
+          if (!Array.isArray(response.result)) {
+            throw new Error("تأیید تاریخ مطالعه‌ی کارت‌ها از Anki دریافت نشد.");
+          }
+          confirmedCardInfo.push(...response.result);
+        }
+        if (
+          confirmedCardInfo.length !== cardIds.length ||
+          confirmedCardInfo.some(
+            (card) => expectedDueByCardId.get(card.cardId) !== card.due,
+          )
+        ) {
+          throw new Error(
+            "تاریخ مطالعه‌ی به‌روزشده‌ی همه‌ی کارت‌ها تأیید نشد.",
+          );
         }
 
         setActionStatus(
-          `روز مطالعه‌ی ${cardIds.length} کارت در دک «${actionDeck}» با عدد تصادفی بین ۰ تا ${maxDays} تنظیم شد.`,
+          `به تاریخ مطالعه‌ی ${cardIds.length} کارت در دک «${actionDeck}» عددی تصادفی بین ${minDays} تا ${maxDays} روز اضافه شد.`,
         );
       } else {
         const ease = selectedAction === "good" ? 3 : 4;
@@ -178,10 +308,16 @@ export default function AnkiCardTransferClient() {
           if (!response.ok) throw new Error(response.error);
         }
 
-        setActionStatus(`${cardIds.length} کارت در دک «${actionDeck}» با موفقیت به‌روزرسانی شد.`);
+        setActionStatus(
+          `${cardIds.length} کارت در دک «${actionDeck}» با موفقیت به‌روزرسانی شد.`,
+        );
       }
     } catch (caught) {
-      setActionError(caught instanceof Error ? caught.message : "اجرای عمل روی کارت‌ها ناموفق بود.");
+      setActionError(
+        caught instanceof Error
+          ? caught.message
+          : "اجرای عمل روی کارت‌ها ناموفق بود.",
+      );
     } finally {
       setActionLoading(false);
     }
@@ -190,15 +326,28 @@ export default function AnkiCardTransferClient() {
   function selectedActionLabel() {
     if (selectedAction === "good") return "خوب (Good، شماره ۳)";
     if (selectedAction === "easy") return "آسان (Easy، شماره ۴)";
-    return `تنظیم روز مطالعه با عدد تصادفی بین ۰ تا ${studyDaysMax}`;
+    return `افزودن عدد تصادفی بین ${studyDaysMin} تا ${studyDaysMax} روز به تاریخ مطالعه‌ی هر کارت`;
   }
 
-  function select(label: string, value: string, onChange: (value: string) => void, values: readonly string[]) {
+  function select(
+    label: string,
+    value: string,
+    onChange: (value: string) => void,
+    values: readonly string[],
+  ) {
     return (
       <label className="grid gap-1">
         <span className="text-xs font-semibold text-muted">{label}</span>
-        <select value={value} onChange={(event) => onChange(event.target.value)} className="h-11 rounded-xl border border-card bg-background px-3 text-sm text-foreground">
-          {values.map((item) => <option key={item} value={item}>{item}</option>)}
+        <select
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          className="h-11 rounded-xl border border-card bg-background px-3 text-sm text-foreground"
+        >
+          {values.map((item) => (
+            <option key={item} value={item}>
+              {item}
+            </option>
+          ))}
         </select>
       </label>
     );
@@ -207,12 +356,21 @@ export default function AnkiCardTransferClient() {
   return (
     <main className="mx-auto w-full max-w-5xl select-text p-4">
       <div className="grid gap-4">
-        <PageHeader title="Card Transfer" subtitle="کارت متناظر همان Note را بر اساس نوع کارت پیدا و به Deck مقصد منتقل کنید." />
-        <section className="grid gap-4 rounded-2xl border border-card bg-background p-4" dir="rtl">
+        <PageHeader
+          title="Card Transfer"
+          subtitle="کارت متناظر همان Note را بر اساس نوع کارت پیدا و به Deck مقصد منتقل کنید."
+        />
+        <section
+          className="grid gap-4 rounded-2xl border border-card bg-background p-4"
+          dir="rtl"
+        >
           <div>
-            <h2 className="text-lg font-semibold text-foreground">عملیات روی کارت‌های یک دک</h2>
+            <h2 className="text-lg font-semibold text-foreground">
+              عملیات روی کارت‌های یک دک
+            </h2>
             <p className="mt-1 text-sm leading-6 text-muted">
-              ابتدا دک را انتخاب کنید؛ عملیات انتخاب‌شده روی کارت‌هایی اجرا می‌شود که با دک و فیلترهای این بخش مطابقت دارند.
+              ابتدا دک را انتخاب کنید؛ عملیات انتخاب‌شده روی کارت‌هایی اجرا
+              می‌شود که با دک و فیلترهای این بخش مطابقت دارند.
             </p>
           </div>
 
@@ -225,7 +383,8 @@ export default function AnkiCardTransferClient() {
             <div className="grid gap-2 rounded-xl border border-card p-4">
               <h3 className="font-semibold text-foreground">فیلترها</h3>
               <p className="text-sm leading-6 text-muted">
-                فعلاً فیلتری تنظیم نشده است؛ همه کارت‌های دک انتخاب‌شده در نظر گرفته می‌شوند.
+                فعلاً فیلتری تنظیم نشده است؛ همه کارت‌های دک انتخاب‌شده در نظر
+                گرفته می‌شوند.
               </p>
             </div>
           </div>
@@ -236,7 +395,11 @@ export default function AnkiCardTransferClient() {
               <input
                 type="checkbox"
                 checked={selectedAction === "good"}
-                onChange={() => setSelectedAction((current) => current === "good" ? null : "good")}
+                onChange={() =>
+                  setSelectedAction((current) =>
+                    current === "good" ? null : "good",
+                  )
+                }
                 className="h-4 w-4 accent-[var(--primary)]"
               />
               خوب (Good، شماره ۳ در Anki)
@@ -245,7 +408,11 @@ export default function AnkiCardTransferClient() {
               <input
                 type="checkbox"
                 checked={selectedAction === "easy"}
-                onChange={() => setSelectedAction((current) => current === "easy" ? null : "easy")}
+                onChange={() =>
+                  setSelectedAction((current) =>
+                    current === "easy" ? null : "easy",
+                  )
+                }
                 className="h-4 w-4 accent-[var(--primary)]"
               />
               آسان (Easy، شماره ۴ در Anki)
@@ -254,58 +421,137 @@ export default function AnkiCardTransferClient() {
               <input
                 type="checkbox"
                 checked={selectedAction === "studyDays"}
-                onChange={() => setSelectedAction((current) => current === "studyDays" ? null : "studyDays")}
+                onChange={() =>
+                  setSelectedAction((current) =>
+                    current === "studyDays" ? null : "studyDays",
+                  )
+                }
                 className="h-4 w-4 accent-[var(--primary)]"
               />
               تنظیم روز مطالعه
             </label>
-            {selectedAction === "studyDays" && <div className="grid gap-2 rounded-xl border border-card p-3 sm:max-w-sm">
-              <label htmlFor="study-days-max" className="text-sm font-semibold text-foreground">
-                حداکثر روز اضافه‌شده به تاریخ امروز
-              </label>
-              <div className="flex items-center gap-3">
-                <input
-                  id="study-days-max"
-                  type="number"
-                  min={0}
-                  step={1}
-                  value={studyDaysMax}
-                  onChange={(event) => setStudyDaysMax(event.target.value === "" ? "" : Number(event.target.value))}
-                  className="h-11 w-24 rounded-xl border border-card bg-background px-3 text-sm text-foreground"
-                  aria-describedby="study-days-help"
-                />
-                <span id="study-days-help" className="text-xs leading-5 text-muted">
-                  برای هر کارت عددی تصادفی بین ۰ تا این مقدار انتخاب می‌شود.
+            {selectedAction === "studyDays" && (
+              <div className="grid gap-3 rounded-xl border border-card p-3 sm:max-w-md">
+                <p className="text-sm font-semibold text-foreground">
+                  بازه‌ی روز اضافه‌شده به تاریخ مطالعه‌ی هر کارت
+                </p>
+                <div className="grid grid-cols-2 gap-3">
+                  <label
+                    htmlFor="study-days-min"
+                    className="grid gap-1 text-xs font-semibold text-muted"
+                  >
+                    حداقل روز
+                    <input
+                      id="study-days-min"
+                      type="number"
+                      min={0}
+                      step={1}
+                      value={studyDaysMin}
+                      onChange={(event) =>
+                        setStudyDaysMin(
+                          event.target.value === ""
+                            ? ""
+                            : Number(event.target.value),
+                        )
+                      }
+                      className="h-11 w-full rounded-xl border border-card bg-background px-3 text-sm text-foreground"
+                      aria-describedby="study-days-help"
+                    />
+                  </label>
+                  <label
+                    htmlFor="study-days-max"
+                    className="grid gap-1 text-xs font-semibold text-muted"
+                  >
+                    حداکثر روز
+                    <input
+                      id="study-days-max"
+                      type="number"
+                      min={0}
+                      step={1}
+                      value={studyDaysMax}
+                      onChange={(event) =>
+                        setStudyDaysMax(
+                          event.target.value === ""
+                            ? ""
+                            : Number(event.target.value),
+                        )
+                      }
+                      className="h-11 w-full rounded-xl border border-card bg-background px-3 text-sm text-foreground"
+                      aria-describedby="study-days-help"
+                    />
+                  </label>
+                </div>
+                <span
+                  id="study-days-help"
+                  className="text-xs leading-5 text-muted"
+                >
+                  برای هر کارت عددی تصادفی از این بازه به تاریخ مطالعه‌ی فعلی
+                  همان کارت اضافه می‌شود.
                 </span>
               </div>
-            </div>}
+            )}
             <button
               type="button"
               onClick={() => setConfirmationOpen(true)}
               disabled={actionLoading || !selectedAction || optionsLoading}
               className="h-11 rounded-xl bg-[var(--primary)] px-4 text-sm font-semibold text-[var(--primary-foreground)] disabled:opacity-60"
             >
-              {actionLoading ? "در حال اجرای عملکرد…" : "اجرای عملکرد انتخاب‌شده"}
+              {actionLoading
+                ? "در حال اجرای عملکرد…"
+                : "اجرای عملکرد انتخاب‌شده"}
             </button>
-            {actionError && <p className="text-sm font-semibold text-red-700 dark:text-red-400">{actionError}</p>}
-            {actionStatus && <p className="rounded-xl border border-card p-3 text-sm text-foreground">{actionStatus}</p>}
+            {actionError && (
+              <p className="text-sm font-semibold text-red-700 dark:text-red-400">
+                {actionError}
+              </p>
+            )}
+            {actionStatus && (
+              <p className="rounded-xl border border-card p-3 text-sm text-foreground">
+                {actionStatus}
+              </p>
+            )}
           </div>
         </section>
         <section className="grid gap-4 rounded-2xl border border-card bg-background p-4">
           <div className="grid gap-4 md:grid-cols-2">
             {select("دک مبدا", sourceDeck, setSourceDeck, options.decks)}
             {select("دک مقصد", targetDeck, setTargetDeck, options.decks)}
-            {select("نوع کارت پایه در دک مبدا", sourceCardType, setSourceCardType, options.cardTypes)}
-            {select("نوع کارت مقصد در همان Note", targetCardType, setTargetCardType, options.cardTypes)}
+            {select(
+              "نوع کارت پایه در دک مبدا",
+              sourceCardType,
+              setSourceCardType,
+              options.cardTypes,
+            )}
+            {select(
+              "نوع کارت مقصد در همان Note",
+              targetCardType,
+              setTargetCardType,
+              options.cardTypes,
+            )}
           </div>
           <p className="text-sm leading-6 text-muted">
-            {optionsLoading ? "در حال دریافت نام Deckها و نوع کارت‌ها از Anki…" : "برای هر کارت نوع پایه، Note آن پیدا می‌شود؛ سپس همه کارت‌های همان Note با نوع مقصد در کل Anki جست‌وجو می‌شوند."}
+            {optionsLoading
+              ? "در حال دریافت نام Deckها و نوع کارت‌ها از Anki…"
+              : "برای هر کارت نوع پایه، Note آن پیدا می‌شود؛ سپس همه کارت‌های همان Note با نوع مقصد در کل Anki جست‌وجو می‌شوند."}
           </p>
-          <button type="button" onClick={() => void transfer()} disabled={loading} className="h-11 rounded-xl bg-[var(--primary)] px-4 text-sm font-semibold text-[var(--primary-foreground)] disabled:opacity-60">
+          <button
+            type="button"
+            onClick={() => void transfer()}
+            disabled={loading}
+            className="h-11 rounded-xl bg-[var(--primary)] px-4 text-sm font-semibold text-[var(--primary-foreground)] disabled:opacity-60"
+          >
             {loading ? "در حال انتقال…" : "انتقال کارت‌ها"}
           </button>
-          {error && <p className="text-sm font-semibold text-red-700 dark:text-red-400">{error}</p>}
-          {status && <p className="rounded-xl border border-card p-3 text-sm text-foreground">{status}</p>}
+          {error && (
+            <p className="text-sm font-semibold text-red-700 dark:text-red-400">
+              {error}
+            </p>
+          )}
+          {status && (
+            <p className="rounded-xl border border-card p-3 text-sm text-foreground">
+              {status}
+            </p>
+          )}
         </section>
       </div>
       {confirmationOpen && selectedAction && (
@@ -315,9 +561,15 @@ export default function AnkiCardTransferClient() {
           aria-modal="true"
           aria-labelledby="anki-action-confirmation-title"
         >
-          <div className="grid w-full max-w-md gap-4 rounded-2xl border border-card bg-background p-5 shadow-xl" dir="rtl">
+          <div
+            className="grid w-full max-w-md gap-4 rounded-2xl border border-card bg-background p-5 shadow-xl"
+            dir="rtl"
+          >
             <div className="grid gap-2">
-              <h2 id="anki-action-confirmation-title" className="text-lg font-semibold text-foreground">
+              <h2
+                id="anki-action-confirmation-title"
+                className="text-lg font-semibold text-foreground"
+              >
                 تأیید اجرای عملیات
               </h2>
               <p className="text-sm leading-7 text-foreground">
@@ -327,10 +579,12 @@ export default function AnkiCardTransferClient() {
                 دک: {actionDeck}
               </p>
               <p className="text-sm leading-7 text-foreground">
-                عملکرد: <span className="font-semibold">{selectedActionLabel()}</span>
+                عملکرد:{" "}
+                <span className="font-semibold">{selectedActionLabel()}</span>
               </p>
               <p className="text-xs leading-6 text-muted">
-                لطفاً نام دک را با دقت بررسی کنید. این تغییرات مستقیماً در Anki اعمال می‌شوند.
+                لطفاً نام دک را با دقت بررسی کنید. این تغییرات مستقیماً در Anki
+                اعمال می‌شوند.
               </p>
             </div>
             <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-start">
