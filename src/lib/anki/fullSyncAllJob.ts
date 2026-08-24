@@ -21,6 +21,7 @@ import { hydrateWordSensesWithPersianMeanings } from "@/lib/words/persianMeaning
 import { hydrateWordSensesWithEnglishFields } from "@/lib/english/wordSenseEnglishFields.server";
 import { hydrateWordSensesWithEnglishSynonyms } from "@/lib/words/englishSynonyms.server";
 import { hydrateWordsWithPrimarySentence } from "@/lib/words/primarySentences.server";
+import { hydrateWordSensesWithActiveStory } from "@/lib/words/activeWordSenseStories.server";
 import {
   consumeWordNoteInfoSnapshot,
   type WordNoteInfoSnapshotItem,
@@ -348,10 +349,12 @@ async function runJob(state: State, options?: { snapshotId?: string }) {
       if (!rows.length) break;
       lastId = rows[rows.length - 1]!.id;
 
-      const hydratedRows = await hydrateWordsWithPrimarySentence(
-        await hydrateWordSensesWithEnglishSynonyms(
-          await hydrateWordSensesWithPersianMeanings(
-            await hydrateWordSensesWithEnglishFields(rows),
+      const hydratedRows = await hydrateWordSensesWithActiveStory(
+        await hydrateWordsWithPrimarySentence(
+          await hydrateWordSensesWithEnglishSynonyms(
+            await hydrateWordSensesWithPersianMeanings(
+              await hydrateWordSensesWithEnglishFields(rows),
+            ),
           ),
         ),
       );

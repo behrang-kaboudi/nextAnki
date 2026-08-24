@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { getPersianWordAudioFileInfo } from "@/lib/persian/persianWordAudio.server";
 import { getSentenceAudioFileInfo } from "@/lib/sentences/sentenceAudio.server";
 import { getWordSenseConceptAudioFileInfo } from "@/lib/words/wordSenseConceptAudio.server";
+import { getWordSenseStoryAudioFileInfo } from "@/lib/words/wordSenseStoryAudio.server";
 
 import { audioNeedsGeneration, getAudioGenerationReason } from "./audioSourceText";
 
@@ -52,6 +53,18 @@ export async function getPendingWordSenseConceptAudioIds(): Promise<number[]> {
   })).map((row) => row.id);
 }
 
+export async function getPendingWordSenseStoryAudioIds(): Promise<number[]> {
+  const rows = await prisma.wordSenseStory.findMany({
+    where: { isActive: true, storyText: { notIn: [""] } },
+    select: { id: true, storyText: true, audio_file_name: true, audio_source_text: true },
+  });
+  return rows.filter((row) => audioNeedsGeneration({
+    text: row.storyText,
+    sourceText: row.audio_source_text,
+    fileSize: getWordSenseStoryAudioFileInfo(row.audio_file_name).size,
+  })).map((row) => row.id);
+}
+
 export async function getPendingSentenceAudioIds(
   field: "sentence_en" | "sentence_en_meaning_fa",
 ): Promise<number[]> {
@@ -80,7 +93,7 @@ export async function getPendingSentenceAudioIds(
 }
 
 export async function getPendingWordAudioTaskCounts(): Promise<PendingWordAudioTaskCounts> {
-  const [englishWords, persianWords, concepts, sentences] = await Promise.all([
+  const [englishWords, persianWords, concepts, sentences, stories] = await Promise.all([
     prisma.englishWord.findMany({
       select: { base_form: true, audio_file_name: true, audio_source_text: true },
     }),
@@ -103,6 +116,10 @@ export async function getPendingWordAudioTaskCounts(): Promise<PendingWordAudioT
         sentence_en_meaning_fa_audio_file_name: true,
         sentence_en_meaning_fa_audio_source_text: true,
       },
+    }),
+    prisma.wordSenseStory.findMany({
+      where: { isActive: true, storyText: { notIn: [""] } },
+      select: { storyText: true, audio_file_name: true, audio_source_text: true },
     }),
   ]);
   const reasons = [
@@ -133,6 +150,11 @@ export async function getPendingWordAudioTaskCounts(): Promise<PendingWordAudioT
         fileSize: getSentenceAudioFileInfo(row.sentence_en_meaning_fa_audio_file_name).size,
       }),
     ]),
+    ...stories.map((row) => getAudioGenerationReason({
+      text: row.storyText,
+      sourceText: row.audio_source_text,
+      fileSize: getWordSenseStoryAudioFileInfo(row.audio_file_name).size,
+    })),
   ];
   const missingFile = reasons.filter((reason) => reason === "missing-file").length;
   const changedText = reasons.filter((reason) => reason === "changed-text").length;

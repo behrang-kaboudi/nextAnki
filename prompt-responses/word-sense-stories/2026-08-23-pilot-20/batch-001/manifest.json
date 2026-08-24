@@ -1,0 +1,11 @@
+{
+  "workflow": "word-sense-stories",
+  "run": "2026-08-23-pilot-20",
+  "batch": "batch-001",
+  "prompt_version": "word-hint-story-v1",
+  "record_count": 20,
+  "qa_status": "passed",
+  "qa_score": 9.2,
+  "application_status": "applied",
+  "created_story_ids": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+}

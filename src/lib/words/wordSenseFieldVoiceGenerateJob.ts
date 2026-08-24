@@ -4,6 +4,7 @@ import { WORD_AUDIO_BATCH_FIELDS, type WordAudioBatchFieldKey } from "@/lib/audi
 import { getAudioGenerationReason, type AudioGenerationReason } from "@/lib/audio/audioSourceText";
 import { isSentenceAudioField, type SentenceAudioField } from "@/lib/audio/sentenceAudioNaming";
 import { isWordSenseConceptAudioField } from "@/lib/audio/wordSenseConceptAudioNaming";
+import { isWordSenseStoryAudioField } from "@/lib/audio/wordSenseStoryAudioNaming";
 import {
   deleteEnglishWordAudio,
   generateEnglishWordAudio,
@@ -25,6 +26,11 @@ import {
   generateWordSenseConceptAudio,
   getWordSenseConceptAudioFileInfo,
 } from "@/lib/words/wordSenseConceptAudio.server";
+import {
+  deleteWordSenseStoryAudio,
+  generateWordSenseStoryAudio,
+  getWordSenseStoryAudioFileInfo,
+} from "@/lib/words/wordSenseStoryAudio.server";
 
 export type WordFieldVoiceJobStatus = {
   jobId: string;
@@ -149,6 +155,18 @@ async function fetchCandidates(field: WordAudioBatchFieldKey): Promise<Candidate
       sourceText: row.concept_explained_fa_audio_source_text,
     }));
   }
+  if (isWordSenseStoryAudioField(field)) {
+    return (await prisma.wordSenseStory.findMany({
+      where: { isActive: true, storyText: { notIn: [""] } },
+      orderBy: { id: "asc" },
+      select: { id: true, storyText: true, audio_file_name: true, audio_source_text: true },
+    })).map((row) => ({
+      id: row.id,
+      text: row.storyText,
+      filename: row.audio_file_name,
+      sourceText: row.audio_source_text,
+    }));
+  }
   const sentenceField = field as SentenceAudioField;
   return (await prisma.sentence.findMany({
     where: sentenceField === "sentence_en"
@@ -178,6 +196,7 @@ function existingSize(field: WordAudioBatchFieldKey, filename: string | null): n
   if (field === "base_form") return getEnglishWordAudioFileInfo(filename).size;
   if (field === "canonical_text") return getPersianWordAudioFileInfo(filename).size;
   if (isWordSenseConceptAudioField(field)) return getWordSenseConceptAudioFileInfo(filename).size;
+  if (isWordSenseStoryAudioField(field)) return getWordSenseStoryAudioFileInfo(filename).size;
   if (isSentenceAudioField(field)) return getSentenceAudioFileInfo(filename).size;
   return 0;
 }
@@ -186,6 +205,7 @@ async function generate(field: WordAudioBatchFieldKey, candidate: Candidate) {
   if (field === "base_form") return generateEnglishWordAudio(candidate.id);
   if (field === "canonical_text") return generatePersianWordCanonicalTextAudio(candidate.id);
   if (isWordSenseConceptAudioField(field)) return generateWordSenseConceptAudio(candidate.id);
+  if (isWordSenseStoryAudioField(field)) return generateWordSenseStoryAudio(candidate.id);
   if (isSentenceAudioField(field)) return generateSentenceAudio(candidate.id, field);
   throw new Error(`Unsupported audio field: ${field}`);
 }
@@ -194,6 +214,7 @@ async function clearMissingFileMetadata(field: WordAudioBatchFieldKey, id: numbe
   if (field === "base_form") return deleteEnglishWordAudio(id);
   if (field === "canonical_text") return deletePersianWordAudio(id);
   if (isWordSenseConceptAudioField(field)) return deleteWordSenseConceptAudio(id);
+  if (isWordSenseStoryAudioField(field)) return deleteWordSenseStoryAudio(id);
   if (isSentenceAudioField(field)) return deleteSentenceAudio(id, field);
 }
 

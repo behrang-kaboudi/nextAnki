@@ -21,6 +21,7 @@ import { prisma } from "@/lib/prisma";
 import { hydrateWordSensesWithEnglishSynonyms } from "@/lib/words/englishSynonyms.server";
 import { hydrateWordSensesWithPersianMeanings } from "@/lib/words/persianMeanings.server";
 import { hydrateWordsWithPrimarySentence } from "@/lib/words/primarySentences.server";
+import { hydrateWordSensesWithActiveStory } from "@/lib/words/activeWordSenseStories.server";
 
 export type WordFieldsSyncFailure = {
   noteId: number | null;
@@ -129,10 +130,12 @@ function recordFailure(state: State, noteId: number | null, error: string) {
 }
 
 async function hydrateWords(words: WordSense[]) {
-  return hydrateWordsWithPrimarySentence(
-    await hydrateWordSensesWithEnglishSynonyms(
-      await hydrateWordSensesWithPersianMeanings(
-        await hydrateWordSensesWithEnglishFields(words),
+  return hydrateWordSensesWithActiveStory(
+    await hydrateWordsWithPrimarySentence(
+      await hydrateWordSensesWithEnglishSynonyms(
+        await hydrateWordSensesWithPersianMeanings(
+          await hydrateWordSensesWithEnglishFields(words),
+        ),
       ),
     ),
   );

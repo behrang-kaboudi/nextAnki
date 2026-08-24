@@ -55,6 +55,8 @@ Run `generate_json_hint` only after `generate_audio.remaining` reaches zero. Use
 
 `REVIEW MULTI-WORD ENTRIES`, `NEEDS YOUR ACTION`, and `Generate all json_hint` are separate human-only UI flows: exclude them completely from this workflow, its API counts, stage and section selection, dependency gating, pending artifacts, and response lifecycle.
 
+`GENERATE WORD STORIES` is also a separate human-reviewed UI flow. Its Prepare API may return any requested positive batch size, while Preview and Apply accept an edited response array and leave omitted WordSense records unchanged. Only stories that have been explicitly confirmed and stored are eligible for `story_text` audio generation; a WordSense with no stored story must not increase the generated-audio count.
+
 ## API contract
 
 Use the application's configured localhost origin. The normal origin is `http://localhost:3009`.

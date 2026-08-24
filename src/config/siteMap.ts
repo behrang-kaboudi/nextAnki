@@ -42,10 +42,12 @@ export const siteMapGroups: SiteMapGroup[] = [
     pages: [
       { title: "WordSense Editor", path: "/words/editor", summary: "Searches vocabulary records and opens them for detailed editing.", menu: true },
       { title: "WordSense Details", path: "/words/editor/:id", summary: "Edits all fields, hints, and media for one WordSense record.", menu: false },
+      { title: "Word Tables", path: "/words/tables", summary: "Opens the five primary vocabulary tables and explains how their records connect.", menu: true },
       { title: "WordSense Table", path: "/words/tables/words", summary: "Browses WordSense records with search, sorting, and direct editing.", menu: true },
       { title: "Persian Word Table", path: "/words/tables/persian-words", summary: "Browses and edits PersianWord records, including linked audio playback.", menu: true },
       { title: "English Word Table", path: "/words/tables/english-words", summary: "Browses canonical English words and phrases with US IPA, JSON hints, one audio file, and WordSense links.", menu: true },
       { title: "Sentence Table", path: "/words/tables/sentences", summary: "Browses and edits unique sentences, Persian meanings, and both persisted sentence-owned audio files.", menu: true },
+      { title: "WordSenseStory Table", path: "/words/tables/stories", summary: "Browses reviewed mnemonic stories with their exact WordSense, sound symbols, sentence anchor, version, and owned audio.", menu: true },
     ],
   },
   {
@@ -180,6 +182,7 @@ export const siteMapGroups: SiteMapGroup[] = [
     pages: [
       { title: "Less Used Overview", path: "/tests", summary: "Searches and opens less frequently used tools and internal utilities.", menu: true },
       { title: "Function Playground", path: "/tests/functions", summary: "Demonstrates reusable server-side function helpers.", menu: true },
+      { title: "Azure IPA Audio Test", path: "/tests/tts/azure-ipa", summary: "Pastes aligned written and IPA segments and generates temporary Azure audio for individually selected rows.", menu: true },
     ],
   },
   {

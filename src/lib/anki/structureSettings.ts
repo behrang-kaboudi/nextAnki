@@ -24,6 +24,8 @@ export const DEFAULT_WORD_NOTE_FIELDS = [
   "sentence_en_audio",
   "sentence_en_meaning_fa",
   "sentence_en_meaning_fa_audio",
+  "story",
+  "story-audio",
   "best_translate",
   "selfGuide",
   "hint_to_select_letters",

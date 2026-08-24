@@ -83,6 +83,7 @@ model WordSense {
   updatedAt                              DateTime     @updatedAt
   english                                EnglishWord  @relation("WordSenseEnglish", fields: [englishId], references: [id], onDelete: Restrict)
   meaning                                PersianWord? @relation("WordSensePrimaryPersianMeaning", fields: [meaningId], references: [id], onDelete: SetNull)
+  stories                                WordSenseStory[]
 
   @@index([englishId], map: "WordSense_englishId_idx")
   @@index([meaningId], map: "WordSense_meaningId_idx")
@@ -206,6 +207,30 @@ model Sentence {
   sentence_en_meaning_fa_audio_source_text String?  @db.Text
   createdAt                                DateTime @default(now())
   updatedAt                                DateTime @updatedAt
+  wordSenseStories                         WordSenseStory[]
+}
+
+model WordSenseStory {
+  id                Int       @id @default(autoincrement())
+  wordSenseId       Int
+  sentenceId        Int?
+  version           Int       @default(1)
+  storyText         String    @db.Text
+  selectedSymbols   Json
+  sourceSnapshot    Json
+  promptVersion     String
+  isActive          Boolean   @default(true)
+  audio_file_name   String?
+  audio_source_text String?   @db.Text
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  wordSense         WordSense @relation(fields: [wordSenseId], references: [id], onDelete: Cascade)
+  sentence          Sentence? @relation(fields: [sentenceId], references: [id], onDelete: SetNull)
+
+  @@unique([wordSenseId, version], map: "WordSenseStory_wordSenseId_version_key")
+  @@index([sentenceId], map: "WordSenseStory_sentenceId_idx")
+  @@index([wordSenseId, isActive], map: "WordSenseStory_wordSenseId_isActive_idx")
+  @@map("word_sense_story")
 }
 
 model IpaKeyword {

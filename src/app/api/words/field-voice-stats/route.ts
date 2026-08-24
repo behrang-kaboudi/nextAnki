@@ -6,11 +6,13 @@ import { WORD_AUDIO_BATCH_FIELDS, type WordAudioBatchFieldKey } from "@/lib/audi
 import { audioNeedsGeneration } from "@/lib/audio/audioSourceText";
 import { isSentenceAudioField } from "@/lib/audio/sentenceAudioNaming";
 import { isWordSenseConceptAudioField } from "@/lib/audio/wordSenseConceptAudioNaming";
+import { isWordSenseStoryAudioField } from "@/lib/audio/wordSenseStoryAudioNaming";
 import { getEnglishWordAudioFileInfo } from "@/lib/english/englishWordAudio.server";
 import { prisma } from "@/lib/prisma";
 import { getPersianWordAudioFileInfo } from "@/lib/persian/persianWordAudio.server";
 import { getSentenceAudioFileInfo } from "@/lib/sentences/sentenceAudio.server";
 import { getWordSenseConceptAudioFileInfo } from "@/lib/words/wordSenseConceptAudio.server";
+import { getWordSenseStoryAudioFileInfo } from "@/lib/words/wordSenseStoryAudio.server";
 
 export const runtime = "nodejs";
 
@@ -75,6 +77,15 @@ export async function GET(req: Request) {
   } else if (isWordSenseConceptAudioField(field)) {
     rows = (await prisma.wordSense.findMany({ select: { concept_explained_fa: true, concept_explained_fa_audio_file_name: true, concept_explained_fa_audio_source_text: true } }))
       .map((row) => ({ text: row.concept_explained_fa, sourceText: row.concept_explained_fa_audio_source_text, size: getWordSenseConceptAudioFileInfo(row.concept_explained_fa_audio_file_name).size }));
+  } else if (isWordSenseStoryAudioField(field)) {
+    rows = (await prisma.wordSenseStory.findMany({
+      where: { isActive: true },
+      select: { storyText: true, audio_file_name: true, audio_source_text: true },
+    })).map((row) => ({
+      text: row.storyText,
+      sourceText: row.audio_source_text,
+      size: getWordSenseStoryAudioFileInfo(row.audio_file_name).size,
+    }));
   } else if (isSentenceAudioField(field)) {
     rows = (await prisma.sentence.findMany({
       select: {

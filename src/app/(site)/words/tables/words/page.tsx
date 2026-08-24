@@ -21,6 +21,8 @@ import { getPendingWordSenseInflectionMergeStats } from "@/lib/words/wordSenseIn
 import { getPendingWordSenseMeaningComparisonStats } from "@/lib/words/wordSenseMeaningComparison.server";
 import { getMeaningReviewEligibilitySummary } from "@/lib/words/meaningReviewWorkflow.server";
 import { getPendingWordSenseIdiomReviewCount } from "@/lib/words/wordSenseIdiomReview.server";
+import { getWordSenseStorySummary } from "@/lib/words/wordSenseStory.server";
+import { WORD_SENSE_STORY_PILOT_IDS } from "@/lib/words/wordSenseStoryPilot";
 import { getCustomExtractionPendingSummary } from "@/lib/word-extraction/customExtraction.server";
 
 import OpenWordSenseEditorModal from "../../editor/OpenWordSenseEditorModal.client";
@@ -45,6 +47,7 @@ import WordSenseSelectVisibleRows from "./WordSenseSelectVisibleRows.client";
 import PersianMeaningIpaReview from "./PersianMeaningIpaReview.client";
 import WordSenseLearningScores from "./WordSenseLearningScores.client";
 import WordSenseIdiomReview from "./WordSenseIdiomReview.client";
+import WordSenseStoryGeneration from "./WordSenseStoryGeneration.client";
 
 export const metadata = { title: "Words — WordSense Table" };
 export const runtime = "nodejs";
@@ -441,6 +444,7 @@ export default async function WordsTablePage({
     pendingMeaningIpaReviewCount,
     phoneticCreateRemainingCount,
     idiomReviewRemainingCount,
+    wordSenseStorySummary,
   ] = await Promise.all([
     prisma.wordSense.count({ where }),
     prisma.wordSense.count({ where: pendingReviewWhere }),
@@ -504,6 +508,7 @@ export default async function WordsTablePage({
       where: { OR: [{ phonetic_us: null }, { phonetic_us: "" }] },
     }),
     getPendingWordSenseIdiomReviewCount(),
+    getWordSenseStorySummary(),
   ]);
   const rows = await hydrateWordsWithPrimarySentence(rawRows);
   const referencedMeaningIds = Array.from(
@@ -690,6 +695,7 @@ export default async function WordsTablePage({
               </div>
               <div className="flex flex-wrap gap-2">
                 <WordSenseIdiomReview remainingCount={idiomReviewRemainingCount} />
+                <WordSenseStoryGeneration initialSummary={wordSenseStorySummary} pilotWordSenseIds={WORD_SENSE_STORY_PILOT_IDS} />
               </div>
               <div className="mt-3 border-t pt-3">
                 <BatchEnglishWordJsonHintGenerate
@@ -778,7 +784,7 @@ export default async function WordsTablePage({
                   <div>
                     <div className="text-sm font-semibold">All audio fields</div>
                     <div className="text-xs opacity-70">
-                      Generates only missing audio for base_form, canonical_text, concept_explained_fa, sentence_en, and sentence_en_meaning_fa.
+                      Generates only missing audio for base_form, canonical_text, concept_explained_fa, sentence_en, sentence_en_meaning_fa, and saved story_text values.
                     </div>
                   </div>
                   <BatchWordFieldVoiceGenerateAllFields

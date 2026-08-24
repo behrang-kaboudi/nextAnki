@@ -1,0 +1,283 @@
+[
+  {
+    "word_sense_id": 30089,
+    "english_word_id": 22456,
+    "english_word": "alleviate",
+    "meaning_fa": "تسکین دادن",
+    "sentence_id": 5087,
+    "selected_symbols": [
+      { "slot": "person", "token": "lp", "target_lang": "en", "target_ipa": "elpɪ", "fa": "ال پی", "en": "lp" },
+      { "slot": "job", "token": "vietnam", "target_lang": "en", "target_ipa": "vɪetnʌm", "fa": "ویتنام", "en": "vietnam" }
+    ],
+    "story_text": "lp پس از تمرین سنگین در vietnam عضله‌درد گرفت. حمام گرم دردش را تسکین داد، اما علت درد را درمان نکرد.",
+    "prompt_version": "word-hint-story-v1",
+    "qa": { "score": 9.3, "passed": true, "checks": { "sense_preserved": true, "all_symbols_exact": true, "symbol_order_preserved": true, "symbols_are_active": true, "sentence_anchor_preserved": true, "causal_continuity_preserved": true, "compact_and_natural": true } }
+  },
+  {
+    "word_sense_id": 1966,
+    "english_word_id": 752,
+    "english_word": "compelling",
+    "meaning_fa": "قانع کننده",
+    "sentence_id": 3303,
+    "selected_symbols": [
+      { "slot": "person", "token": "compose", "target_lang": "en", "target_ipa": "kempoz", "fa": "تشکیل دادن", "en": "compose" },
+      { "slot": "job", "token": "lean", "target_lang": "en", "target_ipa": "lɪn", "fa": "تکیه دادن", "en": "lean" }
+    ],
+    "story_text": "وکیل شواهد را compose کرد و بعد هنگام دفاع به همان مدارک lean کرد. استدلال منسجمش هیئت منصفه را قانع کرد.",
+    "prompt_version": "word-hint-story-v1",
+    "qa": { "score": 9.1, "passed": true, "checks": { "sense_preserved": true, "all_symbols_exact": true, "symbol_order_preserved": true, "symbols_are_active": true, "sentence_anchor_preserved": true, "causal_continuity_preserved": true, "compact_and_natural": true } }
+  },
+  {
+    "word_sense_id": 43291,
+    "english_word_id": 31294,
+    "english_word": "subtle",
+    "meaning_fa": "نامحسوس",
+    "sentence_id": 29138,
+    "selected_symbols": [
+      { "slot": "person", "token": "salt", "target_lang": "en", "target_ipa": "sʌlt", "fa": "نمک", "en": "salt" },
+      { "slot": "job", "token": "تلفن", "target_lang": "fa", "target_ipa": "telefon", "fa": "تلفن", "en": "phone" }
+    ],
+    "story_text": "چند دانه salt روی صفحهٔ تلفن افتاد و بخشی از لوگوی تازه را پوشاند. وقتی صفحه پاک شد، تفاوت‌های نامحسوس لوگو دیده شد.",
+    "prompt_version": "word-hint-story-v1",
+    "qa": { "score": 9.2, "passed": true, "checks": { "sense_preserved": true, "all_symbols_exact": true, "symbol_order_preserved": true, "symbols_are_active": true, "sentence_anchor_preserved": true, "causal_continuity_preserved": true, "compact_and_natural": true } }
+  },
+  {
+    "word_sense_id": 45076,
+    "english_word_id": 32149,
+    "english_word": "undermine",
+    "meaning_fa": "تضعیف کردن",
+    "sentence_id": 30933,
+    "selected_symbols": [
+      { "slot": "person", "token": "undergo", "target_lang": "en", "target_ipa": "ʌnderɡo", "fa": "انجام دادن", "en": "undergo" },
+      { "slot": "job", "token": "running", "target_lang": "en", "target_ipa": "rʌnɪn", "fa": "دو", "en": "running" }
+    ],
+    "story_text": "کودک هر روز تمرین running را undergo می‌کرد، اما مربی مدام او را تحقیر می‌کرد. این انتقادهای تکراری کم‌کم اعتمادبه‌نفسش را تضعیف کرد.",
+    "prompt_version": "word-hint-story-v1",
+    "qa": { "score": 9.4, "passed": true, "checks": { "sense_preserved": true, "all_symbols_exact": true, "symbol_order_preserved": true, "symbols_are_active": true, "sentence_anchor_preserved": true, "causal_continuity_preserved": true, "compact_and_natural": true } }
+  },
+  {
+    "word_sense_id": 29883,
+    "english_word_id": 22296,
+    "english_word": "acknowledge",
+    "meaning_fa": "قبول کردن",
+    "sentence_id": 4705,
+    "selected_symbols": [
+      { "slot": "person", "token": "acne", "target_lang": "en", "target_ipa": "æknɪ", "fa": "آکنه", "en": "acne" },
+      { "slot": "job", "token": "leech", "target_lang": "en", "target_ipa": "lɪʧ", "fa": "زالو", "en": "leech" }
+    ],
+    "story_text": "گزارش ادعا می‌کرد acne با leech کاملاً درمان می‌شود، اما شواهد خلافش را نشان داد. نویسنده سرانجام قبول کرد که گزارش اشتباهات جدی دارد.",
+    "prompt_version": "word-hint-story-v1",
+    "qa": { "score": 9.3, "passed": true, "checks": { "sense_preserved": true, "all_symbols_exact": true, "symbol_order_preserved": true, "symbols_are_active": true, "sentence_anchor_preserved": true, "causal_continuity_preserved": true, "compact_and_natural": true } }
+  },
+  {
+    "word_sense_id": 45077,
+    "english_word_id": 32150,
+    "english_word": "deteriorate",
+    "meaning_fa": "بدتر شدن",
+    "sentence_id": 30934,
+    "selected_symbols": [
+      { "slot": "person", "token": "detail", "target_lang": "en", "target_ipa": "dɪteɪl", "fa": "به دقت تمیز کردن (خودرو)", "en": "detail" },
+      { "slot": "job", "token": "refer", "target_lang": "en", "target_ipa": "rɪfer", "fa": "ارجاع دادن", "en": "refer" }
+    ],
+    "story_text": "راننده خودرو را detail کرد و سپس برای مسیر به نقشه refer کرد. در همین فاصله برف سنگین بارید و وضعیت جاده به‌سرعت بدتر شد.",
+    "prompt_version": "word-hint-story-v1",
+    "qa": { "score": 9.0, "passed": true, "checks": { "sense_preserved": true, "all_symbols_exact": true, "symbol_order_preserved": true, "symbols_are_active": true, "sentence_anchor_preserved": true, "causal_continuity_preserved": true, "compact_and_natural": true } }
+  },
+  {
+    "word_sense_id": 45078,
+    "english_word_id": 32151,
+    "english_word": "discrepancy",
+    "meaning_fa": "مغایرت",
+    "sentence_id": 30935,
+    "selected_symbols": [
+      { "slot": "person", "token": "دیسک", "target_lang": "fa", "target_ipa": "dɪsk", "fa": "دیسک", "en": "disc" },
+      { "slot": "job", "token": "rape", "target_lang": "en", "target_ipa": "reɪp", "fa": "تجاوز", "en": "rape" }
+    ],
+    "story_text": "حسابرس گزارش ثبت‌شده روی دیسک دربارهٔ یک rape را باز کرد. تاریخ آن با گزارش دوم یکی نبود و این مغایرت را آشکار کرد.",
+    "prompt_version": "word-hint-story-v1",
+    "qa": { "score": 8.9, "passed": true, "checks": { "sense_preserved": true, "all_symbols_exact": true, "symbol_order_preserved": true, "symbols_are_active": true, "sentence_anchor_preserved": true, "causal_continuity_preserved": true, "compact_and_natural": true } }
+  },
+  {
+    "word_sense_id": 45079,
+    "english_word_id": 32152,
+    "english_word": "plausible",
+    "meaning_fa": "باورپذیر",
+    "sentence_id": 30936,
+    "selected_symbols": [
+      { "slot": "person", "token": "pliers", "target_lang": "en", "target_ipa": "plʌɪerz", "fa": "انبردست", "en": "pliers" },
+      { "slot": "job", "token": "bell", "target_lang": "en", "target_ipa": "bel", "fa": "زنگ", "en": "bell" }
+    ],
+    "story_text": "او گفت با pliers سیم bell را دوباره وصل کرده است. توضیحش باورپذیر بود، اما برای اطمینان سیم‌ها را بررسی کردیم.",
+    "prompt_version": "word-hint-story-v1",
+    "qa": { "score": 9.4, "passed": true, "checks": { "sense_preserved": true, "all_symbols_exact": true, "symbol_order_preserved": true, "symbols_are_active": true, "sentence_anchor_preserved": true, "causal_continuity_preserved": true, "compact_and_natural": true } }
+  },
+  {
+    "word_sense_id": 45080,
+    "english_word_id": 32153,
+    "english_word": "negligible",
+    "meaning_fa": "ناچیز",
+    "sentence_id": 30937,
+    "selected_symbols": [
+      { "slot": "person", "token": "نگین", "target_lang": "fa", "target_ipa": "neɡɪn", "fa": "نگین", "en": "stud" },
+      { "slot": "job", "token": "ledger", "target_lang": "en", "target_ipa": "leʤer", "fa": "دفتر حساب", "en": "ledger" }
+    ],
+    "story_text": "نگین را خریدند و حسابدار بهایش را در ledger ثبت کرد. اختلاف هزینه برای کل تیم آن‌قدر ناچیز بود که بر بودجه اثری نگذاشت.",
+    "prompt_version": "word-hint-story-v1",
+    "qa": { "score": 9.3, "passed": true, "checks": { "sense_preserved": true, "all_symbols_exact": true, "symbol_order_preserved": true, "symbols_are_active": true, "sentence_anchor_preserved": true, "causal_continuity_preserved": true, "compact_and_natural": true } }
+  },
+  {
+    "word_sense_id": 34223,
+    "english_word_id": 24591,
+    "english_word": "sustain",
+    "meaning_fa": "نگه داشتن",
+    "sentence_id": 13029,
+    "selected_symbols": [
+      { "slot": "person", "token": "sex", "target_lang": "en", "target_ipa": "seks", "fa": "جنسیت", "en": "sex" },
+      { "slot": "job", "token": "تی", "target_lang": "fa", "target_ipa": "teɪ", "fa": "تی", "en": "mop" }
+    ],
+    "story_text": "هر بار بحث sex پیش می‌آمد، او با تی ردپای دعوا را پاک می‌کرد و گفت‌وگو را نیمه‌کاره می‌گذاشت. به همین دلیل نمی‌توانست رابطهٔ نزدیکش را نگه دارد.",
+    "prompt_version": "word-hint-story-v1",
+    "qa": { "score": 8.9, "passed": true, "checks": { "sense_preserved": true, "all_symbols_exact": true, "symbol_order_preserved": true, "symbols_are_active": true, "sentence_anchor_preserved": true, "causal_continuity_preserved": true, "compact_and_natural": true } }
+  },
+  {
+    "word_sense_id": 2152,
+    "english_word_id": 1105,
+    "english_word": "distinguish",
+    "meaning_fa": "تشخیص دادن",
+    "sentence_id": 3448,
+    "selected_symbols": [
+      { "slot": "person", "token": "destroy", "target_lang": "en", "target_ipa": "dɪstroɪ", "fa": "نابود کردن", "en": "destroy" },
+      { "slot": "job", "token": "انگشت", "target_lang": "fa", "target_ipa": "ænɡoʃt", "fa": "انگشت", "en": "finger" }
+    ],
+    "story_text": "پیش از اینکه دستگاه یکی از دو نمونهٔ آبی را destroy کند، انگشت روی دکمه مکث کرد. دو طیف آن‌قدر شبیه بودند که تشخیص دادنشان سخت بود.",
+    "prompt_version": "word-hint-story-v1",
+    "qa": { "score": 9.1, "passed": true, "checks": { "sense_preserved": true, "all_symbols_exact": true, "symbol_order_preserved": true, "symbols_are_active": true, "sentence_anchor_preserved": true, "causal_continuity_preserved": true, "compact_and_natural": true } }
+  },
+  {
+    "word_sense_id": 30232,
+    "english_word_id": 22560,
+    "english_word": "conventional",
+    "meaning_fa": "متداول",
+    "sentence_id": 5287,
+    "selected_symbols": [
+      { "slot": "person", "token": "convey", "target_lang": "en", "target_ipa": "kenveɪ", "fa": "منتقل کردن", "en": "convey" },
+      { "slot": "job", "token": "nation", "target_lang": "en", "target_ipa": "neɪʃen", "fa": "کشور", "en": "nation" }
+    ],
+    "story_text": "راهنما روش قدیمی را convey کرد تا همهٔ اعضای nation همان را اجرا کنند. گروه برای دوری از خطر، این رویکرد متداول را انتخاب کرد.",
+    "prompt_version": "word-hint-story-v1",
+    "qa": { "score": 9.0, "passed": true, "checks": { "sense_preserved": true, "all_symbols_exact": true, "symbol_order_preserved": true, "symbols_are_active": true, "sentence_anchor_preserved": true, "causal_continuity_preserved": true, "compact_and_natural": true } }
+  },
+  {
+    "word_sense_id": 1397,
+    "english_word_id": 3031,
+    "english_word": "reinforce",
+    "meaning_fa": "تقویت کردن",
+    "sentence_id": 2828,
+    "selected_symbols": [
+      { "slot": "person", "token": "ring", "target_lang": "en", "target_ipa": "rɪn", "fa": "انگشتر", "en": "ring" },
+      { "slot": "job", "token": "force", "target_lang": "en", "target_ipa": "fors", "fa": "نیروی نظامی", "en": "force" }
+    ],
+    "story_text": "معلم ring را به نخ بست و از force خواست آن را با نیروی بیشتری بکشد. این مثال‌های اضافی نکتهٔ اصلی درس را تقویت کردند.",
+    "prompt_version": "word-hint-story-v1",
+    "qa": { "score": 9.2, "passed": true, "checks": { "sense_preserved": true, "all_symbols_exact": true, "symbol_order_preserved": true, "symbols_are_active": true, "sentence_anchor_preserved": true, "causal_continuity_preserved": true, "compact_and_natural": true } }
+  },
+  {
+    "word_sense_id": 512,
+    "english_word_id": 19,
+    "english_word": "accountable",
+    "meaning_fa": "پاسخگو",
+    "sentence_id": 2354,
+    "selected_symbols": [
+      { "slot": "person", "token": "x", "target_lang": "en", "target_ipa": "eks", "fa": "ایکس", "en": "x" },
+      { "slot": "job", "token": "outlet", "target_lang": "en", "target_ipa": "ʌʊtlet", "fa": "پریز", "en": "outlet" }
+    ],
+    "story_text": "مدیر سیم x را به outlet معیوب وصل کرد و برق ساختمان قطع شد. چون تصمیم با او بود، باید در برابر همه پاسخگو می‌ماند.",
+    "prompt_version": "word-hint-story-v1",
+    "qa": { "score": 9.4, "passed": true, "checks": { "sense_preserved": true, "all_symbols_exact": true, "symbol_order_preserved": true, "symbols_are_active": true, "sentence_anchor_preserved": true, "causal_continuity_preserved": true, "compact_and_natural": true } }
+  },
+  {
+    "word_sense_id": 1094,
+    "english_word_id": 769,
+    "english_word": "comply",
+    "meaning_fa": "رعایت کردن",
+    "sentence_id": 2635,
+    "selected_symbols": [
+      { "slot": "person", "token": "compose", "target_lang": "en", "target_ipa": "kempoz", "fa": "تشکیل دادن", "en": "compose" },
+      { "slot": "job", "token": "lie", "target_lang": "en", "target_ipa": "lʌɪ", "fa": "دراز کشیدن", "en": "lie" }
+    ],
+    "story_text": "کارگر حفاظ دستگاه را compose کرد، اما بعد خواست کنار تیغه‌ها lie کند. سرپرست جلو او را گرفت و گفت مقررات ایمنی باید همیشه رعایت شوند.",
+    "prompt_version": "word-hint-story-v1",
+    "qa": { "score": 9.1, "passed": true, "checks": { "sense_preserved": true, "all_symbols_exact": true, "symbol_order_preserved": true, "symbols_are_active": true, "sentence_anchor_preserved": true, "causal_continuity_preserved": true, "compact_and_natural": true } }
+  },
+  {
+    "word_sense_id": 30412,
+    "english_word_id": 22693,
+    "english_word": "perceive",
+    "meaning_fa": "درک کردن",
+    "sentence_id": 5606,
+    "selected_symbols": [
+      { "slot": "person", "token": "pear", "target_lang": "en", "target_ipa": "per", "fa": "گلابی", "en": "pear" },
+      { "slot": "job", "token": "sieve", "target_lang": "en", "target_ipa": "sɪv", "fa": "الک", "en": "sieve" }
+    ],
+    "story_text": "یک pear سخنگو با لحنی یکنواخت آواز می‌خواند و ناگهان داخل sieve افتاد. همان لحظه تغییر جزئی لحنش را درک کردم.",
+    "prompt_version": "word-hint-story-v1",
+    "qa": { "score": 9.6, "passed": true, "checks": { "sense_preserved": true, "all_symbols_exact": true, "symbol_order_preserved": true, "symbols_are_active": true, "sentence_anchor_preserved": true, "causal_continuity_preserved": true, "compact_and_natural": true } }
+  },
+  {
+    "word_sense_id": 30200,
+    "english_word_id": 22537,
+    "english_word": "undergo",
+    "meaning_fa": "انجام دادن",
+    "sentence_id": 5240,
+    "selected_symbols": [
+      { "slot": "person", "token": "honor", "target_lang": "en", "target_ipa": "ʌner", "fa": "احترام گذاشتن", "en": "honor" },
+      { "slot": "job", "token": "row", "target_lang": "en", "target_ipa": "ro", "fa": "پارو زدن", "en": "row" }
+    ],
+    "story_text": "او برای honor پزشکش تا درمانگاه قایق را row کرد. قرار بود فردا صبح همان‌جا یک آزمایش پزشکی انجام دهد.",
+    "prompt_version": "word-hint-story-v1",
+    "qa": { "score": 9.0, "passed": true, "checks": { "sense_preserved": true, "all_symbols_exact": true, "symbol_order_preserved": true, "symbols_are_active": true, "sentence_anchor_preserved": true, "causal_continuity_preserved": true, "compact_and_natural": true } }
+  },
+  {
+    "word_sense_id": 109,
+    "english_word_id": 1078,
+    "english_word": "disclose",
+    "meaning_fa": "فاش کردن",
+    "sentence_id": 2162,
+    "selected_symbols": [
+      { "slot": "person", "token": "دیسک", "target_lang": "fa", "target_ipa": "dɪsk", "fa": "دیسک", "en": "disc" },
+      { "slot": "job", "token": "low", "target_lang": "en", "target_ipa": "lo", "fa": "جریان کم فشار هوا", "en": "low" }
+    ],
+    "story_text": "دیسک زیر جریان هوای low شروع به چرخیدن کرد و نزدیک بود اطلاعات شخصی را روی پرده بیندازد. او دستگاه را خاموش کرد و از فاش کردن اطلاعات خودداری کرد.",
+    "prompt_version": "word-hint-story-v1",
+    "qa": { "score": 9.2, "passed": true, "checks": { "sense_preserved": true, "all_symbols_exact": true, "symbol_order_preserved": true, "symbols_are_active": true, "sentence_anchor_preserved": true, "causal_continuity_preserved": true, "compact_and_natural": true } }
+  },
+  {
+    "word_sense_id": 32933,
+    "english_word_id": 24648,
+    "english_word": "presume",
+    "meaning_fa": "فرض کردن",
+    "sentence_id": 11343,
+    "selected_symbols": [
+      { "slot": "person", "token": "print", "target_lang": "en", "target_ipa": "prɪnt", "fa": "رد", "en": "print" },
+      { "slot": "job", "token": "zoom", "target_lang": "en", "target_ipa": "zʊm", "fa": "به سرعت گذشتن", "en": "zoom" }
+    ],
+    "story_text": "دعوت‌نامه را print کردم و پیک با zoom از کنار خانه‌شان گذشت. چون هیچ پاسخی نیامد، فرض کردم که نمی‌آیند.",
+    "prompt_version": "word-hint-story-v1",
+    "qa": { "score": 9.3, "passed": true, "checks": { "sense_preserved": true, "all_symbols_exact": true, "symbol_order_preserved": true, "symbols_are_active": true, "sentence_anchor_preserved": true, "causal_continuity_preserved": true, "compact_and_natural": true } }
+  },
+  {
+    "word_sense_id": 45081,
+    "english_word_id": 32154,
+    "english_word": "concede",
+    "meaning_fa": "پذیرفتن",
+    "sentence_id": 30938,
+    "selected_symbols": [
+      { "slot": "person", "token": "canoe", "target_lang": "en", "target_ipa": "kenʊ", "fa": "قایق پارویی کوچک و باریک", "en": "canoe" },
+      { "slot": "job", "token": "seed", "target_lang": "en", "target_ipa": "sɪd", "fa": "تخمه", "en": "seed" }
+    ],
+    "story_text": "طبق طرح اولیه، canoe باید کیسهٔ seed را سالم به ساحل می‌رساند، اما قایق واژگون شد. طراح سرانجام پذیرفت که برنامه شکست خورده است.",
+    "prompt_version": "word-hint-story-v1",
+    "qa": { "score": 9.4, "passed": true, "checks": { "sense_preserved": true, "all_symbols_exact": true, "symbol_order_preserved": true, "symbols_are_active": true, "sentence_anchor_preserved": true, "causal_continuity_preserved": true, "compact_and_natural": true } }
+  }
+]
+

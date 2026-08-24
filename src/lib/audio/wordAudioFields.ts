@@ -13,6 +13,7 @@ export const WORD_AUDIO_BATCH_FIELDS = [
   "concept_explained_fa",
   "sentence_en",
   "sentence_en_meaning_fa",
+  "story_text",
 ] as const;
 
 export type WordAudioBatchFieldKey = (typeof WORD_AUDIO_BATCH_FIELDS)[number];

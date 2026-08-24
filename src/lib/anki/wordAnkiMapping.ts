@@ -14,6 +14,7 @@ import { getEnglishWordAudioAbsolutePath } from "@/lib/audio/englishWordAudioPat
 import { getPersianWordAudioAbsolutePath } from "@/lib/audio/persianWordAudioPaths.server";
 import { getWordSenseConceptAudioAbsolutePath } from "@/lib/audio/wordSenseConceptAudioPaths.server";
 import { getSentenceAudioAbsolutePath } from "@/lib/audio/sentenceAudioPaths.server";
+import { getWordSenseStoryAudioAbsolutePath } from "@/lib/audio/wordSenseStoryAudioPaths.server";
 import { prisma } from "@/lib/prisma";
 import { getWordAnkiReadinessIssues } from "@/lib/anki/wordAnkiSyncReadiness";
 import {
@@ -32,8 +33,12 @@ import {
   hydrateWordsWithPrimarySentence,
   type WordSenseWithPrimarySentence,
 } from "@/lib/words/primarySentences.server";
+import {
+  hydrateWordSenseWithActiveStory,
+  type ActiveWordSenseStory,
+} from "@/lib/words/activeWordSenseStories.server";
 
-import { IpaCandidate } from "../ipa/setPictures/types";
+import { IpaCandidate, WordPictures } from "../ipa/setPictures/types";
 
 export const WORD_ANKI_LINK_ID_FIELD = "anki_link_id" as const;
 
@@ -189,6 +194,35 @@ function toSoundTagFromAbsPath(absPath: string | null): string {
   return filename ? ` [sound:${filename}]` : "";
 }
 
+function formatFaEnText(candidate: Pick<IpaCandidate, "fa" | "en">): string {
+  const fa = String(candidate.fa ?? "").trim();
+  const en = String(candidate.en ?? "").trim();
+  if (fa && en) return `${fa} — ${en}`;
+  return fa || en || "";
+}
+
+async function buildHintLines(
+  candidates: Array<IpaCandidate | null | undefined>,
+): Promise<string> {
+  const out: string[] = [];
+  const seen = new Set<string>();
+
+  for (const candidate of candidates) {
+    if (!candidate) continue;
+    const key = `${candidate.source}|${candidate.fa}|${candidate.en}|${candidate.target_ipa}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+
+    const text = formatFaEnText(candidate);
+    if (!text) continue;
+
+    const file = await selectFile(candidate);
+    out.push(`${text}${toSoundTagFromAbsPath(file)}`.trim());
+  }
+
+  return out.join("\n").trim();
+}
+
 function asNonEmptyString(value: unknown): string | null {
   if (typeof value !== "string") return null;
   const trimmed = value.trim();
@@ -217,7 +251,8 @@ type WordForAnki = WordSense &
     >
   > &
   Partial<Pick<WordSenseWithEnglishSynonyms<WordSense>, "synonymEnglishWords">> &
-  Partial<Pick<WordSenseWithPrimarySentence<WordSense>, "sentence">>;
+  Partial<Pick<WordSenseWithPrimarySentence<WordSense>, "sentence">> &
+  Partial<{ activeStory: ActiveWordSenseStory | null }>;
 export type WordAnkiFieldGenerator = (
   word: WordForAnki,
 ) => string | Promise<string>;
@@ -246,6 +281,17 @@ function sentenceAudioTag(filename: string | null | undefined): string {
   } catch {
     return "";
   }
+}
+
+function storyAudioTag(story: ActiveWordSenseStory | null | undefined): string {
+  const filename = story?.audio_file_name?.trim() ?? "";
+  if (!filename || path.basename(filename) !== filename) return "";
+  if ((story?.audio_source_text ?? "").trim() !== (story?.storyText ?? "").trim()) {
+    return "";
+  }
+  return toSoundTagFromAbsPath(
+    getWordSenseStoryAudioAbsolutePath(filename),
+  ).trim();
 }
 
 function getFirstPartSpell(word: string): string {
@@ -341,12 +387,21 @@ export const WORD_ANKI_FIELD_GENERATORS = {
   sentence_en_meaning_fa: (w) => w.sentence?.sentence_en_meaning_fa ?? "",
   sentence_en_meaning_fa_audio: (w) =>
     sentenceAudioTag(w.sentence?.sentence_en_meaning_fa_audio_file_name),
+  story: (w) => w.activeStory?.storyText ?? "",
+  "story-audio": (w) => storyAudioTag(w.activeStory),
 
   // TODO: define the source-of-truth for this field (not currently present in DB schema).
   best_translate: () => "",
 
   // User-managed in Anki (personal notes); intentionally not sourced from DB.
   selfGuide: () => "",
+
+  // Restored historical formula: derive the display lines and owned audio tags
+  // from the person/adj/job candidates already stored in json_hint.
+  first_letter_en_hint: async (w) => {
+    const pictures = JSON.parse(w.json_hint ?? "{}") as WordPictures;
+    return buildHintLines([pictures.person, pictures.adj, pictures.job]);
+  },
 
   // This field intentionally stores the number of letters in the English base form.
   // It is not the free-text WordSense.hint_to_select sense-disambiguation hint.
@@ -389,7 +444,6 @@ export function getHydratedWordAnkiReadinessIssues(
 // These are intentionally preserved in Anki and are not sourced from the current DB.
 // Keeping the list explicit prevents a misspelled configured field from being ignored.
 export const WORD_ANKI_PRESERVED_ONLY_FIELDS = [
-  "first_letter_en_hint",
 ] as const;
 
 export function getUnsupportedWordAnkiFieldNames(
@@ -443,11 +497,18 @@ export async function generateWordAnkiFieldsForMetaLexVr9(
     "sentence" in withSynonyms
       ? (withSynonyms as WordForAnki)
       : (await hydrateWordsWithPrimarySentence([withSynonyms]))[0]!;
+  const needsStory = configuredFields.some(
+    (field) => field === "story" || field === "story-audio",
+  );
+  const withStory =
+    needsStory && !("activeStory" in withSentence)
+      ? await hydrateWordSenseWithActiveStory(withSentence)
+      : withSentence;
   const fields = getWordAnkiManagedFieldNames(configuredFields);
   return Promise.all(
     fields.map(
       async (f) =>
-        [f, await WORD_ANKI_FIELD_GENERATORS[f](withSentence)] as const,
+        [f, await WORD_ANKI_FIELD_GENERATORS[f](withStory)] as const,
     ),
   ).then((entries) => Object.fromEntries(entries) as Record<string, string>);
 }

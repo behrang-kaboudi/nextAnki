@@ -33,6 +33,7 @@
       {
         "type": "group",
         "label": "Word Tables",
+        "href": "/words/tables",
         "items": [
           {
             "type": "link",
@@ -61,6 +62,13 @@
             "href": "/words/tables/sentences",
             "icon": "database",
             "description": "Browse Sentence records and manage persisted English and Persian audio filenames."
+          },
+          {
+            "type": "link",
+            "label": "WordSenseStory Table",
+            "href": "/words/tables/stories",
+            "icon": "database",
+            "description": "Browse reviewed mnemonic stories, source links, exact sound symbols, versions, and owned audio."
           }
         ],
         "icon": "database"
@@ -367,6 +375,13 @@
                 "href": "/tests/functions",
                 "icon": "code",
                 "description": "Exercise reusable server-side function helpers."
+              },
+              {
+                "type": "link",
+                "label": "Azure IPA Audio Test",
+                "href": "/tests/tts/azure-ipa",
+                "icon": "audio",
+                "description": "Test individually selected written and IPA segments with Azure audio."
               }
             ],
             "icon": "code"
